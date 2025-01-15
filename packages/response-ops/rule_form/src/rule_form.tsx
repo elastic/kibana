@@ -17,7 +17,7 @@ import {
   RULE_FORM_ROUTE_PARAMS_ERROR_TITLE,
   RULE_FORM_ROUTE_PARAMS_ERROR_TEXT,
 } from './translations';
-import { type RuleFormPlugins } from './types';
+import { RuleFormPlugins } from './types';
 
 const queryClient = new QueryClient();
 

@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isOfAggregateQueryType, type Query } from '@kbn/es-query';
+import { isOfAggregateQueryType, Query } from '@kbn/es-query';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import {
-  type ExpressionFunctionKibana,
-  type ExpressionFunctionKibanaContext,
-  type QueryState,
+  ExpressionFunctionKibana,
+  ExpressionFunctionKibanaContext,
+  QueryState,
   aggregateQueryToAst,
   queryToAst,
   filtersToAst,

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type FieldType } from '@kbn/search-connectors';
+import { FieldType } from '@kbn/search-connectors';
 
 export { FieldType } from '@kbn/search-connectors';
 

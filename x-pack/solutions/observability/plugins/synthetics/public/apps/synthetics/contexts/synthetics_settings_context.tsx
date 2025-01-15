@@ -6,15 +6,15 @@
  */
 
 import {
-  type AppMountParameters,
-  type ChromeBadge,
-  type ChromeBreadcrumb,
-  type CoreStart,
-  type I18nStart,
+  AppMountParameters,
+  ChromeBadge,
+  ChromeBreadcrumb,
+  CoreStart,
+  I18nStart,
 } from '@kbn/core/public';
-import React, { createContext, useContext, useMemo, type PropsWithChildren } from 'react';
+import React, { createContext, useContext, useMemo, PropsWithChildren } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { type ClientPluginsSetup, type ClientPluginsStart } from '../../../plugin';
+import { ClientPluginsSetup, ClientPluginsStart } from '../../../plugin';
 import { CLIENT_DEFAULTS, CONTEXT_DEFAULTS } from '../../../../common/constants';
 import { useGetUrlParams } from '../hooks';
 

@@ -9,7 +9,7 @@
 
 import { KbnError } from '@kbn/kibana-utils-plugin/common';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { type SearchError } from './types';
+import { SearchError } from './types';
 
 /**
  * Request Failure - When an entire multi request fails

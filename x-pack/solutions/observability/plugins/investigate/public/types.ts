@@ -7,9 +7,9 @@
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 import {
-  type ItemDefinition,
-  type ItemDefinitionData,
-  type ItemDefinitionParams,
+  ItemDefinition,
+  ItemDefinitionData,
+  ItemDefinitionParams,
 } from './investigation/item_definition_registry';
 
 export interface ConfigSchema {}

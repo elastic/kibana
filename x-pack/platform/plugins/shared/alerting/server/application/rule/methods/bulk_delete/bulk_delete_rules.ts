@@ -6,8 +6,8 @@
  */
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
-import { type KueryNode, nodeBuilder } from '@kbn/es-query';
-import { type SavedObjectsBulkUpdateObject } from '@kbn/core/server';
+import { KueryNode, nodeBuilder } from '@kbn/es-query';
+import { SavedObjectsBulkUpdateObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { convertRuleIdsToKueryNode } from '../../../../lib';

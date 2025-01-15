@@ -9,8 +9,8 @@
 
 import { uniq } from 'lodash';
 import moment from 'moment';
-import { type Chart } from './point_series';
-import { type Table } from '../../types';
+import { Chart } from './point_series';
+import { Table } from '../../types';
 
 export function initXAxis(chart: Chart, table: Table) {
   const { format, title, params, accessor } = chart.aspects.x[0];

@@ -14,7 +14,7 @@ import { keys } from '@elastic/eui';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { actionServiceMock } from '../../../services/action_service.mock';
 import { columnServiceMock } from '../../../services/column_service.mock';
-import { Table, type TableProps } from './table';
+import { Table, TableProps } from './table';
 import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 

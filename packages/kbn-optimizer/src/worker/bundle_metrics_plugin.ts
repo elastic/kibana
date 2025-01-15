@@ -9,11 +9,11 @@
 
 import Path from 'path';
 
-import type webpack from 'webpack';
+import webpack from 'webpack';
 import { RawSource } from 'webpack-sources';
-import { type CiStatsMetric } from '@kbn/ci-stats-reporter';
+import { CiStatsMetric } from '@kbn/ci-stats-reporter';
 
-import { type Bundle } from '../common';
+import { Bundle } from '../common';
 
 interface Asset {
   name: string;

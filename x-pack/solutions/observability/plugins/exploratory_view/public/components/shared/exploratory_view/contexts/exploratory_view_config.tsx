@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, useContext, useState } from 'react';
-import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { AppDataType, ConfigProps, ReportViewType, SeriesConfig } from '../types';
 

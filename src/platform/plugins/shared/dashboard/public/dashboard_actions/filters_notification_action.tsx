@@ -15,15 +15,15 @@ import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import {
   apiPublishesPartialUnifiedSearch,
   apiHasUniqueId,
-  type EmbeddableApiContext,
-  type HasParentApi,
-  type HasUniqueId,
-  type PublishesDataViews,
-  type PublishesUnifiedSearch,
-  type CanLockHoverActions,
-  type CanAccessViewMode,
+  EmbeddableApiContext,
+  HasParentApi,
+  HasUniqueId,
+  PublishesDataViews,
+  PublishesUnifiedSearch,
+  CanLockHoverActions,
+  CanAccessViewMode,
 } from '@kbn/presentation-publishing';
-import { type Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { coreServices } from '../services/kibana_services';
 import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';

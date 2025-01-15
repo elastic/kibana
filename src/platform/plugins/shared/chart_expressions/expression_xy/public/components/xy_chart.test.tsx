@@ -16,7 +16,7 @@ import {
   BarSeries,
   ColorVariant,
   Fit,
-  type GeometryValue,
+  GeometryValue,
   GroupBy,
   HorizontalAlignment,
   LayoutDirection,
@@ -25,20 +25,20 @@ import {
   Position,
   RectAnnotation,
   ScaleType,
-  type SeriesNameFn,
+  SeriesNameFn,
   Settings,
   SmallMultiples,
   VerticalAlignment,
-  type XYChartSeriesIdentifier,
+  XYChartSeriesIdentifier,
   Tooltip,
   LegendValue,
 } from '@elastic/charts';
-import { type Datatable } from '@kbn/expressions-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
-import { type EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
-import { type DataLayerConfig } from '../../common';
+import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
+import { DataLayerConfig } from '../../common';
 import { LayerTypes } from '../../common/constants';
 import { XyEndzones } from './x_domain';
 import {
@@ -56,8 +56,8 @@ import {
   createSampleDatatableWithRows,
   sampleLayer,
 } from '../../common/__mocks__';
-import { XYChart, type XYChartRenderProps } from './xy_chart';
-import { type ExtendedDataLayerConfig, type XYProps, type AnnotationLayerConfigResult } from '../../common/types';
+import { XYChart, XYChartRenderProps } from './xy_chart';
+import { ExtendedDataLayerConfig, XYProps, AnnotationLayerConfigResult } from '../../common/types';
 import { DataLayers } from './data_layers';
 import { SplitChart } from './split_chart';
 import { LegendSize } from '@kbn/visualizations-plugin/common';

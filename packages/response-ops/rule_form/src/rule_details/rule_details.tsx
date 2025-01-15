@@ -13,7 +13,7 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiComboBox,
-  type EuiComboBoxOptionOption,
+  EuiComboBoxOptionOption,
   EuiText,
 } from '@elastic/eui';
 import {

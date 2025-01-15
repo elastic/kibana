@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type SavedObjectsType } from '@kbn/core/server';
+import { SavedObjectsType } from '@kbn/core/server';
 
 export const SO_ENTITY_DISCOVERY_API_KEY_TYPE = 'entity-discovery-api-key';
 

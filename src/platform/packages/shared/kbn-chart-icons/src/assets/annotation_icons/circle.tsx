@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { type EuiIconProps } from '@elastic/eui';
+import { EuiIconProps } from '@elastic/eui';
 import { IconSimpleWrapper } from '../icon_simple_wrapper';
 
 export const IconCircle = (props: Omit<EuiIconProps, 'type'>) => (

@@ -9,8 +9,8 @@
 
 import { useEffect, useCallback, useState, useRef, useMemo } from 'react';
 
-import { type HttpSetup } from '@kbn/core/public';
-import { sendRequest, type SendRequestConfig } from './send_request';
+import { HttpSetup } from '@kbn/core/public';
+import { sendRequest, SendRequestConfig } from './send_request';
 
 export interface UseRequestConfig extends SendRequestConfig {
   pollIntervalMs?: number;

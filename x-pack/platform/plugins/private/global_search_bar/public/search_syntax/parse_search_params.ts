@@ -7,7 +7,7 @@
 
 import { Query } from '@elastic/eui';
 import { getSearchTerm, getFieldValueMap, applyAliases } from './query_utils';
-import { type FilterValues, type ParsedSearchParams } from './types';
+import { FilterValues, ParsedSearchParams } from './types';
 
 const knownFilters = ['tag', 'type'];
 

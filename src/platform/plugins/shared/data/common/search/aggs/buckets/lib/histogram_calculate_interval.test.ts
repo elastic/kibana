@@ -9,7 +9,7 @@
 
 import {
   calculateHistogramInterval,
-  type CalculateHistogramIntervalParams,
+  CalculateHistogramIntervalParams,
 } from './histogram_calculate_interval';
 import { ES_FIELD_TYPES } from '../../../../types';
 

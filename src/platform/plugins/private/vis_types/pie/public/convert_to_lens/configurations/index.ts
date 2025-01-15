@@ -8,13 +8,13 @@
  */
 
 import { LegendValue } from '@elastic/charts';
-import { LegendDisplay, type PartitionVisParams } from '@kbn/expression-partition-vis-plugin/common';
+import { LegendDisplay, PartitionVisParams } from '@kbn/expression-partition-vis-plugin/common';
 import {
   CategoryDisplayTypes,
   NumberDisplayTypes,
-  type PartitionVisConfiguration,
+  PartitionVisConfiguration,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { type Vis } from '@kbn/visualizations-plugin/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
 
 const getLayers = (
   layerId: string,

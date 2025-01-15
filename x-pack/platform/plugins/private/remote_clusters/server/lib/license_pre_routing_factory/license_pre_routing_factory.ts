@@ -6,12 +6,12 @@
  */
 
 import {
-  type KibanaRequest,
-  type KibanaResponseFactory,
-  type RequestHandler,
-  type RequestHandlerContext,
+  KibanaRequest,
+  KibanaResponseFactory,
+  RequestHandler,
+  RequestHandlerContext,
 } from '@kbn/core/server';
-import { type RouteDependencies } from '../../types';
+import { RouteDependencies } from '../../types';
 
 export const licensePreRoutingFactory = (
   { getLicenseStatus }: RouteDependencies,

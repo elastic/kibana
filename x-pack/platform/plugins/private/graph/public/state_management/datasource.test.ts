@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createMockGraphStore, type MockedGraphEnvironment } from './mocks';
-import { type AdvancedSettings, type WorkspaceField } from '../types';
+import { createMockGraphStore, MockedGraphEnvironment } from './mocks';
+import { AdvancedSettings, WorkspaceField } from '../types';
 import { datasourceSelector, requestDatasource } from './datasource';
 import { datasourceSaga } from './datasource.sagas';
 import { fieldsSelector } from './fields';

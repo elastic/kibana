@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { type ReactNode, useEffect, useMemo } from 'react';
+import React, { ReactNode, useEffect, useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { type AppMountParameters } from '@kbn/core/public';
+import { AppMountParameters } from '@kbn/core/public';
 import { useKibana } from '../../../../utils/kibana_react';
 export interface HeaderMenuPortalProps {
   children: ReactNode;

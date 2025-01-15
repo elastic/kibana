@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { type HttpStart } from '@kbn/core/public';
+import { HttpStart } from '@kbn/core/public';
 import { HashedCache } from '../../../common/hashed_cache';
 import {
-  type FindFieldsMetadataRequestQuery,
+  FindFieldsMetadataRequestQuery,
   findFieldsMetadataRequestQueryRT,
-  type FindFieldsMetadataResponsePayload,
+  FindFieldsMetadataResponsePayload,
   findFieldsMetadataResponsePayloadRT,
 } from '../../../common/latest';
 import {
   DecodeFieldsMetadataError,
   FetchFieldsMetadataError,
-  type FieldName,
+  FieldName,
   FIND_FIELDS_METADATA_URL,
 } from '../../../common/fields_metadata';
 import { decodeOrThrow } from '../../../common/runtime_types';
-import { type IFieldsMetadataClient } from './types';
+import { IFieldsMetadataClient } from './types';
 
 export class FieldsMetadataClient implements IFieldsMetadataClient {
   private cache: HashedCache<FindFieldsMetadataRequestQuery, FindFieldsMetadataResponsePayload>;

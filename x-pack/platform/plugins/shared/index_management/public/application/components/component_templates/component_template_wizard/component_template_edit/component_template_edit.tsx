@@ -6,18 +6,18 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { type RouteComponentProps } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageSection, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { useComponentTemplatesContext } from '../../component_templates_context';
 import {
-  type ComponentTemplateDeserialized,
+  ComponentTemplateDeserialized,
   PageLoading,
   PageError,
   attemptToURIDecode,
-  type Error,
+  Error,
 } from '../../shared_imports';
 import { ComponentTemplateForm } from '../component_template_form';
 import { useRedirectPath } from '../../../../hooks/redirect_path';

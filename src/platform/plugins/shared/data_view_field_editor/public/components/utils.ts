@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type RuntimeFieldSubFields, type RuntimePrimitiveTypes } from '../shared_imports';
+import { RuntimeFieldSubFields, RuntimePrimitiveTypes } from '../shared_imports';
 
 export const fieldTypeMapToRuntimeSpecFormat = (
   subfields: Record<string, RuntimePrimitiveTypes>

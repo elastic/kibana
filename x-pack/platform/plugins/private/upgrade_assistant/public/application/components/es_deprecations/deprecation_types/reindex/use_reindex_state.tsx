@@ -8,13 +8,13 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
 
 import {
-  type ReindexStatusResponse,
+  ReindexStatusResponse,
   ReindexStatus,
   ReindexStep,
-  type ReindexWarning,
+  ReindexWarning,
 } from '../../../../../../common/types';
 import { CancelLoadingState, LoadingState } from '../../../types';
-import { type ApiService } from '../../../../lib/api';
+import { ApiService } from '../../../../lib/api';
 
 const POLL_INTERVAL = 1000;
 

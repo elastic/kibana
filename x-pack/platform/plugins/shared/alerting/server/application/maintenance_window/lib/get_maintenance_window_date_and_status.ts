@@ -5,7 +5,7 @@
  * 2.0.
  */
 import moment from 'moment';
-import { type DateRange, MaintenanceWindowStatus } from '../../../../common';
+import { DateRange, MaintenanceWindowStatus } from '../../../../common';
 
 export interface DateSearchResult {
   event: DateRange;

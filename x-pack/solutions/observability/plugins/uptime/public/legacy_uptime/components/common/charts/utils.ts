@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type XYChartElementEvent } from '@elastic/charts';
+import { XYChartElementEvent } from '@elastic/charts';
 import moment from 'moment';
 
 export const getDateRangeFromChartElement = (

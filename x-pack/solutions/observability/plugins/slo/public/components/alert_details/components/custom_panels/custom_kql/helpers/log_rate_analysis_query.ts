@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { kqlWithFiltersSchema } from '@kbn/slo-schema';
-import { type Filter, FilterStateStore } from '@kbn/es-query';
+import { Filter, FilterStateStore } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/observability-plugin/public';
-import { type KQLCustomIndicator, type GroupingsSchema, ALL_VALUE } from '@kbn/slo-schema';
+import { KQLCustomIndicator, GroupingsSchema, ALL_VALUE } from '@kbn/slo-schema';
 import { isEmpty } from 'lodash';
 
 export const getESQueryForLogRateAnalysis = (

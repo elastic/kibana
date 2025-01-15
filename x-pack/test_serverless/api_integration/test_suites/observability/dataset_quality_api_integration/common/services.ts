@@ -6,14 +6,14 @@
  */
 
 import { createLogger, LogLevel, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { type GenericFtrProviderContext } from '@kbn/test';
+import { GenericFtrProviderContext } from '@kbn/test';
 import {
-  type DatasetQualityApiClient,
+  DatasetQualityApiClient,
   getDatasetQualityApiClientService,
 } from './dataset_quality_api_supertest';
 import {
-  type InheritedServices,
-  type InheritedFtrProviderContext,
+  InheritedServices,
+  InheritedFtrProviderContext,
   services as inheritedServices,
 } from '../../../../services';
 

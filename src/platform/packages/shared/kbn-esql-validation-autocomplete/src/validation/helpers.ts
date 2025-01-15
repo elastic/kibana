@@ -14,7 +14,7 @@ import type {
   ESQLMessage,
   ESQLSingleAstItem,
 } from '@kbn/esql-ast';
-import { type FunctionDefinition } from '../definitions/types';
+import { FunctionDefinition } from '../definitions/types';
 import { getAllArrayTypes, getAllArrayValues } from '../shared/helpers';
 import { getMessageFromId } from './errors';
 import type { ESQLPolicy, ReferenceMaps } from './types';

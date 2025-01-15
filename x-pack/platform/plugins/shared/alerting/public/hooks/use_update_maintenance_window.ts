@@ -12,7 +12,7 @@ import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import type { MaintenanceWindow } from '../../common';
 
 import { useKibana } from '../utils/kibana_react';
-import { updateMaintenanceWindow, type UpdateParams } from '../services/maintenance_windows_api/update';
+import { updateMaintenanceWindow, UpdateParams } from '../services/maintenance_windows_api/update';
 
 interface UseUpdateMaintenanceWindowProps {
   onError?: (error: IHttpFetchError<KibanaServerError>) => void;

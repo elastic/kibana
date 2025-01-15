@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { canSkipBoundariesFetch, getShapeFilters } from './get_shape_filters';
 
 const boundariesRequestMeta = {

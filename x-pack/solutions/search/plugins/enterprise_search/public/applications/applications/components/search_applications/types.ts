@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Page } from '../../../../../common/types/pagination';
+import { Page } from '../../../../../common/types/pagination';
 
 export const DEFAULT_META = {
   from: 0,

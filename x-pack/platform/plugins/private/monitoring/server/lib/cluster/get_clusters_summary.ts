@@ -7,10 +7,10 @@
 
 import { omit, get } from 'lodash';
 import {
-  type ElasticsearchModifiedSource,
-  type ElasticsearchLegacySource,
-  type ElasticsearchSourceKibanaStats,
-  type ElasticsearchMetricbeatSource,
+  ElasticsearchModifiedSource,
+  ElasticsearchLegacySource,
+  ElasticsearchSourceKibanaStats,
+  ElasticsearchMetricbeatSource,
 } from '../../../common/types/es';
 import { calculateOverallStatus } from '../calculate_overall_status';
 import { MonitoringLicenseError } from '../errors/custom_errors';

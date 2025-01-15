@@ -6,14 +6,14 @@
  */
 
 import sinon from 'sinon';
-import { type AwaitedProperties } from '@kbn/utility-types';
+import { AwaitedProperties } from '@kbn/utility-types';
 import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import { CUSTOM_ELEMENT_TYPE } from '../../../common/lib/constants';
 import { initializeCreateCustomElementRoute } from './create';
 import {
   kibanaResponseFactory,
-  type RequestHandlerContext,
-  type RequestHandler,
+  RequestHandlerContext,
+  RequestHandler,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import { getMockedRouterDeps } from '../test_helpers';

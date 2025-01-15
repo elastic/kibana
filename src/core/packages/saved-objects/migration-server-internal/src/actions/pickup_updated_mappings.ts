@@ -8,7 +8,7 @@
  */
 
 import * as Either from 'fp-ts/lib/Either';
-import type * as TaskEither from 'fp-ts/lib/TaskEither';
+import * as TaskEither from 'fp-ts/lib/TaskEither';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {

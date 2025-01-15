@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type AuthenticatedUser, type ElasticsearchClient, type Logger } from '@kbn/core/server';
-import { type ConversationResponse } from '@kbn/elastic-assistant-common';
-import { type EsConversationSchema } from './types';
+import { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ConversationResponse } from '@kbn/elastic-assistant-common';
+import { EsConversationSchema } from './types';
 import { transformESSearchToConversations } from './transforms';
 
 export interface GetConversationParams {

@@ -17,18 +17,18 @@ import {
   EuiSpacer,
   EuiSelectableMessage,
   EuiDataGrid,
-  type EuiDataGridProps,
-  type EuiDataGridCellPopoverElementProps,
+  EuiDataGridProps,
+  EuiDataGridCellPopoverElementProps,
   EuiI18n,
   EuiText,
   EuiCallOut,
   useResizeObserver,
   EuiSwitch,
-  type EuiSwitchEvent,
+  EuiSwitchEvent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { type Storage } from '@kbn/kibana-utils-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   SHOW_MULTIFIELDS,
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -49,7 +49,7 @@ import {
   DEFAULT_MARGIN_BOTTOM,
   getTabContentAvailableHeight,
 } from '../doc_viewer_source/get_height';
-import { TableFilters, type TableFiltersProps, useTableFilters } from './table_filters';
+import { TableFilters, TableFiltersProps, useTableFilters } from './table_filters';
 import { TableCell } from './table_cell';
 import { getPinColumnControl } from './get_pin_control';
 import { FieldRow } from './field_row';

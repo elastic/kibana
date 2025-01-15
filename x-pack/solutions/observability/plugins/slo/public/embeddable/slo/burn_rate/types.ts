@@ -5,18 +5,18 @@
  * 2.0.
  */
 import {
-  type ApplicationStart,
-  type IUiSettingsClient,
-  type NotificationsStart,
+  ApplicationStart,
+  IUiSettingsClient,
+  NotificationsStart,
   type CoreStart,
 } from '@kbn/core/public';
-import { type DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import {
-  type PublishesPanelTitle,
-  type PublishesWritablePanelTitle,
-  type SerializedTitles,
+  PublishesPanelTitle,
+  PublishesWritablePanelTitle,
+  SerializedTitles,
 } from '@kbn/presentation-publishing';
-import { type Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 
 export interface EmbeddableProps {
   sloId: string;

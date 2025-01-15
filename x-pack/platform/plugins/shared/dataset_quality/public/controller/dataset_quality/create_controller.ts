@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { type CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { getDevToolsOptions } from '@kbn/xstate-utils';
 import equal from 'fast-deep-equal';
 import { distinctUntilChanged, from, map } from 'rxjs';
 import { interpret } from 'xstate';
-import { type DataStreamsStatsServiceStart } from '../../services/data_streams_stats';
+import { DataStreamsStatsServiceStart } from '../../services/data_streams_stats';
 import {
   createDatasetQualityControllerStateMachine,
   DEFAULT_CONTEXT,
 } from '../../state_machines/dataset_quality_controller';
 import { getContextFromPublicState, getPublicStateFromContext } from './public_state';
-import { type DatasetQualityController, type DatasetQualityPublicStateUpdate } from './types';
+import { DatasetQualityController, DatasetQualityPublicStateUpdate } from './types';
 
 type InitialState = DatasetQualityPublicStateUpdate;
 

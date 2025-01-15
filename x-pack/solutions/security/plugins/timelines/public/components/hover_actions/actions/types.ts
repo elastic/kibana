@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type EuiButtonEmpty, type EuiButtonIcon, type EuiButtonIconPropsForButton } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiButtonIconPropsForButton } from '@elastic/eui';
 import type { FilterManager } from '@kbn/data-plugin/public';
 
 export interface FilterValueFnArgs {

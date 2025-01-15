@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, type ButtonHTMLAttributes } from 'react';
+import React, { useState, useEffect, ButtonHTMLAttributes } from 'react';
 import {
   EuiPopover,
   EuiFormRow,
@@ -27,9 +27,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
 import classNames from 'classnames';
-import { type WorkspaceField } from '../../types';
+import { WorkspaceField } from '../../types';
 import { iconChoices } from '../../helpers/style_choices';
-import { type UpdateableFieldProperties } from './field_manager';
+import { UpdateableFieldProperties } from './field_manager';
 
 import { isEqual } from '../helpers';
 import { IconRenderer } from '../icon_renderer';

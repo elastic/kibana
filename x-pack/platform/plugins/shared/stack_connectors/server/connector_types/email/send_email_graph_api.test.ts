@@ -10,11 +10,11 @@ jest.mock('axios', () => ({
 }));
 
 import axios from 'axios';
-import { type Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { type CustomHostSettings } from '@kbn/actions-plugin/server/config';
-import { ConnectorUsageCollector, type ProxySettings } from '@kbn/actions-plugin/server/types';
+import { CustomHostSettings } from '@kbn/actions-plugin/server/config';
+import { ConnectorUsageCollector, ProxySettings } from '@kbn/actions-plugin/server/types';
 import { sendEmailGraphApi } from './send_email_graph_api';
 
 const createAxiosInstanceMock = axios.create as jest.Mock;

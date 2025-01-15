@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type KueryNode } from '@kbn/es-query';
+import { KueryNode } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import {
   EuiConfirmModal,
@@ -21,9 +21,9 @@ import {
 } from '@elastic/eui';
 import {
   withBulkRuleOperations,
-  type ComponentOpts as BulkOperationsComponentOpts,
+  ComponentOpts as BulkOperationsComponentOpts,
 } from '../../common/components/with_bulk_rule_api_operations';
-import { type RuleTableItem, type SnoozeSchedule, type BulkEditActions } from '../../../../types';
+import { RuleTableItem, SnoozeSchedule, BulkEditActions } from '../../../../types';
 import { SnoozePanel, futureTimeToInterval } from './rule_snooze';
 import { useBulkEditResponse } from '../../../hooks/use_bulk_edit_response';
 import { useKibana } from '../../../../common/lib/kibana';

@@ -18,7 +18,7 @@ import {
   USER,
 } from '../../../common/constants.mock';
 
-import { type CreateListItemOptions } from '.';
+import { CreateListItemOptions } from '.';
 
 export const getCreateListItemOptionsMock = (): CreateListItemOptions => ({
   dateNow: DATE_NOW,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, type PropsWithChildren } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';

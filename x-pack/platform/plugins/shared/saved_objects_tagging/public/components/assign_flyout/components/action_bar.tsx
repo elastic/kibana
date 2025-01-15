@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 

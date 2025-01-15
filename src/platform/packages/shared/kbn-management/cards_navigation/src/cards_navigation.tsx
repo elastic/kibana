@@ -22,13 +22,13 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import {
-  type CardsNavigationComponentProps,
-  type AppRegistrySections,
-  type Application,
-  type AppProps,
-  type AppId,
-  type AppDefinition,
-  type CardNavExtensionDefinition,
+  CardsNavigationComponentProps,
+  AppRegistrySections,
+  Application,
+  AppProps,
+  AppId,
+  AppDefinition,
+  CardNavExtensionDefinition,
 } from './types';
 import { appCategories, appDefinitions as defaultCardNavigationDefinitions } from './consts';
 

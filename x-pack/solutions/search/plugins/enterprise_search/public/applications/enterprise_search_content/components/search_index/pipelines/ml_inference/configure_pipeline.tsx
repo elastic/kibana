@@ -16,7 +16,7 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiTabbedContent,
-  type EuiTabbedContentTab,
+  EuiTabbedContentTab,
   EuiTitle,
   EuiText,
 } from '@elastic/eui';

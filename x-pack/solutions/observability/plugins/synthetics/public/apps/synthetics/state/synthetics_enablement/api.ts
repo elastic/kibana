@@ -7,7 +7,7 @@
 
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import {
-  type MonitorManagementEnablementResult,
+  MonitorManagementEnablementResult,
   MonitorManagementEnablementResultCodec,
 } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service';

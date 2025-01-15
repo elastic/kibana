@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import axios, { type AxiosInstance, type AxiosRequestConfig } from 'axios';
-import { type ToolingLog } from '@kbn/tooling-log';
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import { ToolingLog } from '@kbn/tooling-log';
 import { getYearAgoIso } from './utils';
 
 type Environment = 'ENVIRONMENT_ALL' | 'ci' | 'development';

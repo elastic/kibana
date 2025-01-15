@@ -6,12 +6,12 @@
  */
 
 import {
-  type ByteSize,
-  type IndicesDataStream,
-  type IndicesDataStreamsStatsDataStreamsStatsItem,
-  type Metadata,
-  type IndicesDataStreamIndex,
-  type IndicesDataStreamLifecycleWithRollover,
+  ByteSize,
+  IndicesDataStream,
+  IndicesDataStreamsStatsDataStreamsStatsItem,
+  Metadata,
+  IndicesDataStreamIndex,
+  IndicesDataStreamLifecycleWithRollover,
 } from '@elastic/elasticsearch/lib/api/types';
 
 interface TimestampFieldFromEs {

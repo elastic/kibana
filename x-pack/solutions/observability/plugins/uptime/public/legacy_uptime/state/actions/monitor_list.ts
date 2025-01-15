@@ -7,8 +7,8 @@
 
 import { createAction } from 'redux-actions';
 import {
-  type FetchMonitorStatesQueryArgs,
-  type MonitorSummariesResult,
+  FetchMonitorStatesQueryArgs,
+  MonitorSummariesResult,
 } from '../../../../common/runtime_types';
 
 export const getMonitorList = createAction<FetchMonitorStatesQueryArgs>('GET_MONITOR_LIST');

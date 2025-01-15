@@ -7,10 +7,10 @@
 
 import type SuperTest from 'supertest';
 
-import { type Rule } from '@kbn/alerting-plugin/common';
+import { Rule } from '@kbn/alerting-plugin/common';
 import {
-  type BaseRuleParams,
-  type InternalRuleCreate,
+  BaseRuleParams,
+  InternalRuleCreate,
 } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 
 /**

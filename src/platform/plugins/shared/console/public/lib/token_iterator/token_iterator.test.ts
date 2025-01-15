@@ -8,7 +8,7 @@
  */
 
 import { TokenIterator } from './token_iterator';
-import { type Position, type Token, type TokensProvider } from '../../types';
+import { Position, Token, TokensProvider } from '../../types';
 
 const mockTokensProviderFactory = (tokenMtx: Token[][]): TokensProvider => {
   return {

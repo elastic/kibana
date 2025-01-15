@@ -9,9 +9,9 @@ import { useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { type ResponseError } from '../../../../../common/types';
+import { ResponseError } from '../../../../../common/types';
 import { useAppContext } from '../../../app_context';
-import { type DeprecationLoggingPreviewProps } from '../../types';
+import { DeprecationLoggingPreviewProps } from '../../types';
 
 const i18nTexts = {
   enabledMessage: i18n.translate(

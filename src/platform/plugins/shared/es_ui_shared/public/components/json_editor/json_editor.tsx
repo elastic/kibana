@@ -12,7 +12,7 @@ import { EuiFormRow } from '@elastic/eui';
 import { debounce } from 'lodash';
 import { CodeEditor } from '@kbn/code-editor';
 
-import { useJson, type OnJsonEditorUpdateHandler } from './use_json';
+import { useJson, OnJsonEditorUpdateHandler } from './use_json';
 
 interface Props<T extends object = { [key: string]: any }> {
   onUpdate: OnJsonEditorUpdateHandler<T>;

@@ -8,10 +8,10 @@
 import { createReducer } from '@reduxjs/toolkit';
 import {
   DEFAULT_THROTTLING,
-  type ServiceLocations,
-  type ThrottlingOptions,
+  ServiceLocations,
+  ThrottlingOptions,
 } from '../../../../../common/runtime_types';
-import { type IHttpSerializedFetchError } from '../utils/http_error';
+import { IHttpSerializedFetchError } from '../utils/http_error';
 
 import {
   getServiceLocations,

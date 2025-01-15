@@ -11,8 +11,8 @@ import React from 'react';
 import { renderWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 
-import { RemoveFooter, type Props } from './remove_footer';
-import { SampleDataCardProvider, type Services } from '../services';
+import { RemoveFooter, Props } from './remove_footer';
+import { SampleDataCardProvider, Services } from '../services';
 import { getMockServices } from '../mocks';
 
 describe('install footer', () => {

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { type PassThrough } from 'stream';
+import { PassThrough } from 'stream';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { type ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 import { ErrorWithStatusCode } from '../../error_with_status_code';
 import { findSourceValue } from '../utils/find_source_value';
-import { type SearchEsListItemSchema } from '../../schemas/elastic_response';
+import { SearchEsListItemSchema } from '../../schemas/elastic_response';
 
 /**
  * How many results to page through from the network at a time

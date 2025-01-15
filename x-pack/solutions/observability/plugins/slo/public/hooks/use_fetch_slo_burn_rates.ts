@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ALL_VALUE, type GetSLOBurnRatesResponse, type SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, GetSLOBurnRatesResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
-  type QueryObserverResult,
-  type RefetchOptions,
-  type RefetchQueryFilters,
+  QueryObserverResult,
+  RefetchOptions,
+  RefetchQueryFilters,
   useQuery,
 } from '@tanstack/react-query';
 import { SLO_LONG_REFETCH_INTERVAL } from '../constants';

@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import React, { type MouseEvent } from 'react';
+import React, { MouseEvent } from 'react';
 import { useConfirmModal } from '../hooks/use_confirm_modal';
 import type { UseConversationListResult } from '../hooks/use_conversation_list';
 import { EMPTY_CONVERSATION_TITLE } from '../i18n';

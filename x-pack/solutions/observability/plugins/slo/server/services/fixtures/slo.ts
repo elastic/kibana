@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { type SavedObject } from '@kbn/core-saved-objects-server';
+import { SavedObject } from '@kbn/core-saved-objects-server';
 import {
   ALL_VALUE,
-  type CreateSLOParams,
-  type HistogramIndicator,
+  CreateSLOParams,
+  HistogramIndicator,
   sloDefinitionSchema,
-  type SyntheticsAvailabilityIndicator,
-  type TimesliceMetricIndicator,
+  SyntheticsAvailabilityIndicator,
+  TimesliceMetricIndicator,
 } from '@kbn/slo-schema';
 import { cloneDeep } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { SLO_MODEL_VERSION, SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 import {
-  type APMTransactionDurationIndicator,
-  type APMTransactionErrorRateIndicator,
+  APMTransactionDurationIndicator,
+  APMTransactionErrorRateIndicator,
   Duration,
   DurationUnit,
-  type Indicator,
-  type KQLCustomIndicator,
-  type MetricCustomIndicator,
-  type SLODefinition,
-  type StoredSLODefinition,
+  Indicator,
+  KQLCustomIndicator,
+  MetricCustomIndicator,
+  SLODefinition,
+  StoredSLODefinition,
 } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
 import { twoMinute } from './duration';

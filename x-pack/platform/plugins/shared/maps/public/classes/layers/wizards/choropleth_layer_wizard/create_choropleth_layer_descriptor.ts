@@ -18,12 +18,12 @@ import {
 } from '../../../../../common/constants';
 import { getJoinAggKey } from '../../../../../common/get_agg_key';
 import {
-  type ColorDynamicOptions,
-  type CountAggDescriptor,
-  type EMSFileSourceDescriptor,
-  type ESSearchSourceDescriptor,
-  type JoinDescriptor,
-  type VectorStylePropertiesDescriptor,
+  ColorDynamicOptions,
+  CountAggDescriptor,
+  EMSFileSourceDescriptor,
+  ESSearchSourceDescriptor,
+  JoinDescriptor,
+  VectorStylePropertiesDescriptor,
 } from '../../../../../common/descriptor_types';
 import { VectorStyle } from '../../../styles/vector/vector_style';
 import { GeoJsonVectorLayer, MvtVectorLayer } from '../../vector_layer';

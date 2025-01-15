@@ -10,7 +10,7 @@
 import { EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 import React from 'react';
 import { APP_WRAPPER_CLASS } from '@kbn/core-application-common';
-import { type Error } from '../types';
+import { Error } from '../types';
 
 interface Props {
   title: React.ReactNode;

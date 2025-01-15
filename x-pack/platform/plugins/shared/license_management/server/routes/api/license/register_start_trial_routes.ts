@@ -6,7 +6,7 @@
  */
 
 import { canStartTrial, startTrial } from '../../../lib/start_trial';
-import { type RouteDependencies } from '../../../types';
+import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../helpers';
 
 export function registerStartTrialRoutes({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ActionTypeExecutorResult, type RewriteResponseCase } from '@kbn/actions-plugin/common';
+import { ActionTypeExecutorResult, RewriteResponseCase } from '@kbn/actions-plugin/common';
 
 export type ConnectorExecutorResult<T> = ReturnType<
   RewriteResponseCase<ActionTypeExecutorResult<T>>

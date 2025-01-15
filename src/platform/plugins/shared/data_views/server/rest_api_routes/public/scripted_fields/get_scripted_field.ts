@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { type IRouter, type StartServicesAccessor } from '@kbn/core/server';
+import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { ErrorIndexPatternFieldNotFound } from '../../../error';
 import { handleErrors } from '../util/handle_errors';
 import type {
@@ -17,7 +17,7 @@ import type {
 } from '../../../types';
 import { INITIAL_REST_VERSION } from '../../../constants';
 import { fieldSpecSchemaFields } from '../../../schemas';
-import { type FieldSpecRestResponse } from '../../route_types';
+import { FieldSpecRestResponse } from '../../route_types';
 
 export const registerGetScriptedFieldRoute = (
   router: IRouter,

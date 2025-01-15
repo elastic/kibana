@@ -9,12 +9,12 @@
 
 import { BehaviorSubject } from 'rxjs';
 import {
-  type Plugin,
-  type CoreSetup,
-  type AppUpdater,
-  type AppUpdatableFields,
-  type CoreStart,
-  type AppMountParameters,
+  Plugin,
+  CoreSetup,
+  AppUpdater,
+  AppUpdatableFields,
+  CoreStart,
+  AppMountParameters,
 } from '@kbn/core/public';
 import { renderApp } from './application';
 import './types';

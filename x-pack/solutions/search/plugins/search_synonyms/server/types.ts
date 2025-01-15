@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type FeaturesPluginSetup } from '@kbn/features-plugin/server';
-export type * from '../common/types';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+export * from '../common/types';
 
 export interface SearchSynonymsPluginSetupDependencies {
   features: FeaturesPluginSetup;

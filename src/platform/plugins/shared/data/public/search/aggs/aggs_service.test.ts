@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, type Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
-import { type BucketAggType, getAggTypes, type MetricAggType } from '../../../common';
+import { BucketAggType, getAggTypes, MetricAggType } from '../../../common';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { dataPluginMock } from '../../mocks';
 
 import {
   AggsService,
-  type AggsSetupDependencies,
-  type AggsStartDependencies,
+  AggsSetupDependencies,
+  AggsStartDependencies,
   createGetConfig,
 } from './aggs_service';
 import { createNowProviderMock } from '../../now_provider/mocks';

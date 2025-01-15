@@ -9,7 +9,7 @@
 
 import type { StatusInfoServiceStatus as ServiceStatus } from '@kbn/core-status-common';
 import { getLevelSortValue, groupByLevel, getHighestStatus } from './status_level';
-import { type FormattedStatus, type StatusState } from './load_status';
+import { FormattedStatus, StatusState } from './load_status';
 
 type CreateStatusInput = Partial<Omit<FormattedStatus, 'state' | 'original'>> & {
   state?: Partial<StatusState>;

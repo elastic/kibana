@@ -6,14 +6,14 @@
  */
 
 import {
-  type Feature,
-  type FeatureCollection,
-  type Geometry,
-  type GeometryCollection,
-  type LineString,
-  type MultiLineString,
-  type MultiPoint,
-  type MultiPolygon,
+  Feature,
+  FeatureCollection,
+  Geometry,
+  GeometryCollection,
+  LineString,
+  MultiLineString,
+  MultiPoint,
+  MultiPolygon,
 } from 'geojson';
 import turfAlong from '@turf/along';
 import turfArea from '@turf/area';

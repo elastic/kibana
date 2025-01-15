@@ -8,7 +8,7 @@
  */
 
 import fs from 'node:fs';
-import { type Command } from '@kbn/dev-cli-runner';
+import { Command } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { ScoutReportDataStream } from '../reporting/report';
 import { getValidatedESClient } from './common';

@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {type Moment} from 'moment';
-import type moment from 'moment';
+import moment, { Moment } from 'moment';
 import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 
 export interface Usage {

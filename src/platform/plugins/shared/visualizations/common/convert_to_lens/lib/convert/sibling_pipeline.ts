@@ -8,7 +8,7 @@
  */
 
 import { convertMetricToColumns } from '../metrics';
-import { type AggBasedColumn, type ExtendedColumnConverterArgs, type SiblingPipelineMetric } from './types';
+import { AggBasedColumn, ExtendedColumnConverterArgs, SiblingPipelineMetric } from './types';
 import { convertToSchemaConfig } from '../../../vis_schemas';
 
 export const convertToSiblingPipelineColumns = (

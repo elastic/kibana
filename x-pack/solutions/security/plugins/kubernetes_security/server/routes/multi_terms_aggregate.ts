@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { type IRouter, type Logger } from '@kbn/core/server';
+import { IRouter, Logger } from '@kbn/core/server';
 import {
   MULTI_TERMS_AGGREGATE_ROUTE,
   AGGREGATE_PAGE_SIZE,
@@ -22,8 +22,8 @@ import {
   ENTRY_LEADER_INTERACTIVE,
 } from '../../common/constants';
 import {
-  type MultiTermsAggregateGroupBy,
-  type MultiTermsAggregateBucketPaginationResult,
+  MultiTermsAggregateGroupBy,
+  MultiTermsAggregateBucketPaginationResult,
 } from '../../common/types';
 
 export const registerMultiTermsAggregateRoute = (router: IRouter, logger: Logger) => {

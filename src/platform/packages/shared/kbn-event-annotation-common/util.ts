@@ -10,10 +10,10 @@
 import { euiLightVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import {
-  type EventAnnotationConfig,
-  type RangeEventAnnotationConfig,
-  type PointInTimeEventAnnotationConfig,
-  type QueryPointEventAnnotationConfig,
+  EventAnnotationConfig,
+  RangeEventAnnotationConfig,
+  PointInTimeEventAnnotationConfig,
+  QueryPointEventAnnotationConfig,
 } from './types';
 
 export const defaultAnnotationColor = euiLightVars.euiColorAccent;

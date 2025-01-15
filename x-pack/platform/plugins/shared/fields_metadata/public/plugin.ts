@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { createUseFieldsMetadataHook } from './hooks/use_fields_metadata';
 import { FieldsMetadataService } from './services/fields_metadata';
-import { type FieldsMetadataClientPluginClass } from './types';
+import { FieldsMetadataClientPluginClass } from './types';
 
 export class FieldsMetadataPlugin implements FieldsMetadataClientPluginClass {
   private fieldsMetadata: FieldsMetadataService;

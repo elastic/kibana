@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Pipeline } from './pipeline';
+import { Pipeline } from './pipeline';
 
 export const tiAbusechUrl: Pipeline = {
   name: 'logs-ti_abusech.url-1.3.1',

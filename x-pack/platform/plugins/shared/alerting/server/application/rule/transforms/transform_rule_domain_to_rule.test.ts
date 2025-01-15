@@ -6,7 +6,7 @@
  */
 
 import { transformRuleDomainToRule } from './transform_rule_domain_to_rule';
-import { type RuleDomain } from '../types';
+import { RuleDomain } from '../types';
 
 describe('transformRuleDomainToRule', () => {
   const MOCK_API_KEY = Buffer.from('123:abc').toString('base64');

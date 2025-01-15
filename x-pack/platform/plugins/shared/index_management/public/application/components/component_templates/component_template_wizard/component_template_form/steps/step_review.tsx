@@ -23,7 +23,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
-  type ComponentTemplateDeserialized,
+  ComponentTemplateDeserialized,
   serializers,
   serializeComponentTemplate,
 } from '../../../shared_imports';

@@ -6,7 +6,7 @@
  */
 
 import { POOR_QUALITY_MINIMUM_PERCENTAGE, DEGRADED_QUALITY_MINIMUM_PERCENTAGE } from '../constants';
-import { type QualityIndicators } from '../types';
+import { QualityIndicators } from '../types';
 
 export const mapPercentageToQuality = (percentage: number): QualityIndicators => {
   return percentage > POOR_QUALITY_MINIMUM_PERCENTAGE

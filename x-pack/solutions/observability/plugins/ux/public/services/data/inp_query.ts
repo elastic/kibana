@@ -6,10 +6,10 @@
  */
 
 import type { ESSearchResponse } from '@kbn/es-types';
-import { type UXMetrics } from '@kbn/observability-shared-plugin/public/types';
+import { UXMetrics } from '@kbn/observability-shared-plugin/public/types';
 import { DEFAULT_RANKS, getRanksPercentages } from './core_web_vitals_query';
 import { INP_FIELD } from '../../../common/elasticsearch_fieldnames';
-import { type SetupUX, type UxUIFilters } from '../../../typings/ui_filters';
+import { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
 import { mergeProjection } from '../../../common/utils/merge_projection';
 import { getRumPageExitTransactionsProjection } from './projections';
 

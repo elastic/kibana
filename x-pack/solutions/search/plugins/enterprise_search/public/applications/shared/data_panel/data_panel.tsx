@@ -13,14 +13,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  type EuiIconProps,
+  EuiIconProps,
   EuiSplitPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  type EuiTitleProps,
+  EuiTitleProps,
 } from '@elastic/eui';
-import { type _EuiPanelDivlike } from '@elastic/eui/src/components/panel/panel';
+import { _EuiPanelDivlike } from '@elastic/eui/src/components/panel/panel';
 
 import './data_panel.scss';
 import { LoadingOverlay } from '../loading';

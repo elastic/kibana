@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { isValidUrl } from '@kbn/presentation-util-plugin/common';
-import { type ContainerStyle, Overflow, BackgroundRepeat, BackgroundSize } from '../../../types';
+import { ContainerStyle, Overflow, BackgroundRepeat, BackgroundSize } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Output extends ContainerStyle {

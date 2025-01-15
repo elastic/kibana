@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type AppMountParameters, type CoreSetup, type CoreStart, type Plugin } from '@kbn/core/public';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import {
-  type GuidedOnboardingExamplePluginSetup,
-  type GuidedOnboardingExamplePluginStart,
-  type AppPluginStartDependencies,
+  GuidedOnboardingExamplePluginSetup,
+  GuidedOnboardingExamplePluginStart,
+  AppPluginStartDependencies,
 } from './types';
 import { PLUGIN_NAME } from '../common';
 

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { type estypes } from '@elastic/elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
 import {
-  type DocumentEntry,
+  DocumentEntry,
   DocumentEntryType,
-  type IndexEntry,
+  IndexEntry,
   IndexEntryType,
-  type KnowledgeBaseEntryResponse,
+  KnowledgeBaseEntryResponse,
 } from '@kbn/elastic-assistant-common';
-import { type EsKnowledgeBaseEntrySchema, type LegacyEsKnowledgeBaseEntrySchema } from './types';
+import { EsKnowledgeBaseEntrySchema, LegacyEsKnowledgeBaseEntrySchema } from './types';
 
 export const transformESSearchToKnowledgeBaseEntry = (
   response: estypes.SearchResponse<EsKnowledgeBaseEntrySchema>

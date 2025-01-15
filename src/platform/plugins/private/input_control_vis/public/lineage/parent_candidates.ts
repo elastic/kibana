@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getTitle, type ControlParams } from '../editor_utils';
+import { getTitle, ControlParams } from '../editor_utils';
 
 export function getParentCandidates(
   controlParamsList: ControlParams[],

@@ -13,11 +13,11 @@ import { firstValueFrom } from 'rxjs';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { set } from '@kbn/safer-lodash-set';
 
-import { type ViewMode } from '@kbn/presentation-publishing';
+import { ViewMode } from '@kbn/presentation-publishing';
 import { backupServiceStrings } from '../dashboard_container/_dashboard_container_strings';
-import { type UnsavedPanelState } from '../dashboard_container/types';
+import { UnsavedPanelState } from '../dashboard_container/types';
 import { coreServices, spacesService } from './kibana_services';
-import { type DashboardState } from '../dashboard_api/types';
+import { DashboardState } from '../dashboard_api/types';
 import { DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
 
 export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type * from './bulk_enable_rules_types';
+export * from './bulk_enable_rules_types';

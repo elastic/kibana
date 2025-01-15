@@ -6,8 +6,8 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { type KueryNode } from '@kbn/es-query';
-import { type SanitizedRuleWithLegacyId } from '../../types';
+import { KueryNode } from '@kbn/es-query';
+import { SanitizedRuleWithLegacyId } from '../../types';
 import {
   ReadOperations,
   AlertingAuthorizationEntity,
@@ -18,9 +18,9 @@ import {
   formatExecutionLogResult,
   getExecutionLogAggregation,
 } from '../../lib/get_execution_log_aggregation';
-import { type IExecutionLogResult } from '../../../common';
+import { IExecutionLogResult } from '../../../common';
 import { parseDate } from '../common';
-import { type RulesClientContext } from '../types';
+import { RulesClientContext } from '../types';
 import { getRule } from '../../application/rule/methods/get/get_rule';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 

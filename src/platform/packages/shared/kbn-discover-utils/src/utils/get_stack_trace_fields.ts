@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getFieldValue, type LogDocument, type StackTraceFields } from '..';
+import { getFieldValue, LogDocument, StackTraceFields } from '..';
 import {
   ERROR_EXCEPTION_STACKTRACE,
   ERROR_LOG_STACKTRACE,

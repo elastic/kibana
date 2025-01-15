@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type AppMountParameters, type CoreSetup, type CoreStart, type Plugin } from '@kbn/core/public';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import {
-  type AppPluginSetupDependencies,
-  type AppPluginStartDependencies,
-  type UnifiedFieldListExamplesPluginSetup,
-  type UnifiedFieldListExamplesPluginStart,
+  AppPluginSetupDependencies,
+  AppPluginStartDependencies,
+  UnifiedFieldListExamplesPluginSetup,
+  UnifiedFieldListExamplesPluginStart,
 } from './types';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import image from './unified_field_list.png';

@@ -6,10 +6,10 @@
  */
 
 import {
-  type BoundChatCompleteOptions,
-  type ChatCompleteAPI,
+  BoundChatCompleteOptions,
+  ChatCompleteAPI,
   MessageRole,
-  type UnboundChatCompleteOptions,
+  UnboundChatCompleteOptions,
 } from '@kbn/inference-common';
 import { bindChatComplete } from './bind_chat_complete';
 

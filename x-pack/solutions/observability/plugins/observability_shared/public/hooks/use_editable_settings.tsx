@@ -6,7 +6,7 @@
  */
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo, useState } from 'react';
-import { type IUiSettingsClient, type UiSettingsType } from '@kbn/core/public';
+import { IUiSettingsClient, UiSettingsType } from '@kbn/core/public';
 import { isEmpty } from 'lodash';
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
 import type {

@@ -8,11 +8,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
-import { type FieldPath } from 'react-hook-form';
+import { FieldPath } from 'react-hook-form';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { type DataView } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { useRunTimeFieldBeingUsed } from '../../hooks/use_find_runtime_usage';
-import { type CreateSLOForm } from '../../types';
+import { CreateSLOForm } from '../../types';
 
 export function RunTimeFieldUsed({
   dataView,

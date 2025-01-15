@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type IHttpFetchError, type ResponseErrorBody } from '@kbn/core/public';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import {
-  type CreateInvestigationItemParams,
-  type CreateInvestigationItemResponse,
+  CreateInvestigationItemParams,
+  CreateInvestigationItemResponse,
 } from '@kbn/investigation-shared';
 import { useMutation } from '@tanstack/react-query';
 import { useKibana } from '../../../utils/kibana_react';

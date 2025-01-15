@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type TypeOf } from '@kbn/config-schema';
-import { type finishMaintenanceWindowParamsSchema } from '../schemas';
+import { TypeOf } from '@kbn/config-schema';
+import { finishMaintenanceWindowParamsSchema } from '../schemas';
 
 export type FinishMaintenanceWindowParams = TypeOf<typeof finishMaintenanceWindowParamsSchema>;

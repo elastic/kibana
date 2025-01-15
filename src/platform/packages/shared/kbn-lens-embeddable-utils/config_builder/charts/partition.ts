@@ -14,13 +14,13 @@ import type {
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
-  type BuildDependencies,
+  BuildDependencies,
   DEFAULT_LAYER_ID,
-  type LensAttributes,
-  type LensPieConfig,
-  type LensTreeMapConfig,
-  type LensMosaicConfig,
-  type LensLegendConfig,
+  LensAttributes,
+  LensPieConfig,
+  LensTreeMapConfig,
+  LensMosaicConfig,
+  LensLegendConfig,
 } from '../types';
 import {
   addLayerColumn,

@@ -9,9 +9,9 @@
 
 import { resolve, relative } from 'path';
 import { createReadStream } from 'fs';
-import { type Readable, type Writable } from 'stream';
+import { Readable, Writable } from 'stream';
 import type { Client } from '@elastic/elasticsearch';
-import { type ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
 import { createPromiseFromStreams } from '@kbn/utils';
 import { REPO_ROOT } from '@kbn/repo-info';

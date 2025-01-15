@@ -28,20 +28,20 @@ import {
   EuiDelayRender,
   EuiScreenReaderOnly,
   htmlIdGenerator,
-  type EuiSwitchEvent,
+  EuiSwitchEvent,
 } from '@elastic/eui';
 
-import { type Cluster, type ClusterPayload } from '../../../../../../common/lib';
+import { Cluster, ClusterPayload } from '../../../../../../common/lib';
 import { SNIFF_MODE, PROXY_MODE } from '../../../../../../common/constants';
 
-import { AppContext, type Context } from '../../../../app_context';
+import { AppContext, Context } from '../../../../app_context';
 
 import { skippingDisconnectedClustersUrl } from '../../../../services/documentation';
 
 import { RequestFlyout } from '../components/request_flyout';
 import { ConnectionMode } from './components';
 import {
-  type ClusterErrors,
+  ClusterErrors,
   convertCloudRemoteAddressToProxyConnection,
   validateCluster,
   isCloudAdvancedOptionsEnabled,

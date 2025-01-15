@@ -7,7 +7,7 @@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTextColor, EuiRadioGroup, EuiSpacer } from '@elastic/eui';
-import React, { type FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 
 import { get } from 'lodash';
 import { NumericField, ToggleField, useFormData } from '../../../../../../shared_imports';

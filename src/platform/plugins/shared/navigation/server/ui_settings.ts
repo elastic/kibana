@@ -9,12 +9,12 @@
 
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { type UiSettingsParams } from '@kbn/core/types';
+import { UiSettingsParams } from '@kbn/core/types';
 import { i18n } from '@kbn/i18n';
 import { isRelativeUrl } from '@kbn/std';
 
 import { DEFAULT_ROUTE_UI_SETTING_ID, DEFAULT_ROUTES } from '../common/constants';
-import { type NavigationServerStartDependencies } from './types';
+import { NavigationServerStartDependencies } from './types';
 
 /**
  * uiSettings definitions for Navigation

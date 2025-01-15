@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 import fetch from 'node-fetch';
-import { type MetricEvent } from './types';
+import { MetricEvent } from './types';
 
 const eventsToNDJSON = (events: MetricEvent[]) => {
   return `${events.map((event) => JSON.stringify(event)).join('\n')}\n`;

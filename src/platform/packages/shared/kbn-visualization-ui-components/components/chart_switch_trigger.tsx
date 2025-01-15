@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiText, EuiFlexGroup, EuiFlexItem, type IconType } from '@elastic/eui';
+import { EuiIcon, EuiText, EuiFlexGroup, EuiFlexItem, IconType } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';

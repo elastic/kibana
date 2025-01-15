@@ -10,7 +10,7 @@
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
 import { Reference } from '../references';
-import { type ExtendsDeepOptions, Type, type TypeOptions } from './type';
+import { ExtendsDeepOptions, Type, TypeOptions } from './type';
 
 export type ConditionalTypeValue = string | number | boolean | object | null;
 

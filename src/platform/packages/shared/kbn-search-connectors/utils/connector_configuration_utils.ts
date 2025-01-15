@@ -9,14 +9,14 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  type ConnectorConfigProperties,
-  type ConnectorConfiguration,
-  type Dependency,
+  ConnectorConfigProperties,
+  ConnectorConfiguration,
+  Dependency,
   FieldType,
   isConfigEntry,
 } from '..';
 
-import { type ConfigEntryView, type ConfigView } from '../components/configuration/connector_configuration';
+import { ConfigEntryView, ConfigView } from '../components/configuration/connector_configuration';
 
 import { isCategoryEntry } from './is_category_entry';
 

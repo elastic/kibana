@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Vis } from '@kbn/visualizations-plugin/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
 import { toExpressionAst } from './to_ast';
-import { AggTypes, type TableVisParams } from '../common';
+import { AggTypes, TableVisParams } from '../common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 
 const mockSchemas = {

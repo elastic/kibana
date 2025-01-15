@@ -8,10 +8,10 @@
  */
 
 import {
-  type DataViewsContract,
-  type DataView,
-  type DataViewField,
-  type DataViewListItem,
+  DataViewsContract,
+  DataView,
+  DataViewField,
+  DataViewListItem,
   DataViewType,
 } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';

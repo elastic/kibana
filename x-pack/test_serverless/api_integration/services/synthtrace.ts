@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type Client } from '@elastic/elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 import {
   ApmSynthtraceEsClient,
   ApmSynthtraceKibanaClient,
   createLogger,
   LogLevel,
 } from '@kbn/apm-synthtrace';
-import url, { format, type UrlObject } from 'url';
-import { type FtrProviderContext } from '../ftr_provider_context';
+import url, { format, UrlObject } from 'url';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 async function getSynthtraceEsClient(client: Client, kibanaClient: ApmSynthtraceKibanaClient) {
   const kibanaVersion = await kibanaClient.fetchLatestApmPackageVersion();

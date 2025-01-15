@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type CaseStatuses } from '../status/types';
+import { CaseStatuses } from '../status/types';
 export interface CaseTooltipContentProps {
   title: string;
   description: string;

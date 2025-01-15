@@ -25,10 +25,10 @@ import {
   TIMESTAMP,
   VERSION,
 } from '@kbn/rule-data-utils';
-import { type DeepPartial } from '@kbn/utility-types';
+import { DeepPartial } from '@kbn/utility-types';
 import { get, omit } from 'lodash';
-import { type Alert as LegacyAlert } from '../../alert/alert';
-import { type AlertInstanceContext, type AlertInstanceState, type RuleAlertData } from '../../types';
+import { Alert as LegacyAlert } from '../../alert/alert';
+import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
 import type { AlertRule } from '../types';
 import { stripFrameworkFields } from './strip_framework_fields';
 import { nanosToMicros } from './nanos_to_micros';

@@ -7,11 +7,11 @@
 
 import { firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { type Plugin, type CoreSetup } from '@kbn/core/public';
-import { type ILicense } from '@kbn/licensing-plugin/common/types';
+import { Plugin, CoreSetup } from '@kbn/core/public';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 
 import { PLUGIN } from '../common';
-import { type AppPublicPluginDependencies } from './types';
+import { AppPublicPluginDependencies } from './types';
 import { SearchProfilerLocatorDefinition } from './locator';
 
 const checkLicenseStatus = (license: ILicense) => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 

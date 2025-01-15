@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type Reducer } from 'react';
-import { type State } from './store';
+import { Reducer } from 'react';
+import { State } from './store';
 
-import { type OnHighlightChangeArgs } from '../components/profile_tree';
-import { type ShardSerialized, type Targets } from '../types';
+import { OnHighlightChangeArgs } from '../components/profile_tree';
+import { ShardSerialized, Targets } from '../types';
 import { hasSearch, hasAggregations } from '../lib';
 
 export type Action =

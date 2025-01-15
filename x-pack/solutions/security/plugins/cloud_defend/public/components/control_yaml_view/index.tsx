@@ -22,8 +22,8 @@ import {
   getSelectorsAndResponsesFromYaml,
 } from '../../../common/utils/helpers';
 import * as i18n from './translations';
-import { type ViewDeps, SelectorConditionsMap } from '../../types';
-import { type SelectorCondition } from '../../../common';
+import { ViewDeps, SelectorConditionsMap } from '../../types';
+import { SelectorCondition } from '../../../common';
 
 const { editor } = monaco;
 

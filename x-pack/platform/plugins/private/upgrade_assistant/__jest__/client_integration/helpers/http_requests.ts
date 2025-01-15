@@ -9,10 +9,10 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 
 import { API_BASE_PATH } from '../../../common/constants';
 import {
-  type CloudBackupStatus,
-  type ESUpgradeStatus,
-  type DeprecationLoggingStatus,
-  type ResponseError,
+  CloudBackupStatus,
+  ESUpgradeStatus,
+  DeprecationLoggingStatus,
+  ResponseError,
 } from '../../../common/types';
 
 type HttpMethod = 'GET' | 'PUT' | 'DELETE' | 'POST';

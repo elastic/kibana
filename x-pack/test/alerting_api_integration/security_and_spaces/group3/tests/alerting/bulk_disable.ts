@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios, SuperuserAtSpace1 } from '../../../scenarios';
-import { type FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getUrlPrefix,
   getTestRuleData,

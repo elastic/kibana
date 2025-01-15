@@ -13,7 +13,7 @@ import {
   getSidebarItems,
 } from './data_formatting';
 import {
-  type NetworkItems,
+  NetworkItems,
   MimeType,
   FriendlyFlyoutLabels,
   FriendlyTimingLabels,
@@ -21,7 +21,7 @@ import {
   Metadata,
 } from './types';
 import { mockMoment } from '../../../../../lib/helper/test_helpers';
-import { type WaterfallDataEntry } from '../../waterfall/types';
+import { WaterfallDataEntry } from '../../waterfall/types';
 
 export const networkItems: NetworkItems = [
   {

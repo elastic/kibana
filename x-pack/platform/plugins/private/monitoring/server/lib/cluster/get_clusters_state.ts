@@ -6,8 +6,8 @@
  */
 
 import { find } from 'lodash';
-import { type ElasticsearchResponse, type ElasticsearchModifiedSource } from '../../../common/types/es';
-import { type LegacyRequest } from '../../types';
+import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../common/types/es';
+import { LegacyRequest } from '../../types';
 import { getIndexPatterns } from '../../../common/get_index_patterns';
 import { Globals } from '../../static_globals';
 

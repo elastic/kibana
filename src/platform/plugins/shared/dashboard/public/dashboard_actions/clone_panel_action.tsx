@@ -7,19 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiCanDuplicatePanels, type CanDuplicatePanels } from '@kbn/presentation-containers';
+import { apiCanDuplicatePanels, CanDuplicatePanels } from '@kbn/presentation-containers';
 import {
   apiCanAccessViewMode,
   apiHasParentApi,
   apiHasUniqueId,
-  type CanAccessViewMode,
-  type EmbeddableApiContext,
+  CanAccessViewMode,
+  EmbeddableApiContext,
   getInheritedViewMode,
-  type HasParentApi,
-  type PublishesBlockingError,
-  type HasUniqueId,
+  HasParentApi,
+  PublishesBlockingError,
+  HasUniqueId,
 } from '@kbn/presentation-publishing';
-import { type Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { DASHBOARD_ACTION_GROUP } from '.';
 import { dashboardClonePanelActionStrings } from './_dashboard_actions_strings';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React, { FC } from 'react';
 import { EuiHorizontalRule, EuiSwitch } from '@elastic/eui';
 import {
   useCanvasShareableState,

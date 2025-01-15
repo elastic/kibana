@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { Client } from '@elastic/elasticsearch';
-import { type GetResponse } from '@elastic/elasticsearch/lib/api/types';
+import { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 
 import type SuperTest from 'supertest';
@@ -27,39 +27,39 @@ import {
   INTERNAL_GET_CASE_CATEGORIES_URL,
   INTERNAL_CASE_SIMILAR_CASES_URL,
 } from '@kbn/cases-plugin/common/constants';
-import { type CaseMetricsFeature } from '@kbn/cases-plugin/common';
+import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import type { SingleCaseMetricsResponse, CasesMetricsResponse } from '@kbn/cases-plugin/common';
-import { type SignalHit } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
-import { type CasePersistedAttributes } from '@kbn/cases-plugin/server/common/types/case';
+import { SignalHit } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
+import { CasePersistedAttributes } from '@kbn/cases-plugin/server/common/types/case';
 import type { SavedObjectsRawDocSource } from '@kbn/core/server';
 import type { ConfigurationPersistedAttributes } from '@kbn/cases-plugin/server/common/types/configure';
 import {
-  type ConnectorMappingsAttributes,
-  type Case,
-  type Cases,
-  type CaseStatuses,
-  type CaseCustomField,
+  ConnectorMappingsAttributes,
+  Case,
+  Cases,
+  CaseStatuses,
+  CaseCustomField,
 } from '@kbn/cases-plugin/common/types/domain';
 import {
-  type AddObservableRequest,
-  type UpdateObservableRequest,
-  type AlertResponse,
-  type CaseResolveResponse,
-  type CasesBulkGetResponse,
-  type CasesFindResponse,
-  type CasesPatchRequest,
-  type CasesStatusResponse,
-  type CustomFieldPutRequest,
-  type GetRelatedCasesByAlertResponse,
-  type SimilarCasesSearchRequest,
-  type CasesSimilarResponse,
+  AddObservableRequest,
+  UpdateObservableRequest,
+  AlertResponse,
+  CaseResolveResponse,
+  CasesBulkGetResponse,
+  CasesFindResponse,
+  CasesPatchRequest,
+  CasesStatusResponse,
+  CustomFieldPutRequest,
+  GetRelatedCasesByAlertResponse,
+  SimilarCasesSearchRequest,
+  CasesSimilarResponse,
 } from '@kbn/cases-plugin/common/types/api';
 import {
   getCaseCreateObservableUrl,
   getCaseUpdateObservableUrl,
   getCaseDeleteObservableUrl,
 } from '@kbn/cases-plugin/common/api';
-import { type User } from '../authentication/types';
+import { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
 

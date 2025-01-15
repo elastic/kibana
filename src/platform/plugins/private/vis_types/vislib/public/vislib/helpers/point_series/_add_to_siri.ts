@@ -9,7 +9,7 @@
 
 import type { Dimension } from '@kbn/vis-type-xy-plugin/public';
 
-import { type Point } from './_get_point';
+import { Point } from './_get_point';
 
 const getAggId = (accessor: string) => (accessor ?? '').split('-').pop() ?? '';
 

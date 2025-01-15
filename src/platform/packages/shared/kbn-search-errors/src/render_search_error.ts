@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { EsError } from './es_error';
 
 export function renderSearchError(

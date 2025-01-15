@@ -6,9 +6,9 @@
  */
 
 import { getLocalhostRealIp } from '@kbn/security-solution-plugin/scripts/endpoint/common/network_services';
-import { type FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext } from '@kbn/test';
 
-import { type ExperimentalFeatures } from '@kbn/security-solution-plugin/common/experimental_features';
+import { ExperimentalFeatures } from '@kbn/security-solution-plugin/common/experimental_features';
 import { ES_RESOURCES } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/serverless';
 import { DefendWorkflowsCypressCliTestRunner } from './runner';
 

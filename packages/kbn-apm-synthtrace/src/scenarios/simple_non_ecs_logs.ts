@@ -8,14 +8,14 @@
  */
 
 import {
-  type LogDocument,
+  LogDocument,
   log,
   generateShortId,
   generateLongId,
   LONG_FIELD_NAME,
 } from '@kbn/apm-synthtrace-client';
 import moment from 'moment';
-import { type Scenario } from '../cli/scenario';
+import { Scenario } from '../cli/scenario';
 import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
 import { withClient } from '../lib/utils/with_client';
 import {

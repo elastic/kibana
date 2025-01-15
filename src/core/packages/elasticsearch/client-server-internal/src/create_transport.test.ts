@@ -12,7 +12,7 @@ import { transportConstructorMock, transportRequestMock } from './create_transpo
 import { errors } from '@elastic/elasticsearch';
 import type { BaseConnectionPool } from '@elastic/elasticsearch';
 import type { InternalUnauthorizedErrorHandler } from './retry_unauthorized';
-import { createTransport, type ErrorHandlerAccessor } from './create_transport';
+import { createTransport, ErrorHandlerAccessor } from './create_transport';
 
 const createConnectionPool = () => {
   return { _connectionPool: 'mocked' } as unknown as BaseConnectionPool;

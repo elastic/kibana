@@ -13,19 +13,19 @@ import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { get } from 'lodash';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
-  type Capabilities,
-  type OverlayStart,
-  type NotificationsStart,
-  type ScopedHistory,
-  type HttpSetup,
-  type IUiSettingsClient,
-  type DocLinksStart,
-  type ThemeServiceStart,
+  Capabilities,
+  OverlayStart,
+  NotificationsStart,
+  ScopedHistory,
+  HttpSetup,
+  IUiSettingsClient,
+  DocLinksStart,
+  ThemeServiceStart,
 } from '@kbn/core/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { Header, Inspect, NotFoundErrors } from './components';
 import { bulkDeleteObjects, bulkGetObjects } from '../../lib';
-import { type SavedObjectWithMetadata } from '../../types';
+import { SavedObjectWithMetadata } from '../../types';
 import './saved_object_view.scss';
 
 export interface SavedObjectEditionProps {

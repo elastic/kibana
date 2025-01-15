@@ -9,12 +9,12 @@
 
 import {
   actions,
-  type ActorRef,
-  type AnyEventObject,
-  type EventObject,
-  type Expr,
-  type PureAction,
-  type SendActionOptions,
+  ActorRef,
+  AnyEventObject,
+  EventObject,
+  Expr,
+  PureAction,
+  SendActionOptions,
 } from 'xstate';
 
 export const sendIfDefined =

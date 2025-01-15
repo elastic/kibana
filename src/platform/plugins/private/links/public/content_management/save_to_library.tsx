@@ -11,14 +11,14 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   showSaveModal,
-  type OnSaveProps,
+  OnSaveProps,
   SavedObjectSaveModal,
-  type SaveResult,
+  SaveResult,
 } from '@kbn/saved-objects-plugin/public';
 import { CONTENT_ID } from '../../common';
 import { checkForDuplicateTitle } from './duplicate_title_check';
 import { linksClient } from './links_content_management_client';
-import { type LinksRuntimeState } from '../types';
+import { LinksRuntimeState } from '../types';
 import { serializeLinksAttributes } from '../lib/serialize_attributes';
 
 const modalTitle = i18n.translate('links.contentManagement.saveModalTitle', {

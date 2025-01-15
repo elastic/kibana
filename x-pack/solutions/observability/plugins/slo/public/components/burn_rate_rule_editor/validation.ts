@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
-import { type BurnRateRuleParams, type Duration } from '../../typings';
+import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
+import { BurnRateRuleParams, Duration } from '../../typings';
 import { toMinutes } from '../../utils/slo/duration';
 
 export interface WindowResult {

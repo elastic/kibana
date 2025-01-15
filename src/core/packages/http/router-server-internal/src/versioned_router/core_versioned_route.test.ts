@@ -15,12 +15,12 @@ import type {
   VersionedRouteValidation,
   RouteSecurity,
 } from '@kbn/core-http-server';
-import { type Router } from '../router';
+import { Router } from '../router';
 import { createFooValidation } from '../router.test.util';
 import { createRouter } from './mocks';
 import { CoreVersionedRouter, unwrapVersionedResponseBodyValidation } from '.';
 import { passThroughValidation } from './core_versioned_route';
-import { type Method } from './types';
+import { Method } from './types';
 import { createRequest } from './core_versioned_route.test.util';
 import { isConfigSchema } from '@kbn/config-schema';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';

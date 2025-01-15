@@ -20,7 +20,7 @@ import {
   TAGS,
 } from '../../constants/index.mock';
 
-import { type UpdateExceptionListItemSchema } from '.';
+import { UpdateExceptionListItemSchema } from '.';
 
 export const getUpdateExceptionListItemSchemaMock = (): UpdateExceptionListItemSchema => ({
   _version: undefined,

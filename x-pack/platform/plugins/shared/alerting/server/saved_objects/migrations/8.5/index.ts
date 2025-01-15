@@ -6,15 +6,15 @@
  */
 
 import {
-  type SavedObjectMigrationContext,
-  type SavedObjectUnsanitizedDoc,
+  SavedObjectMigrationContext,
+  SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
-import { type EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { isSerializedSearchSource } from '@kbn/data-plugin/common';
 import { pick } from 'lodash';
-import { type RawRule } from '../../../types';
+import { RawRule } from '../../../types';
 import { createEsoMigration, isEsQueryRuleType, pipeMigrations } from '../utils';
-import { type AlertLogMeta } from '../types';
+import { AlertLogMeta } from '../types';
 
 function stripOutRuntimeFieldsInOldESQuery(
   doc: SavedObjectUnsanitizedDoc<RawRule>,

@@ -11,17 +11,17 @@ import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { faker } from '@faker-js/faker';
 import { act } from 'react-dom/test-utils';
-import { type IFieldFormat } from '@kbn/field-formats-plugin/common';
+import { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { type Datatable } from '@kbn/expressions-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { DatatableComponent } from './table_basic';
 import type { DatatableProps } from '../../../../common/expressions';
 import { LENS_EDIT_PAGESIZE_ACTION } from './constants';
-import { type DatatableRenderProps } from './types';
-import { type PaletteOutput } from '@kbn/coloring';
+import { DatatableRenderProps } from './types';
+import { PaletteOutput } from '@kbn/coloring';
 import { getTransposeId } from '@kbn/transpose-utils';
-import { type CustomPaletteState } from '@kbn/charts-plugin/common';
+import { CustomPaletteState } from '@kbn/charts-plugin/common';
 import { getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 
 jest.mock('../../../shared_components/coloring/get_cell_color_fn', () => {

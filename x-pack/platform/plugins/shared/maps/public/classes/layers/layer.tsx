@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
-import { type Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import type { Query } from '@kbn/es-query';
 import {
   getWarningsTitle,
@@ -17,14 +17,14 @@ import {
   ViewDetailsPopover,
 } from '@kbn/search-response-warnings';
 import _ from 'lodash';
-import React, { type ReactElement, type ReactNode } from 'react';
+import React, { ReactElement, ReactNode } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
-import { type FeatureCollection } from 'geojson';
+import { FeatureCollection } from 'geojson';
 import { DataRequest } from '../util/data_request';
 import { hasIncompleteResults } from '../util/tile_meta_feature_utils';
 import {
-  type LAYER_TYPE,
+  LAYER_TYPE,
   MAX_ZOOM,
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
   MIN_ZOOM,
@@ -32,19 +32,19 @@ import {
 } from '../../../common/constants';
 import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import {
-  type Attribution,
-  type CustomIcon,
-  type LayerDescriptor,
-  type MapExtent,
-  type StyleDescriptor,
-  type TileMetaFeature,
-  type Timeslice,
-  type StyleMetaDescriptor,
+  Attribution,
+  CustomIcon,
+  LayerDescriptor,
+  MapExtent,
+  StyleDescriptor,
+  TileMetaFeature,
+  Timeslice,
+  StyleMetaDescriptor,
 } from '../../../common/descriptor_types';
-import { type ISource, type SourceEditorArgs } from '../sources/source';
-import { type DataRequestContext } from '../../actions';
-import { type IStyle } from '../styles/style';
-import { type LICENSED_FEATURES } from '../../licensed_features';
+import { ISource, SourceEditorArgs } from '../sources/source';
+import { DataRequestContext } from '../../actions';
+import { IStyle } from '../styles/style';
+import { LICENSED_FEATURES } from '../../licensed_features';
 import { hasESSourceMethod, isESVectorTileSource } from '../sources/es_source';
 import { TileErrorsList } from './tile_errors_list';
 import { isLayerGroup } from './layer_group';

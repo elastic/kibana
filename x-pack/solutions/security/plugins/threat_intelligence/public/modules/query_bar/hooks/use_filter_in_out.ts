@@ -6,11 +6,11 @@
  */
 
 import { useCallback } from 'react';
-import { type Filter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 import { useIndicatorsFiltersContext } from '../../indicators/hooks/use_filters_context';
-import { type Indicator } from '../../../../common/types/indicator';
-import { type FilterIn, type FilterOut, updateFiltersArray } from '../utils/filter';
+import { Indicator } from '../../../../common/types/indicator';
+import { FilterIn, FilterOut, updateFiltersArray } from '../utils/filter';
 import { useSourcererDataView } from '../../indicators/hooks/use_sourcerer_data_view';
 
 export interface UseFilterInParam {

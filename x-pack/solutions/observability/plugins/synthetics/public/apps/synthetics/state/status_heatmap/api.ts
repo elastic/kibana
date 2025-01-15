@@ -6,7 +6,7 @@
  */
 
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
-import { type MonitorStatusHeatmapBucket } from '../../../../../common/runtime_types';
+import { MonitorStatusHeatmapBucket } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service';
 
 export const fetchMonitorStatusHeatmap = async ({

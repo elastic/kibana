@@ -11,11 +11,11 @@ import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 import {
-  type ConfigDeprecation,
-  type AddConfigDeprecation,
-  type ConfigDeprecationFactory,
-  type FactoryConfigDeprecationDetails,
-  type ConfigDeprecationCommand,
+  ConfigDeprecation,
+  AddConfigDeprecation,
+  ConfigDeprecationFactory,
+  FactoryConfigDeprecationDetails,
+  ConfigDeprecationCommand,
 } from './types';
 
 const getDeprecationTitle = (deprecationPath: string) => {

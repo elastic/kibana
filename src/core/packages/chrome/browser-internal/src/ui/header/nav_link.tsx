@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiIcon, type EuiListGroupItemProps } from '@elastic/eui';
+import { EuiIcon, EuiListGroupItemProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';

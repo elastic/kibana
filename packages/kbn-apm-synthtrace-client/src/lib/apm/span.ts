@@ -9,7 +9,7 @@
 
 import { BaseSpan } from './base_span';
 import { generateShortId } from '../utils/generate_id';
-import { type ApmFields, type SpanParams } from './apm_fields';
+import { ApmFields, SpanParams } from './apm_fields';
 
 export class Span extends BaseSpan {
   constructor(fields: ApmFields) {

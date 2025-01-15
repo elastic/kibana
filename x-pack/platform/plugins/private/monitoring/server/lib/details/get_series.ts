@@ -7,8 +7,8 @@
 
 import { get } from 'lodash';
 import moment from 'moment';
-import { type ElasticsearchResponse } from '../../../common/types/es';
-import { type LegacyRequest, type Bucket } from '../../types';
+import { ElasticsearchResponse } from '../../../common/types/es';
+import { LegacyRequest, Bucket } from '../../types';
 import { checkParam } from '../error_missing_required';
 import { metrics } from '../metrics';
 import { createQuery } from '../create_query';
@@ -16,7 +16,7 @@ import { formatTimestampToDuration } from '../../../common';
 import {
   NORMALIZED_DERIVATIVE_UNIT,
   CALCULATE_DURATION_UNTIL,
-  type INDEX_PATTERN_TYPES,
+  INDEX_PATTERN_TYPES,
   STANDALONE_CLUSTER_CLUSTER_UUID,
   METRICBEAT_INDEX_NAME_UNIQUE_TOKEN,
   DS_INDEX_PATTERN_METRICS,

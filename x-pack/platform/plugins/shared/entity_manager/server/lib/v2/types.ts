@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type IClusterClient } from '@kbn/core/server';
+import { IClusterClient } from '@kbn/core/server';
 import { z } from '@kbn/zod';
 import moment from 'moment';
 

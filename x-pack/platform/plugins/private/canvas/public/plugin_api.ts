@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { type ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import {
-  type AnyExpressionFunctionDefinition,
-  type AnyExpressionTypeDefinition,
-  type AnyExpressionRenderDefinition,
-  type AnyRendererFactory,
+  AnyExpressionFunctionDefinition,
+  AnyExpressionTypeDefinition,
+  AnyExpressionRenderDefinition,
+  AnyRendererFactory,
 } from '../types';
-import { type ElementFactory } from '../types';
+import { ElementFactory } from '../types';
 
 type SpecPromiseFn<T extends any> = () => Promise<T[]>;
 type AddToRegistry<T extends any> = (add: T[] | SpecPromiseFn<T>) => void;

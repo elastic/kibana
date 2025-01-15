@@ -7,21 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BUCKET_TYPES, type IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
+import { BUCKET_TYPES, IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import {
-  type AggBasedColumn,
-  type CounterRateColumn,
-  type GenericColumnWithMeta,
-  type SchemaConfig,
-  type SupportedAggregation,
+  AggBasedColumn,
+  CounterRateColumn,
+  GenericColumnWithMeta,
+  SchemaConfig,
+  SupportedAggregation,
 } from '../../common';
 import {
-  type AvgColumn,
-  type CountColumn,
-  type MaxColumn,
-  type DateHistogramColumn,
-  type Meta,
+  AvgColumn,
+  CountColumn,
+  MaxColumn,
+  DateHistogramColumn,
+  Meta,
 } from '../../common/convert_to_lens/lib';
 import {
   getBucketCollapseFn,
@@ -34,7 +34,7 @@ import {
   isValidVis,
   sortColumns,
 } from './utils';
-import { type Schemas } from '../vis_schemas';
+import { Schemas } from '../vis_schemas';
 
 const mockConvertBucketToColumns = jest.fn();
 

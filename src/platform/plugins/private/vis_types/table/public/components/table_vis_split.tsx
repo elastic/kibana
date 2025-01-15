@@ -9,9 +9,9 @@
 
 import React, { memo } from 'react';
 
-import { type IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { type TableGroup, type TableVisConfig, type TableVisUseUiStateProps } from '../types';
+import { TableGroup, TableVisConfig, TableVisUseUiStateProps } from '../types';
 import { TableVisBasic } from './table_vis_basic';
 
 interface TableVisSplitProps {

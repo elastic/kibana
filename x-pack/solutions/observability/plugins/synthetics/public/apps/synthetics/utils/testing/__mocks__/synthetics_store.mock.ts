@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type SyntheticsAppState } from '../../../state/root_reducer';
+import { SyntheticsAppState } from '../../../state/root_reducer';
 import {
   ConfigKey,
   MonitorTypeEnum,
@@ -14,9 +14,9 @@ import {
   ScheduleUnit,
   SourceType,
   VerificationMode,
-  type TLSVersion,
+  TLSVersion,
 } from '../../../../../../common/runtime_types';
-import { type MonitorDetailsState } from '../../../state';
+import { MonitorDetailsState } from '../../../state';
 
 /**
  * NOTE: This variable name MUST start with 'mock*' in order for

@@ -6,4 +6,4 @@
  */
 
 export * from './rules_service';
-export type * from './types';
+export * from './types';

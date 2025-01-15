@@ -7,7 +7,7 @@
 
 import { last } from 'lodash';
 import {
-  type CustomThresholdExpressionMetric,
+  CustomThresholdExpressionMetric,
   InfraFormatterType,
 } from '../../../../common/custom_threshold_rule/types';
 

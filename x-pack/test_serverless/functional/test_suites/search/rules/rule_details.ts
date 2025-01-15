@@ -7,8 +7,8 @@
 
 import { expect } from 'expect';
 import { v4 as uuidv4 } from 'uuid';
-import { type RoleCredentials } from '../../../../shared/services';
-import { type FtrProviderContext } from '../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../shared/services';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export enum RuleNotifyWhen {
   CHANGE = 'onActionGroupChange',

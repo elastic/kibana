@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type IUiSettingsClient, type SavedObject, type SavedObjectsClientContract } from '@kbn/core/server';
+import { IUiSettingsClient, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
-import { type ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
-import { type SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
-import { type LocatorServicesDeps as Services } from '.';
-import { type DiscoverAppLocatorParams } from '../../common';
+import { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
+import { LocatorServicesDeps as Services } from '.';
+import { DiscoverAppLocatorParams } from '../../common';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
 import { titleFromLocatorFactory } from './title_from_locator';
 

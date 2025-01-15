@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { type CoreSetup, type CoreStart, type Logger, type Plugin, type PluginInitializerContext } from '@kbn/core/server';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { mapValues } from 'lodash';
 import { DataTelemetryService } from './services';
 import { getDatasetQualityServerRouteRepository } from './routes';
 import { registerRoutes } from './routes/register_routes';
-import { type DatasetQualityRouteHandlerResources } from './routes/types';
+import { DatasetQualityRouteHandlerResources } from './routes/types';
 import {
-  type DatasetQualityPluginSetup,
-  type DatasetQualityPluginSetupDependencies,
-  type DatasetQualityPluginStart,
-  type DatasetQualityPluginStartDependencies,
+  DatasetQualityPluginSetup,
+  DatasetQualityPluginSetupDependencies,
+  DatasetQualityPluginStart,
+  DatasetQualityPluginStartDependencies,
 } from './types';
 
 export class DatasetQualityServerPlugin

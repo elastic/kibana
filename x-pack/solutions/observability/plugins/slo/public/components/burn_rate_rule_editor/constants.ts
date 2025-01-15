@@ -12,7 +12,7 @@ import {
   MEDIUM_PRIORITY_ACTION,
 } from '../../../common/constants';
 
-import { type WindowSchema } from '../../typings';
+import { WindowSchema } from '../../typings';
 
 type PartialWindowSchema = Partial<WindowSchema>;
 

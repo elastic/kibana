@@ -7,4 +7,4 @@
 
 export * from './components/alerts_grouping';
 export * from './contexts/alerts_grouping_context';
-export type * from './types';
+export * from './types';

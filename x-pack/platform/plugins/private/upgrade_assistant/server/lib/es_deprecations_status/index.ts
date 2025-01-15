@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type IScopedClusterClient } from '@kbn/core/server';
-import { type EnrichedDeprecationInfo, type ESUpgradeStatus, type FeatureSet } from '../../../common/types';
+import { IScopedClusterClient } from '@kbn/core/server';
+import { EnrichedDeprecationInfo, ESUpgradeStatus, FeatureSet } from '../../../common/types';
 import { getEnrichedDeprecations } from './migrations';
 import { getHealthIndicators } from './health_indicators';
 

@@ -10,11 +10,11 @@
 import React, {
   createContext,
   useContext,
-  type FunctionComponent,
+  FunctionComponent,
   useMemo,
-  type PropsWithChildren,
+  PropsWithChildren,
 } from 'react';
-import { type NotificationsStart, type CoreStart } from '@kbn/core/public';
+import { NotificationsStart, CoreStart } from '@kbn/core/public';
 import type { BehaviorSubject } from 'rxjs';
 import type {
   DataViewLazy,
@@ -22,7 +22,7 @@ import type {
   FieldFormatsStart,
   RuntimeFieldSubFields,
 } from '../shared_imports';
-import { type ApiService } from '../lib/api';
+import { ApiService } from '../lib/api';
 import type { InternalFieldType, PluginStart } from '../types';
 
 export interface Context {

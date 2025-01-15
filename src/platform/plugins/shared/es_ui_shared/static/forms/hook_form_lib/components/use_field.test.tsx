@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, type FunctionComponent, useState, useCallback } from 'react';
+import React, { useEffect, FunctionComponent, useState, useCallback } from 'react';
 import { act } from 'react-dom/test-utils';
 import { first } from 'rxjs';
 
-import { registerTestBed, type TestBed } from '../shared_imports';
-import { type FormHook, type OnUpdateHandler, type FieldConfig, type FieldHook } from '../types';
+import { registerTestBed, TestBed } from '../shared_imports';
+import { FormHook, OnUpdateHandler, FieldConfig, FieldHook } from '../types';
 import { useForm } from '../hooks/use_form';
 import { useBehaviorSubject } from '../hooks/utils/use_behavior_subject';
 import { Form } from './form';

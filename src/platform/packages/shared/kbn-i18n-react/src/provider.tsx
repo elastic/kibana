@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC, type PropsWithChildren } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { i18n } from '@kbn/i18n';
 import { IntlProvider } from 'react-intl';
 

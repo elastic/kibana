@@ -6,7 +6,7 @@
  */
 
 import { toExpression } from './visualization';
-import { fromExpression, type Ast } from '@kbn/interpreter';
+import { fromExpression, Ast } from '@kbn/interpreter';
 
 const baseInput = {
   id: 'elementId',

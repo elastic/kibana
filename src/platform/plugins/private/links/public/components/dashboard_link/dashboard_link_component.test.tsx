@@ -17,9 +17,9 @@ import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
 import { DashboardLinkComponent } from './dashboard_link_component';
 import { DashboardLinkStrings } from './dashboard_link_strings';
 import { getMockLinksParentApi } from '../../mocks';
-import { type ResolvedLink } from '../../types';
+import { ResolvedLink } from '../../types';
 import { BehaviorSubject } from 'rxjs';
-import { type AggregateQuery, type Filter, type Query, type TimeRange } from '@kbn/es-query';
+import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 
 function createMockLinksParent({
   initialQuery,

@@ -6,10 +6,10 @@
  */
 
 import {
-  type MonitorFields,
-  type ServiceLocationErrors,
-  type SyntheticsMonitor,
-  type SyntheticsMonitorSchedule,
+  MonitorFields,
+  ServiceLocationErrors,
+  SyntheticsMonitor,
+  SyntheticsMonitorSchedule,
 } from '../runtime_types';
 
 export interface TestNowResponse {

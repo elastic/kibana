@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ImportExceptionsResponseSchema } from '.';
+import { ImportExceptionsResponseSchema } from '.';
 
 export const getImportExceptionsResponseSchemaMock = (
   success = 0,

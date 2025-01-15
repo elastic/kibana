@@ -19,10 +19,10 @@ import {
   EuiText,
   EuiSwitch,
   EuiButton,
-  type EuiComboBoxOptionOption,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 
-import { type PolicyFromES } from '../../../../../common/types';
+import { PolicyFromES } from '../../../../../common/types';
 import { addLifecyclePolicyToTemplate, useLoadIndexTemplates } from '../../../services/api';
 import { toasts } from '../../../services/notification';
 import { showApiError } from '../../../services/api_errors';

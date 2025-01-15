@@ -7,7 +7,7 @@
 
 import { Query } from '@elastic/eui';
 import { getSearchTerm, getFieldValueMap, applyAliases } from './query_utils';
-import { type FilterValues } from './types';
+import { FilterValues } from './types';
 
 describe('getSearchTerm', () => {
   const searchTerm = (raw: string) => getSearchTerm(Query.parse(raw));

@@ -7,7 +7,7 @@
 
 import expect from 'expect';
 import type { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
-import { type FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   expectDefaultElasticsearchOutput,
   expectDefaultFleetServer,

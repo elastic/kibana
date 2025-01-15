@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import {
   EuiBasicTable,
-  type EuiBasicTableColumn,
+  EuiBasicTableColumn,
   EuiButton,
   EuiComboBox,
   EuiFieldText,

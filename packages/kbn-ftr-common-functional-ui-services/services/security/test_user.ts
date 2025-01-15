@@ -12,9 +12,9 @@ import supertest from 'supertest';
 
 import type { Browser } from '../browser';
 import type { TestSubjects } from '../test_subjects';
-import { type Role } from './role';
-import { type User } from './user';
-import { FtrService, type FtrProviderContext } from '../ftr_provider_context';
+import { Role } from './role';
+import { User } from './user';
+import { FtrService, FtrProviderContext } from '../ftr_provider_context';
 
 const TEST_USER_NAME = 'test_user';
 const TEST_USER_PASSWORD = 'changeme';

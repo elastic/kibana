@@ -6,7 +6,7 @@
  */
 
 import {
-  type ElasticsearchResponseError,
+  ElasticsearchResponseError,
   isNotFoundException,
   isResourceNotFoundException,
 } from '../../utils/identify_exceptions';

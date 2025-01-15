@@ -8,10 +8,10 @@
 import React, { useState } from 'react';
 
 import { EuiForm } from '@elastic/eui';
-import { type Repository, type EmptyRepository } from '../../../../common/types';
+import { Repository, EmptyRepository } from '../../../../common/types';
 import { flatten } from '../../../../common/lib';
 
-import { type RepositoryValidation, validateRepository } from '../../services/validation';
+import { RepositoryValidation, validateRepository } from '../../services/validation';
 import { RepositoryFormStepOne } from './step_one';
 import { RepositoryFormStepTwo } from './step_two';
 

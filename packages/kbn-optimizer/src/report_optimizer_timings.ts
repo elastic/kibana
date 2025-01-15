@@ -9,10 +9,10 @@
 
 import { concatMap } from 'rxjs';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
-import { type ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 
-import { type OptimizerConfig } from './optimizer';
-import { type OptimizerUpdate$ } from './run_optimizer';
+import { OptimizerConfig } from './optimizer';
+import { OptimizerUpdate$ } from './run_optimizer';
 import { pipeClosure } from './common';
 
 export function reportOptimizerTimings(log: ToolingLog, config: OptimizerConfig) {

@@ -14,9 +14,9 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { controlGroupStateBuilder } from '@kbn/controls-plugin/public';
 import {
-  type DashboardApi,
+  DashboardApi,
   DashboardRenderer,
-  type DashboardCreationOptions,
+  DashboardCreationOptions,
 } from '@kbn/dashboard-plugin/public';
 import { FILTER_DEBUGGER_EMBEDDABLE_ID } from './constants';
 

@@ -10,12 +10,12 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 
 import {
-  type EsDataTypeGeoPoint,
-  type EsDataTypeGeoPointRange,
-  type EsDataTypeRange,
-  type EsDataTypeRangeTerm,
-  type EsDataTypeSingle,
-  type EsDataTypeUnion,
+  EsDataTypeGeoPoint,
+  EsDataTypeGeoPointRange,
+  EsDataTypeRange,
+  EsDataTypeRangeTerm,
+  EsDataTypeSingle,
+  EsDataTypeUnion,
   esDataTypeGeoPoint,
   esDataTypeGeoPointRange,
   esDataTypeRange,

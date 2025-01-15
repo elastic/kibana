@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type PartitionChartProps } from '../../../common/types';
+import { PartitionChartProps } from '../../../common/types';
 
 export const data: PartitionChartProps['visData'] = {
   type: 'datatable',

@@ -8,19 +8,19 @@
  */
 
 import { BehaviorSubject, Subject, combineLatest, debounceTime, skipWhile, switchMap } from 'rxjs';
-import { type PublishesSavedObjectId, type PublishingSubject } from '@kbn/presentation-publishing';
-import { type ControlGroupApi } from '@kbn/controls-plugin/public';
+import { PublishesSavedObjectId, PublishingSubject } from '@kbn/presentation-publishing';
+import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { childrenUnsavedChanges$, initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { omit } from 'lodash';
-import { type DashboardCreationOptions, type DashboardState } from './types';
-import { type initializePanelsManager } from './panels_manager';
-import { type initializeSettingsManager } from './settings_manager';
-import { type initializeUnifiedSearchManager } from './unified_search_manager';
+import { DashboardCreationOptions, DashboardState } from './types';
+import { initializePanelsManager } from './panels_manager';
+import { initializeSettingsManager } from './settings_manager';
+import { initializeUnifiedSearchManager } from './unified_search_manager';
 import {
   PANELS_CONTROL_GROUP_KEY,
   getDashboardBackupService,
 } from '../services/dashboard_backup_service';
-import { type initializeViewModeManager } from './view_mode_manager';
+import { initializeViewModeManager } from './view_mode_manager';
 
 export function initializeUnsavedChangesManager({
   creationOptions,

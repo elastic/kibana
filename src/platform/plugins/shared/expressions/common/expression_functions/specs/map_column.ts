@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Observable, combineLatest, defer } from 'rxjs';
+import { Observable, combineLatest, defer } from 'rxjs';
 import { defaultIfEmpty, map } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { type ExpressionFunctionDefinition } from '../types';
-import { type Datatable, type DatatableColumnType, getType } from '../../expression_types';
+import { ExpressionFunctionDefinition } from '../types';
+import { Datatable, DatatableColumnType, getType } from '../../expression_types';
 
 export interface MapColumnArguments {
   id?: string | null;

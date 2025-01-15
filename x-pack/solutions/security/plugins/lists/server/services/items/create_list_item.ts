@@ -6,20 +6,20 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { type ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import {
-  type DeserializerOrUndefined,
-  type IdOrUndefined,
-  type ListItemSchema,
-  type MetaOrUndefined,
-  type RefreshWithWaitFor,
-  type SerializerOrUndefined,
-  type Type,
+  DeserializerOrUndefined,
+  IdOrUndefined,
+  ListItemSchema,
+  MetaOrUndefined,
+  RefreshWithWaitFor,
+  SerializerOrUndefined,
+  Type,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 
 import { transformListItemToElasticQuery } from '../utils';
-import { type IndexEsListItemSchema } from '../../schemas/elastic_query';
+import { IndexEsListItemSchema } from '../../schemas/elastic_query';
 
 export interface CreateListItemOptions {
   deserializer: DeserializerOrUndefined;

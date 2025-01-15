@@ -9,13 +9,13 @@ import React from 'react';
 
 import { REPOSITORY_TYPES } from '../../../../../../../common/constants';
 import {
-  type AzureRepository,
-  type FSRepository,
-  type GCSRepository,
-  type HDFSRepository,
-  type ReadonlyRepository,
-  type Repository,
-  type S3Repository,
+  AzureRepository,
+  FSRepository,
+  GCSRepository,
+  HDFSRepository,
+  ReadonlyRepository,
+  Repository,
+  S3Repository,
 } from '../../../../../../../common/types';
 
 import { AzureDetails } from './azure_details';

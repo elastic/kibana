@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type CoreSetup, type Plugin } from '@kbn/core/server';
+import { CoreSetup, Plugin } from '@kbn/core/server';
 import { PLUGIN_ID } from '../common';
 
-import { type Dependencies } from './types';
+import { Dependencies } from './types';
 
 export class CloudDataMigrationPlugin implements Plugin<void, void, any, any> {
   public setup(coreSetup: CoreSetup, { features }: Dependencies) {

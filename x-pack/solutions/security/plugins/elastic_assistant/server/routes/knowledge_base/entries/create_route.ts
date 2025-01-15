@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type IKibanaResponse } from '@kbn/core/server';
+import { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   API_VERSIONS,
@@ -14,9 +14,9 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import {
   KnowledgeBaseEntryCreateProps,
-  type KnowledgeBaseEntryResponse,
+  KnowledgeBaseEntryResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
-import { type ElasticAssistantPluginRouter } from '../../../types';
+import { ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';
 import { performChecks } from '../../helpers';
 

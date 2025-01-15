@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type IndexSettings } from '@kbn/index-management-plugin/common';
-import { type RoleCredentials } from '../../../shared/services';
+import { IndexSettings } from '@kbn/index-management-plugin/common';
+import { RoleCredentials } from '../../../shared/services';
 import { API_BASE_PATH } from './constants';
-import { type FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function SvlSettingsApi({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');

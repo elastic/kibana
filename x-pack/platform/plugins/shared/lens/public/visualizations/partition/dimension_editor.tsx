@@ -11,8 +11,8 @@ import { i18n } from '@kbn/i18n';
 import {
   CategoricalColorMapping,
   DEFAULT_COLOR_MAPPING_CONFIG,
-  type PaletteRegistry,
-  type ColorMapping,
+  PaletteRegistry,
+  ColorMapping,
   SPECIAL_TOKENS_STRING_CONVERSION,
 } from '@kbn/coloring';
 import { ColorPicker } from '@kbn/visualization-ui-components';
@@ -20,9 +20,9 @@ import { useDebouncedValue } from '@kbn/visualization-utils';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiText, EuiBadge } from '@elastic/eui';
 import { useState, useCallback } from 'react';
 import { getColorCategories } from '@kbn/chart-expressions-common';
-import { KbnPalette, type KbnPalettes } from '@kbn/palettes';
-import { type PieVisualizationState } from '../../../common/types';
-import { type VisualizationDimensionEditorProps } from '../../types';
+import { KbnPalette, KbnPalettes } from '@kbn/palettes';
+import { PieVisualizationState } from '../../../common/types';
+import { VisualizationDimensionEditorProps } from '../../types';
 import {
   PalettePanelContainer,
   PalettePicker,

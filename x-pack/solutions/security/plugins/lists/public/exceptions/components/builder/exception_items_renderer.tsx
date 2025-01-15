@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import React, { type ElementType, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import React, { ElementType, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
-import { type HttpStart } from '@kbn/core/public';
+import { HttpStart } from '@kbn/core/public';
 import { addIdToItem } from '@kbn/securitysolution-utils';
 import {
-  type ExceptionListItemSchema,
-  type ExceptionListType,
-  type NamespaceType,
+  ExceptionListItemSchema,
+  ExceptionListType,
+  NamespaceType,
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
-  type OsTypeArray,
+  OsTypeArray,
   entriesNested,
   exceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  type CreateExceptionListItemBuilderSchema,
-  type DataViewField,
-  type ExceptionsBuilderExceptionItem,
-  type ExceptionsBuilderReturnExceptionItem,
-  type OperatorOption,
+  CreateExceptionListItemBuilderSchema,
+  DataViewField,
+  ExceptionsBuilderExceptionItem,
+  ExceptionsBuilderReturnExceptionItem,
+  OperatorOption,
   containsValueListEntry,
   filterExceptionItems,
   getDefaultEmptyEntry,
   getDefaultNestedEmptyEntry,
   getNewExceptionItem,
 } from '@kbn/securitysolution-list-utils';
-import { type DataViewBase } from '@kbn/es-query';
+import { DataViewBase } from '@kbn/es-query';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
 import deepEqual from 'fast-deep-equal';
 
@@ -41,7 +41,7 @@ import { AndOrBadge } from '../and_or_badge';
 import { BuilderExceptionListItemComponent } from './exception_item_renderer';
 import { BuilderLogicButtons } from './logic_buttons';
 import { getTotalErrorExist } from './selectors';
-import { type EntryFieldError, type State, exceptionsBuilderReducer } from './reducer';
+import { EntryFieldError, State, exceptionsBuilderReducer } from './reducer';
 const MyInvisibleAndBadge = styled(EuiFlexItem)`
   visibility: hidden;
 `;

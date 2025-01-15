@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { type Logger } from '@kbn/logging';
+import { Logger } from '@kbn/logging';
 import {
-  type IntervalSchedule,
+  IntervalSchedule,
   parseDuration,
-  type RuleAction,
+  RuleAction,
   RuleNotifyWhenTypeValues,
-  type ThrottledActions,
+  ThrottledActions,
 } from '../../../../common';
 
 export const isSummaryAction = (action?: RuleAction) => {

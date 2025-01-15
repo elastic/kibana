@@ -7,7 +7,7 @@
 
 import React from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
-import { type MemoryRouterProps } from 'react-router';
+import { MemoryRouterProps } from 'react-router';
 import { screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { KubernetesSecurityRoutes } from '.';

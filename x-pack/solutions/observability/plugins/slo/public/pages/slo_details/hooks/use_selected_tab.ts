@@ -7,12 +7,12 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { type SloDetailsPathParams } from '../types';
+import { SloDetailsPathParams } from '../types';
 import {
   ALERTS_TAB_ID,
   HISTORY_TAB_ID,
   OVERVIEW_TAB_ID,
-  type SloTabId,
+  SloTabId,
 } from '../components/slo_details';
 
 export const useSelectedTab = () => {

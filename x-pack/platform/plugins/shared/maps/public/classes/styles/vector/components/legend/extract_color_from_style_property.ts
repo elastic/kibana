@@ -8,8 +8,8 @@
 import { getColorRampCenterColor, getColorPalette } from '../../../color_palettes';
 import { COLOR_MAP_TYPE, STYLE_TYPE } from '../../../../../../common/constants';
 import {
-  type ColorDynamicOptions,
-  type ColorStylePropertyDescriptor,
+  ColorDynamicOptions,
+  ColorStylePropertyDescriptor,
 } from '../../../../../../common/descriptor_types';
 
 export function extractColorFromStyleProperty(

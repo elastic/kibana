@@ -6,8 +6,8 @@
  */
 
 import {
-  type SavedObject,
-  type SavedObjectsClientContract,
+  SavedObject,
+  SavedObjectsClientContract,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import { uniqBy } from 'lodash';
@@ -17,8 +17,8 @@ import {
   privateLocationSavedObjectName,
 } from '../../common/saved_objects/private_locations';
 import {
-  type PrivateLocationAttributes,
-  type SyntheticsPrivateLocationsAttributes,
+  PrivateLocationAttributes,
+  SyntheticsPrivateLocationsAttributes,
 } from '../runtime_types/private_locations';
 
 export const getPrivateLocations = async (

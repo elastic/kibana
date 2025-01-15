@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { actions, type ActorRefFrom, createMachine, type EmittedFrom, SpecialTargets } from 'xstate';
+import { actions, ActorRefFrom, createMachine, EmittedFrom, SpecialTargets } from 'xstate';
 import deepEqual from 'react-fast-compare';
-import { sendIfDefined, type OmitDeprecatedState } from '@kbn/xstate-utils';
+import { sendIfDefined, OmitDeprecatedState } from '@kbn/xstate-utils';
 import { IntegrationError, NamingCollisionError } from '../../types';
-import { type IIntegrationsClient } from '../services/integrations_client';
+import { IIntegrationsClient } from '../services/integrations_client';
 import {
   createArrayValidator,
   createCharacterLimitValidation,
@@ -21,12 +21,12 @@ import {
 import { DEFAULT_CONTEXT } from './defaults';
 import { CreateIntegrationNotificationEventSelectors } from './notifications';
 import {
-  type CreateCustomIntegrationContext,
-  type CreateCustomIntegrationEvent,
-  type CreateCustomIntegrationTypestate,
-  type DefaultCreateCustomIntegrationContext,
-  type WithErrors,
-  type WithPreviouslyCreatedIntegration,
+  CreateCustomIntegrationContext,
+  CreateCustomIntegrationEvent,
+  CreateCustomIntegrationTypestate,
+  DefaultCreateCustomIntegrationContext,
+  WithErrors,
+  WithPreviouslyCreatedIntegration,
 } from './types';
 import {
   datasetNameWillBePrefixed,

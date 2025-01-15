@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { Controls, type ControlsProps } from './controls';
+import { Controls, ControlsProps } from './controls';
 import { EuiThemeProvider } from '@elastic/eui';
 import { useStore, useReactFlow } from '@xyflow/react';
 

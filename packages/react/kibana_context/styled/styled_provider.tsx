@@ -12,8 +12,8 @@ import React from 'react';
 
 import * as styledComponents from 'styled-components';
 
-import { type ThemedStyledComponentsModule, ThemeProvider, type ThemeProviderProps } from 'styled-components';
-import { type euiThemeVars, euiLightVars, euiDarkVars } from '@kbn/ui-theme';
+import { ThemedStyledComponentsModule, ThemeProvider, ThemeProviderProps } from 'styled-components';
+import { euiThemeVars, euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 
 /**
  * A `deprecated` structure representing a Kibana theme containing variables from the current EUI theme.

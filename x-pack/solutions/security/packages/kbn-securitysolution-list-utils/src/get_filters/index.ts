@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ExceptionListFilter, type NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListFilter, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { getGeneralFilters } from '../get_general_filters';
 import { getSavedObjectTypes } from '../get_saved_object_types';
 export interface GetFiltersParams {

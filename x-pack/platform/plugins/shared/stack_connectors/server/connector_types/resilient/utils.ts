@@ -6,7 +6,7 @@
  */
 
 import { isArray } from 'lodash';
-import { type GetValueTextContentResponse, type UpdateIncidentRequest } from './types';
+import { GetValueTextContentResponse, UpdateIncidentRequest } from './types';
 
 export const getValueTextContent = (
   field: string,

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type EntityV2 } from '@kbn/entities-schema';
-import { type Logger } from '@kbn/core/server';
+import { EntityV2 } from '@kbn/entities-schema';
+import { Logger } from '@kbn/core/server';
 import { readSourceDefinitions } from './source_definition';
-import { type InternalClusterClient } from '../types';
+import { InternalClusterClient } from '../types';
 import { UnknownEntityType } from '../errors/unknown_entity_type';
 
 export async function identityFieldsBySource(

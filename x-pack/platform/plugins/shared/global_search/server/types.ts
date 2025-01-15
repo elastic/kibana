@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import type {
   ISavedObjectTypeRegistry,
   IUiSettingsClient,
@@ -16,13 +16,13 @@ import type {
   IScopedClusterClient,
 } from '@kbn/core/server';
 import {
-  type GlobalSearchBatchedResults,
-  type GlobalSearchProviderFindOptions,
-  type GlobalSearchProviderResult,
-  type GlobalSearchProviderFindParams,
-  type GlobalSearchFindParams,
+  GlobalSearchBatchedResults,
+  GlobalSearchProviderFindOptions,
+  GlobalSearchProviderResult,
+  GlobalSearchProviderFindParams,
+  GlobalSearchFindParams,
 } from '../common/types';
-import { type SearchServiceSetup, type SearchServiceStart } from './services';
+import { SearchServiceSetup, SearchServiceStart } from './services';
 
 export type GlobalSearchPluginSetup = Pick<SearchServiceSetup, 'registerResultProvider'>;
 export type GlobalSearchPluginStart = Pick<SearchServiceStart, 'find' | 'getSearchableTypes'>;

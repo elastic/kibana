@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { type TypeOf } from '@kbn/config-schema';
-import { type Mutable } from 'utility-types';
+import { TypeOf } from '@kbn/config-schema';
+import { Mutable } from 'utility-types';
 import {
-  type SentinelOneBaseApiResponseSchema,
-  type SentinelOneConfigSchema,
-  type SentinelOneExecuteScriptParamsSchema,
-  type SentinelOneGetAgentsParamsSchema,
-  type SentinelOneGetAgentsResponseSchema,
-  type SentinelOneGetRemoteScriptsParamsSchema,
-  type SentinelOneGetRemoteScriptsResponseSchema,
-  type SentinelOneGetRemoteScriptStatusParamsSchema,
-  type SentinelOneIsolateHostParamsSchema,
-  type SentinelOneSecretsSchema,
-  type SentinelOneActionParamsSchema,
-  type SentinelOneFetchAgentFilesParamsSchema,
-  type SentinelOneFetchAgentFilesResponseSchema,
-  type SentinelOneDownloadAgentFileParamsSchema,
-  type SentinelOneGetActivitiesParamsSchema,
-  type SentinelOneGetActivitiesResponseSchema,
-  type SentinelOneExecuteScriptResponseSchema,
-  type SentinelOneGetRemoteScriptResultsParamsSchema,
-  type SentinelOneDownloadRemoteScriptResultsParamsSchema,
+  SentinelOneBaseApiResponseSchema,
+  SentinelOneConfigSchema,
+  SentinelOneExecuteScriptParamsSchema,
+  SentinelOneGetAgentsParamsSchema,
+  SentinelOneGetAgentsResponseSchema,
+  SentinelOneGetRemoteScriptsParamsSchema,
+  SentinelOneGetRemoteScriptsResponseSchema,
+  SentinelOneGetRemoteScriptStatusParamsSchema,
+  SentinelOneIsolateHostParamsSchema,
+  SentinelOneSecretsSchema,
+  SentinelOneActionParamsSchema,
+  SentinelOneFetchAgentFilesParamsSchema,
+  SentinelOneFetchAgentFilesResponseSchema,
+  SentinelOneDownloadAgentFileParamsSchema,
+  SentinelOneGetActivitiesParamsSchema,
+  SentinelOneGetActivitiesResponseSchema,
+  SentinelOneExecuteScriptResponseSchema,
+  SentinelOneGetRemoteScriptResultsParamsSchema,
+  SentinelOneDownloadRemoteScriptResultsParamsSchema,
 } from './schema';
 
 interface SentinelOnePagination {

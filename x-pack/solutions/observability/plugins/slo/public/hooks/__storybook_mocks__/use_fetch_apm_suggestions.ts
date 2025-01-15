@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Params, type UseFetchApmSuggestions } from '../use_fetch_apm_suggestions';
+import { Params, UseFetchApmSuggestions } from '../use_fetch_apm_suggestions';
 
 export const useFetchApmSuggestions = ({
   fieldName,

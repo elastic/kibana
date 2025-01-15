@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { type IScopedClusterClient } from '@kbn/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 
 import { CONNECTORS_INDEX } from '@kbn/search-connectors';
 
 import {
-  type CrawlerCustomScheduleMappingServer,
-  type CrawlerCustomScheduleMappingClient,
-  type CrawlerCustomScheduleServer,
+  CrawlerCustomScheduleMappingServer,
+  CrawlerCustomScheduleMappingClient,
+  CrawlerCustomScheduleServer,
 } from '../../../common/types/crawler';
 
 import { fetchCrawlerCustomSchedulingKeysByIndexName } from './fetch_crawler_multiple_schedules';

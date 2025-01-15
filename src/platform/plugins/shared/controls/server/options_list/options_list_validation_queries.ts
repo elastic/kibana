@@ -12,10 +12,10 @@ import { get, isEmpty } from 'lodash';
 
 import {
   getSelectionAsFieldType,
-  type OptionsListSelection,
+  OptionsListSelection,
 } from '../../common/options_list/options_list_selections';
-import { type OptionsListRequestBody } from '../../common/options_list/types';
-import { type OptionsListValidationAggregationBuilder } from './types';
+import { OptionsListRequestBody } from '../../common/options_list/types';
+import { OptionsListValidationAggregationBuilder } from './types';
 
 /**
  * Validation aggregations

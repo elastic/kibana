@@ -24,7 +24,7 @@ import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import type { UpdateObjectsSpacesParams } from './update_objects_spaces';
 import { updateObjectsSpaces } from './update_objects_spaces';
 import {
-  type ISavedObjectsSecurityExtension,
+  ISavedObjectsSecurityExtension,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
 import {

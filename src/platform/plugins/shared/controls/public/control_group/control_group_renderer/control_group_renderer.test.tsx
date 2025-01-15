@@ -10,14 +10,14 @@
 import React from 'react';
 
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-import { type Filter } from '@kbn/es-query';
-import { type PublishesUnifiedSearch, type PublishingSubject } from '@kbn/presentation-publishing';
+import { Filter } from '@kbn/es-query';
+import { PublishesUnifiedSearch, PublishingSubject } from '@kbn/presentation-publishing';
 import { act, render, waitFor } from '@testing-library/react';
 
-import { type ControlGroupRendererApi } from '.';
+import { ControlGroupRendererApi } from '.';
 import { CONTROL_GROUP_TYPE } from '../..';
 import { getControlGroupEmbeddableFactory } from '../get_control_group_factory';
-import { ControlGroupRenderer, type ControlGroupRendererProps } from './control_group_renderer';
+import { ControlGroupRenderer, ControlGroupRendererProps } from './control_group_renderer';
 
 type ParentApiType = PublishesUnifiedSearch & {
   unifiedSearchFilters$?: PublishingSubject<Filter[] | undefined>;

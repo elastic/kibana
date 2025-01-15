@@ -5,40 +5,40 @@
  * 2.0.
  */
 import {
-  type SavedObjectsUpdateResponse,
-  type SavedObjectsClientContract,
-  type SavedObjectsFindResult,
+  SavedObjectsUpdateResponse,
+  SavedObjectsClientContract,
+  SavedObjectsFindResult,
 } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { type EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { getSavedObjectKqlFilter } from '../../routes/common';
 import { InvalidLocationError } from './normalizers/common_fields';
-import { type SyntheticsServerSetup } from '../../types';
-import { type RouteContext } from '../../routes/types';
+import { SyntheticsServerSetup } from '../../types';
+import { RouteContext } from '../../routes/types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { getAllLocations } from '../get_all_locations';
 import { syncNewMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/add_monitor_bulk';
-import { type SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
+import { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
 import {
-  type MonitorConfigUpdate,
+  MonitorConfigUpdate,
   syncEditedMonitorBulk,
 } from '../../routes/monitor_cruds/bulk_cruds/edit_monitor_bulk';
 import {
   ConfigKey,
-  type SyntheticsMonitorWithSecretsAttributes,
-  type EncryptedSyntheticsMonitorAttributes,
-  type ServiceLocationErrors,
-  type ProjectMonitor,
-  type Locations,
-  type SyntheticsMonitor,
-  type MonitorFields,
+  SyntheticsMonitorWithSecretsAttributes,
+  EncryptedSyntheticsMonitorAttributes,
+  ServiceLocationErrors,
+  ProjectMonitor,
+  Locations,
+  SyntheticsMonitor,
+  MonitorFields,
   type SyntheticsPrivateLocations,
 } from '../../../common/runtime_types';
 import { formatSecrets, normalizeSecrets } from '../utils/secrets';
 import {
   validateProjectMonitor,
   validateMonitor,
-  type ValidationResult,
+  ValidationResult,
   INVALID_CONFIGURATION_ERROR,
 } from '../../routes/monitor_cruds/monitor_validation';
 import { normalizeProjectMonitor } from './normalizers';

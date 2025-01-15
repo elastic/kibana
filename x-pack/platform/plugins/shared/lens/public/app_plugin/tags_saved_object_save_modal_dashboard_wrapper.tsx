@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { type FC, useState, useMemo, useCallback } from 'react';
-import { type OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import React, { FC, useState, useMemo, useCallback } from 'react';
+import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import {
-  type SaveModalDashboardProps,
+  SaveModalDashboardProps,
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
-import { type SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 
 export type DashboardSaveProps = OnSaveProps & {
   returnToOrigin: boolean;

@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { GraphVisualization } from './graph_visualization';
-import { type Workspace, type WorkspaceEdge, type WorkspaceNode } from '../../types';
+import { Workspace, WorkspaceEdge, WorkspaceNode } from '../../types';
 
 describe('graph_visualization', () => {
   const nodes: WorkspaceNode[] = [

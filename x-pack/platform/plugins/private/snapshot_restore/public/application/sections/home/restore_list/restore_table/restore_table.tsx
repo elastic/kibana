@@ -10,13 +10,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { orderBy } from 'lodash';
 import {
   EuiBasicTable,
-  type EuiBasicTableColumn,
+  EuiBasicTableColumn,
   EuiButtonIcon,
   EuiHealth,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
-import { type SnapshotRestore } from '../../../../../../common/types';
+import { SnapshotRestore } from '../../../../../../common/types';
 import { UIM_RESTORE_LIST_EXPAND_INDEX } from '../../../../constants';
 import { useServices } from '../../../../app_context';
 import { FormattedDateTime } from '../../../../components';

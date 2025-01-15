@@ -9,7 +9,7 @@
 
 import * as literal from '../../node_types/literal';
 import * as wildcard from '../../node_types/wildcard';
-import { type DataViewBase, type KueryNode } from '../../../..';
+import { DataViewBase, KueryNode } from '../../../..';
 
 export function getFields(node: KueryNode, indexPattern?: DataViewBase) {
   if (!indexPattern) return [];

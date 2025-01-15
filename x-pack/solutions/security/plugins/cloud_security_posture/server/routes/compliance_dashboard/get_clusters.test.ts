@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ClusterBucket, getClustersFromAggs } from './get_clusters';
+import { ClusterBucket, getClustersFromAggs } from './get_clusters';
 
 const mockClusterBuckets: ClusterBucket[] = [
   {

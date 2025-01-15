@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type SavedObjectsClientContract, type SavedObject } from '@kbn/core/server';
+import { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
 import {
   OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
-  type ObservabilityOnboardingFlow,
-  type SavedObservabilityOnboardingFlow,
+  ObservabilityOnboardingFlow,
+  SavedObservabilityOnboardingFlow,
 } from '../../saved_objects/observability_onboarding_status';
 
 interface Options {

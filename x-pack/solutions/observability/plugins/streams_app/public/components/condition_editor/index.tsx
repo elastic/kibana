@@ -16,11 +16,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 import {
-  type AndCondition,
-  type BinaryFilterCondition,
-  type Condition,
-  type FilterCondition,
-  type OrCondition,
+  AndCondition,
+  BinaryFilterCondition,
+  Condition,
+  FilterCondition,
+  OrCondition,
 } from '@kbn/streams-schema';
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';

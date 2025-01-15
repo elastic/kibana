@@ -7,14 +7,14 @@
 
 import { random } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { type Plugin, type CoreSetup, type CoreStart, type Logger, type PluginInitializerContext } from '@kbn/core/server';
+import { Plugin, CoreSetup, CoreStart, Logger, PluginInitializerContext } from '@kbn/core/server';
 import { throwRetryableError } from '@kbn/task-manager-plugin/server/task_running';
 import { EventEmitter } from 'events';
 import { firstValueFrom, Subject } from 'rxjs';
 import {
-  type TaskManagerSetupContract,
-  type TaskManagerStartContract,
-  type ConcreteTaskInstance,
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+  ConcreteTaskInstance,
 } from '@kbn/task-manager-plugin/server';
 import { DEFAULT_MAX_WORKERS } from '@kbn/task-manager-plugin/server/config';
 import { TaskPriority } from '@kbn/task-manager-plugin/server/task';

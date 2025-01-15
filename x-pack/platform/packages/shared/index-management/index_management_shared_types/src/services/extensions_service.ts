@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type FunctionComponent, type ReactNode } from 'react';
+import { FunctionComponent, ReactNode } from 'react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import { type EuiBadgeProps } from '@elastic/eui';
-import { type IndexDetailsTab } from '../home_sections';
-import { type Index } from '../types';
+import { EuiBadgeProps } from '@elastic/eui';
+import { IndexDetailsTab } from '../home_sections';
+import { Index } from '../types';
 
 export interface IndexContent {
   renderContent: (args: {

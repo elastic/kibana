@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { type VFC } from 'react';
+import React, { VFC } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { useCaseDisabled } from '../hooks/use_case_permission';
 import {
-  type AttachmentMetadata,
+  AttachmentMetadata,
   generateAttachmentsMetadata,
   generateAttachmentsWithoutOwner,
 } from '../utils/attachments';
 import { useKibana } from '../../../hooks/use_kibana';
-import { type Indicator } from '../../../../common/types/indicator';
+import { Indicator } from '../../../../common/types/indicator';
 
 export interface AddToExistingCaseProps {
   /**

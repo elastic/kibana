@@ -10,9 +10,9 @@
 import expect from '@kbn/expect';
 
 import { RangeFilterManager } from './range_filter_manager';
-import { type FilterManager as QueryFilterManager, type DataViewsContract } from '@kbn/data-plugin/public';
-import { type DataView } from '@kbn/data-views-plugin/public';
-import { type RangeFilter, type RangeFilterMeta } from '@kbn/es-query';
+import { FilterManager as QueryFilterManager, DataViewsContract } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { RangeFilter, RangeFilterMeta } from '@kbn/es-query';
 
 describe('RangeFilterManager', function () {
   const controlId = 'control1';

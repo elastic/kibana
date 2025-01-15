@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type PluginInitializer, type PluginInitializerContext } from '@kbn/core/public';
+import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { Plugin } from './plugin';
-import { type EntityManagerPublicPluginSetup, type EntityManagerPublicPluginStart } from './types';
+import { EntityManagerPublicPluginSetup, EntityManagerPublicPluginStart } from './types';
 
 export const plugin: PluginInitializer<
   EntityManagerPublicPluginSetup | undefined,

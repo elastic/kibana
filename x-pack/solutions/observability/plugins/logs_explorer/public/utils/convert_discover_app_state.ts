@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { type QueryState } from '@kbn/data-plugin/public';
-import { type DiscoverAppState } from '@kbn/discover-plugin/public';
-import { type ExistsFilter, type Filter, FILTERS, type PhrasesFilter } from '@kbn/es-query';
-import { type PhraseFilterValue } from '@kbn/es-query/src/filters/build_filters';
+import { QueryState } from '@kbn/data-plugin/public';
+import { DiscoverAppState } from '@kbn/discover-plugin/public';
+import { ExistsFilter, Filter, FILTERS, PhrasesFilter } from '@kbn/es-query';
+import { PhraseFilterValue } from '@kbn/es-query/src/filters/build_filters';
 import { cloneDeep } from 'lodash';
 import { CONTENT_FIELD, RESOURCE_FIELD, SMART_FALLBACK_FIELDS } from '../../common/constants';
 import {
-  type ChartDisplayOptions,
-  type DisplayOptions,
-  type GridColumnDisplayOptions,
-  type GridRowsDisplayOptions,
+  ChartDisplayOptions,
+  DisplayOptions,
+  GridColumnDisplayOptions,
+  GridRowsDisplayOptions,
 } from '../../common';
 import type { ControlOptions, OptionsListControl } from '../controller';
 

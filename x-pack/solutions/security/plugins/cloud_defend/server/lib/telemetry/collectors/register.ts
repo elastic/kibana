@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { type CollectorFetchContext, type UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { CollectorFetchContext, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { CoreStart, Logger } from '@kbn/core/server';
-import { type CloudDefendPluginStart, type CloudDefendPluginStartDeps } from '../../../types';
+import { CloudDefendPluginStart, CloudDefendPluginStartDeps } from '../../../types';
 import { getIndicesStats } from './indices_stats_collector';
 import { getPodsStats } from './pods_stats_collector';
 import { cloudDefendUsageSchema } from './schema';
-import { type CloudDefendUsage } from './types';
+import { CloudDefendUsage } from './types';
 import { getAccountsStats } from './accounts_stats_collector';
 import { getInstallationStats } from './installation_stats_collector';
 

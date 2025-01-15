@@ -7,9 +7,9 @@
 
 import { useEffect, useState } from 'react';
 import { combineLatest } from 'rxjs';
-import { type CoreStart, DEFAULT_APP_CATEGORIES, type PublicAppInfo } from '@kbn/core/public';
+import { CoreStart, DEFAULT_APP_CATEGORIES, type PublicAppInfo } from '@kbn/core/public';
 import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
-import { type ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
+import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 
 interface UseIsNavControlVisibleProps {
   coreStart: CoreStart;

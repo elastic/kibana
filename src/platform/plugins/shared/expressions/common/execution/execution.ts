@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
 import { isPromise } from '@kbn/std';
-import { type ObservableLike, type UnwrapObservable } from '@kbn/utility-types';
+import { ObservableLike, UnwrapObservable } from '@kbn/utility-types';
 import { keys, last as lastOf, mapValues, reduce, zipObject } from 'lodash';
 import {
   combineLatest,
@@ -25,30 +25,30 @@ import {
   timer,
   Observable,
   ReplaySubject,
-  type Subscription,
+  Subscription,
 } from 'rxjs';
 import { catchError, finalize, map, pluck, shareReplay, switchMap, tap } from 'rxjs';
 import { now, AbortError, calculateObjectHash } from '@kbn/kibana-utils-plugin/common';
-import { type Adapters } from '@kbn/inspector-plugin/common';
-import { type Executor } from '../executor';
-import { createExecutionContainer, type ExecutionContainer } from './container';
+import { Adapters } from '@kbn/inspector-plugin/common';
+import { Executor } from '../executor';
+import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
-import { isExpressionValueError, type ExpressionValueError } from '../expression_types/specs/error';
+import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
 import {
-  type ExpressionAstArgument,
-  type ExpressionAstExpression,
-  type ExpressionAstFunction,
+  ExpressionAstArgument,
+  ExpressionAstExpression,
+  ExpressionAstFunction,
   parse,
   formatExpression,
   parseExpression,
-  type ExpressionAstNode,
+  ExpressionAstNode,
 } from '../ast';
-import { type ExecutionContext, type DefaultInspectorAdapters } from './types';
-import { getType, type Datatable } from '../expression_types';
+import { ExecutionContext, DefaultInspectorAdapters } from './types';
+import { getType, Datatable } from '../expression_types';
 import type { ExpressionFunction, ExpressionFunctionParameter } from '../expression_functions';
 import { getByAlias } from '../util/get_by_alias';
 import { ExecutionContract } from './execution_contract';
-import { type ExpressionExecutionParams } from '../service';
+import { ExpressionExecutionParams } from '../service';
 import { createDefaultInspectorAdapters } from '../util/create_default_inspector_adapters';
 
 type UnwrapReturnType<Function extends (...args: any[]) => unknown> =

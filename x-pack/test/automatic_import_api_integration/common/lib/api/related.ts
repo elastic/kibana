@@ -6,12 +6,12 @@
  */
 import type SuperTest from 'supertest';
 import {
-  type RelatedRequestBody,
+  RelatedRequestBody,
   RELATED_GRAPH_PATH,
-  type RelatedResponse,
+  RelatedResponse,
 } from '@kbn/integration-assistant-plugin/common';
 import { superUser } from '../authentication/users';
-import { type User } from '../authentication/types';
+import { User } from '../authentication/types';
 import { BadRequestError } from '../error/error';
 
 export const postRelated = async ({

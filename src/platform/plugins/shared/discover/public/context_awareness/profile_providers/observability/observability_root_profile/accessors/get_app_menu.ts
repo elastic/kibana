@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppMenuActionId, AppMenuActionType, type AppMenuRegistry } from '@kbn/discover-utils';
-import { DATA_QUALITY_LOCATOR_ID, type DataQualityLocatorParams } from '@kbn/deeplinks-observability';
+import { AppMenuActionId, AppMenuActionType, AppMenuRegistry } from '@kbn/discover-utils';
+import { DATA_QUALITY_LOCATOR_ID, DataQualityLocatorParams } from '@kbn/deeplinks-observability';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { isOfQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { type AppMenuExtensionParams } from '../../../..';
+import { AppMenuExtensionParams } from '../../../..';
 import type { RootProfileProvider } from '../../../../profiles';
-import { type ProfileProviderServices } from '../../../profile_provider_services';
+import { ProfileProviderServices } from '../../../profile_provider_services';
 
 export const createGetAppMenu =
   (services: ProfileProviderServices): RootProfileProvider['profile']['getAppMenu'] =>

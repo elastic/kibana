@@ -8,25 +8,25 @@
 import sinon from 'sinon';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import {
-  type RuleExecutorOptions,
-  type RuleTypeParams,
-  type RuleTypeState,
-  type AlertInstanceState,
-  type AlertInstanceContext,
+  RuleExecutorOptions,
+  RuleTypeParams,
+  RuleTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
   RuleExecutionStatusWarningReasons,
-  type Rule,
-  type RuleAction,
-  type RuleAlertData,
+  Rule,
+  RuleAction,
+  RuleAlertData,
   DEFAULT_FLAPPING_SETTINGS,
   DEFAULT_QUERY_DELAY_SETTINGS,
 } from '../types';
 import {
-  type ConcreteTaskInstance,
+  ConcreteTaskInstance,
   createTaskRunError,
   isUnrecoverableError,
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server';
-import { type TaskRunnerContext } from './types';
+import { TaskRunnerContext } from './types';
 import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
@@ -38,11 +38,11 @@ import {
   elasticsearchServiceMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { type PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { actionsMock, actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { alertsMock } from '../mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
-import { type IEventLogger } from '@kbn/event-log-plugin/server';
+import { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { omit } from 'lodash';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
@@ -76,13 +76,13 @@ import { translations } from '../constants/translations';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import {
   AlertingEventLogger,
-  type ContextOpts,
+  ContextOpts,
 } from '../lib/alerting_event_logger/alerting_event_logger';
 import { getAlertFromRaw } from '../rules_client/lib/get_alert_from_raw';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
-import { type SharePluginStart } from '@kbn/share-plugin/server';
+import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { type DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
@@ -92,11 +92,11 @@ import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { RuleResultService } from '../monitoring/rule_result_service';
 import { ruleResultServiceMock } from '../monitoring/rule_result_service.mock';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
-import { type UntypedNormalizedRuleType } from '../rule_type_registry';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import * as getExecutorServicesModule from './get_executor_services';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
 import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
-import { type MaintenanceWindow } from '../application/maintenance_window/types';
+import { MaintenanceWindow } from '../application/maintenance_window/types';
 import { ErrorWithType } from '../lib/error_with_type';
 
 jest.mock('uuid', () => ({

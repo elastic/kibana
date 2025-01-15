@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type ReactNode, useEffect, useMemo } from 'react';
+import React, { ReactNode, useEffect, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';

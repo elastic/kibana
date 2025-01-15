@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type RouteComponentProps } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 
-import { type AppUnmount } from '@kbn/core/public';
-import { type DevToolsStartServices } from './types';
+import { AppUnmount } from '@kbn/core/public';
+import { DevToolsStartServices } from './types';
 
 /**
  * Descriptor for a dev tool. A dev tool works similar to an application

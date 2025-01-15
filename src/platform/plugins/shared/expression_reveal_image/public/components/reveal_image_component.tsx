@@ -9,10 +9,10 @@
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useResizeObserver } from '@elastic/eui';
-import { type IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
-import { css, type CSSObject } from '@emotion/react';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import { css, CSSObject } from '@emotion/react';
 import { isValidUrl } from '@kbn/presentation-util-plugin/common';
-import { type NodeDimensions, type RevealImageRendererConfig, type OriginString } from '../../common/types';
+import { NodeDimensions, RevealImageRendererConfig, OriginString } from '../../common/types';
 
 const revealImageParentStyle = css`
   height: 100%;

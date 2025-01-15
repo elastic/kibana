@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { type ElasticsearchClient } from '@kbn/core/server';
-import { schema, type TypeOf } from '@kbn/config-schema';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { schema, TypeOf } from '@kbn/config-schema';
 import {
-  type IndexSettings,
-  type LegacyTemplateSerialized,
-  type TemplateFromEs,
+  IndexSettings,
+  LegacyTemplateSerialized,
+  TemplateFromEs,
 } from '@kbn/index-management-plugin/common/types';
-import { type RouteDependencies } from '../../../types';
+import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
 function isReservedSystemTemplate(templateName: string, indexPatterns: string[]): boolean {

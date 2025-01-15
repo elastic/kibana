@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ScopedHistory } from '@kbn/core/public';
-import { type MouseEvent } from 'react';
-import { type History, parsePath } from 'history';
+import { ScopedHistory } from '@kbn/core/public';
+import { MouseEvent } from 'react';
+import { History, parsePath } from 'history';
 
 interface LocationObject {
   pathname?: string;

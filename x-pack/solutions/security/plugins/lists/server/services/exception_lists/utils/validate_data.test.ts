@@ -6,7 +6,7 @@
  */
 
 import {
-  type CreateExceptionListItemSchema,
+  CreateExceptionListItemSchema,
   createExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 

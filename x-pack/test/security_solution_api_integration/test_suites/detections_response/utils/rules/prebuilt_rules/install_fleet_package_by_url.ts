@@ -6,9 +6,9 @@
  */
 import type { Client } from '@elastic/elasticsearch';
 import type SuperTest from 'supertest';
-import { type InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
+import { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
-import { type RetryService } from '@kbn/ftr-common-functional-services';
+import { RetryService } from '@kbn/ftr-common-functional-services';
 import expect from 'expect';
 import { refreshSavedObjectIndices } from '../../refresh_index';
 

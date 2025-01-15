@@ -7,9 +7,9 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { failedDependency, forbidden } from '@hapi/boom';
-import { type KibanaRequest } from '@kbn/core-http-server';
+import { KibanaRequest } from '@kbn/core-http-server';
 import {
-  type PutSLOSettingsParams,
+  PutSLOSettingsParams,
   createSLOParamsSchema,
   deleteSLOInstancesParamsSchema,
   deleteSLOParamsSchema,
@@ -61,7 +61,7 @@ import { DefaultSummarySearchClient } from '../../services/summary_search_client
 import { DefaultSummaryTransformGenerator } from '../../services/summary_transform_generator/summary_transform_generator';
 import { createTransformGenerators } from '../../services/transform_generators';
 import { createSloServerRoute } from '../create_slo_server_route';
-import { type SLORoutesDependencies } from '../types';
+import { SLORoutesDependencies } from '../types';
 
 const assertPlatinumLicense = async (plugins: SLORoutesDependencies['plugins']) => {
   const licensing = await plugins.licensing.start();

@@ -8,7 +8,7 @@
  */
 
 import { useEffect } from 'react';
-import { type History } from 'history';
+import { History } from 'history';
 
 export function useUrl({
   history,

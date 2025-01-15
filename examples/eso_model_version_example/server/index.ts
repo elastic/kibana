@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type PluginInitializer } from '@kbn/core/server';
+import { PluginInitializer } from '@kbn/core/server';
 import { EsoModelVersionExample } from './plugin';
 
 export const plugin: PluginInitializer<void, void> = async () => new EsoModelVersionExample();

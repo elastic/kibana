@@ -6,32 +6,32 @@
  */
 
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { type TimeRange } from '@kbn/es-query';
-import { type HasInspectorAdapters } from '@kbn/inspector-plugin/public';
+import { TimeRange } from '@kbn/es-query';
+import { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import {
   apiIsOfType,
   apiPublishesPanelTitle,
   apiPublishesUnifiedSearch,
-  type HasEditCapabilities,
-  type HasLibraryTransforms,
-  type HasSupportedTriggers,
-  type PublishesDataLoading,
-  type PublishesDataViews,
-  type PublishesUnifiedSearch,
-  type SerializedTitles,
+  HasEditCapabilities,
+  HasLibraryTransforms,
+  HasSupportedTriggers,
+  PublishesDataLoading,
+  PublishesDataViews,
+  PublishesUnifiedSearch,
+  SerializedTitles,
 } from '@kbn/presentation-publishing';
-import { type HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
-import { type DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
-import { type Observable } from 'rxjs';
-import { type MapAttributes } from '../../common/content_management';
+import { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
+import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import { Observable } from 'rxjs';
+import { MapAttributes } from '../../common/content_management';
 import {
-  type LayerDescriptor,
-  type MapCenterAndZoom,
-  type MapExtent,
-  type MapSettings,
+  LayerDescriptor,
+  MapCenterAndZoom,
+  MapExtent,
+  MapSettings,
 } from '../../common/descriptor_types';
-import { type ILayer } from '../classes/layers/layer';
-import { type EventHandlers } from '../reducers/non_serializable_instances';
+import { ILayer } from '../classes/layers/layer';
+import { EventHandlers } from '../reducers/non_serializable_instances';
 
 export type MapSerializedState = SerializedTitles &
   Partial<DynamicActionsSerializedState> & {

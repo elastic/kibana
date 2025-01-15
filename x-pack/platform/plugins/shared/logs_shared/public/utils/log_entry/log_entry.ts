@@ -9,14 +9,14 @@ import type { TimeKey, UniqueTimeKey } from '@kbn/io-ts-utils';
 import { bisector } from 'd3-array';
 import { compareToTimeKey, getIndexAtTimeKey } from '../../../common/time';
 import {
-  type LogEntry,
-  type LogColumn,
-  type LogTimestampColumn,
-  type LogFieldColumn,
-  type LogMessageColumn,
-  type LogMessagePart,
-  type LogMessageFieldPart,
-  type LogMessageConstantPart,
+  LogEntry,
+  LogColumn,
+  LogTimestampColumn,
+  LogFieldColumn,
+  LogMessageColumn,
+  LogMessagePart,
+  LogMessageFieldPart,
+  LogMessageConstantPart,
 } from '../../../common/log_entry';
 
 export const getLogEntryKey = (entry: { cursor: TimeKey }) => entry.cursor;

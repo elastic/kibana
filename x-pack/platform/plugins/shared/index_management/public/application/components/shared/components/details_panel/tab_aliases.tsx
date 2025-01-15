@@ -9,7 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCodeBlock, EuiCallOut } from '@elastic/eui';
 
-import { type Aliases } from '../../../../../../common';
+import { Aliases } from '../../../../../../common';
 
 interface Props {
   aliases: Aliases | undefined;

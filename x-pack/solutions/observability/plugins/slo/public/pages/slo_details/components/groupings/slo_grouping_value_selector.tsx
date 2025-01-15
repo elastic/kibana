@@ -8,13 +8,13 @@
 import {
   EuiButtonIcon,
   EuiComboBox,
-  type EuiComboBoxOptionOption,
+  EuiComboBoxOptionOption,
   EuiCopy,
   EuiFlexItem,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { ALL_VALUE, type SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import useDebounce from 'react-use/lib/useDebounce';

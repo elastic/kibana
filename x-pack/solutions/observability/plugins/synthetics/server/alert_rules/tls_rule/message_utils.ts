@@ -6,22 +6,22 @@
  */
 
 import moment from 'moment/moment';
-import { type IBasePath } from '@kbn/core-http-server';
+import { IBasePath } from '@kbn/core-http-server';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import {
-  type AlertInstanceContext as AlertContext,
-  type AlertInstanceState as AlertState,
-  type ActionGroupIdsOf,
+  AlertInstanceContext as AlertContext,
+  AlertInstanceState as AlertState,
+  ActionGroupIdsOf,
 } from '@kbn/alerting-plugin/server';
 import { i18n } from '@kbn/i18n';
-import { type PublicAlertsClient } from '@kbn/alerting-plugin/server/alerts_client/types';
-import { type ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
+import { PublicAlertsClient } from '@kbn/alerting-plugin/server/alerts_client/types';
+import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
-import { type TLSLatestPing } from './tls_rule_executor';
+import { TLSLatestPing } from './tls_rule_executor';
 import { ALERT_DETAILS_URL } from '../action_variables';
-import { type Cert } from '../../../common/runtime_types';
+import { Cert } from '../../../common/runtime_types';
 import { tlsTranslations } from '../translations';
-import { type MonitorStatusActionGroup } from '../../../common/constants/synthetics_alerts';
+import { MonitorStatusActionGroup } from '../../../common/constants/synthetics_alerts';
 import {
   CERT_COMMON_NAME,
   CERT_HASH_SHA256,

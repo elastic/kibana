@@ -8,10 +8,10 @@
 import { useEffect } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import {
-  type FindFieldsMetadataRequestQuery,
-  type FindFieldsMetadataResponsePayload,
+  FindFieldsMetadataRequestQuery,
+  FindFieldsMetadataResponsePayload,
 } from '../../../common/latest';
-import { type FieldsMetadataServiceStart } from '../../services/fields_metadata';
+import { FieldsMetadataServiceStart } from '../../services/fields_metadata';
 
 interface UseFieldsMetadataFactoryDeps {
   fieldsMetadataService: FieldsMetadataServiceStart;

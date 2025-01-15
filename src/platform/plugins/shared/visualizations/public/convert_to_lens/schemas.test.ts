@@ -9,10 +9,10 @@
 
 import {
   AggConfig,
-  type AggConfigOptions,
+  AggConfigOptions,
   AggConfigs,
-  type AggConfigsOptions,
-  type GetConfigFn,
+  AggConfigsOptions,
+  GetConfigFn,
 } from '@kbn/data-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';

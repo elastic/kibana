@@ -6,13 +6,13 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { type Processor } from '../../../../common/types';
+import { Processor } from '../../../../common/types';
 import {
-  type ProcessorInternal,
-  type VerboseTestOutput,
-  type Document,
-  type ProcessorResult,
-  type ProcessorResults,
+  ProcessorInternal,
+  VerboseTestOutput,
+  Document,
+  ProcessorResult,
+  ProcessorResults,
 } from './types';
 
 export interface DeserializeArgs {

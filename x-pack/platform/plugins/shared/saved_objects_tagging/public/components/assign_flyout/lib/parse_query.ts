@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Query } from '@elastic/eui';
+import { Query } from '@elastic/eui';
 
 export interface ParsedQuery {
   /**

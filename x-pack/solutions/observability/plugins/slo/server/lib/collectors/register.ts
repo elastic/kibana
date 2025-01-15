@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { fetcher } from './fetcher';
 import type { Usage } from './type';
 

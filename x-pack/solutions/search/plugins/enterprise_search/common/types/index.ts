@@ -6,12 +6,12 @@
  */
 
 import {
-  type Account as AppSearchAccount,
-  type ConfiguredLimits as AppSearchConfiguredLimits,
+  Account as AppSearchAccount,
+  ConfiguredLimits as AppSearchConfiguredLimits,
 } from './app_search';
 import {
-  type WorkplaceSearchInitialData,
-  type ConfiguredLimits as WorkplaceSearchConfiguredLimits,
+  WorkplaceSearchInitialData,
+  ConfiguredLimits as WorkplaceSearchConfiguredLimits,
 } from './workplace_search';
 
 export interface InitialAppData {

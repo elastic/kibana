@@ -8,7 +8,7 @@
  */
 
 import { filterCustomIntegrations } from './find';
-import { type CustomIntegration } from '../../common';
+import { CustomIntegration } from '../../common';
 
 describe('Custom Integrations Find Service', () => {
   const integrations: CustomIntegration[] = [

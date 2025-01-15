@@ -9,10 +9,10 @@ import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import {
-  type AbortedRequestSearchStrategyError,
-  type GenericSearchStrategyError,
-  type SearchStrategyError,
-  type ShardFailureSearchStrategyError,
+  AbortedRequestSearchStrategyError,
+  GenericSearchStrategyError,
+  SearchStrategyError,
+  ShardFailureSearchStrategyError,
 } from '../../common/search_strategies/common/errors';
 
 export const DataSearchErrorCallout: React.FC<{

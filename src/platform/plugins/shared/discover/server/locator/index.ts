@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type CoreStart, type IUiSettingsClient, type SavedObjectsClientContract } from '@kbn/core/server';
-import { type ISearchStartSearchSource } from '@kbn/data-plugin/common';
-import { type DiscoverServerPluginLocatorService, type DiscoverServerPluginStartDeps } from '..';
+import { CoreStart, IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { DiscoverServerPluginLocatorService, DiscoverServerPluginStartDeps } from '..';
 import { getScopedClient } from './service';
 
 export type { ColumnsFromLocatorFn } from './columns_from_locator';

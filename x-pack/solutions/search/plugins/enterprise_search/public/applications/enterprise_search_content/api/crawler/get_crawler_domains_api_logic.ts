@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type Meta } from '../../../../../common/types';
+import { Meta } from '../../../../../common/types';
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
-import { type CrawlerDomainsWithMetaFromServer } from './types';
+import { CrawlerDomainsWithMetaFromServer } from './types';
 
 import { crawlerDomainsWithMetaServerToClient } from './utils';
 

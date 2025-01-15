@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type SerializedHotPhase } from '../../../../../../common/types';
+import { SerializedHotPhase } from '../../../../../../common/types';
 import { i18nTexts } from '../../../edit_policy/i18n_texts';
 import { ActionDescription } from './action_description';
 import type { ActionComponentProps } from './types';

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type TypeOf } from '@kbn/config-schema';
+import { TypeOf } from '@kbn/config-schema';
 import {
-  type bulkGetMaintenanceWindowsErrorSchema,
-  type bulkGetMaintenanceWindowsResultSchema,
+  bulkGetMaintenanceWindowsErrorSchema,
+  bulkGetMaintenanceWindowsResultSchema,
 } from '../schemas';
 
 export type BulkGetMaintenanceWindowsError = TypeOf<typeof bulkGetMaintenanceWindowsErrorSchema>;

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { type ReactNode } from 'react';
-import { type DataView } from '@kbn/data-plugin/common';
+import { ReactNode } from 'react';
+import { DataView } from '@kbn/data-plugin/common';
 import { ESTooltipProperty } from './es_tooltip_property';
 import { AGG_TYPE } from '../../../common/constants';
-import { type ITooltipProperty } from './tooltip_property';
-import { type IESAggField } from '../fields/agg';
+import { ITooltipProperty } from './tooltip_property';
+import { IESAggField } from '../fields/agg';
 
 export class ESAggTooltipProperty extends ESTooltipProperty {
   private readonly _aggType: AGG_TYPE;

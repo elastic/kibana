@@ -36,7 +36,7 @@ import { mappingsWithPropsApiLogic } from '../../api/mappings/mappings_logic';
 
 import {
   AccessControlIndexSelector,
-  type AccessControlSelectorOption,
+  AccessControlSelectorOption,
 } from './components/access_control_index_selector/access_control_index_selector';
 import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';

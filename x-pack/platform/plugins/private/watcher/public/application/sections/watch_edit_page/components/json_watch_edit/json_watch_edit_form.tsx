@@ -24,7 +24,7 @@ import { CodeEditor } from '@kbn/code-editor';
 
 import { XJson } from '../../../../shared_imports';
 import { serializeJsonWatch } from '../../../../../../common/lib/serialization';
-import { ErrableFormRow, SectionError, type Error as ServerError } from '../../../../components';
+import { ErrableFormRow, SectionError, Error as ServerError } from '../../../../components';
 import { onWatchSave } from '../../watch_edit_actions';
 import { WatchContext } from '../../watch_context';
 import { goToWatchList } from '../../../../lib/navigation';

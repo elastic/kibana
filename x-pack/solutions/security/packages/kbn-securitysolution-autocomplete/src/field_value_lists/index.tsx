@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { type ElementType, useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiComboBox, type EuiComboBoxOptionOption, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
+import React, { ElementType, useCallback, useEffect, useMemo, useState } from 'react';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useFindListsBySize } from '@kbn/securitysolution-list-hooks';
-import { type DataViewFieldBase } from '@kbn/es-query';
+import { DataViewFieldBase } from '@kbn/es-query';
 import { getDocLinks } from '@kbn/doc-links';
 
 import { filterFieldToList } from '../filter_field_to_list';

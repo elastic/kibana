@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type SavedObjectsBulkCreateObject, type SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsBulkCreateObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { type ExceptionListSoSchema } from '../../../../schemas/saved_objects/exceptions_list_so_schema';
+import { ExceptionListSoSchema } from '../../../../schemas/saved_objects/exceptions_list_so_schema';
 
 import { bulkCreateImportedLists } from './bulk_create_imported_lists';
 

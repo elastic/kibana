@@ -10,9 +10,9 @@ import React, { useEffect } from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
-  type Criteria,
+  Criteria,
   EuiBasicTable,
-  type EuiBasicTableColumn,
+  EuiBasicTableColumn,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiHorizontalRule,
@@ -24,10 +24,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import {
-  type EuiTableFieldDataColumnType,
-  type EuiTableSortingType,
+  EuiTableFieldDataColumnType,
+  EuiTableSortingType,
 } from '@elastic/eui/src/components/basic_table/table_types';
-import { type UseEuiTheme } from '@elastic/eui/src/services/theme/hooks';
+import { UseEuiTheme } from '@elastic/eui/src/services/theme/hooks';
 
 import { i18n } from '@kbn/i18n';
 
@@ -37,13 +37,13 @@ import { getFlag } from '../../../utils/get_flag';
 import { AnalyticsCollectionExploreTableLogic } from '../analytics_collection_explore_table_logic';
 import {
   ExploreTableColumns,
-  type ExploreTableItem,
+  ExploreTableItem,
   ExploreTables,
-  type SearchTermsTable,
-  type ClickedTable,
-  type ReferrersTable,
-  type WorsePerformersTable,
-  type LocationsTable,
+  SearchTermsTable,
+  ClickedTable,
+  ReferrersTable,
+  WorsePerformersTable,
+  LocationsTable,
 } from '../analytics_collection_explore_table_types';
 
 import { AnalyticsCollectionExplorerCallout } from './analytics_collection_explorer_callout';

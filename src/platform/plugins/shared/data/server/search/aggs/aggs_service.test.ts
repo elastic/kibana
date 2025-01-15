@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type KibanaRequest, type ElasticsearchClient } from '@kbn/core/server';
+import { KibanaRequest, ElasticsearchClient } from '@kbn/core/server';
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/server/mocks';
-import { type BucketAggType, getAggTypes, type MetricAggType } from '../../../common';
+import { BucketAggType, getAggTypes, MetricAggType } from '../../../common';
 import { createFieldFormatsStartMock } from '@kbn/field-formats-plugin/server/mocks';
 import { createIndexPatternsStartMock } from '../../data_views/mocks';
 
-import { AggsService, type AggsSetupDependencies, type AggsStartDependencies } from './aggs_service';
+import { AggsService, AggsSetupDependencies, AggsStartDependencies } from './aggs_service';
 
 const { savedObjects, uiSettings } = coreMock.createStart();
 

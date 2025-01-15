@@ -10,7 +10,7 @@ import {
   STORED_SOURCE_OPTION,
   DISABLED_SOURCE_OPTION,
   SYNTHETIC_SOURCE_OPTION,
-  type SourceOptionKey,
+  SourceOptionKey,
 } from './constants';
 
 export const sourceOptionLabels: Record<SourceOptionKey, string> = {

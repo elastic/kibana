@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type AvailableLanguages, Languages } from '../code_examples';
+import { AvailableLanguages, Languages } from '../code_examples';
 
 export function getDefaultCodingLanguage(): AvailableLanguages {
   const defaultLang = readConsoleDefaultLanguage() ?? 'python';

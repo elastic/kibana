@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type MobileDevice, apm, type ApmFields } from '@kbn/apm-synthtrace-client';
+import { MobileDevice, apm, ApmFields } from '@kbn/apm-synthtrace-client';
 import type {
   DeviceInfo,
   GeoInfo,
   NetworkConnectionInfo,
   OSInfo,
 } from '@kbn/apm-synthtrace-client';
-import { type Scenario } from '../cli/scenario';
+import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
 

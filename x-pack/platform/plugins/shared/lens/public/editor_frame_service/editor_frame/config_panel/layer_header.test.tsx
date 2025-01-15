@@ -18,7 +18,7 @@ import {
 import { LayerHeader } from './layer_header';
 import { renderWithReduxStore } from '../../../mocks';
 import userEvent from '@testing-library/user-event';
-import { type LensAppState } from '../../../state_management';
+import { LensAppState } from '../../../state_management';
 
 describe('LayerHeader', () => {
   const renderLayerSettings = (

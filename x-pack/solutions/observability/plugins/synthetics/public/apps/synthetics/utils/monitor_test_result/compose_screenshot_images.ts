@@ -7,8 +7,8 @@
 
 import {
   isScreenshotBlockDoc,
-  type ScreenshotRefImageData,
-  type ScreenshotBlockCache,
+  ScreenshotRefImageData,
+  ScreenshotBlockCache,
 } from '../../../../../common/runtime_types';
 
 /**

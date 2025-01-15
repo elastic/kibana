@@ -13,9 +13,9 @@ import * as Rx from 'rxjs';
 import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs';
 import { RenderCompleteDispatcher } from '@kbn/kibana-utils-plugin/public';
-import { type Adapters } from '@kbn/inspector-plugin/public';
-import { type EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/common';
-import { type EmbeddableError, type EmbeddableOutput, type IEmbeddable } from './i_embeddable';
+import { Adapters } from '@kbn/inspector-plugin/public';
+import { EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/common';
+import { EmbeddableError, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { genericEmbeddableInputIsEqual, omitGenericEmbeddableInput } from './diff_embeddable_input';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {

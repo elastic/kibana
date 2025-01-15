@@ -20,7 +20,7 @@ import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
-  type SavedObjectsSerializer,
+  SavedObjectsSerializer,
   LEGACY_URL_ALIAS_TYPE,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { kibanaMigratorMock } from '../../mocks';

@@ -7,7 +7,7 @@
 
 import { EuiSelect } from '@elastic/eui';
 import React from 'react';
-import { type SchemaEditorEditingState } from '../hooks/use_editing_state';
+import { SchemaEditorEditingState } from '../hooks/use_editing_state';
 
 type FieldFormTypeProps = Pick<SchemaEditorEditingState, 'nextFieldType' | 'setNextFieldType'>;
 

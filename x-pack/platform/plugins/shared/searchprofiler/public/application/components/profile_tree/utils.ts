@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Operation } from '../../types';
+import { Operation } from '../../types';
 
 export const hasVisibleChild = ({ children }: Operation) => {
   return Boolean(children && children.some((child) => child.visible));

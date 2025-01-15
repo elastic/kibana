@@ -6,11 +6,11 @@
  */
 
 import React, { useMemo } from 'react';
-import { type StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
-import { type FieldDefinitionConfigWithName, type ReadStreamDefinition } from '@kbn/streams-schema';
+import { FieldDefinitionConfigWithName, ReadStreamDefinition } from '@kbn/streams-schema';
 import { getFormattedError } from '../../../util/errors';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { PreviewTable } from '../../preview_table';

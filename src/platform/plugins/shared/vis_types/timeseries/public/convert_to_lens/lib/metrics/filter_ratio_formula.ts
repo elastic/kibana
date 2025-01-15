@@ -9,9 +9,9 @@
 
 import type { Query } from '@kbn/es-query';
 import type { Metric, MetricType } from '../../../../common/types';
-import { getFormulaFromMetric, type SupportedMetric, SUPPORTED_METRICS } from './supported_metrics';
+import { getFormulaFromMetric, SupportedMetric, SUPPORTED_METRICS } from './supported_metrics';
 import { addAdditionalArgs } from '.';
-import { type AdditionalArgs } from '../../types';
+import { AdditionalArgs } from '../../types';
 
 const escapeQuotes = (str: string) => {
   return str?.replace(/\\/g, '\\\\').replace(/'/g, "\\'");

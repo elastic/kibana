@@ -8,11 +8,11 @@
  */
 
 import moment from 'moment';
-import { type Logger } from '@kbn/logging';
+import { Logger } from '@kbn/logging';
 import {
-  type CollectorFetchContext,
-  type UsageCountersSavedObject,
-  type UsageCountersSavedObjectAttributes,
+  CollectorFetchContext,
+  UsageCountersSavedObject,
+  UsageCountersSavedObjectAttributes,
   USAGE_COUNTERS_SAVED_OBJECT_TYPE,
 } from '@kbn/usage-collection-plugin/server';
 

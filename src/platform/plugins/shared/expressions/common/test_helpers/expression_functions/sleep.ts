@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ExpressionFunctionDefinition } from '../../expression_functions';
+import { ExpressionFunctionDefinition } from '../../expression_functions';
 
 export const sleep: ExpressionFunctionDefinition<'sleep', unknown, { time: number }, unknown> = {
   name: 'sleep',

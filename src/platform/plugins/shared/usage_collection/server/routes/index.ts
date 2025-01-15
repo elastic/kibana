@@ -8,10 +8,10 @@
  */
 
 import {
-  type IRouter,
-  type ISavedObjectsRepository,
+  IRouter,
+  ISavedObjectsRepository,
   type MetricsServiceSetup,
-  type ServiceStatus,
+  ServiceStatus,
 } from '@kbn/core/server';
 import type { Observable } from 'rxjs';
 import type { ICollectorSet } from '../collector';

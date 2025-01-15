@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Filter, type FilterMeta, FILTERS, FilterStateStore } from './types';
-import { type DataViewBase } from '../../es_query';
+import { Filter, FilterMeta, FILTERS, FilterStateStore } from './types';
+import { DataViewBase } from '../../es_query';
 
 /**
  * @public

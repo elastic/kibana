@@ -17,13 +17,13 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiFieldNumber,
-  type EuiComboBoxOptionOption,
+  EuiComboBoxOptionOption,
   EuiComboBox,
 } from '@elastic/eui';
 import { builtInGroupByTypes } from '../constants';
-import { type FieldOption, type GroupByType } from '../types';
+import { FieldOption, GroupByType } from '../types';
 import { ClosablePopoverTitle } from './components';
-import { type IErrorObject } from '../../types';
+import { IErrorObject } from '../../types';
 
 interface GroupByOverFieldOption {
   label: string;

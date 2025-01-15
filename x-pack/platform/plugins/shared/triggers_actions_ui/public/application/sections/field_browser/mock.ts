@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { type BrowserFields } from '@kbn/rule-registry-plugin/common';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 
 const DEFAULT_INDEX_PATTERN = [
   'apm-*-transaction*',

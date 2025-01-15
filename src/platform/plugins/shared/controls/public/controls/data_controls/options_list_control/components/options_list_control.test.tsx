@@ -9,11 +9,11 @@
 
 import React from 'react';
 
-import { type DataViewField } from '@kbn/data-views-plugin/common';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import { render } from '@testing-library/react';
 import { getOptionsListMocks } from '../../mocks/api_mocks';
-import { type ContextStateManager, OptionsListControlContext } from '../options_list_context_provider';
-import { type OptionsListComponentApi } from '../types';
+import { ContextStateManager, OptionsListControlContext } from '../options_list_context_provider';
+import { OptionsListComponentApi } from '../types';
 import { OptionsListControl } from './options_list_control';
 
 describe('Options list control', () => {

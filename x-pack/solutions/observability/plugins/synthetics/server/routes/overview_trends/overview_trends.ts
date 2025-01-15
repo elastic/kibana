@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { type ObjectType, schema } from '@kbn/config-schema';
+import { ObjectType, schema } from '@kbn/config-schema';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import type { TrendRequest, TrendTable } from '../../../common/types';
-import { getFetchTrendsQuery, type TrendsQuery } from './fetch_trends';
-import { type SyntheticsRestApiRouteFactory } from '../types';
-import { type SyntheticsEsClient } from '../../lib';
+import { getFetchTrendsQuery, TrendsQuery } from './fetch_trends';
+import { SyntheticsRestApiRouteFactory } from '../types';
+import { SyntheticsEsClient } from '../../lib';
 
 export const getIntervalForCheckCount = (schedule: string, numChecks = 50) =>
   Number(schedule) * numChecks;

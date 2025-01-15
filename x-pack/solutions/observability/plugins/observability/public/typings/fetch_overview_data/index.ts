@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type UXMetrics } from '@kbn/observability-shared-plugin/public';
+import { UXMetrics } from '@kbn/observability-shared-plugin/public';
 import type { ObservabilityApp } from '../../../typings/common';
-import { type ApmIndicesConfig } from '../../../common/typings';
+import { ApmIndicesConfig } from '../../../common/typings';
 
 export interface Stat {
   type: 'number' | 'percent' | 'bytesPerSecond';

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, type TypeOf, type Type, offeringBasedSchema } from '@kbn/config-schema';
+import { schema, TypeOf, Type, offeringBasedSchema } from '@kbn/config-schema';
 import { getConfigPath } from '@kbn/utils';
-import { type PluginConfigDescriptor } from '@kbn/core/server';
+import { PluginConfigDescriptor } from '@kbn/core/server';
 import { labelsSchema } from './telemetry_labels';
 
 const clusterEnvSchema: [Type<'prod'>, Type<'staging'>] = [

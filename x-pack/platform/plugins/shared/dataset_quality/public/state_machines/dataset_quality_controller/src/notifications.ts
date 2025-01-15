@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type IToasts } from '@kbn/core/public';
+import { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { type DataStreamType } from '../../../../common/types';
+import { DataStreamType } from '../../../../common/types';
 
 export const fetchDatasetStatsFailedNotifier = (toasts: IToasts, error: Error) => {
   toasts.addDanger({

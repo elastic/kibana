@@ -9,10 +9,10 @@
 
 /* eslint-disable no-bitwise */
 
-import { type ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 import { Node, TypeFormatFlags } from 'ts-morph';
 import { isNamedNode } from '../tsmorph_utils';
-import { type PluginOrPackage, type Reference } from '../types';
+import { PluginOrPackage, Reference } from '../types';
 import { extractImportReferences } from './extract_import_refs';
 import { getTypeKind } from './get_type_kind';
 

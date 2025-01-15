@@ -17,12 +17,12 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { fetchAnchor } from '../services/anchor';
 import { fetchSurroundingDocs, SurrDocType } from '../services/context';
 import {
-  type ContextFetchState,
+  ContextFetchState,
   FailureReason,
   getInitialContextQueryState,
   LoadingStatus,
 } from '../services/context_query_state';
-import { type AppState } from '../services/context_state';
+import { AppState } from '../services/context_state';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import {
   getTieBreakerFieldName,

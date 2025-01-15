@@ -6,14 +6,14 @@
  */
 
 import { api } from './api';
-import { type ExternalService } from './types';
+import { ExternalService } from './types';
 import {
   apiParams,
   externalServiceMock,
   recordResponseCreate,
   recordResponseUpdate,
 } from './mocks';
-import { type Logger } from '@kbn/logging';
+import { Logger } from '@kbn/logging';
 
 let mockedLogger: jest.Mocked<Logger>;
 

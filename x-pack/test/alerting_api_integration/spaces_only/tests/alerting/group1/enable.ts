@@ -8,14 +8,14 @@
 import expect from '@kbn/expect';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { Spaces } from '../../../scenarios';
-import { type FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   AlertUtils,
   checkAAD,
   getUrlPrefix,
   getTestRuleData,
   ObjectRemover,
-  type TaskManagerDoc,
+  TaskManagerDoc,
 } from '../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export

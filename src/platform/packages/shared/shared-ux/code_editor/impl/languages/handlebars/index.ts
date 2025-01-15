@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type LangModuleType } from '@kbn/monaco';
+import { LangModuleType } from '@kbn/monaco';
 import { languageConfiguration, lexerRules } from './language';
 import { LANG } from './constants';
 

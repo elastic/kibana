@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { skipBodyValidation } from '../../lib/route_config_helpers';
 
-import { type RouteDependencies } from '../../plugin';
+import { RouteDependencies } from '../../plugin';
 
 export function registerSearchRelevanceSuggestionsRoutes({
   router,

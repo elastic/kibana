@@ -5,12 +5,12 @@
  * 2.0.
  */
 import type { TypeOf } from '@kbn/config-schema';
-import { type RuleParamsV1, type RuleResponseV1 } from '../../../response';
+import { RuleParamsV1, RuleResponseV1 } from '../../../response';
 import {
-  type actionSchemaV1,
-  type actionFrequencySchemaV1,
-  type createParamsSchemaV1,
-  type createBodySchemaV1,
+  actionSchemaV1,
+  actionFrequencySchemaV1,
+  createParamsSchemaV1,
+  createBodySchemaV1,
 } from '..';
 
 export type CreateRuleAction = TypeOf<typeof actionSchemaV1>;

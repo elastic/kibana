@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { AppMenuActionType, getFieldValue } from '@kbn/discover-utils';
 import React, { useState } from 'react';
-import { type RootProfileProvider, SolutionType } from '../../../profiles';
+import { RootProfileProvider, SolutionType } from '../../../profiles';
 import { ExampleContextProvider } from '../example_context';
 
 export const createExampleRootProfileProvider = (): RootProfileProvider => ({

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Component as ReactComponent, type ComponentType } from 'react';
-import { type HTMLAttributes, type ReactWrapper } from 'enzyme';
+import { Component as ReactComponent, ComponentType } from 'react';
+import { HTMLAttributes, ReactWrapper } from 'enzyme';
 
 import { findTestSubject } from '../find_test_subject';
 import { reactRouterMock } from '../router_helpers';
@@ -18,12 +18,12 @@ import {
   getJSXComponentWithProps,
 } from './mount_component';
 import {
-  type TestBedConfig,
-  type AsyncTestBedConfig,
-  type TestBed,
-  type SetupFunc,
-  type SyncSetupFunc,
-  type AsyncSetupFunc,
+  TestBedConfig,
+  AsyncTestBedConfig,
+  TestBed,
+  SetupFunc,
+  SyncSetupFunc,
+  AsyncSetupFunc,
 } from './types';
 
 const defaultConfig: TestBedConfig = {

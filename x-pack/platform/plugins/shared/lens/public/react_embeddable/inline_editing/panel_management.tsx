@@ -7,8 +7,8 @@
 
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { BehaviorSubject } from 'rxjs';
-import { type PublishingSubject } from '@kbn/presentation-publishing';
-import { type LensRuntimeState } from '../types';
+import { PublishingSubject } from '@kbn/presentation-publishing';
+import { LensRuntimeState } from '../types';
 
 export interface PanelManagementApi {
   isEditingEnabled: () => boolean;

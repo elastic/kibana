@@ -10,7 +10,7 @@
 import React from 'react';
 import { EuiPageTemplate, EuiTitle, EuiText } from '@elastic/eui';
 import ReactDOM from 'react-dom';
-import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 
 export const renderApp = (_core: CoreStart, { element }: AppMountParameters) => {
   ReactDOM.render(

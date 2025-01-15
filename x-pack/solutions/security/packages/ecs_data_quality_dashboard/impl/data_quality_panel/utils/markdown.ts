@@ -35,11 +35,11 @@ import {
   SIZE,
 } from '../translations';
 import {
-  type AllowedValue,
-  type EnrichedFieldMetadata,
-  type IlmPhase,
-  type IncompatibleFieldMetadata,
-  type UnallowedValueCount,
+  AllowedValue,
+  EnrichedFieldMetadata,
+  IlmPhase,
+  IncompatibleFieldMetadata,
+  UnallowedValueCount,
 } from '../types';
 import { getDocsCountPercent } from './stats';
 

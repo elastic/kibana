@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type FindSLOParams, type FindSLOResponse, findSLOResponseSchema } from '@kbn/slo-schema';
+import { FindSLOParams, FindSLOResponse, findSLOResponseSchema } from '@kbn/slo-schema';
 import { keyBy } from 'lodash';
-import { type SLODefinition } from '../domain/models';
+import { SLODefinition } from '../domain/models';
 import { IllegalArgumentError } from '../errors';
-import { type SLORepository } from './slo_repository';
+import { SLORepository } from './slo_repository';
 import type {
   Pagination,
   Sort,

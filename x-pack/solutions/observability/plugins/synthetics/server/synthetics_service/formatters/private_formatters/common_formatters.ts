@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type CommonFields, ConfigKey, SourceType } from '../../../../common/runtime_types';
+import { CommonFields, ConfigKey, SourceType } from '../../../../common/runtime_types';
 import {
   arrayToJsonFormatter,
   stringToJsonFormatter,
-  type FormatterFn,
+  FormatterFn,
   secondsToCronFormatter,
 } from './formatting_utils';
 

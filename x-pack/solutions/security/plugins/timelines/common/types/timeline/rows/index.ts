@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { type DeprecatedRowRendererId } from '..';
+import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { DeprecatedRowRendererId } from '..';
 
 /**
  * This interface should not be used anymore.

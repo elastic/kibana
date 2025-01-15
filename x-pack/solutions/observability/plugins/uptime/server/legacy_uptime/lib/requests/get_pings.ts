@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
 } from '../../../../common/constants/client_defaults';
-import { type UMElasticsearchQueryFn } from '../adapters/framework';
+import { UMElasticsearchQueryFn } from '../adapters/framework';
 import {
-  type GetPingsParams,
-  type HttpResponseBody,
-  type PingsResponse,
-  type Ping,
+  GetPingsParams,
+  HttpResponseBody,
+  PingsResponse,
+  Ping,
 } from '../../../../common/runtime_types';
 
 const DEFAULT_PAGE_SIZE = 25;

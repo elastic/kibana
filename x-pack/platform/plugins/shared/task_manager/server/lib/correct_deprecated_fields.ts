@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type Logger } from '@kbn/core/server';
-import { type TaskInstance, type TaskInstanceWithDeprecatedFields } from '../task';
+import { Logger } from '@kbn/core/server';
+import { TaskInstance, TaskInstanceWithDeprecatedFields } from '../task';
 
 export function ensureDeprecatedFieldsAreCorrected(
   { id, taskType, interval, schedule, ...taskInstance }: TaskInstanceWithDeprecatedFields,

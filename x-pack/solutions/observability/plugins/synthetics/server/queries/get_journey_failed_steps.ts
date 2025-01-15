@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { type SyntheticsEsClient } from '../lib';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SyntheticsEsClient } from '../lib';
 import { asMutableArray } from '../../common/utils/as_mutable_array';
-import { type JourneyStep } from '../../common/runtime_types/ping/synthetics';
+import { JourneyStep } from '../../common/runtime_types/ping/synthetics';
 
 export interface GetJourneyStepsParams {
   checkGroups: string[];

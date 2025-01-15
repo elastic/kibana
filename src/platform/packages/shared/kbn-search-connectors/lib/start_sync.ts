@@ -9,7 +9,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
-import { type SyncJobType } from '../types/connectors';
+import { SyncJobType } from '../types/connectors';
 
 export const startConnectorSync = async (
   client: ElasticsearchClient,

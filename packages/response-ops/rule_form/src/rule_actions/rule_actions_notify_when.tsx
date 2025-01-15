@@ -11,10 +11,10 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { css } from '@emotion/css'; // We can't use @emotion/react - this component gets used with plugins that use both styled-components and Emotion
 import { i18n } from '@kbn/i18n';
 import {
-  type RuleNotifyWhenType,
+  RuleNotifyWhenType,
   RuleNotifyWhen,
-  type RuleAction,
-  type RuleActionFrequency,
+  RuleAction,
+  RuleActionFrequency,
 } from '@kbn/alerting-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -31,7 +31,7 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   useEuiTheme,
-  type EuiSuperSelectOption,
+  EuiSuperSelectOption,
 } from '@elastic/eui';
 import { some, filter, map } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';

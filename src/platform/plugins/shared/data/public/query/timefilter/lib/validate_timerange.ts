@@ -8,7 +8,7 @@
  */
 
 import dateMath from '@kbn/datemath';
-import { type TimeRange } from '@kbn/es-query';
+import { TimeRange } from '@kbn/es-query';
 
 export function validateTimeRange(time?: TimeRange): boolean {
   if (!time) return false;

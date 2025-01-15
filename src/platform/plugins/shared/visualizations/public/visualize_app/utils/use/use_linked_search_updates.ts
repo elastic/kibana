@@ -9,13 +9,13 @@
 
 import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { type EventEmitter } from 'events';
+import { EventEmitter } from 'events';
 
-import { type Filter, type Query } from '@kbn/es-query';
+import { Filter, Query } from '@kbn/es-query';
 import {
-  type VisualizeServices,
-  type VisualizeAppStateContainer,
-  type VisualizeEditorVisInstance,
+  VisualizeServices,
+  VisualizeAppStateContainer,
+  VisualizeEditorVisInstance,
 } from '../../types';
 
 export const useLinkedSearchUpdates = (

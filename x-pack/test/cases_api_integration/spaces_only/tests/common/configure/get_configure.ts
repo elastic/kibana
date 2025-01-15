@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { nullUser } from '../../../../common/lib/mock';
-import { type FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
   removeServerGeneratedPropertiesFromSavedObject,

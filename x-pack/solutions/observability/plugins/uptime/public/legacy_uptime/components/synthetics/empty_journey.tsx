@@ -7,7 +7,7 @@
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { type FC } from 'react';
+import React, { FC } from 'react';
 
 interface Props {
   checkGroup?: string;

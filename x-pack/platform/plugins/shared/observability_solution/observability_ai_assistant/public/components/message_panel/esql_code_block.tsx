@@ -10,13 +10,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  type UseEuiTheme,
+  UseEuiTheme,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { type ChatActionClickHandler, ChatActionClickType } from '../chat/types';
+import { ChatActionClickHandler, ChatActionClickType } from '../chat/types';
 
 const getCodeBlockClassName = (theme: UseEuiTheme) => css`
   background-color: ${theme.euiTheme.colors.lightestShade};

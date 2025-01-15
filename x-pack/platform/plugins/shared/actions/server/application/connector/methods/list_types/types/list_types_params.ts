@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type TypeOf } from '@kbn/config-schema';
-import { type listTypesParamsSchema } from '../schemas';
+import { TypeOf } from '@kbn/config-schema';
+import { listTypesParamsSchema } from '../schemas';
 
 type ListTypesParamsType = TypeOf<typeof listTypesParamsSchema>;
 

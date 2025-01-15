@@ -25,8 +25,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TelemetryOptIn } from '../../../components/telemetry_opt_in';
 import { EXTERNAL_LINKS } from '../../../../../common/constants';
-import { AppContextConsumer, type AppDependencies } from '../../../app_context';
-import { type TelemetryPluginStart, shouldShowTelemetryOptIn } from '../../../lib/telemetry';
+import { AppContextConsumer, AppDependencies } from '../../../app_context';
+import { TelemetryPluginStart, shouldShowTelemetryOptIn } from '../../../lib/telemetry';
 
 export interface Props {
   loadTrialStatus: () => void;

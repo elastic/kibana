@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { type ExternalReferenceAttachmentAttributes } from '@kbn/cases-plugin/common/types/domain';
+import { ExternalReferenceAttachmentAttributes } from '@kbn/cases-plugin/common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
-import { type FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { nullUser, postCaseReq, postFileReq } from '../../../../common/lib/mock';
 import {

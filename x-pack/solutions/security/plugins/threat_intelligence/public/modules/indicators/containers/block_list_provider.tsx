@@ -7,10 +7,10 @@
 
 import React, {
   createContext,
-  type Dispatch,
-  type FC,
-  type PropsWithChildren,
-  type SetStateAction,
+  Dispatch,
+  FC,
+  PropsWithChildren,
+  SetStateAction,
   useState,
 } from 'react';
 

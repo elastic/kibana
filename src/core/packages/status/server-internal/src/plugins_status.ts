@@ -10,7 +10,7 @@
 import {
   BehaviorSubject,
   merge,
-  type Observable,
+  Observable,
   ReplaySubject,
   Subject,
   type Subscription,

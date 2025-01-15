@@ -6,10 +6,10 @@
  */
 
 import { partition, mapValues, pickBy } from 'lodash';
-import { type CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import memoizeOne from 'memoize-one';
-import { type DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { DateRange } from '../../../../common/types';
 import type {
   DatasourceFixAction,
@@ -33,11 +33,11 @@ import type { DataViewDragDropOperation, FormBasedLayer, FormBasedPrivateState }
 import { getSortScoreByPriorityForField } from './operations';
 import { generateId } from '../../../id_generator';
 import {
-  type GenericIndexPatternColumn,
-  type ReferenceBasedIndexPatternColumn,
-  type BaseIndexPatternColumn,
+  GenericIndexPatternColumn,
+  ReferenceBasedIndexPatternColumn,
+  BaseIndexPatternColumn,
 } from './definitions/column_types';
-import { type FormulaIndexPatternColumn, insertOrReplaceFormulaColumn } from './definitions/formula';
+import { FormulaIndexPatternColumn, insertOrReplaceFormulaColumn } from './definitions/formula';
 import type { TimeScaleUnit } from '../../../../common/expressions';
 import { documentField } from '../document_field';
 import { isColumnOfType } from './definitions/helpers';

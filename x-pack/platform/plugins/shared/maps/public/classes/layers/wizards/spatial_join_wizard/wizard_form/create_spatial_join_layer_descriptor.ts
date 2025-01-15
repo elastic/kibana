@@ -16,9 +16,9 @@ import {
 } from '../../../../../../common/constants';
 import { getJoinAggKey } from '../../../../../../common/get_agg_key';
 import {
-  type CountAggDescriptor,
-  type JoinDescriptor,
-  type VectorStylePropertiesDescriptor,
+  CountAggDescriptor,
+  JoinDescriptor,
+  VectorStylePropertiesDescriptor,
 } from '../../../../../../common/descriptor_types';
 import { VectorStyle } from '../../../../styles/vector/vector_style';
 import { GeoJsonVectorLayer } from '../../../vector_layer';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, type PropsWithChildren } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
 
 export const LoadingIssuesError: FC<PropsWithChildren<unknown>> = ({ children }) => (

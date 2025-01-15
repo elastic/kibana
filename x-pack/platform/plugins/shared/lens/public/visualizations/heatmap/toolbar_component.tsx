@@ -6,8 +6,8 @@
  */
 
 import React, { memo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, type IconType } from '@elastic/eui';
-import { type Position } from '@elastic/charts';
+import { EuiFlexGroup, EuiFlexItem, IconType } from '@elastic/eui';
+import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { EuiIconAxisLeft, EuiIconAxisBottom } from '@kbn/chart-icons';

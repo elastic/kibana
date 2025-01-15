@@ -6,7 +6,7 @@
  */
 
 import { useContext } from 'react';
-import { BlockListContext, type BlockListContextValue } from '../containers/block_list_provider';
+import { BlockListContext, BlockListContextValue } from '../containers/block_list_provider';
 
 /**
  * Hook to retrieve {@link BlockListContext}

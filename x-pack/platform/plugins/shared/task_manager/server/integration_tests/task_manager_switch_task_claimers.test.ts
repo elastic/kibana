@@ -7,7 +7,7 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
-import { type SerializedConcreteTaskInstance, TaskStatus } from '../task';
+import { SerializedConcreteTaskInstance, TaskStatus } from '../task';
 import type { TaskClaimingOpts } from '../queries/task_claiming';
 import { injectTask, setupTestServers, retry } from './lib';
 import { setupKibanaServer } from './lib/setup_test_servers';

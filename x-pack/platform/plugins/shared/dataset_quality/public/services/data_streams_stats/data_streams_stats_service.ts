@@ -6,10 +6,10 @@
  */
 
 import {
-  type DataStreamsStatsServiceSetup,
-  type DataStreamsStatsServiceStartDeps,
-  type DataStreamsStatsServiceStart,
-  type IDataStreamsStatsClient,
+  DataStreamsStatsServiceSetup,
+  DataStreamsStatsServiceStartDeps,
+  DataStreamsStatsServiceStart,
+  IDataStreamsStatsClient,
 } from './types';
 
 export class DataStreamsStatsService {

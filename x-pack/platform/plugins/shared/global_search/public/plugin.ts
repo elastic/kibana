@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type CoreSetup, type CoreStart, type Plugin, type PluginInitializerContext } from '@kbn/core/public';
-import { type LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { LicenseChecker, type ILicenseChecker } from '../common/license_checker';
-import { type GlobalSearchPluginSetup, type GlobalSearchPluginStart } from './types';
-import { type GlobalSearchClientConfigType } from './config';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { LicenseChecker, ILicenseChecker } from '../common/license_checker';
+import { GlobalSearchPluginSetup, GlobalSearchPluginStart } from './types';
+import { GlobalSearchClientConfigType } from './config';
 import { SearchService } from './services';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

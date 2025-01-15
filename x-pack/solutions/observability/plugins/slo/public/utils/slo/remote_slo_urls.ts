@@ -6,7 +6,7 @@
  */
 
 import { encode } from '@kbn/rison';
-import { ALL_VALUE, type SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import path from 'path';
 import { paths } from '../../../common/locators/paths';
 

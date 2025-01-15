@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  type SubActionConnectorType,
+  SubActionConnectorType,
   ValidatorType,
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import {
@@ -16,11 +16,11 @@ import {
   GenerativeAIForSecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
-import { type ValidatorServices } from '@kbn/actions-plugin/server/types';
+import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { assertURL } from '@kbn/actions-plugin/server/sub_action_framework/helpers/validators';
 import { BEDROCK_CONNECTOR_ID, BEDROCK_TITLE } from '../../../common/bedrock/constants';
 import { ConfigSchema, SecretsSchema } from '../../../common/bedrock/schema';
-import { type Config, type Secrets } from '../../../common/bedrock/types';
+import { Config, Secrets } from '../../../common/bedrock/types';
 import { BedrockConnector } from './bedrock';
 import { renderParameterTemplates } from './render';
 

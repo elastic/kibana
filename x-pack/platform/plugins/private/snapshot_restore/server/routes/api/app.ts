@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { type Privileges } from '@kbn/es-ui-shared-plugin/common';
+import { Privileges } from '@kbn/es-ui-shared-plugin/common';
 
 import {
   APP_REQUIRED_CLUSTER_PRIVILEGES,
   APP_RESTORE_INDEX_PRIVILEGES,
   APP_SLM_CLUSTER_PRIVILEGES,
 } from '../../../common';
-import { type RouteDependencies } from '../../types';
+import { RouteDependencies } from '../../types';
 import { addBasePath } from '../helpers';
 
 const extractMissingPrivileges = (privilegesObject: { [key: string]: boolean } = {}): string[] =>

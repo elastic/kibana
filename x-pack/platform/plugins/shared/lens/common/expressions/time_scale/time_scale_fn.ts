@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import moment, { type Moment } from 'moment-timezone';
+import moment, { Moment } from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
-import { buildResultColumns, type DatatableRow, type ExecutionContext } from '@kbn/expressions-plugin/common';
+import { buildResultColumns, DatatableRow, ExecutionContext } from '@kbn/expressions-plugin/common';
 import {
   calculateBounds,
-  type DatatableUtilitiesService,
+  DatatableUtilitiesService,
   parseInterval,
-  type TimeRangeBounds,
-  type TimeRange,
+  TimeRangeBounds,
+  TimeRange,
 } from '@kbn/data-plugin/common';
 import type { TimeScaleExpressionFunction, TimeScaleUnit, TimeScaleArgs } from './types';
 

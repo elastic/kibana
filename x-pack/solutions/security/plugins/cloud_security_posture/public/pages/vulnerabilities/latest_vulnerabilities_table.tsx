@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { type DataTableRecord } from '@kbn/discover-utils/types';
+import { DataTableRecord } from '@kbn/discover-utils/types';
 import { i18n } from '@kbn/i18n';
-import { type EuiDataGridCellValueElementProps, EuiSpacer } from '@elastic/eui';
-import { type Filter } from '@kbn/es-query';
-import { type HttpSetup } from '@kbn/core-http-browser';
+import { EuiDataGridCellValueElementProps, EuiSpacer } from '@elastic/eui';
+import { Filter } from '@kbn/es-query';
+import { HttpSetup } from '@kbn/core-http-browser';
 import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
 import { CVSScoreBadge, SeverityStatusBadge } from '@kbn/cloud-security-posture';
 import { getVendorName } from '../../common/utils/get_vendor_name';

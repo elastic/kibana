@@ -14,12 +14,12 @@ import {
   getJsDependencyPathsMock,
 } from './bootstrap_renderer.test.mocks';
 
-import { type PackageInfo } from '@kbn/config';
-import { type AuthStatus } from '@kbn/core-http-server';
+import { PackageInfo } from '@kbn/config';
+import { AuthStatus } from '@kbn/core-http-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
-import { bootstrapRendererFactory, type BootstrapRenderer } from './bootstrap_renderer';
+import { bootstrapRendererFactory, BootstrapRenderer } from './bootstrap_renderer';
 import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
 
 const createPackageInfo = (parts: Partial<PackageInfo> = {}): PackageInfo => ({

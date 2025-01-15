@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AggConfig, type IAggConfig, type AggConfigSerialized } from '../agg_config';
+import { AggConfig, IAggConfig, AggConfigSerialized } from '../agg_config';
 import { BaseParamType } from './base';
 
 export class AggParamType<

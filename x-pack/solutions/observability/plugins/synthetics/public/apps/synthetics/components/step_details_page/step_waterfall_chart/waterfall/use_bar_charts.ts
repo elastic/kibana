@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { type IWaterfallContext } from './context/waterfall_context';
+import { IWaterfallContext } from './context/waterfall_context';
 import { CANVAS_MAX_ITEMS } from './constants';
 
 export interface UseBarHookProps {

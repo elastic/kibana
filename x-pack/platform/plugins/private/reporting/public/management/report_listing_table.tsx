@@ -6,11 +6,11 @@
  */
 
 import { Component, Fragment, default as React } from 'react';
-import { type Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 import {
   EuiBasicTable,
-  type EuiBasicTableColumn,
+  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
@@ -18,11 +18,11 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type ILicense } from '@kbn/licensing-plugin/public';
+import { ILicense } from '@kbn/licensing-plugin/public';
 import { durationToNumber, REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '@kbn/reporting-common';
 
-import { checkLicense, type Job } from '@kbn/reporting-public';
-import { type ListingPropsInternal } from '.';
+import { checkLicense, Job } from '@kbn/reporting-public';
+import { ListingPropsInternal } from '.';
 import { prettyPrintJobType } from '../../common/job_utils';
 import { Poller } from '../../common/poller';
 import { ReportDeleteButton, ReportInfoFlyout, ReportStatusIndicator } from './components';

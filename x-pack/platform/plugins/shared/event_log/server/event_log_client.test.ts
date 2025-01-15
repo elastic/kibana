@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { type KibanaRequest } from '@kbn/core/server';
+import { KibanaRequest } from '@kbn/core/server';
 import { EventLogClient } from './event_log_client';
-import { type EsContext } from './es';
+import { EsContext } from './es';
 import { contextMock } from './es/context.mock';
 import { merge } from 'lodash';
 import moment from 'moment';
-import { type IClusterClientAdapter } from './es/cluster_client_adapter';
+import { IClusterClientAdapter } from './es/cluster_client_adapter';
 import { fromKueryExpression } from '@kbn/es-query';
 
 const expectedSavedObject = {

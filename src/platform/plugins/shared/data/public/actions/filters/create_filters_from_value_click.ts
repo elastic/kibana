@@ -8,17 +8,17 @@
  */
 
 import _ from 'lodash';
-import { type Datatable } from '@kbn/expressions-plugin/public';
+import { Datatable } from '@kbn/expressions-plugin/public';
 import {
   compareFilters,
   COMPARE_ALL_OPTIONS,
-  type Filter,
+  Filter,
   toggleFilterNegated,
   type AggregateQuery,
 } from '@kbn/es-query';
 import { appendWhereClauseToESQLQuery } from '@kbn/esql-utils';
 import { getIndexPatterns, getSearchService } from '../../services';
-import { type AggConfigSerialized } from '../../../common/search/aggs';
+import { AggConfigSerialized } from '../../../common/search/aggs';
 import { mapAndFlattenFilters } from '../../query';
 
 interface ValueClickDataContext {

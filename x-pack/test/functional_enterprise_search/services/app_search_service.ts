@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 const ENTERPRISE_SEARCH_USER = 'enterprise_search';
 const ENTERPRISE_SEARCH_PASSWORD = 'changeme';
@@ -15,7 +15,7 @@ import {
   indexData,
   waitForIndexedDocs,
   destroyEngine,
-  type IEngine,
+  IEngine,
 } from './app_search_client';
 
 export interface IUser {

@@ -11,7 +11,7 @@ import {
   handleChange,
   handleAdd,
   handleDelete,
-  type CollectionActionsProps,
+  CollectionActionsProps,
 } from './collection_actions';
 
 describe('collection actions', () => {

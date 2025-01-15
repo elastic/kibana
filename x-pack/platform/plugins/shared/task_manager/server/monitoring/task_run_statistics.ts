@@ -5,40 +5,40 @@
  * 2.0.
  */
 
-import { combineLatest, type Observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { filter, startWith, map } from 'rxjs';
-import { type JsonObject, type JsonValue } from '@kbn/utility-types';
+import { JsonObject, JsonValue } from '@kbn/utility-types';
 import { isNumber, mapValues } from 'lodash';
-import { type Logger } from '@kbn/core/server';
-import { type AggregatedStatProvider, type AggregatedStat } from '../lib/runtime_statistics_aggregator';
-import { type TaskLifecycleEvent } from '../polling_lifecycle';
+import { Logger } from '@kbn/core/server';
+import { AggregatedStatProvider, AggregatedStat } from '../lib/runtime_statistics_aggregator';
+import { TaskLifecycleEvent } from '../polling_lifecycle';
 import {
   isTaskRunEvent,
   isTaskPollingCycleEvent,
-  type TaskRun,
-  type ErroredTask,
-  type RanTask,
-  type TaskTiming,
+  TaskRun,
+  ErroredTask,
+  RanTask,
+  TaskTiming,
   isTaskManagerStatEvent,
-  type TaskManagerStat,
+  TaskManagerStat,
   TaskPersistence,
-  type TaskClaim,
+  TaskClaim,
   isTaskClaimEvent,
 } from '../task_events';
-import { isOk, type Ok, unwrap } from '../lib/result_type';
-import { type ConcreteTaskInstance } from '../task';
+import { isOk, Ok, unwrap } from '../lib/result_type';
+import { ConcreteTaskInstance } from '../task';
 import { TaskRunResult } from '../task_running';
-import { FillPoolResult, type ClaimAndFillPoolResult } from '../lib/fill_pool';
+import { FillPoolResult, ClaimAndFillPoolResult } from '../lib/fill_pool';
 import {
-  type AveragedStat,
+  AveragedStat,
   calculateRunningAverage,
   calculateFrequency,
   createRunningAveragedStat,
   createMapOfRunningAveragedStats,
 } from './task_run_calculators';
 import { HealthStatus } from './monitoring_stats_stream';
-import { type TaskPollingLifecycle } from '../polling_lifecycle';
-import { type TaskExecutionFailureThreshold, type TaskManagerConfig } from '../config';
+import { TaskPollingLifecycle } from '../polling_lifecycle';
+import { TaskExecutionFailureThreshold, TaskManagerConfig } from '../config';
 
 interface FillPoolStat extends JsonObject {
   duration: number[];

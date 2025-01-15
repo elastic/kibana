@@ -7,12 +7,12 @@
 
 import expect from '@kbn/expect';
 import { CASES_URL, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
-import { type UserCommentAttachmentAttributes } from '@kbn/cases-plugin/common/types/domain';
+import { UserCommentAttachmentAttributes } from '@kbn/cases-plugin/common/types/domain';
 import {
   CasePersistedSeverity,
   CasePersistedStatus,
 } from '@kbn/cases-plugin/server/common/types/case';
-import { type FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   deleteAllCaseItems,
   getCase,

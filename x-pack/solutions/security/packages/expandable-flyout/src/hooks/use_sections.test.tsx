@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook, type RenderHookResult } from '@testing-library/react';
+import { renderHook, RenderHookResult } from '@testing-library/react';
 import type { UseSectionsParams, UseSectionsResult } from './use_sections';
 import { useSections } from './use_sections';
 import { useExpandableFlyoutState } from '../..';

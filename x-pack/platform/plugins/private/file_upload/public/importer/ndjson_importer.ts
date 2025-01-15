@@ -6,7 +6,7 @@
  */
 
 import { Importer } from './importer';
-import { type CreateDocsResponse } from './types';
+import { CreateDocsResponse } from './types';
 
 export class NdjsonImporter extends Importer {
   constructor() {

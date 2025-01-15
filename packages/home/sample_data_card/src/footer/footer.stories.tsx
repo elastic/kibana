@@ -8,11 +8,11 @@
  */
 
 import React from 'react';
-import { type ComponentMeta } from '@storybook/react';
+import { ComponentMeta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
 import type { SampleDataSet } from '@kbn/home-sample-data-types';
-import { type Params, getStoryArgTypes, getStoryServices, mockDataSet } from '../mocks';
+import { Params, getStoryArgTypes, getStoryServices, mockDataSet } from '../mocks';
 import { SampleDataCardProvider } from '../services';
 import { Footer as Component } from '.';
 

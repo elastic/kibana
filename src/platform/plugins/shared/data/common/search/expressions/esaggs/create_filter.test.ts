@@ -8,12 +8,12 @@
  */
 
 import { isRangeFilter } from '@kbn/es-query';
-import { BytesFormat, type FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
-import { AggConfigs, type IAggConfig } from '../../aggs';
+import { BytesFormat, FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
+import { AggConfigs, IAggConfig } from '../../aggs';
 import { mockAggTypesRegistry } from '../../aggs/test_helpers';
 
 import { createFilter } from './create_filter';
-import { type Datatable } from '@kbn/expressions-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/common';
 
 describe('createFilter', () => {
   let table: Datatable;

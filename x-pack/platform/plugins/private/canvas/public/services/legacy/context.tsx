@@ -9,11 +9,11 @@ import React, {
   useContext,
   createElement,
   createContext,
-  type ComponentType,
-  type FC,
-  type ReactElement,
+  ComponentType,
+  FC,
+  ReactElement,
 } from 'react';
-import { type CanvasServices, type CanvasServiceProviders, services } from '.';
+import { CanvasServices, CanvasServiceProviders, services } from '.';
 
 export interface WithServicesProps {
   services: CanvasServices;

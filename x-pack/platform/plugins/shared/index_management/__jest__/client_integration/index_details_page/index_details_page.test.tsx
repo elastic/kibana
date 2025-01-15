@@ -6,13 +6,13 @@
  */
 
 import { setupEnvironment } from '../helpers';
-import { type IndexDetailsPageTestBed, setup } from './index_details_page.helpers';
+import { IndexDetailsPageTestBed, setup } from './index_details_page.helpers';
 import { act } from 'react-dom/test-utils';
 
 import React from 'react';
 
-import { IndexDetailsSection, type IndexDetailsTab, type IndexDetailsTabId } from '../../../common/constants';
-import { API_BASE_PATH, type Index, INTERNAL_API_BASE_PATH } from '../../../common';
+import { IndexDetailsSection, IndexDetailsTab, IndexDetailsTabId } from '../../../common/constants';
+import { API_BASE_PATH, Index, INTERNAL_API_BASE_PATH } from '../../../common';
 
 import {
   breadcrumbService,

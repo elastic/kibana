@@ -14,7 +14,7 @@ import { render } from '@testing-library/react';
 import { omit } from 'lodash';
 import React from 'react';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
-import CompareDocuments, { type CompareDocumentsProps } from './compare_documents';
+import CompareDocuments, { CompareDocumentsProps } from './compare_documents';
 import { useComparisonFields } from './hooks/use_comparison_fields';
 
 let mockLocalStorage: Record<string, string> = {};

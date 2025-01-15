@@ -9,7 +9,7 @@
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { Fragment } from 'react';
-import { type Error } from '../types';
+import { Error } from '../types';
 
 interface Props {
   title: React.ReactNode;

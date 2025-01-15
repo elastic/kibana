@@ -11,10 +11,10 @@ import React from 'react';
 import {
   EuiButtonGroup,
   htmlIdGenerator,
-  type EuiButtonGroupOptionProps,
+  EuiButtonGroupOptionProps,
   useEuiTheme,
-  type IconType,
-  type EuiButtonGroupProps,
+  IconType,
+  EuiButtonGroupProps,
 } from '@elastic/eui';
 
 import { IconButtonGroupStyles } from './icon_button_group.styles';

@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-import { type FtrProviderContext } from '../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { EntityStoreUtils } from '../../utils';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 export default ({ getService }: FtrProviderContext) => {

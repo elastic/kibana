@@ -10,23 +10,23 @@
 import React, { useCallback, useMemo, useState } from 'react';
 
 import {
-  type Direction,
+  Direction,
   EuiButtonGroup,
-  type EuiButtonGroupOptionProps,
+  EuiButtonGroupOptionProps,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
-  type EuiSelectableOption,
+  EuiSelectableOption,
   EuiToolTip,
 } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import {
   getCompatibleSortingTypes,
-  type OptionsListSortBy,
+  OptionsListSortBy,
   OPTIONS_LIST_DEFAULT_SORT,
 } from '../../../../../common/options_list/suggestions_sorting';
 import { useOptionsListContext } from '../options_list_context_provider';

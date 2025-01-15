@@ -7,26 +7,26 @@
 
 import { firstValueFrom } from 'rxjs';
 import {
-  type CoreSetup,
-  type CoreStart,
+  CoreSetup,
+  CoreStart,
   DEFAULT_APP_CATEGORIES,
-  type KibanaRequest,
-  type Logger,
-  type Plugin,
-  type PluginConfigDescriptor,
-  type PluginInitializerContext,
+  KibanaRequest,
+  Logger,
+  Plugin,
+  PluginConfigDescriptor,
+  PluginInitializerContext,
 } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import { type EntityManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
+import { EntityManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
 import { EntityClient } from './lib/entity_client';
 import { entityManagerRouteRepository } from './routes';
-import { type EntityManagerRouteDependencies } from './routes/types';
+import { EntityManagerRouteDependencies } from './routes/types';
 import { EntityDiscoveryApiKeyType, entityDefinition } from './saved_objects';
 import {
-  type EntityManagerPluginSetupDependencies,
-  type EntityManagerPluginStartDependencies,
-  type EntityManagerServerSetup,
+  EntityManagerPluginSetupDependencies,
+  EntityManagerPluginStartDependencies,
+  EntityManagerServerSetup,
 } from './types';
 import { setupEntityDefinitionsIndex } from './lib/v2/definitions/setup_entity_definitions_index';
 import {

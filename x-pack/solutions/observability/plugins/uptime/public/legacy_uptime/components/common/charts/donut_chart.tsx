@@ -9,9 +9,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { Chart, type Datum, Partition, Settings, PartitionLayout, type PartialTheme } from '@elastic/charts';
+import { Chart, Datum, Partition, Settings, PartitionLayout, PartialTheme } from '@elastic/charts';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { type ClientPluginsStart } from '../../../../plugin';
+import { ClientPluginsStart } from '../../../../plugin';
 import { DonutChartLegend } from './donut_chart_legend';
 
 interface DonutChartProps {

@@ -14,9 +14,9 @@ import { Position } from '@elastic/charts';
 
 import { TextInputOption } from '@kbn/vis-default-editor-plugin/public';
 
-import { type ValueAxis, ScaleType } from '../../../../types';
+import { ValueAxis, ScaleType } from '../../../../types';
 import { LabelOptions } from './label_options';
-import { ValueAxisOptions, type ValueAxisOptionsParams } from './value_axis_options';
+import { ValueAxisOptions, ValueAxisOptionsParams } from './value_axis_options';
 import { valueAxis } from './mocks';
 
 const POSITION = 'position';

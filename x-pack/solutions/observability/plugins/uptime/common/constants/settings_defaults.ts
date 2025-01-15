@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type DynamicSettings } from '../runtime_types';
+import { DynamicSettings } from '../runtime_types';
 
 export const DYNAMIC_SETTINGS_DEFAULTS: DynamicSettings = {
   heartbeatIndices: 'heartbeat-*',

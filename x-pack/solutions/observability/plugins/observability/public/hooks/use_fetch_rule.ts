@@ -6,9 +6,9 @@
  */
 
 import {
-  type QueryObserverResult,
-  type RefetchOptions,
-  type RefetchQueryFilters,
+  QueryObserverResult,
+  RefetchOptions,
+  RefetchQueryFilters,
   useQuery,
 } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';

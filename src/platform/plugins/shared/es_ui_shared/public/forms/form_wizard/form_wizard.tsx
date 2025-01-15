@@ -8,14 +8,14 @@
  */
 
 import React from 'react';
-import { EuiStepsHorizontal, type EuiStepStatus, EuiSpacer } from '@elastic/eui';
+import { EuiStepsHorizontal, EuiStepStatus, EuiSpacer } from '@elastic/eui';
 
 import {
   FormWizardProvider,
   FormWizardConsumer,
-  type Props as ProviderProps,
+  Props as ProviderProps,
 } from './form_wizard_context';
-import { FormWizardNav, type NavTexts } from './form_wizard_nav';
+import { FormWizardNav, NavTexts } from './form_wizard_nav';
 
 interface Props<T extends object, S extends string> extends ProviderProps<T> {
   isSaving?: boolean;

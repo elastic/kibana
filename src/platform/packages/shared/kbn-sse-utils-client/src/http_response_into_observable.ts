@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type OperatorFunction, switchMap } from 'rxjs';
+import { OperatorFunction, switchMap } from 'rxjs';
 import type { ServerSentEvent } from '@kbn/sse-utils/src/events';
 import {
   createObservableFromHttpResponse,
-  type StreamedHttpResponse,
+  StreamedHttpResponse,
 } from './create_observable_from_http_response';
 
 export function httpResponseIntoObservable<

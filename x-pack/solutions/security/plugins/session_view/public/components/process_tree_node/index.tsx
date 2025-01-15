@@ -14,11 +14,11 @@
 import React, {
   useState,
   useEffect,
-  type MouseEvent,
+  MouseEvent,
   useCallback,
   useMemo,
-  type RefObject,
-  type ReactElement,
+  RefObject,
+  ReactElement,
 } from 'react';
 import { EuiButton, EuiIcon, EuiToolTip, formatDate, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -35,7 +35,7 @@ import { SplitText } from './split_text';
 import { Nbsp } from './nbsp';
 import { useDateFormat } from '../../hooks';
 import { TextHighlight } from './text_highlight';
-import { type SessionViewTelemetryKey } from '../../types';
+import { SessionViewTelemetryKey } from '../../types';
 
 export const EXEC_USER_CHANGE = i18n.translate('xpack.sessionView.execUserChange', {
   defaultMessage: 'Exec user change',

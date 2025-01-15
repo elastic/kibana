@@ -8,9 +8,9 @@
  */
 
 import React from 'react';
-import { EuiRange, type EuiRangeTick } from '@elastic/eui';
-import { type _SingleRangeChangeEvent } from '@elastic/eui/src/components/form/range/types';
-import { type Timeslice } from '../types';
+import { EuiRange, EuiRangeTick } from '@elastic/eui';
+import { _SingleRangeChangeEvent } from '@elastic/eui/src/components/form/range/types';
+import { Timeslice } from '../types';
 
 interface Props {
   value: Timeslice;

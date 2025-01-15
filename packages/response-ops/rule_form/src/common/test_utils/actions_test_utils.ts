@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ActionType } from '@kbn/actions-types';
-import { type RuleSystemAction } from '@kbn/alerting-types';
+import { ActionType } from '@kbn/actions-types';
+import { RuleSystemAction } from '@kbn/alerting-types';
 import {
-  type ActionConnector,
-  type ActionTypeModel,
-  type GenericValidationResult,
-  type RuleAction,
+  ActionConnector,
+  ActionTypeModel,
+  GenericValidationResult,
+  RuleAction,
 } from '@kbn/alerts-ui-shared';
 import { actionTypeRegistryMock } from '@kbn/alerts-ui-shared/src/common/test_utils/action_type_registry.mock';
 

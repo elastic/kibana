@@ -12,7 +12,7 @@ import { shallow } from 'enzyme';
 
 import { NumberInputOption } from '@kbn/vis-default-editor-plugin/public';
 
-import { LineOptions, type LineOptionsParams } from './line_options';
+import { LineOptions, LineOptionsParams } from './line_options';
 import { seriesParam } from './mocks';
 
 const LINE_WIDTH = 'lineWidth';

@@ -13,10 +13,10 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiIcon,
-  type IconType,
+  IconType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type GaugeLabelMajorMode, type GaugeShape, GaugeShapes } from '@kbn/expression-gauge-plugin/common';
+import { GaugeLabelMajorMode, GaugeShape, GaugeShapes } from '@kbn/expression-gauge-plugin/common';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import {
   IconChartGaugeArcSimple,

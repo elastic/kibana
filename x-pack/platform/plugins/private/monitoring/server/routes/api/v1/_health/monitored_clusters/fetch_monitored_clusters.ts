@@ -7,7 +7,7 @@
 
 import { merge } from 'lodash';
 
-import { buildMonitoredClusters, type MonitoredClusters } from './build_monitored_clusters';
+import { buildMonitoredClusters, MonitoredClusters } from './build_monitored_clusters';
 import {
   monitoredClustersQuery,
   persistentMetricsetsQuery,

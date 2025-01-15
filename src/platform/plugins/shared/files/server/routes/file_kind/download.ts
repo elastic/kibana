@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { type Readable } from 'stream';
+import { Readable } from 'stream';
 import type { FilesClient } from '../../../common/files_client';
 import type { FileKind } from '../../../common/types';
 import { fileNameWithExt } from '../common_schemas';
@@ -16,7 +16,7 @@ import { fileErrors } from '../../file';
 import { getDownloadHeadersForFile, getDownloadedFileName } from '../common';
 import { getById } from './helpers';
 import type { CreateHandler, FileKindRouter } from './types';
-import { type CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
+import { CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
 
 export const method = 'get' as const;
 

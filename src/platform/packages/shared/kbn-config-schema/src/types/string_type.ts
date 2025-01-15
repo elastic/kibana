@@ -9,7 +9,7 @@
 
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import { Type, type TypeOptions, convertValidationFunction } from './type';
+import { Type, TypeOptions, convertValidationFunction } from './type';
 
 import { META_FIELD_X_OAS_MIN_LENGTH, META_FIELD_X_OAS_MAX_LENGTH } from '../oas_meta_fields';
 

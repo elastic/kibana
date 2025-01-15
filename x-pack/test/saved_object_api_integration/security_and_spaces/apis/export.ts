@@ -6,12 +6,12 @@
  */
 
 import { getTestScenarios } from '../../common/lib/saved_object_test_utils';
-import { type TestUser } from '../../common/lib/types';
-import { type FtrProviderContext } from '../../common/ftr_provider_context';
+import { TestUser } from '../../common/lib/types';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   exportTestSuiteFactory,
   getTestCases,
-  type ExportTestDefinition,
+  ExportTestDefinition,
 } from '../../common/suites/export';
 
 const createTestCases = (spaceId: string) => {

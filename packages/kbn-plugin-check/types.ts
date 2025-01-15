@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ClassDeclaration, type Project } from 'ts-morph';
+import { ClassDeclaration, Project } from 'ts-morph';
 import {
-  type PLUGIN_LAYERS,
-  type PLUGIN_LIFECYCLES,
-  type PLUGIN_REQUIREMENTS,
-  type MANIFEST_STATES,
-  type DEPENDENCY_STATES,
-  type PLUGIN_STATES,
-  type SOURCE_OF_TYPE,
-  type MANIFEST_REQUIREMENTS,
+  PLUGIN_LAYERS,
+  PLUGIN_LIFECYCLES,
+  PLUGIN_REQUIREMENTS,
+  MANIFEST_STATES,
+  DEPENDENCY_STATES,
+  PLUGIN_STATES,
+  SOURCE_OF_TYPE,
+  MANIFEST_REQUIREMENTS,
 } from './const';
 
 /** An enumeration of plugin classes within a single plugin.  */

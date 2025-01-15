@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Moment } from 'moment';
+import { Moment } from 'moment';
 
-import { type TimeRange } from '@kbn/es-query';
-import { type RefreshInterval } from '../../../common';
+import { TimeRange } from '@kbn/es-query';
+import { RefreshInterval } from '../../../common';
 
 export interface TimefilterConfig {
   timeDefaults: TimeRange;

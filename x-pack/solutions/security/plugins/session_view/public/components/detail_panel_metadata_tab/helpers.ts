@@ -13,10 +13,10 @@ import type {
 } from '../../../common';
 import { DASH } from '../../constants';
 import {
-  type DetailPanelHost,
-  type DetailPanelContainer,
-  type DetailPanelOrchestrator,
-  type DetailPanelCloud,
+  DetailPanelHost,
+  DetailPanelContainer,
+  DetailPanelOrchestrator,
+  DetailPanelCloud,
 } from '../../types';
 import { dataOrDash } from '../../utils/data_or_dash';
 

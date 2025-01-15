@@ -5,25 +5,25 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { type SavedObjectsUpdateResponse, type SavedObject } from '@kbn/core/server';
+import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
 import { invalidOriginError } from './add_monitor';
 import { InvalidLocationError } from '../../synthetics_service/project_monitor/normalizers/common_fields';
-import { AddEditMonitorAPI, type CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
+import { AddEditMonitorAPI, CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from './add_monitor_project';
 import { getDecryptedMonitor } from '../../saved_objects/synthetics_monitor';
 import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
 import { mergeSourceMonitor } from './formatters/saved_object_to_monitor';
-import { type RouteContext, type SyntheticsRestApiRouteFactory } from '../types';
+import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import {
-  type MonitorFields,
-  type EncryptedSyntheticsMonitorAttributes,
-  type SyntheticsMonitorWithSecretsAttributes,
-  type SyntheticsMonitor,
+  MonitorFields,
+  EncryptedSyntheticsMonitorAttributes,
+  SyntheticsMonitorWithSecretsAttributes,
+  SyntheticsMonitor,
   ConfigKey,
-  type MonitorLocations,
+  MonitorLocations,
 } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { MonitorValidationError, normalizeAPIConfig, validateMonitor } from './monitor_validation';

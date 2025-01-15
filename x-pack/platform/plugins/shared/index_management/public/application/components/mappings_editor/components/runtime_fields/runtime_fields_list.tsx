@@ -14,9 +14,9 @@ import { useMappingsState, useDispatch } from '../../mappings_state_context';
 import {
   documentationService,
   GlobalFlyout,
-  type RuntimeField,
+  RuntimeField,
   RuntimeFieldEditorFlyoutContent,
-  type RuntimeFieldEditorFlyoutContentProps,
+  RuntimeFieldEditorFlyoutContentProps,
 } from '../../shared_imports';
 import { useConfig } from '../../config_context';
 import { EmptyPrompt } from './empty_prompt';

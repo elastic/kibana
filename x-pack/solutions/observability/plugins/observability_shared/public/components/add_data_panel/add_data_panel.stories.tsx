@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type ComponentProps, type ComponentType } from 'react';
+import React, { ComponentProps, ComponentType } from 'react';
 import { AddDataPanel } from '.';
 
 export default {

@@ -19,8 +19,8 @@ import type {
   RouteMethod,
 } from '@kbn/core/server';
 import type { FileServiceStart } from '../file_service';
-import { type Counters } from '../usage';
-import { type AnyEndpoint } from './api_routes';
+import { Counters } from '../usage';
+import { AnyEndpoint } from './api_routes';
 
 export interface FilesRequestHandlerContext extends RequestHandlerContext {
   files: Promise<{

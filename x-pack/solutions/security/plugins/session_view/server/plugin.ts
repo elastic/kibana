@@ -6,14 +6,14 @@
  */
 
 import {
-  type CoreSetup,
-  type CoreStart,
-  type Plugin,
-  type Logger,
-  type PluginInitializerContext,
-  type IRouter,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+  PluginInitializerContext,
+  IRouter,
 } from '@kbn/core/server';
-import { type SessionViewSetupPlugins, type SessionViewStartPlugins } from './types';
+import { SessionViewSetupPlugins, SessionViewStartPlugins } from './types';
 import { registerRoutes } from './routes';
 
 export class SessionViewPlugin implements Plugin {

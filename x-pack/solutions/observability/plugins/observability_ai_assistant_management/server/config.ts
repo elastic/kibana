@@ -6,7 +6,7 @@
  */
 
 import { schema, type TypeOf } from '@kbn/config-schema';
-import { type PluginConfigDescriptor } from '@kbn/core-plugins-server';
+import { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 
 const configSchema = schema.object({
   visibilityEnabled: schema.boolean({ defaultValue: true }),

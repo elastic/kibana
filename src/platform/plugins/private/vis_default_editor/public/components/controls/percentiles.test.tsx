@@ -8,11 +8,11 @@
  */
 
 import React from 'react';
-import { type AggParamEditorProps } from '../agg_param_props';
-import { type IAggConfig } from '@kbn/data-plugin/public';
+import { AggParamEditorProps } from '../agg_param_props';
+import { IAggConfig } from '@kbn/data-plugin/public';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { PercentilesEditor } from './percentiles';
-import { type EditorVisState } from '../sidebar/state/reducers';
+import { EditorVisState } from '../sidebar/state/reducers';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {

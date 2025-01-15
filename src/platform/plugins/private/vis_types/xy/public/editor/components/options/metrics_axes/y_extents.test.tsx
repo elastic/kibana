@@ -11,7 +11,7 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 
 import { ScaleType } from '../../../../types';
-import { YExtents, type YExtentsProps } from './y_extents';
+import { YExtents, YExtentsProps } from './y_extents';
 import { NumberInputOption } from '@kbn/vis-default-editor-plugin/public';
 
 describe('YExtents component', () => {

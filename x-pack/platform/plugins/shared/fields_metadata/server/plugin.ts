@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { type PluginInitializerContext, type CoreStart, type Plugin, type Logger } from '@kbn/core/server';
+import { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
 import {
-  type FieldsMetadataPluginCoreSetup,
-  type FieldsMetadataServerSetup,
-  type FieldsMetadataServerStart,
-  type FieldsMetadataServerPluginSetupDeps,
-  type FieldsMetadataServerPluginStartDeps,
+  FieldsMetadataPluginCoreSetup,
+  FieldsMetadataServerSetup,
+  FieldsMetadataServerStart,
+  FieldsMetadataServerPluginSetupDeps,
+  FieldsMetadataServerPluginStartDeps,
 } from './types';
 import { initFieldsMetadataServer } from './fields_metadata_server';
 import { FieldsMetadataService } from './services/fields_metadata';
-import { type FieldsMetadataBackendLibs } from './lib/shared_types';
+import { FieldsMetadataBackendLibs } from './lib/shared_types';
 
 export class FieldsMetadataPlugin
   implements

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { type ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type { ListItemArraySchema, Type } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
-  type TransformElasticToListItemOptions,
+  TransformElasticToListItemOptions,
   getQueryFilterFromTypeValue,
   transformElasticToListItem,
 } from '../utils';
-import { type SearchEsListItemSchema } from '../../schemas/elastic_response';
+import { SearchEsListItemSchema } from '../../schemas/elastic_response';
 
 export interface GetListItemByValuesOptions {
   listId: string;

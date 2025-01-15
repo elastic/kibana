@@ -16,9 +16,9 @@ import {
   EuiSkeletonText,
   EuiSpacer,
   EuiSwitch,
-  type EuiSwitchEvent,
+  EuiSwitchEvent,
 } from '@elastic/eui';
-import { type DataViewField } from '@kbn/data-views-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
 import { getIndexPatternService } from '../../../kibana_services';

@@ -21,4 +21,4 @@ export const PainlessLang: CompleteLangModuleType = {
   validation$,
 };
 
-export type * from './types';
+export * from './types';

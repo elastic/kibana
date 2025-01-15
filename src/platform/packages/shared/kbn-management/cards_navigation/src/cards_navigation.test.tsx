@@ -12,7 +12,7 @@ import { render, screen, cleanup } from '@testing-library/react';
 
 import { APP_BASE_PATH, sectionsMock } from '../mocks/mocks';
 import { CardsNavigation } from './cards_navigation';
-import { type CardsNavigationComponentProps } from './types';
+import { CardsNavigationComponentProps } from './types';
 
 const renderCardsNavigationComponent = (props: CardsNavigationComponentProps) => {
   return [render(<CardsNavigation {...props} />)];

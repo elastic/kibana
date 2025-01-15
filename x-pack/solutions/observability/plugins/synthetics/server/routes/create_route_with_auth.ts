@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { type HttpResponsePayload, type ResponseError } from '@kbn/core-http-server';
-import { type ILicense } from '@kbn/licensing-plugin/server';
+import { HttpResponsePayload, ResponseError } from '@kbn/core-http-server';
+import { ILicense } from '@kbn/licensing-plugin/server';
 import {
   LICENSE_MISSING_ERROR,
   LICENSE_NOT_ACTIVE_ERROR,
   LICENSE_NOT_SUPPORTED_ERROR,
 } from '../../common/constants';
 import {
-  type SupportedMethod,
-  type SyntheticsRestApiRouteFactory,
-  type SyntheticsRoute,
-  type SyntheticsRouteHandler,
+  SupportedMethod,
+  SyntheticsRestApiRouteFactory,
+  SyntheticsRoute,
+  SyntheticsRouteHandler,
 } from './types';
 
 function getDefaultWriteAccessFlag(method: SupportedMethod) {

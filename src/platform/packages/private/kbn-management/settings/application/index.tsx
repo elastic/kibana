@@ -10,7 +10,7 @@
 import React from 'react';
 import { SettingsApplication } from './application';
 import {
-  type SettingsApplicationKibanaDependencies,
+  SettingsApplicationKibanaDependencies,
   SettingsApplicationKibanaProvider,
 } from './services';
 

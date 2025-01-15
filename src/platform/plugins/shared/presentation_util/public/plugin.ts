@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type CoreSetup, type CoreStart, type Plugin } from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import {
-  type PresentationUtilPluginSetup,
-  type PresentationUtilPluginSetupDeps,
-  type PresentationUtilPluginStart,
-  type PresentationUtilPluginStartDeps,
+  PresentationUtilPluginSetup,
+  PresentationUtilPluginSetupDeps,
+  PresentationUtilPluginStart,
+  PresentationUtilPluginStartDeps,
 } from './types';
 
 import { registerExpressionsLanguage } from '.';

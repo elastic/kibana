@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ParserWorker } from './types';
+import { ParserWorker } from './types';
 import { monaco } from '../monaco_imports';
-import { type WorkerProxyService } from './worker_proxy';
+import { WorkerProxyService } from './worker_proxy';
 
 export const setupWorker = (
   langId: string,

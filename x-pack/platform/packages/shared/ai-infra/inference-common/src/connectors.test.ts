@@ -9,7 +9,7 @@ import {
   InferenceConnectorType,
   isSupportedConnectorType,
   isSupportedConnector,
-  type RawConnector,
+  RawConnector,
   COMPLETION_TASK_TYPE,
 } from './connectors';
 

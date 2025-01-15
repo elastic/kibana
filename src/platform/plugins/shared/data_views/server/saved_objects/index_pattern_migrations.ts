@@ -8,7 +8,7 @@
  */
 
 import { flow, omit } from 'lodash';
-import { type SavedObjectMigrationFn } from '@kbn/core/server';
+import { SavedObjectMigrationFn } from '@kbn/core/server';
 
 const migrateAttributeTypeAndAttributeTypeMeta: SavedObjectMigrationFn<
   { type?: string; typeMeta?: string },

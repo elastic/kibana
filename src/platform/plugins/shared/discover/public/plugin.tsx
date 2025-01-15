@@ -8,41 +8,41 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, map, type Observable } from 'rxjs';
+import { BehaviorSubject, map, Observable } from 'rxjs';
 import {
-  type AppMountParameters,
-  type AppUpdater,
-  type CoreSetup,
-  type CoreStart,
-  type Plugin,
-  type PluginInitializerContext,
-  type ScopedHistory,
+  AppMountParameters,
+  AppUpdater,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+  ScopedHistory,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
-import { type SavedSearchAttributes, SavedSearchType } from '@kbn/saved-search-plugin/common';
+import { SavedSearchAttributes, SavedSearchType } from '@kbn/saved-search-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../common';
 import { registerFeature } from './register_feature';
-import { buildServices, type UrlTracker } from './build_services';
+import { buildServices, UrlTracker } from './build_services';
 import { ViewSavedSearchAction } from './embeddable/actions/view_saved_search_action';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 import {
-  type DiscoverContextAppLocator,
+  DiscoverContextAppLocator,
   DiscoverContextAppLocatorDefinition,
 } from './application/context/services/locator';
 import {
-  type DiscoverSingleDocLocator,
+  DiscoverSingleDocLocator,
   DiscoverSingleDocLocatorDefinition,
 } from './application/doc/locator';
 import {
-  type DiscoverAppLocator,
+  DiscoverAppLocator,
   DiscoverAppLocatorDefinition,
   DiscoverESQLLocatorDefinition,
 } from '../common';
-import { defaultCustomizationContext, type DiscoverCustomizationContext } from './customizations';
+import { defaultCustomizationContext, DiscoverCustomizationContext } from './customizations';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './embeddable/constants';
 import {
   DiscoverContainerInternal,
@@ -51,7 +51,7 @@ import {
 import { getESQLSearchProvider } from './global_search/search_provider';
 import { HistoryService } from './history_service';
 import type { ConfigSchema, ExperimentalFeatures } from '../server/config';
-import { type DiscoverSetup, type DiscoverSetupPlugins, type DiscoverStart, type DiscoverStartPlugins } from './types';
+import { DiscoverSetup, DiscoverSetupPlugins, DiscoverStart, DiscoverStartPlugins } from './types';
 import { deserializeState } from './embeddable/utils/serialization_utils';
 import { DISCOVER_CELL_ACTIONS_TRIGGER } from './context_awareness/types';
 import { RootProfileService } from './context_awareness/profiles/root_profile';

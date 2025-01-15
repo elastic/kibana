@@ -12,7 +12,7 @@
 */
 
 import { filters } from './filters';
-import { type ExpressionValueFilter } from '../../../types';
+import { ExpressionValueFilter } from '../../../types';
 
 export function getESFilter(filter: ExpressionValueFilter) {
   if (!filter.filterType || !filters[filter.filterType]) {

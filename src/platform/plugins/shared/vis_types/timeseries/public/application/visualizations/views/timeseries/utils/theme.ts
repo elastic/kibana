@@ -9,7 +9,7 @@
 
 // @ts-ignore
 import colorJS from 'color';
-import { type Theme, LEGACY_LIGHT_THEME, LEGACY_DARK_THEME } from '@elastic/charts';
+import { Theme, LEGACY_LIGHT_THEME, LEGACY_DARK_THEME } from '@elastic/charts';
 
 function computeRelativeLuminosity(rgb: string) {
   return colorJS(rgb).luminosity();

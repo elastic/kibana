@@ -8,9 +8,9 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
-import { type IconPosition } from '@kbn/expression-xy-plugin/common';
+import { IconPosition } from '@kbn/expression-xy-plugin/common';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import { type YAxisMode } from '../../types';
+import { YAxisMode } from '../../types';
 
 import { idPrefix } from '../dimension_editor';
 

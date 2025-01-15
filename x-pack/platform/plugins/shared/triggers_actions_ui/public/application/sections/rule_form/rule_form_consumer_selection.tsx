@@ -6,10 +6,10 @@
  */
 
 import React, { useMemo, useCallback, useEffect } from 'react';
-import { EuiComboBox, EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AlertConsumers, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
-import { type IErrorObject, type RuleCreationValidConsumer } from '../../../types';
+import { IErrorObject, RuleCreationValidConsumer } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
 
 const SELECT_LABEL: string = i18n.translate(

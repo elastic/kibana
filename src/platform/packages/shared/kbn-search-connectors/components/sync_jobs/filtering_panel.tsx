@@ -13,7 +13,7 @@ import { EuiCodeBlock, EuiPanel, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { type FilteringRule, type FilteringRules } from '../..';
+import { FilteringRule, FilteringRules } from '../..';
 
 import { FilteringRulesTable } from './filtering_rules_table';
 

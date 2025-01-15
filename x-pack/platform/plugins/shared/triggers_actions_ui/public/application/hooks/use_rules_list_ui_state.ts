@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import { type RulesListFilters } from '../../types';
+import { RulesListFilters } from '../../types';
 
 interface UseUiProps {
   authorizedToReadAnyRules: boolean;

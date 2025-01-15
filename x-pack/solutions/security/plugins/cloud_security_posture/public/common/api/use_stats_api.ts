@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
+import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { useKibana } from '../hooks/use_kibana';
-import { type ComplianceDashboardDataV2, type PosturePolicyTemplate } from '../../../common/types_old';
+import { ComplianceDashboardDataV2, PosturePolicyTemplate } from '../../../common/types_old';
 import { STATS_ROUTE_PATH } from '../../../common/constants';
 
 // TODO: consolidate both hooks into one hook with a dynamic key

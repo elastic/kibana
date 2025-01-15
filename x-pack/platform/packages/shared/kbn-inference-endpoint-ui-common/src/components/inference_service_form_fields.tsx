@@ -15,7 +15,7 @@ import {
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import {
   EuiFieldText,
-  type EuiFieldTextProps,
+  EuiFieldTextProps,
   EuiFormControlLayout,
   EuiFormRow,
   EuiHorizontalRule,
@@ -24,15 +24,15 @@ import {
   keys,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
+import { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
 
-import { type HttpSetup, type IToasts } from '@kbn/core/public';
+import { HttpSetup, IToasts } from '@kbn/core/public';
 import * as LABELS from '../translations';
-import { type Config, type ConfigEntryView, FieldType, type Secrets } from '../types/types';
+import { Config, ConfigEntryView, FieldType, Secrets } from '../types/types';
 import { SERVICE_PROVIDERS } from './providers/render_service_provider/service_provider';
-import { DEFAULT_TASK_TYPE, type ServiceProviderKeys } from '../constants';
+import { DEFAULT_TASK_TYPE, ServiceProviderKeys } from '../constants';
 import { SelectableProvider } from './providers/selectable';
-import { type TaskTypeOption, generateInferenceEndpointId, getTaskTypeOptions } from '../utils/helpers';
+import { TaskTypeOption, generateInferenceEndpointId, getTaskTypeOptions } from '../utils/helpers';
 import { ConfigurationFormItems } from './configuration/configuration_form_items';
 import { AdditionalOptionsFields } from './additional_options_fields';
 import { ProviderSecretHiddenField } from './hidden_fields/provider_secret_hidden_field';

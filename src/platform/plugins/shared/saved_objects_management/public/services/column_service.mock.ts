@@ -9,9 +9,9 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
-  type SavedObjectsManagementColumnService,
-  type SavedObjectsManagementColumnServiceSetup,
-  type SavedObjectsManagementColumnServiceStart,
+  SavedObjectsManagementColumnService,
+  SavedObjectsManagementColumnServiceSetup,
+  SavedObjectsManagementColumnServiceStart,
 } from './column_service';
 
 const createSetupMock = (): jest.Mocked<SavedObjectsManagementColumnServiceSetup> => {

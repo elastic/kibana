@@ -10,21 +10,21 @@
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { Operations } from '../../constants';
 import { createColumn, getFormat } from './column';
-import { type SupportedMetric } from './supported_metrics';
-import { type CommonColumnConverterArgs, type MetricsWithField } from './types';
-import { type SchemaConfig } from '../../../types';
+import { SupportedMetric } from './supported_metrics';
+import { CommonColumnConverterArgs, MetricsWithField } from './types';
+import { SchemaConfig } from '../../../types';
 import {
-  type AvgColumn,
-  type CardinalityColumn,
-  type CountColumn,
-  type MaxColumn,
-  type MedianColumn,
-  type MinColumn,
-  type SumColumn,
+  AvgColumn,
+  CardinalityColumn,
+  CountColumn,
+  MaxColumn,
+  MedianColumn,
+  MinColumn,
+  SumColumn,
 } from './types';
 import { getFieldNameFromField } from '../utils';
 import { isFieldValid } from '../../utils';
-import { type Operation } from '../../types';
+import { Operation } from '../../types';
 
 type MetricAggregationWithoutParams =
   | typeof Operations.AVERAGE

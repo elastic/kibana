@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { getFunctionHelp } from '../../../i18n';
 
 export function clear(): ExpressionFunctionDefinition<'clear', any, {}, null> {

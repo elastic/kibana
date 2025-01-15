@@ -6,7 +6,7 @@
  */
 
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
-import { type FtrProviderContext } from '../../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { navigateToCasesApp } from '../../../../../../shared/lib/cases';
 
 export default function ({ getPageObject, getPageObjects, getService }: FtrProviderContext) {

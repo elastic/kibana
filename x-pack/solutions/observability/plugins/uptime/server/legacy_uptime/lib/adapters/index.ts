@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type * from './framework';
+export * from './framework';

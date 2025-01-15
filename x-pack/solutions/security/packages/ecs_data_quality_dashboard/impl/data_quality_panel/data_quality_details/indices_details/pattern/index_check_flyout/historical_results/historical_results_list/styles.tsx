@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type UseEuiTheme } from '@elastic/eui';
+import { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export const accordionCss = ({ euiTheme }: UseEuiTheme) =>

@@ -6,7 +6,7 @@
  */
 
 import { openSans } from '../../../common/lib/fonts';
-import { type Style } from '../../../types';
+import { Style } from '../../../types';
 
 // converts the output of the font function to a flot font spec
 // for font spec, see https://github.com/flot/flot/blob/master/API.md#customizing-the-axes

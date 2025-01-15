@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Env, RawConfigService, ConfigService, type RawConfigAdapter } from '@kbn/config';
-import { type Logger } from '@kbn/logging';
-import { devConfigSchema, DevConfig, type DevConfigType } from './dev_config';
-import { httpConfigSchema, HttpConfig, type HttpConfigType } from './http_config';
-import { pluginsConfigSchema, PluginsConfig, type PluginsConfigType } from './plugins_config';
-import { type CliDevConfig } from './types';
+import { Env, RawConfigService, ConfigService, RawConfigAdapter } from '@kbn/config';
+import { Logger } from '@kbn/logging';
+import { devConfigSchema, DevConfig, DevConfigType } from './dev_config';
+import { httpConfigSchema, HttpConfig, HttpConfigType } from './http_config';
+import { pluginsConfigSchema, PluginsConfig, PluginsConfigType } from './plugins_config';
+import { CliDevConfig } from './types';
 
 export const loadConfig = async ({
   env,

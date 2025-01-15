@@ -27,7 +27,7 @@ import { i18n } from '@kbn/i18n';
 
 import { DisplayType } from '../..';
 
-import { type ConfigEntryView, LicenseContext } from './connector_configuration';
+import { ConfigEntryView, LicenseContext } from './connector_configuration';
 import { DocumentLevelSecurityPanel } from './document_level_security_panel';
 import {
   ensureBooleanType,

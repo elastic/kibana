@@ -11,7 +11,7 @@ import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 import {
   LOG_ENTRIES_HIGHLIGHTS_PATH,
-  type LogEntriesHighlightsRequest,
+  LogEntriesHighlightsRequest,
   logEntriesHighlightsRequestRT,
   logEntriesHighlightsResponseRT,
 } from '../../../../../common/http_api';

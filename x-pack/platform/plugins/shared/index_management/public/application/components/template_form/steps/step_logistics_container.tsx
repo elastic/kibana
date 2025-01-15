@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { Forms } from '../../../../shared_imports';
-import { type WizardContent } from '../template_form';
+import { WizardContent } from '../template_form';
 import { StepLogistics } from './step_logistics';
 
 interface Props {

@@ -7,20 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type Rx from 'rxjs';
-import { firstValueFrom, lastValueFrom, of, throwError } from 'rxjs';
+import Rx, { firstValueFrom, lastValueFrom, of, throwError } from 'rxjs';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/common';
-import { buildExpression, type ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import { buildExpression, ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { type SearchFieldValue, SearchSource, type SearchSourceDependencies, SortDirection } from '.';
-import { AggConfigs, type AggTypesRegistryStart } from '../..';
+import { SearchFieldValue, SearchSource, SearchSourceDependencies, SortDirection } from '.';
+import { AggConfigs, AggTypesRegistryStart } from '../..';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
-import { type RequestAdapter, type RequestResponder } from '@kbn/inspector-plugin/common';
+import { RequestAdapter, RequestResponder } from '@kbn/inspector-plugin/common';
 import { switchMap } from 'rxjs';
-import { type Filter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { stubIndexPattern } from '../../stubs';
-import { type SearchSourceSearchOptions } from './types';
+import { SearchSourceSearchOptions } from './types';
 
 const getComputedFields = () => ({
   storedFields: [],

@@ -7,7 +7,7 @@
 
 import Chance from 'chance';
 import { getRandomString } from '@kbn/test-jest-helpers';
-import { type FollowerIndex } from '../../../../common/types';
+import { FollowerIndex } from '../../../../common/types';
 
 const chance = new Chance();
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type QueryContext } from './query_context';
+import { QueryContext } from './query_context';
 import { fetchChunk } from './fetch_chunk';
-import { CursorDirection, type MonitorSummary } from '../../../../../common/runtime_types';
-import { type CursorPagination } from './types';
+import { CursorDirection, MonitorSummary } from '../../../../../common/runtime_types';
+import { CursorPagination } from './types';
 
 // Hardcoded chunk size for how many monitors to fetch at a time when querying
 export const CHUNK_SIZE = 1000;

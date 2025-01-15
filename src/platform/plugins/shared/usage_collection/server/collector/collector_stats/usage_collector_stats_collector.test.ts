@@ -9,7 +9,7 @@
 
 import {
   usageCollectorsStatsCollector,
-  type CollectorsStatsCollectorParams,
+  CollectorsStatsCollectorParams,
 } from './usage_collector_stats_collector';
 import { UsageCollector } from '../usage_collector';
 import { loggingSystemMock } from '@kbn/core/server/mocks';

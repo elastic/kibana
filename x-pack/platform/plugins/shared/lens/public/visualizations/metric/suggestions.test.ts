@@ -7,7 +7,7 @@
 
 import { getSuggestions } from './suggestions';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { type MetricVisualizationState } from './types';
+import { MetricVisualizationState } from './types';
 import { IconChartMetric } from '@kbn/chart-icons';
 
 const metricColumn = {

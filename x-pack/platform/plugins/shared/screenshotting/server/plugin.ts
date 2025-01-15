@@ -17,7 +17,7 @@ import type {
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import {
   ChromiumArchivePaths,
-  type ConfigType,
+  ConfigType,
   createConfig,
   getChromiumPackage,
 } from '@kbn/screenshotting-server';

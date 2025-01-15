@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { type HttpFetchOptionsWithPath } from '@kbn/core/public';
+import { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { setupEnvironment } from '../../helpers';
 import { API_BASE_PATH } from '../../../common/constants';
 import {
@@ -15,7 +15,7 @@ import {
   POLICY_WITH_INCLUDE_EXCLUDE,
   POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS,
 } from '../constants';
-import { type SerializationTestBed, setupSerializationTestBed } from './policy_serialization.helpers';
+import { SerializationTestBed, setupSerializationTestBed } from './policy_serialization.helpers';
 
 describe('<EditPolicy /> serialization', () => {
   let testBed: SerializationTestBed;

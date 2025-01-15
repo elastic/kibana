@@ -20,7 +20,7 @@ import {
   type UnknownDocsFound,
 } from './check_for_unknown_docs';
 import { isTypeof } from '.';
-import { type CalculatedExcludeFilter, calculateExcludeFilters } from './calculate_exclude_filters';
+import { CalculatedExcludeFilter, calculateExcludeFilters } from './calculate_exclude_filters';
 import { deleteByQuery } from './delete_by_query';
 
 /** @internal */

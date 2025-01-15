@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { type AssistantMessage, MessageRole } from '@kbn/inference-common';
+import { AssistantMessage, MessageRole } from '@kbn/inference-common';
 import {
   RCA_INVESTIGATE_ENTITY_TOOL_NAME,
   RCA_OBSERVE_TOOL_NAME,
 } from '@kbn/observability-ai-common/root_cause_analysis';
 import { compact, findLast } from 'lodash';
-import { from, type Observable, of, switchMap } from 'rxjs';
+import { from, Observable, of, switchMap } from 'rxjs';
 import { observeInvestigationResults } from './tasks/observe_investigation_results';
 import {
-  type InvestigateEntityToolMessage,
-  type ObservationToolMessage,
-  type RootCauseAnalysisContext,
-  type RootCauseAnalysisEvent,
+  InvestigateEntityToolMessage,
+  ObservationToolMessage,
+  RootCauseAnalysisContext,
+  RootCauseAnalysisEvent,
 } from './types';
 
 export function callObserveTool({

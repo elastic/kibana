@@ -12,8 +12,8 @@ import {
   isFoundGetResponseMock,
   rawDocExistsInNamespaceMock,
 } from './get.isolated.test.mocks';
-import { type SavedObject, type CheckAuthorizationResult } from '@kbn/core-saved-objects-server';
-import { apiContextMock, type ApiExecutionContextMock } from '../../mocks';
+import { SavedObject, CheckAuthorizationResult } from '@kbn/core-saved-objects-server';
+import { apiContextMock, ApiExecutionContextMock } from '../../mocks';
 import { performGet } from './get';
 
 const createSavedObject = (id = 'foo'): SavedObject => {

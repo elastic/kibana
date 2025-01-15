@@ -8,16 +8,16 @@
  */
 
 import React from 'react';
-import { type ViewMode } from '@kbn/presentation-publishing';
+import { ViewMode } from '@kbn/presentation-publishing';
 import type { Reference } from '@kbn/content-management-utils';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { type SaveDashboardReturn } from '../services/dashboard_content_management_service/types';
-import { type DashboardSaveOptions } from '../dashboard_container/types';
+import { SaveDashboardReturn } from '../services/dashboard_content_management_service/types';
+import { DashboardSaveOptions } from '../dashboard_container/types';
 import { coreServices, dataService, savedObjectsTaggingService } from '../services/kibana_services';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
-import { type DashboardState } from './types';
+import { DashboardState } from './types';
 import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../dashboard_constants';
 import { extractTitleAndCount } from '../dashboard_container/embeddable/api/lib/extract_title_and_count';
 import { DashboardSaveModal } from '../dashboard_container/embeddable/api/overlays/save_modal';

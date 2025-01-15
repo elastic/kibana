@@ -8,17 +8,17 @@
 import Boom from '@hapi/boom';
 import { map, mergeMap, catchError, of } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { type Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import { from } from 'rxjs';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
-import { type ISearchStrategy, type PluginStart } from '@kbn/data-plugin/server';
+import { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import {
   ReadOperations,
-  type AlertingServerStart,
+  AlertingServerStart,
   AlertingAuthorizationEntity,
 } from '@kbn/alerting-plugin/server';
-import { type SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { type SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { buildAlertFieldsRequest } from '@kbn/alerts-as-data-utils';
 import { partition } from 'lodash';
 import { isSiemRuleType } from '@kbn/rule-data-utils';

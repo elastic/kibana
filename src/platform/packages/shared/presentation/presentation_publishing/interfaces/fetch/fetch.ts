@@ -15,7 +15,7 @@ import {
   filter,
   map,
   merge,
-  type Observable,
+  Observable,
   of,
   skip,
   startWith,
@@ -24,16 +24,16 @@ import {
   takeUntil,
   tap,
 } from 'rxjs';
-import { type AggregateQuery, type Filter, type Query, type TimeRange } from '@kbn/es-query';
+import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { useMemo, useEffect } from 'react';
 import {
   apiPublishesTimeRange,
   apiPublishesUnifiedSearch,
-  type PublishesTimeRange,
-  type PublishesUnifiedSearch,
+  PublishesTimeRange,
+  PublishesUnifiedSearch,
 } from './publishes_unified_search';
-import { apiPublishesSearchSession, type PublishesSearchSession } from './publishes_search_session';
-import { apiHasParentApi, type HasParentApi } from '../has_parent_api';
+import { apiPublishesSearchSession, PublishesSearchSession } from './publishes_search_session';
+import { apiHasParentApi, HasParentApi } from '../has_parent_api';
 import { apiPublishesReload } from './publishes_reload';
 import { useStateFromPublishingSubject } from '../../publishing_subject';
 

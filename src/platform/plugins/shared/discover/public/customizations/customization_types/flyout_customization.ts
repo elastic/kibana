@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type EuiFlyoutProps, type IconType } from '@elastic/eui';
+import { EuiFlyoutProps, IconType } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import {type MouseEventHandler} from 'react';
-import type React from 'react';
-import { type ComponentType } from 'react';
+import React, { type ComponentType, MouseEventHandler } from 'react';
 
 export interface FlyoutDefaultActionItem {
   disabled?: boolean;

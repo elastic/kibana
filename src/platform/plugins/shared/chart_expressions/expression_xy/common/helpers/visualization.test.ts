@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type CommonXYDataLayerConfigResult } from '../types';
+import { CommonXYDataLayerConfigResult } from '../types';
 import { isTimeChart } from './visualization';
 
 describe('#isTimeChart', () => {

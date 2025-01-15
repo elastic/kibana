@@ -9,7 +9,7 @@
 
 import { MultiBar, Presets } from 'cli-progress';
 
-import { type ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { getAllPlugins } from './lib';
 

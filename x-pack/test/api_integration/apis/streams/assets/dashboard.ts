@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { enableStreams, indexDocument } from '../helpers/requests';
 import { createStreamsRepositorySupertestClient } from '../helpers/repository_client';
-import { type FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 import { cleanUpRootStream } from '../helpers/cleanup';
 
 export default function ({ getService }: FtrProviderContext) {

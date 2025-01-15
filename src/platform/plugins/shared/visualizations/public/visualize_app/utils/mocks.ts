@@ -9,7 +9,7 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { type VisualizeServices } from '../types';
+import { VisualizeServices } from '../types';
 
 export const createVisualizeServicesMock = () => {
   const coreStartMock = coreMock.createStart();

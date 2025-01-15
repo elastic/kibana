@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type KueryNode, nodeBuilder } from '@kbn/es-query';
+import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { RULE_SAVED_OBJECT_TYPE } from '../..';
 
 export const NodeBuilderOperators = {

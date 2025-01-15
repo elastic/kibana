@@ -7,7 +7,7 @@
 
 import { faker } from '@faker-js/faker';
 import { memoize, sample } from 'lodash';
-import { type Moment } from 'moment';
+import { Moment } from 'moment';
 import { NGINX_PROXY, NGINX_PROXY_HOSTS } from '../../../common/constants';
 import { createNginxTimestamp } from '../create_nginx_timestamp';
 

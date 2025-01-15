@@ -6,8 +6,8 @@
  */
 
 import {
-  type IlmExplainLifecycleLifecycleExplainManaged,
-  type IlmExplainLifecycleLifecycleExplainUnmanaged,
+  IlmExplainLifecycleLifecycleExplainManaged,
+  IlmExplainLifecycleLifecycleExplainUnmanaged,
 } from '@elastic/elasticsearch/lib/api/types';
 
 import { getIlmPhase } from './get_ilm_phase';

@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { type ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { DOC_TYPE } from '../../common/constants';
 import {
-  type LensApi,
-  type LensEmbeddableStartServices,
-  type LensRuntimeState,
-  type LensSerializedState,
+  LensApi,
+  LensEmbeddableStartServices,
+  LensRuntimeState,
+  LensSerializedState,
 } from './types';
 
 import { loadEmbeddableData } from './data_loader';

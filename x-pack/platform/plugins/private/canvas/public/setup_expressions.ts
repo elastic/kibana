@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type CoreSetup } from '@kbn/core/public';
+import { CoreSetup } from '@kbn/core/public';
 import { serializeProvider } from '@kbn/expressions-plugin/common';
 import { API_ROUTE_FUNCTIONS } from '../common/lib/constants';
 
-import { type CanvasSetupDeps } from './plugin';
+import { CanvasSetupDeps } from './plugin';
 
 let cached: Promise<void> | null = null;
 

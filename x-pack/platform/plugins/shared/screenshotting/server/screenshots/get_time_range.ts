@@ -6,9 +6,9 @@
  */
 
 import type { HeadlessChromiumDriver } from '../browsers';
-import { type Layout } from '../layouts';
+import { Layout } from '../layouts';
 import { CONTEXT_GETTIMERANGE } from './constants';
-import { Actions, type EventLogger } from './event_logger';
+import { Actions, EventLogger } from './event_logger';
 
 export const getTimeRange = async (
   browser: HeadlessChromiumDriver,

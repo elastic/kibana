@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ApmFetchDataResponse, type FetchData } from '../../../typings';
+import { ApmFetchDataResponse, FetchData } from '../../../typings';
 
 export const fetchApmData: FetchData<ApmFetchDataResponse> = () => {
   return Promise.resolve(response);

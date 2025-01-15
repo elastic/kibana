@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { schema, type TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-import { type RouteDependencies } from '../../../types';
+import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
-import { type TemplateDeserialized } from '../../../../common';
+import { TemplateDeserialized } from '../../../../common';
 
 const bodySchema = schema.object({
   templates: schema.arrayOf(

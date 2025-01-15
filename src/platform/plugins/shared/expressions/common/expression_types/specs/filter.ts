@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ExpressionTypeDefinition, type ExpressionValueBoxed } from '../types';
+import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
 
 /**
  * Represents an object that is a Filter.

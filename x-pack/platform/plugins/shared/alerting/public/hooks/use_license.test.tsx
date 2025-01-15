@@ -8,7 +8,7 @@
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { renderHook } from '@testing-library/react';
 import { useLicense } from './use_license';
-import { type AppMockRenderer, createAppMockRenderer } from '../lib/test_utils';
+import { AppMockRenderer, createAppMockRenderer } from '../lib/test_utils';
 
 let appMockRenderer: AppMockRenderer;
 

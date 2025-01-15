@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { from, type Observable, of, switchMap } from 'rxjs';
+import { from, Observable, of, switchMap } from 'rxjs';
 import { RCA_END_PROCESS_TOOL_NAME } from '@kbn/observability-ai-common/root_cause_analysis';
-import { type AssistantMessage, MessageRole } from '@kbn/inference-common';
+import { AssistantMessage, MessageRole } from '@kbn/inference-common';
 import { writeFinalReport } from './tasks/write_final_report';
-import { type EndProcessToolMessage, type RootCauseAnalysisContext } from './types';
+import { EndProcessToolMessage, RootCauseAnalysisContext } from './types';
 import { generateSignificantEventsTimeline } from './tasks/generate_timeline';
 import { EMPTY_ASSISTANT_MESSAGE } from './empty_assistant_message';
 

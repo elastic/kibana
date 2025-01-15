@@ -10,7 +10,7 @@
 import {
   EuiPopover,
   EuiPopoverTitle,
-  type PopoverAnchorPosition,
+  PopoverAnchorPosition,
   EuiContextMenuItem,
   toSentenceCase,
   EuiHorizontalRule,
@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
-import { type DocLinksStart } from '@kbn/core/public';
+import { DocLinksStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
 export const strings = {

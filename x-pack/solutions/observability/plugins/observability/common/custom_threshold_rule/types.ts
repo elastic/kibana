@@ -6,11 +6,11 @@
  */
 
 import * as rt from 'io-ts';
-import { type DataViewSpec, type SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { type Filter, type Query } from '@kbn/es-query';
-import { type COMPARATORS } from '@kbn/alerting-comparators';
-import { type LEGACY_COMPARATORS } from '../utils/convert_legacy_outside_comparator';
-import { type TimeUnitChar } from '../utils/formatters/duration';
+import { DataViewSpec, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { Filter, Query } from '@kbn/es-query';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { LEGACY_COMPARATORS } from '../utils/convert_legacy_outside_comparator';
+import { TimeUnitChar } from '../utils/formatters/duration';
 
 export const ThresholdFormatterTypeRT = rt.keyof({
   abbreviatedNumber: null,

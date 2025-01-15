@@ -10,10 +10,10 @@ import React from 'react';
 import { useValues } from 'kea';
 
 import {
-  type CriteriaWithPagination,
+  CriteriaWithPagination,
   EuiBadge,
   EuiBasicTable,
-  type EuiBasicTableColumn,
+  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
@@ -21,7 +21,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { type Meta } from '../../../../../common/types/pagination';
+import { Meta } from '../../../../../common/types/pagination';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
@@ -33,7 +33,7 @@ import {
 } from '../../utils/connector_status_helpers';
 
 import { ConnectorType } from './connector_type';
-import { type ConnectorViewItem } from './connectors_logic';
+import { ConnectorViewItem } from './connectors_logic';
 
 interface ConnectorsTableProps {
   isCrawler: boolean;

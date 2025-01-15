@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type IKibanaResponse, kibanaResponseFactory } from '@kbn/core/server';
+import { IKibanaResponse, kibanaResponseFactory } from '@kbn/core/server';
 import type { File } from '../../../common';
-import { errors, type FileServiceStart } from '../../file_service';
+import { errors, FileServiceStart } from '../../file_service';
 
 type ResultOrHttpError =
   | { result: File; error?: undefined }

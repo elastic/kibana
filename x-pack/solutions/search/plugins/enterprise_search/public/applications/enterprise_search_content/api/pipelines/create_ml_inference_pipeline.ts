@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type FieldMapping } from '../../../../../common/ml_inference_pipeline';
+import { FieldMapping } from '../../../../../common/ml_inference_pipeline';
 
 import {
-  type CreateMLInferencePipeline,
-  type MlInferencePipeline,
+  CreateMLInferencePipeline,
+  MlInferencePipeline,
 } from '../../../../../common/types/pipelines';
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';

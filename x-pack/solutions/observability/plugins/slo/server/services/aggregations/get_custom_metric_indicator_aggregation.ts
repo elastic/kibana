@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { metricCustomDocCountMetric, type MetricCustomIndicator } from '@kbn/slo-schema';
+import { metricCustomDocCountMetric, MetricCustomIndicator } from '@kbn/slo-schema';
 import { getElasticsearchQueryOrThrow } from '../transform_generators';
 
 type MetricCustomMetricDef =

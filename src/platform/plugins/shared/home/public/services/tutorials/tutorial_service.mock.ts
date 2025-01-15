@@ -8,7 +8,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { type TutorialService, type TutorialServiceSetup } from './tutorial_service';
+import { TutorialService, TutorialServiceSetup } from './tutorial_service';
 
 const createSetupMock = (): jest.Mocked<TutorialServiceSetup> => {
   const setup = {

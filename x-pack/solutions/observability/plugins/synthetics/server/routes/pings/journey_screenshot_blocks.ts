@@ -6,13 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { type IKibanaResponse } from '@kbn/core-http-server';
+import { IKibanaResponse } from '@kbn/core-http-server';
 import { isRight } from 'fp-ts/Either';
 import * as t from 'io-ts';
 import { getJourneyScreenshotBlocks } from '../../queries/get_journey_screenshot_blocks';
-import { type ScreenshotBlockDoc } from '../../../common/runtime_types';
+import { ScreenshotBlockDoc } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { type RouteContext, type SyntheticsRestApiRouteFactory } from '../types';
+import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 
 export const createJourneyScreenshotBlocksRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Role } from '@kbn/security-plugin/common';
+import { Role } from '@kbn/security-plugin/common';
 import { rootRequest } from '../tasks/api_calls/common';
 
 /**

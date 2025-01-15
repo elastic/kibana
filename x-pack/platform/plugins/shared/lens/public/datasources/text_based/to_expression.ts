@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type Ast } from '@kbn/interpreter';
+import { Ast } from '@kbn/interpreter';
 import { textBasedQueryStateToExpressionAst } from '@kbn/data-plugin/common';
-import { type ExpressionAstFunction } from '@kbn/expressions-plugin/common';
-import { type TextBasedPrivateState, type TextBasedLayer, type IndexPatternRef } from './types';
+import { ExpressionAstFunction } from '@kbn/expressions-plugin/common';
+import { TextBasedPrivateState, TextBasedLayer, IndexPatternRef } from './types';
 import type { OriginalColumn } from '../../../common/types';
 
 function getExpressionForLayer(

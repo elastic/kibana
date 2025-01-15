@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type RefObject } from 'react';
+import React, { RefObject } from 'react';
 import userEvent from '@testing-library/user-event';
 import {
   mockAlerts,
@@ -13,8 +13,8 @@ import {
   childProcessMock,
   sessionViewAlertProcessMock,
 } from '../../../common/mocks/constants/session_view_process.mock';
-import { type AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { type ProcessDeps, ProcessTreeNode } from '.';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
+import { ProcessDeps, ProcessTreeNode } from '.';
 import { DEBOUNCE_TIMEOUT } from '../../../common/constants';
 import { useDateFormat } from '../../hooks';
 

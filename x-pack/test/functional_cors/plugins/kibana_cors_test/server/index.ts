@@ -7,7 +7,7 @@
 
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { CorsTestPlugin } from './plugin';
-import { configSchema, type ConfigSchema } from './config';
+import { configSchema, ConfigSchema } from './config';
 
 export const plugin = async (initContext: PluginInitializerContext) =>
   new CorsTestPlugin(initContext);

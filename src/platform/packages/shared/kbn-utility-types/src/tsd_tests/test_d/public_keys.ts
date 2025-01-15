@@ -8,7 +8,7 @@
  */
 
 import { expectType } from 'tsd';
-import { type PublicKeys } from '../../..';
+import { PublicKeys } from '../../..';
 
 class Test {
   public str: string = '';

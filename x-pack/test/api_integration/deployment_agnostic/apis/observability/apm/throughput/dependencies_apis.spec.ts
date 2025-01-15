@@ -7,7 +7,7 @@
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { meanBy, sumBy } from 'lodash';
-import { type DependencyNode, type ServiceNode } from '@kbn/apm-plugin/common/connections';
+import { DependencyNode, ServiceNode } from '@kbn/apm-plugin/common/connections';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { roundNumber } from '../utils/common';

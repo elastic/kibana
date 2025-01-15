@@ -6,20 +6,20 @@
  */
 
 import {
-  type IndicesGetMappingIndexMappingRecord,
-  type MappingProperty,
+  IndicesGetMappingIndexMappingRecord,
+  MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
 import { has, sortBy } from 'lodash/fp';
 
 import { EMPTY_METADATA, EcsFlatTyped } from '../constants';
 import {
-  type CustomFieldMetadata,
-  type EcsCompliantFieldMetadata,
-  type EnrichedFieldMetadata,
-  type IncompatibleFieldMetadata,
-  type PartitionedFieldMetadata,
-  type SameFamilyFieldMetadata,
-  type UnallowedValueCount,
+  CustomFieldMetadata,
+  EcsCompliantFieldMetadata,
+  EnrichedFieldMetadata,
+  IncompatibleFieldMetadata,
+  PartitionedFieldMetadata,
+  SameFamilyFieldMetadata,
+  UnallowedValueCount,
 } from '../types';
 
 export const isEcsCompliantFieldMetadata = (

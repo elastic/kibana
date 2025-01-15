@@ -12,11 +12,11 @@ import { i18n } from '@kbn/i18n';
 
 import { AggGroupNames } from '@kbn/data-plugin/public';
 import { ColorMode, ColorSchemas } from '@kbn/charts-plugin/public';
-import { type VisTypeDefinition } from '@kbn/visualizations-plugin/public';
+import { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 
 import { getGaugeOptions } from '../editor/components';
 import { toExpressionAst } from '../to_ast';
-import { type GaugeVisParams, GaugeType, type GaugeTypeProps } from '../types';
+import { GaugeVisParams, GaugeType, GaugeTypeProps } from '../types';
 import { SplitTooltip } from './split_tooltip';
 
 export const getGoalVisTypeDefinition = (

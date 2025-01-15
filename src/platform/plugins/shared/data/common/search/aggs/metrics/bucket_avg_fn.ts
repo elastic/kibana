@@ -8,9 +8,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type Assign } from '@kbn/utility-types';
-import { type ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { type AggExpressionType, type AggExpressionFunctionArgs, METRIC_TYPES } from '..';
+import { Assign } from '@kbn/utility-types';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '..';
 
 export const aggBucketAvgFnName = 'aggBucketAvg';
 

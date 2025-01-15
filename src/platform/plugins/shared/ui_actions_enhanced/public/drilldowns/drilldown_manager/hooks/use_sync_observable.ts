@@ -8,7 +8,7 @@
  */
 
 import { useRef, useMemo } from 'react';
-import { type Observable, type Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import useIsomorphicLayoutEffect from 'react-use/lib/useIsomorphicLayoutEffect';
 import useUpdate from 'react-use/lib/useUpdate';
 

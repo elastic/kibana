@@ -7,14 +7,14 @@
 
 import { LogicMounter } from '../../../../__mocks__/kea_logic';
 
-import { type RefreshInterval } from '@kbn/data-plugin/common';
-import { type TimeRange } from '@kbn/es-query';
+import { RefreshInterval } from '@kbn/data-plugin/common';
+import { TimeRange } from '@kbn/es-query';
 
 import { KibanaLogic } from '../../../../shared/kibana/kibana_logic';
 
 import {
   AnalyticsCollectionToolbarLogic,
-  type AnalyticsCollectionToolbarLogicValues,
+  AnalyticsCollectionToolbarLogicValues,
 } from './analytics_collection_toolbar_logic';
 
 jest.mock('../../../../shared/kibana/kibana_logic', () => ({

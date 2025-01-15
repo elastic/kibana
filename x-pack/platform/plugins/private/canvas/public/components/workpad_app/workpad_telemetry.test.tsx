@@ -14,7 +14,7 @@ import {
   WorkpadLoadedWithErrorsMetric,
 } from './workpad_telemetry';
 import { METRIC_TYPE } from '../../lib/ui_metric';
-import { type ExpressionContext, type ResolvedArgType } from '../../../types';
+import { ExpressionContext, ResolvedArgType } from '../../../types';
 
 jest.mock('react-redux', () => {
   const originalModule = jest.requireActual('react-redux');

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type CoreSetup, DEFAULT_APP_CATEGORIES, type Plugin } from '@kbn/core/server';
+import { CoreSetup, DEFAULT_APP_CATEGORIES, Plugin } from '@kbn/core/server';
 import {
-  type FeaturesPluginSetup,
+  FeaturesPluginSetup,
   // PluginStartContract as FeaturesPluginStart,
 } from '@kbn/features-plugin/server';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';

@@ -7,9 +7,9 @@
 
 import { FeatureRegistry } from './feature_registry';
 import {
-  type ElasticsearchFeatureConfig,
-  type FeatureKibanaPrivilegesReference,
-  type KibanaFeatureConfig,
+  ElasticsearchFeatureConfig,
+  FeatureKibanaPrivilegesReference,
+  KibanaFeatureConfig,
 } from '../common';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';

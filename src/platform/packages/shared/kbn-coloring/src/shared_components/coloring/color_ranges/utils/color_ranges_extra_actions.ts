@@ -10,11 +10,11 @@
 import {
   checkIsMaxContinuity,
   checkIsMinContinuity,
-  type PaletteContinuity,
-  type DataBounds,
+  PaletteContinuity,
+  DataBounds,
   roundValue,
   getDataMinMax,
-  type CustomPaletteParams,
+  CustomPaletteParams,
 } from '../../../../palettes';
 
 import type { ColorRange } from '../types';

@@ -8,8 +8,8 @@
 import React from 'react';
 import { ConnectorProvider } from '../application/context/connector_context';
 import { CreateConnectorFlyout } from '../application/sections/action_connector_form';
-import { type CreateConnectorFlyoutProps } from '../application/sections/action_connector_form/create_connector_flyout';
-import { type ConnectorServices } from '../types';
+import { CreateConnectorFlyoutProps } from '../application/sections/action_connector_form/create_connector_flyout';
+import { ConnectorServices } from '../types';
 
 export const getAddConnectorFlyoutLazy = (
   props: CreateConnectorFlyoutProps & { connectorServices: ConnectorServices }

@@ -7,20 +7,20 @@
 
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import {
-  type ExecutionResponseItem,
+  ExecutionResponseItem,
   ExecutionResponseType,
 } from '@kbn/actions-plugin/server/create_execute_function';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { chunk } from 'lodash';
-import { type ThrottledActions } from '../../types';
-import { type ActionSchedulerOptions, type ActionsToSchedule, type IActionScheduler } from './types';
-import { type Alert } from '../../alert';
+import { ThrottledActions } from '../../types';
+import { ActionSchedulerOptions, ActionsToSchedule, IActionScheduler } from './types';
+import { Alert } from '../../alert';
 import {
-  type AlertInstanceContext,
-  type AlertInstanceState,
-  type RuleTypeParams,
-  type RuleTypeState,
-  type RuleAlertData,
+  AlertInstanceContext,
+  AlertInstanceState,
+  RuleTypeParams,
+  RuleTypeState,
+  RuleAlertData,
 } from '../../../common';
 import { getSummaryActionsFromTaskState } from './lib';
 import { withAlertingSpan } from '../lib';

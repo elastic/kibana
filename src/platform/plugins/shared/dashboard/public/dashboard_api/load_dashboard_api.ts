@@ -8,9 +8,9 @@
  */
 
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
-import { type DashboardPanelMap } from '../../common';
+import { DashboardPanelMap } from '../../common';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
-import { type DashboardCreationOptions, type DashboardState } from './types';
+import { DashboardCreationOptions, DashboardState } from './types';
 import { getDashboardApi } from './get_dashboard_api';
 import { startQueryPerformanceTracking } from '../dashboard_container/embeddable/create/performance/query_performance_tracking';
 import { coreServices } from '../services/kibana_services';
@@ -18,7 +18,7 @@ import {
   PANELS_CONTROL_GROUP_KEY,
   getDashboardBackupService,
 } from '../services/dashboard_backup_service';
-import { type UnsavedPanelState } from '../dashboard_container/types';
+import { UnsavedPanelState } from '../dashboard_container/types';
 import { DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
 
 export async function loadDashboardApi({

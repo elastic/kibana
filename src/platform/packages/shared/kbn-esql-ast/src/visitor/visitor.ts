@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GlobalVisitorContext, type SharedData } from './global_visitor_context';
+import { GlobalVisitorContext, SharedData } from './global_visitor_context';
 import { QueryVisitorContext } from './contexts';
-import { type VisitorContext } from './contexts';
+import { VisitorContext } from './contexts';
 import type {
   AstNodeToVisitorName,
   EnsureFunction,

@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type PluginInitializerContext, type CoreSetup, type CoreStart, type Plugin } from '@kbn/core/server';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import {
-  type VisTypeVegaPluginSetupDependencies,
-  type VisTypeVegaPluginSetup,
-  type VisTypeVegaPluginStart,
+  VisTypeVegaPluginSetupDependencies,
+  VisTypeVegaPluginSetup,
+  VisTypeVegaPluginStart,
 } from './types';
 
 export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisTypeVegaPluginStart> {

@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { type DataView } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { mockIndicatorsFiltersContext } from '../../../../mocks/mock_indicators_filters_context';
 import { StoryProvidersComponent } from '../../../../mocks/story_providers';
-import { generateMockIndicator, type Indicator } from '../../../../../common/types/indicator';
+import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 import { IndicatorsTable } from './table';
 import { IndicatorsFiltersContext } from '../../hooks/use_filters_context';
 import { DEFAULT_COLUMNS } from '../../hooks/use_column_settings';

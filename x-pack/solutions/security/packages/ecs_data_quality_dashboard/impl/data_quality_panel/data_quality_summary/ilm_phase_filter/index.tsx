@@ -7,7 +7,7 @@
 
 import {
   EuiComboBox,
-  type EuiComboBoxOptionOption,
+  EuiComboBoxOptionOption,
   EuiFormControlLayout,
   EuiFormLabel,
   EuiToolTip,

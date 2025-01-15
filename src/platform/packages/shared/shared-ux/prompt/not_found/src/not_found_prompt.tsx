@@ -11,7 +11,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiEmptyPrompt,
-  type EuiEmptyPromptProps,
+  EuiEmptyPromptProps,
   EuiImage,
   useEuiTheme,
 } from '@elastic/eui';

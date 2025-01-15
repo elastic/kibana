@@ -17,17 +17,17 @@ import {
   TaskRunResult,
 } from '.';
 import {
-  type TaskEvent,
+  TaskEvent,
   asTaskRunEvent,
   asTaskMarkRunningEvent,
-  type TaskRun,
+  TaskRun,
   TaskPersistence,
   asTaskManagerStatEvent,
 } from '../task_events';
-import { type ConcreteTaskInstance, getDeleteTaskRunResult, TaskStatus } from '../task';
+import { ConcreteTaskInstance, getDeleteTaskRunResult, TaskStatus } from '../task';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import moment from 'moment';
-import { type TaskDefinitionRegistry, TaskTypeDictionary } from '../task_type_dictionary';
+import { TaskDefinitionRegistry, TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
 import { throwRetryableError, throwUnrecoverableError } from './errors';
 import apm from 'elastic-apm-node';

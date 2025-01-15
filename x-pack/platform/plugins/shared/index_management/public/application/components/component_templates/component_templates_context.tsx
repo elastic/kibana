@@ -6,16 +6,16 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { type UiCounterMetricType } from '@kbn/analytics';
+import { UiCounterMetricType } from '@kbn/analytics';
 
 import {
-  type HttpSetup,
-  type DocLinksStart,
-  type NotificationsSetup,
-  type CoreStart,
-  type ExecutionContextStart,
+  HttpSetup,
+  DocLinksStart,
+  NotificationsSetup,
+  CoreStart,
+  ExecutionContextStart,
 } from '@kbn/core/public';
-import { type IndexManagementStartServices } from '../../../types';
+import { IndexManagementStartServices } from '../../../types';
 import { getApi, getUseRequest, getSendRequest, getDocumentation } from './lib';
 
 const ComponentTemplatesContext = createContext<Context | undefined>(undefined);

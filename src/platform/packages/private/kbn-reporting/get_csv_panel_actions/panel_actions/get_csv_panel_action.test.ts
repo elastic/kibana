@@ -9,15 +9,15 @@
 
 import * as Rx from 'rxjs';
 
-import { type CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { SearchSource } from '@kbn/data-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { type PublishesSavedSearch } from '@kbn/discover-plugin/public';
+import { PublishesSavedSearch } from '@kbn/discover-plugin/public';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { type LicenseCheckState } from '@kbn/licensing-plugin/public';
+import { LicenseCheckState } from '@kbn/licensing-plugin/public';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { type EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { ReportingAPIClient } from '@kbn/reporting-public';
 import type { ClientConfigType } from '@kbn/reporting-public/types';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';

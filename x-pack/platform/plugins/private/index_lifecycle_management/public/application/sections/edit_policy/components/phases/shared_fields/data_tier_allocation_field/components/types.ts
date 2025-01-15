@@ -6,8 +6,8 @@
  */
 
 import {
-  type ListNodesRouteResponse,
-  type PhaseWithAllocation,
+  ListNodesRouteResponse,
+  PhaseWithAllocation,
 } from '../../../../../../../../../common/types';
 
 export interface SharedProps {

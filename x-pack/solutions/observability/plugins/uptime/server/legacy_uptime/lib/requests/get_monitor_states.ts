@@ -6,11 +6,11 @@
  */
 
 import { CONTEXT_DEFAULTS, QUERY } from '../../../../common/constants';
-import { type UMElasticsearchQueryFn } from '../adapters';
+import { UMElasticsearchQueryFn } from '../adapters';
 import {
-  type SortOrder,
-  type CursorDirection,
-  type MonitorSummariesResult,
+  SortOrder,
+  CursorDirection,
+  MonitorSummariesResult,
 } from '../../../../common/runtime_types';
 import { QueryContext, MonitorSummaryIterator } from './search';
 

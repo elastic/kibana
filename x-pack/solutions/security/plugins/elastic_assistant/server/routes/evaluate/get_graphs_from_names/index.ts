@@ -7,8 +7,8 @@
 
 import {
   ASSISTANT_GRAPH_MAP,
-  type AssistantGraphMetadata,
-  type AttackDiscoveryGraphMetadata,
+  AssistantGraphMetadata,
+  AttackDiscoveryGraphMetadata,
 } from '../../../lib/langchain/graphs';
 
 export interface GetGraphsFromNamesResults {

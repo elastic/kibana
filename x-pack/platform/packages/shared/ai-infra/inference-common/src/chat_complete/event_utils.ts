@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { filter, type OperatorFunction } from 'rxjs';
-import { type InferenceTaskEvent } from '../inference_task';
+import { filter, OperatorFunction } from 'rxjs';
+import { InferenceTaskEvent } from '../inference_task';
 import {
   ChatCompletionEventType,
-  type ChatCompletionEvent,
-  type ChatCompletionChunkEvent,
-  type ChatCompletionMessageEvent,
-  type ChatCompletionTokenCountEvent,
+  ChatCompletionEvent,
+  ChatCompletionChunkEvent,
+  ChatCompletionMessageEvent,
+  ChatCompletionTokenCountEvent,
 } from './events';
 import type { ToolOptions } from './tools';
 

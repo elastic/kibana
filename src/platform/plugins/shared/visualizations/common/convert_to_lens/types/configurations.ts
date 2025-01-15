@@ -7,29 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type HorizontalAlignment, type LayoutDirection, type Position, type VerticalAlignment } from '@elastic/charts';
-import { type $Values } from '@kbn/utility-types';
+import { HorizontalAlignment, LayoutDirection, Position, VerticalAlignment } from '@elastic/charts';
+import { $Values } from '@kbn/utility-types';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { type KibanaQueryOutput } from '@kbn/data-plugin/common';
-import { type LegendSize, type XYLegendValue, type PartitionLegendValue } from '../../constants';
+import { KibanaQueryOutput } from '@kbn/data-plugin/common';
+import { LegendSize, type XYLegendValue, type PartitionLegendValue } from '../../constants';
 import {
-  type CategoryDisplayTypes,
-  type PartitionChartTypes,
-  type NumberDisplayTypes,
-  type LegendDisplayTypes,
-  type FillTypes,
-  type SeriesTypes,
-  type YAxisModes,
-  type XYCurveTypes,
-  type LayerTypes,
-  type GaugeShapes,
-  type GaugeTicksPositions,
-  type GaugeLabelMajorModes,
-  type GaugeColorModes,
-  type GaugeCentralMajorModes,
-  type CollapseFunctions,
+  CategoryDisplayTypes,
+  PartitionChartTypes,
+  NumberDisplayTypes,
+  LegendDisplayTypes,
+  FillTypes,
+  SeriesTypes,
+  YAxisModes,
+  XYCurveTypes,
+  LayerTypes,
+  GaugeShapes,
+  GaugeTicksPositions,
+  GaugeLabelMajorModes,
+  GaugeColorModes,
+  GaugeCentralMajorModes,
+  CollapseFunctions,
 } from '../constants';
-import { type ExpressionValueVisDimension } from '../../expression_functions';
+import { ExpressionValueVisDimension } from '../../expression_functions';
 
 export type ChartShapes = 'heatmap';
 

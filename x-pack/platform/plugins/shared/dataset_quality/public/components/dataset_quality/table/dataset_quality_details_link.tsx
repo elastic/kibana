@@ -8,12 +8,12 @@
 import { EuiHeaderLink } from '@elastic/eui';
 import {
   DATA_QUALITY_DETAILS_LOCATOR_ID,
-  type DataQualityDetailsLocatorParams,
+  DataQualityDetailsLocatorParams,
 } from '@kbn/deeplinks-observability';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import { type BrowserUrlService } from '@kbn/share-plugin/public';
+import { BrowserUrlService } from '@kbn/share-plugin/public';
 import React from 'react';
-import { type TimeRangeConfig } from '../../../../common/types';
+import { TimeRangeConfig } from '../../../../common/types';
 
 export const DatasetQualityDetailsLink = React.memo(
   ({

@@ -8,15 +8,15 @@
  */
 
 import moment from 'moment';
-import { type ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 import dedent from 'dedent';
 import Fsp from 'fs/promises';
 import Path from 'path';
 import {
-  type ApiDeclaration,
-  type ApiReference,
-  type PluginOrPackage,
-  type ReferencedDeprecationsByPlugin,
+  ApiDeclaration,
+  ApiReference,
+  PluginOrPackage,
+  ReferencedDeprecationsByPlugin,
 } from '../types';
 import { AUTO_GENERATED_WARNING } from '../auto_generated_warning';
 import { getPluginApiDocId } from '../utils';

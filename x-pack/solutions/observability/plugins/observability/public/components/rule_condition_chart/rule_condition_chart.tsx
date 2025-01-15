@@ -7,32 +7,32 @@
 
 import React, { useState, useEffect } from 'react';
 import { EuiEmptyPrompt, useEuiTheme } from '@elastic/eui';
-import { type Query, type Filter } from '@kbn/es-query';
-import { type FillStyle, type SeriesType, type TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
-import { type DataView } from '@kbn/data-views-plugin/common';
+import { Query, Filter } from '@kbn/es-query';
+import { FillStyle, SeriesType, TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useAsync from 'react-use/lib/useAsync';
 import {
-  type LensAttributes,
+  LensAttributes,
   LensAttributesBuilder,
   XYChart,
   XYDataLayer,
-  type XYLayerOptions,
+  XYLayerOptions,
   XYReferenceLinesLayer,
   XYByValueAnnotationsLayer,
 } from '@kbn/lens-embeddable-utils';
-import { type IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { type TimeRange } from '@kbn/es-query';
-import { type EventAnnotationConfig } from '@kbn/event-annotation-common';
+import { TimeRange } from '@kbn/es-query';
+import { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { type SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { type TimeUnitChar } from '../../../common';
-import { type LEGACY_COMPARATORS } from '../../../common/utils/convert_legacy_outside_comparator';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { TimeUnitChar } from '../../../common';
+import { LEGACY_COMPARATORS } from '../../../common/utils/convert_legacy_outside_comparator';
 import { EventsAsUnit } from '../../../common/constants';
-import { type Aggregators } from '../../../common/custom_threshold_rule/types';
+import { Aggregators } from '../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../utils/kibana_react';
-import { type AggMap, PainlessTinyMathParser } from './painless_tinymath_parser';
+import { AggMap, PainlessTinyMathParser } from './painless_tinymath_parser';
 import {
   lensFieldFormatter,
   getBufferThreshold,

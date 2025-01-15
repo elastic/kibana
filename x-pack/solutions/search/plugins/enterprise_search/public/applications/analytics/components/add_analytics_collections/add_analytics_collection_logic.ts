@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { kea, type MakeLogicType } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { type HttpError, Status } from '../../../../../common/types/api';
+import { HttpError, Status } from '../../../../../common/types/api';
 
-import { type Actions } from '../../../shared/api_logic/create_api_logic';
+import { Actions } from '../../../shared/api_logic/create_api_logic';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import {
   flashAPIErrors,
@@ -21,8 +21,8 @@ import {
 import { KibanaLogic } from '../../../shared/kibana';
 import {
   AddAnalyticsCollectionsAPILogic,
-  type AddAnalyticsCollectionApiLogicArgs,
-  type AddAnalyticsCollectionApiLogicResponse,
+  AddAnalyticsCollectionApiLogicArgs,
+  AddAnalyticsCollectionApiLogicResponse,
 } from '../../api/add_analytics_collection/add_analytics_collection_api_logic';
 import { COLLECTION_OVERVIEW_PATH } from '../../routes';
 

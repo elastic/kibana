@@ -6,10 +6,10 @@
  */
 
 import {
-  type GetInvestigationItemsResponse,
+  GetInvestigationItemsResponse,
   getInvestigationItemsResponseSchema,
 } from '@kbn/investigation-shared';
-import { type InvestigationRepository } from './investigation_repository';
+import { InvestigationRepository } from './investigation_repository';
 
 export async function getInvestigationItems(
   investigationId: string,

@@ -16,7 +16,7 @@ import type { MessageFormatElement } from '@formatjs/icu-messageformat-parser';
 import ts from 'typescript';
 type TypeScript = typeof ts;
 
-import { extractMessagesFromCallExpression, type MessageDescriptor, type ExtractorOpts } from './call_expt';
+import { extractMessagesFromCallExpression, MessageDescriptor, ExtractorOpts } from './call_expt';
 import { extractMessageFromJsxComponent } from './react';
 
 function getVisitor(

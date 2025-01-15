@@ -10,11 +10,11 @@ import type { SavedObjectsFindResult, SavedObjectAttribute } from '@kbn/core/ser
 
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { type Rule } from '../../../types';
+import { Rule } from '../../../types';
 
 import {
   legacyGetBulkRuleActionsSavedObject,
-  type LegacyActionsObj,
+  LegacyActionsObj,
   formatLegacyActions,
 } from './format_legacy_actions';
 import { legacyRuleActionsSavedObjectType } from './types';

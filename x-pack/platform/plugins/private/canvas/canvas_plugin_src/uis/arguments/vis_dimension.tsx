@@ -6,11 +6,11 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSelect, type EuiSelectProps } from '@elastic/eui';
-import { type DatatableColumn, type ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSelectProps } from '@elastic/eui';
+import { DatatableColumn, ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../i18n';
-import { type ResolvedArgProps, type ResolvedColumns } from '../../../public/expression_types/arg';
+import { ResolvedArgProps, ResolvedColumns } from '../../../public/expression_types/arg';
 
 const { VisDimension: strings } = ArgumentStrings;
 

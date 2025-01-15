@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { type ISavedObjectsRepository, type SavedObjectsBulkResponse } from '@kbn/core/server';
-import { type TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { ISavedObjectsRepository, SavedObjectsBulkResponse } from '@kbn/core/server';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
-  type ActionTypeRegistryContract as ConnectorTypeRegistryContract,
-  type InMemoryConnector,
+  ActionTypeRegistryContract as ConnectorTypeRegistryContract,
+  InMemoryConnector,
   UNALLOWED_FOR_UNSECURE_EXECUTION_CONNECTOR_TYPE_IDS,
 } from './types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
-import { type ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
+import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
 import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './lib';
-import { type ExecutionResponseItem, ExecutionResponseType } from './create_execute_function';
-import { type ActionsConfigurationUtilities } from './actions_config';
+import { ExecutionResponseItem, ExecutionResponseType } from './create_execute_function';
+import { ActionsConfigurationUtilities } from './actions_config';
 import { hasReachedTheQueuedActionsLimit } from './lib/has_reached_queued_actions_limit';
 
 interface CreateBulkUnsecuredExecuteFunctionOptions {

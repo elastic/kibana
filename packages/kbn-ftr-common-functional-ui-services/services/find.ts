@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type WebDriver, type WebElement, By, until } from 'selenium-webdriver';
+import { WebDriver, WebElement, By, until } from 'selenium-webdriver';
 
-import { type Browsers } from './remote/browsers';
+import { Browsers } from './remote/browsers';
 import type { FtrProviderContext } from './ftr_provider_context';
 import { WebElementWrapper } from './web_element_wrapper';
-import { type TimeoutOpt } from '../types';
+import { TimeoutOpt } from '../types';
 
 import { FtrService } from './ftr_provider_context';
 

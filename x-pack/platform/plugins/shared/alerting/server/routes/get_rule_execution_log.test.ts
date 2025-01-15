@@ -11,7 +11,7 @@ import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { rulesClientMock } from '../rules_client.mock';
-import { type IExecutionLogResult } from '../../common';
+import { IExecutionLogResult } from '../../common';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access', () => ({

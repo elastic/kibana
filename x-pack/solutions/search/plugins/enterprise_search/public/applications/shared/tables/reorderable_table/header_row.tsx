@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 import { Cell } from './cell';
 import { DRAGGABLE_UX_STYLE } from './constants';
-import { type Column } from './types';
+import { Column } from './types';
 
 interface HeaderRowProps<Item> {
   columns: Array<Column<Item>>;

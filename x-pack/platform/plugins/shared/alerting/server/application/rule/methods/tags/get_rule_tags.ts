@@ -5,12 +5,12 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
-import { type KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
+import { KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
 import { findRulesSo } from '../../../../data/rule/methods/find_rules_so';
-import { ruleTagsParamsSchema, type RuleTagsParams, type RuleTagsAggregationResult } from '.';
+import { ruleTagsParamsSchema, RuleTagsParams, RuleTagsAggregationResult } from '.';
 import type { RuleTagsFormattedResponse } from '../../../../../common/routes/rule/apis/tags';
 import { DEFAULT_TAGS_PER_PAGE } from '../../../../../common/routes/rule/apis/tags/constants/latest';
-import { type RulesClientContext } from '../../../../rules_client/types';
+import { RulesClientContext } from '../../../../rules_client/types';
 import { AlertingAuthorizationEntity } from '../../../../authorization';
 import { alertingAuthorizationFilterOpts } from '../../../../rules_client/common/constants';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';

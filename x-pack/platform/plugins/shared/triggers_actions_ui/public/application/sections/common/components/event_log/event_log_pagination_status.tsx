@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type Pagination, EuiText } from '@elastic/eui';
+import { Pagination, EuiText } from '@elastic/eui';
 
 export type EventLogPaginationStatusProps = Required<
   Pick<Pagination, 'pageIndex' | 'pageSize' | 'totalItemCount'>

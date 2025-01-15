@@ -10,10 +10,10 @@
 import { type Observable, firstValueFrom } from 'rxjs';
 import type { IRouter, SavedObjectsClient } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { type RequestHandler } from '@kbn/core-http-server';
+import { RequestHandler } from '@kbn/core-http-server';
 import { labelsSchema } from '../config/telemetry_labels';
 import type { TelemetryConfigType } from '../config';
-import { type v2 } from '../../common/types';
+import { v2 } from '../../common/types';
 import {
   FetchTelemetryConfigRoutePathBasedV2,
   FetchTelemetryConfigRoute,

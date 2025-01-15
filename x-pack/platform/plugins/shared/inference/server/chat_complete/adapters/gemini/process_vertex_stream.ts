@@ -7,8 +7,8 @@
 
 import { Observable } from 'rxjs';
 import {
-  type ChatCompletionChunkEvent,
-  type ChatCompletionTokenCountEvent,
+  ChatCompletionChunkEvent,
+  ChatCompletionTokenCountEvent,
   ChatCompletionEventType,
 } from '@kbn/inference-common';
 import { generateFakeToolCallId } from '../../../../common';

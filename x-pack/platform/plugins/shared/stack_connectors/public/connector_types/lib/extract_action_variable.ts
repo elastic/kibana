@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { fromNullable, type Option } from 'fp-ts/lib/Option';
-import { type ActionVariable } from '@kbn/alerting-plugin/common';
+import { fromNullable, Option } from 'fp-ts/lib/Option';
+import { ActionVariable } from '@kbn/alerting-plugin/common';
 
 export function extractActionVariable(
   actionVariables: ActionVariable[],

@@ -6,7 +6,7 @@
  */
 
 import { render } from '@testing-library/react';
-import { type ReactElement, type ElementType } from 'react';
+import { ReactElement, ElementType } from 'react';
 import { generateLinkedRulesMenuItems } from '.';
 import { rules } from '../mocks/rule_references.mock';
 import {

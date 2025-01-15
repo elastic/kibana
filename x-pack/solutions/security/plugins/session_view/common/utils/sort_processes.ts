@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Process } from '..';
+import { Process } from '..';
 
 export const sortProcesses = (a: Process, b: Process) => {
   const eventAStartTime = a.getDetails()?.process?.start || 0;

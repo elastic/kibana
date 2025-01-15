@@ -8,13 +8,13 @@
  */
 
 import {
-  type SavedObjectReferenceWithContext,
-  type SavedObjectsFindResult,
-  type SavedObjectsResolveResponse,
+  SavedObjectReferenceWithContext,
+  SavedObjectsFindResult,
+  SavedObjectsResolveResponse,
 } from '@kbn/core-saved-objects-api-server';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
-import { type SavedObject, type BulkResolveError } from '../..';
+import { SavedObject, BulkResolveError } from '../..';
 
 /**
  * The AuthorizationTypeEntry interface contains space-related details

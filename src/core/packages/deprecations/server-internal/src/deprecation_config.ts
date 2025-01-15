@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, type TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
 const configSchema = schema.object({

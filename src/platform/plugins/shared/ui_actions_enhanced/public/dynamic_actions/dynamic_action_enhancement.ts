@@ -8,10 +8,10 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { type EnhancementRegistryDefinition } from '@kbn/embeddable-plugin/public';
-import { type SavedObjectReference } from '@kbn/core/types';
-import { type DynamicActionsState } from '..';
-import { type UiActionsServiceEnhancements } from '../services';
+import { EnhancementRegistryDefinition } from '@kbn/embeddable-plugin/public';
+import { SavedObjectReference } from '@kbn/core/types';
+import { DynamicActionsState } from '..';
+import { UiActionsServiceEnhancements } from '../services';
 
 export const dynamicActionEnhancement = (
   uiActionsEnhanced: UiActionsServiceEnhancements

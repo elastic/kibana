@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 import { EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -17,11 +17,11 @@ import {
   Field,
   ToggleField,
   ComboBoxField,
-  type ValidationFunc,
-  type SerializerFunc,
+  ValidationFunc,
+  SerializerFunc,
 } from '../../../../../../shared_imports';
 
-import { type FieldsConfig } from './shared';
+import { FieldsConfig } from './shared';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import { FieldNameField } from './common_fields/field_name_field';
 

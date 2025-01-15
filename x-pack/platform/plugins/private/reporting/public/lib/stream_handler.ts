@@ -8,12 +8,12 @@
 import * as Rx from 'rxjs';
 import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs';
 
-import { type CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { JOB_STATUS } from '@kbn/reporting-common';
-import { type JobId } from '@kbn/reporting-common/types';
+import { JobId } from '@kbn/reporting-common/types';
 
-import { type Job, type ReportingAPIClient, jobCompletionNotifications } from '@kbn/reporting-public';
+import { Job, ReportingAPIClient, jobCompletionNotifications } from '@kbn/reporting-public';
 import {
   getFailureToast,
   getGeneralErrorToast,
@@ -22,7 +22,7 @@ import {
   getWarningMaxSizeToast,
   getWarningToast,
 } from '../notifier';
-import { type JobSummary, type JobSummarySet } from '../types';
+import { JobSummary, JobSummarySet } from '../types';
 
 /**
  * @todo Replace with `Infinity` once elastic/eui#5945 is resolved.

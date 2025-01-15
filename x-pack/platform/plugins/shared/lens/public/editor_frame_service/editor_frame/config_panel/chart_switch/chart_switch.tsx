@@ -10,13 +10,13 @@ import React, { useState, useMemo, memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ExperimentalBadge } from '../../../../shared_components';
 import {
-  type Visualization,
-  type FramePublicAPI,
-  type VisualizationType,
-  type VisualizationMap,
-  type DatasourceMap,
-  type Suggestion,
-  type DatasourcePublicAPI,
+  Visualization,
+  FramePublicAPI,
+  VisualizationType,
+  VisualizationMap,
+  DatasourceMap,
+  Suggestion,
+  DatasourcePublicAPI,
 } from '../../../../types';
 import { getSuggestions, switchToSuggestion } from '../../suggestion_helpers';
 import { showMemoizedErrorNotification } from '../../../../lens_ui_errors';
@@ -25,14 +25,14 @@ import {
   removeLayers,
   useLensDispatch,
   useLensSelector,
-  type VisualizationState,
-  type DatasourceStates,
+  VisualizationState,
+  DatasourceStates,
   selectActiveDatasourceId,
   selectVisualization,
   selectDatasourceStates,
 } from '../../../../state_management';
 import { generateId } from '../../../../id_generator/id_generator';
-import { ChartSwitchSelectable, type SelectableEntry } from './chart_switch_selectable';
+import { ChartSwitchSelectable, SelectableEntry } from './chart_switch_selectable';
 import { ChartSwitchOptionPrepend } from './chart_option';
 
 type VisChartSwitchPosition = VisualizationType & {

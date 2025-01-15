@@ -26,7 +26,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { docLinks } from '../../../../../shared/doc_links';
 
-import { type CrawlRequestStats } from '../../../../api/crawler/types';
+import { CrawlRequestStats } from '../../../../api/crawler/types';
 
 export interface CrawlerDetailsSummaryProps {
   crawlDepth: number;

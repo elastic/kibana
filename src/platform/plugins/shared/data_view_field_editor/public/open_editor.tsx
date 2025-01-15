@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { type CoreStart, type OverlayRef } from '@kbn/core/public';
+import { CoreStart, OverlayRef } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FieldEditorLoader } from './components/field_editor_loader';
@@ -22,7 +22,7 @@ import type {
   FieldFormatsStart,
   DataViewField,
 } from './shared_imports';
-import { type DataView, DataViewLazy } from './shared_imports';
+import { DataView, DataViewLazy } from './shared_imports';
 import { createKibanaReactContext } from './shared_imports';
 import type { CloseEditor, Field, InternalFieldType, PluginStart } from './types';
 

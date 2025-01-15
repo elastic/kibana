@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type TypeOf } from '@kbn/config-schema';
+import { TypeOf } from '@kbn/config-schema';
 
 import type {
   ActionType as ConnectorType,
@@ -27,16 +27,16 @@ import {
 import { createExternalService } from './service';
 import { api } from './api';
 import {
-  type ExecutorParams,
-  type ExecutorSubActionPushParams,
-  type JiraPublicConfigurationType,
-  type JiraSecretConfigurationType,
-  type JiraExecutorResultData,
-  type ExecutorSubActionGetFieldsByIssueTypeParams,
-  type ExecutorSubActionCommonFieldsParams,
-  type ExecutorSubActionGetIssuesParams,
-  type ExecutorSubActionGetIssueParams,
-  type ExecutorSubActionGetIncidentParams,
+  ExecutorParams,
+  ExecutorSubActionPushParams,
+  JiraPublicConfigurationType,
+  JiraSecretConfigurationType,
+  JiraExecutorResultData,
+  ExecutorSubActionGetFieldsByIssueTypeParams,
+  ExecutorSubActionCommonFieldsParams,
+  ExecutorSubActionGetIssuesParams,
+  ExecutorSubActionGetIssueParams,
+  ExecutorSubActionGetIncidentParams,
 } from './types';
 import * as i18n from './translations';
 

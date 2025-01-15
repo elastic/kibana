@@ -9,9 +9,9 @@
 
 import { schema } from '@kbn/config-schema';
 import type { FileKind } from '../../../common/types';
-import { type FilesClient } from '../../../common/files_client';
+import { FilesClient } from '../../../common/files_client';
 import { fileErrors } from '../../file';
-import { type CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
+import { CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
 import type { CreateHandler, FileKindRouter } from './types';
 
 import { getById } from './helpers';

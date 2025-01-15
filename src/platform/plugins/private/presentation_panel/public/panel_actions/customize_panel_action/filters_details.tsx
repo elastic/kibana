@@ -17,7 +17,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { hasEditCapabilities } from '@kbn/presentation-publishing';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import { editPanelAction } from '../panel_actions';
-import { type CustomizePanelActionApi } from './customize_panel_action';
+import { CustomizePanelActionApi } from './customize_panel_action';
 
 export const filterDetailsActionStrings = {
   getQueryTitle: () =>

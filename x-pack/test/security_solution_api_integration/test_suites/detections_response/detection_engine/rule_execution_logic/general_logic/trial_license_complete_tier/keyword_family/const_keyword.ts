@@ -8,8 +8,8 @@
 import expect from '@kbn/expect';
 import { get } from 'lodash';
 import {
-  type EqlRuleCreateProps,
-  type ThresholdRuleCreateProps,
+  EqlRuleCreateProps,
+  ThresholdRuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ALERT_THRESHOLD_RESULT } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
@@ -24,7 +24,7 @@ import {
   waitForRuleSuccess,
   waitForAlertsToBePresent,
 } from '../../../../../../../../common/utils/security_solution';
-import { type FtrProviderContext } from '../../../../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

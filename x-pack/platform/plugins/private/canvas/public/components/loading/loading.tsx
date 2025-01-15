@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiIcon, EuiLoadingSpinner, isColorDark } from '@elastic/eui';
 import { hexToRgb } from '../../../common/lib/hex_to_rgb';

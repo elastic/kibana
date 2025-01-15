@@ -10,7 +10,7 @@ import { sortBy, throttle } from 'lodash';
 import * as React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { type Rect } from './measurable_item_view';
+import { Rect } from './measurable_item_view';
 
 interface VerticalScrollPanelProps<Child> {
   children?: (

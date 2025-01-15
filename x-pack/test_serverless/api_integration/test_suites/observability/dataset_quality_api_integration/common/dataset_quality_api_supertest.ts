@@ -6,13 +6,13 @@
  */
 import { format } from 'url';
 import supertest from 'supertest';
-import type request from 'superagent';
+import request from 'superagent';
 import type { APIClientRequestParamsOf, APIReturnType } from '@kbn/dataset-quality-plugin/common';
-import { type Config, kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
+import { Config, kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
 import type { APIEndpoint } from '@kbn/dataset-quality-plugin/server/routes';
 import { formatRequest } from '@kbn/server-route-repository';
-import { type InternalRequestHeader, type RoleCredentials } from '../../../../../shared/services';
-import { type InheritedFtrProviderContext } from '../../../../services';
+import { InternalRequestHeader, RoleCredentials } from '../../../../../shared/services';
+import { InheritedFtrProviderContext } from '../../../../services';
 
 export function createDatasetQualityApiClient(st: supertest.Agent) {
   return async <TEndpoint extends APIEndpoint>(

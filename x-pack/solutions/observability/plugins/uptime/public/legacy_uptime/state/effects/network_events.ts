@@ -11,7 +11,7 @@ import {
   getNetworkEvents,
   getNetworkEventsSuccess,
   getNetworkEventsFail,
-  type FetchNetworkEventsParams,
+  FetchNetworkEventsParams,
 } from '../actions/network_events';
 import { fetchNetworkEvents } from '../api/network_events';
 import type { SyntheticsNetworkEventsApiResponse } from '../../../../common/runtime_types';

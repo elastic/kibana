@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiAutoRefreshButton, type OnRefreshChangeProps } from '@elastic/eui';
+import { EuiAutoRefreshButton, OnRefreshChangeProps } from '@elastic/eui';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 
 export const AutoRefreshButton = () => {

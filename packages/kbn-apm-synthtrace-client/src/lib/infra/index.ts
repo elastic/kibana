@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dockerContainer, type DockerContainerMetricsDocument } from './docker_container';
-import { host, type HostMetricsDocument, minimalHost } from './host';
-import { k8sContainer, type K8sContainerMetricsDocument } from './k8s_container';
-import { pod, type PodMetricsDocument } from './pod';
-import { awsRds, type AWSRdsMetricsDocument } from './aws/rds';
-import { k8sNode, type K8sNodeMetricsDocument } from './k8s_node';
+import { dockerContainer, DockerContainerMetricsDocument } from './docker_container';
+import { host, HostMetricsDocument, minimalHost } from './host';
+import { k8sContainer, K8sContainerMetricsDocument } from './k8s_container';
+import { pod, PodMetricsDocument } from './pod';
+import { awsRds, AWSRdsMetricsDocument } from './aws/rds';
+import { k8sNode, K8sNodeMetricsDocument } from './k8s_node';
 
 export type InfraDocument =
   | HostMetricsDocument

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type ConcreteTaskInstance } from '../../task';
-import { isLimited, type TaskClaimingBatches } from '../../queries/task_claiming';
+import { ConcreteTaskInstance } from '../../task';
+import { isLimited, TaskClaimingBatches } from '../../queries/task_claiming';
 
 // given a list of tasks and capacity info, select the tasks that meet capacity
 export function selectTasksByCapacity(

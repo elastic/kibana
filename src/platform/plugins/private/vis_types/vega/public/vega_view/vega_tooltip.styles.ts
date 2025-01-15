@@ -9,7 +9,7 @@
 
 import { css } from '@emotion/react';
 import {
-  type UseEuiTheme,
+  UseEuiTheme,
   logicalCSS,
   logicalTextAlignCSS,
   mathWithUnits,

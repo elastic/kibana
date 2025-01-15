@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Action, createAction } from '@kbn/ui-actions-plugin/public';
+import { Action, createAction } from '@kbn/ui-actions-plugin/public';
 
 export const SAMPLE_PANEL_LINK = 'samplePanelLink';
 

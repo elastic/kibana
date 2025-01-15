@@ -9,8 +9,8 @@ import { useRouteMatch } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import {
-  type ScreenshotImageBlob,
-  type ScreenshotRefImageData,
+  ScreenshotImageBlob,
+  ScreenshotRefImageData,
 } from '../../../../../../../common/runtime_types';
 import { getJourneyScreenshot } from '../../../../../state/api/journey';
 import { MONITOR_ADD_ROUTE, MONITOR_EDIT_ROUTE } from '../../../../../../../common/constants';

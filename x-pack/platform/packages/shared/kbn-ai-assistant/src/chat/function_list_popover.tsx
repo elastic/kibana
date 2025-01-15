@@ -14,7 +14,7 @@ import {
   EuiHighlight,
   EuiPopover,
   EuiSelectable,
-  type EuiSelectableOption,
+  EuiSelectableOption,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';

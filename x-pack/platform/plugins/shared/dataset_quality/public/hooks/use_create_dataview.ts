@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { type DataView } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { useKibanaContextForPlugin } from '../utils';
 
 interface UseCreateDataViewProps {

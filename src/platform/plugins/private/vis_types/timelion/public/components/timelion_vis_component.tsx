@@ -15,15 +15,15 @@ import {
   Position,
   Axis,
   TooltipType,
-  type LegendPositionConfig,
+  LegendPositionConfig,
   LayoutDirection,
   Placement,
   Tooltip,
   LegendValue,
-  type BrushEndListener,
+  BrushEndListener,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
-import { type RangeFilterParams } from '@kbn/es-query';
+import { RangeFilterParams } from '@kbn/es-query';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useActiveCursor } from '@kbn/charts-plugin/public';

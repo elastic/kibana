@@ -8,11 +8,11 @@
  */
 
 import React from 'react';
-import { EuiFieldText, type EuiFieldTextProps } from '@elastic/eui';
+import { EuiFieldText, EuiFieldTextProps } from '@elastic/eui';
 
 import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
 
-import { type InputProps } from '../types';
+import { InputProps } from '../types';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 
 /**

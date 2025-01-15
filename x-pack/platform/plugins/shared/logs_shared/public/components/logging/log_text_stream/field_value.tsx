@@ -7,7 +7,7 @@
 
 import stringify from 'json-stable-stringify';
 import React from 'react';
-import { type JsonArray, type JsonValue } from '@kbn/utility-types';
+import { JsonArray, JsonValue } from '@kbn/utility-types';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ActiveHighlightMarker, highlightFieldValue, HighlightMarker } from './highlighting';
 

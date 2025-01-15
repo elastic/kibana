@@ -7,15 +7,15 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { type KbnClient } from '@kbn/test';
-import { type Role } from '@kbn/security-plugin/common';
-import { type ToolingLog } from '@kbn/tooling-log';
+import { KbnClient } from '@kbn/test';
+import { Role } from '@kbn/security-plugin/common';
+import { ToolingLog } from '@kbn/tooling-log';
 import { inspect } from 'util';
-import { type AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 import {
   getServerlessSecurityKibanaRoleDefinitions,
-  type ServerlessSecurityRoles,
-  type YamlRoleDefinitions,
+  ServerlessSecurityRoles,
+  YamlRoleDefinitions,
 } from './kibana_roles';
 import { STANDARD_HTTP_HEADERS } from '../default_http_headers';
 

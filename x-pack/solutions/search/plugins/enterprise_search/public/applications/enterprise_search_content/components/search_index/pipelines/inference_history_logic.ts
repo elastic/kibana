@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { kea, type MakeLogicType } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../../common/types/api';
-import { type MlInferenceHistoryItem } from '../../../../../../common/types/pipelines';
-import { type Actions } from '../../../../shared/api_logic/create_api_logic';
+import { MlInferenceHistoryItem } from '../../../../../../common/types/pipelines';
+import { Actions } from '../../../../shared/api_logic/create_api_logic';
 import {
-  type FetchMlInferencePipelineHistoryApiLogicArgs,
-  type FetchMlInferencePipelineHistoryApiLogicResponse,
+  FetchMlInferencePipelineHistoryApiLogicArgs,
+  FetchMlInferencePipelineHistoryApiLogicResponse,
   FetchMlInferencePipelineHistoryApiLogic,
 } from '../../../api/pipelines/fetch_ml_inference_pipeline_history';
 import { IndexNameLogic } from '../index_name_logic';

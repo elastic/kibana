@@ -15,7 +15,7 @@ import { createSavedObjects } from './create_saved_objects';
 import { extractErrors } from './extract_errors';
 import {
   LEGACY_URL_ALIAS_TYPE,
-  type LegacyUrlAlias,
+  LegacyUrlAlias,
 } from '@kbn/core-saved-objects-base-server-internal';
 
 type CreateSavedObjectsParams = Parameters<typeof createSavedObjects>[0];

@@ -14,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { type IndexPatternManagmentContext } from '../../../../../types';
+import { IndexPatternManagmentContext } from '../../../../../types';
 
 export const Header = () => {
   const { docLinks } = useKibana<IndexPatternManagmentContext>().services;

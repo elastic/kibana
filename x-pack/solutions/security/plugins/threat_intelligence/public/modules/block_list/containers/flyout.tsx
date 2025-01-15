@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { type VFC } from 'react';
+import React, { VFC } from 'react';
 import {
-  type CreateExceptionListItemSchema,
-  type EntriesArray,
+  CreateExceptionListItemSchema,
+  EntriesArray,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { usePolicies } from '../hooks/use_policies';
 import { useBlockListContext } from '../../indicators/hooks/use_block_list_context';

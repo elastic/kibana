@@ -15,7 +15,7 @@ jest.mock('../lib/get_default_query_language', () => ({
 }));
 
 import { TimeseriesPanelConfig } from './timeseries';
-import { type PanelConfigProps } from './types';
+import { PanelConfigProps } from './types';
 
 describe('TimeseriesPanelConfig', () => {
   it('sets the number input to the given value', () => {

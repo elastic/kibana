@@ -11,9 +11,9 @@ import { useActions, useValues } from 'kea';
 
 import {
   InlineEditableTable,
-  type InlineEditableTableProps,
+  InlineEditableTableProps,
 } from '../inline_editable_table/inline_editable_table';
-import { type ItemWithAnID } from '../types';
+import { ItemWithAnID } from '../types';
 
 import { GenericEndpointInlineEditableTableLogic } from './generic_endpoint_inline_editable_table_logic';
 

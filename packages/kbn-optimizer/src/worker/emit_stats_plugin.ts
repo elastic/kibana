@@ -10,9 +10,9 @@
 import Fs from 'fs';
 import Path from 'path';
 
-import type webpack from 'webpack';
+import webpack from 'webpack';
 
-import { type Bundle } from '../common';
+import { Bundle } from '../common';
 
 export class EmitStatsPlugin {
   constructor(private readonly bundle: Bundle) {}

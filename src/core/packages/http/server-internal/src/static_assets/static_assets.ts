@@ -8,7 +8,7 @@
  */
 
 import type { BasePath } from '../base_path_service';
-import { type CdnConfig } from '../cdn_config';
+import { CdnConfig } from '../cdn_config';
 import {
   suffixPathnameToPathname,
   suffixPathnameToURLPathname,

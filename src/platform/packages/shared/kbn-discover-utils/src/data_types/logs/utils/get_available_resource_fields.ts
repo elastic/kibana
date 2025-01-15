@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ResourceFields } from '../../..';
+import { ResourceFields } from '../../..';
 import * as constants from '../constants';
 
 export const getAvailableResourceFields = (resourceDoc: ResourceFields) => {

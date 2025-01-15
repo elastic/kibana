@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type FtrProviderContext } from '../services';
+import { FtrProviderContext } from '../services';
 
 export const createTestSpaces = async ({ getService }: FtrProviderContext) => {
   const spaceService = getService('spaces');

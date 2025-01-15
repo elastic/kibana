@@ -33,7 +33,7 @@ import { getBenchmarkCisName, getBenchmarkApplicableTo } from '../../../common/u
 import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
 import { benchmarksNavigation } from '../../common/navigation/constants';
 import {
-  type GetBenchmarkDynamicValues,
+  GetBenchmarkDynamicValues,
   useBenchmarkDynamicValues,
 } from '../../common/hooks/use_benchmark_dynamic_values';
 import { useKibana } from '../../common/hooks/use_kibana';

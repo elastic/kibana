@@ -7,14 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  type Logger,
-  type KibanaRequest,
-  type KibanaResponseFactory,
-  type RequestHandler,
-  type RequestHandlerContext,
+  Logger,
+  KibanaRequest,
+  KibanaResponseFactory,
+  RequestHandler,
+  RequestHandlerContext,
 } from '@kbn/core/server';
 
-import { type ILicense, type LicenseType, type LicenseCheckState, type LicensingPluginStart } from './shared_imports';
+import { ILicense, LicenseType, LicenseCheckState, LicensingPluginStart } from './shared_imports';
 
 type LicenseLogger = Pick<Logger, 'warn'>;
 type LicenseDependency = Pick<LicensingPluginStart, 'license$'>;

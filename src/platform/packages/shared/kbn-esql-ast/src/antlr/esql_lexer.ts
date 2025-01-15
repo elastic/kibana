@@ -2,13 +2,13 @@
 // Generated from src/antlr/esql_lexer.g4 by ANTLR 4.13.2
 // noinspection ES6UnusedImports,JSUnusedGlobalSymbols,JSUnusedLocalSymbols
 import {
-	type ATN,
+	ATN,
 	ATNDeserializer,
-	type CharStream,
-	type DecisionState, DFA,
+	CharStream,
+	DecisionState, DFA,
 	Lexer,
 	LexerATNSimulator,
-	type RuleContext,
+	RuleContext,
 	PredictionContextCache,
 	Token
 } from "antlr4";

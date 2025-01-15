@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type PipelineVersion } from '../../types';
+import { PipelineVersion } from '../../types';
 
 export const mergePipelineVersions = (versions: PipelineVersion[]): PipelineVersion[] => {
   const versionsByHash = versions.reduce(

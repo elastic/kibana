@@ -13,14 +13,14 @@ import {
   type EuiDataGridColumn,
   type EuiDataGridColumnCellAction,
   EuiScreenReaderOnly,
-  type EuiListGroupItemProps,
+  EuiListGroupItemProps,
 } from '@elastic/eui';
 import { type DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { type ToastsStart, type IUiSettingsClient } from '@kbn/core/public';
-import { type DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
+import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { ExpandButton } from './data_table_expand_button';
-import { type CustomGridColumnsConfiguration, type UnifiedDataTableSettings } from '../types';
+import { CustomGridColumnsConfiguration, UnifiedDataTableSettings } from '../types';
 import type { ValueToStringConverter, DataTableColumnsMeta } from '../types';
 import { buildCellActions } from './default_cell_actions';
 import { getSchemaByKbnType } from './data_table_schema';
@@ -33,7 +33,7 @@ import {
 import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';
 import { buildEditFieldButton } from './build_edit_field_button';
 import { DataTableColumnHeader, DataTableTimeColumnHeader } from './data_table_column_header';
-import { type UnifiedDataTableProps } from './data_table';
+import { UnifiedDataTableProps } from './data_table';
 
 export const getColumnDisplayName = (
   columnName: string,

@@ -8,8 +8,8 @@
  */
 
 import React, { lazy } from 'react';
-import { type VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
-import { type TagCloudVisParams, type TagCloudTypeProps } from '../types';
+import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import { TagCloudVisParams, TagCloudTypeProps } from '../types';
 
 const TagCloudOptionsLazy = lazy(() => import('./tag_cloud_options'));
 

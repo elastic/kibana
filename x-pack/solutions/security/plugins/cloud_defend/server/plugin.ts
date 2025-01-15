@@ -5,19 +5,19 @@
  * 2.0.
  */
 import {
-  type PluginInitializerContext,
-  type CoreSetup,
-  type CoreStart,
-  type Plugin,
-  type Logger,
-  type SavedObjectsClientContract,
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { PackagePolicy, NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import {
-  type CloudDefendPluginSetup,
-  type CloudDefendPluginStart,
-  type CloudDefendPluginStartDeps,
-  type CloudDefendPluginSetupDeps,
+  CloudDefendPluginSetup,
+  CloudDefendPluginStart,
+  CloudDefendPluginStartDeps,
+  CloudDefendPluginSetupDeps,
 } from './types';
 import { setupRoutes } from './routes/setup_routes';
 import { isCloudDefendPackage } from '../common/utils/helpers';

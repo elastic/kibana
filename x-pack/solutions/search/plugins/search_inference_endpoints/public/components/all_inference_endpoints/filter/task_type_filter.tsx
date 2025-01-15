@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { TaskTypes } from '../../../../common/types';
-import { type FilterOptions } from '../types';
-import { MultiSelectFilter, type MultiSelectFilterOption } from './multi_select_filter';
+import { FilterOptions } from '../types';
+import { MultiSelectFilter, MultiSelectFilterOption } from './multi_select_filter';
 import * as i18n from './translations';
 
 interface Props {

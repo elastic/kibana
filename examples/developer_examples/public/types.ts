@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type EuiListGroupItemProps } from '@elastic/eui';
+import { EuiListGroupItemProps } from '@elastic/eui';
 
 export interface ExampleDefinition {
   /**

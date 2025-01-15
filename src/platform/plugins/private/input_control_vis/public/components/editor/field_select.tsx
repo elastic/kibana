@@ -10,10 +10,10 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 
-import { injectI18n, FormattedMessage, type WrappedComponentProps } from '@kbn/i18n-react';
-import { EuiFormRow, EuiComboBox, type EuiComboBoxOptionOption } from '@elastic/eui';
+import { injectI18n, FormattedMessage, WrappedComponentProps } from '@kbn/i18n-react';
+import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { type DataView, type DataViewField } from '@kbn/data-views-plugin/public';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 
 interface FieldSelectUiState {
   isLoading: boolean;

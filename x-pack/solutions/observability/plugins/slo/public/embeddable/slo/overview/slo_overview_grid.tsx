@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import { ALL_VALUE, type HistoricalSummaryResponse, type SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
   Chart,
   isMetricElementEvent,
   Metric,
   MetricTrendShape,
   Settings,
-  type MetricDatum,
+  MetricDatum,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

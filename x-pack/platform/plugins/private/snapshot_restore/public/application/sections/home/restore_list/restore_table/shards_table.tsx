@@ -18,7 +18,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { type SnapshotRestore, type SnapshotRestoreShard } from '../../../../../../common/types';
+import { SnapshotRestore, SnapshotRestoreShard } from '../../../../../../common/types';
 import { useServices } from '../../../../app_context';
 import { FormattedDateTime } from '../../../../components';
 

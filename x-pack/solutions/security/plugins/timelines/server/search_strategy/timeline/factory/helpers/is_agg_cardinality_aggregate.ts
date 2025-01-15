@@ -5,8 +5,8 @@
  * 2.0.
  */
 import {
-  type AggregationsAggregate,
-  type AggregationsCardinalityAggregate,
+  AggregationsAggregate,
+  AggregationsCardinalityAggregate,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 // type guard for checking if the Aggregation for a given field is a Cardinality

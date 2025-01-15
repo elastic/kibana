@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type FormulaPublicApi, type HeatmapVisualizationState } from '@kbn/lens-plugin/public';
+import { FormulaPublicApi, HeatmapVisualizationState } from '@kbn/lens-plugin/public';
 
 import { euiPaletteRed } from '@elastic/eui';
-import { type ColorStop } from '@kbn/coloring';
-import { type LayerConfig } from '../lens_attributes';
+import { ColorStop } from '@kbn/coloring';
+import { LayerConfig } from '../lens_attributes';
 import { SingleMetricLensAttributes } from './single_metric_attributes';
 
 export class HeatMapLensAttributes extends SingleMetricLensAttributes {

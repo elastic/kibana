@@ -6,10 +6,10 @@
  */
 
 import {
-  type IRouter,
-  type KibanaRequest,
-  type RequestHandlerContext,
-  type RouteValidatorConfig,
+  IRouter,
+  KibanaRequest,
+  RequestHandlerContext,
+  RouteValidatorConfig,
 } from '@kbn/core/server';
 import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 

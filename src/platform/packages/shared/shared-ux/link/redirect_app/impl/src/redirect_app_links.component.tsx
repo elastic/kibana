@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC, useRef, type MouseEventHandler, useCallback } from 'react';
+import React, { FC, useRef, MouseEventHandler, useCallback } from 'react';
 
 import type { RedirectAppLinksComponentProps } from '@kbn/shared-ux-link-redirect-app-types';
 

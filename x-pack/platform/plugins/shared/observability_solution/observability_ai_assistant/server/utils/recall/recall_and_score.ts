@@ -6,13 +6,13 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { type AnalyticsServiceStart } from '@kbn/core/server';
+import { AnalyticsServiceStart } from '@kbn/core/server';
 import { scoreSuggestions } from './score_suggestions';
 import type { Message } from '../../../common';
 import type { ObservabilityAIAssistantClient } from '../../service/client';
 import type { FunctionCallChatFunction } from '../../service/types';
-import { type RecallRanking, recallRankingEventType } from '../../analytics/recall_ranking';
-import { type RecalledEntry } from '../../service/knowledge_base_service';
+import { RecallRanking, recallRankingEventType } from '../../analytics/recall_ranking';
+import { RecalledEntry } from '../../service/knowledge_base_service';
 
 export type RecalledSuggestion = Pick<RecalledEntry, 'id' | 'text' | 'score'>;
 

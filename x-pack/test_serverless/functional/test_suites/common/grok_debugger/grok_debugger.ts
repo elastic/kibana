@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { type FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['svlCommonPage', 'common', 'grokDebugger']);

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { type FC, type PropsWithChildren } from 'react';
-import { type Option, none, some, fold, isSome } from 'fp-ts/lib/Option';
+import React, { FC, PropsWithChildren } from 'react';
+import { Option, none, some, fold, isSome } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -14,8 +14,8 @@ import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { type DocLinksStart, type HttpSetup } from '@kbn/core/public';
-import { type AlertingFrameworkHealth } from '@kbn/alerting-types';
+import { DocLinksStart, HttpSetup } from '@kbn/core/public';
+import { AlertingFrameworkHealth } from '@kbn/alerting-types';
 import './health_check.scss';
 import { fetchUiHealthStatus as triggersActionsUiHealth } from '@kbn/alerts-ui-shared/src/common/apis/fetch_ui_health_status';
 import { fetchAlertingFrameworkHealth as alertingFrameworkHealth } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerting_framework_health';

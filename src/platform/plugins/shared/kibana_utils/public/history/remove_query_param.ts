@@ -8,7 +8,7 @@
  */
 
 import { stringify } from 'query-string';
-import { type History, type Location } from 'history';
+import { History, Location } from 'history';
 import { url } from '../../common';
 import { getQueryParams } from './get_query_params';
 

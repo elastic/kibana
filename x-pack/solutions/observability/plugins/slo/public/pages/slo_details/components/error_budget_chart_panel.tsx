@@ -11,13 +11,13 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { type SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState, useCallback } from 'react';
-import { type SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
-import { type TimeBounds } from '../types';
-import { type SloTabId } from './slo_details';
+import { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
+import { TimeBounds } from '../types';
+import { SloTabId } from './slo_details';
 import { useKibana } from '../../../hooks/use_kibana';
-import { type ChartData } from '../../../typings/slo';
+import { ChartData } from '../../../typings/slo';
 import { ErrorBudgetChart } from './error_budget_chart';
 import { ErrorBudgetHeader } from './error_budget_header';
 import { SLO_ERROR_BUDGET_ID } from '../../../embeddable/slo/error_budget/constants';

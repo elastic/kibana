@@ -17,8 +17,8 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { Router } from '@kbn/shared-ux-router';
-import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
-import { type CasesPublicStart } from '@kbn/cases-plugin/public';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';

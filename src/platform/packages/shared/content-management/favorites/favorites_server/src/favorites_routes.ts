@@ -8,15 +8,15 @@
  */
 
 import {
-  type CoreRequestHandlerContext,
-  type CoreSetup,
-  type Logger,
+  CoreRequestHandlerContext,
+  CoreSetup,
+  Logger,
   SECURITY_EXTENSION_ID,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { FavoritesService, FavoritesLimitExceededError } from './favorites_service';
 import { favoritesSavedObjectType } from './favorites_saved_object';
-import { type FavoritesRegistry } from './favorites_registry';
+import { FavoritesRegistry } from './favorites_registry';
 
 /**
  * @public

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ActionExecutionMeta, type UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { type FilterManager } from '@kbn/data-plugin/public';
+import { ActionExecutionMeta, UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import { FilterManager } from '@kbn/data-plugin/public';
 
 export const UPDATE_FILTER_REFERENCES_ACTION = 'UPDATE_FILTER_REFERENCES_ACTION';
 

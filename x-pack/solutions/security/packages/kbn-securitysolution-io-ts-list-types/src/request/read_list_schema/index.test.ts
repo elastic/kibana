@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { getReadListSchemaMock } from './index.mock';
-import { type ReadListSchema, readListSchema } from '.';
+import { ReadListSchema, readListSchema } from '.';
 
 describe('read_list_schema', () => {
   test('it should validate a typical list item request', () => {

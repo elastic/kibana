@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useCallback, type ChangeEventHandler } from 'react';
+import React, { useEffect, useCallback, ChangeEventHandler } from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 
-import { type AggParamEditorProps } from '../agg_param_props';
+import { AggParamEditorProps } from '../agg_param_props';
 
 function StringParamEditor({
   agg,

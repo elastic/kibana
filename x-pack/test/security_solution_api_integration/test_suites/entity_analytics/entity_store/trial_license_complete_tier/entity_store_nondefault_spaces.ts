@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { type FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
+import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 import { EntityStoreUtils } from '../../utils';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 

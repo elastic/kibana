@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Datatable } from '../../expression_types';
+import { Datatable } from '../../expression_types';
 import { buildResultColumns, getBucketIdentifier } from '../series_calculation_helpers';
-import { type OverallMetricArgs } from './overall_metric';
+import { OverallMetricArgs } from './overall_metric';
 
 function getValueAsNumberArray(value: unknown) {
   if (Array.isArray(value)) {

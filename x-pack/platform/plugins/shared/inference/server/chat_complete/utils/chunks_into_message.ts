@@ -6,16 +6,16 @@
  */
 
 import {
-  type ChatCompletionChunkEvent,
+  ChatCompletionChunkEvent,
   ChatCompletionEventType,
-  type ChatCompletionMessageEvent,
-  type ChatCompletionTokenCountEvent,
-  type ToolOptions,
-  type UnvalidatedToolCall,
+  ChatCompletionMessageEvent,
+  ChatCompletionTokenCountEvent,
+  ToolOptions,
+  UnvalidatedToolCall,
   withoutTokenCountEvents,
 } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
-import { type OperatorFunction, map, merge, share, toArray } from 'rxjs';
+import { OperatorFunction, map, merge, share, toArray } from 'rxjs';
 import { validateToolCalls } from '../../util/validate_tool_calls';
 
 export function chunksIntoMessage<TToolOptions extends ToolOptions>({

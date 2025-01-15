@@ -11,7 +11,7 @@ import moment from 'moment';
 import Fsp from 'fs/promises';
 import Path from 'path';
 import dedent from 'dedent';
-import { type PluginApi, type ScopeApi } from '../types';
+import { PluginApi, ScopeApi } from '../types';
 import {
   countScopeApi,
   getPluginApiDocId,
@@ -22,7 +22,7 @@ import {
 } from '../utils';
 import { writePluginDocSplitByFolder } from './write_plugin_split_by_folder';
 import { AUTO_GENERATED_WARNING } from '../auto_generated_warning';
-import { type WritePluginDocsOpts } from './types';
+import { WritePluginDocsOpts } from './types';
 
 /**
  * Converts the plugin doc to mdx and writes it into the file system. If the plugin,

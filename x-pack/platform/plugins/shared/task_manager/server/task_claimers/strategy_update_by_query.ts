@@ -9,21 +9,21 @@
  * This module contains helpers for managing the task manager storage layer.
  */
 import apm from 'elastic-apm-node';
-import { type Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { groupBy, pick } from 'lodash';
 
 import { asOk } from '../lib/result_type';
-import { type TaskTypeDictionary } from '../task_type_dictionary';
+import { TaskTypeDictionary } from '../task_type_dictionary';
 import {
-  type TaskClaimerOpts,
-  type ClaimOwnershipResult,
+  TaskClaimerOpts,
+  ClaimOwnershipResult,
   getEmptyClaimOwnershipResult,
   isTaskTypeExcluded,
 } from '.';
-import { type ConcreteTaskInstance } from '../task';
+import { ConcreteTaskInstance } from '../task';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import { isLimited, TASK_MANAGER_MARK_AS_CLAIMED } from '../queries/task_claiming';
-import { type TaskClaim, asTaskClaimEvent, startTaskTimer } from '../task_events';
+import { TaskClaim, asTaskClaimEvent, startTaskTimer } from '../task_events';
 import { shouldBeOneOf, mustBeAllOf, filterDownBy, matchesClauses } from '../queries/query_clauses';
 
 import {
@@ -39,9 +39,9 @@ import {
 
 import {
   correctVersionConflictsForContinuation,
-  type TaskStore,
-  type UpdateByQueryResult,
-  type SearchOpts,
+  TaskStore,
+  UpdateByQueryResult,
+  SearchOpts,
 } from '../task_store';
 
 interface OwnershipClaimingOpts {

@@ -7,7 +7,7 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { API_BASE_PATH } from '../../../common/constants';
-import { type Cluster } from '../../../common/lib';
+import { Cluster } from '../../../common/lib';
 
 type HttpMethod = 'GET' | 'DELETE';
 

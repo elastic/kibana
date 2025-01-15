@@ -14,9 +14,9 @@ import {
   AreaSeries,
   ScaleType,
   CurveType,
-  type AreaSeriesStyle,
+  AreaSeriesStyle,
   PointShape,
-  type RecursivePartial,
+  RecursivePartial,
 } from '@elastic/charts';
 import type { VisSeries } from '../../../common/vis_data';
 

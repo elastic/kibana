@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import { decodeCloudId } from './decode_cloud_id';
 
 describe('Fleet - decodeCloudId', () => {

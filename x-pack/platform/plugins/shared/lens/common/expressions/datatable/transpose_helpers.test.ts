@@ -7,7 +7,7 @@
 
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { type DatatableArgs } from '..';
+import { DatatableArgs } from '..';
 import { transposeTable } from './transpose_helpers';
 
 describe('transpose helpers', () => {

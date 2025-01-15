@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { type ChromiumArchivePaths, type PackageInfo } from '@kbn/screenshotting-server';
+import { ChromiumArchivePaths, PackageInfo } from '@kbn/screenshotting-server';
 import del from 'del';
 import path from 'path';
 import { download } from './download';

@@ -7,10 +7,10 @@
 
 import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 
-import { type HttpResponse } from '@kbn/core/public';
+import { HttpResponse } from '@kbn/core/public';
 
-import { type ErrorResponse, Status } from '../../../../../../../common/types/api';
-import { type MlModel, MlModelDeploymentState } from '../../../../../../../common/types/ml';
+import { ErrorResponse, Status } from '../../../../../../../common/types/api';
+import { MlModel, MlModelDeploymentState } from '../../../../../../../common/types/ml';
 
 import { GetDocumentsApiLogic } from '../../../../api/documents/get_document_logic';
 import { MappingsApiLogic } from '../../../../api/mappings/mappings_logic';
@@ -26,7 +26,7 @@ import { SimulateMlInterfacePipelineApiLogic } from '../../../../api/pipelines/s
 import {
   MLInferenceLogic,
   EMPTY_PIPELINE_CONFIGURATION,
-  type MLInferenceProcessorsValues,
+  MLInferenceProcessorsValues,
 } from './ml_inference_logic';
 import { AddInferencePipelineSteps } from './types';
 

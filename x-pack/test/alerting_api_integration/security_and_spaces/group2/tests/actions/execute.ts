@@ -6,12 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { type IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
+import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/lib/action_execution_source';
 import { systemActionScenario, UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../../common/lib';
-import { type FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {

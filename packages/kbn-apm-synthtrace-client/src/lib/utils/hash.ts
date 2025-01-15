@@ -8,7 +8,7 @@
  */
 
 import { fast1a32 } from 'fnv-plus';
-import { type Fields } from '../entity';
+import { Fields } from '../entity';
 
 export function hashKeysOf<T extends Fields>(source: T, keys: Array<keyof T>) {
   let hashed: string = '';

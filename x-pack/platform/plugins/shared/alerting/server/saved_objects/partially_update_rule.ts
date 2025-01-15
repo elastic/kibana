@@ -7,19 +7,19 @@
 
 import { omit, pick } from 'lodash';
 import {
-  type ElasticsearchClient,
-  type SavedObjectsClient,
+  ElasticsearchClient,
+  SavedObjectsClient,
   SavedObjectsErrorHelpers,
-  type SavedObjectsUpdateOptions,
+  SavedObjectsUpdateOptions,
 } from '@kbn/core/server';
 import { decodeRequestVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { type RawRule } from '../types';
+import { RawRule } from '../types';
 
 import {
   RuleAttributesToEncrypt,
   RuleAttributesIncludedInAAD,
-  type RuleAttributesNotPartiallyUpdatable,
+  RuleAttributesNotPartiallyUpdatable,
   RULE_SAVED_OBJECT_TYPE,
 } from '.';
 

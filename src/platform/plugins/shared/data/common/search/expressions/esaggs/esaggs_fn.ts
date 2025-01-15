@@ -8,18 +8,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/common';
 
-import { type IndexPatternExpressionType } from '@kbn/data-views-plugin/common/expressions';
-import { type DataViewsContract } from '@kbn/data-views-plugin/common';
+import { IndexPatternExpressionType } from '@kbn/data-views-plugin/common/expressions';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 
-import { type AggsStart, type AggExpressionType, aggCountFnName } from '../../aggs';
-import { type ISearchStartSearchSource } from '../../search_source';
+import { AggsStart, AggExpressionType, aggCountFnName } from '../../aggs';
+import { ISearchStartSearchSource } from '../../search_source';
 
-import { type KibanaContext } from '../kibana_context_type';
+import { KibanaContext } from '../kibana_context_type';
 import { handleRequest } from './request_handler';
 
 const name = 'esaggs';

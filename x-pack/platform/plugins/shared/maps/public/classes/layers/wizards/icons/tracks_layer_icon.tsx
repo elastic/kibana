@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 
 export const TracksLayerIcon: FunctionComponent = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="49" height="25" fill="none" viewBox="0 0 49 25">

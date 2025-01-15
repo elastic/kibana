@@ -8,8 +8,8 @@
  */
 
 import { useStateFromPublishingSubject } from '../publishing_subject';
-import { apiHasParentApi, type HasParentApi } from './has_parent_api';
-import { apiPublishesViewMode, type PublishesViewMode } from './publishes_view_mode';
+import { apiHasParentApi, HasParentApi } from './has_parent_api';
+import { apiPublishesViewMode, PublishesViewMode } from './publishes_view_mode';
 
 /**
  * This API can access a view mode, either its own or from its parent API.

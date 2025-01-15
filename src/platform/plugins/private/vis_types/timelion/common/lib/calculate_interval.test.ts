@@ -9,7 +9,7 @@
 
 import { calculateInterval as fn } from './calculate_interval';
 
-import moment, { type unitOfTime } from 'moment';
+import moment, { unitOfTime } from 'moment';
 
 const from = (count: number, unit: unitOfTime.DurationConstructor) =>
   moment().subtract(count, unit).valueOf();

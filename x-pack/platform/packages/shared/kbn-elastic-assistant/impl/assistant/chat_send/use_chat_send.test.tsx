@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type HttpSetup } from '@kbn/core-http-browser';
+import { HttpSetup } from '@kbn/core-http-browser';
 import { useSendMessage } from '../use_send_message';
 import { useConversation } from '../use_conversation';
 import { emptyWelcomeConvo, welcomeConvo } from '../../mock/conversation';
-import { useChatSend, type UseChatSendProps } from './use_chat_send';
+import { useChatSend, UseChatSendProps } from './use_chat_send';
 import { waitFor, renderHook, act } from '@testing-library/react';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { useAssistantContext } from '../../..';

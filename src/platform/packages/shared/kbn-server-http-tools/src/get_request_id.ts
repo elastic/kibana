@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Request } from '@hapi/hapi';
+import { Request } from '@hapi/hapi';
 import { v4 as uuidv4 } from 'uuid';
 
 export function getRequestId(

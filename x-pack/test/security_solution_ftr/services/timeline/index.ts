@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { type Response } from 'superagent';
+import { Response } from 'superagent';
 import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
 import { TIMELINE_DRAFT_URL, TIMELINE_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
-  type GetDraftTimelinesResponse,
-  type PatchTimelineResponse,
-  type SavedTimeline,
+  GetDraftTimelinesResponse,
+  PatchTimelineResponse,
+  SavedTimeline,
 } from '@kbn/security-solution-plugin/common/api/timeline';
 import moment from 'moment';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';

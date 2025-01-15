@@ -11,10 +11,10 @@ import _ from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { aggTopMetricsFnName } from './top_metrics_fn';
-import { type IMetricAggConfig, MetricAggType } from './metric_agg_type';
+import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
-import { type DataViewField, KBN_FIELD_TYPES } from '../../..';
-import { type BaseAggParams } from '../types';
+import { DataViewField, KBN_FIELD_TYPES } from '../../..';
+import { BaseAggParams } from '../types';
 import { createTopHitFilter } from './lib/create_filter';
 
 export interface BaseAggParamsTopMetrics extends BaseAggParams {

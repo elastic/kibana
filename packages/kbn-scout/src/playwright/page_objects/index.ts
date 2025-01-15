@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ScoutPage } from '../fixtures/types';
+import { ScoutPage } from '../fixtures/types';
 import { DashboardApp } from './dashboard_app';
 import { DatePicker } from './date_picker';
 import { DiscoverApp } from './discover_app';

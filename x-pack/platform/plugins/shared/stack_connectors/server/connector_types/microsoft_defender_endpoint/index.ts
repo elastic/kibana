@@ -6,7 +6,7 @@
  */
 
 import {
-  type SubActionConnectorType,
+  SubActionConnectorType,
   ValidatorType,
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { EndpointSecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
@@ -18,8 +18,8 @@ import {
 import { MicrosoftDefenderEndpointConnector } from './microsoft_defender_endpoint';
 
 import {
-  type MicrosoftDefenderEndpointConfig,
-  type MicrosoftDefenderEndpointSecrets,
+  MicrosoftDefenderEndpointConfig,
+  MicrosoftDefenderEndpointSecrets,
 } from '../../../common/microsoft_defender_endpoint/types';
 import {
   MicrosoftDefenderEndpointConfigSchema,

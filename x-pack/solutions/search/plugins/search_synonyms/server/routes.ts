@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { type IRouter, type Logger } from '@kbn/core/server';
+import { IRouter, Logger } from '@kbn/core/server';
 
 export function defineRoutes({ logger, router }: { logger: Logger; router: IRouter }) {}

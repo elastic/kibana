@@ -6,15 +6,15 @@
  */
 
 import { CASES_URL } from '@kbn/cases-plugin/common';
-import { type Case, type CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import { Case, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import {
-  type CasePostRequest,
-  type CasesFindResponse,
-  type CasePatchRequest,
+  CasePostRequest,
+  CasesFindResponse,
+  CasePatchRequest,
 } from '@kbn/cases-plugin/common/types/api';
 import type SuperTest from 'supertest';
-import { type ToolingLog } from '@kbn/tooling-log';
-import { type User } from '../authentication/types';
+import { ToolingLog } from '@kbn/tooling-log';
+import { User } from '../authentication/types';
 
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';

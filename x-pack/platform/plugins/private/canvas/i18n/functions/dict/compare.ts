@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { type compare, Operation } from '../../../canvas_plugin_src/functions/common/compare';
-import { type FunctionHelp } from '../function_help';
-import { type FunctionFactory } from '../../../types';
+import { compare, Operation } from '../../../canvas_plugin_src/functions/common/compare';
+import { FunctionHelp } from '../function_help';
+import { FunctionFactory } from '../../../types';
 import {
   CONTEXT,
   TYPE_BOOLEAN,

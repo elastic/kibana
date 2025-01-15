@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import React, { Component, type CSSProperties, type RefObject, type ReactNode } from 'react';
+import React, { Component, CSSProperties, RefObject, ReactNode } from 'react';
 import {
   EuiCallOut,
   EuiLoadingSpinner,
@@ -16,13 +16,13 @@ import {
   EuiContextMenu,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type ActionExecutionContext, type Action } from '@kbn/ui-actions-plugin/public';
-import { type GeoJsonProperties } from 'geojson';
-import { type Filter } from '@kbn/es-query';
+import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import { GeoJsonProperties } from 'geojson';
+import { Filter } from '@kbn/es-query';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { isUrlDrilldown } from '../../../../trigger_actions/trigger_utils';
-import { type RawValue } from '../../../../../common/constants';
-import { type ITooltipProperty } from '../../../../classes/tooltips/tooltip_property';
+import { RawValue } from '../../../../../common/constants';
+import { ITooltipProperty } from '../../../../classes/tooltips/tooltip_property';
 
 interface Props {
   featureId?: string | number;

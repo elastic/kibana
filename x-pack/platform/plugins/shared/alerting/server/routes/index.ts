@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { type DocLinksServiceSetup, type IRouter } from '@kbn/core/server';
-import { type UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { type EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { DocLinksServiceSetup, IRouter } from '@kbn/core/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
-import { type Observable } from 'rxjs';
-import { type GetAlertIndicesAlias, type ILicenseState } from '../lib';
-import { type AlertingRequestHandlerContext } from '../types';
+import { Observable } from 'rxjs';
+import { GetAlertIndicesAlias, ILicenseState } from '../lib';
+import { AlertingRequestHandlerContext } from '../types';
 import { createRuleRoute } from './rule/apis/create';
 import { getRuleRoute, getInternalRuleRoute } from './rule/apis/get/get_rule_route';
 import { updateRuleRoute } from './rule/apis/update/update_rule_route';

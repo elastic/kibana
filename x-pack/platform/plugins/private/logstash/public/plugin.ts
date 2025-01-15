@@ -6,14 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type Subscription, Subject, combineLatest } from 'rxjs';
+import { Subscription, Subject, combineLatest } from 'rxjs';
 import { map } from 'rxjs';
 import { once } from 'lodash';
 
-import { type Capabilities, type CoreSetup, type CoreStart, type Plugin } from '@kbn/core/public';
-import { type HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { type ManagementSetup } from '@kbn/management-plugin/public';
-import { type LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import { Capabilities, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 
 // @ts-ignore
 import type { PluginInitializerContext } from '@kbn/core-plugins-browser';

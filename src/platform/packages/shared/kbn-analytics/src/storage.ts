@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Report } from './report';
+import { Report } from './report';
 
 export interface Storage<T = Report, S = void> {
   get: (key: string) => T | undefined;

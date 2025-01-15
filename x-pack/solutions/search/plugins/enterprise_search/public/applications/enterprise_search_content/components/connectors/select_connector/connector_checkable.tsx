@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type MouseEvent, useState } from 'react';
+import React, { MouseEvent, useState } from 'react';
 
 import { css } from '@emotion/react';
 
@@ -22,7 +22,7 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiText,
-  type EuiThemeComputed,
+  EuiThemeComputed,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';

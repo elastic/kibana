@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type DatatableColumn } from '@kbn/expressions-plugin/common';
+import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import {
-  type ManualEventAnnotationOutput,
-  type ManualPointEventAnnotationArgs,
-  type ManualRangeEventAnnotationArgs,
+  ManualEventAnnotationOutput,
+  ManualPointEventAnnotationArgs,
+  ManualRangeEventAnnotationArgs,
 } from './manual_event_annotation/types';
 import {
-  type QueryPointEventAnnotationArgs,
-  type QueryPointEventAnnotationOutput,
+  QueryPointEventAnnotationArgs,
+  QueryPointEventAnnotationOutput,
 } from './query_point_event_annotation/types';
 
 export type Fill = 'inside' | 'outside' | 'none';

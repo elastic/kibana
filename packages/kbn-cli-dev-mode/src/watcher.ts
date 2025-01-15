@@ -14,7 +14,7 @@ import { RepoSourceClassifier } from '@kbn/repo-source-classifier';
 import { ImportResolver } from '@kbn/import-resolver';
 import { makeMatcher } from '@kbn/picomatcher';
 
-import { type Log } from './log';
+import { Log } from './log';
 
 const packageMatcher = makeMatcher([
   '**/*',

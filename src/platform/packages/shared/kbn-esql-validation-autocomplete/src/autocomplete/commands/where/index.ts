@@ -13,7 +13,7 @@ import {
   type ESQLCommand,
   type ESQLSingleAstItem,
   type ESQLFunction,
-  type ESQLAst,
+  ESQLAst,
 } from '@kbn/esql-ast';
 import { logicalOperators } from '../../../definitions/builtin';
 import { isParameterType, type SupportedDataType } from '../../../definitions/types';

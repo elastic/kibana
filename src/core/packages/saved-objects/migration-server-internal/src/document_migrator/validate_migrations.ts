@@ -17,8 +17,8 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import { assertValidModelVersion } from '@kbn/core-saved-objects-base-server-internal';
 import {
-  type SavedObjectsModelChange,
-  type SavedObjectsModelMappingsAdditionChange,
+  SavedObjectsModelChange,
+  SavedObjectsModelMappingsAdditionChange,
 } from '@kbn/core-saved-objects-server';
 
 /**

@@ -7,25 +7,25 @@
 
 jest.mock('../es_indices_state_check', () => ({ esIndicesStateCheck: jest.fn() }));
 import { BehaviorSubject } from 'rxjs';
-import { type TransportResult } from '@elastic/elasticsearch';
-import { type Logger } from '@kbn/core/server';
+import { TransportResult } from '@elastic/elasticsearch';
+import { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import {
-  type ReindexOperation,
-  type ReindexSavedObject,
+  ReindexOperation,
+  ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { type LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
 import { getMockVersionInfo } from '../__fixtures__/version';
 import { esIndicesStateCheck } from '../es_indices_state_check';
 import { versionService } from '../version';
 
-import { type ReindexService, reindexServiceFactory } from './reindex_service';
+import { ReindexService, reindexServiceFactory } from './reindex_service';
 
 const asApiResponse = <T>(body: T): TransportResult<T> =>
   ({

@@ -6,13 +6,13 @@
  */
 
 import React, { useState, lazy, useEffect, useCallback } from 'react';
-import { type RouteComponentProps } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 
-import { type Section, routeToRules, routeToLogs } from './constants';
+import { Section, routeToRules, routeToLogs } from './constants';
 import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
 

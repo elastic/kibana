@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type EndpointOf } from '@kbn/server-route-repository';
-import { type ObservabilityConfig } from '..';
+import { EndpointOf } from '@kbn/server-route-repository';
+import { ObservabilityConfig } from '..';
 import { aiAssistantRouteRepository } from './assistant/route';
 import { rulesRouteRepository } from './rules/route';
 

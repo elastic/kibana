@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { type Agent as SuperTestAgent } from 'supertest';
+import { Agent as SuperTestAgent } from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import type { SavedObjectReference, SavedObjectsImportRetry } from '@kbn/core/server';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
 import { expectResponses, getUrlPrefix, getTestTitle } from '../lib/saved_object_test_utils';
-import { type ExpectResponseBody, type TestCase, type TestDefinition, type TestSuite } from '../lib/types';
+import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
 
 export interface ResolveImportErrorsTestDefinition extends TestDefinition {
   request: {

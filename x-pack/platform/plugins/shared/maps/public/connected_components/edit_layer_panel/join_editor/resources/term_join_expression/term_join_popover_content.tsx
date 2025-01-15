@@ -10,18 +10,18 @@ import {
   EuiPopoverTitle,
   EuiFormRow,
   EuiComboBox,
-  type EuiComboBoxOptionOption,
+  EuiComboBoxOptionOption,
   EuiFormHelpText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { type DataViewField } from '@kbn/data-views-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getDataViewSelectPlaceholder } from '../../../../../../common/i18n_getters';
 import { DEFAULT_MAX_BUCKETS_LIMIT } from '../../../../../../common/constants';
 import {
-  type ESTermSourceDescriptor,
-  type JoinSourceDescriptor,
+  ESTermSourceDescriptor,
+  JoinSourceDescriptor,
 } from '../../../../../../common/descriptor_types';
 import { SingleFieldSelect } from '../../../../../components/single_field_select';
 import { ValidatedNumberInput } from '../../../../../components/validated_number_input';

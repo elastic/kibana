@@ -13,7 +13,7 @@ import {
   EuiPopover,
   EuiContextMenuPanel,
   EuiContextMenuItem,
-  type EuiContextMenuItemProps,
+  EuiContextMenuItemProps,
 } from '@elastic/eui';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';

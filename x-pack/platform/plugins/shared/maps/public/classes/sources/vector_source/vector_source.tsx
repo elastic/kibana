@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import React, { type ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 import {
-  type FeatureCollection,
-  type GeoJsonProperties,
-  type Geometry,
-  type MultiPolygon,
-  type Polygon,
-  type Position,
+  FeatureCollection,
+  GeoJsonProperties,
+  Geometry,
+  MultiPolygon,
+  Polygon,
+  Position,
 } from 'geojson';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { Query } from '@kbn/data-plugin/common';
 import type { MapGeoJSONFeature } from '@kbn/mapbox-gl';
-import { type Filter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
-import { type Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { type ActionExecutionContext, type Action } from '@kbn/ui-actions-plugin/public';
-import { type IVectorStyle } from '../../styles/vector/vector_style';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import { IVectorStyle } from '../../styles/vector/vector_style';
 import { GEO_JSON_TYPE, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
-import { type TooltipFeatureAction } from '../../../../common/descriptor_types';
-import { type ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
-import { AbstractSource, type ISource } from '../source';
-import { type IField } from '../../fields/field';
+import { TooltipFeatureAction } from '../../../../common/descriptor_types';
+import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
+import { AbstractSource, ISource } from '../source';
+import { IField } from '../../fields/field';
 import {
-  type DataFilters,
-  type DataRequestMeta,
-  type MapExtent,
-  type Timeslice,
-  type VectorSourceRequestMeta,
+  DataFilters,
+  DataRequestMeta,
+  MapExtent,
+  Timeslice,
+  VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import { type DataRequest } from '../../util/data_request';
+import { DataRequest } from '../../util/data_request';
 import { FeatureGeometryFilterForm } from '../../../connected_components/mb_map/tooltip_control/features_tooltip';
 
 export function hasVectorSourceMethod(

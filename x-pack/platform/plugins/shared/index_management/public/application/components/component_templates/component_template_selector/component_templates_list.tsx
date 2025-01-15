@@ -7,10 +7,10 @@
 
 import React from 'react';
 
-import { type ComponentTemplateListItem } from '../../../../../common';
+import { ComponentTemplateListItem } from '../../../../../common';
 import {
   ComponentTemplatesListItem,
-  type Props as ComponentTemplatesListItemProps,
+  Props as ComponentTemplatesListItemProps,
 } from './component_templates_list_item';
 
 interface Props {

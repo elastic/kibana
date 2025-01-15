@@ -6,13 +6,13 @@
  */
 
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import { type AssistantScope } from '@kbn/ai-assistant-common';
+import { AssistantScope } from '@kbn/ai-assistant-common';
 import type { Message } from '../../common';
-import { chatFeedbackEventSchema, type ChatFeedback } from './schemas/chat_feedback';
-import { insightFeedbackEventSchema, type InsightFeedback } from './schemas/insight_feedback';
-import { insightResponseEventSchema, type InsightResponse } from './schemas/insight_response';
+import { chatFeedbackEventSchema, ChatFeedback } from './schemas/chat_feedback';
+import { insightFeedbackEventSchema, InsightFeedback } from './schemas/insight_feedback';
+import { insightResponseEventSchema, InsightResponse } from './schemas/insight_response';
 import { userSentPromptEventSchema } from './schemas/user_sent_prompt';
-import { type ObservabilityAIAssistantTelemetryEventType } from './telemetry_event_type';
+import { ObservabilityAIAssistantTelemetryEventType } from './telemetry_event_type';
 
 const schemas = [
   chatFeedbackEventSchema,

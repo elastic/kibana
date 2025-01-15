@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type * from './rewrite_request_case_types';
+export * from './rewrite_request_case_types';
 export * from './action_types';

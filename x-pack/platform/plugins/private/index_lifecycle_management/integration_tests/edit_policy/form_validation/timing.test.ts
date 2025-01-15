@@ -8,9 +8,9 @@
 import { act } from 'react-dom/test-utils';
 import { i18nTexts } from '../../../public/application/sections/edit_policy/i18n_texts';
 
-import { type PhaseWithTiming } from '../../../common/types';
+import { PhaseWithTiming } from '../../../common/types';
 import { setupEnvironment } from '../../helpers';
-import { setupValidationTestBed, type ValidationTestBed } from './validation.helpers';
+import { setupValidationTestBed, ValidationTestBed } from './validation.helpers';
 
 describe('<EditPolicy /> timing validation', () => {
   let testBed: ValidationTestBed;

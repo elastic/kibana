@@ -9,15 +9,15 @@
 
 import { has } from 'lodash';
 import {
-  type PluginInitializerContext,
-  type CoreSetup,
-  type CoreStart,
-  type Plugin,
-  type IUiSettingsClient,
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  IUiSettingsClient,
 } from '@kbn/core/server';
-import { type FieldFormatsStart, type FieldFormatsSetup } from './types';
+import { FieldFormatsStart, FieldFormatsSetup } from './types';
 import { DateFormat, DateNanosFormat } from './lib/converters';
-import { baseFormatters, type FieldFormatInstanceType, FieldFormatsRegistry } from '../common';
+import { baseFormatters, FieldFormatInstanceType, FieldFormatsRegistry } from '../common';
 import { getUiSettings } from './ui_settings';
 
 export class FieldFormatsPlugin implements Plugin<FieldFormatsSetup, FieldFormatsStart> {

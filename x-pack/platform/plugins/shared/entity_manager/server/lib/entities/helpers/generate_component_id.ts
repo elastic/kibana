@@ -10,7 +10,7 @@ import {
   ENTITY_HISTORY,
   ENTITY_LATEST,
   ENTITY_SCHEMA_VERSION_V1,
-  type EntityDefinition,
+  EntityDefinition,
   entitiesIndexPattern,
 } from '@kbn/entities-schema';
 import {

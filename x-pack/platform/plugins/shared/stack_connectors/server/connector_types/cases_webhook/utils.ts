@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type AxiosResponse, type AxiosError } from 'axios';
+import { AxiosResponse, AxiosError } from 'axios';
 import { isEmpty, isObjectLike, get } from 'lodash';
 import { getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
 import * as i18n from './translations';

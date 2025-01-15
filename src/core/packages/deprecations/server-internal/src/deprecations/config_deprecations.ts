@@ -8,7 +8,7 @@
  */
 
 import type { IConfigService } from '@kbn/config';
-import { type DeprecationsFactory } from '../deprecations_factory';
+import { DeprecationsFactory } from '../deprecations_factory';
 
 interface RegisterConfigDeprecationsInfo {
   deprecationsFactory: DeprecationsFactory;

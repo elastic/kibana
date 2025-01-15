@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { type ExpressionValueRender, type ContainerStyle } from '../../../types';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { ExpressionValueRender, ContainerStyle } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 import { DEFAULT_ELEMENT_CSS } from '../../../common/lib/constants';
 

@@ -22,7 +22,7 @@ import {
   USER,
 } from '../../constants/index.mock';
 
-import { type ExceptionListItemSchema } from '.';
+import { ExceptionListItemSchema } from '.';
 
 export const getExceptionListItemSchemaMock = (
   overrides?: Partial<ExceptionListItemSchema>

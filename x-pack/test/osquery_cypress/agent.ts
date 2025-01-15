@@ -6,8 +6,8 @@
  */
 
 import execa from 'execa';
-import { type ToolingLog } from '@kbn/tooling-log';
-import { type KbnClient } from '@kbn/test';
+import { ToolingLog } from '@kbn/tooling-log';
+import { KbnClient } from '@kbn/test';
 import {
   fetchFleetServerUrl,
   waitForHostToEnroll,

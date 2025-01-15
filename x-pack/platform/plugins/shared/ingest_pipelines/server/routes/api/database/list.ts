@@ -8,7 +8,7 @@
 import sortBy from 'lodash/sortBy';
 import { deserializeGeoipDatabase, type GeoipDatabaseFromES } from './serialization';
 import { API_BASE_PATH } from '../../../../common/constants';
-import { type RouteDependencies } from '../../../types';
+import { RouteDependencies } from '../../../types';
 
 export const registerListDatabaseRoute = ({
   router,

@@ -14,7 +14,7 @@
 
 import React from 'react';
 import { PhaseDescription } from './phase_description';
-import { type Phases } from '../../../../../common/types';
+import { Phases } from '../../../../../common/types';
 import { MinAge, WaitForSnapshot, DeleteSearchableSnapshot } from './components';
 
 export const DeletePhase = ({ phases }: { phases: Phases }) => {

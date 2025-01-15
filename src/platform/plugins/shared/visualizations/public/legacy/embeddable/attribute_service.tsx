@@ -12,13 +12,13 @@ import { i18n } from '@kbn/i18n';
 import { get, omit } from 'lodash';
 import {
   SavedObjectSaveModal,
-  type OnSaveProps,
-  type SaveResult,
+  OnSaveProps,
+  SaveResult,
   showSaveModal,
 } from '@kbn/saved-objects-plugin/public';
 import {
-  type EmbeddableInput,
-  type SavedObjectEmbeddableInput,
+  EmbeddableInput,
+  SavedObjectEmbeddableInput,
   isSavedObjectEmbeddableInput,
 } from '@kbn/embeddable-plugin/common';
 import { getNotifications } from '../../services';

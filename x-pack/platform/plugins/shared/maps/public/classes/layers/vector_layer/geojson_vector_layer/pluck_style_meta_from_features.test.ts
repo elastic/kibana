@@ -12,9 +12,9 @@ import {
   VECTOR_SHAPE_TYPE,
   VECTOR_STYLES,
 } from '../../../../../common/constants';
-import { type ColorDynamicOptions } from '../../../../../common/descriptor_types';
-import { type IVectorLayer } from '../vector_layer';
-import { type IVectorSource } from '../../../sources/vector_source';
+import { ColorDynamicOptions } from '../../../../../common/descriptor_types';
+import { IVectorLayer } from '../vector_layer';
+import { IVectorSource } from '../../../sources/vector_source';
 import { OTHER_CATEGORY_KEY } from '../../../styles/vector/properties/dynamic_style_property';
 import { DynamicColorProperty } from '../../../styles/vector/properties/dynamic_color_property';
 import { InlineField } from '../../../fields/inline_field';

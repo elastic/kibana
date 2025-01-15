@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { type Logger } from '@kbn/core/server';
-import { ConnectorUsageCollector, type Services } from '@kbn/actions-plugin/server/types';
+import { Logger } from '@kbn/core/server';
+import { ConnectorUsageCollector, Services } from '@kbn/actions-plugin/server/types';
 import { validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import axios from 'axios';
-import { getConnectorType, type TeamsConnectorType, ConnectorTypeId } from '.';
+import { getConnectorType, TeamsConnectorType, ConnectorTypeId } from '.';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
-import { type ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { loggerMock } from '@kbn/logging-mocks';
 
 jest.mock('axios');

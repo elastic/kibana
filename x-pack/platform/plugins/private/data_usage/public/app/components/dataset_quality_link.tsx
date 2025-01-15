@@ -7,7 +7,7 @@
 
 import React from 'react';
 import {
-  type DataQualityDetailsLocatorParams,
+  DataQualityDetailsLocatorParams,
   DATA_QUALITY_DETAILS_LOCATOR_ID,
 } from '@kbn/deeplinks-observability';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ShardSerialized } from '../../../types';
+import { ShardSerialized } from '../../../types';
 jest.mock('../constants', () => ({
   MAX_TREE_DEPTH: 3,
 }));

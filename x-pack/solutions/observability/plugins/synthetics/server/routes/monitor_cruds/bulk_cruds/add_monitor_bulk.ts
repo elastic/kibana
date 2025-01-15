@@ -4,23 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type SavedObjectsClientContract, type SavedObject } from '@kbn/core/server';
+import { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
 import pMap from 'p-map';
-import { type SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
 import { v4 as uuidV4 } from 'uuid';
-import { type NewPackagePolicy } from '@kbn/fleet-plugin/common';
-import { type SavedObjectError } from '@kbn/core-saved-objects-common';
-import { type SyntheticsServerSetup } from '../../../types';
-import { type RouteContext } from '../../types';
+import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import { SavedObjectError } from '@kbn/core-saved-objects-common';
+import { SyntheticsServerSetup } from '../../../types';
+import { RouteContext } from '../../types';
 import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monitor_upgrade_sender';
 import { formatSecrets } from '../../../synthetics_service/utils';
 import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 import {
   ConfigKey,
-  type EncryptedSyntheticsMonitorAttributes,
-  type MonitorFields,
-  type ServiceLocationErrors,
-  type SyntheticsMonitor,
+  EncryptedSyntheticsMonitorAttributes,
+  MonitorFields,
+  ServiceLocationErrors,
+  SyntheticsMonitor,
   type SyntheticsPrivateLocations,
 } from '../../../../common/runtime_types';
 import { DeleteMonitorAPI } from '../services/delete_monitor_api';

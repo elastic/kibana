@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Type, type ExtendsDeepOptions } from './type';
+import { Type, ExtendsDeepOptions } from './type';
 
 import { META_FIELD_X_OAS_OPTIONAL } from '../oas_meta_fields';
 export class MaybeType<V> extends Type<V | undefined> {

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type KibanaRequest, type SavedObjectsClientContract } from '@kbn/core/server';
+import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { fromNullable, getOrElse } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';

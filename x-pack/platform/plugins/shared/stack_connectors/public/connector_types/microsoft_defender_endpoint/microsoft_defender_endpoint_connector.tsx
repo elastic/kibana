@@ -8,9 +8,9 @@
 import React from 'react';
 
 import {
-  type ActionConnectorFieldsProps,
-  type ConfigFieldSchema,
-  type SecretsFieldSchema,
+  ActionConnectorFieldsProps,
+  ConfigFieldSchema,
+  SecretsFieldSchema,
   SimpleConnectorForm,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import * as translations from './translations';

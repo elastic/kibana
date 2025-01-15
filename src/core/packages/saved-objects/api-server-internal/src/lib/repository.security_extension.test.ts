@@ -17,15 +17,15 @@ import {
 
 import { SavedObjectsRepository } from './repository';
 import { loggerMock } from '@kbn/logging-mocks';
-import { type estypes } from '@elastic/elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { type SavedObjectsBulkUpdateObject } from '@kbn/core-saved-objects-api-server';
-import { type SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import { SavedObjectsBulkUpdateObject } from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import {
-  type ISavedObjectsSecurityExtension,
-  type SavedObjectsRawDocSource,
-  type AuthorizationTypeEntry,
-  type SavedObject,
+  ISavedObjectsSecurityExtension,
+  SavedObjectsRawDocSource,
+  AuthorizationTypeEntry,
+  SavedObject,
 } from '@kbn/core-saved-objects-server';
 import { kibanaMigratorMock } from '../mocks';
 import {
@@ -66,7 +66,7 @@ import {
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 import { arrayMapsAreEqual } from '@kbn/core-saved-objects-utils-server';
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
-import { type OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/types';
+import { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/types';
 
 describe('SavedObjectsRepository Security Extension', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;

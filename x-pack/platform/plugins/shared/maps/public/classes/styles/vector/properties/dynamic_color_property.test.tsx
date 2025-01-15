@@ -18,14 +18,14 @@ import { DynamicColorProperty } from './dynamic_color_property';
 import {
   COLOR_MAP_TYPE,
   FIELD_ORIGIN,
-  type RawValue,
+  RawValue,
   DATA_MAPPING_FUNCTION,
   VECTOR_STYLES,
 } from '../../../../../common/constants';
 import { mockField, MockLayer, MockStyle } from './test_helpers/test_util';
-import { type ColorDynamicOptions } from '../../../../../common/descriptor_types';
-import { type IVectorLayer } from '../../../layers/vector_layer';
-import { type IField } from '../../../fields/field';
+import { ColorDynamicOptions } from '../../../../../common/descriptor_types';
+import { IVectorLayer } from '../../../layers/vector_layer';
+import { IField } from '../../../fields/field';
 
 const makeProperty = (options: ColorDynamicOptions, style?: MockStyle, field?: IField) => {
   return new DynamicColorProperty(

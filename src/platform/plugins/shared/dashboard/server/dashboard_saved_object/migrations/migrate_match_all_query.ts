@@ -9,7 +9,7 @@
 
 import { get } from 'lodash';
 import { DEFAULT_QUERY_LANGUAGE } from '@kbn/data-plugin/common';
-import { type SavedObjectMigrationFn } from '@kbn/core/server';
+import { SavedObjectMigrationFn } from '@kbn/core/server';
 
 /**
  * This migration script is related to:

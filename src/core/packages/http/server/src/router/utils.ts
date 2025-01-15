@@ -8,10 +8,10 @@
  */
 
 import {
-  type RouteValidator,
-  type RouteValidatorFullConfigRequest,
-  type RouteValidatorFullConfigResponse,
-  type RouteValidatorRequestAndResponses,
+  RouteValidator,
+  RouteValidatorFullConfigRequest,
+  RouteValidatorFullConfigResponse,
+  RouteValidatorRequestAndResponses,
 } from './route_validator';
 
 type AnyRouteValidator = RouteValidator<unknown, unknown, unknown>;

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ReactNode } from 'react';
+import { ReactNode } from 'react';
 import type { Capabilities } from '@kbn/core/public';
-import { type SavedObjectsManagementRecord } from '.';
+import { SavedObjectsManagementRecord } from '.';
 
 interface ActionContext {
   capabilities: Capabilities;

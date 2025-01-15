@@ -8,7 +8,7 @@
  */
 
 import { dynamicActionsCollector } from './dynamic_actions_collector';
-import { type DynamicActionsState } from '../../common';
+import { DynamicActionsState } from '../../common';
 
 const state: DynamicActionsState = {
   events: [

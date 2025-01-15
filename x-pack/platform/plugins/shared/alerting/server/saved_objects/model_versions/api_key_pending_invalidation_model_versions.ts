@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
+import { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
 import { rawApiKeyPendingInvalidationSchemaV1 } from '../schemas/raw_api_key_pending_invalidation';
 
 export const apiKeyPendingInvalidationModelVersions: SavedObjectsModelVersionMap = {

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { createMockGraphStore, type MockedGraphEnvironment } from './mocks';
+import { createMockGraphStore, MockedGraphEnvironment } from './mocks';
 import {
   loadSavedWorkspace,
   loadingSaga,
   saveWorkspace,
   savingSaga,
-  type LoadSavedWorkspacePayload,
+  LoadSavedWorkspacePayload,
 } from './persistence';
-import { type UrlTemplate, type AdvancedSettings, type WorkspaceField, type GraphWorkspaceSavedObject } from '../types';
-import { type IndexpatternDatasource, datasourceSelector } from './datasource';
+import { UrlTemplate, AdvancedSettings, WorkspaceField, GraphWorkspaceSavedObject } from '../types';
+import { IndexpatternDatasource, datasourceSelector } from './datasource';
 import { fieldsSelector } from './fields';
 import { metaDataSelector, updateMetaData } from './meta_data';
 import { templatesSelector } from './url_templates';

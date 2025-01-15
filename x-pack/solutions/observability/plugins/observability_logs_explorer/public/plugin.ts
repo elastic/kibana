@@ -6,11 +6,11 @@
  */
 
 import {
-  type AppMountParameters,
-  type CoreSetup,
-  type CoreStart,
-  type Plugin,
-  type PluginInitializerContext,
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
 } from '@kbn/core/public';
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
 import { type ObservabilityLogsExplorerConfig } from '../common/plugin_config';

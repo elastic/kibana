@@ -7,26 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Agent, type IncomingMessage } from 'http';
+import { Agent, IncomingMessage } from 'http';
 import { pick } from 'lodash';
-import { type SemVer } from 'semver';
+import { SemVer } from 'semver';
 
-import { type KibanaRequest, type RequestHandler } from '@kbn/core/server';
+import { KibanaRequest, RequestHandler } from '@kbn/core/server';
 
 // TODO: find a better way to get information from the request like remoteAddress and remotePort
 // for forwarding.
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
-import { type ESConfigForProxy } from '../../../../types';
+import { ESConfigForProxy } from '../../../../types';
 import {
   getElasticsearchProxyConfig,
-  type ProxyConfigCollection,
+  ProxyConfigCollection,
   proxyRequest,
   setHeaders,
 } from '../../../../lib';
 
-import { type RouteDependencies } from '../../..';
+import { RouteDependencies } from '../../..';
 
-import { type Body, type Query } from './validation_config';
+import { Body, Query } from './validation_config';
 import { toURL } from '../../../../lib/utils';
 
 function filterHeaders(originalHeaders: object, headersToKeep: string[]): object {

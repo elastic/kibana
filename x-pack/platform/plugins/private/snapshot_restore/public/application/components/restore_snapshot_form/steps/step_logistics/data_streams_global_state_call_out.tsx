@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { type FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { useCore } from '../../../../app_context';
 

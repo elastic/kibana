@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { type CoreStart, type CoreSetup, type Plugin, type PluginInitializerContext } from '@kbn/core/public';
-import { type SharePluginStart, type SharePluginSetup } from '@kbn/share-plugin/public';
-import { type EmbeddableSetup, type EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
-  type AdvancedUiActionsSetup,
-  type AdvancedUiActionsStart,
+  AdvancedUiActionsSetup,
+  AdvancedUiActionsStart,
 } from '@kbn/ui-actions-enhanced-plugin/public';
-import { type DashboardStart } from '@kbn/dashboard-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { DashboardDrilldownsService } from './services';
 
 export interface SetupDependencies {

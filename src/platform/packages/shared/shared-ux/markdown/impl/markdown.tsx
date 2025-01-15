@@ -10,7 +10,7 @@
 import {
   EuiLink,
   EuiMarkdownEditor,
-  type EuiMarkdownEditorProps,
+  EuiMarkdownEditorProps,
   EuiMarkdownFormat,
   getDefaultEuiMarkdownPlugins,
 } from '@elastic/eui';

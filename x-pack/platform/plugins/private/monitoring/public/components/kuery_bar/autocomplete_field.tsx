@@ -12,10 +12,10 @@ import {
   EuiOutsideClickDetector,
   EuiPanel,
   logicalCSS,
-  type UseEuiTheme,
+  UseEuiTheme,
 } from '@elastic/eui';
 
-import { type QuerySuggestion } from '@kbn/unified-search-plugin/public';
+import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
 
 import { composeStateUpdaters } from '../../lib/typed_react';
 import { SuggestionItem } from './suggestion_item';

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { type EuiBasicTableColumn, EuiCallOut, EuiLink, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiCallOut, EuiLink, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared';
-import { type Cases } from '@kbn/cases-plugin/common';
+import { Cases } from '@kbn/cases-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { type AlertStatus } from '@kbn/rule-data-utils';
+import { AlertStatus } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import React from 'react';
 import { Tooltip as CaseTooltip } from '@kbn/cases-components';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { LEGACY_COMPARATORS } from '../../../common/utils/convert_legacy_outside_comparator';
-import { type NavigateToCaseView } from '../../hooks/use_case_view_navigation';
+import { NavigateToCaseView } from '../../hooks/use_case_view_navigation';
 import { formatCase } from './helpers/format_cases';
-import { type FlyoutThresholdData } from './helpers/map_rules_params_with_flyout';
+import { FlyoutThresholdData } from './helpers/map_rules_params_with_flyout';
 import { Groups } from '../alert_sources/groups';
 import type { Group } from '../../../common/typings';
 

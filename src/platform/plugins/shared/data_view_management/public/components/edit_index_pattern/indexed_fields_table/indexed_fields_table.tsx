@@ -9,11 +9,11 @@
 
 import React, { Component } from 'react';
 import { createSelector } from 'reselect';
-import { type OverlayStart } from '@kbn/core/public';
-import { type DataViewField, type DataView, type RuntimeField } from '@kbn/data-views-plugin/public';
+import { OverlayStart } from '@kbn/core/public';
+import { DataViewField, DataView, RuntimeField } from '@kbn/data-views-plugin/public';
 import { Table } from './components/table';
-import { type IndexedFieldItem } from './types';
-import { type StartServices } from '../../../types';
+import { IndexedFieldItem } from './types';
+import { StartServices } from '../../../types';
 
 interface IndexedFieldsTableProps {
   fields: DataViewField[];

@@ -15,12 +15,12 @@ import { ToolingLog } from '@kbn/tooling-log';
 
 import { writePluginDocs } from '../mdx/write_plugin_mdx_docs';
 import {
-  type ApiDeclaration,
-  type ApiStats,
-  type PluginApi,
-  type PluginOrPackage,
-  type Reference,
-  type TextWithLinks,
+  ApiDeclaration,
+  ApiStats,
+  PluginApi,
+  PluginOrPackage,
+  Reference,
+  TextWithLinks,
   TypeKind,
 } from '../types';
 import { getKibanaPlatformPlugin } from './kibana_platform_plugin_mock';

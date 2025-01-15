@@ -5,19 +5,19 @@
  * 2.0.
  */
 import React, {
-  type FunctionComponent,
+  FunctionComponent,
   useCallback,
   useEffect,
   useState,
   useMemo,
-  type MouseEventHandler,
+  MouseEventHandler,
 } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { EDITOR_PX_HEIGHT, isXJsonValue } from '../processors/shared';
-import { ComboBoxField, Field, type FieldHook } from '../../../../../../shared_imports';
+import { ComboBoxField, Field, FieldHook } from '../../../../../../shared_imports';
 
 import { XJsonEditor } from '.';
 

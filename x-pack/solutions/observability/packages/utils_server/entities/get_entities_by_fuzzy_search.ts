@@ -7,7 +7,7 @@
 
 import { castArray, orderBy } from 'lodash';
 import Fuse from 'fuse.js';
-import { type ObservabilityElasticsearchClient } from '../es/client/create_observability_es_client';
+import { ObservabilityElasticsearchClient } from '../es/client/create_observability_es_client';
 
 export async function getEntitiesByFuzzySearch({
   esClient,

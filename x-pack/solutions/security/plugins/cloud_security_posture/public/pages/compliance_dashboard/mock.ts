@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type BenchmarkData, type ComplianceDashboardDataV2 } from '../../../common/types_old';
+import { BenchmarkData, ComplianceDashboardDataV2 } from '../../../common/types_old';
 
 export const getMockDashboardData = () => ({
   ...mockDashboardData,

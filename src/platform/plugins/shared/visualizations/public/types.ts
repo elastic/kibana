@@ -13,13 +13,13 @@ import type {
   ResolvedSimpleSavedObject,
 } from '@kbn/core/public';
 import {
-  type IAggConfigs,
-  type SerializedSearchSourceFields,
-  type TimefilterContract,
-  type AggConfigSerialized,
+  IAggConfigs,
+  SerializedSearchSourceFields,
+  TimefilterContract,
+  AggConfigSerialized,
 } from '@kbn/data-plugin/public';
 import type { ISearchSource } from '@kbn/data-plugin/common';
-import { type ExpressionAstExpression } from '@kbn/expressions-plugin/public';
+import { ExpressionAstExpression } from '@kbn/expressions-plugin/public';
 
 import type { TableListTab } from '@kbn/content-management-tabbed-table-list-view';
 import type { Vis } from './vis';

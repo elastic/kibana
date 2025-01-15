@@ -15,8 +15,8 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
 import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
 import {
-  type DataDocuments$,
-  type DataTotalHits$,
+  DataDocuments$,
+  DataTotalHits$,
 } from '../../application/main/state_management/discover_data_state_container';
 import { FetchStatus } from '../../application/types';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';

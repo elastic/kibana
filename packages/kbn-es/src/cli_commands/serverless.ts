@@ -21,11 +21,11 @@ import {
   ES_SERVERLESS_REPO_ELASTICSEARCH,
   ES_SERVERLESS_DEFAULT_IMAGE,
   DEFAULT_PORT,
-  type ServerlessOptions,
+  ServerlessOptions,
   isServerlessProjectType,
   serverlessProjectTypes,
 } from '../utils';
-import { type Command } from './types';
+import { Command } from './types';
 import { createCliError } from '../errors';
 
 const supportedProjectTypesStr = Array.from(serverlessProjectTypes).join(' | ').trim();

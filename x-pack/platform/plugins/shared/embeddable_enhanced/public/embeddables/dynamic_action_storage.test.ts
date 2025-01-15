@@ -7,13 +7,13 @@
 
 import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { of } from '@kbn/kibana-utils-plugin/public';
-import { type UiActionsEnhancedSerializedEvent } from '@kbn/ui-actions-enhanced-plugin/public';
+import { UiActionsEnhancedSerializedEvent } from '@kbn/ui-actions-enhanced-plugin/public';
 import { BehaviorSubject } from 'rxjs';
-import { DynamicActionStorage, type DynamicActionStorageApi } from './dynamic_action_storage';
+import { DynamicActionStorage, DynamicActionStorageApi } from './dynamic_action_storage';
 // use real const to make test fail in case someone accidentally changes it
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
-import { type DynamicActionsSerializedState } from '../plugin';
-import { type SerializedAction } from '@kbn/ui-actions-enhanced-plugin/common/types';
+import { DynamicActionsSerializedState } from '../plugin';
+import { SerializedAction } from '@kbn/ui-actions-enhanced-plugin/common/types';
 
 const getApi = (): DynamicActionStorageApi => {
   const dynamicActionsState$ = new BehaviorSubject<DynamicActionsSerializedState['enhancements']>({

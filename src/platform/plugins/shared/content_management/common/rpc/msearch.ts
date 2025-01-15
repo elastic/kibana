@@ -10,7 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import type { Version } from '@kbn/object-versioning';
 import { versionSchema } from './constants';
-import { searchQuerySchema, searchResultSchema, type SearchQuery, type SearchResult } from './search';
+import { searchQuerySchema, searchResultSchema, SearchQuery, SearchResult } from './search';
 
 import type { ProcedureSchemas } from './types';
 

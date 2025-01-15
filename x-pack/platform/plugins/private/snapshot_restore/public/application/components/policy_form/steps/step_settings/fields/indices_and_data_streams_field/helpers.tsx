@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { type EuiSelectableOption } from '@elastic/eui';
+import { EuiSelectableOption } from '@elastic/eui';
 import { orderDataStreamsAndIndices } from '../../../../../lib';
 import { DataStreamBadge } from '../../../../../data_stream_badge';
 

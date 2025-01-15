@@ -14,7 +14,7 @@ import { gatherV1CgroupMetrics } from './v1';
 import { gatherV2CgroupMetrics } from './v2';
 import { gatherInfo } from './gather_info';
 import { GROUP_CPU, GROUP_CPUACCT } from './constants';
-import { type OsCgroupMetrics } from './types';
+import { OsCgroupMetrics } from './types';
 
 interface OsCgroupMetricsCollectorOptions {
   logger: Logger;

@@ -8,34 +8,34 @@
  */
 
 import {
-  type AppMountParameters,
-  type CoreSetup,
-  type CoreStart,
-  type Plugin,
-  type PluginInitializerContext,
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
-import { type DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { type UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { type UrlForwardingSetup, type UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
-import { type SharePluginSetup, type SharePluginStart } from '@kbn/share-plugin/public';
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
 import { setServices } from './application/kibana_services';
 import type { ConfigSchema } from '../server/config';
 import {
   EnvironmentService,
-  type EnvironmentServiceSetup,
+  EnvironmentServiceSetup,
   FeatureCatalogueRegistry,
-  type FeatureCatalogueRegistrySetup,
+  FeatureCatalogueRegistrySetup,
   TutorialService,
-  type TutorialServiceSetup,
+  TutorialServiceSetup,
   AddDataService,
-  type AddDataServiceSetup,
+  AddDataServiceSetup,
   WelcomeService,
-  type WelcomeServiceSetup,
+  WelcomeServiceSetup,
 } from './services';
 
 export interface HomePluginStartDependencies {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import moment, { type Moment } from 'moment';
+import moment, { Moment } from 'moment';
 
 export const parseTimestamp = (tsValue: string): Moment => {
   let parsed = Date.parse(tsValue);

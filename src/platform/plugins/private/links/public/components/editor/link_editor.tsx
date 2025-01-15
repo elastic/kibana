@@ -25,19 +25,19 @@ import {
   EuiButtonEmpty,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  type EuiRadioGroupOption,
+  EuiRadioGroupOption,
 } from '@elastic/eui';
 
 import {
-  type LinkType,
+  LinkType,
   EXTERNAL_LINK_TYPE,
   DASHBOARD_LINK_TYPE,
-  type LinkOptions,
+  LinkOptions,
 } from '../../../common/content_management';
 import { LinksStrings } from '../links_strings';
 import { LinkInfo } from './constants';
 import { LinkOptionsComponent } from './link_options';
-import { type UnorderedLink } from '../../editor/open_link_editor_flyout';
+import { UnorderedLink } from '../../editor/open_link_editor_flyout';
 import { LinkDestination } from './link_destination';
 
 export const LinkEditor = ({

@@ -7,11 +7,11 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  type CspBenchmarkRulesBulkActionRequestSchema,
+  CspBenchmarkRulesBulkActionRequestSchema,
   cspBenchmarkRulesBulkActionRequestSchema,
 } from '@kbn/cloud-security-posture-common/schema/rules/v4';
 import type { CspBenchmarkRulesBulkActionResponse } from '@kbn/cloud-security-posture-common/schema/rules/v4';
-import { type CspRouter } from '../../../types';
+import { CspRouter } from '../../../types';
 
 import { CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH } from '../../../../common/constants';
 import { bulkActionBenchmarkRulesHandler } from './v1';

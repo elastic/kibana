@@ -6,8 +6,8 @@
  */
 
 import {
-  type ActionsClientChatOpenAI,
-  type ActionsClientSimpleChatModel,
+  ActionsClientChatOpenAI,
+  ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import { celTestState } from '../../../__jest__/fixtures/cel';

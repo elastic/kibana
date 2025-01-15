@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type Pipeline } from '../../../../../common/types';
-import { type VerboseTestOutput, type Document } from '../types';
+import { Pipeline } from '../../../../../common/types';
+import { VerboseTestOutput, Document } from '../types';
 
 export const PROCESSORS: Pick<Pipeline, 'processors'> = {
   processors: [

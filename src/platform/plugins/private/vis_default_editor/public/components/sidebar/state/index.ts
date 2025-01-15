@@ -8,14 +8,14 @@
  */
 
 import { useReducer, useCallback } from 'react';
-import { type EventEmitter } from 'events';
+import { EventEmitter } from 'events';
 
-import { type Vis } from '@kbn/visualizations-plugin/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { createEditorStateReducer, initEditorState, type EditorVisState } from './reducers';
+import { createEditorStateReducer, initEditorState, EditorVisState } from './reducers';
 import { EditorStateActionTypes } from './constants';
-import { type EditorAction } from './actions';
-import { type VisDefaultEditorKibanaServices } from '../../../types';
+import { EditorAction } from './actions';
+import { VisDefaultEditorKibanaServices } from '../../../types';
 
 export * from './editor_form_state';
 export * from './actions';

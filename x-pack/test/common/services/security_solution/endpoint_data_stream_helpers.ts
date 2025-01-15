@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Client } from '@elastic/elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import {
   alertsIndexPattern,

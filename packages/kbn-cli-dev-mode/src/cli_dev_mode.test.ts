@@ -14,7 +14,7 @@ import { createAbsolutePathSerializer, createAnyInstanceSerializer } from '@kbn/
 import { REPO_ROOT } from '@kbn/repo-info';
 
 import { TestLog } from './log';
-import { CliDevMode, type SomeCliArgs } from './cli_dev_mode';
+import { CliDevMode, SomeCliArgs } from './cli_dev_mode';
 import type { CliDevConfig } from './config';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());

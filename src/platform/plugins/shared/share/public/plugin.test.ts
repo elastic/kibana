@@ -9,7 +9,7 @@
 
 import { registryMock, managerMock } from './plugin.test.mocks';
 import { SharePlugin } from './plugin';
-import { type CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { anonymousAccessMock } from '../common/anonymous_access/index.mock';
 

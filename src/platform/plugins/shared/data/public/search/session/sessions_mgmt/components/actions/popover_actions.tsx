@@ -10,21 +10,21 @@
 import {
   EuiButtonIcon,
   EuiContextMenu,
-  type EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelDescriptor,
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
 import {
-  type EuiContextMenuPanelItemDescriptorEntry,
-  type EuiContextMenuPanelItemSeparator,
+  EuiContextMenuPanelItemDescriptorEntry,
+  EuiContextMenuPanelItemSeparator,
 } from '@elastic/eui/src/components/context_menu/context_menu';
 import { i18n } from '@kbn/i18n';
-import { type CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import React, { useState } from 'react';
-import { type SearchSessionsMgmtAPI } from '../../lib/api';
-import { type UISession } from '../../types';
+import { SearchSessionsMgmtAPI } from '../../lib/api';
+import { UISession } from '../../types';
 import { getAction } from './get_action';
-import { ACTION, type OnActionComplete } from './types';
+import { ACTION, OnActionComplete } from './types';
 
 interface PopoverActionItemsProps {
   session: UISession;

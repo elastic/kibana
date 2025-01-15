@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { type TestBedConfig, registerTestBed, type TestBed } from '@kbn/test-jest-helpers';
+import { TestBedConfig, registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 
 import { BASE_PATH } from '../../../public/application/constants';
 import { SnapshotList } from '../../../public/application/sections/home/snapshot_list';

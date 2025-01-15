@@ -10,25 +10,25 @@
 import React from 'react';
 import { Position } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
-import { type FieldFormat, type FormatFactory } from '@kbn/field-formats-plugin/common';
+import { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
 import { groupBy, orderBy } from 'lodash';
 import {
-  type IconPosition,
-  type ReferenceLineConfig,
-  type FillStyle,
-  type ExtendedReferenceLineDecorationConfig,
-  type ReferenceLineDecorationConfig,
-  type CommonXYReferenceLineLayerConfig,
+  IconPosition,
+  ReferenceLineConfig,
+  FillStyle,
+  ExtendedReferenceLineDecorationConfig,
+  ReferenceLineDecorationConfig,
+  CommonXYReferenceLineLayerConfig,
 } from '../../../common/types';
 import { FillStyles } from '../../../common/constants';
 import {
-  type GroupsConfiguration,
+  GroupsConfiguration,
   mapVerticalToHorizontalPlacement,
   Marker,
   MarkerBody,
   getAxisPosition,
   getOriginalAxisPosition,
-  type AxesMap,
+  AxesMap,
   isReferenceLine,
 } from '../../helpers';
 import type { ReferenceLineAnnotationConfig } from './reference_line_annotations';

@@ -8,10 +8,10 @@
  */
 
 import { resolve, relative } from 'path';
-import { type Stats, createReadStream, createWriteStream } from 'fs';
+import { Stats, createReadStream, createWriteStream } from 'fs';
 import { stat, rename } from 'fs/promises';
-import { type Readable, type Writable } from 'stream';
-import { type ToolingLog } from '@kbn/tooling-log';
+import { Readable, Writable } from 'stream';
+import { ToolingLog } from '@kbn/tooling-log';
 import { createPromiseFromStreams } from '@kbn/utils';
 import { REPO_ROOT } from '@kbn/repo-info';
 import {

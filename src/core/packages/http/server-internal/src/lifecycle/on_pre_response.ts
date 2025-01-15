@@ -8,10 +8,10 @@
  */
 
 import {
-  type Lifecycle,
-  type Request,
-  type ResponseObject,
-  type ResponseToolkit as HapiResponseToolkit,
+  Lifecycle,
+  Request,
+  ResponseObject,
+  ResponseToolkit as HapiResponseToolkit,
 } from '@hapi/hapi';
 import Boom from '@hapi/boom';
 import type { Logger } from '@kbn/logging';

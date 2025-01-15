@@ -6,5 +6,5 @@
  */
 
 export * from './dataset_types';
-export type * from './quality_types';
-export type * from './common';
+export * from './quality_types';
+export * from './common';

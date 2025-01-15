@@ -8,7 +8,7 @@
  */
 
 import { UiSettingsClientCommon } from './ui_settings_client_common';
-import { type UiSettingsServiceOptions } from '../types';
+import { UiSettingsServiceOptions } from '../types';
 import { SettingNotRegisteredError } from '../ui_settings_errors';
 
 /**

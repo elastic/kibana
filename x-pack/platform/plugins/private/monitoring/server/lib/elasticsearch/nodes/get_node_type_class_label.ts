@@ -7,8 +7,8 @@
 
 import { nodeTypeLabel, nodeTypeClass } from './lookups';
 import {
-  type ElasticsearchLegacySource,
-  type ElasticsearchMetricbeatNode,
+  ElasticsearchLegacySource,
+  ElasticsearchMetricbeatNode,
 } from '../../../../common/types/es';
 
 /*

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type CasesService } from './types';
+import { CasesService } from './types';
 
 export const openAddToExistingCaseModalMock = jest.fn();
 export const openAddToNewCaseFlyoutMock = jest.fn();

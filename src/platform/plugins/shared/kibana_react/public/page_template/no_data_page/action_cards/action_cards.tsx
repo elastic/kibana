@@ -10,8 +10,8 @@
 import './action_cards.scss';
 
 import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
-import React, { type ReactElement } from 'react';
-import { type ElasticAgentCard, type NoDataCard } from '../no_data_card';
+import React, { ReactElement } from 'react';
+import { ElasticAgentCard, NoDataCard } from '../no_data_card';
 
 interface ActionCardsProps {
   actionCards: Array<ReactElement<typeof NoDataCard> | ReactElement<typeof ElasticAgentCard>>;

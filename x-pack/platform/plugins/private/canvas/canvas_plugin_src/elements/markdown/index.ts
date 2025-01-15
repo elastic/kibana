@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ElementFactory } from '../../../types';
+import { ElementFactory } from '../../../types';
 export const markdown: ElementFactory = () => ({
   name: 'markdown',
   displayName: 'Text',

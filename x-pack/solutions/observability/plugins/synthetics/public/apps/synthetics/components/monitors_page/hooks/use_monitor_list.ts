@@ -12,7 +12,7 @@ import { useMonitorFiltersState } from '../common/monitor_filters/use_filters';
 import {
   fetchMonitorListAction,
   quietFetchMonitorListAction,
-  type MonitorListPageState,
+  MonitorListPageState,
   selectEncryptedSyntheticsSavedMonitors,
   selectMonitorListState,
   updateManagementPageStateAction,

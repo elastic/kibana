@@ -12,14 +12,14 @@ import {
   FIELD_ORIGIN,
   JOIN_FIELD_NAME_PREFIX,
   LAYER_TYPE,
-  type VECTOR_STYLES,
+  VECTOR_STYLES,
 } from '../constants';
 import { getJoinAggKey } from '../get_agg_key';
 import {
-  type AggDescriptor,
-  type JoinDescriptor,
-  type LayerDescriptor,
-  type VectorLayerDescriptor,
+  AggDescriptor,
+  JoinDescriptor,
+  LayerDescriptor,
+  VectorLayerDescriptor,
 } from '../descriptor_types';
 import type { MapAttributes } from '../content_management';
 

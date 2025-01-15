@@ -8,7 +8,7 @@
  */
 
 import { singleAstriskValidator } from './form_schema';
-import { type ValidationFuncArg } from '../shared_imports';
+import { ValidationFuncArg } from '../shared_imports';
 
 describe('validators', () => {
   test('singleAstriskValidator should pass', async () => {

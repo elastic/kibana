@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import type SuperTest from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
@@ -14,7 +14,7 @@ import type {
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
-import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { retry } from '../../common/retry';
 
 const TIMEOUT = 70_000;

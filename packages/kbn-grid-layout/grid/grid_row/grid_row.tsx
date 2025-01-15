@@ -17,10 +17,10 @@ import { cloneDeep } from 'lodash';
 import { DragPreview } from '../drag_preview';
 import { GridPanel } from '../grid_panel';
 import {
-  type GridLayoutStateManager,
-  type GridRowData,
-  type UserInteractionEvent,
-  type PanelInteractionEvent,
+  GridLayoutStateManager,
+  GridRowData,
+  UserInteractionEvent,
+  PanelInteractionEvent,
 } from '../types';
 import { getKeysInOrder } from '../utils/resolve_grid_row';
 import { GridRowHeader } from './grid_row_header';

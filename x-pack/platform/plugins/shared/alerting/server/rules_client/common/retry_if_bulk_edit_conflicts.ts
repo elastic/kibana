@@ -7,14 +7,14 @@
 
 import pMap from 'p-map';
 import { chunk } from 'lodash';
-import { type KueryNode } from '@kbn/es-query';
-import { type Logger, type SavedObjectsBulkUpdateObject, type SavedObjectsUpdateResponse } from '@kbn/core/server';
-import { type BulkActionSkipResult } from '../../../common/bulk_edit';
+import { KueryNode } from '@kbn/es-query';
+import { Logger, SavedObjectsBulkUpdateObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
+import { BulkActionSkipResult } from '../../../common/bulk_edit';
 import { convertRuleIdsToKueryNode } from '../../lib';
-import { type BulkOperationError } from '../types';
+import { BulkOperationError } from '../types';
 import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { type RawRule } from '../../types';
+import { RawRule } from '../../types';
 
 // max number of failed SO ids in one retry filter
 const MaxIdsNumberInRetryFilter = 1000;

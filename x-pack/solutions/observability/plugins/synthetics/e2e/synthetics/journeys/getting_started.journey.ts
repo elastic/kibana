@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { journey, step, expect, before, type Page } from '@elastic/synthetics';
+import { journey, step, expect, before, Page } from '@elastic/synthetics';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 import { cleanTestMonitors } from './services/add_monitor';
 

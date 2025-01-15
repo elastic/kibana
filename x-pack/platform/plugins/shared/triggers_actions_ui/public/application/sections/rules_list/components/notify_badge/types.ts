@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type RuleSnoozeSettings, type SnoozeSchedule } from '../../../../../types';
+import { RuleSnoozeSettings, SnoozeSchedule } from '../../../../../types';
 
 export interface RulesListNotifyBadgeProps {
   /**

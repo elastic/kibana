@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type LogMeta } from '@kbn/core/server';
+import { LogMeta } from '@kbn/core/server';
 import type { TaskRunMetrics } from '@kbn/reporting-common/types';
-import { type ActionType } from '.';
+import { ActionType } from '.';
 
 export interface ReportingAction<A extends ActionType> extends LogMeta {
   event: {

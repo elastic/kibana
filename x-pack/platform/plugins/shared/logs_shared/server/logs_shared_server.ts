@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type LogsSharedBackendLibs } from './lib/logs_shared_types';
+import { LogsSharedBackendLibs } from './lib/logs_shared_types';
 import {
   initLogEntriesHighlightsRoute,
   initLogEntriesSummaryHighlightsRoute,

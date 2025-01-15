@@ -14,7 +14,7 @@ import { BASE_PATH } from '../paths';
 import { installArchive } from './install_archive';
 import { log as defaultLog } from '../utils/log';
 import { Artifact } from '../artifact';
-import { type DownloadSnapshotOptions, type InstallSnapshotOptions } from './types';
+import { DownloadSnapshotOptions, InstallSnapshotOptions } from './types';
 
 /**
  * Download an ES snapshot

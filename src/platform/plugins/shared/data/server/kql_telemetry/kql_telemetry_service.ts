@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type CoreSetup, type Plugin, type PluginInitializerContext } from '@kbn/core/server';
-import { type UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { registerKqlTelemetryRoute } from './route';
 import { makeKQLUsageCollector } from './usage_collector';
 import { kqlTelemetry } from '../saved_objects';

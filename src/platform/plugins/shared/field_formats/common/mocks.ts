@@ -8,7 +8,7 @@
  */
 
 import { identity } from 'lodash';
-import { FieldFormat, type IFieldFormatsRegistry } from '.';
+import { FieldFormat, IFieldFormatsRegistry } from '.';
 
 export const fieldFormatsMock: IFieldFormatsRegistry = {
   getByFieldType: jest.fn(),

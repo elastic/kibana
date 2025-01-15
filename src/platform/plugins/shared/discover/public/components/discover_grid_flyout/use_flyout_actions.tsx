@@ -8,8 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type FlyoutActionItem, type FlyoutCustomization } from '../../customizations';
-import { type UseNavigationProps, useNavigationProps } from '../../hooks/use_navigation_props';
+import { FlyoutActionItem, FlyoutCustomization } from '../../customizations';
+import { UseNavigationProps, useNavigationProps } from '../../hooks/use_navigation_props';
 
 interface UseFlyoutActionsParams extends UseNavigationProps {
   actions?: FlyoutCustomization['actions'];

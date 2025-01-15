@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type DataView, type FieldSpec, type RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
+import { DataView, FieldSpec, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, BoolQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 
-import { type OptionsListSelection } from './options_list_selections';
-import { type OptionsListSortingType } from './suggestions_sorting';
-import { type DefaultDataControlState } from '../types';
-import { type OptionsListSearchTechnique } from './suggestions_searching';
+import { OptionsListSelection } from './options_list_selections';
+import { OptionsListSortingType } from './suggestions_sorting';
+import { DefaultDataControlState } from '../types';
+import { OptionsListSearchTechnique } from './suggestions_searching';
 
 /**
  * ----------------------------------------------------------------

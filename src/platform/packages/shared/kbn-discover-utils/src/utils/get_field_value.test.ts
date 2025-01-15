@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type DataTableRecord } from '../types';
+import { DataTableRecord } from '../types';
 import { getFieldValue } from './get_field_value';
 
 const dataTableRecord: DataTableRecord = {

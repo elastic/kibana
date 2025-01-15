@@ -24,7 +24,7 @@ import {
   isSourceItem,
   shouldBeQuotedText,
 } from '../shared/helpers';
-import { type ESQLCallbacks } from '../shared/types';
+import { ESQLCallbacks } from '../shared/types';
 import { buildQueryForFieldsFromSource } from '../validation/helpers';
 import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX, METADATA_FIELDS } from '../shared/constants';
 import type { CodeAction, Callbacks, CodeActionOptions } from './types';

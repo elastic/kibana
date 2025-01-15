@@ -20,12 +20,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { type DragDropIdentifier, ReorderProvider, type DropType } from '@kbn/dom-drag-drop';
+import { DragDropIdentifier, ReorderProvider, DropType } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
 import { LayerActions } from './layer_actions';
-import { isOperation, type LayerAction, type VisualizationDimensionGroupConfig } from '../../../types';
+import { isOperation, LayerAction, VisualizationDimensionGroupConfig } from '../../../types';
 import { LayerHeader } from './layer_header';
-import { type LayerPanelProps } from './types';
+import { LayerPanelProps } from './types';
 import { DimensionContainer } from './dimension_container';
 import { EmptyDimensionButton } from './buttons/empty_dimension_button';
 import { DraggableDimensionButton } from './buttons/draggable_dimension_button';

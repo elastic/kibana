@@ -7,13 +7,13 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ActionConnectorMode, type ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionConnectorMode, ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow } from '@elastic/eui';
 import { EuiFieldText } from '@elastic/eui';
-import { type D3SecurityRunActionParams } from '../../../common/d3security/types';
+import { D3SecurityRunActionParams } from '../../../common/d3security/types';
 import { SUB_ACTION } from '../../../common/d3security/constants';
-import { type D3SecurityActionParams } from './types';
+import { D3SecurityActionParams } from './types';
 
 const D3ParamsFields: React.FunctionComponent<ActionParamsProps<D3SecurityActionParams>> = ({
   actionParams,

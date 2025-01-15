@@ -8,31 +8,31 @@
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { type AssistantAvailability, AssistantProvider } from '@kbn/elastic-assistant';
+import { AssistantAvailability, AssistantProvider } from '@kbn/elastic-assistant';
 import React from 'react';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { type Theme } from '@elastic/charts';
+import { Theme } from '@elastic/charts';
 import { coreMock } from '@kbn/core/public/mocks';
-import { type UserProfileService } from '@kbn/core/public';
+import { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@elastic/eui';
 
-import { DataQualityProvider, type DataQualityProviderProps } from '../../data_quality_context';
+import { DataQualityProvider, DataQualityProviderProps } from '../../data_quality_context';
 import { ResultsRollupContext } from '../../contexts/results_rollup_context';
 import { IndicesCheckContext } from '../../contexts/indices_check_context';
-import { type UseIndicesCheckReturnValue } from '../../hooks/use_indices_check/types';
-import { type UseResultsRollupReturnValue } from '../../hooks/use_results_rollup/types';
+import { UseIndicesCheckReturnValue } from '../../hooks/use_indices_check/types';
+import { UseResultsRollupReturnValue } from '../../hooks/use_results_rollup/types';
 import { getMergeResultsRollupContextProps } from './utils/get_merged_results_rollup_context_props';
 import { getMergedDataQualityContextProps } from './utils/get_merged_data_quality_context_props';
 import { getMergedIndicesCheckContextProps } from './utils/get_merged_indices_check_context_props';
 import { HistoricalResultsContext } from '../../data_quality_details/indices_details/pattern/contexts/historical_results_context';
 import { initialFetchHistoricalResultsReducerState } from '../../data_quality_details/indices_details/pattern/hooks/use_historical_results';
 import {
-  type FetchHistoricalResultsReducerState,
-  type UseHistoricalResultsReturnValue,
+  FetchHistoricalResultsReducerState,
+  UseHistoricalResultsReturnValue,
 } from '../../data_quality_details/indices_details/pattern/hooks/use_historical_results/types';
 
 interface TestExternalProvidersProps {

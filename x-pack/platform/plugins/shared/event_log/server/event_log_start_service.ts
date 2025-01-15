@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { type Observable } from 'rxjs';
-import { type IClusterClient, type KibanaRequest } from '@kbn/core/server';
-import { type SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import { Observable } from 'rxjs';
+import { IClusterClient, KibanaRequest } from '@kbn/core/server';
+import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
-import { type EsContext } from './es';
-import { type IEventLogClientService } from './types';
+import { EsContext } from './es';
+import { IEventLogClientService } from './types';
 import { EventLogClient } from './event_log_client';
-import { type SavedObjectProviderRegistry } from './saved_object_provider_registry';
+import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
 export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 

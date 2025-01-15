@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { type ComponentType } from 'react';
+import React, { ComponentType } from 'react';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { PluginContext, type PluginContextValue } from '../../context/plugin_context/plugin_context';
+import { PluginContext, PluginContextValue } from '../../context/plugin_context/plugin_context';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { apmAlertResponseExample } from './alerts_flyout.mock';
 import { AlertsFlyout } from './alerts_flyout';

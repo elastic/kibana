@@ -13,10 +13,10 @@ import { fork, type ChildProcess } from 'child_process';
 import * as Rx from 'rxjs';
 import { map, takeUntil, first, ignoreElements } from 'rxjs';
 
-import { isWorkerMsg, type WorkerConfig, type WorkerMsg, type Bundle, BundleRemotes } from '../common';
+import { isWorkerMsg, WorkerConfig, WorkerMsg, Bundle, BundleRemotes } from '../common';
 
 import { observeStdio$ } from './observe_stdio';
-import { type OptimizerConfig } from './optimizer_config';
+import { OptimizerConfig } from './optimizer_config';
 
 export interface WorkerStdio {
   type: 'worker stdio';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, type PropsWithChildren, createContext } from 'react';
+import React, { FC, PropsWithChildren, createContext } from 'react';
 import { useRoutingContext } from './hooks/use_routing_context';
 
 export interface WorkpadRoutingContextType {

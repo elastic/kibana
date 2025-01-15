@@ -9,12 +9,12 @@ import { sortBy } from 'lodash';
 import { flow, map, flatten, uniq } from 'lodash/fp';
 
 import {
-  type SnapshotDetails,
-  type SnapshotDetailsEs,
-  type SnapshotConfig,
-  type SnapshotConfigEs,
-  type SnapshotRetention,
-  type SnapshotRetentionEs,
+  SnapshotDetails,
+  SnapshotDetailsEs,
+  SnapshotConfig,
+  SnapshotConfigEs,
+  SnapshotRetention,
+  SnapshotRetentionEs,
 } from '../types';
 
 import { deserializeTime, serializeTime } from './time_serialization';

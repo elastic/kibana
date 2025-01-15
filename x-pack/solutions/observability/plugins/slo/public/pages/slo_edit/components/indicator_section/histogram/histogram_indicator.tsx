@@ -7,7 +7,7 @@
 
 import {
   EuiComboBox,
-  type EuiComboBoxOptionOption,
+  EuiComboBoxOptionOption,
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,12 +15,12 @@ import {
   EuiIconTip,
   EuiSpacer,
 } from '@elastic/eui';
-import { type DataView, type FieldSpec } from '@kbn/data-views-plugin/common';
+import { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment, useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { createOptionsFromFields, type Option } from '../../../helpers/create_options';
-import { type CreateSLOForm } from '../../../types';
+import { createOptionsFromFields, Option } from '../../../helpers/create_options';
+import { CreateSLOForm } from '../../../types';
 import { QueryBuilder } from '../../common/query_builder';
 
 interface HistogramIndicatorProps {

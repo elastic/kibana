@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type DataView } from '@kbn/data-plugin/common';
-import { type AGG_TYPE } from '../../../../common/constants';
+import { DataView } from '@kbn/data-plugin/common';
+import { AGG_TYPE } from '../../../../common/constants';
 import type { IESSource } from '../es_source/types';
-import { type IESAggField } from '../../fields/agg';
+import { IESAggField } from '../../fields/agg';
 
 export function hasESAggSourceMethod(
   source: IESSource,

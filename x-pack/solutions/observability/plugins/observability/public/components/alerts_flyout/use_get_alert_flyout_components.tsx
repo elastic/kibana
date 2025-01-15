@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { type AlertsTableFlyoutBaseProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { AlertsTableFlyoutBaseProps } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';

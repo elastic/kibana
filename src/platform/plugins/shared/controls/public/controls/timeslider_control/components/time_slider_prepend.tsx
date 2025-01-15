@@ -8,9 +8,9 @@
  */
 
 import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
-import { type ViewMode } from '@kbn/presentation-publishing';
-import React, { type FC, useCallback, useState } from 'react';
-import { first, type Observable, type Subscription } from 'rxjs';
+import { ViewMode } from '@kbn/presentation-publishing';
+import React, { FC, useCallback, useState } from 'react';
+import { first, Observable, Subscription } from 'rxjs';
 import { PlayButton } from './play_button';
 import { TimeSliderStrings } from './time_slider_strings';
 

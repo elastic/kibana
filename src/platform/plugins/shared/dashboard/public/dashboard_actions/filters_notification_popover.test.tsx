@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type AggregateQuery, type Filter, FilterStateStore, type Query } from '@kbn/es-query';
+import { AggregateQuery, Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { type FiltersNotificationActionApi } from './filters_notification_action';
+import { FiltersNotificationActionApi } from './filters_notification_action';
 import { FiltersNotificationPopover } from './filters_notification_popover';
-import { type ViewMode } from '@kbn/presentation-publishing';
+import { ViewMode } from '@kbn/presentation-publishing';
 
 const canEditUnifiedSearch = jest.fn().mockReturnValue(true);
 

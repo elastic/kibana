@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { type TypeOf } from '@kbn/config-schema';
+import { TypeOf } from '@kbn/config-schema';
 import {
   AGENT_POLICY_API_ROUTES,
-  type CreateAgentPolicyResponse,
+  CreateAgentPolicyResponse,
   EPM_API_ROUTES,
   PACKAGE_POLICY_API_ROUTES,
 } from '@kbn/fleet-plugin/common';
 import {
-  type NewAgentPolicySchema,
-  type SimplifiedCreatePackagePolicyRequestBodySchema,
+  NewAgentPolicySchema,
+  SimplifiedCreatePackagePolicyRequestBodySchema,
 } from '@kbn/fleet-plugin/server/types';
 import { rootRequest } from './common';
 

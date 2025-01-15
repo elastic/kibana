@@ -16,7 +16,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { maplibregl, type Map as MapboxMap } from '@kbn/mapbox-gl';
+import { maplibregl, Map as MapboxMap } from '@kbn/mapbox-gl';
 import { i18n } from '@kbn/i18n';
 import { CUSTOM_ICON_PIXEL_RATIO, createSdfIcon } from '../../symbol_utils';
 

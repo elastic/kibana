@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type LayoutConfigType } from '../layout';
+import { LayoutConfigType } from '../layout';
 
 /**
  * Configuration of a console appender

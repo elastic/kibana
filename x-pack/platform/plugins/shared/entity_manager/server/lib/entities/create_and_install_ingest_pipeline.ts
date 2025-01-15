@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type ElasticsearchClient, type Logger } from '@kbn/core/server';
-import { type EntityDefinition } from '@kbn/entities-schema';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { EntityDefinition } from '@kbn/entities-schema';
 import { generateLatestIngestPipelineId } from './helpers/generate_component_id';
 import { retryTransientEsErrors } from './helpers/retry';
 import { generateLatestProcessors } from './ingest_pipeline/generate_latest_processors';

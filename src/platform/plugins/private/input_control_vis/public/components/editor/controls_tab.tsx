@@ -20,8 +20,8 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 
-import { type VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
-import { type DataView } from '@kbn/data-views-plugin/public';
+import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { ControlEditor } from './control_editor';
 import {
   addControl,
@@ -29,13 +29,13 @@ import {
   newControl,
   removeControl,
   setControl,
-  type ControlParams,
+  ControlParams,
   CONTROL_TYPES,
-  type ControlParamsOptions,
+  ControlParamsOptions,
 } from '../../editor_utils';
 import { getLineageMap, getParentCandidates } from '../../lineage';
-import { type InputControlVisDependencies } from '../../plugin';
-import { type InputControlVisParams } from '../../types';
+import { InputControlVisDependencies } from '../../plugin';
+import { InputControlVisParams } from '../../types';
 
 interface ControlsTabUiState {
   type: CONTROL_TYPES;

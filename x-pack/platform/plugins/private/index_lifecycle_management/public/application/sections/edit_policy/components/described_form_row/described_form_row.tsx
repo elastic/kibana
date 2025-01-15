@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { type FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useState } from 'react';
 import {
   EuiDescribedFormGroup,
-  type EuiDescribedFormGroupProps,
-  type EuiSwitchProps,
+  EuiDescribedFormGroupProps,
+  EuiSwitchProps,
   EuiSwitch,
   EuiSpacer,
 } from '@elastic/eui';

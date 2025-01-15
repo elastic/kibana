@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, type Observable, Subject, type Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 import { delay, filter, map, shareReplay } from 'rxjs';
 import { defaults } from 'lodash';
-import { type SerializableRecord, type UnwrapObservable } from '@kbn/utility-types';
-import { type Adapters } from '@kbn/inspector-plugin/public';
-import { type IExpressionLoaderParams } from './types';
-import { type ExpressionAstExpression } from '../common';
-import { type ExecutionContract } from '../common/execution/execution_contract';
+import { SerializableRecord, UnwrapObservable } from '@kbn/utility-types';
+import { Adapters } from '@kbn/inspector-plugin/public';
+import { IExpressionLoaderParams } from './types';
+import { ExpressionAstExpression } from '../common';
+import { ExecutionContract } from '../common/execution/execution_contract';
 
 import { ExpressionRenderHandler } from './render';
 import { getExpressionsService } from './services';

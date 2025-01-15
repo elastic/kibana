@@ -9,13 +9,13 @@ import React from 'react';
 import {
   Axis,
   BarSeries,
-  type BarStyleAccessor,
+  BarStyleAccessor,
   Chart,
-  type DomainRange,
+  DomainRange,
   Position,
   ScaleType,
   Settings,
-  type TickFormatter,
+  TickFormatter,
   TooltipType,
   Tooltip,
 } from '@elastic/charts';

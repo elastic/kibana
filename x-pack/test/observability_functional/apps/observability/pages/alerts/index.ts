@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { type FtrProviderContext } from '../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { asyncForEach } from '../../helpers';
 
 const ACTIVE_ALERTS_CELL_COUNT = 78;

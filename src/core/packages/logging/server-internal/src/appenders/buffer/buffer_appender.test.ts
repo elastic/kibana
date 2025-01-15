@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LogLevel, type LogRecord } from '@kbn/logging';
+import { LogLevel, LogRecord } from '@kbn/logging';
 import { BufferAppender } from './buffer_appender';
 
 test('`flush()` does not return any record buffered at the beginning.', () => {

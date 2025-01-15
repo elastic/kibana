@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { type KibanaResponseFactory } from '@kbn/core/server';
-import { type ErrorThatHandlesItsOwnResponse } from './types';
+import { KibanaResponseFactory } from '@kbn/core/server';
+import { ErrorThatHandlesItsOwnResponse } from './types';
 import { GenerationErrorCode } from '../../../common/constants';
 import {
-  type GenerationErrorAttributes,
-  type GenerationErrorBody,
+  GenerationErrorAttributes,
+  GenerationErrorBody,
 } from '../../../common/api/generation_error';
 
 const errorCode = GenerationErrorCode.UNPARSEABLE_CSV_DATA;

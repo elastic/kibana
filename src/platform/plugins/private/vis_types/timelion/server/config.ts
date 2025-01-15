@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { offeringBasedSchema, schema, type TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   graphiteUrls: schema.maybe(schema.arrayOf(schema.string())),

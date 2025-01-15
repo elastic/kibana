@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type RetryService } from '@kbn/ftr-common-functional-services';
+import { RetryService } from '@kbn/ftr-common-functional-services';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 /**

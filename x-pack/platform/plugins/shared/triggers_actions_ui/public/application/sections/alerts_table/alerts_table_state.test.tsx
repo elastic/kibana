@@ -13,26 +13,26 @@ import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS, ALERT_UUID } from '@kbn/r
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import {
-  type Alerts,
+  Alerts,
   AlertsField,
-  type AlertsTableConfigurationRegistry,
-  type AlertsTableFlyoutBaseProps,
-  type AlertsTableProps,
-  type FetchAlertData,
-  type RenderCustomActionsRowArgs,
+  AlertsTableConfigurationRegistry,
+  AlertsTableFlyoutBaseProps,
+  AlertsTableProps,
+  FetchAlertData,
+  RenderCustomActionsRowArgs,
 } from '../../../types';
 import { PLUGIN_ID } from '../../../common/constants';
-import AlertsTableState, { type AlertsTableStateProps } from './alerts_table_state';
+import AlertsTableState, { AlertsTableStateProps } from './alerts_table_state';
 import { AlertsTable } from './alerts_table';
 import { useBulkGetCases } from './hooks/use_bulk_get_cases';
 import { DefaultSort } from './hooks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { type BrowserFields } from '@kbn/alerting-types';
+import { BrowserFields } from '@kbn/alerting-types';
 import { getCasesMockMap } from './cases/index.mock';
 import { createCasesServiceMock } from './index.mock';
 import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
 import { getMaintenanceWindowMockMap } from './maintenance_windows/index.mock';
-import { type AlertTableConfigRegistry } from '../../alert_table_config_registry';
+import { AlertTableConfigRegistry } from '../../alert_table_config_registry';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fetchAlertsFields } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields';
 import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_search_alerts_query';

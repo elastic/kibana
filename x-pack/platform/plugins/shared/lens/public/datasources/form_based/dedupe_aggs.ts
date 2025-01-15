@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { type AggFunctionsMapping } from '@kbn/data-plugin/public';
+import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import {
-  type ExpressionAstExpressionBuilder,
-  type ExpressionAstFunctionBuilder,
+  ExpressionAstExpressionBuilder,
+  ExpressionAstFunctionBuilder,
 } from '@kbn/expressions-plugin/common';
-import { type GenericOperationDefinition } from './operations';
+import { GenericOperationDefinition } from './operations';
 import { groupByKey } from './operations/definitions/get_group_by_key';
-import { extractAggId, type OriginalColumn } from './to_expression';
+import { extractAggId, OriginalColumn } from './to_expression';
 
 /**
  * Consolidates duplicate agg expression builders to increase performance

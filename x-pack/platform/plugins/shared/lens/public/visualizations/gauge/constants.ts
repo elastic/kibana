@@ -6,9 +6,9 @@
  */
 
 import {
-  type GaugeShape,
+  GaugeShape,
   GaugeShapes,
-  type GaugeState as GaugeStateOriginal,
+  GaugeState as GaugeStateOriginal,
 } from '@kbn/expression-gauge-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { LayerType } from '../../../common/types';

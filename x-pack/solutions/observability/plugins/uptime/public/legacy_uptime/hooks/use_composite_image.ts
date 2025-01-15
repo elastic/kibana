@@ -9,9 +9,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import React from 'react';
 import { composeScreenshotRef } from '../lib/helper/compose_screenshot_images';
 import {
-  type ScreenshotRefImageData,
-  type ScreenshotBlockCache,
-  type StoreScreenshotBlock,
+  ScreenshotRefImageData,
+  ScreenshotBlockCache,
+  StoreScreenshotBlock,
   isPendingBlock,
 } from '../../../common/runtime_types';
 import { fetchBlocksAction } from '../state/reducers/synthetics';

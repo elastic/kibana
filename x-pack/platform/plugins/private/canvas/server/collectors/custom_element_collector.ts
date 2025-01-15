@@ -6,13 +6,13 @@
  */
 
 import { get } from 'lodash';
-import { type MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import { parseExpression } from '@kbn/expressions-plugin/common';
 import { collectFns } from './collector_helpers';
 import {
-  type TelemetryCollector,
-  type TelemetryCustomElement,
-  type TelemetryCustomElementDocument,
+  TelemetryCollector,
+  TelemetryCustomElement,
+  TelemetryCustomElementDocument,
 } from '../../types';
 
 const CUSTOM_ELEMENT_TYPE = 'canvas-element';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type UseKnowledgeBaseResult } from '../use_knowledge_base';
+import { UseKnowledgeBaseResult } from '../use_knowledge_base';
 
 export function useKnowledgeBase(): UseKnowledgeBaseResult {
   return {

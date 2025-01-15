@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
-import { type FieldMapping } from '../../../../../common/ml_inference_pipeline';
+import { FieldMapping } from '../../../../../common/ml_inference_pipeline';
 
 import { ErrorCode } from '../../../../../common/types/error_codes';
 

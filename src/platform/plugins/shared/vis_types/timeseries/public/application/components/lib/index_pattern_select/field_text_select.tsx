@@ -10,7 +10,7 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiFieldText, type EuiFieldTextProps, EuiButtonIcon } from '@elastic/eui';
+import { EuiFieldText, EuiFieldTextProps, EuiButtonIcon } from '@elastic/eui';
 import { SwitchModePopover } from './switch_mode_popover';
 import type { SelectIndexComponentProps } from './types';
 

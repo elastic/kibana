@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type ReactNode, type KeyboardEvent } from 'react';
+import React, { ReactNode, KeyboardEvent } from 'react';
 import PropTypes from 'prop-types';
 // @ts-expect-error no @types definition
 import { Shortcuts } from 'react-shortcuts';

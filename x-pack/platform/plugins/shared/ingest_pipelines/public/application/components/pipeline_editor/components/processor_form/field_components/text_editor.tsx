@@ -6,11 +6,11 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import React, { type FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import {
   CodeEditor,
-  type FieldHook,
+  FieldHook,
   getFieldValidityAndErrorMessage,
 } from '../../../../../../shared_imports';
 

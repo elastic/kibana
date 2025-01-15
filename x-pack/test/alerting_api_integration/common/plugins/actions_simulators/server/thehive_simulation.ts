@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type http from 'http';
+import http from 'http';
 
-import { type ProxyArgs, Simulator } from './simulator';
+import { ProxyArgs, Simulator } from './simulator';
 
 export class TheHiveSimulator extends Simulator {
   private readonly returnError: boolean;

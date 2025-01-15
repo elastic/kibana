@@ -17,9 +17,9 @@ jest.mock('rxjs', () => {
 
 import { TestScheduler } from 'rxjs/testing';
 import { merge, tap, of, NEVER } from 'rxjs';
-import { type FileJSON } from '@kbn/shared-ux-file-types';
+import { FileJSON } from '@kbn/shared-ux-file-types';
 import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
-import { type FilePickerState, createFilePickerState } from './file_picker_state';
+import { FilePickerState, createFilePickerState } from './file_picker_state';
 
 const getTestScheduler = () =>
   new TestScheduler((actual, expected) => expect(actual).toEqual(expected));

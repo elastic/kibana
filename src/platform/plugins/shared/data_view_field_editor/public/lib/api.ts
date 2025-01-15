@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type HttpSetup } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import {
   FIELD_PREVIEW_PATH as path,
   INITIAL_REST_VERSION as version,
 } from '../../common/constants';
 import { sendRequest } from '../shared_imports';
-import { type PainlessExecuteContext, type FieldPreviewResponse } from '../components/preview';
+import { PainlessExecuteContext, FieldPreviewResponse } from '../components/preview';
 
 export const initApi = (httpClient: HttpSetup) => {
   const getFieldPreview = ({

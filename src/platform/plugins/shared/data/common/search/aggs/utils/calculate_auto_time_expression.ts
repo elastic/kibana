@@ -8,9 +8,9 @@
  */
 
 import moment from 'moment';
-import { type TimeBucketsInterval } from '../buckets/lib/time_buckets/time_buckets';
+import { TimeBucketsInterval } from '../buckets/lib/time_buckets/time_buckets';
 import { UI_SETTINGS } from '../../../constants';
-import { type TimeRange } from '../../../query';
+import { TimeRange } from '../../../query';
 import { TimeBuckets } from '../buckets/lib/time_buckets';
 import { toAbsoluteDates } from './date_interval_utils';
 import { autoInterval } from '../buckets/_interval_options';

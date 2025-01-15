@@ -7,24 +7,24 @@
 
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { buildEsQuery, type Filter, type Query } from '@kbn/es-query';
+import { buildEsQuery, Filter, Query } from '@kbn/es-query';
 import styled from '@emotion/styled';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { type JsonValue } from '@kbn/utility-types';
+import { JsonValue } from '@kbn/utility-types';
 import { noop } from 'lodash';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import { type LogEntryCursor } from '../../../common/log_entry';
-import { defaultLogViewsStaticConfig, type LogViewReference } from '../../../common/log_views';
-import { type BuiltEsQuery, useLogStream } from '../../containers/logs/log_stream';
+import { LogEntryCursor } from '../../../common/log_entry';
+import { defaultLogViewsStaticConfig, LogViewReference } from '../../../common/log_views';
+import { BuiltEsQuery, useLogStream } from '../../containers/logs/log_stream';
 import { useLogView } from '../../hooks/use_log_view';
 import { LogViewsClient } from '../../services/log_views';
-import { type LogColumnRenderConfiguration } from '../../utils/log_column_render_configuration';
+import { LogColumnRenderConfiguration } from '../../utils/log_column_render_configuration';
 import { useKibanaQuerySettings } from '../../utils/use_kibana_query_settings';
 import { useLogEntryFlyout } from '../logging/log_entry_flyout';
-import { ScrollableLogTextStreamView, type VisibleInterval } from '../logging/log_text_stream';
+import { ScrollableLogTextStreamView, VisibleInterval } from '../logging/log_text_stream';
 import { LogStreamErrorBoundary } from './log_stream_error_boundary';
 
 interface LogStreamPluginDeps {

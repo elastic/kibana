@@ -17,11 +17,11 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import { type FormHook } from '../../../../../shared_imports';
-import { type Document } from '../../types';
+import { FormHook } from '../../../../../shared_imports';
+import { Document } from '../../types';
 
-import { Tabs, type TestPipelineFlyoutTab, OutputTab, DocumentsTab } from './test_pipeline_tabs';
-import { type TestPipelineFlyoutForm } from './test_pipeline_flyout.container';
+import { Tabs, TestPipelineFlyoutTab, OutputTab, DocumentsTab } from './test_pipeline_tabs';
+import { TestPipelineFlyoutForm } from './test_pipeline_flyout.container';
 
 export interface Props {
   onClose: () => void;

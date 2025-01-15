@@ -12,15 +12,15 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { setStubKibanaServices } from '@kbn/presentation-panel-plugin/public/mocks';
 import { getLinksEmbeddableFactory } from './links_embeddable';
-import { type Link } from '../../common/content_management';
+import { Link } from '../../common/content_management';
 import { CONTENT_ID } from '../../common';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import {
-  type LinksApi,
-  type LinksParentApi,
-  type LinksRuntimeState,
-  type LinksSerializedState,
-  type ResolvedLink,
+  LinksApi,
+  LinksParentApi,
+  LinksRuntimeState,
+  LinksSerializedState,
+  ResolvedLink,
 } from '../types';
 import { linksClient } from '../content_management';
 import { getMockLinksParentApi } from '../mocks';

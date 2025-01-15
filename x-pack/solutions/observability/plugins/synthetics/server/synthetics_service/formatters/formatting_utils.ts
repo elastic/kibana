@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type Logger } from '@kbn/logging';
+import { Logger } from '@kbn/logging';
 import { isEmpty } from 'lodash';
-import { type ConfigKey, type MonitorFields } from '../../../common/runtime_types';
-import { type ParsedVars, replaceVarsWithParams } from './lightweight_param_formatter';
+import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
+import { ParsedVars, replaceVarsWithParams } from './lightweight_param_formatter';
 import variableParser from './variable_parser';
 
 export type FormatterFn = (

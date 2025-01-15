@@ -10,11 +10,11 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL,
-  type GetKnowledgeBaseIndicesResponse,
+  GetKnowledgeBaseIndicesResponse,
 } from '@kbn/elastic-assistant-common';
-import { type IKibanaResponse } from '@kbn/core/server';
+import { IKibanaResponse } from '@kbn/core/server';
 import { buildResponse } from '../../lib/build_response';
-import { type ElasticAssistantPluginRouter } from '../../types';
+import { ElasticAssistantPluginRouter } from '../../types';
 
 /**
  * Get the indices that have fields of `semantic_text` type

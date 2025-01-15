@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { type BulkOptions, type BulkOptionsFilter, type BulkOptionsIds } from '../types';
+import { BulkOptions, BulkOptionsFilter, BulkOptionsIds } from '../types';
 
 export const getAndValidateCommonBulkOptions = (options: BulkOptions) => {
   const filter = (options as BulkOptionsFilter).filter;

@@ -17,13 +17,13 @@ import {
   useForm,
   useFormData,
   useFormIsModified,
-  type FormHook,
+  FormHook,
   UseField,
   TextField,
-  type RuntimeType,
-  type RuntimePrimitiveTypes,
+  RuntimeType,
+  RuntimePrimitiveTypes,
 } from '../../shared_imports';
-import { type Field } from '../../types';
+import { Field } from '../../types';
 import { useFieldEditorContext } from '../field_editor_context';
 import { useFieldPreviewContext } from '../preview';
 
@@ -33,7 +33,7 @@ import { getNameFieldConfig, getFieldPreviewChanges } from './lib';
 import { TypeField } from './form_fields';
 import { FieldDetail } from './field_detail';
 import { CompositeEditor } from './composite_editor';
-import { type TypeSelection } from './types';
+import { TypeSelection } from './types';
 import { ChangeType } from '../preview/types';
 
 export interface FieldEditorFormState {

@@ -15,12 +15,12 @@ import {
 import { registerRoutes } from './routes';
 import type { InferenceConfig } from './config';
 import {
-  type InferenceBoundClientCreateOptions,
-  type InferenceClientCreateOptions,
-  type InferenceServerSetup,
-  type InferenceServerStart,
-  type InferenceSetupDependencies,
-  type InferenceStartDependencies,
+  InferenceBoundClientCreateOptions,
+  InferenceClientCreateOptions,
+  InferenceServerSetup,
+  InferenceServerStart,
+  InferenceSetupDependencies,
+  InferenceStartDependencies,
 } from './types';
 
 export class InferencePlugin

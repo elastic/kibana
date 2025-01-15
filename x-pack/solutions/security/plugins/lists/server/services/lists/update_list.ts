@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type {
   DescriptionOrUndefined,
   Id,
@@ -14,9 +14,9 @@ import type {
   NameOrUndefined,
   _VersionOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { type VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
+import { VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
 
-import { type UpdateEsListSchema } from '../../schemas/elastic_query';
+import { UpdateEsListSchema } from '../../schemas/elastic_query';
 import { checkVersionConflict, waitUntilDocumentIndexed } from '../utils';
 
 import { getList } from '.';

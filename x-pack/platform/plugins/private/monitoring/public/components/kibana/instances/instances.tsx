@@ -19,7 +19,7 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiToolTip,
-  type UseEuiTheme,
+  UseEuiTheme,
   euiFontSize,
 } from '@elastic/eui';
 
@@ -31,7 +31,7 @@ import type { TableChange, Sorting, Pagination } from '../../../application/hook
 import type { AlertsByName } from '../../../alerts/types';
 import { KIBANA_SYSTEM_ID } from '../../../../common/constants';
 import { SetupModeFeature } from '../../../../common/enums';
-import { type ElasticsearchSourceKibanaStats } from '../../../../common/types/es';
+import { ElasticsearchSourceKibanaStats } from '../../../../common/types/es';
 import { AlertsStatus } from '../../../alerts/status';
 import { ExternalConfigContext } from '../../../application/contexts/external_config_context';
 import { formatMetric, formatNumber } from '../../../lib/format_number';

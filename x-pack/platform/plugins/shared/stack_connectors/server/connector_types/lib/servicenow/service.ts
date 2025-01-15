@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { type AxiosResponse } from 'axios';
+import { AxiosResponse } from 'axios';
 
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { isEmpty } from 'lodash';
 import {
-  type ExternalService,
-  type ExternalServiceParamsCreate,
-  type ExternalServiceParamsUpdate,
-  type ImportSetApiResponse,
-  type ImportSetApiResponseError,
-  type ServiceNowIncident,
-  type GetApplicationInfoResponse,
-  type ServiceFactory,
-  type ExternalServiceParamsClose,
+  ExternalService,
+  ExternalServiceParamsCreate,
+  ExternalServiceParamsUpdate,
+  ImportSetApiResponse,
+  ImportSetApiResponseError,
+  ServiceNowIncident,
+  GetApplicationInfoResponse,
+  ServiceFactory,
+  ExternalServiceParamsClose,
 } from './types';
 
 import * as i18n from './translations';
-import { type ServiceNowPublicConfigurationType, type ServiceNowSecretConfigurationType } from './types';
+import { ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType } from './types';
 import {
   createServiceError,
   getPushedDate,

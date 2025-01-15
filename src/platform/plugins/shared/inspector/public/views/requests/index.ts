@@ -10,8 +10,8 @@
 import { i18n } from '@kbn/i18n';
 
 import { lazy } from 'react';
-import { type InspectorViewDescription } from '../../types';
-import { type Adapters } from '../../../common';
+import { InspectorViewDescription } from '../../types';
+import { Adapters } from '../../../common';
 
 const RequestsViewComponent = lazy(() => import('./components/requests_view'));
 

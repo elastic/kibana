@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { type Rule, type SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
+import { Rule, SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
-import { type RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { publicAlertsClientMock } from '@kbn/alerting-plugin/server/alerts_client/alerts_client.mock';
 import {
-  type IBasePath,
-  type IUiSettingsClient,
-  type SavedObject,
-  type SavedObjectsClientContract,
-  type SavedObjectsFindResponse,
+  IBasePath,
+  IUiSettingsClient,
+  SavedObject,
+  SavedObjectsClientContract,
+  SavedObjectsFindResponse,
 } from '@kbn/core/server';
 import {
-  type ElasticsearchClientMock,
+  ElasticsearchClientMock,
   elasticsearchServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import { type ISearchStartSearchSource } from '@kbn/data-plugin/public';
+import { ISearchStartSearchSource } from '@kbn/data-plugin/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { type MockedLogger } from '@kbn/logging-mocks';
+import { MockedLogger } from '@kbn/logging-mocks';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -32,7 +32,7 @@ import {
   ALERT_REASON,
   SLO_BURN_RATE_RULE_TYPE_ID,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import { type SharePluginStart } from '@kbn/share-plugin/server';
+import { SharePluginStart } from '@kbn/share-plugin/server';
 import { sloDefinitionSchema } from '@kbn/slo-schema';
 import { get } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
@@ -47,11 +47,11 @@ import {
   SLO_INSTANCE_ID_FIELD,
   SLO_REVISION_FIELD,
 } from '../../../../common/field_names/slo';
-import { type SLODefinition, type StoredSLODefinition } from '../../../domain/models';
+import { SLODefinition, StoredSLODefinition } from '../../../domain/models';
 import { SLONotFound } from '../../../errors';
 import { SO_SLO_TYPE } from '../../../saved_objects';
 import { createSLO } from '../../../services/fixtures/slo';
-import { type BurnRateAlert, getRuleExecutor } from './executor';
+import { BurnRateAlert, getRuleExecutor } from './executor';
 import {
   LONG_WINDOW,
   SHORT_WINDOW,
@@ -60,13 +60,13 @@ import {
   generateStatsKey,
   generateWindowId,
 } from './lib/build_query';
-import { type EvaluationBucket } from './lib/evaluate';
+import { EvaluationBucket } from './lib/evaluate';
 import {
   AlertStates,
-  type BurnRateAlertContext,
-  type BurnRateAlertState,
-  type BurnRateAllowedActionGroups,
-  type BurnRateRuleParams,
+  BurnRateAlertContext,
+  BurnRateAlertState,
+  BurnRateAllowedActionGroups,
+  BurnRateRuleParams,
 } from './types';
 
 const commonEsResponse = {

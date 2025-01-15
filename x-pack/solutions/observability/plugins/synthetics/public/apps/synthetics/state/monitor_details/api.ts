@@ -9,9 +9,9 @@ import moment from 'moment';
 import { apiService } from '../../../../utils/api_service';
 import {
   EncryptedSyntheticsMonitorCodec,
-  type PingsResponse,
+  PingsResponse,
   PingsResponseType,
-  type SyntheticsMonitorWithId,
+  SyntheticsMonitorWithId,
 } from '../../../../../common/runtime_types';
 import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '../../../../../lib/helper/rtl_helpers';
-import { NoImageDisplay, type NoImageDisplayProps } from './no_image_display';
+import { NoImageDisplay, NoImageDisplayProps } from './no_image_display';
 import { imageLoadingSpinnerAriaLabel } from './translations';
 
 describe('NoImageDisplay', () => {

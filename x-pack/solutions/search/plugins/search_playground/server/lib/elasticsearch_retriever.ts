@@ -7,11 +7,11 @@
 
 import { BaseRetriever, type BaseRetrieverInput } from '@langchain/core/retrievers';
 import { Document } from '@langchain/core/documents';
-import { type Client } from '@elastic/elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 import {
-  type AggregationsAggregate,
-  type SearchHit,
-  type SearchResponse,
+  AggregationsAggregate,
+  SearchHit,
+  SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getValueForSelectedField } from '../utils/get_value_for_selected_field';
 

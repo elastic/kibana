@@ -16,9 +16,9 @@ import {
   euiPaletteGreen,
   euiPaletteGray,
   euiPaletteColorBlind,
-  type EuiColorPalettePickerPaletteProps,
+  EuiColorPalettePickerPaletteProps,
 } from '@elastic/eui';
-import { type PercentilesFieldMeta } from '../../../common/descriptor_types';
+import { PercentilesFieldMeta } from '../../../common/descriptor_types';
 
 export const DEFAULT_HEATMAP_COLOR_RAMP_NAME = 'theclassic';
 

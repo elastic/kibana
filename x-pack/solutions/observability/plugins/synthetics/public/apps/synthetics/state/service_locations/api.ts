@@ -7,10 +7,10 @@
 
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import {
-  type ServiceLocations,
-  type ServiceLocationsApiResponse,
+  ServiceLocations,
+  ServiceLocationsApiResponse,
   ServiceLocationsApiResponseCodec,
-  type ThrottlingOptions,
+  ThrottlingOptions,
 } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service';
 

@@ -6,7 +6,7 @@
  */
 
 import type SuperTest from 'supertest';
-import { type User } from '../authentication/types';
+import { User } from '../authentication/types';
 
 export const getSpaceUrlPrefix = (spaceId: string | undefined | null) => {
   return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;

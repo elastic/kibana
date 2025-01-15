@@ -6,27 +6,27 @@
  */
 
 import {
-  type IUiSettingsClient,
-  type KibanaRequest,
-  type Logger,
-  type SavedObjectsClientContract,
+  IUiSettingsClient,
+  KibanaRequest,
+  Logger,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { type DataViewsContract } from '@kbn/data-views-plugin/common';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { RULE_SAVED_OBJECT_TYPE } from '..';
 import { getEsRequestTimeout } from '../lib';
 import {
   createWrappedScopedClusterClientFactory,
-  type WrappedScopedClusterClient,
+  WrappedScopedClusterClient,
 } from '../lib/wrap_scoped_cluster_client';
 import {
-  type WrappedSearchSourceClient,
+  WrappedSearchSourceClient,
   wrapSearchSourceClient,
 } from '../lib/wrap_search_source_client';
-import { type RuleMonitoringService } from '../monitoring/rule_monitoring_service';
-import { type RuleResultService } from '../monitoring/rule_result_service';
-import { type PublicRuleMonitoringService, type PublicRuleResultService } from '../types';
+import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
+import { RuleResultService } from '../monitoring/rule_result_service';
+import { PublicRuleMonitoringService, PublicRuleResultService } from '../types';
 import { withAlertingSpan } from './lib';
-import { type TaskRunnerContext } from './types';
+import { TaskRunnerContext } from './types';
 
 interface GetExecutorServicesOpts {
   context: TaskRunnerContext;

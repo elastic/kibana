@@ -18,10 +18,10 @@ import {
   EuiSuperDatePicker,
   EuiSwitch,
   EuiText,
-  type OnTimeChangeProps,
+  OnTimeChangeProps,
 } from '@elastic/eui';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { type TimeRange } from '@kbn/es-query';
+import { TimeRange } from '@kbn/es-query';
 import { useBatchedOptionalPublishingSubjects } from '@kbn/presentation-publishing';
 import { SearchEmbeddableRenderer } from '../react_embeddables/search/search_embeddable_renderer';
 import { SEARCH_EMBEDDABLE_ID } from '../react_embeddables/search/constants';

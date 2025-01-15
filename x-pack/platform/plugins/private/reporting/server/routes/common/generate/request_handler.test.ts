@@ -9,18 +9,18 @@ jest.mock('uuid', () => ({ v4: () => 'mock-report-id' }));
 
 import rison from '@kbn/rison';
 
-import { type KibanaRequest, type KibanaResponseFactory } from '@kbn/core/server';
+import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { type JobParamsPDFV2, type TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import { JobParamsPDFV2, TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 
-import { type ReportingCore } from '../../..';
-import { Report, type ReportingStore } from '../../../lib/store';
+import { ReportingCore } from '../../..';
+import { Report, ReportingStore } from '../../../lib/store';
 import { createMockReportingCore } from '../../../test_helpers';
 import {
-  type ReportingJobResponse,
-  type ReportingRequestHandlerContext,
-  type ReportingSetup,
+  ReportingJobResponse,
+  ReportingRequestHandlerContext,
+  ReportingSetup,
 } from '../../../types';
 import { RequestHandler } from './request_handler';
 

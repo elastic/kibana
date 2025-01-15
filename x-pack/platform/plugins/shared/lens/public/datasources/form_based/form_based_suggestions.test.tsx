@@ -12,7 +12,7 @@ import type {
   StaticValueColumn,
   CountColumn,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { type DatasourceSuggestion } from '../../types';
+import { DatasourceSuggestion } from '../../types';
 import { generateId } from '../../id_generator';
 import type { FormBasedPrivateState } from './types';
 import {
@@ -20,16 +20,16 @@ import {
   getDatasourceSuggestionsFromCurrentState,
   getDatasourceSuggestionsForVisualizeField,
   getDatasourceSuggestionsForVisualizeCharts,
-  type IndexPatternSuggestion,
+  IndexPatternSuggestion,
 } from './form_based_suggestions';
 import { documentField } from './document_field';
 import { getFieldByNameFactory } from './pure_helpers';
 import { isEqual } from 'lodash';
-import { type DateHistogramIndexPatternColumn, type TermsIndexPatternColumn } from './operations';
+import { DateHistogramIndexPatternColumn, TermsIndexPatternColumn } from './operations';
 import {
-  type MathIndexPatternColumn,
-  type RangeIndexPatternColumn,
-  type StaticValueIndexPatternColumn,
+  MathIndexPatternColumn,
+  RangeIndexPatternColumn,
+  StaticValueIndexPatternColumn,
 } from './operations/definitions';
 
 jest.mock('./loader');

@@ -12,9 +12,9 @@ import { BehaviorSubject } from 'rxjs';
 
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { stubFieldSpecMap } from '@kbn/data-views-plugin/common/field.stub';
-import { type TimeRange } from '@kbn/es-query';
+import { TimeRange } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
-import { act, fireEvent, render, type RenderResult, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, RenderResult, waitFor } from '@testing-library/react';
 
 import {
   DEFAULT_CONTROL_GROW,

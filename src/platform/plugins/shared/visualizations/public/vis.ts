@@ -18,16 +18,16 @@
  */
 
 import { isFunction, defaults, cloneDeep } from 'lodash';
-import { type Assign } from '@kbn/utility-types';
+import { Assign } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 
-import { type IAggConfigs, type ISearchSource, type AggConfigSerialized } from '@kbn/data-plugin/public';
+import { IAggConfigs, ISearchSource, AggConfigSerialized } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { type SavedSearch } from '@kbn/saved-search-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { PersistedState } from './persisted_state';
 import { getTypes, getAggs, getSearch, getFieldsFormats, getSavedSearch } from './services';
-import { type BaseVisType } from './vis_types';
-import { type SerializedVis, type SerializedVisData, type VisParams } from '../common/types';
+import { BaseVisType } from './vis_types';
+import { SerializedVis, SerializedVisData, VisParams } from '../common/types';
 
 export type { SerializedVis, SerializedVisData };
 

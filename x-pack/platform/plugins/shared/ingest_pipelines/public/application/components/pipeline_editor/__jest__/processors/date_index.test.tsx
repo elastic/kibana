@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { setup, type SetupResult, getProcessorValue, setupEnvironment } from './processor.helpers';
+import { setup, SetupResult, getProcessorValue, setupEnvironment } from './processor.helpers';
 
 const DATE_INDEX_TYPE = 'date_index_name';
 

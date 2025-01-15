@@ -9,8 +9,8 @@
 
 import { ESLint } from 'eslint';
 
-import { type ToolingLog } from '@kbn/tooling-log';
-import { type File } from '../file';
+import { ToolingLog } from '@kbn/tooling-log';
+import { File } from '../file';
 
 /**
  * Filters a list of files to only include lintable files.

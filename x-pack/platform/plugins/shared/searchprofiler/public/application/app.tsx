@@ -22,7 +22,7 @@ import {
 
 import { useAppContext, useProfilerActionContext, useProfilerReadContext } from './contexts';
 import { hasAggregations, hasSearch } from './lib';
-import { type Targets } from './types';
+import { Targets } from './types';
 
 export const App = () => {
   const { getLicenseStatus, notifications } = useAppContext();

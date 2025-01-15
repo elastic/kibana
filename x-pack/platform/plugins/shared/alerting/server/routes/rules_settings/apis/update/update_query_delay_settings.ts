@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { type IRouter } from '@kbn/core/server';
-import { type ILicenseState } from '../../../../lib';
+import { IRouter } from '@kbn/core/server';
+import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import { type AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { API_PRIVILEGES } from '../../../../../common';
 import {
   updateQueryDelaySettingsBodySchemaV1,
-  type UpdateQueryDelaySettingsRequestBodyV1,
-  type UpdateQueryDelaySettingsResponseV1,
+  UpdateQueryDelaySettingsRequestBodyV1,
+  UpdateQueryDelaySettingsResponseV1,
 } from '../../../../../common/routes/rules_settings/apis/update';
 import { transformQueryDelaySettingsToResponseV1 } from '../../transforms';
 

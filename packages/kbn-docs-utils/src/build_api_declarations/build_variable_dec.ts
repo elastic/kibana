@@ -8,20 +8,20 @@
  */
 
 import {
-  type VariableDeclaration,
+  VariableDeclaration,
   Node,
-  type PropertyAssignment,
-  type PropertyDeclaration,
-  type PropertySignature,
-  type ShorthandPropertyAssignment,
+  PropertyAssignment,
+  PropertyDeclaration,
+  PropertySignature,
+  ShorthandPropertyAssignment,
 } from 'ts-morph';
 import { isInternal } from '../utils';
-import { type ApiDeclaration, TypeKind } from '../types';
+import { ApiDeclaration, TypeKind } from '../types';
 import { getArrowFunctionDec } from './build_arrow_fn_dec';
 import { buildApiDeclaration } from './build_api_declaration';
 import { buildBasicApiDeclaration } from './build_basic_api_declaration';
 import { buildCallSignatureDec } from './build_call_signature_dec';
-import { type BuildApiDecOpts } from './types';
+import { BuildApiDecOpts } from './types';
 import { getOptsForChild } from './utils';
 
 /**

@@ -7,11 +7,11 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { type KibanaServerError } from '@kbn/kibana-utils-plugin/common';
+import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import { useKibana } from './use_kibana';
 import * as i18n from './translations';
 import { INFERENCE_ENDPOINTS_QUERY_KEY } from '../../common/constants';
-import { type InferenceEndpoint } from '../types';
+import { InferenceEndpoint } from '../types';
 
 interface MutationArgs {
   inferenceEndpoint: InferenceEndpoint;

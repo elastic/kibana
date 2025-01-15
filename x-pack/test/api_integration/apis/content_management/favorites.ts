@@ -12,11 +12,11 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 
-import { type FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   cleanupInteractiveUser,
   loginAsInteractiveUser,
-  type LoginAsInteractiveUserResponse,
+  LoginAsInteractiveUserResponse,
   setupInteractiveUser,
 } from './helpers';
 

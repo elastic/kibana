@@ -6,7 +6,7 @@
  */
 
 import type { PluginConfigDescriptor } from '@kbn/core/server';
-import { schema, type TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 const uptimeConfig = schema.object({
   index: schema.maybe(schema.string()),

@@ -12,7 +12,7 @@ import {
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import {
-  type MaintenanceWindowClientContext,
+  MaintenanceWindowClientContext,
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
 } from '../../../../../common';
 

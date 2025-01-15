@@ -10,9 +10,9 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import {
   createLlmProxy,
-  type LlmProxy,
+  LlmProxy,
 } from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
-import { type FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { deleteConnectors, createConnector } from '../../common/connectors';
 
 export default function ApiTest({ getService, getPageObjects }: FtrProviderContext) {

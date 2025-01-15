@@ -9,9 +9,9 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { type ViewMode } from '@kbn/presentation-publishing';
+import { ViewMode } from '@kbn/presentation-publishing';
 import { getOptionsListControlFactory } from '../controls/data_controls/options_list_control/get_options_list_control_factory';
-import { type OptionsListControlApi } from '../controls/data_controls/options_list_control/types';
+import { OptionsListControlApi } from '../controls/data_controls/options_list_control/types';
 import { getMockedBuildApi, getMockedControlGroupApi } from '../controls/mocks/control_mocks';
 import { coreServices } from '../services/kibana_services';
 import { DeleteControlAction } from './delete_control_action';

@@ -6,17 +6,17 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { type DiscoverStateContainer } from '@kbn/discover-plugin/public';
+import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import deepEqual from 'fast-deep-equal';
 import { mapValues, pick } from 'lodash';
-import { type InvokeCreator } from 'xstate';
+import { InvokeCreator } from 'xstate';
 import {
   availableControlPanelFields,
   controlPanelConfigs,
   ControlPanelRT,
-  type ControlPanels,
+  ControlPanels,
 } from '../../../../../common';
-import { type LogsExplorerControllerContext, type LogsExplorerControllerEvent } from '../types';
+import { LogsExplorerControllerContext, LogsExplorerControllerEvent } from '../types';
 
 export const initializeControlPanels =
   (): InvokeCreator<LogsExplorerControllerContext, LogsExplorerControllerEvent> =>

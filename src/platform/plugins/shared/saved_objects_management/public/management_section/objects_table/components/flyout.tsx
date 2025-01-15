@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Component, Fragment, type ReactNode } from 'react';
+import React, { Component, Fragment, ReactNode } from 'react';
 import { take } from 'lodash';
 import {
   EuiFlyout,
@@ -33,8 +33,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type HttpStart, type IBasePath } from '@kbn/core/public';
-import { type ISearchStart } from '@kbn/data-plugin/public';
+import { HttpStart, IBasePath } from '@kbn/core/public';
+import { ISearchStart } from '@kbn/data-plugin/public';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 import {
   withEuiTablePersist,
@@ -45,11 +45,11 @@ import {
   importFile,
   resolveImportErrors,
   processImportResponse,
-  type ProcessedImportResponse,
+  ProcessedImportResponse,
 } from '../../../lib';
-import { type FailedImportConflict, type RetryDecision } from '../../../lib/resolve_import_errors';
+import { FailedImportConflict, RetryDecision } from '../../../lib/resolve_import_errors';
 import { OverwriteModal } from './overwrite_modal';
-import { ImportModeControl, type ImportMode } from './import_mode_control';
+import { ImportModeControl, ImportMode } from './import_mode_control';
 import { ImportSummary } from './import_summary';
 
 const CREATE_NEW_COPIES_DEFAULT = false;

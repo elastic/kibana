@@ -13,7 +13,7 @@ import {
   RULE_REQUIRES_APP_CONTEXT,
 } from '../../../common/constants';
 import type { MonitoringConfig } from '../../types';
-import { LazyExpression, type LazyExpressionProps } from './lazy_expression';
+import { LazyExpression, LazyExpressionProps } from './lazy_expression';
 
 const DEFAULT_VALIDATE = () => ({ errors: {} });
 

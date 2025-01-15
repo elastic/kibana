@@ -6,9 +6,9 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { type SearchListItemArraySchema, type Type } from '@kbn/securitysolution-io-ts-list-types';
+import { SearchListItemArraySchema, Type } from '@kbn/securitysolution-io-ts-list-types';
 
-import { type SearchEsListItemSchema } from '../../schemas/elastic_response';
+import { SearchEsListItemSchema } from '../../schemas/elastic_response';
 
 import { transformElasticHitsToListItem } from './transform_elastic_to_list_item';
 

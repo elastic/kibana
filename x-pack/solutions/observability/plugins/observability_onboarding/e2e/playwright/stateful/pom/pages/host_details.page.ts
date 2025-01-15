@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect, type Page } from '@playwright/test';
+import { expect, Page } from '@playwright/test';
 
 export class HostDetailsPage {
   page: Page;

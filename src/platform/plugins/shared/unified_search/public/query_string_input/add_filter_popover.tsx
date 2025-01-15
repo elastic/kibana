@@ -13,18 +13,18 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiPopover,
-  type EuiButtonIconProps,
+  EuiButtonIconProps,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type Filter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
 import {
   withCloseFilterEditorConfirmModal,
-  type WithCloseFilterEditorConfirmModalProps,
+  WithCloseFilterEditorConfirmModalProps,
 } from '../filter_bar/filter_editor';
-import { type SuggestionsAbstraction } from '../typeahead/suggestions_component';
+import { SuggestionsAbstraction } from '../typeahead/suggestions_component';
 
 export const strings = {
   getAddFilterButtonLabel: () =>

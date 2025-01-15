@@ -15,7 +15,7 @@ import {
   EuiFocusTrap,
   EuiPortal,
   EuiScreenReaderOnly,
-  type EuiThemeComputed,
+  EuiThemeComputed,
   EuiThemeProvider,
   EuiWindowEvent,
   keys,
@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { dynamic } from '@kbn/shared-ux-utility';
 
 import {
-  type EmbeddableConsoleDependencies,
+  EmbeddableConsoleDependencies,
   EmbeddableConsoleView,
 } from '../../../types/embeddable_console';
 

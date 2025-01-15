@@ -6,7 +6,7 @@
  */
 
 import { isDate } from 'lodash';
-import { type LicenseType } from '../../common/types';
+import { LicenseType } from '../../common/types';
 
 /** @public */
 export interface FeatureUsageServiceSetup {

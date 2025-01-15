@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { type IRouter, type RouteConfigOptions, type RouteMethod } from '@kbn/core/server';
-import { type ILicenseState } from '../../../../lib';
+import { IRouter, RouteConfigOptions, RouteMethod } from '@kbn/core/server';
+import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import { type RuleParamsV1, ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
-import { type Rule } from '../../../../application/rule/types';
+import { RuleParamsV1, ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
+import { Rule } from '../../../../application/rule/types';
 import {
-  type AlertingRequestHandlerContext,
+  AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
   INTERNAL_BASE_ALERTING_API_PATH,
 } from '../../../../types';

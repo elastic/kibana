@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { PureComponent, type ChangeEvent } from 'react';
-import { injectI18n, FormattedMessage, type WrappedComponentProps } from '@kbn/i18n-react';
+import React, { PureComponent, ChangeEvent } from 'react';
+import { injectI18n, FormattedMessage, WrappedComponentProps } from '@kbn/i18n-react';
 
 import {
   EuiAccordion,
@@ -20,11 +20,11 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { type DataView } from '@kbn/data-views-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { RangeControlEditor } from './range_control_editor';
 import { ListControlEditor } from './list_control_editor';
-import { getTitle, type ControlParams, CONTROL_TYPES, type ControlParamsOptions } from '../../editor_utils';
-import { type InputControlVisDependencies } from '../../plugin';
+import { getTitle, ControlParams, CONTROL_TYPES, ControlParamsOptions } from '../../editor_utils';
+import { InputControlVisDependencies } from '../../plugin';
 
 import './control_editor.scss';
 

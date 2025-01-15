@@ -10,12 +10,12 @@ import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 
 import type { TimeRange } from '@kbn/es-query';
-import { type ExpressionFunctionDefinition, type DatatableRow } from '@kbn/expressions-plugin/public';
+import { ExpressionFunctionDefinition, DatatableRow } from '@kbn/expressions-plugin/public';
 // @ts-expect-error untyped local
 import { buildBoolArray } from '../../common/lib/build_bool_array';
-import { type Datatable, type ExpressionValueFilter } from '../../types';
+import { Datatable, ExpressionValueFilter } from '../../types';
 import { getFunctionHelp } from '../../i18n';
-import { type InitializeArguments } from '.';
+import { InitializeArguments } from '.';
 
 const errors = {
   timelionError: () =>

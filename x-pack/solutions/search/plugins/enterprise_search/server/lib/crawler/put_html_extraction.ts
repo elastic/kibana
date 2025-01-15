@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
-import { CONNECTORS_INDEX, type Connector } from '@kbn/search-connectors';
+import { CONNECTORS_INDEX, Connector } from '@kbn/search-connectors';
 
 export async function updateHtmlExtraction(
   client: IScopedClusterClient,

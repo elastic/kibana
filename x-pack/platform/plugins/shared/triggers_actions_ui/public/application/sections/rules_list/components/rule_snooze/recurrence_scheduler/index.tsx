@@ -15,12 +15,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { type Moment } from 'moment';
+import { Moment } from 'moment';
 import React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { NumberField } from '../helpers/number_field';
-import { RRuleFrequency, type RecurrenceSchedule } from '../../../../../../types';
+import { RRuleFrequency, RecurrenceSchedule } from '../../../../../../types';
 import { i18nMonthDayDate } from '../../../../../lib/i18n_month_day_date';
 import {
   DEFAULT_REPEAT_OPTIONS,
@@ -30,7 +30,7 @@ import {
 } from './constants';
 import { CustomRecurrenceScheduler } from './custom_recurrence_scheduler';
 import {
-  type CustomFrequencyState,
+  CustomFrequencyState,
   generateNthByweekday,
   getWeekdayInfo,
   recurrenceSummary,

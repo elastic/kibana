@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ScopedHistory } from '@kbn/core-application-browser';
+import { ScopedHistory } from '@kbn/core-application-browser';
 
-import { type ForwardedDashboardState } from './locator';
-import { convertPanelsArrayToPanelMap, type DashboardContainerInput } from '../../../common';
+import { ForwardedDashboardState } from './locator';
+import { convertPanelsArrayToPanelMap, DashboardContainerInput } from '../../../common';
 
 export const loadDashboardHistoryLocationState = (
   getScopedHistory: () => ScopedHistory

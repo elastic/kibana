@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type PromptResponse } from '@kbn/elastic-assistant-common';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 
 export const mockSystemPrompt: PromptResponse = {
   id: 'mock-system-prompt-1',

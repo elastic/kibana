@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { type RefObject, useMemo, useCallback, useState } from 'react';
+import React, { RefObject, useMemo, useCallback, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
-import { type SidebarItem } from './types';
+import { SidebarItem } from './types';
 import { MiddleTruncatedText } from '../../waterfall';
 import { SideBarItemHighlighter } from '../../waterfall/components/styles';
 import { SIDEBAR_FILTER_MATCHES_SCREENREADER_LABEL } from '../../waterfall/components/translations';
-import { type OnSidebarClick } from '../../waterfall/components/use_flyout';
+import { OnSidebarClick } from '../../waterfall/components/use_flyout';
 
 interface SidebarItemProps {
   item: SidebarItem;

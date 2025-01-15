@@ -7,20 +7,20 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { type AnyAction, type Dispatch } from 'redux';
-import { type ThunkDispatch } from 'redux-thunk';
+import { AnyAction, Dispatch } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { type Filter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';
-import { type Geometry, type Position } from 'geojson';
+import { Geometry, Position } from 'geojson';
 import { asyncForEach, asyncMap } from '@kbn/std';
 import { DRAW_MODE, DRAW_SHAPE, LAYER_STYLE_TYPE } from '../../common/constants';
 import type { MapExtentState, MapViewContext } from '../reducers/map/types';
 import { getInspectorAdapters } from '../reducers/non_serializable_instances';
-import { type MapStoreState } from '../reducers/store';
-import { type IVectorStyle } from '../classes/styles/vector/vector_style';
+import { MapStoreState } from '../reducers/store';
+import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import {
   getDataFilters,
   getFilters,
@@ -65,12 +65,12 @@ import {
 } from './data_request_actions';
 import { addLayer, addLayerWithoutDataSync } from './layer_actions';
 import {
-  type CustomIcon,
-  type DrawState,
-  type MapCenterAndZoom,
-  type MapExtent,
-  type MapSettings,
-  type Timeslice,
+  CustomIcon,
+  DrawState,
+  MapCenterAndZoom,
+  MapExtent,
+  MapSettings,
+  Timeslice,
 } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';
 import { hasVectorLayerMethod } from '../classes/layers/vector_layer';

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type PropsWithChildren, type FC } from 'react';
-import { FormattedRelativeTime, type IntlShape } from 'react-intl';
+import React, { PropsWithChildren, FC } from 'react';
+import { FormattedRelativeTime, IntlShape } from 'react-intl';
 import { selectUnit } from '@formatjs/intl-utils';
 import moment from 'moment';
 import { I18nProvider } from './provider';

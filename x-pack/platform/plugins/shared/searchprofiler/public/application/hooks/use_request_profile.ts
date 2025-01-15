@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useAppContext } from '../contexts/app_context';
 import { checkForParseErrors } from '../lib';
-import { type ShardSerialized } from '../types';
+import { ShardSerialized } from '../types';
 
 interface Args {
   query: string;

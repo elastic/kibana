@@ -7,7 +7,7 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 
-import { type IRouter, type Logger } from '@kbn/core/server';
+import { IRouter, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import {
   DEFEND_INSIGHTS,
@@ -18,7 +18,7 @@ import {
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { buildResponse } from '../../lib/build_response';
-import { type ElasticAssistantRequestHandlerContext } from '../../types';
+import { ElasticAssistantRequestHandlerContext } from '../../types';
 import { isDefendInsightsEnabled, updateDefendInsightsLastViewedAt } from './helpers';
 
 export const getDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {

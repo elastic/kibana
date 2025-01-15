@@ -12,7 +12,7 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiSuperSelect,
-  type EuiSuperSelectOption,
+  EuiSuperSelectOption,
 } from '@elastic/eui';
 import * as i18n from './translations';
 

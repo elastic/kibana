@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { type TypeOf } from '@kbn/config-schema';
+import { TypeOf } from '@kbn/config-schema';
 
 import {
-  type MicrosoftDefenderEndpointSecretsSchema,
-  type MicrosoftDefenderEndpointConfigSchema,
-  type MicrosoftDefenderEndpointActionParamsSchema,
-  type MicrosoftDefenderEndpointBaseApiResponseSchema,
-  type IsolateHostParamsSchema,
-  type ReleaseHostParamsSchema,
-  type TestConnectorParamsSchema,
-  type AgentDetailsParamsSchema,
-  type GetActionsParamsSchema,
+  MicrosoftDefenderEndpointSecretsSchema,
+  MicrosoftDefenderEndpointConfigSchema,
+  MicrosoftDefenderEndpointActionParamsSchema,
+  MicrosoftDefenderEndpointBaseApiResponseSchema,
+  IsolateHostParamsSchema,
+  ReleaseHostParamsSchema,
+  TestConnectorParamsSchema,
+  AgentDetailsParamsSchema,
+  GetActionsParamsSchema,
 } from './schema';
 
 export type MicrosoftDefenderEndpointConfig = TypeOf<typeof MicrosoftDefenderEndpointConfigSchema>;

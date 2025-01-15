@@ -9,8 +9,8 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import { loggerMock } from '@kbn/logging-mocks';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import {
-  type ActionsClientChatOpenAI,
-  type ActionsClientSimpleChatModel,
+  ActionsClientChatOpenAI,
+  ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 
 export const createMockClients = () => {

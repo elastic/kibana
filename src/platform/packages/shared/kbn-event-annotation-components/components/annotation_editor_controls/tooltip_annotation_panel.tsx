@@ -14,8 +14,8 @@ import fastIsEqual from 'fast-deep-equal';
 import { getFieldIconType } from '@kbn/field-utils';
 import { useExistingFieldsReader } from '@kbn/unified-field-list';
 import {
-  type FieldOption,
-  type FieldOptionValue,
+  FieldOption,
+  FieldOptionValue,
   FieldPicker,
   NewBucketButton,
   DragDropBuckets,
@@ -23,7 +23,7 @@ import {
   FieldsBucketContainer,
   isFieldLensCompatible,
 } from '@kbn/visualization-ui-components';
-import { type DataView } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
 
 export const MAX_TOOLTIP_FIELDS_SIZE = 3;

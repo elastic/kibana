@@ -8,7 +8,7 @@
  */
 
 import Axios from 'axios';
-import { type ValidationResult } from './ask';
+import { ValidationResult } from './ask';
 
 interface Body {
   match?: string;

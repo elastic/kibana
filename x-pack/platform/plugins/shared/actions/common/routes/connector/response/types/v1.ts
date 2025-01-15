@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { type TypeOf } from '@kbn/config-schema';
+import { TypeOf } from '@kbn/config-schema';
 import {
-  type connectorResponseSchemaV1,
-  type connectorTypesResponseSchemaV1,
-  type allConnectorsResponseSchema,
-  type connectorExecuteResponseSchema,
+  connectorResponseSchemaV1,
+  connectorTypesResponseSchemaV1,
+  allConnectorsResponseSchema,
+  connectorExecuteResponseSchema,
 } from '..';
 
 type ConnectorResponseSchemaType = TypeOf<typeof connectorResponseSchemaV1>;

@@ -16,7 +16,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provi
 import {
   fetchServiceInventoryAlertCounts,
   fetchServiceTabAlertCount,
-  type ApmAlertFields,
+  ApmAlertFields,
   getIndexAction,
   APM_ACTION_VARIABLE_INDEX,
   APM_ALERTS_INDEX,

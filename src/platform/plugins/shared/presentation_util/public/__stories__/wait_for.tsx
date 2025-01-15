@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useEffect, useRef, type ReactElement } from 'react';
+import React, { useState, useEffect, useRef, ReactElement } from 'react';
 import { act } from 'react-test-renderer';
-import { type Story } from '@storybook/react';
+import { Story } from '@storybook/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
 export const waitFor =

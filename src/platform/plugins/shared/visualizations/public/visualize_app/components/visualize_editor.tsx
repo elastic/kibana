@@ -21,9 +21,9 @@ import {
   useLinkedSearchUpdates,
   useDataViewUpdates,
 } from '../utils';
-import { type VisualizeServices } from '../types';
+import { VisualizeServices } from '../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';
-import { type VisualizeAppProps } from '../app';
+import { VisualizeAppProps } from '../app';
 import { VisualizeConstants } from '../../../common/constants';
 import type { VisualizeInput } from '../..';
 

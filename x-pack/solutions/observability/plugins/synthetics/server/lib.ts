@@ -6,24 +6,24 @@
  */
 
 import {
-  type MsearchMultisearchBody,
-  type MsearchMultisearchHeader,
+  MsearchMultisearchBody,
+  MsearchMultisearchHeader,
 } from '@elastic/elasticsearch/lib/api/types';
 import {
-  type ElasticsearchClient,
-  type SavedObjectsClientContract,
-  type KibanaRequest,
-  type CoreRequestHandlerContext,
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  KibanaRequest,
+  CoreRequestHandlerContext,
 } from '@kbn/core/server';
 import chalk from 'chalk';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ESSearchResponse, InferSearchResponseOf } from '@kbn/es-types';
 import { RequestStatus } from '@kbn/inspector-plugin/common';
-import { type InspectResponse } from '@kbn/observability-plugin/typings/common';
+import { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { getInspectResponse } from '@kbn/observability-shared-plugin/common';
 import { SYNTHETICS_API_URLS, SYNTHETICS_INDEX_PATTERN } from '../common/constants';
-import { type SyntheticsServerSetup } from './types';
+import { SyntheticsServerSetup } from './types';
 
 export interface CountResponse {
   result: {

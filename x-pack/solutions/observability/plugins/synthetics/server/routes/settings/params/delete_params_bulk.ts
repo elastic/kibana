@@ -6,10 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { type SyntheticsRestApiRouteFactory } from '../../types';
+import { SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { type DeleteParamsResponse } from '../../../../common/runtime_types';
+import { DeleteParamsResponse } from '../../../../common/runtime_types';
 
 export const deleteSyntheticsParamsBulkRoute: SyntheticsRestApiRouteFactory<
   DeleteParamsResponse[],

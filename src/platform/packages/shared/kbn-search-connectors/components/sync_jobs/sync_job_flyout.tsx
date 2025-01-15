@@ -21,7 +21,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { type ConnectorSyncJob } from '../../types';
+import { ConnectorSyncJob } from '../../types';
 import { SyncJobDocumentsPanel } from './documents_panel';
 import { SyncJobEventsPanel } from './events_panel';
 import { FilteringPanel } from './filtering_panel';

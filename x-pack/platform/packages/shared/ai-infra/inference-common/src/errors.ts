@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type InferenceTaskEventBase, InferenceTaskEventType } from './inference_task';
+import { InferenceTaskEventBase, InferenceTaskEventType } from './inference_task';
 
 /**
  * Enum for generic inference error codes.

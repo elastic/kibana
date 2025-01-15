@@ -7,13 +7,13 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import type http from 'http';
+import http from 'http';
 
 import expect from '@kbn/expect';
-import { CaseStatuses, AttachmentType, type User } from '@kbn/cases-plugin/common/types/domain';
-import { type RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
-import { type CaseConnector } from '@kbn/cases-plugin/common/types/domain';
-import { type FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { CaseStatuses, AttachmentType, User } from '@kbn/cases-plugin/common/types/domain';
+import { RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
+import { CaseConnector } from '@kbn/cases-plugin/common/types/domain';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 
 import {

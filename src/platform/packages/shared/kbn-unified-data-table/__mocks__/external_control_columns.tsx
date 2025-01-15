@@ -16,9 +16,9 @@ import {
   EuiFlexItem,
   EuiPopoverTitle,
   EuiSpacer,
-  type EuiDataGridControlColumn,
+  EuiDataGridControlColumn,
 } from '@elastic/eui';
-import { type RowControlColumn } from '@kbn/discover-utils';
+import { RowControlColumn } from '@kbn/discover-utils';
 
 const SelectionHeaderCell = () => {
   return (

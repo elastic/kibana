@@ -9,8 +9,8 @@ import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  type EuiButtonSize,
-  type EuiButtonEmptySizes,
+  EuiButtonSize,
+  EuiButtonEmptySizes,
   EuiToolTip,
   EuiButtonIcon,
 } from '@elastic/eui';

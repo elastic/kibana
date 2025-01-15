@@ -27,7 +27,7 @@ import {
   securitySolutionOnlyNoCreateComment,
   securitySolutionOnlyReadCreateComment,
 } from './roles';
-import { type User } from './types';
+import { User } from './types';
 
 export const superUser: User = {
   username: 'superuser',

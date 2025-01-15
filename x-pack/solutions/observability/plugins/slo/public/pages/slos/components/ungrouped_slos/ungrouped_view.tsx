@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexItem, EuiTablePagination } from '@elastic/eui';
-import { type FindSLOResponse } from '@kbn/slo-schema';
+import { FindSLOResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import { SlosView } from '../slos_view';

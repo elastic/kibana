@@ -10,9 +10,9 @@
 import { isBoom } from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 import { getFields } from '../lib/get_fields';
-import { type Framework } from '../plugin';
+import { Framework } from '../plugin';
 import { ROUTES } from '../../common/constants';
-import { type VisTypeTimeseriesRouter } from '../types';
+import { VisTypeTimeseriesRouter } from '../types';
 
 export const fieldsRoutes = (router: VisTypeTimeseriesRouter, framework: Framework) => {
   router.get<{}, { index: string }, {}>(

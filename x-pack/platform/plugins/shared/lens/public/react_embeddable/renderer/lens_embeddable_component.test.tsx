@@ -7,9 +7,9 @@
 
 import { render, screen } from '@testing-library/react';
 import { getLensApiMock, getLensInternalApiMock, getValidExpressionParams } from '../mocks';
-import { type LensApi, type LensInternalApi } from '../types';
+import { LensApi, LensInternalApi } from '../types';
 import { BehaviorSubject } from 'rxjs';
-import { type PublishingSubject } from '@kbn/presentation-publishing';
+import { PublishingSubject } from '@kbn/presentation-publishing';
 import React from 'react';
 import { LensEmbeddableComponent } from './lens_embeddable_component';
 

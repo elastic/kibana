@@ -8,7 +8,7 @@
  */
 
 import type { Plugin, CoreSetup } from '@kbn/core/server';
-import { type UsageCollectionSetup, type UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { registerRoutes } from './routes';
 
 export interface TestPluginDepsSetup {

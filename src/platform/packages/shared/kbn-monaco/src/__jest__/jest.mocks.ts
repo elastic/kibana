@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type MockIModel } from './types';
+import { MockIModel } from './types';
 
 const createMockModel = (ID: string) => {
   const model: MockIModel = {

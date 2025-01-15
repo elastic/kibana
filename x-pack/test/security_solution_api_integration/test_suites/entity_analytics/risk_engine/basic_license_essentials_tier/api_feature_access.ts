@@ -6,7 +6,7 @@
  */
 
 import { riskEngineRouteHelpersFactory } from '../../utils';
-import { type FtrProviderContext } from '../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

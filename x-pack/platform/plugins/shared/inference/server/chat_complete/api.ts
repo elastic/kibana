@@ -14,7 +14,7 @@ import {
   type ChatCompleteCompositeResponse,
   createInferenceRequestError,
   type ToolOptions,
-  type ChatCompleteOptions,
+  ChatCompleteOptions,
 } from '@kbn/inference-common';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { getInferenceAdapter } from './adapters';

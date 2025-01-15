@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { type ActionType } from '@kbn/actions-plugin/common';
+import { ActionType } from '@kbn/actions-plugin/common';
 import { ConnectorAddModal } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import {
-  type ActionConnector,
-  type ActionTypeRegistryContract,
+  ActionConnector,
+  ActionTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { ActionTypeSelectorModal } from '../connector_selector_inline/action_type_selector_modal';
 interface Props {

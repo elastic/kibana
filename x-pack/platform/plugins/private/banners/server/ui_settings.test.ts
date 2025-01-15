@@ -6,7 +6,7 @@
  */
 
 import { uiSettingsServiceMock } from '@kbn/core/server/mocks';
-import { type BannersConfigType } from './config';
+import { BannersConfigType } from './config';
 import { registerSettings } from './ui_settings';
 
 const createConfig = (parts: Partial<BannersConfigType> = {}): BannersConfigType => ({

@@ -8,8 +8,8 @@
 import type { IStaticAssets } from '@kbn/core-http-browser';
 import {
   CONNECTOR_DEFINITIONS,
-  type ConnectorDefinition,
-  type ConnectorServerSideDefinition,
+  ConnectorDefinition,
+  ConnectorServerSideDefinition,
   getConnectorsDict,
 } from '@kbn/search-connectors';
 

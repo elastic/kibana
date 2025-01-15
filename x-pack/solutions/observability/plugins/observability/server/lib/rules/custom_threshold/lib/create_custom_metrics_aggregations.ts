@@ -9,7 +9,7 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
 import {
   Aggregators,
-  type CustomThresholdExpressionMetric,
+  CustomThresholdExpressionMetric,
 } from '../../../../../common/custom_threshold_rule/types';
 import {
   createLastValueAggBucket,

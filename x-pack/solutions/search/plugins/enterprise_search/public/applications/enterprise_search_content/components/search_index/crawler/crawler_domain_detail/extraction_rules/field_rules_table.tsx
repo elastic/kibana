@@ -9,7 +9,7 @@ import React from 'react';
 
 import {
   EuiBasicTable,
-  type EuiBasicTableColumn,
+  EuiBasicTableColumn,
   EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 
 import {
   ContentFrom,
-  type ExtractionRuleFieldRule,
+  ExtractionRuleFieldRule,
   FieldType,
   MultipleObjectsHandling,
 } from '../../../../../../../../common/types/extraction_rules';

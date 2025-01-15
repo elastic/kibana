@@ -9,17 +9,17 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   type AuthenticatedUser,
   type SecurityServiceStart,
-  type AnalyticsServiceStart,
-  type KibanaRequest,
-  type Logger,
+  AnalyticsServiceStart,
+  KibanaRequest,
+  Logger,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { withSpan } from '@kbn/apm-utils';
-import { type EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { type SpacesServiceStart } from '@kbn/spaces-plugin/server';
-import { type IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
@@ -32,24 +32,24 @@ import {
   validateSecrets,
 } from './validate_with_schema';
 import {
-  type ActionType,
-  type ActionTypeConfig,
-  type ActionTypeExecutorRawResult,
-  type ActionTypeExecutorResult,
-  type ActionTypeRegistryContract,
-  type ActionTypeSecrets,
-  type GetServicesFunction,
-  type GetUnsecuredServicesFunction,
-  type InMemoryConnector,
-  type RawAction,
-  type Services,
+  ActionType,
+  ActionTypeConfig,
+  ActionTypeExecutorRawResult,
+  ActionTypeExecutorResult,
+  ActionTypeRegistryContract,
+  ActionTypeSecrets,
+  GetServicesFunction,
+  GetUnsecuredServicesFunction,
+  InMemoryConnector,
+  RawAction,
+  Services,
   UNALLOWED_FOR_UNSECURE_EXECUTION_CONNECTOR_TYPE_IDS,
-  type UnsecuredServices,
-  type ValidatorServices,
+  UnsecuredServices,
+  ValidatorServices,
 } from '../types';
 import { EVENT_LOG_ACTIONS } from '../constants/event_log';
-import { type ActionExecutionSource, type ActionExecutionSourceType } from './action_execution_source';
-import { type RelatedSavedObjects } from './related_saved_objects';
+import { ActionExecutionSource, ActionExecutionSourceType } from './action_execution_source';
+import { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
 import { ActionExecutionError, ActionExecutionErrorReason } from './errors/action_execution_error';
 import type { ActionsAuthorization } from '../authorization/actions_authorization';

@@ -8,10 +8,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type Assign } from '@kbn/utility-types';
-import { type ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { type IpPrefixOutput } from '../../expressions';
-import { type AggExpressionType, type AggExpressionFunctionArgs, BUCKET_TYPES } from '..';
+import { Assign } from '@kbn/utility-types';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { IpPrefixOutput } from '../../expressions';
+import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '..';
 
 export const aggIpPrefixFnName = 'aggIpPrefix';
 

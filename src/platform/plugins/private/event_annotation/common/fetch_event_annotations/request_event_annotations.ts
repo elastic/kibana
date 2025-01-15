@@ -10,18 +10,18 @@
 import { defer, lastValueFrom } from 'rxjs';
 import { partition } from 'lodash';
 import {
-  type AggsStart,
-  type DataView,
-  type DataViewSpec,
-  type ExpressionValueSearchContext,
+  AggsStart,
+  DataView,
+  DataViewSpec,
+  ExpressionValueSearchContext,
   parseEsInterval,
-  type AggConfigs,
+  AggConfigs,
 } from '@kbn/data-plugin/common';
 
-import { type ExecutionContext } from '@kbn/expressions-plugin/common';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import moment from 'moment';
-import { type ESCalendarInterval, type ESFixedInterval, roundDateToESInterval } from '@elastic/charts';
-import { type Adapters } from '@kbn/inspector-plugin/common';
+import { ESCalendarInterval, ESFixedInterval, roundDateToESInterval } from '@elastic/charts';
+import { Adapters } from '@kbn/inspector-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { i18n } from '@kbn/i18n';
 import { handleRequest } from './handle_request';
@@ -36,8 +36,8 @@ import {
   wrapRowsInDatatable,
 } from './utils';
 import type { ManualEventAnnotationOutput } from '../manual_event_annotation/types';
-import { type QueryPointEventAnnotationOutput } from '../query_point_event_annotation/types';
-import { type FetchEventAnnotationsArgs, type FetchEventAnnotationsStartDependencies } from './types';
+import { QueryPointEventAnnotationOutput } from '../query_point_event_annotation/types';
+import { FetchEventAnnotationsArgs, FetchEventAnnotationsStartDependencies } from './types';
 
 interface ManualGroup {
   type: 'manual';

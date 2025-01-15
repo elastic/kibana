@@ -8,7 +8,7 @@
  */
 
 import type { IRouter, RequestHandler } from '@kbn/core/server';
-import { type AnyEndpoint } from '../api_routes';
+import { AnyEndpoint } from '../api_routes';
 import type { FilesRequestHandlerContext } from '../types';
 
 export type FileKindRouter = IRouter<FileKindsRequestHandlerContext>;

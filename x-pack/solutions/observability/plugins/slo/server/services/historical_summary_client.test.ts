@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import moment from 'moment';
-import { type DateRange, type SLODefinition } from '../domain/models';
+import { DateRange, SLODefinition } from '../domain/models';
 import { oneMinute, oneMonth, sevenDays, thirtyDays } from './fixtures/duration';
 import { createSLO } from './fixtures/slo';
 import {

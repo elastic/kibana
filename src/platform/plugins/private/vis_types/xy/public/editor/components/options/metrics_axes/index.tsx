@@ -13,12 +13,12 @@ import { cloneDeep, get } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 
-import { BUCKET_TYPES, type IAggConfig } from '@kbn/data-plugin/public';
+import { BUCKET_TYPES, IAggConfig } from '@kbn/data-plugin/public';
 import { LEGACY_TIME_AXIS } from '@kbn/charts-plugin/common';
 import { getUISettings } from '../../../../services';
 
-import { type VisParams, type ValueAxis, type SeriesParam, type CategoryAxis } from '../../../../types';
-import { type ValidationVisOptionsProps } from '../../common';
+import { VisParams, ValueAxis, SeriesParam, CategoryAxis } from '../../../../types';
+import { ValidationVisOptionsProps } from '../../common';
 import { SeriesPanel } from './series_panel';
 import { CategoryAxisPanel } from './category_axis_panel';
 import { ValueAxesPanel } from './value_axes_panel';

@@ -8,7 +8,7 @@
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
-import { type ProcessorInternal, type ProcessorSelector } from '../types';
+import { ProcessorInternal, ProcessorSelector } from '../types';
 
 interface Props {
   processor: ProcessorInternal;

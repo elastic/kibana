@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { WATCH_TYPES } from '../../../../common/constants';
 import { serializeJsonWatch, serializeThresholdWatch } from '../../../../common/lib/serialization';
-import { type RouteDependencies } from '../../../types';
+import { RouteDependencies } from '../../../types';
 
 const paramsSchema = schema.object({
   id: schema.string(),

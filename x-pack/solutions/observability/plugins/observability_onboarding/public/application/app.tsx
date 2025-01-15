@@ -6,7 +6,7 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import { type AppMountParameters, APP_WRAPPER_CLASS, type CoreStart } from '@kbn/core/public';
+import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -16,11 +16,11 @@ import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../common/telemetry_events';
-import { type AppContext, type ConfigSchema, type ObservabilityOnboardingAppServices } from '..';
+import { AppContext, ConfigSchema, ObservabilityOnboardingAppServices } from '..';
 import { ObservabilityOnboardingHeaderActionMenu } from './shared/header_action_menu';
 import {
-  type ObservabilityOnboardingPluginSetupDeps,
-  type ObservabilityOnboardingPluginStartDeps,
+  ObservabilityOnboardingPluginSetupDeps,
+  ObservabilityOnboardingPluginStartDeps,
 } from '../plugin';
 import { ObservabilityOnboardingFlow } from './observability_onboarding_flow';
 

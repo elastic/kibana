@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { kea, type MakeLogicType } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
-import { type Actions } from '../../../../shared/api_logic/create_api_logic';
+import { Actions } from '../../../../shared/api_logic/create_api_logic';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 
 import { KibanaLogic } from '../../../../shared/kibana';
 import {
   CreateApiIndexApiLogic,
-  type CreateApiIndexApiLogicArgs,
-  type CreateApiIndexApiLogicResponse,
+  CreateApiIndexApiLogicArgs,
+  CreateApiIndexApiLogicResponse,
 } from '../../../api/index/create_api_index_api_logic';
 import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
 import { SearchIndexTabId } from '../../search_index/search_index';

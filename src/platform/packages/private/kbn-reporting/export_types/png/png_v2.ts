@@ -14,16 +14,16 @@ import {
   lastValueFrom,
   map,
   mergeMap,
-  type Observable,
+  Observable,
   of,
   takeUntil,
   tap,
 } from 'rxjs';
-import { type Writable } from 'stream';
+import { Writable } from 'stream';
 
 import type { LicenseType } from '@kbn/licensing-plugin/server';
 import {
-  type CancellationToken,
+  CancellationToken,
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
@@ -33,10 +33,10 @@ import {
 } from '@kbn/reporting-common';
 import type { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/types';
 import {
-  type JobParamsPNGV2,
+  JobParamsPNGV2,
   PNG_JOB_TYPE_V2,
   PNG_REPORT_TYPE_V2,
-  type TaskPayloadPNGV2,
+  TaskPayloadPNGV2,
 } from '@kbn/reporting-export-types-png-common';
 import {
   decryptJobHeaders,

@@ -8,7 +8,7 @@
  */
 
 import * as React from 'react';
-import { EuiTabbedContent, type EuiTabbedContentProps } from '@elastic/eui';
+import { EuiTabbedContent, EuiTabbedContentProps } from '@elastic/eui';
 import { PreviewAst } from './components/preview_ast';
 import { PreviewTokens } from './components/preview_tokens';
 import { PreviewUi } from './components/preview_ui';

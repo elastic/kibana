@@ -7,7 +7,7 @@
 import { isLeft } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { pick } from 'lodash';
-import { legacyExperimentalFieldMap, type ExperimentalRuleFieldMap } from '@kbn/alerts-as-data-utils';
+import { legacyExperimentalFieldMap, ExperimentalRuleFieldMap } from '@kbn/alerts-as-data-utils';
 
 import { runtimeTypeFromFieldMap } from './field_map';
 

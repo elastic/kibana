@@ -27,7 +27,7 @@ import { AnalyticsEvents } from '../analytics/constants';
 import { useAutoBottomScroll } from '../hooks/use_auto_bottom_scroll';
 import { ChatSidebar } from './chat_sidebar';
 import { useChat } from '../hooks/use_chat';
-import { type ChatForm, ChatFormFields, type ChatRequestData, MessageRole } from '../types';
+import { ChatForm, ChatFormFields, ChatRequestData, MessageRole } from '../types';
 
 import { MessageList } from './message_list/message_list';
 import { QuestionInput } from './question_input';

@@ -15,10 +15,10 @@ import {
   EVENT_ACTION,
 } from '@kbn/rule-data-utils';
 import {
-  type BulkRequest,
-  type BulkResponse,
-  type BulkResponseItem,
-  type BulkOperationType,
+  BulkRequest,
+  BulkResponse,
+  BulkResponseItem,
+  BulkOperationType,
 } from '@elastic/elasticsearch/lib/api/types';
 
 import { resolveAlertConflicts } from './alert_conflict_resolver';

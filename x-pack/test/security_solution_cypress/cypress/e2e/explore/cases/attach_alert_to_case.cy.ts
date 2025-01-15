@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ROLES, type SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
+import { ROLES, SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 
 import { getNewRule } from '../../../objects/rule';
 

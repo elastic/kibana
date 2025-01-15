@@ -7,9 +7,9 @@
 
 import { LogicMounter } from '../../../../../../__mocks__/kea_logic';
 
-import { type HttpResponse } from '@kbn/core/public';
+import { HttpResponse } from '@kbn/core/public';
 
-import { type ErrorResponse, type HttpError, Status } from '../../../../../../../../common/types/api';
+import { ErrorResponse, HttpError, Status } from '../../../../../../../../common/types/api';
 import { MlModelDeploymentState } from '../../../../../../../../common/types/ml';
 import { CreateTextExpansionModelApiLogic } from '../../../../../api/ml_models/text_expansion/create_text_expansion_model_api_logic';
 import { FetchTextExpansionModelApiLogic } from '../../../../../api/ml_models/text_expansion/fetch_text_expansion_model_api_logic';
@@ -18,7 +18,7 @@ import { StartTextExpansionModelApiLogic } from '../../../../../api/ml_models/te
 import {
   getTextExpansionError,
   TextExpansionCalloutLogic,
-  type TextExpansionCalloutValues,
+  TextExpansionCalloutValues,
 } from './text_expansion_callout_logic';
 
 const DEFAULT_VALUES: TextExpansionCalloutValues = {

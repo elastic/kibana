@@ -6,7 +6,7 @@
  */
 
 import { alertingAuthorizationMock } from './authorization/alerting_authorization.mock';
-import { type RulesClientApi } from './types';
+import { RulesClientApi } from './types';
 
 type Schema = RulesClientApi;
 export type RulesClientMock = jest.Mocked<Schema>;

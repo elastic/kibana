@@ -6,12 +6,12 @@
  */
 
 import {
-  type SavedObjectModelDataBackfillFn,
-  type SavedObjectModelTransformationDoc,
-  type SavedObjectModelUnsafeTransformFn,
+  SavedObjectModelDataBackfillFn,
+  SavedObjectModelTransformationDoc,
+  SavedObjectModelUnsafeTransformFn,
 } from '@kbn/core-saved-objects-server';
-import { type SavedObject, type SavedObjectsType } from '@kbn/core/server';
-import { type EntityDefinition } from '@kbn/entities-schema';
+import { SavedObject, SavedObjectsType } from '@kbn/core/server';
+import { EntityDefinition } from '@kbn/entities-schema';
 import {
   generateHistoryIndexTemplateId,
   generateHistoryIngestPipelineId,

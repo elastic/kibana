@@ -8,7 +8,7 @@
  */
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { type RuntimeType } from '../../shared_imports';
+import { RuntimeType } from '../../shared_imports';
 
 export const RUNTIME_FIELD_OPTIONS_PRIMITIVE: Array<EuiComboBoxOptionOption<RuntimeType>> = [
   {

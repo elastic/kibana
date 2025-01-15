@@ -6,12 +6,12 @@
  */
 
 import {
-  type CommentsArray,
-  type EntriesArray,
-  type Entry,
-  type EntryMatch,
-  type EntryNested,
-  type OsTypeArray,
+  CommentsArray,
+  EntriesArray,
+  Entry,
+  EntryMatch,
+  EntryNested,
+  OsTypeArray,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 export const DATE_NOW = '2020-04-20T15:25:31.830Z';

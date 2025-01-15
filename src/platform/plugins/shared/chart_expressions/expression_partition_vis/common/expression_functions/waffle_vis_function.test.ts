@@ -9,16 +9,16 @@
 
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 import {
-  type WaffleVisConfig,
+  WaffleVisConfig,
   LabelPositions,
   ValueFormats,
   LegendDisplay,
 } from '../types/expression_renderers';
-import { type ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { type Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { waffleVisFunction } from './waffle_vis_function';
 import { PARTITION_LABELS_VALUE, PARTITION_VIS_RENDERER_NAME } from '../constants';
-import { type ExecutionContext } from '@kbn/expressions-plugin/common';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { LegendValue } from '@elastic/charts';
 
 describe('interpreter/functions#waffleVis', () => {

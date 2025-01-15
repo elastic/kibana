@@ -10,7 +10,7 @@
 import {
   EuiButtonIcon,
   EuiPopover,
-  type EuiPopoverProps,
+  EuiPopoverProps,
   EuiPopoverTitle,
   EuiSpacer,
   EuiText,

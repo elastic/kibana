@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import type SuperTest from 'supertest';
 
 export async function getConnector(

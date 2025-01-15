@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apm, type ApmFields, httpExitSpan, type Serializable } from '@kbn/apm-synthtrace-client';
+import { apm, ApmFields, httpExitSpan, Serializable } from '@kbn/apm-synthtrace-client';
 import { Readable } from 'stream';
-import { type Scenario } from '../cli/scenario';
+import { Scenario } from '../cli/scenario';
 
-import { type RunOptions } from '../cli/utils/parse_run_cli_flags';
+import { RunOptions } from '../cli/utils/parse_run_cli_flags';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
 

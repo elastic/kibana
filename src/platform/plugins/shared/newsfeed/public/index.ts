@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type PluginInitializerContext } from '@kbn/core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import {
-  type NewsfeedPublicPluginSetup,
-  type NewsfeedPublicPluginStart,
+  NewsfeedPublicPluginSetup,
+  NewsfeedPublicPluginStart,
   NewsfeedPublicPlugin,
 } from './plugin';
-import { type FetchResult, type NewsfeedItem } from './types';
+import { FetchResult, NewsfeedItem } from './types';
 import { NewsfeedApiEndpoint } from './lib/api';
 
 export type { NewsfeedPublicPluginSetup, NewsfeedPublicPluginStart, FetchResult, NewsfeedItem };

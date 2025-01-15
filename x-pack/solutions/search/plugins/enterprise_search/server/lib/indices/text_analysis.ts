@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type AnalysisTokenFilter } from '@elastic/elasticsearch/lib/api/types';
+import { AnalysisTokenFilter } from '@elastic/elasticsearch/lib/api/types';
 
 interface LanguageDataEntry {
   custom_filter_definitions?: object;

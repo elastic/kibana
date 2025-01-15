@@ -8,7 +8,7 @@
 import './setting_with_sibling_flyout.scss';
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect, type MutableRefObject } from 'react';
+import React, { useState, useEffect, MutableRefObject } from 'react';
 import {
   EuiFlyoutHeader,
   EuiFlyoutFooter,

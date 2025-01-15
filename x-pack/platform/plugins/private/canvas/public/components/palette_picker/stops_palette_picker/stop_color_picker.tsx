@@ -13,9 +13,9 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { type FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { type ColorStop } from '../types';
+import { ColorStop } from '../types';
 
 interface Props {
   removable?: boolean;

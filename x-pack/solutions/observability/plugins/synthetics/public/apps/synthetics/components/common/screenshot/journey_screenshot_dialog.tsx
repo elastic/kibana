@@ -6,12 +6,12 @@
  */
 
 import React, {
-  type MouseEvent,
+  MouseEvent,
   useContext,
   useEffect,
   useState,
   useCallback,
-  type KeyboardEvent,
+  KeyboardEvent,
 } from 'react';
 import { i18n } from '@kbn/i18n';
 import {

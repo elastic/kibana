@@ -8,9 +8,9 @@
  */
 
 import Fs from 'fs';
-import { type PlaywrightTestConfig } from 'playwright/test';
+import { PlaywrightTestConfig } from 'playwright/test';
 import { createFlagError } from '@kbn/dev-cli-errors';
-import { type ScoutTestOptions, VALID_CONFIG_MARKER } from '../types';
+import { ScoutTestOptions, VALID_CONFIG_MARKER } from '../types';
 import { loadConfigModule } from './config_loader';
 
 export async function validatePlaywrightConfig(configPath: string) {

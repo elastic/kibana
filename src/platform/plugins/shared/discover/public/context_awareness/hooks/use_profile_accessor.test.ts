@@ -8,7 +8,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { type AppliedProfile, getMergedAccessor } from '../composable_profile';
+import { AppliedProfile, getMergedAccessor } from '../composable_profile';
 import { useProfileAccessor } from './use_profile_accessor';
 import { getDataTableRecords } from '../../__fixtures__/real_hits';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';

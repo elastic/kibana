@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, type PropsWithChildren } from 'react';
-import { type ClientPluginsStart } from '../../plugin';
+import React, { createContext, useContext, PropsWithChildren } from 'react';
+import { ClientPluginsStart } from '../../plugin';
 
 export const UptimeStartupPluginsContext = createContext<Partial<ClientPluginsStart>>({});
 

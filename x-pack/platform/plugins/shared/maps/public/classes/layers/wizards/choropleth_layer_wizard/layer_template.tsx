@@ -8,19 +8,19 @@
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type FileLayer } from '@elastic/ems-client';
+import { FileLayer } from '@elastic/ems-client';
 import {
   EuiComboBox,
-  type EuiComboBoxOptionOption,
+  EuiComboBoxOptionOption,
   EuiFormRow,
   EuiPanel,
   EuiRadioGroup,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { type DataViewField, type DataView } from '@kbn/data-plugin/common';
+import { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { getDataViewLabel, getDataViewSelectPlaceholder } from '../../../../../common/i18n_getters';
-import { type RenderWizardArguments } from '../layer_wizard_registry';
+import { RenderWizardArguments } from '../layer_wizard_registry';
 import { EMSFileSelect } from '../../../../components/ems_file_select';
 import { GeoIndexPatternSelect } from '../../../../components/geo_index_pattern_select';
 import { SingleFieldSelect } from '../../../../components/single_field_select';

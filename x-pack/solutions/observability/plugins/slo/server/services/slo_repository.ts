@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { type SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { type Logger } from '@kbn/core/server';
-import { ALL_VALUE, type Paginated, type Pagination, sloDefinitionSchema } from '@kbn/slo-schema';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { Logger } from '@kbn/core/server';
+import { ALL_VALUE, Paginated, Pagination, sloDefinitionSchema } from '@kbn/slo-schema';
 import { isLeft } from 'fp-ts/lib/Either';
 import { merge } from 'lodash';
 import { SLO_MODEL_VERSION } from '../../common/constants';
-import { type SLODefinition, type StoredSLODefinition } from '../domain/models';
+import { SLODefinition, StoredSLODefinition } from '../domain/models';
 import { SLONotFound } from '../errors';
 import { SO_SLO_TYPE } from '../saved_objects';
 

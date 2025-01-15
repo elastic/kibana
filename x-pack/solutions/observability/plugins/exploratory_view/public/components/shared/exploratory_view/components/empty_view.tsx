@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer, EuiText } from '@ela
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { LOADING_VIEW } from '../series_editor/series_editor';
-import { type ReportViewType, type SeriesUrl } from '../types';
+import { ReportViewType, SeriesUrl } from '../types';
 
 export function EmptyView({
   loading,

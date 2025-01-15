@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { type FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 const customDataViewIdParam = 'context-enc:oded-param';
 const customDocIdParam = '1+1=2/&?#';

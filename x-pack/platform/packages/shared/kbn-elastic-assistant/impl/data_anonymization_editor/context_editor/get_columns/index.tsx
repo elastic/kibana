@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { type EuiBasicTableColumn, EuiButtonEmpty, EuiCode, EuiSwitch, EuiText } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiButtonEmpty, EuiCode, EuiSwitch, EuiText } from '@elastic/eui';
 import React from 'react';
 
 import styled from 'styled-components';
 
 import { BulkActions } from '../bulk_actions';
 import * as i18n from '../translations';
-import { type BatchUpdateListItem, type ContextEditorRow, FIELDS } from '../types';
+import { BatchUpdateListItem, ContextEditorRow, FIELDS } from '../types';
 
 const AnonymizedButton = styled(EuiButtonEmpty)`
   max-height: 24px;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type KibanaRequest } from '@kbn/core-http-server';
+import { KibanaRequest } from '@kbn/core-http-server';
 import { createFieldsMetadataClientMock } from './fields_metadata_client.mock';
-import { type FieldsMetadataServiceSetup, type FieldsMetadataServiceStart } from './types';
+import { FieldsMetadataServiceSetup, FieldsMetadataServiceStart } from './types';
 
 export const createFieldsMetadataServiceSetupMock =
   (): jest.Mocked<FieldsMetadataServiceSetup> => ({

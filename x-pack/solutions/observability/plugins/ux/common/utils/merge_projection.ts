@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type DeepPartial } from 'utility-types';
+import { DeepPartial } from 'utility-types';
 import { cloneDeep, isPlainObject, mergeWith } from 'lodash';
 
 type PlainObject = Record<string | number | symbol, any>;

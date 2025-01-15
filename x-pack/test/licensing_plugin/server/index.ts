@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type FtrProviderContext } from '../services';
+import { FtrProviderContext } from '../services';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ loadTestFile }: FtrProviderContext) {

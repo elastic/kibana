@@ -8,8 +8,8 @@
  */
 
 import expect from '@kbn/expect';
-import { type TimeStrings } from '../../../page_objects/common_page';
-import { type FtrProviderContext } from '../ftr_provider_context';
+import { TimeStrings } from '../../../page_objects/common_page';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

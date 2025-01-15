@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type VisParams } from '../common';
-import { type VisEditorConstructor } from './visualize_app/types';
+import { VisParams } from '../common';
+import { VisEditorConstructor } from './visualize_app/types';
 
 const DEFAULT_NAME = 'default';
 

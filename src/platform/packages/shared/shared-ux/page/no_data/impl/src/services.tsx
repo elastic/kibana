@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC, type PropsWithChildren } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 import { NoDataCardKibanaProvider, NoDataCardProvider } from '@kbn/shared-ux-card-no-data';
 

@@ -6,24 +6,24 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
-import { type SanitizedRule, type RawAlertInstance, type AlertInstanceContext } from '@kbn/alerting-plugin/common';
-import { type RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { SanitizedRule, RawAlertInstance, AlertInstanceContext } from '@kbn/alerting-plugin/common';
+import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { BaseRule } from './base_rule';
 import {
-  type AlertData,
-  type AlertCluster,
-  type AlertState,
-  type AlertMessage,
-  type IndexShardSizeUIMeta,
-  type AlertMessageTimeToken,
-  type AlertMessageLinkToken,
-  type AlertInstanceState,
-  type CommonAlertParams,
-  type CommonAlertFilter,
-  type IndexShardSizeStats,
+  AlertData,
+  AlertCluster,
+  AlertState,
+  AlertMessage,
+  IndexShardSizeUIMeta,
+  AlertMessageTimeToken,
+  AlertMessageLinkToken,
+  AlertInstanceState,
+  CommonAlertParams,
+  CommonAlertFilter,
+  IndexShardSizeStats,
 } from '../../common/types/alerts';
 import { RULE_LARGE_SHARD_SIZE, RULE_DETAILS } from '../../common/constants';
 import { fetchIndexShardSize } from '../lib/alerts/fetch_index_shard_size';

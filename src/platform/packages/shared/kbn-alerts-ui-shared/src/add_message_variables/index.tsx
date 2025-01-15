@@ -21,7 +21,7 @@ import {
   EuiFlexItem,
   EuiPopoverFooter,
   EuiToolTip,
-  type EuiSelectableOption,
+  EuiSelectableOption,
 } from '@elastic/eui';
 import type { ActionVariable } from '@kbn/alerting-types';
 import './add_message_variables.scss';

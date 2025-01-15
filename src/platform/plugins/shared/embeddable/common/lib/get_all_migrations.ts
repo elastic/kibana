@@ -8,9 +8,9 @@
  */
 
 import {
-  type MigrateFunctionsObject,
-  type PersistableState,
-  type PersistableStateMigrateFn,
+  MigrateFunctionsObject,
+  PersistableState,
+  PersistableStateMigrateFn,
 } from '@kbn/kibana-utils-plugin/common/persistable_state';
 import { baseEmbeddableMigrations } from './migrate_base_input';
 

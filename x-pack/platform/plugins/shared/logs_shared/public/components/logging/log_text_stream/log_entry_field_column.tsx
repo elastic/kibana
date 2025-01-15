@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { type JsonValue } from '@kbn/utility-types';
+import { JsonValue } from '@kbn/utility-types';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { type LogColumn } from '../../../../common/log_entry';
+import { LogColumn } from '../../../../common/log_entry';
 import { isFieldColumn, isHighlightFieldColumn } from '../../../utils/log_entry';
 import { FieldValue } from './field_value';
 import { LogEntryColumnContent } from './log_entry_column';
@@ -16,7 +16,7 @@ import {
   longWrappedContentStyle,
   preWrappedContentStyle,
   unwrappedContentStyle,
-  type WrapMode,
+  WrapMode,
 } from './text_styles';
 
 export interface LogEntryFieldColumnProps {

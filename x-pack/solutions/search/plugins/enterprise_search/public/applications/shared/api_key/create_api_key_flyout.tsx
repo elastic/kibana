@@ -29,7 +29,7 @@ import {
   EuiStep,
   EuiSpacer,
   EuiSwitch,
-  type EuiSwitchEvent,
+  EuiSwitchEvent,
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,

@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { type State } from '../../../types';
+import { State } from '../../../types';
 
 // page getters
 export function canUserWrite(state: State): boolean {

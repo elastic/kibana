@@ -12,13 +12,13 @@ import {
   VECTOR_SHAPE_TYPE,
 } from '../../../../../common/constants';
 import {
-  type Category,
-  type DynamicStylePropertyOptions,
-  type RangeFieldMeta,
-  type StyleMetaDescriptor,
+  Category,
+  DynamicStylePropertyOptions,
+  RangeFieldMeta,
+  StyleMetaDescriptor,
 } from '../../../../../common/descriptor_types';
 import {
-  type IDynamicStyleProperty,
+  IDynamicStyleProperty,
   OTHER_CATEGORY_KEY,
 } from '../../../styles/vector/properties/dynamic_style_property';
 

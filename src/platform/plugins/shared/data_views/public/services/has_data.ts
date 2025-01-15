@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type CoreStart, type HttpStart } from '@kbn/core/public';
-import { type IHttpFetchError, type ResponseErrorBody, isHttpFetchError } from '@kbn/core-http-browser';
+import { CoreStart, HttpStart } from '@kbn/core/public';
+import { IHttpFetchError, ResponseErrorBody, isHttpFetchError } from '@kbn/core-http-browser';
 import { isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_ASSETS_TO_IGNORE, HasEsDataFailureReason } from '../../common';
-import { type HasDataViewsResponse, type IndicesViaSearchResponse } from '..';
-import { type IndicesResponse, type IndicesResponseModified } from '../types';
+import { HasDataViewsResponse, IndicesViaSearchResponse } from '..';
+import { IndicesResponse, IndicesResponseModified } from '../types';
 
 export interface HasEsDataParams {
   /**

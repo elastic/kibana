@@ -6,7 +6,7 @@
  */
 
 import type { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
-import { type ConnectorServerSideDefinition } from '@kbn/search-connectors';
+import { ConnectorServerSideDefinition } from '@kbn/search-connectors';
 import { getConnectorTypes } from '../common/lib/connector_types';
 import type {
   SearchConnectorsPluginSetup as SearchConnectorsPluginSetup,

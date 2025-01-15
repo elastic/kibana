@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { createContext, type FunctionComponent, useContext } from 'react';
-import { UseMultiFields, type FieldHook, type FieldConfig } from '../../../../shared_imports';
+import React, { createContext, FunctionComponent, useContext } from 'react';
+import { UseMultiFields, FieldHook, FieldConfig } from '../../../../shared_imports';
 
 /**
  * Those are the fields that we always want present in our form.

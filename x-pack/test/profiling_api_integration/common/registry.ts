@@ -9,9 +9,9 @@ import { joinByKey } from '@kbn/apm-plugin/common/utils/join_by_key';
 import { maybe } from '@kbn/apm-plugin/common/utils/maybe';
 import callsites from 'callsites';
 import { castArray, groupBy } from 'lodash';
-import { type ProfilingFtrConfigName } from '../configs';
+import { ProfilingFtrConfigName } from '../configs';
 import { getBettertest } from './bettertest';
-import { type FtrProviderContext } from './ftr_provider_context';
+import { FtrProviderContext } from './ftr_provider_context';
 import { cleanUpProfilingData } from '../utils/profiling_data';
 
 interface RunCondition {

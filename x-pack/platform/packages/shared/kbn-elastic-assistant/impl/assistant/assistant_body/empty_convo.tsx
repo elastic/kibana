@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { type Dispatch, type SetStateAction } from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { type PromptResponse } from '@kbn/elastic-assistant-common';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { AssistantBeacon } from '@kbn/ai-assistant-icon';
 import { SystemPrompt } from '../prompt_editor/system_prompt';
 import { SetupKnowledgeBaseButton } from '../../knowledge_base/setup_knowledge_base_button';

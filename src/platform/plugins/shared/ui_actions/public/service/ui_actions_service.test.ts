@@ -8,9 +8,9 @@
  */
 
 import { UiActionsService } from './ui_actions_service';
-import { type ActionDefinition, ActionInternal } from '../actions';
+import { ActionDefinition, ActionInternal } from '../actions';
 import { createHelloWorldAction } from '../tests/test_samples';
-import { type TriggerRegistry, type ActionRegistry } from '../types';
+import { TriggerRegistry, ActionRegistry } from '../types';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
 

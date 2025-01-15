@@ -6,17 +6,17 @@
  */
 
 import {
-  type Field,
-  type QueryDslFieldAndFormat,
-  type QueryDslQueryContainer,
+  Field,
+  QueryDslFieldAndFormat,
+  QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SUMMARY_FILTER } from '../../../common/constants/client_defaults';
-import { type SyntheticsEsClient } from '../../lib';
+import { SyntheticsEsClient } from '../../lib';
 import {
-  type GetPingsParams,
-  type HttpResponseBody,
-  type PingsResponse,
-  type Ping,
+  GetPingsParams,
+  HttpResponseBody,
+  PingsResponse,
+  Ping,
 } from '../../../common/runtime_types';
 
 const DEFAULT_PAGE_SIZE = 25;

@@ -7,8 +7,8 @@
 
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { openSans } from '../../../common/lib/fonts';
-import { type ElementFactory } from '../../../types';
-import { type SetupInitializer } from '../../plugin';
+import { ElementFactory } from '../../../types';
+import { SetupInitializer } from '../../plugin';
 
 export const metricElementInitializer: SetupInitializer<ElementFactory> = (core, setup) => {
   return () => ({

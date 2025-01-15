@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiIcon, type EuiIconProps } from '@elastic/eui';
+import { EuiIcon, EuiIconProps } from '@elastic/eui';
 
 const MicrosoftIconSvg = memo(() => {
   return (

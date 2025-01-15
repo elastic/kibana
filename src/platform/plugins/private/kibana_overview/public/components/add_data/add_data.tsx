@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC } from 'react';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { type FeatureCatalogueEntry } from '@kbn/home-plugin/public';
+import { FeatureCatalogueEntry } from '@kbn/home-plugin/public';
 import { Synopsis } from '../synopsis';
 import { METRIC_TYPE, trackUiMetric } from '../../lib/ui_metric';
 

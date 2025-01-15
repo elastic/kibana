@@ -7,12 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
-import { type IVectorLayer } from '../vector_layer';
+import { IVectorLayer } from '../vector_layer';
 import { GeoJsonVectorLayer } from '../geojson_vector_layer';
-import { type IVectorStyle, VectorStyle } from '../../../styles/vector/vector_style';
+import { IVectorStyle, VectorStyle } from '../../../styles/vector/vector_style';
 import { getDefaultDynamicProperties } from '../../../styles/vector/vector_style_defaults';
-import { type IDynamicStyleProperty } from '../../../styles/vector/properties/dynamic_style_property';
-import { type IStyleProperty } from '../../../styles/vector/properties/style_property';
+import { IDynamicStyleProperty } from '../../../styles/vector/properties/dynamic_style_property';
+import { IStyleProperty } from '../../../styles/vector/properties/style_property';
 import {
   COUNT_PROP_NAME,
   GRID_RESOLUTION,
@@ -26,24 +26,24 @@ import {
 } from '../../../../../common/constants';
 import { ESGeoGridSource } from '../../../sources/es_geo_grid_source/es_geo_grid_source';
 import { canSkipSourceUpdate } from '../../../util/can_skip_fetch';
-import { type IESSource } from '../../../sources/es_source';
-import { type ISource } from '../../../sources/source';
-import { type DataRequestContext } from '../../../../actions';
+import { IESSource } from '../../../sources/es_source';
+import { ISource } from '../../../sources/source';
+import { DataRequestContext } from '../../../../actions';
 import { DataRequestAbortError } from '../../../util/data_request';
 import {
-  type CustomIcon,
-  type VectorStyleDescriptor,
-  type SizeDynamicOptions,
-  type DynamicStylePropertyOptions,
-  type StylePropertyOptions,
-  type Timeslice,
-  type VectorLayerDescriptor,
-  type VectorSourceRequestMeta,
-  type VectorStylePropertiesDescriptor,
+  CustomIcon,
+  VectorStyleDescriptor,
+  SizeDynamicOptions,
+  DynamicStylePropertyOptions,
+  StylePropertyOptions,
+  Timeslice,
+  VectorLayerDescriptor,
+  VectorSourceRequestMeta,
+  VectorStylePropertiesDescriptor,
 } from '../../../../../common/descriptor_types';
-import { type IVectorSource } from '../../../sources/vector_source';
-import { type LICENSED_FEATURES } from '../../../../licensed_features';
-import { type ESSearchSource } from '../../../sources/es_search_source/es_search_source';
+import { IVectorSource } from '../../../sources/vector_source';
+import { LICENSED_FEATURES } from '../../../../licensed_features';
+import { ESSearchSource } from '../../../sources/es_search_source/es_search_source';
 import { isSearchSourceAbortError } from '../../../sources/es_source/es_source';
 
 const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';

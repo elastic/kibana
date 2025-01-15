@@ -8,7 +8,7 @@
 import { ecsTestState } from '../../../__jest__/fixtures/ecs_mapping';
 import { ECS_RESERVED } from './constants';
 
-import { type EcsMappingState } from '../../types';
+import { EcsMappingState } from '../../types';
 import {
   extractECSMapping,
   findDuplicateFields,

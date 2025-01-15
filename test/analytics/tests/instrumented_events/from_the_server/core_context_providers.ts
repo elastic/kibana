@@ -8,8 +8,8 @@
  */
 
 import expect from '@kbn/expect';
-import { type Event } from '@kbn/core/public';
-import { type FtrProviderContext } from '../../../services';
+import { Event } from '@kbn/core/public';
+import { FtrProviderContext } from '../../../services';
 
 export default function ({ getService }: FtrProviderContext) {
   const deployment = getService('deployment');

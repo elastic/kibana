@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type EntityDefinition } from '@kbn/entities-schema';
+import { EntityDefinition } from '@kbn/entities-schema';
 import {
-  type QueryDslQueryContainer,
-  type TransformPutTransformRequest,
+  QueryDslQueryContainer,
+  TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { getElasticsearchQueryOrThrow } from '../helpers/get_elasticsearch_query_or_throw';
 import { generateLatestMetricAggregations } from './generate_metric_aggregations';

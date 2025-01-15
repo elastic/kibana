@@ -8,8 +8,8 @@
  */
 
 import { mockStorage } from '../../storage/hashed_item_store/mock';
-import { createKbnUrlStateStorage, type IKbnUrlStateStorage } from './create_kbn_url_state_storage';
-import { type History, createBrowserHistory } from 'history';
+import { createKbnUrlStateStorage, IKbnUrlStateStorage } from './create_kbn_url_state_storage';
+import { History, createBrowserHistory } from 'history';
 import { takeUntil, toArray } from 'rxjs';
 import { Subject } from 'rxjs';
 import { CoreScopedHistory } from '@kbn/core/public';

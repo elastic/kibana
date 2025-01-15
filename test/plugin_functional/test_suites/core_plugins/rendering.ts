@@ -11,7 +11,7 @@ import _ from 'lodash';
 import expect from '@kbn/expect';
 
 import '@kbn/core-provider-plugin/types';
-import { type PluginFunctionalProviderContext } from '../../services';
+import { PluginFunctionalProviderContext } from '../../services';
 
 declare global {
   interface Window {

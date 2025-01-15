@@ -7,7 +7,7 @@
 
 import { omit } from 'lodash';
 import React from 'react';
-import { type InferableComponentEnhancerWithProps, type ConnectedComponent } from 'react-redux';
+import { InferableComponentEnhancerWithProps, ConnectedComponent } from 'react-redux';
 
 export type RendererResult = React.ReactElement<any> | null;
 export type RendererFunction<RenderArgs, Result = RendererResult> = (args: RenderArgs) => Result;

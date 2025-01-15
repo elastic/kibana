@@ -7,22 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type QueryPointEventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
+import { QueryPointEventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 import {
-  type Datatable,
-  type DefaultInspectorAdapters,
-  type ExecutionContext,
+  Datatable,
+  DefaultInspectorAdapters,
+  ExecutionContext,
 } from '@kbn/expressions-plugin/common';
-import { type ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { type Dimension, prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { Dimension, prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
 import { LayerTypes, REFERENCE_LINE } from '../constants';
 import { strings } from '../i18n';
 import {
-  type AnnotationLayerConfigResult,
-  type CommonXYDataLayerConfig,
-  type CommonXYLayerConfig,
-  type ExpressionAnnotationResult,
-  type ReferenceLineLayerConfig,
+  AnnotationLayerConfigResult,
+  CommonXYDataLayerConfig,
+  CommonXYLayerConfig,
+  ExpressionAnnotationResult,
+  ReferenceLineLayerConfig,
 } from '../types';
 
 export const logDatatables = (

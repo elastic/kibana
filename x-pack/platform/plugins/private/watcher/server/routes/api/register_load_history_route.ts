@@ -7,9 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
-import { type IScopedClusterClient } from '@kbn/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { INDEX_NAMES } from '../../../common/constants';
-import { type RouteDependencies } from '../../types';
+import { RouteDependencies } from '../../types';
 // @ts-ignore
 import { WatchHistoryItem } from '../../models/watch_history_item';
 

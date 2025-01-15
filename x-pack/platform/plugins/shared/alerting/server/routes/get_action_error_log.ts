@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { type IRouter } from '@kbn/core/server';
+import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { type ILicenseState } from '../lib';
-import { type GetActionErrorLogByIdParams } from '../rules_client';
-import { type RewriteRequestCase, verifyAccessAndContext } from './lib';
-import { type AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
+import { ILicenseState } from '../lib';
+import { GetActionErrorLogByIdParams } from '../rules_client';
+import { RewriteRequestCase, verifyAccessAndContext } from './lib';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from './constants';
 
 const paramSchema = schema.object({

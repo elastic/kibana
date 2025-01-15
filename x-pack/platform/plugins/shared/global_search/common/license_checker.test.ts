@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type Observable, of, BehaviorSubject } from 'rxjs';
+import { Observable, of, BehaviorSubject } from 'rxjs';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
-import { type ILicense, type LicenseCheck } from '@kbn/licensing-plugin/common/types';
+import { ILicense, LicenseCheck } from '@kbn/licensing-plugin/common/types';
 import { LicenseChecker } from './license_checker';
 
 describe('LicenseChecker', () => {

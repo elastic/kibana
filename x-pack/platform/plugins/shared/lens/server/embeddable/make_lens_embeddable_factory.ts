@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { type EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
+import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import {
   mergeMigrationFunctionMaps,
-  type MigrateFunctionsObject,
+  MigrateFunctionsObject,
 } from '@kbn/kibana-utils-plugin/common';
 import { DOC_TYPE } from '../../common/constants';
 import {
@@ -37,19 +37,19 @@ import {
   commonMigrateMetricFormatter,
 } from '../migrations/common_migrations';
 import {
-  type CustomVisualizationMigrations,
-  type LensDocShape713,
-  type LensDocShape715,
-  type LensDocShape810,
-  type LensDocShape850,
-  type LensDocShapePre712,
-  type LensDocShape860,
-  type VisState716,
-  type VisState810,
-  type VisState850,
-  type VisStatePre715,
-  type VisStatePre830,
-  type XYVisState850,
+  CustomVisualizationMigrations,
+  LensDocShape713,
+  LensDocShape715,
+  LensDocShape810,
+  LensDocShape850,
+  LensDocShapePre712,
+  LensDocShape860,
+  VisState716,
+  VisState810,
+  VisState850,
+  VisStatePre715,
+  VisStatePre830,
+  XYVisState850,
 } from '../migrations/types';
 import { extract, inject } from '../../common/embeddable_factory';
 

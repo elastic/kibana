@@ -6,7 +6,7 @@
  */
 
 import { API_URLS } from '../../../../common/constants';
-import { type SyntheticsHasIntegrationMonitorsResponse } from '../../../../common/types/integration_deprecation';
+import { SyntheticsHasIntegrationMonitorsResponse } from '../../../../common/types/integration_deprecation';
 import { apiService } from './utils';
 
 export const getHasIntegrationMonitors =

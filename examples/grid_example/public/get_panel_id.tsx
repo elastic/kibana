@@ -20,7 +20,7 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
 } from '@elastic/eui';
-import { type CoreStart } from '@kbn/core-lifecycle-browser';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { i18n } from '@kbn/i18n';
 

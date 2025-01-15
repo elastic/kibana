@@ -11,7 +11,7 @@ import { Listr } from 'listr2';
 import { run } from '@kbn/dev-cli-runner';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { isFailError } from '@kbn/dev-cli-errors';
-import { type I18nCheckTaskContext, type MessageDescriptor } from '../types';
+import { I18nCheckTaskContext, MessageDescriptor } from '../types';
 
 import {
   checkConfigs,

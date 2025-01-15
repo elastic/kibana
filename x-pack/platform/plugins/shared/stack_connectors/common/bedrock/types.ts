@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { type TypeOf } from '@kbn/config-schema';
+import { TypeOf } from '@kbn/config-schema';
 import {
-  type ConfigSchema,
-  type DashboardActionParamsSchema,
-  type DashboardActionResponseSchema,
-  type SecretsSchema,
-  type RunActionParamsSchema,
-  type RunActionResponseSchema,
-  type InvokeAIActionParamsSchema,
-  type InvokeAIActionResponseSchema,
-  type InvokeAIRawActionParamsSchema,
-  type InvokeAIRawActionResponseSchema,
-  type StreamingResponseSchema,
-  type RunApiLatestResponseSchema,
-  type BedrockMessageSchema,
-  type BedrockToolChoiceSchema,
-  type BedrockClientSendParamsSchema,
-  type BedrockClientSendResponseSchema,
+  ConfigSchema,
+  DashboardActionParamsSchema,
+  DashboardActionResponseSchema,
+  SecretsSchema,
+  RunActionParamsSchema,
+  RunActionResponseSchema,
+  InvokeAIActionParamsSchema,
+  InvokeAIActionResponseSchema,
+  InvokeAIRawActionParamsSchema,
+  InvokeAIRawActionResponseSchema,
+  StreamingResponseSchema,
+  RunApiLatestResponseSchema,
+  BedrockMessageSchema,
+  BedrockToolChoiceSchema,
+  BedrockClientSendParamsSchema,
+  BedrockClientSendResponseSchema,
 } from './schema';
 
 export type Config = TypeOf<typeof ConfigSchema>;

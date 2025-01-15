@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { type Plugin, type CoreSetup } from '@kbn/core/server';
+import { Plugin, CoreSetup } from '@kbn/core/server';
 
 export class UiSettingsPlugin implements Plugin {
   public setup(core: CoreSetup) {

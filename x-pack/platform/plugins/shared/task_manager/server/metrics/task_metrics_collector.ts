@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { type Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import {
-  type AggregationsStringTermsBucket,
-  type AggregationsStringTermsBucketKeys,
-  type AggregationsTermsAggregateBase,
+  AggregationsStringTermsBucket,
+  AggregationsStringTermsBucketKeys,
+  AggregationsTermsAggregateBase,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { type Observable, Subject } from 'rxjs';
-import { type TaskStore } from '../task_store';
+import { Observable, Subject } from 'rxjs';
+import { TaskStore } from '../task_store';
 import {
   IdleTaskWithExpiredRunAt,
   RunningOrClaimingTaskWithExpiredRetryAt,
   OneOfTaskTypes,
 } from '../queries/mark_available_tasks_as_claimed';
-import { type ITaskEventEmitter, type TaskLifecycleEvent } from '../polling_lifecycle';
+import { ITaskEventEmitter, TaskLifecycleEvent } from '../polling_lifecycle';
 import { asTaskManagerMetricEvent } from '../task_events';
 import { asOk } from '../lib/result_type';
 

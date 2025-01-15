@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_BULK_DELETE } from '@kbn/security-solution-plugin/common/constants';
-import { type FtrProviderContext } from '../../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   getSimpleRule,
   getSimpleRuleOutput,

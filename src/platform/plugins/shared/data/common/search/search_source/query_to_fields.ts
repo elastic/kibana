@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type DataViewLazy } from '@kbn/data-views-plugin/common';
+import { DataViewLazy } from '@kbn/data-views-plugin/common';
 import { fromKueryExpression, getKqlFieldNames, isFilter, isOfQueryType } from '@kbn/es-query';
 import type { SearchRequest } from './fetch';
-import { type EsQuerySortValue } from '../..';
+import { EsQuerySortValue } from '../..';
 
 export async function queryToFields({
   dataView,

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
-import { type ElasticsearchClient } from '@kbn/core/server';
+import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import { ElasticsearchClient } from '@kbn/core/server';
 
-import { type DeleteMlInferencePipelineResponse } from '../../../../../../common/types/pipelines';
+import { DeleteMlInferencePipelineResponse } from '../../../../../../common/types/pipelines';
 
 import { getInferencePipelineNameFromIndexName } from '../../../../../utils/ml_inference_pipeline_utils';
 

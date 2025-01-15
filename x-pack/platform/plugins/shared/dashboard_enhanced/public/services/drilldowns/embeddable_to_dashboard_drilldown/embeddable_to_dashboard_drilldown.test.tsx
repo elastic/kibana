@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { type Filter, type RangeFilter, FilterStateStore, type Query, type TimeRange } from '@kbn/es-query';
+import { Filter, RangeFilter, FilterStateStore, Query, TimeRange } from '@kbn/es-query';
 import { type Context, EmbeddableToDashboardDrilldown } from './embeddable_to_dashboard_drilldown';
-import { type AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboard_drilldown';
+import { AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboard_drilldown';
 import { savedObjectsServiceMock } from '@kbn/core/public/mocks';
-import { type DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
-import { type StartDependencies } from '../../../plugin';
-import { type StartServicesGetter } from '@kbn/kibana-utils-plugin/public/core';
+import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
+import { StartDependencies } from '../../../plugin';
+import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public/core';
 import { DashboardAppLocatorDefinition } from '@kbn/dashboard-plugin/public/dashboard_app/locator/locator';
 import { BehaviorSubject } from 'rxjs';
 

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { type RulesClient } from '@kbn/alerting-plugin/server';
+import { RulesClient } from '@kbn/alerting-plugin/server';
 import { calculateAuto } from '@kbn/calculate-auto';
-import { MessageRole, type AssistantMessage, type ToolMessage, ToolChoiceType } from '@kbn/inference-common';
-import { type InferenceClient } from '@kbn/inference-plugin/server';
-import { type Logger } from '@kbn/logging';
-import { type AlertsClient } from '@kbn/rule-registry-plugin/server';
+import { MessageRole, AssistantMessage, ToolMessage, ToolChoiceType } from '@kbn/inference-common';
+import { InferenceClient } from '@kbn/inference-plugin/server';
+import { Logger } from '@kbn/logging';
+import { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import { findLast, pick } from 'lodash';
 import moment from 'moment';
-import { catchError, filter, from, map, mergeMap, type Observable, of, switchMap } from 'rxjs';
-import { type ObservabilityAIAssistantClient } from '@kbn/observability-ai-assistant-plugin/server';
-import { type ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import { catchError, filter, from, map, mergeMap, Observable, of, switchMap } from 'rxjs';
+import { ObservabilityAIAssistantClient } from '@kbn/observability-ai-assistant-plugin/server';
+import { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import {
   RCA_END_PROCESS_TOOL_NAME,
   RCA_INVESTIGATE_ENTITY_TOOL_NAME,
@@ -27,12 +27,12 @@ import { callObserveTool } from './call_observe_tool';
 import { RCA_PROMPT_CHANGES, RCA_PROMPT_ENTITIES, RCA_SYSTEM_PROMPT_BASE } from './prompts';
 import { RCA_TOOLS } from './tools';
 import {
-  type EndProcessToolMessage,
-  type InvestigateEntityToolMessage,
-  type ObservationToolMessage,
-  type RootCauseAnalysisContext,
-  type RootCauseAnalysisEvent,
-  type ToolErrorMessage,
+  EndProcessToolMessage,
+  InvestigateEntityToolMessage,
+  ObservationToolMessage,
+  RootCauseAnalysisContext,
+  RootCauseAnalysisEvent,
+  ToolErrorMessage,
 } from './types';
 import { callTools } from './util/call_tools';
 import { formatEntity } from './util/format_entity';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ConnectorSyncJob, type Paginate } from '../types';
+import { ConnectorSyncJob, Paginate } from '../types';
 import { fetchConnectors, fetchSyncJobs } from '..';
 import { collectConnectorStats } from './collect_connector_stats';
 import {

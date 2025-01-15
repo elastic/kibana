@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Operations, type PercentileParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { Operations, PercentileParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import type { Percentile } from '../../../../common/types';
-import { type AdditionalArgs } from '../../types';
+import { AdditionalArgs } from '../../types';
 import { createColumn, getFormat } from './column';
 import {
-  type PercentileColumnWithExtendedMeta,
-  type PercentileColumn,
-  type Column,
-  type CommonColumnConverterArgs,
+  PercentileColumnWithExtendedMeta,
+  PercentileColumn,
+  Column,
+  CommonColumnConverterArgs,
 } from './types';
 
 export const isPercentileColumnWithMeta = (

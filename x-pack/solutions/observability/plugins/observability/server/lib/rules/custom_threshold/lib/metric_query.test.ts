@@ -8,8 +8,8 @@
 import moment from 'moment';
 import {
   Aggregators,
-  type CustomMetricExpressionParams,
-  type SearchConfigurationType,
+  CustomMetricExpressionParams,
+  SearchConfigurationType,
 } from '../../../../../common/custom_threshold_rule/types';
 import { getElasticsearchMetricQuery } from './metric_query';
 import { COMPARATORS } from '@kbn/alerting-comparators';

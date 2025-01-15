@@ -6,21 +6,21 @@
  */
 
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
-import { type CloudSetup } from '@kbn/cloud-plugin/server';
-import { type DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import { type FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import {
-  type RuleRegistryPluginSetupContract,
-  type RuleRegistryPluginStartContract,
+  RuleRegistryPluginSetupContract,
+  RuleRegistryPluginStartContract,
 } from '@kbn/rule-registry-plugin/server';
-import { type SharePluginSetup } from '@kbn/share-plugin/server';
-import { type SpacesPluginSetup, type SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { SharePluginSetup } from '@kbn/share-plugin/server';
+import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
-  type TaskManagerSetupContract,
-  type TaskManagerStartContract,
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { type UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SloClient } from './client';
 

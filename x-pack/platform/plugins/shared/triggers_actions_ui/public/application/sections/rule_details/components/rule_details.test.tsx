@@ -10,10 +10,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { mountWithIntl, shallowWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from '@testing-library/react';
 import { RuleDetails } from './rule_details';
-import { type Rule, type ActionType, type RuleTypeModel, type RuleType } from '../../../../types';
-import { EuiBadge, EuiButtonEmpty, type EuiPageHeaderProps } from '@elastic/eui';
+import { Rule, ActionType, RuleTypeModel, RuleType } from '../../../../types';
+import { EuiBadge, EuiButtonEmpty, EuiPageHeaderProps } from '@elastic/eui';
 import {
-  type ActionGroup,
+  ActionGroup,
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
   ALERTING_FEATURE_ID,

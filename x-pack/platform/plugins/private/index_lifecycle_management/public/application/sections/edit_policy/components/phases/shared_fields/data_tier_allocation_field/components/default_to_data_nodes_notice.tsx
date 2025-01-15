@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { type FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { type PhaseWithAllocation } from '../../../../../../../../../common/types';
+import { PhaseWithAllocation } from '../../../../../../../../../common/types';
 import {
   noCustomAttributesTitle,
   nodeAllocationMigrationGuidance,

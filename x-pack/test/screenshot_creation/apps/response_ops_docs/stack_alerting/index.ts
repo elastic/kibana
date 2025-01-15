@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export const indexThresholdRuleName = 'kibana sites - low bytes';
 export const esQueryRuleName = 'sample logs query rule';

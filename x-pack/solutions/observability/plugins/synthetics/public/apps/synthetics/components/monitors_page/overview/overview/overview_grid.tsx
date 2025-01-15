@@ -8,7 +8,7 @@ import React, { useState, memo, useCallback, useEffect, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import InfiniteLoader from 'react-window-infinite-loader';
-import { FixedSizeList, type ListChildComponentProps } from 'react-window';
+import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,10 +16,10 @@ import {
   EuiButtonEmpty,
   EuiText,
   EuiAutoSizer,
-  type EuiAutoSize,
+  EuiAutoSize,
 } from '@elastic/eui';
 import { ShowAllSpaces } from '../../common/show_all_spaces';
-import { type OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
+import { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
 import { quietFetchOverviewStatusAction } from '../../../../state/overview_status';
 import type { TrendRequest } from '../../../../../../../common/types';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../embeddables/constants';
@@ -41,7 +41,7 @@ import { NoMonitorsFound } from '../../common/no_monitors_found';
 import { MonitorDetailFlyout } from './monitor_detail_flyout';
 import { useSyntheticsRefreshContext } from '../../../../contexts';
 import { MetricItem } from './metric_item';
-import { type FlyoutParamProps } from './types';
+import { FlyoutParamProps } from './types';
 
 const ITEM_HEIGHT = 172;
 const ROW_COUNT = 4;

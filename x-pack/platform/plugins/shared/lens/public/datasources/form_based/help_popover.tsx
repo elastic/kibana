@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { type ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import {
   EuiIcon,
   EuiLink,
-  type EuiLinkButtonProps,
+  EuiLinkButtonProps,
   EuiPopover,
-  type EuiPopoverProps,
+  EuiPopoverProps,
   EuiWrappingPopover,
-  type EuiWrappingPopoverProps,
+  EuiWrappingPopoverProps,
   EuiPopoverTitle,
   EuiText,
 } from '@elastic/eui';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { type StartServices } from '../../types';
+import { StartServices } from '../../types';
 import './help_popover.scss';
 
 export const HelpPopoverButton = ({

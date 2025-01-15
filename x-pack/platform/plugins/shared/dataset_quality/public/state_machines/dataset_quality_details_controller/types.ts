@@ -8,19 +8,19 @@
 import type { DoneInvokeEvent } from 'xstate';
 import type { DegradedFieldSortField } from '../../hooks';
 import {
-  type Dashboard,
-  type DataStreamDetails,
-  type DataStreamRolloverResponse,
-  type DataStreamSettings,
-  type DegradedField,
-  type DegradedFieldAnalysis,
-  type DegradedFieldResponse,
-  type DegradedFieldValues,
-  type NonAggregatableDatasets,
-  type UpdateFieldLimitResponse,
+  Dashboard,
+  DataStreamDetails,
+  DataStreamRolloverResponse,
+  DataStreamSettings,
+  DegradedField,
+  DegradedFieldAnalysis,
+  DegradedFieldResponse,
+  DegradedFieldValues,
+  NonAggregatableDatasets,
+  UpdateFieldLimitResponse,
 } from '../../../common/api_types';
-import { type TableCriteria, type TimeRangeConfig } from '../../../common/types';
-import { type IntegrationType } from '../../../common/data_stream_details';
+import { TableCriteria, TimeRangeConfig } from '../../../common/types';
+import { IntegrationType } from '../../../common/data_stream_details';
 
 export interface DataStream {
   name: string;

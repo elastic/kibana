@@ -9,13 +9,13 @@
 
 import { ProfilingESField } from './elasticsearch';
 import {
-  type Executable,
-  type FileID,
+  Executable,
+  FileID,
   isErrorFrame,
-  type StackFrame,
-  type StackFrameID,
-  type StackTrace,
-  type StackTraceID,
+  StackFrame,
+  StackFrameID,
+  StackTrace,
+  StackTraceID,
 } from './profiling';
 import { convertTonsToKgs } from './utils';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, type ReactEventHandler } from 'react';
+import React, { FC, ReactEventHandler } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiDescriptionList,

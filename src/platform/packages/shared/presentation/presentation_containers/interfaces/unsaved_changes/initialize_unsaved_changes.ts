@@ -13,16 +13,16 @@ import {
   combineLatestWith,
   debounceTime,
   map,
-  type Subscription,
+  Subscription,
 } from 'rxjs';
 import {
   getInitialValuesFromComparators,
-  type PublishesUnsavedChanges,
-  type PublishingSubject,
+  PublishesUnsavedChanges,
+  PublishingSubject,
   runComparators,
-  type StateComparators,
+  StateComparators,
 } from '@kbn/presentation-publishing';
-import { type HasSnapshottableState } from '../serialized_state';
+import { HasSnapshottableState } from '../serialized_state';
 import { apiHasSaveNotification } from '../has_save_notification';
 
 export const COMPARATOR_SUBJECTS_DEBOUNCE = 100;

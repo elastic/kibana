@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { type AlertNavigationRegistry } from './alert_navigation_registry';
+import { AlertNavigationRegistry } from './alert_navigation_registry';
 
 type Schema = PublicMethodsOf<AlertNavigationRegistry>;
 

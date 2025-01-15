@@ -7,7 +7,7 @@
 
 import {
   RulesSettingsClient,
-  type RulesSettingsClientConstructorOptions,
+  RulesSettingsClientConstructorOptions,
 } from './rules_settings_client';
 import { RulesSettingsFlappingClient } from './flapping/rules_settings_flapping_client';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';

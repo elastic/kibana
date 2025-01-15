@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC } from 'react';
-import { mount, type ReactWrapper } from 'enzyme';
+import React, { FC } from 'react';
+import { mount, ReactWrapper } from 'enzyme';
 import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';
 import { MountPointPortal } from './mount_point_portal';
 import { act } from 'react-dom/test-utils';

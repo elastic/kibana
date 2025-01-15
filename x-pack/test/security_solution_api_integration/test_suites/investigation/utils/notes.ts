@@ -7,9 +7,9 @@
 
 import type SuperTest from 'supertest';
 import {
-  type GetNotesResult,
-  type Note,
-  type PersistNoteRouteRequestBody,
+  GetNotesResult,
+  Note,
+  PersistNoteRouteRequestBody,
 } from '@kbn/security-solution-plugin/common/api/timeline';
 import { NOTE_URL } from '@kbn/security-solution-plugin/common/constants';
 

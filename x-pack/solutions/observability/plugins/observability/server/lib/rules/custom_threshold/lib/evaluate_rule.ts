@@ -7,18 +7,18 @@
 
 import moment from 'moment';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { type EsQueryConfig } from '@kbn/es-query';
+import { EsQueryConfig } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
 import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
 import {
   Aggregators,
-  type CustomMetricExpressionParams,
-  type SearchConfigurationType,
+  CustomMetricExpressionParams,
+  SearchConfigurationType,
 } from '../../../../../common/custom_threshold_rule/types';
-import { type AdditionalContext } from '../utils';
+import { AdditionalContext } from '../utils';
 import { createTimerange } from './create_timerange';
 import { getData } from './get_data';
-import { checkMissingGroups, type MissingGroupsRecord } from './check_missing_group';
+import { checkMissingGroups, MissingGroupsRecord } from './check_missing_group';
 
 export interface EvaluatedRuleParams {
   criteria: CustomMetricExpressionParams[];

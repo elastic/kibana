@@ -11,7 +11,7 @@ import { useValues, useActions } from 'kea';
 
 import {
   EuiBasicTable,
-  type EuiBasicTableColumn,
+  EuiBasicTableColumn,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -27,7 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
 
-import { type EnterpriseSearchApplicationIndex } from '../../../../../common/types/search_applications';
+import { EnterpriseSearchApplicationIndex } from '../../../../../common/types/search_applications';
 
 import { SEARCH_INDEX_PATH } from '../../../enterprise_search_content/routes';
 import { healthColorsMap } from '../../../shared/constants/health_colors';

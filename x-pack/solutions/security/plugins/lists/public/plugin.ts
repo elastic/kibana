@@ -6,13 +6,13 @@
  */
 
 import {
-  type CoreSetup,
-  type CoreStart,
-  type Plugin as IPlugin,
-  type PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin as IPlugin,
+  PluginInitializerContext,
 } from '@kbn/core/public';
 
-import { type PluginSetup, type PluginStart, type SetupPlugins, type StartPlugins } from './types';
+import { PluginSetup, PluginStart, SetupPlugins, StartPlugins } from './types';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

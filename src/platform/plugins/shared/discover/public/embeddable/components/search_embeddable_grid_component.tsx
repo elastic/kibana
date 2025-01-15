@@ -8,20 +8,20 @@
  */
 
 import React, { useMemo } from 'react';
-import { type BehaviorSubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import {
-  type FetchContext,
+  FetchContext,
   useBatchedOptionalPublishingSubjects,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { type SortOrder } from '@kbn/saved-search-plugin/public';
-import { type SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
-import { type DataGridDensity, DataLoadingState, useColumns } from '@kbn/unified-data-table';
-import { type DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { type DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
+import { SortOrder } from '@kbn/saved-search-plugin/public';
+import { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
+import { DataGridDensity, DataLoadingState, useColumns } from '@kbn/unified-data-table';
+import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getSortForEmbeddable } from '../../utils';

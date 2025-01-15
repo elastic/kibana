@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { type PluginInitializer, type PluginInitializerContext } from '@kbn/core/public';
-import { type PublicConfigType, SearchAssistantPlugin } from './plugin';
+import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import { PublicConfigType, SearchAssistantPlugin } from './plugin';
 import {
-  type SearchAssistantPluginSetup,
-  type SearchAssistantPluginStart,
-  type SearchAssistantPluginStartDependencies,
+  SearchAssistantPluginSetup,
+  SearchAssistantPluginStart,
+  SearchAssistantPluginStartDependencies,
 } from './types';
 
 export const plugin: PluginInitializer<

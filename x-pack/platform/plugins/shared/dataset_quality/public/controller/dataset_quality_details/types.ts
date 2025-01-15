@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import {
-  type DatasetQualityDetailsControllerStateService,
-  type DegradedFieldsTableConfig,
-  type WithDefaultControllerState,
+  DatasetQualityDetailsControllerStateService,
+  DegradedFieldsTableConfig,
+  WithDefaultControllerState,
 } from '../../state_machines/dataset_quality_details_controller';
 
 type DegradedFieldTableSortOptions = Omit<DegradedFieldsTableConfig['table']['sort'], 'field'> & {

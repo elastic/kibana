@@ -9,8 +9,8 @@
 
 import { monaco } from '../../../monaco_imports';
 import {
-  type MonacoAutocompleteCommandDefinition,
-  type SuggestionRawDefinitionWithMonacoRange,
+  MonacoAutocompleteCommandDefinition,
+  SuggestionRawDefinitionWithMonacoRange,
 } from '../types';
 
 export function wrapAsMonacoSuggestions(

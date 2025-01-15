@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { css } from '@emotion/css';
 
 import { EuiNotificationBadge } from '@elastic/eui';
-import { type Toast } from '@kbn/core-notifications-browser';
-import { type MountPoint } from '@kbn/core-mount-utils-browser';
+import { Toast } from '@kbn/core-notifications-browser';
+import { MountPoint } from '@kbn/core-mount-utils-browser';
 
 /**
  * We can introduce this type within this domain, to allow for react-managed titles

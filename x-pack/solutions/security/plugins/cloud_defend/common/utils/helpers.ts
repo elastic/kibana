@@ -5,10 +5,10 @@
  * 2.0.
  */
 import yaml from 'js-yaml';
-import { type NewPackagePolicy } from '@kbn/fleet-plugin/common';
-import { type Truthy } from 'lodash';
+import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import { Truthy } from 'lodash';
 import { INTEGRATION_PACKAGE_NAME } from '../constants';
-import { type Selector, type Response } from '..';
+import { Selector, Response } from '..';
 
 /**
  * @example

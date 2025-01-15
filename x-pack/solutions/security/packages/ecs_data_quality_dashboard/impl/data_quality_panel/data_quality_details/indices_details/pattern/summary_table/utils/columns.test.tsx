@@ -6,9 +6,9 @@
  */
 
 import {
-  type CustomItemAction,
-  type EuiTableActionsColumnType,
-  type EuiTableFieldDataColumnType,
+  CustomItemAction,
+  EuiTableActionsColumnType,
+  EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { render, screen } from '@testing-library/react';
@@ -25,7 +25,7 @@ import {
   getSummaryTableSizeInBytesColumn,
 } from './columns';
 import { VIEW_HISTORY } from '../translations';
-import { type IndexSummaryTableItem } from '../../../../../types';
+import { IndexSummaryTableItem } from '../../../../../types';
 import { CHECK_NOW } from '../../translations';
 
 const defaultBytesFormat = '0,0.[0]b';

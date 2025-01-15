@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, type Ref } from 'react';
+import React, { forwardRef, Ref } from 'react';
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
-import { type EuiHeaderSectionItemButtonRef } from '@elastic/eui/src/components/header/header_section/header_section_item_button';
+import { EuiHeaderSectionItemButtonRef } from '@elastic/eui/src/components/header/header_section/header_section_item_button';
 
 interface HeaderMenuButtonProps {
   'aria-controls': string;

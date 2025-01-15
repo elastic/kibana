@@ -13,26 +13,26 @@ jest.mock('../../../../lib/content_stream', () => ({
   getContentStream: jest.fn(),
 }));
 
-import { type estypes } from '@elastic/elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
-import { type ElasticsearchClientMock, coreMock } from '@kbn/core/server/mocks';
+import { ElasticsearchClientMock, coreMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
-import { type ExportType } from '@kbn/reporting-server';
+import { ExportType } from '@kbn/reporting-server';
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
-import { type IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
+import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 
-import { type ReportingCore } from '../../../..';
-import { type ReportingInternalSetup, type ReportingInternalStart } from '../../../../core';
-import { type ContentStream, getContentStream } from '../../../../lib';
+import { ReportingCore } from '../../../..';
+import { ReportingInternalSetup, ReportingInternalStart } from '../../../../core';
+import { ContentStream, getContentStream } from '../../../../lib';
 import { reportingMock } from '../../../../mocks';
 import {
   createMockPluginSetup,
   createMockPluginStart,
   createMockReportingCore,
 } from '../../../../test_helpers';
-import { type ReportingRequestHandlerContext } from '../../../../types';
+import { ReportingRequestHandlerContext } from '../../../../types';
 import { EventTracker } from '../../../../usage';
 import { STATUS_CODES } from '../../../common/jobs/constants';
 import { registerJobInfoRoutesInternal as registerJobInfoRoutes } from '../jobs';

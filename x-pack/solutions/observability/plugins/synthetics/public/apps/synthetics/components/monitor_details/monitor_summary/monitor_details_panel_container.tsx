@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiSkeletonText } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import {
-  type MonitorDetailsPanelProps,
+  MonitorDetailsPanelProps,
   MonitorDetailsPanel,
 } from '../../common/components/monitor_details_panel';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';

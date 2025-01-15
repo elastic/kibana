@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type DataRetention, type DataStream, type IndexMode } from './data_streams';
-import { type IndexSettings } from './indices';
-import { type Aliases } from './aliases';
-import { type Mappings } from './mappings';
+import { DataRetention, DataStream, IndexMode } from './data_streams';
+import { IndexSettings } from './indices';
+import { Aliases } from './aliases';
+import { Mappings } from './mappings';
 
 /**
  * Index template format from Elasticsearch

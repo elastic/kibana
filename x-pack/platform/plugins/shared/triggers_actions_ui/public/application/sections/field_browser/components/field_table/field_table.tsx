@@ -7,12 +7,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiInMemoryTable,
-  type Pagination,
-  type Direction,
+  Pagination,
+  Direction,
   useEuiTheme,
-  type CriteriaWithPagination,
+  CriteriaWithPagination,
 } from '@elastic/eui';
-import { type BrowserFields } from '@kbn/rule-registry-plugin/common';
+import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { getFieldColumns, getFieldItemsData } from '../field_items';
 import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from '../../helpers';
 import type { BrowserFieldItem, FieldBrowserProps, GetFieldTableColumns } from '../../types';

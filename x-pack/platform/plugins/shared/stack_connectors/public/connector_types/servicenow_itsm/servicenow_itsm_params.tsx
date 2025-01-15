@@ -18,14 +18,14 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ActionConnectorMode, type ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionConnectorMode, ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
   useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { type Choice, type Fields } from '../lib/servicenow/types';
-import { type ServiceNowITSMActionParams, EventAction } from './types';
+import { Choice, Fields } from '../lib/servicenow/types';
+import { ServiceNowITSMActionParams, EventAction } from './types';
 import { useGetChoices } from '../lib/servicenow/use_get_choices';
 import {
   ACTION_GROUP_RECOVERED,

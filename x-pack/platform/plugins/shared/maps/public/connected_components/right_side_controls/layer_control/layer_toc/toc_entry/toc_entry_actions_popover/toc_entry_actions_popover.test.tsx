@@ -19,8 +19,8 @@ jest.mock('../../../../../../kibana_services', () => ({
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { AbstractLayer, type ILayer } from '../../../../../../classes/layers/layer';
-import { AbstractSource, type ISource } from '../../../../../../classes/sources/source';
+import { AbstractLayer, ILayer } from '../../../../../../classes/layers/layer';
+import { AbstractSource, ISource } from '../../../../../../classes/sources/source';
 
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 

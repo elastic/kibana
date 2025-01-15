@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type CoreSetup } from '@kbn/core/public';
+import { CoreSetup } from '@kbn/core/public';
 import dateMath from '@kbn/datemath';
 import { memoize } from 'lodash';
-import { UI_SETTINGS, type ValueSuggestionsMethod } from '@kbn/data-plugin/common';
+import { UI_SETTINGS, ValueSuggestionsMethod } from '@kbn/data-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { TimefilterSetup } from '@kbn/data-plugin/public';
 import type { AutocompleteUsageCollector } from '../collectors';

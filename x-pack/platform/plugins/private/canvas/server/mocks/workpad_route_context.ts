@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type AwaitedProperties } from '@kbn/utility-types';
-import { type CanvasRouteHandlerContext } from '../workpad_route_context';
+import { AwaitedProperties } from '@kbn/utility-types';
+import { CanvasRouteHandlerContext } from '../workpad_route_context';
 
 export interface MockWorkpadRouteContext extends AwaitedProperties<CanvasRouteHandlerContext> {
   canvas: {

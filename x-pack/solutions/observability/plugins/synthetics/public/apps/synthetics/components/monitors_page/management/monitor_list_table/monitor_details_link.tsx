@@ -11,7 +11,7 @@ import { useSelector } from 'react-redux';
 import { selectSelectedLocationId } from '../../../../state';
 import {
   ConfigKey,
-  type EncryptedSyntheticsSavedMonitor,
+  EncryptedSyntheticsSavedMonitor,
 } from '../../../../../../../common/runtime_types';
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
 

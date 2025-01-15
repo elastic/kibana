@@ -6,11 +6,11 @@
  */
 
 import { compact } from 'lodash';
-import { type ElasticsearchClient, type SavedObjectsClientContract } from '@kbn/core/server';
-import { type EntityDefinition } from '@kbn/entities-schema';
+import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { EntityDefinition } from '@kbn/entities-schema';
 import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
 import { BUILT_IN_ID_PREFIX } from './built_in';
-import { type EntityDefinitionState, type EntityDefinitionWithState } from './types';
+import { EntityDefinitionState, EntityDefinitionWithState } from './types';
 
 export async function findEntityDefinitions({
   soClient,

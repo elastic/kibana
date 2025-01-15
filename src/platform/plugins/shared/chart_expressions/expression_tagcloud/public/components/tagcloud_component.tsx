@@ -17,21 +17,21 @@ import {
   Chart,
   Settings,
   Wordcloud,
-  type RenderChangeListener,
+  RenderChangeListener,
   LEGACY_LIGHT_THEME,
-  type ElementClickListener,
-  type WordCloudElementEvent,
+  ElementClickListener,
+  WordCloudElementEvent,
 } from '@elastic/charts';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
-import { type PaletteRegistry, type PaletteOutput, getColorFactory } from '@kbn/coloring';
-import { type IInterpreterRenderHandlers, type DatatableRow } from '@kbn/expressions-plugin/public';
+import { PaletteRegistry, PaletteOutput, getColorFactory } from '@kbn/coloring';
+import { IInterpreterRenderHandlers, DatatableRow } from '@kbn/expressions-plugin/public';
 import { getColorCategories, getOverridesFor } from '@kbn/chart-expressions-common';
 import type { AllowedSettingsOverrides, AllowedChartOverrides } from '@kbn/charts-plugin/common';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { isMultiFieldKey } from '@kbn/data-plugin/common';
-import { type KbnPalettes, useKbnPalettes } from '@kbn/palettes';
+import { KbnPalettes, useKbnPalettes } from '@kbn/palettes';
 import { getFormatService } from '../format_service';
-import { type TagcloudRendererConfig } from '../../common/types';
+import { TagcloudRendererConfig } from '../../common/types';
 import { ScaleOptions, Orientation } from '../../common/constants';
 
 import './tag_cloud.scss';

@@ -6,7 +6,7 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-import { type TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import type {
   ColumnHeaderOptions,
   SessionViewConfig,

@@ -11,7 +11,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
-  type EuiSelectableOption,
+  EuiSelectableOption,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

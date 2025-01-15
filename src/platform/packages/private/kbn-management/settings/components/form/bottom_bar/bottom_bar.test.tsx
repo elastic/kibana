@@ -11,7 +11,7 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import {
   BottomBar,
-  type BottomBarProps,
+  BottomBarProps,
   DATA_TEST_SUBJ_SAVE_BUTTON,
   DATA_TEST_SUBJ_CANCEL_BUTTON,
 } from './bottom_bar';

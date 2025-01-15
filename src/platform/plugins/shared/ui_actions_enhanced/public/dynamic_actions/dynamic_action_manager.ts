@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createStateContainer, type StateContainer } from '@kbn/kibana-utils-plugin/common';
-import { type EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { type UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { type Subscription } from 'rxjs';
+import { createStateContainer, StateContainer } from '@kbn/kibana-utils-plugin/common';
+import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
+import { Subscription } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { type StartContract } from '../plugin';
+import { StartContract } from '../plugin';
 import { dynamicActionGrouping } from './dynamic_action_grouping';
-import { defaultState, selectors, type State, transitions } from './dynamic_action_manager_state';
-import { type ActionStorage } from './dynamic_action_storage';
-import { type SerializedAction, type SerializedEvent } from './types';
+import { defaultState, selectors, State, transitions } from './dynamic_action_manager_state';
+import { ActionStorage } from './dynamic_action_storage';
+import { SerializedAction, SerializedEvent } from './types';
 
 const compareEvents = (
   a: ReadonlyArray<{ eventId: string }>,

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type Connector } from '@kbn/search-connectors';
+import { Connector } from '@kbn/search-connectors';
 
-import { createApiLogic, type Actions } from '../../../shared/api_logic/create_api_logic';
+import { createApiLogic, Actions } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface FetchConnectorByIdApiLogicArgs {

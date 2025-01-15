@@ -9,9 +9,9 @@
 
 import { useState } from 'react';
 import {
-  type DiscoverStateContainer,
+  DiscoverStateContainer,
   getDiscoverStateContainer,
-  type DiscoverStateContainerParams,
+  DiscoverStateContainerParams,
 } from '../state_management/discover_state';
 
 /**

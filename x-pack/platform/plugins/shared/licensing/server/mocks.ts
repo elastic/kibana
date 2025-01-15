@@ -7,9 +7,9 @@
 
 import { BehaviorSubject } from 'rxjs';
 import {
-  type LicensingPluginSetup,
-  type LicensingPluginStart,
-  type LicensingApiRequestHandlerContext,
+  LicensingPluginSetup,
+  LicensingPluginStart,
+  LicensingApiRequestHandlerContext,
 } from './types';
 import { licenseMock } from '../common/licensing.mock';
 import { featureUsageMock } from './services/feature_usage_service.mock';

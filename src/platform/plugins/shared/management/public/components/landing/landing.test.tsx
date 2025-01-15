@@ -10,7 +10,7 @@
 import React from 'react';
 import { merge } from 'lodash';
 import { coreMock } from '@kbn/core/public/mocks';
-import { registerTestBed, type AsyncTestBedConfig, type TestBed } from '@kbn/test-jest-helpers';
+import { registerTestBed, AsyncTestBedConfig, TestBed } from '@kbn/test-jest-helpers';
 
 import { AppContextProvider } from '../management_app/management_context';
 import { ManagementLandingPage } from './landing';

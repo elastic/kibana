@@ -10,7 +10,7 @@ import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  type EuiSelectableOption,
+  EuiSelectableOption,
   EuiText,
   EuiTextColor,
   EuiTextTruncate,
@@ -18,7 +18,7 @@ import {
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 
-import { type MlModel } from '../../../../../../../common/types/ml';
+import { MlModel } from '../../../../../../../common/types/ml';
 import { TrainedModelHealth } from '../ml_model_health';
 
 import { LicenseBadge } from './license_badge';

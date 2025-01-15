@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type TimeRange } from './types';
+import { TimeRange } from './types';
 
 export const isTimeRange = (x: unknown): x is TimeRange =>
   !!x &&

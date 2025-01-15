@@ -9,9 +9,9 @@
 
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { createFailError } from '@kbn/dev-cli-errors';
-import { type ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 
-import { type TestFailure } from './get_failures';
+import { TestFailure } from './get_failures';
 
 export async function reportFailuresToEs(log: ToolingLog, failures: TestFailure[]) {
   if (!failures?.length) {

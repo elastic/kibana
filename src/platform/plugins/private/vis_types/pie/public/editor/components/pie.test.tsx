@@ -9,8 +9,8 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { type ReactWrapper } from 'enzyme';
-import PieOptions, { type PieOptionsProps } from './pie';
+import { ReactWrapper } from 'enzyme';
+import PieOptions, { PieOptionsProps } from './pie';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type AlertSummaryTimeRange, type ChartProps } from '../../sections/alert_summary_widget/types';
+import { AlertSummaryTimeRange, ChartProps } from '../../sections/alert_summary_widget/types';
 
 export const mockedAlertSummaryResponse = {
   activeAlertCount: 2,

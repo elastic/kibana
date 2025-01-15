@@ -13,12 +13,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
-  type IAggConfig,
-  type AggParam,
-  type OptionedValueProp,
-  type OptionedParamType,
+  IAggConfig,
+  AggParam,
+  OptionedValueProp,
+  OptionedParamType,
 } from '@kbn/data-plugin/public';
-import { type AggParamEditorProps, type OptionedParamEditorProps } from '../agg_param_props';
+import { AggParamEditorProps, OptionedParamEditorProps } from '../agg_param_props';
 
 export interface AggregateValueProp extends OptionedValueProp {
   isCompatible(aggConfig: IAggConfig): boolean;

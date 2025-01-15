@@ -7,12 +7,12 @@
 
 import { toArray, map, firstValueFrom } from 'rxjs';
 import {
-  type ChatCompleteResponse,
-  type ChatCompleteStreamResponse,
+  ChatCompleteResponse,
+  ChatCompleteStreamResponse,
   createInferenceInternalError,
   isChatCompletionMessageEvent,
   isChatCompletionTokenCountEvent,
-  type ToolOptions,
+  ToolOptions,
   withoutChunkEvents,
 } from '@kbn/inference-common';
 

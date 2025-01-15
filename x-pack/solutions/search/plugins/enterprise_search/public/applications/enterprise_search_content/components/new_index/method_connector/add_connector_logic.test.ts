@@ -13,7 +13,7 @@ import { KibanaLogic } from '../../../../shared/kibana';
 
 import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
 
-import { AddConnectorLogic, type AddConnectorValues } from './add_connector_logic';
+import { AddConnectorLogic, AddConnectorValues } from './add_connector_logic';
 
 jest.mock('../../../../shared/kibana', () => ({
   KibanaLogic: { values: { navigateToUrl: jest.fn() } },

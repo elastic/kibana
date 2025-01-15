@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback, useEffect } from 'react';
+import React, { FC, useCallback, useEffect } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import { Loading } from '../loading';
-import { type CanvasElement, type ExpressionContext } from '../../../types';
-import { type ExpressionType } from '../../expression_types/types';
+import { CanvasElement, ExpressionContext } from '../../../types';
+import { ExpressionType } from '../../expression_types/types';
 
 interface FunctionFormContextPendingProps {
   context?: ExpressionContext;

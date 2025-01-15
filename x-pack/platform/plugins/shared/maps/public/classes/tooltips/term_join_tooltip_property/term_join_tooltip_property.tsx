@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { type ReactNode } from 'react';
-import { type Filter } from '@kbn/es-query';
-import { type ITooltipProperty } from '../tooltip_property';
+import React, { ReactNode } from 'react';
+import { Filter } from '@kbn/es-query';
+import { ITooltipProperty } from '../tooltip_property';
 import { TermJoinKeyLabel } from './term_join_key_label';
 import type { ITermJoinSource } from '../../sources/join_sources';
 

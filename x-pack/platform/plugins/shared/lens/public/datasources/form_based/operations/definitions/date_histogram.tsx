@@ -16,14 +16,14 @@ import {
   EuiFormRow,
   EuiIconTip,
   EuiSwitch,
-  type EuiSwitchEvent,
+  EuiSwitchEvent,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import {
-  type AggFunctionsMapping,
-  type AggParamOption,
-  type IndexPatternAggRestrictions,
+  AggFunctionsMapping,
+  AggParamOption,
+  IndexPatternAggRestrictions,
   search,
   UI_SETTINGS,
 } from '@kbn/data-plugin/public';
@@ -31,10 +31,10 @@ import { extendedBoundsToAst, intervalOptions } from '@kbn/data-plugin/common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import { updateColumnParam } from '../layer_helpers';
-import { type FieldBasedOperationErrorMessage, type OperationDefinition, type ParamEditorProps } from '.';
-import { type FieldBasedIndexPatternColumn } from './column_types';
+import { FieldBasedOperationErrorMessage, OperationDefinition, ParamEditorProps } from '.';
+import { FieldBasedIndexPatternColumn } from './column_types';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
-import { type FormBasedLayer } from '../../types';
+import { FormBasedLayer } from '../../types';
 import { TIME_SHIFT_MULTIPLE_DATE_HISTOGRAMS } from '../../../../user_messages_ids';
 
 const { isValidInterval } = search.aggs;

@@ -12,7 +12,7 @@ import { omit, omitBy } from 'lodash';
 import {
   ConfigKey,
   MonitorTypeEnum,
-  type HTTPFields,
+  HTTPFields,
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
@@ -27,7 +27,7 @@ import {
   removeMonitorEmptyValues,
   transformPublicKeys,
 } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/formatters/saved_object_to_monitor';
-import { type FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 

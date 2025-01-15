@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type LogRecord, LogLevel, type LogMeta } from '@kbn/logging';
+import { LogRecord, LogLevel, LogMeta } from '@kbn/logging';
 import type { MetaRewritePolicyConfig } from '@kbn/core-logging-server';
 import { MetaRewritePolicy } from './meta_policy';
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ExpressionAstExpression, type ExpressionAstArgument } from './types';
+import { ExpressionAstExpression, ExpressionAstArgument } from './types';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { parse: parseRaw } = require('@kbn/interpreter');

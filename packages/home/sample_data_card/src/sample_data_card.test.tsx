@@ -14,7 +14,7 @@ import { act } from 'react-dom/test-utils';
 import { SampleDataCard } from './sample_data_card';
 import { SampleDataCardProvider } from './services';
 import { getMockServices, getMockDataSet } from './mocks';
-import { type Services } from './services';
+import { Services } from './services';
 import { INSTALLED_STATUS, UNINSTALLED_STATUS } from './constants';
 
 describe('SampleDataCard', () => {

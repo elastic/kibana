@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Fields } from '../entity';
+import { Fields } from '../entity';
 import { serviceEntity } from './service_entity';
 import { hostEntity } from './host_entity';
 import { containerEntity } from './container_entity';

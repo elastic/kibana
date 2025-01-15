@@ -10,14 +10,14 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiSelectable,
-  type EuiSelectableProps,
+  EuiSelectableProps,
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiButtonGroup,
   toSentenceCase,
-  type Direction,
+  Direction,
 } from '@elastic/eui';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';

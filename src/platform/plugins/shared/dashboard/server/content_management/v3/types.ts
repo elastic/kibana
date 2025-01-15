@@ -7,32 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type TypeOf } from '@kbn/config-schema';
+import { TypeOf } from '@kbn/config-schema';
 import {
-  type CreateIn,
-  type GetIn,
-  type SearchIn,
-  type SearchResult,
-  type UpdateIn,
+  CreateIn,
+  GetIn,
+  SearchIn,
+  SearchResult,
+  UpdateIn,
 } from '@kbn/content-management-plugin/common';
-import { type SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import { type WithRequiredProperty } from '@kbn/utility-types';
+import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import { WithRequiredProperty } from '@kbn/utility-types';
 import {
-  type dashboardItemSchema,
-  type controlGroupInputSchema,
-  type gridDataSchema,
-  type panelSchema,
-  type dashboardAttributesSchema,
-  type dashboardCreateOptionsSchema,
-  type dashboardCreateResultSchema,
-  type dashboardGetResultSchema,
-  type dashboardSearchOptionsSchema,
-  type dashboardSearchResultsSchema,
-  type dashboardUpdateOptionsSchema,
-  type optionsSchema,
+  dashboardItemSchema,
+  controlGroupInputSchema,
+  gridDataSchema,
+  panelSchema,
+  dashboardAttributesSchema,
+  dashboardCreateOptionsSchema,
+  dashboardCreateResultSchema,
+  dashboardGetResultSchema,
+  dashboardSearchOptionsSchema,
+  dashboardSearchResultsSchema,
+  dashboardUpdateOptionsSchema,
+  optionsSchema,
 } from './cm_services';
-import { type CONTENT_ID } from '../../../common/content_management';
-import { type DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
+import { CONTENT_ID } from '../../../common/content_management';
+import { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 
 export type DashboardOptions = TypeOf<typeof optionsSchema>;
 

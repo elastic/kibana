@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ListArray } from '@kbn/securitysolution-io-ts-list-types';
+import { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { Pagination } from '@elastic/eui';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';

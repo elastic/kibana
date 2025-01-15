@@ -8,7 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCodeBlock, EuiCallOut } from '@elastic/eui';
-import { type Mappings } from '../../../../../../common';
+import { Mappings } from '../../../../../../common';
 
 interface Props {
   mappings: Mappings | undefined;

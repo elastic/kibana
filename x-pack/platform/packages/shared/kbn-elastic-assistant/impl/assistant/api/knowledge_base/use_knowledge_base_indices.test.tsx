@@ -8,7 +8,7 @@
 import { waitFor, renderHook } from '@testing-library/react';
 import {
   useKnowledgeBaseIndices,
-  type UseKnowledgeBaseIndicesParams,
+  UseKnowledgeBaseIndicesParams,
 } from './use_knowledge_base_indices';
 import { getKnowledgeBaseIndices as _getKnowledgeBaseIndices } from './api';
 

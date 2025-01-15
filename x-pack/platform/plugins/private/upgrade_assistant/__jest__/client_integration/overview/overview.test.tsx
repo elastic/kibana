@@ -6,7 +6,7 @@
  */
 
 import { setupEnvironment } from '../helpers';
-import { type OverviewTestBed, setupOverviewPage } from './overview.helpers';
+import { OverviewTestBed, setupOverviewPage } from './overview.helpers';
 
 describe('Overview Page', () => {
   let testBed: OverviewTestBed;

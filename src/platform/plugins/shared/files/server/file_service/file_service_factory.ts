@@ -8,29 +8,29 @@
  */
 
 import {
-  type SavedObjectsServiceSetup,
-  type SavedObjectsServiceStart,
-  type Logger,
-  type KibanaRequest,
+  SavedObjectsServiceSetup,
+  SavedObjectsServiceStart,
+  Logger,
+  KibanaRequest,
 } from '@kbn/core/server';
-import { type SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
-import { type UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { type File, type FileJSON, type FileMetadata } from '../../common';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { File, FileJSON, FileMetadata } from '../../common';
 import { fileObjectType, fileShareObjectType, hiddenTypes } from '../saved_objects';
-import { type BlobStorageService } from '../blob_storage_service';
+import { BlobStorageService } from '../blob_storage_service';
 import { FileClientImpl } from '../file_client/file_client';
 import { InternalFileShareService } from '../file_share_service';
 import {
-  type CreateFileArgs,
-  type FindFileArgs,
-  type GetByIdArgs,
-  type BulkGetByIdArgs,
-  type UpdateFileArgs,
+  CreateFileArgs,
+  FindFileArgs,
+  GetByIdArgs,
+  BulkGetByIdArgs,
+  UpdateFileArgs,
 } from './file_action_types';
 import { InternalFileService } from './internal_file_service';
-import { type FileServiceStart } from './file_service';
-import { type FileKindsRegistry } from '../../common/file_kinds_registry';
+import { FileServiceStart } from './file_service';
+import { FileKindsRegistry } from '../../common/file_kinds_registry';
 import { SavedObjectsFileMetadataClient } from '../file_client';
 
 /**

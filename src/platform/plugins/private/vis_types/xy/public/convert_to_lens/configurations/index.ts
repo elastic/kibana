@@ -10,24 +10,24 @@
 import { LegendValue, Position, ScaleType as ECScaleType } from '@elastic/charts';
 import {
   SeriesTypes,
-  type Column,
-  type XYConfiguration,
-  type XYDataLayerConfig,
-  type XYReferenceLineLayerConfig,
+  Column,
+  XYConfiguration,
+  XYDataLayerConfig,
+  XYReferenceLineLayerConfig,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { type Vis } from '@kbn/visualizations-plugin/public';
-import { type Layer } from '..';
-import { type ChartType } from '../../../common';
+import { Vis } from '@kbn/visualizations-plugin/public';
+import { Layer } from '..';
+import { ChartType } from '../../../common';
 import {
-  type CategoryAxis,
-  type ChartMode,
+  CategoryAxis,
+  ChartMode,
   InterpolationMode,
-  type Scale,
+  Scale,
   ScaleType,
-  type SeriesParam,
+  SeriesParam,
   ThresholdLineStyle,
-  type ValueAxis,
-  type VisParams,
+  ValueAxis,
+  VisParams,
 } from '../../types';
 import { getCurveType, getMode, getYAxisPosition } from '../../utils/common';
 

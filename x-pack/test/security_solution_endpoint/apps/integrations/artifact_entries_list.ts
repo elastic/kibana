@@ -8,22 +8,22 @@
 import { unzip } from 'zlib';
 import { promisify } from 'util';
 import expect from '@kbn/expect';
-import { type IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import {
   ENDPOINT_ARTIFACT_LIST_IDS,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
-import { type ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services';
-import { type FtrProviderContext } from '../../configs/ftr_provider_context';
+import { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services';
+import { FtrProviderContext } from '../../configs/ftr_provider_context';
 import {
-  type ArtifactBodyType,
+  ArtifactBodyType,
   getArtifactsListTestsData,
-  type ArtifactActionsType,
-  type AgentPolicyResponseType,
+  ArtifactActionsType,
+  AgentPolicyResponseType,
   getCreateMultipleData,
-  type MultipleArtifactActionsType,
+  MultipleArtifactActionsType,
 } from './mocks';
-import { type PolicyTestResourceInfo } from '../../services/endpoint_policy';
+import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
 import { targetTags } from '../../target_tags';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {

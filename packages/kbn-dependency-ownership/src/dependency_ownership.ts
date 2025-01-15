@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type RenovatePackageRule, ruleCoversDependency } from './rule';
+import { RenovatePackageRule, ruleCoversDependency } from './rule';
 import { parseConfig } from './parse_config';
 
 type DependencyOwners = string[];

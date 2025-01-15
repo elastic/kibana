@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type HttpSetup } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import {
   createDeleteSearchableSnapshotActions,
   createMinAgeActions,

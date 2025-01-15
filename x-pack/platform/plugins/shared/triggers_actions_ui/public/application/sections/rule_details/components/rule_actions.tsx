@@ -4,22 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { type ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import {
   EuiText,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  type IconType,
+  IconType,
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
-import { type ActionTypeRegistryContract, suspendedComponentWithProps } from '../../../..';
+import { RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
+import { ActionTypeRegistryContract, suspendedComponentWithProps } from '../../../..';
 import { useFetchRuleActionConnectors } from '../../../hooks/use_fetch_rule_action_connectors';
 import { NOTIFY_WHEN_OPTIONS } from '../../rule_form/rule_notify_when';
-import { type RuleUiAction } from '../../../../types';
+import { RuleUiAction } from '../../../../types';
 
 export interface RuleActionsProps {
   ruleActions: RuleUiAction[];

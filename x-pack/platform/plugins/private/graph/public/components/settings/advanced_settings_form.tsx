@@ -8,8 +8,8 @@
 import React, { useState, useEffect } from 'react';
 import { EuiFormRow, EuiFieldNumber, EuiComboBox, EuiSwitch, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type AdvancedSettings } from '../../types';
-import { type SettingsStateProps } from './settings';
+import { AdvancedSettings } from '../../types';
+import { SettingsStateProps } from './settings';
 
 // Helper type to get all keys of an interface
 // that are of type number.

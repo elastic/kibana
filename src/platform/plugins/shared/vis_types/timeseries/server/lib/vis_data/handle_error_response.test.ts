@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Panel } from '../../../common/types';
-import { handleErrorResponse, type ErrorResponse } from './handle_error_response';
+import { Panel } from '../../../common/types';
+import { handleErrorResponse, ErrorResponse } from './handle_error_response';
 
 describe('handleErrorResponse', () => {
   const handleError = handleErrorResponse({

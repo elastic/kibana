@@ -6,10 +6,10 @@
  */
 
 import {
-  type PendingBlock,
-  type ScreenshotBlockCache,
-  type ScreenshotBlockDoc,
-  type SyntheticsJourneyApiResponse,
+  PendingBlock,
+  ScreenshotBlockCache,
+  ScreenshotBlockDoc,
+  SyntheticsJourneyApiResponse,
 } from '../../../../../common/runtime_types';
 
 export function isPendingBlock(data: unknown): data is PendingBlock {

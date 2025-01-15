@@ -8,26 +8,26 @@
  */
 
 import type { PaletteOutput } from '@kbn/coloring';
-import { type LayoutDirection, type MetricStyle, type MetricWTrend } from '@elastic/charts';
-import { type $Values } from '@kbn/utility-types';
+import { LayoutDirection, MetricStyle, MetricWTrend } from '@elastic/charts';
+import { $Values } from '@kbn/utility-types';
 import {
-  type Datatable,
-  type DefaultInspectorAdapters,
-  type ExecutionContext,
-  type ExpressionFunctionDefinition,
-  type ExpressionValueRender,
+  Datatable,
+  DefaultInspectorAdapters,
+  ExecutionContext,
+  ExpressionFunctionDefinition,
+  ExpressionValueRender,
 } from '@kbn/expressions-plugin/common';
-import { type ExpressionValueVisDimension, type prepareLogTable } from '@kbn/visualizations-plugin/common';
+import { ExpressionValueVisDimension, prepareLogTable } from '@kbn/visualizations-plugin/common';
 import type {
   AllowedChartOverrides,
   AllowedSettingsOverrides,
   CustomPaletteState,
 } from '@kbn/charts-plugin/common';
-import { type VisParams, type visType } from './expression_renderers';
+import { VisParams, visType } from './expression_renderers';
 import {
-  type EXPRESSION_METRIC_NAME,
-  type EXPRESSION_METRIC_TRENDLINE_NAME,
-  type AvailableMetricIcons,
+  EXPRESSION_METRIC_NAME,
+  EXPRESSION_METRIC_TRENDLINE_NAME,
+  AvailableMetricIcons,
 } from '../constants';
 
 export type AvailableMetricIcon = $Values<typeof AvailableMetricIcons>;

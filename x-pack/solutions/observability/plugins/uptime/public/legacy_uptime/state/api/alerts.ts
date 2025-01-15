@@ -6,24 +6,24 @@
  */
 
 import {
-  type ActionType,
-  type AsApiContract,
-  type Rule,
+  ActionType,
+  AsApiContract,
+  Rule,
   transformRule,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { type RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { MonitorStatusTranslations } from '../../../../common/rules/legacy_uptime/translations';
-import { type ActionConnector } from '../../../../common/rules/types';
+import { ActionConnector } from '../../../../common/rules/types';
 import { CLIENT_ALERT_TYPES, MONITOR_STATUS } from '../../../../common/constants/uptime_alerts';
 import { apiService } from './utils';
 
-import { type AlertsResult, type MonitorIdParam } from '../actions/types';
+import { AlertsResult, MonitorIdParam } from '../actions/types';
 import { API_URLS } from '../../../../common/constants';
-import { type AtomicStatusCheckParams } from '../../../../common/runtime_types/alerts';
+import { AtomicStatusCheckParams } from '../../../../common/runtime_types/alerts';
 
-import { populateAlertActions, type RuleAction } from '../../../../common/rules/alert_actions';
-import { type Ping } from '../../../../common/runtime_types/ping';
-import { type DefaultEmail } from '../../../../common/runtime_types';
+import { populateAlertActions, RuleAction } from '../../../../common/rules/alert_actions';
+import { Ping } from '../../../../common/runtime_types/ping';
+import { DefaultEmail } from '../../../../common/runtime_types';
 
 const UPTIME_AUTO_ALERT = 'UPTIME_AUTO';
 

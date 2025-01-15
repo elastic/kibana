@@ -13,7 +13,7 @@ import {
   ProcessorsEmptyPrompt,
   OnFailureProcessorsTitle,
   ProcessorsHeader,
-  type OnDoneLoadJsonHandler,
+  OnDoneLoadJsonHandler,
 } from './components';
 import { ProcessorsEditor, GlobalOnFailureProcessorsEditor } from './editors';
 

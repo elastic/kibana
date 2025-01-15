@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { kea, type MakeLogicType } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 
 import { KibanaLogic } from '../kibana';
 
-import { type IFlashMessage } from './types';
+import { IFlashMessage } from './types';
 
 interface FlashMessagesValues {
   historyListener: Function | null;

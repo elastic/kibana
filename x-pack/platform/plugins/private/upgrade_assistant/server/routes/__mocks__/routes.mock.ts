@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type AwaitedProperties } from '@kbn/utility-types';
-import { type RequestHandler, type RequestHandlerContext } from '@kbn/core/server';
+import { AwaitedProperties } from '@kbn/utility-types';
+import { RequestHandler, RequestHandlerContext } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,

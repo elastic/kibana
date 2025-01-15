@@ -14,10 +14,10 @@ import {
   EuiLink,
   EuiIcon,
   EuiToolTip,
-  type DraggableProvidedDragHandleProps,
+  DraggableProvidedDragHandleProps,
 } from '@elastic/eui';
 
-import { type ComponentTemplateListItem } from '../../../../../common';
+import { ComponentTemplateListItem } from '../../../../../common';
 import { TemplateContentIndicator } from '../../shared';
 
 import './component_templates_list_item.scss';

@@ -8,9 +8,9 @@
  */
 
 import typeDetect from 'type-detect';
-import { type Stream } from 'stream';
+import { Stream } from 'stream';
 import { internals } from '../internals';
-import { Type, type TypeOptions } from './type';
+import { Type, TypeOptions } from './type';
 
 export class StreamType extends Type<Stream> {
   constructor(options?: TypeOptions<Stream>) {

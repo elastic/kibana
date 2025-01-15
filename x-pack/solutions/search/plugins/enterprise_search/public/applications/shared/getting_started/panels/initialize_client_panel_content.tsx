@@ -12,11 +12,11 @@ import {
   CodeBox,
   getConsoleRequest,
   getLanguageDefinitionCodeSnippet,
-  type LanguageDefinition,
-  type LanguageDefinitionSnippetArguments,
+  LanguageDefinition,
+  LanguageDefinitionSnippetArguments,
 } from '@kbn/search-api-panels';
 
-import { type KibanaDeps } from '../../../../../common/types';
+import { KibanaDeps } from '../../../../../common/types';
 
 import { languageDefinitions } from '../languages/languages';
 

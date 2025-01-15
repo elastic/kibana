@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type Plugin, type CoreSetup } from '@kbn/core/server';
+import { Plugin, CoreSetup } from '@kbn/core/server';
 
-import { type PluginSetupContract as ActionsSetup } from '@kbn/actions-plugin/server';
-import { type AlertingServerSetup } from '@kbn/alerting-plugin/server';
+import { PluginSetupContract as ActionsSetup } from '@kbn/actions-plugin/server';
+import { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 
 import {
   getConnectorType as getSystemLogExampleConnectorType,

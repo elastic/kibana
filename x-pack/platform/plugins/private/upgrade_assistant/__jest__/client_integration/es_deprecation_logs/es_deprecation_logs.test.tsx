@@ -7,11 +7,11 @@
 
 import { act } from 'react-dom/test-utils';
 import {
-  type EsDeprecationLogsTestBed,
+  EsDeprecationLogsTestBed,
   setupESDeprecationLogsPage,
 } from './es_deprecation_logs.helpers';
 import { setupEnvironment, advanceTime } from '../helpers';
-import { type DeprecationLoggingStatus } from '../../../common/types';
+import { DeprecationLoggingStatus } from '../../../common/types';
 import {
   DEPRECATION_LOGS_INDEX,
   DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS,

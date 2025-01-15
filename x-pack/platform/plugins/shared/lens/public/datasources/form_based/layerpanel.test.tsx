@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { type FormBasedPrivateState } from './types';
-import { type FormBasedLayerPanelProps, LayerPanel } from './layerpanel';
+import { FormBasedPrivateState } from './types';
+import { FormBasedLayerPanelProps, LayerPanel } from './layerpanel';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { getFieldByNameFactory } from './pure_helpers';
-import { type TermsIndexPatternColumn } from './operations';
+import { TermsIndexPatternColumn } from './operations';
 import userEvent from '@testing-library/user-event';
 
 Object.defineProperty(HTMLElement.prototype, 'scrollWidth', { value: 400 });

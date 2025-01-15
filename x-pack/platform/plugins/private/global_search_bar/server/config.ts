@@ -6,7 +6,7 @@
  */
 
 import type { PluginConfigDescriptor } from '@kbn/core/server';
-import { schema, type TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   input_max_limit: schema.number({

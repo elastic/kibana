@@ -8,8 +8,8 @@
 import { get } from 'lodash';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { ALERT_ACTION_GROUP } from '@kbn/rule-data-utils';
-import { type Alert as LegacyAlert } from '../../alert';
-import { type ActionGroup, type AlertInstanceState, type AlertInstanceContext, type RuleAlertData } from '../../types';
+import { Alert as LegacyAlert } from '../../alert';
+import { ActionGroup, AlertInstanceState, AlertInstanceContext, RuleAlertData } from '../../types';
 
 export const isAlertImproving = <
   AlertData extends RuleAlertData,

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { errors, type TransportResult } from '@elastic/elasticsearch';
+import { errors, TransportResult } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { type Either, isLeft } from 'fp-ts/lib/Either';
+import { Either, isLeft } from 'fp-ts/lib/Either';
 
-import { type ElasticsearchClient } from '@kbn/core/server';
-import { type Logger } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 
 import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
@@ -19,11 +19,11 @@ import {
   RuleDataWriteDisabledError,
   RuleDataWriterInitializationError,
 } from '../rule_data_plugin_service/errors';
-import { type IndexInfo } from '../rule_data_plugin_service/index_info';
-import { type IResourceInstaller } from '../rule_data_plugin_service/resource_installer';
-import { type IRuleDataClient, type IRuleDataReader, type IRuleDataWriter } from './types';
-import { type ParsedTechnicalFields } from '../../common/parse_technical_fields';
-import { type ParsedExperimentalFields } from '../../common/parse_experimental_fields';
+import { IndexInfo } from '../rule_data_plugin_service/index_info';
+import { IResourceInstaller } from '../rule_data_plugin_service/resource_installer';
+import { IRuleDataClient, IRuleDataReader, IRuleDataWriter } from './types';
+import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
+import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 
 export interface RuleDataClientConstructorOptions {
   indexInfo: IndexInfo;

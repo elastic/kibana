@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type Dispatch } from 'react';
+import React, { Dispatch } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { type Filter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import type { FiltersBuilderActions } from './reducer';
-import { type SuggestionsAbstraction } from '../typeahead/suggestions_component';
+import { SuggestionsAbstraction } from '../typeahead/suggestions_component';
 
 interface FiltersBuilderContextType {
   dataView: DataView;

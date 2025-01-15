@@ -14,8 +14,8 @@ import {
   relatedExpectedHandlerResponse,
 } from '../../../__jest__/fixtures/related';
 import {
-  type ActionsClientChatOpenAI,
-  type ActionsClientSimpleChatModel,
+  ActionsClientChatOpenAI,
+  ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 
 const model = new FakeLLM({

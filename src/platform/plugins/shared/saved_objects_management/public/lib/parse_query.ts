@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Query } from '@elastic/eui';
+import { Query } from '@elastic/eui';
 import type { SavedObjectManagementTypeInfo } from '../../common';
 
 interface ParsedQuery {

@@ -9,9 +9,9 @@ import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import {
-  type ExpressionFunction,
-  type ExpressionFunctionParameter,
-  type Style,
+  ExpressionFunction,
+  ExpressionFunctionParameter,
+  Style,
 } from '@kbn/expressions-plugin/common';
 
 import { registerExpressionsLanguage } from '@kbn/presentation-util-plugin/public';

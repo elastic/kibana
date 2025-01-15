@@ -13,14 +13,14 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiHealth,
-  type EuiSuperSelectProps,
+  EuiSuperSelectProps,
   EuiSuperSelect,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { type PrivateLocation } from '../../../../../../common/runtime_types';
+import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { selectAgentPolicies } from '../../../state/private_locations';
 
 export const AGENT_POLICY_FIELD_NAME = 'agentPolicyId';

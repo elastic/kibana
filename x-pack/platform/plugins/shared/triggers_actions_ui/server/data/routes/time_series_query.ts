@@ -6,15 +6,15 @@
  */
 
 import {
-  type IRouter,
-  type RequestHandlerContext,
-  type KibanaRequest,
-  type IKibanaResponse,
-  type KibanaResponseFactory,
+  IRouter,
+  RequestHandlerContext,
+  KibanaRequest,
+  IKibanaResponse,
+  KibanaResponseFactory,
 } from '@kbn/core/server';
-import { type Logger } from '@kbn/core/server';
-import { type TimeSeriesQueryParameters } from '../lib/time_series_query';
-import { type TimeSeriesQuery, TimeSeriesQuerySchema, type TimeSeriesResult } from '../lib/time_series_types';
+import { Logger } from '@kbn/core/server';
+import { TimeSeriesQueryParameters } from '../lib/time_series_query';
+import { TimeSeriesQuery, TimeSeriesQuerySchema, TimeSeriesResult } from '../lib/time_series_types';
 export type { TimeSeriesQuery, TimeSeriesResult } from '../lib/time_series_types';
 
 export function createTimeSeriesQueryRoute(

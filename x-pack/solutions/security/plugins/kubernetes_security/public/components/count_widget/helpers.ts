@@ -6,7 +6,7 @@
  */
 
 import { DEFAULT_FILTER_QUERY } from '../../../common/constants';
-import { type QueryDslQueryContainerBool } from '../../types';
+import { QueryDslQueryContainerBool } from '../../types';
 
 export const addResourceTypeToFilterQuery = (
   filterQuery: string | undefined,

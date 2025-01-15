@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { type BulkDisableRulesRequestBody } from '..';
+import { BulkDisableRulesRequestBody } from '..';
 
 export const validateBulkDisableRulesBody = (options: BulkDisableRulesRequestBody) => {
   const filter = options.filter;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { registerTestBed, type TestBed } from '@kbn/test-jest-helpers';
-import { type HttpSetup } from '@kbn/core/public';
-import { type RepositoryType } from '../../../common/types';
+import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
+import { HttpSetup } from '@kbn/core/public';
+import { RepositoryType } from '../../../common/types';
 import { RepositoryAdd } from '../../../public/application/sections/repository_add';
 import { WithAppDependencies } from './setup_environment';
 

@@ -18,7 +18,7 @@ import {
   getXAxisLabelFormatter,
   getColorBands,
   getBrushData,
-  type MonitorStatusPanelProps,
+  MonitorStatusPanelProps,
 } from './monitor_status_data';
 import { useMonitorStatusData } from './use_monitor_status_data';
 

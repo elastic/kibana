@@ -14,9 +14,9 @@ import { parseSearchParams } from '@kbn/share-plugin/common/url_service';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { kbnTestConfig } from '@kbn/test';
 import type { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
-import { type DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { ISO_DATE_REGEX } from './constants';
-import { type ActionDocument, type LogsExplorerLocatorParsedParams } from './types';
+import { ActionDocument, LogsExplorerLocatorParsedParams } from './types';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');

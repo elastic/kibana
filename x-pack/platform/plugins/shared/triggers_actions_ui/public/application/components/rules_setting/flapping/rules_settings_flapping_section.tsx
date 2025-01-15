@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { type RulesSettingsFlappingProperties } from '@kbn/alerting-plugin/common';
+import { RulesSettingsFlappingProperties } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -15,7 +15,7 @@ import {
   EuiForm,
   EuiSpacer,
   EuiSwitch,
-  type EuiSwitchProps,
+  EuiSwitchProps,
   EuiPanel,
   EuiText,
   EuiEmptyPrompt,
@@ -23,7 +23,7 @@ import {
 import { flappingOffMessage } from '@kbn/alerts-ui-shared/src/rule_settings/rule_settings_flapping_message';
 import {
   RulesSettingsFlappingFormSection,
-  type RulesSettingsFlappingFormSectionProps,
+  RulesSettingsFlappingFormSectionProps,
   RulesSettingsFlappingTitle,
 } from './rules_settings_flapping_form_section';
 

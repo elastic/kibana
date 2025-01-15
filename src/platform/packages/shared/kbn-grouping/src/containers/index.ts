@@ -8,4 +8,4 @@
  */
 
 export * from './query';
-export type * from './query/types';
+export * from './query/types';

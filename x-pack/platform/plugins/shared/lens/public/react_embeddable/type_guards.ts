@@ -12,10 +12,10 @@ import {
 } from '@kbn/presentation-publishing';
 import { isObject } from 'lodash';
 import {
-  type LensApiCallbacks,
-  type LensApi,
-  type LensComponentForwardedProps,
-  type LensPublicCallbacks,
+  LensApiCallbacks,
+  LensApi,
+  LensComponentForwardedProps,
+  LensPublicCallbacks,
 } from './types';
 
 function apiHasLensCallbacks(api: unknown): api is LensApiCallbacks {

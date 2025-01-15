@@ -14,8 +14,8 @@ import {
   categorizationExpectedHandlerResponse,
 } from '../../../__jest__/fixtures/categorization';
 import {
-  type ActionsClientChatOpenAI,
-  type ActionsClientSimpleChatModel,
+  ActionsClientChatOpenAI,
+  ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 
 const model = new FakeLLM({

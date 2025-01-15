@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { type DataViewDescriptor } from '../../../../common/data_views/models/data_view_descriptor';
+import { DataViewDescriptor } from '../../../../common/data_views/models/data_view_descriptor';
 import { openDiscoverLabel } from '../constants';
 
 interface DataViewMenuItemProps {

@@ -10,7 +10,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import {
   createAction,
   ACTION_VISUALIZE_GEO_FIELD,
-  type VisualizeFieldContext,
+  VisualizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
 import { getUsageCollection } from '../kibana_services';
 import { APP_ID } from '../../common/constants';

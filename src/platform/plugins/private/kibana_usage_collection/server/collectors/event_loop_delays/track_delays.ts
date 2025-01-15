@@ -8,7 +8,7 @@
  */
 
 import { takeUntil, finalize, map } from 'rxjs';
-import { type Observable, timer, switchMap } from 'rxjs';
+import { Observable, timer, switchMap } from 'rxjs';
 import type { ISavedObjectsRepository } from '@kbn/core/server';
 import type { IEventLoopDelaysMonitor, IntervalHistogram } from '@kbn/core/server';
 import {

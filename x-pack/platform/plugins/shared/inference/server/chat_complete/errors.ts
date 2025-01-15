@@ -9,9 +9,9 @@ import { InferenceTaskError, type UnvalidatedToolCall } from '@kbn/inference-com
 import { i18n } from '@kbn/i18n';
 import {
   ChatCompletionErrorCode,
-  type ChatCompletionTokenLimitReachedError,
-  type ChatCompletionToolNotFoundError,
-  type ChatCompletionToolValidationError,
+  ChatCompletionTokenLimitReachedError,
+  ChatCompletionToolNotFoundError,
+  ChatCompletionToolValidationError,
 } from '@kbn/inference-common/src/chat_complete/errors';
 
 export function createTokenLimitReachedError(

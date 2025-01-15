@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { QueryClient, QueryClientProvider, useQuery as _useQuery } from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react';
 import { useGetDataUsageDataStreams } from './use_get_data_streams';

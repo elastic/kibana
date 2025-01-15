@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BulkUploader, type BulkUploaderOptions } from './bulk_uploader';
+import { BulkUploader, BulkUploaderOptions } from './bulk_uploader';
 
 export type InitBulkUploaderOptions = Omit<BulkUploaderOptions, 'interval'>;
 

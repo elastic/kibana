@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { get } from 'lodash';
-import { schema, type TypeOf } from '@kbn/config-schema';
-import { type PluginConfigDescriptor, type PluginInitializerContext } from '@kbn/core/server';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 export { ID as INDEX_THRESHOLD_ID } from './rule_types/index_threshold/rule_type';
 
 export const configSchema = schema.object({});

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type PropsWithChildren } from 'react';
+import React, { PropsWithChildren } from 'react';
 import classnames from 'classnames';
 
 /**

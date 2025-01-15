@@ -7,9 +7,9 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
-import { type IScopedClusterClient } from '@kbn/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { reduce, size } from 'lodash';
-import { type RouteDependencies } from '../../../types';
+import { RouteDependencies } from '../../../types';
 
 const bodySchema = schema.object({ pattern: schema.string() }, { unknowns: 'allow' });
 

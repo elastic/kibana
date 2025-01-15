@@ -9,9 +9,9 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiText } fr
 import { css } from '@emotion/css';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
 
-import { type ActionConnector, type ActionType } from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugin/public';
 
-import { type OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { some } from 'lodash';
 import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';

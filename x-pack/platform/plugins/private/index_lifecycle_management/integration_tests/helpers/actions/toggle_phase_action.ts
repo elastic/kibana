@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type TestBed } from '@kbn/test-jest-helpers';
+import { TestBed } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 
-import { type Phase } from '../../../common/types';
+import { Phase } from '../../../common/types';
 
 const toggleDeletePhase = async (testBed: TestBed) => {
   const { find, component } = testBed;

@@ -13,17 +13,17 @@ import type {
 } from '@kbn/visualizations-plugin/public';
 import { DOC_TYPE } from '../../common/constants';
 import {
-  type LensCreateIn,
-  type LensCreateOut,
-  type LensDeleteIn,
-  type LensDeleteOut,
-  type LensGetIn,
-  type LensGetOut,
-  type LensSearchIn,
-  type LensSearchOut,
-  type LensSearchQuery,
-  type LensUpdateIn,
-  type LensUpdateOut,
+  LensCreateIn,
+  LensCreateOut,
+  LensDeleteIn,
+  LensDeleteOut,
+  LensGetIn,
+  LensGetOut,
+  LensSearchIn,
+  LensSearchOut,
+  LensSearchQuery,
+  LensUpdateIn,
+  LensUpdateOut,
 } from '../../common/content_management';
 
 export function getLensClient<Attr extends SerializableAttributes = SerializableAttributes>(

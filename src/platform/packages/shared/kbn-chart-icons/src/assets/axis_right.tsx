@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type EuiIconProps } from '@elastic/eui';
+import { EuiIconProps } from '@elastic/eui';
 import React from 'react';
 import { IconSimpleWrapper } from './icon_simple_wrapper';
 

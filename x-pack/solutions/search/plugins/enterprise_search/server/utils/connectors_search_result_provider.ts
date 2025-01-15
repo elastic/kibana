@@ -10,8 +10,8 @@ import { from, takeUntil, switchMap, of } from 'rxjs';
 import type { IStaticAssets } from '@kbn/core-http-browser';
 
 import {
-  type GlobalSearchProviderResult,
-  type GlobalSearchResultProvider,
+  GlobalSearchProviderResult,
+  GlobalSearchResultProvider,
 } from '@kbn/global-search-plugin/server';
 import { i18n } from '@kbn/i18n';
 

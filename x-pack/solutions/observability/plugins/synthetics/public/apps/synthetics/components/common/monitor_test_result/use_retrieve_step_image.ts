@@ -7,12 +7,12 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import {
-  type ScreenshotImageBlob,
-  type ScreenshotRefImageData,
+  ScreenshotImageBlob,
+  ScreenshotRefImageData,
   isScreenshotRef,
 } from '../../../../../../common/runtime_types';
 import { useComposeImageFromRef } from '../../../hooks/use_composite_image';
-import { type BackoffOptions, getJourneyScreenshot } from '../../../state';
+import { BackoffOptions, getJourneyScreenshot } from '../../../state';
 
 type ImageResponse = ScreenshotImageBlob | ScreenshotRefImageData | null;
 interface ImageDataResult {

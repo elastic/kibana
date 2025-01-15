@@ -8,7 +8,7 @@
 import { EuiButtonGroup, EuiFormRow, EuiSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import deepEqual from 'fast-deep-equal';
-import { type Moment } from 'moment';
+import { Moment } from 'moment';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 
 import { NumberField } from '../helpers/number_field';
@@ -16,7 +16,7 @@ import { RRuleFrequency } from '../../../../../../types';
 import { I18N_WEEKDAY_OPTIONS } from './constants';
 import {
   buildCustomRecurrenceSchedulerState,
-  type CustomFrequencyState,
+  CustomFrequencyState,
   getInitialByweekday,
   getWeekdayInfo,
 } from './helpers';

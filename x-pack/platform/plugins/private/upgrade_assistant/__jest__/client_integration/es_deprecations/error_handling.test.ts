@@ -8,7 +8,7 @@
 import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment } from '../helpers';
-import { type ElasticsearchTestBed, setupElasticsearchPage } from './es_deprecations.helpers';
+import { ElasticsearchTestBed, setupElasticsearchPage } from './es_deprecations.helpers';
 
 describe('Error handling', () => {
   let testBed: ElasticsearchTestBed;

@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { NumeralFormat } from './numeral';
-import { type TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
+import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
 
 /** @public */

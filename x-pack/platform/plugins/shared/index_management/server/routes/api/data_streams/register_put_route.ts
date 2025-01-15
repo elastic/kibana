@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { schema, type TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-import { type RouteDependencies } from '../../../types';
+import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
 /** HTTP Warning headers have the following syntax:

@@ -24,7 +24,7 @@ import {
   kibanaAssets as kibanaAssetsHeartbeat,
 } from './heartbeat';
 
-import { type GeneratorFunction } from '../../types';
+import { GeneratorFunction } from '../../types';
 
 import { indexTemplate as adminConsoleIndexTemplate } from './admin_console/ecs';
 import { indexTemplate as messageProcessorIndexTemplate } from './message_processor/ecs';

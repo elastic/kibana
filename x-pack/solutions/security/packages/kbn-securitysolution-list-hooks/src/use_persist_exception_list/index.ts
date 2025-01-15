@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Dispatch, useEffect, useState } from 'react';
+import { Dispatch, useEffect, useState } from 'react';
 import type {
   AddExceptionList,
   PersistHookProps,

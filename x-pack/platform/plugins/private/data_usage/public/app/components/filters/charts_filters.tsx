@@ -17,10 +17,10 @@ import {
 
 import { UX_LABELS } from '../../../translations';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
-import { type useGetDataUsageMetrics } from '../../../hooks/use_get_usage_metrics';
+import { useGetDataUsageMetrics } from '../../../hooks/use_get_usage_metrics';
 import { type UsageMetricsDateRangePickerProps, UsageMetricsDateRangePicker } from './date_picker';
-import { ChartsFilter, type ChartsFilterProps } from './charts_filter';
-import { type FilterName } from '../../hooks';
+import { ChartsFilter, ChartsFilterProps } from './charts_filter';
+import { FilterName } from '../../hooks';
 
 export interface ChartsFiltersProps extends UsageMetricsDateRangePickerProps {
   isUpdateDisabled: boolean;

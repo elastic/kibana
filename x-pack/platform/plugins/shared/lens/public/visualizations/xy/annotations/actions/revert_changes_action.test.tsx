@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { type OverlayRef } from '@kbn/core-mount-utils-browser';
-import { type IToasts } from '@kbn/core-notifications-browser';
-import { type PointInTimeEventAnnotationConfig } from '@kbn/event-annotation-common';
+import { OverlayRef } from '@kbn/core-mount-utils-browser';
+import { IToasts } from '@kbn/core-notifications-browser';
+import { PointInTimeEventAnnotationConfig } from '@kbn/event-annotation-common';
 import { cloneDeep } from 'lodash';
 import {
-  type XYByReferenceAnnotationLayerConfig,
-  type XYByValueAnnotationLayerConfig,
-  type XYState,
+  XYByReferenceAnnotationLayerConfig,
+  XYByValueAnnotationLayerConfig,
+  XYState,
 } from '../../types';
 import { revert } from './revert_changes_action';
 

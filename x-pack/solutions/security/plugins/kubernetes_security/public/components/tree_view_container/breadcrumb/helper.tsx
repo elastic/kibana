@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type KubernetesCollectionMap, KubernetesTreeViewLevels } from '../../../types';
+import { KubernetesCollectionMap, KubernetesTreeViewLevels } from '../../../types';
 
 export const showBreadcrumbDisplayText = (
   treeNavSelection: Partial<KubernetesCollectionMap<string>>,

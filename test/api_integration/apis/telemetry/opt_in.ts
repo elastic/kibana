@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import type SuperTest from 'supertest';
+import SuperTest from 'supertest';
 import type { KbnClient } from '@kbn/test';
 import type { TelemetrySavedObjectAttributes } from '@kbn/telemetry-plugin/server/saved_objects';
 import {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FunctionComponent, useState, useCallback } from 'react';
+import React, { FunctionComponent, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, isUndefined } from 'lodash';
 import { EuiCode } from '@elastic/eui';
@@ -22,7 +22,7 @@ import {
 } from '../../../../../../shared_imports';
 import { hasTemplateSnippet } from '../../../utils';
 
-import { type FieldsConfig, to, from, isXJsonField, isXJsonValue } from './shared';
+import { FieldsConfig, to, from, isXJsonField, isXJsonValue } from './shared';
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { XJsonToggle } from '../field_components';

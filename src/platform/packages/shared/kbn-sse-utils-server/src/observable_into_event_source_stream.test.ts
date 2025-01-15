@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Logger } from '@kbn/logging';
+import { Logger } from '@kbn/logging';
 import { observableIntoEventSourceStream } from './observable_into_event_source_stream';
-import { type PassThrough } from 'node:stream';
+import { PassThrough } from 'node:stream';
 import { Subject } from 'rxjs';
-import { type ServerSentEvent, ServerSentEventType } from '@kbn/sse-utils/src/events';
+import { ServerSentEvent, ServerSentEventType } from '@kbn/sse-utils/src/events';
 import {
   ServerSentEventErrorCode,
   createSSEInternalError,

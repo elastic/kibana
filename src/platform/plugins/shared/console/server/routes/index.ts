@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type IRouter, type Logger } from '@kbn/core/server';
-import { type SemVer } from 'semver';
+import { IRouter, Logger } from '@kbn/core/server';
+import { SemVer } from 'semver';
 
-import { type EsLegacyConfigService, type SpecDefinitionsService } from '../services';
-import { type ESConfigForProxy } from '../types';
-import { type ProxyConfigCollection } from '../lib';
-import { type handleEsError } from '../shared_imports';
+import { EsLegacyConfigService, SpecDefinitionsService } from '../services';
+import { ESConfigForProxy } from '../types';
+import { ProxyConfigCollection } from '../lib';
+import { handleEsError } from '../shared_imports';
 
 import { registerEsConfigRoute } from './api/console/es_config';
 import { registerProxyRoute } from './api/console/proxy';

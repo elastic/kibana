@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type StartServicesAccessor } from '@kbn/core/server';
-import { type LicensingPluginStart } from '../types';
-import { type LicensingRouter } from '../types';
+import { StartServicesAccessor } from '@kbn/core/server';
+import { LicensingPluginStart } from '../types';
+import { LicensingRouter } from '../types';
 
 export function registerFeatureUsageRoute(
   router: LicensingRouter,

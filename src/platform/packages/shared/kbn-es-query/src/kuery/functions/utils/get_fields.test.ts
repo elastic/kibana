@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type DataViewBase } from '../../../..';
+import { DataViewBase } from '../../../..';
 import { fields } from '../../../filters/stubs';
 
 import { nodeTypes } from '../..';

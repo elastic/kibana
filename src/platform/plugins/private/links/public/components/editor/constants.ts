@@ -10,7 +10,7 @@
 import {
   DASHBOARD_LINK_TYPE,
   EXTERNAL_LINK_TYPE,
-  type LinkType,
+  LinkType,
 } from '../../../common/content_management';
 import { DashboardLinkStrings } from '../dashboard_link/dashboard_link_strings';
 import { ExternalLinkStrings } from '../external_link/external_link_strings';

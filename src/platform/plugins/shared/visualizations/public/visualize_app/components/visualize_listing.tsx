@@ -14,8 +14,8 @@ import React, {
   useRef,
   useMemo,
   useEffect,
-  type MouseEvent,
-  type MutableRefObject,
+  MouseEvent,
+  MutableRefObject,
 } from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -32,7 +32,7 @@ import {
   type TableListTab,
 } from '@kbn/content-management-tabbed-table-list-view';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
-import { type TableListViewProps } from '@kbn/content-management-table-list-view';
+import { TableListViewProps } from '@kbn/content-management-table-list-view';
 import { TableListViewTable } from '@kbn/content-management-table-list-view-table';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 

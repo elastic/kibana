@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import { type EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { type ColumnHeaderOptions, type DeprecatedRowRenderer } from '../..';
-import { type BrowserFields, type TimelineNonEcsData } from '../../../search_strategy';
+import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { ColumnHeaderOptions, DeprecatedRowRenderer } from '../..';
+import { BrowserFields, TimelineNonEcsData } from '../../../search_strategy';
 
 /**
  * The following props are provided to the function called by `renderCellValue`.

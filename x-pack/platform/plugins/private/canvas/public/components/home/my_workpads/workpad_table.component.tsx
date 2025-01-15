@@ -9,19 +9,19 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiInMemoryTable,
-  type EuiInMemoryTableProps,
-  type EuiTableActionsColumnType,
-  type EuiBasicTableColumn,
+  EuiInMemoryTableProps,
+  EuiTableActionsColumnType,
+  EuiBasicTableColumn,
   EuiToolTip,
   EuiButtonIcon,
-  type EuiTableSelectionType,
+  EuiTableSelectionType,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
 import moment from 'moment';
 
 import { RoutingLink } from '../../routing';
-import { type FoundWorkpad } from '../../../services/canvas_workpad_service';
+import { FoundWorkpad } from '../../../services/canvas_workpad_service';
 import { WorkpadTableTools } from './workpad_table_tools';
 import { WorkpadImport } from './workpad_import';
 

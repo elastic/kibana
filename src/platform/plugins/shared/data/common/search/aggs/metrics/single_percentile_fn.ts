@@ -8,8 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { type AggExpressionType, type AggExpressionFunctionArgs, METRIC_TYPES } from '..';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '..';
 
 export const aggSinglePercentileFnName = 'aggSinglePercentile';
 

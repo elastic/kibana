@@ -8,14 +8,14 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PainlessLang, type PainlessContext } from '@kbn/monaco';
+import { PainlessLang, PainlessContext } from '@kbn/monaco';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiFormRow,
   EuiComboBox,
-  type EuiComboBoxOptionOption,
+  EuiComboBoxOptionOption,
   EuiLink,
   EuiCallOut,
   EuiCode,
@@ -25,14 +25,14 @@ import {
   useForm,
   useFormData,
   Form,
-  type FormHook,
+  FormHook,
   UseField,
   TextField,
   CodeEditor,
-  type ValidationFunc,
-  type FieldConfig,
+  ValidationFunc,
+  FieldConfig,
 } from '../../shared_imports';
-import { type RuntimeField, type RuntimeType } from '../../types';
+import { RuntimeField, RuntimeType } from '../../types';
 import { RUNTIME_FIELD_OPTIONS } from '../../constants';
 import { schema } from './schema';
 

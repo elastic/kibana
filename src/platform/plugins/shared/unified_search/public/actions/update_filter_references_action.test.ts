@@ -12,7 +12,7 @@ import { FilterStateStore } from '@kbn/es-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   createUpdateFilterReferencesAction,
-  type UpdateFilterReferencesActionContext,
+  UpdateFilterReferencesActionContext,
 } from './update_filter_references_action';
 import { updateFilterReferencesTrigger } from '../triggers/update_filter_references_trigger';
 import { mockFilter } from '../mocks/get_stub_filter';

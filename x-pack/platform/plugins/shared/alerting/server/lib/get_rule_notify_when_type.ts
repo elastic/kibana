@@ -6,7 +6,7 @@
  */
 
 import { ruleNotifyWhen } from '../application/rule/constants';
-import { type RuleNotifyWhen } from '../application/rule/types';
+import { RuleNotifyWhen } from '../application/rule/types';
 
 export function getRuleNotifyWhenType(
   notifyWhen: RuleNotifyWhen | null,

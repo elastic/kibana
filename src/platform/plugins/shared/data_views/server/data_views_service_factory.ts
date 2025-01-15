@@ -8,14 +8,14 @@
  */
 
 import {
-  type Logger,
-  type SavedObjectsClientContract,
-  type ElasticsearchClient,
-  type UiSettingsServiceStart,
-  type KibanaRequest,
-  type CoreStart,
+  Logger,
+  SavedObjectsClientContract,
+  ElasticsearchClient,
+  UiSettingsServiceStart,
+  KibanaRequest,
+  CoreStart,
 } from '@kbn/core/server';
-import { type FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { DataViewsService } from '../common';
 import { UiSettingsServerToCommon } from './ui_settings_wrapper';
 import { IndexPatternsApiServer } from './index_patterns_api_client';

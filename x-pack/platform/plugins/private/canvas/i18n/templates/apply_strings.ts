@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type CanvasTemplate } from '../../types';
+import { CanvasTemplate } from '../../types';
 import { getTemplateStrings } from './template_strings';
 
 import { TagStrings } from '..';

@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { USERS, type User, type ExpectedResponse } from '../../../common/lib';
-import { type FtrProviderContext } from '../services';
+import { USERS, User, ExpectedResponse } from '../../../common/lib';
+import { FtrProviderContext } from '../services';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {

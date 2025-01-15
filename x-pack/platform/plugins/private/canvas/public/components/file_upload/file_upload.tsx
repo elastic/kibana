@@ -7,7 +7,7 @@
 
 import { EuiFilePicker } from '@elastic/eui';
 import PropTypes from 'prop-types';
-import React, { type FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 
 interface Props {
   /** Optional ID of the component */

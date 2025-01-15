@@ -8,7 +8,7 @@
  */
 
 import { startCase } from 'lodash';
-import { type IMetricAggConfig } from '../metric_agg_type';
+import { IMetricAggConfig } from '../metric_agg_type';
 
 export const makeNestedLabel = (aggConfig: IMetricAggConfig, label: string) => {
   const uppercaseLabel = startCase(label);

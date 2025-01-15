@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import {
-  type ConfigKey,
-  type SyntheticsMonitorWithSecretsAttributes,
+  ConfigKey,
+  SyntheticsMonitorWithSecretsAttributes,
 } from '../../../../../common/runtime_types';
 
 export type SyntheticsSavedObjectUnsanitizedDoc850 = SavedObjectUnsanitizedDoc<

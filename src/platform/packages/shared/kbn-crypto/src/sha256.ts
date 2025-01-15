@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import crypto, { type BinaryToTextEncoding } from 'crypto';
+import crypto, { BinaryToTextEncoding } from 'crypto';
 
 export const createSHA256Hash = (
   input: string | Buffer,

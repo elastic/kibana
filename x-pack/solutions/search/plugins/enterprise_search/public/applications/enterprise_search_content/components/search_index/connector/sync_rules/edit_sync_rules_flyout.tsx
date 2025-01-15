@@ -17,13 +17,13 @@ import {
   EuiFlyoutBody,
   EuiText,
   EuiTabbedContent,
-  type EuiTabbedContentTab,
+  EuiTabbedContentTab,
   EuiSpacer,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { type FilteringValidation } from '@kbn/search-connectors';
+import { FilteringValidation } from '@kbn/search-connectors';
 
 import { AdvancedSyncRules } from './advanced_sync_rules';
 import { EditSyncRulesTab } from './edit_sync_rules_tab';

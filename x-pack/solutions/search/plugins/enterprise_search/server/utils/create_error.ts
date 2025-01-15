@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type KibanaResponseFactory } from '@kbn/core-http-server';
+import { KibanaResponseFactory } from '@kbn/core-http-server';
 
-import { type ErrorCode } from '../../common/types/error_codes';
+import { ErrorCode } from '../../common/types/error_codes';
 
 export interface EnterpriseSearchError {
   errorCode: ErrorCode;

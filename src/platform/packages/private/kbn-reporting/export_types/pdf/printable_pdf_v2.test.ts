@@ -8,7 +8,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { type Writable } from 'stream';
+import { Writable } from 'stream';
 
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';

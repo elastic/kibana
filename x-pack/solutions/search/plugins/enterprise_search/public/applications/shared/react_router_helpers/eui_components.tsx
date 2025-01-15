@@ -11,22 +11,22 @@ import {
   EuiLink,
   EuiButton,
   EuiButtonEmpty,
-  type EuiButtonEmptyProps,
+  EuiButtonEmptyProps,
   EuiButtonIcon,
-  type EuiButtonIconProps,
-  type EuiButtonProps,
-  type EuiLinkAnchorProps,
+  EuiButtonIconProps,
+  EuiButtonProps,
+  EuiLinkAnchorProps,
   EuiListGroupItem,
-  type EuiListGroupItemProps,
+  EuiListGroupItemProps,
   EuiPanel,
   EuiCard,
-  type EuiCardProps,
+  EuiCardProps,
   EuiBadge,
-  type EuiBadgeProps,
+  EuiBadgeProps,
 } from '@elastic/eui';
-import { type EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
+import { EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
 
-import { type ReactRouterProps } from '../types';
+import { ReactRouterProps } from '../types';
 
 import { generateReactRouterProps } from '.';
 

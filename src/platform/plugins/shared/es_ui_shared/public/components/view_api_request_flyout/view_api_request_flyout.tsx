@@ -13,7 +13,7 @@ import { compressToEncodedURIComponent } from 'lz-string';
 
 import {
   EuiFlyout,
-  type EuiFlyoutProps,
+  EuiFlyoutProps,
   EuiFlyoutHeader,
   EuiTitle,
   EuiFlyoutBody,
@@ -25,7 +25,7 @@ import {
   EuiCopy,
 } from '@elastic/eui';
 import type { UrlService } from '@kbn/share-plugin/common/url_service';
-import { type ApplicationStart, APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { ApplicationStart, APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 type FlyoutProps = Omit<EuiFlyoutProps, 'onClose'>;

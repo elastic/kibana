@@ -9,22 +9,22 @@
 
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
-import { type DataViewsContract } from '@kbn/data-plugin/public';
+import { DataViewsContract } from '@kbn/data-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { useEsqlMode } from './use_esql_mode';
 import { FetchStatus } from '../../types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { type AggregateQuery, type Query } from '@kbn/es-query';
+import { AggregateQuery, Query } from '@kbn/es-query';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { type DataViewListItem } from '@kbn/data-views-plugin/common';
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 import { DiscoverMainProvider } from '../state_management/discover_state_provider';
-import { type DiscoverAppState } from '../state_management/discover_app_state_container';
-import { type DiscoverStateContainer } from '../state_management/discover_state';
+import { DiscoverAppState } from '../state_management/discover_app_state_container';
+import { DiscoverStateContainer } from '../state_management/discover_state';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { dataViewAdHoc } from '../../../__mocks__/data_view_complex';
-import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import { omit } from 'lodash';
 
 function getHookProps(

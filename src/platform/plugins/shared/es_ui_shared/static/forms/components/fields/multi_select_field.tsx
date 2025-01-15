@@ -10,7 +10,7 @@
 import React from 'react';
 import { EuiFormRow, EuiSelectable, EuiPanel } from '@elastic/eui';
 
-import { type FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
 interface Props {
   field: FieldHook;

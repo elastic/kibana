@@ -10,10 +10,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 import TestConnectorForm from './test_connector_form';
 import { none, some } from 'fp-ts/lib/Option';
 import {
-  type ActionConnector,
+  ActionConnector,
   ActionConnectorMode,
-  type ActionParamsProps,
-  type GenericValidationResult,
+  ActionParamsProps,
+  GenericValidationResult,
 } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { EuiFormRow, EuiFieldText, EuiText, EuiLink, EuiForm, EuiSelect } from '@elastic/eui';

@@ -8,9 +8,9 @@
 import axios from 'axios';
 import {
   DEFAULT_AAD_CONFIG,
-  type RuleType,
-  type RuleTypeParams,
-  type RuleTypeState,
+  RuleType,
+  RuleTypeParams,
+  RuleTypeState,
   AlertsClientError,
 } from '@kbn/alerting-plugin/server';
 import { schema } from '@kbn/config-schema';

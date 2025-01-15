@@ -6,28 +6,28 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import {
-  type Rule,
-  type RawAlertInstance,
-  type AlertInstanceState,
-  type AlertInstanceContext,
+  Rule,
+  RawAlertInstance,
+  AlertInstanceState,
+  AlertInstanceContext,
 } from '@kbn/alerting-plugin/common';
-import { type RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { BaseRule } from './base_rule';
 import {
-  type AlertData,
-  type AlertCluster,
-  type AlertMessage,
-  type AlertThreadPoolRejectionsState,
-  type AlertMessageTimeToken,
-  type AlertMessageLinkToken,
-  type ThreadPoolRejectionsAlertParams,
-  type CommonAlertFilter,
-  type AlertState,
-  type AlertThreadPoolRejectionsStats,
+  AlertData,
+  AlertCluster,
+  AlertMessage,
+  AlertThreadPoolRejectionsState,
+  AlertMessageTimeToken,
+  AlertMessageLinkToken,
+  ThreadPoolRejectionsAlertParams,
+  CommonAlertFilter,
+  AlertState,
+  AlertThreadPoolRejectionsStats,
 } from '../../common/types/alerts';
 import { fetchThreadPoolRejectionStats } from '../lib/alerts/fetch_thread_pool_rejections_stats';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';

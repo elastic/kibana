@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { type IHttpFetchError, type ResponseErrorBody } from '@kbn/core/public';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import {
-  type CreateInvestigationParams,
-  type CreateInvestigationResponse,
-  type FindInvestigationsResponse,
+  CreateInvestigationParams,
+  CreateInvestigationResponse,
+  FindInvestigationsResponse,
 } from '@kbn/investigation-shared';
-import { type QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
+import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from './use_kibana';
 import { investigationKeys } from './query_key_factory';

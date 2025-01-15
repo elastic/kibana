@@ -7,7 +7,7 @@
 
 import { LIST_ID } from '../../constants/index.mock';
 
-import { type ExportListItemQuerySchema } from '.';
+import { ExportListItemQuerySchema } from '.';
 
 export const getExportListItemQuerySchemaMock = (): ExportListItemQuerySchema => ({
   list_id: LIST_ID,

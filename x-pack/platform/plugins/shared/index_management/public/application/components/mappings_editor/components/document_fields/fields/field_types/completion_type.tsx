@@ -9,7 +9,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { type NormalizedField, type Field as FieldType } from '../../../../types';
+import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
 import { UseField, Field } from '../../../../shared_imports';
 import { AnalyzersParameter, MetaParameter } from '../../field_parameters';

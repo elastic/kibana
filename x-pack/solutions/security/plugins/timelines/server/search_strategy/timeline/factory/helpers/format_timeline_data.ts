@@ -7,10 +7,10 @@
 
 import { get, has } from 'lodash/fp';
 import {
-  type EventHit,
-  type TimelineEdges,
-  type TimelineNonEcsData,
-  type EventSource,
+  EventHit,
+  TimelineEdges,
+  TimelineNonEcsData,
+  EventSource,
 } from '../../../../../common/search_strategy';
 import { toStringArray } from '../../../../../common/utils/to_array';
 import { getDataFromFieldsHits } from '../../../../../common/utils/field_formatters';

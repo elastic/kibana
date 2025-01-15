@@ -11,9 +11,9 @@ import React, { lazy } from 'react';
 import { get } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { type CoreSetup, type IUiSettingsClient, type KibanaExecutionContext } from '@kbn/core/public';
+import { CoreSetup, IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/public';
 
-import { VisualizationContainer, type PersistedState } from '@kbn/visualizations-plugin/public';
+import { VisualizationContainer, PersistedState } from '@kbn/visualizations-plugin/public';
 
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';

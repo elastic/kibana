@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type OperationDocumentationType } from './types';
+import { OperationDocumentationType } from './types';
 
 export const NORMALIZE_BY_UNIT_ID = 'normalize_by_unit';
 export const NORMALIZE_BY_UNIT_NAME = i18n.translate('lensFormulaDocs.timeScale', {

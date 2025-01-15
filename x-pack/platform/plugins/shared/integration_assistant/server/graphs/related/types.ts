@@ -6,7 +6,7 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { type RelatedState, type ChatModels } from '../../types';
+import { RelatedState, ChatModels } from '../../types';
 
 export interface RelatedBaseNodeParams {
   state: RelatedState;

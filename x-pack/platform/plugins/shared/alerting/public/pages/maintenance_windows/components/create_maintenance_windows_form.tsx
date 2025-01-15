@@ -9,7 +9,7 @@ import moment from 'moment';
 import {
   FIELD_TYPES,
   Form,
-  type FormSubmitHandler,
+  FormSubmitHandler,
   getUseField,
   useForm,
   useFormData,
@@ -34,7 +34,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import type { Filter } from '@kbn/es-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
-import { type FormProps, schema } from './schema';
+import { FormProps, schema } from './schema';
 import * as i18n from '../translations';
 import { RecurringSchedule } from './recurring_schedule_form/recurring_schedule';
 import { SubmitButton } from './submit_button';

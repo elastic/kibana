@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { waitFor } from '@testing-library/react';
-import { type AppContextTestRender, createAppRootMockRenderer } from '../../../test';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../../test';
 import { DynamicTreeView } from '.';
 import { clusterResponseMock, nodeResponseMock } from '../mocks';
 import { TreeViewContextProvider } from '../contexts';

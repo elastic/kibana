@@ -8,8 +8,8 @@
  */
 
 import {
-  type ExpressionFunctionDefinition,
-  type ExpressionValueRender,
+  ExpressionFunctionDefinition,
+  ExpressionValueRender,
 } from '@kbn/expressions-plugin/common';
 
 interface Arguments {

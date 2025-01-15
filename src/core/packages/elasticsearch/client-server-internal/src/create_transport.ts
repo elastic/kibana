@@ -16,7 +16,7 @@ import {
   type TransportResult,
 } from '@elastic/elasticsearch';
 import { isUnauthorizedError } from '@kbn/es-errors';
-import { type InternalUnauthorizedErrorHandler, isRetryResult } from './retry_unauthorized';
+import { InternalUnauthorizedErrorHandler, isRetryResult } from './retry_unauthorized';
 
 type TransportClass = typeof Transport;
 

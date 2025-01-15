@@ -6,11 +6,11 @@
  */
 
 import {
-  type SavedObjectMigrationMap,
-  type SavedObjectUnsanitizedDoc,
-  type SavedObjectMigrationContext,
+  SavedObjectMigrationMap,
+  SavedObjectUnsanitizedDoc,
+  SavedObjectMigrationContext,
 } from '@kbn/core/server';
-import { type rulesV1, type rulesV2, type rulesV3 } from '@kbn/cloud-security-posture-common/schema/rules';
+import { rulesV1, rulesV2, rulesV3 } from '@kbn/cloud-security-posture-common/schema/rules';
 
 function migrateCspBenchmarkRuleToV840(
   doc: SavedObjectUnsanitizedDoc<rulesV1.CspBenchmarkRule>,

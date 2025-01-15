@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { type RunContext } from '@kbn/task-manager-plugin/server';
+import { RunContext } from '@kbn/task-manager-plugin/server';
 import {
-  type RuleAlertData,
-  type RuleTypeParams,
-  type RuleTypeState,
-  type AlertInstanceState,
-  type AlertInstanceContext,
+  RuleAlertData,
+  RuleTypeParams,
+  RuleTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
 } from '../types';
 import { TaskRunner } from './task_runner';
-import { type NormalizedRuleType } from '../rule_type_registry';
-import { type InMemoryMetrics } from '../monitoring';
-import { type TaskRunnerContext } from './types';
+import { NormalizedRuleType } from '../rule_type_registry';
+import { InMemoryMetrics } from '../monitoring';
+import { TaskRunnerContext } from './types';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { AdHocTaskRunner } from './ad_hoc_task_runner';
 

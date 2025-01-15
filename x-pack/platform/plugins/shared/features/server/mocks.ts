@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type FeaturesPluginSetup, type FeaturesPluginStart } from './plugin';
+import { FeaturesPluginSetup, FeaturesPluginStart } from './plugin';
 import {
   featurePrivilegeIterator,
   subFeaturePrivilegeIterator,

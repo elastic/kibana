@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type CoreEditor, type Position } from '../../types';
+import { CoreEditor, Position } from '../../types';
 import { TokenIterator } from '../../lib/token_iterator';
 
 interface Dependencies {

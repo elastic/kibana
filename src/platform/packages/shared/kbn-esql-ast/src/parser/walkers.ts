@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ParserRuleContext, type TerminalNode } from 'antlr4';
+import { ParserRuleContext, TerminalNode } from 'antlr4';
 import {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   default as esql_parser,
@@ -59,7 +59,7 @@ import {
   ValueExpressionDefaultContext,
   InlineCastContext,
   IndexPatternContext,
-  type InlinestatsCommandContext,
+  InlinestatsCommandContext,
 } from '../antlr/esql_parser';
 import {
   createSource,
@@ -87,14 +87,14 @@ import {
 } from './factories';
 
 import {
-  type ESQLLiteral,
-  type ESQLColumn,
-  type ESQLFunction,
-  type ESQLCommandOption,
-  type ESQLAstItem,
-  type ESQLAstField,
-  type ESQLInlineCast,
-  type ESQLOrderExpression,
+  ESQLLiteral,
+  ESQLColumn,
+  ESQLFunction,
+  ESQLCommandOption,
+  ESQLAstItem,
+  ESQLAstField,
+  ESQLInlineCast,
+  ESQLOrderExpression,
 } from '../types';
 import { firstItem, lastItem } from '../visitor/utils';
 

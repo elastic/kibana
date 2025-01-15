@@ -7,15 +7,15 @@
 
 import { isEmpty } from 'lodash/fp';
 import type { EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
-import { type TimelineEqlRequestOptions } from '../../../../common/api/search_strategy/timeline/eql';
+import { TimelineEqlRequestOptions } from '../../../../common/api/search_strategy/timeline/eql';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
 import {
-  type EqlSearchResponse,
-  type EqlSequence,
-  type EventHit,
-  type TimelineEdges,
+  EqlSearchResponse,
+  EqlSequence,
+  EventHit,
+  TimelineEdges,
 } from '../../../../common/search_strategy';
-import { type TimelineEqlResponse } from '../../../../common/search_strategy/timeline/events/eql';
+import { TimelineEqlResponse } from '../../../../common/search_strategy/timeline/events/eql';
 import { inspectStringifyObject } from '../../../utils/build_query';
 import { formatTimelineData } from '../factory/helpers/format_timeline_data';
 

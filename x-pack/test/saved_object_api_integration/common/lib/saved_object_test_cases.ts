@@ -6,7 +6,7 @@
  */
 
 import { SPACES, ALL_SPACES_ID } from './spaces';
-import { type TestCase } from './types';
+import { TestCase } from './types';
 
 const {
   DEFAULT: { spaceId: DEFAULT_SPACE_ID },

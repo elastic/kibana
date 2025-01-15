@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type MyImageMetadata } from '../common';
+import { MyImageMetadata } from '../common';
 import type {
   FilesSetup,
   FilesStart,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ServerlessPluginStart } from './types';
+import { ServerlessPluginStart } from './types';
 
 const startMock = (): ServerlessPluginStart => ({
   initNavigation: jest.fn(),

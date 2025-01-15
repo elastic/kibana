@@ -9,9 +9,9 @@
 
 import React, { useCallback } from 'react';
 import { GroupBy, SmallMultiples, Predicate } from '@elastic/charts';
-import { type ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { type Datatable } from '@kbn/expressions-plugin/public';
+import { Datatable } from '@kbn/expressions-plugin/public';
 
 interface SplitChartProps {
   splitColumnAccessor?: ExpressionValueVisDimension | string;

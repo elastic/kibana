@@ -12,7 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
-  type EuiPopoverProps,
+  EuiPopoverProps,
   EuiPopoverTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';

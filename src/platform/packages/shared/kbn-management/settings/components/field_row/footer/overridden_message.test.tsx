@@ -10,7 +10,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { FieldOverriddenMessage } from './overridden_message';
-import { type FieldDefinition } from '@kbn/management-settings-types';
+import { FieldDefinition } from '@kbn/management-settings-types';
 
 describe('FieldOverriddenMessage', () => {
   const defaultProps = {

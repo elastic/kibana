@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type DynamicActionsState } from '../../common';
-import { type ActionFactory } from '../types';
+import { DynamicActionsState } from '../../common';
+import { ActionFactory } from '../types';
 
 export const dynamicActionFactoriesCollector = (
   getActionFactory: (id: string) => undefined | ActionFactory,

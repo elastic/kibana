@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type IStaticAssets } from '@kbn/core-http-browser';
+import { IStaticAssets } from '@kbn/core-http-browser';
 import { getConnectorFullTypes } from '../common/lib/connector_types';
 import type { SearchConnectorsPluginStart } from './types';
 

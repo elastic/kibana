@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { EuiDatePicker, EuiDatePickerRange } from '@elastic/eui';
-import { type Moment } from 'moment';
+import { Moment } from 'moment';
 import DateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { useSeriesStorage } from '../hooks/use_series_storage';
-import { type SeriesUrl } from '../types';
+import { SeriesUrl } from '../types';
 import { ReportTypes } from '../configurations/constants';
 
 export const parseRelativeDate = (date: string, options = {}): Moment | void => {

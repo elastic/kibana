@@ -9,7 +9,7 @@ import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 
-import { type CanvasVariable } from '../../../../types';
+import { CanvasVariable } from '../../../../types';
 
 import { EditVar } from '../edit_var';
 

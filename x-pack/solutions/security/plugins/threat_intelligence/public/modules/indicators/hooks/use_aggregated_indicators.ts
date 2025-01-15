@@ -6,18 +6,18 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { type Filter, type Query, type TimeRange } from '@kbn/es-query';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useMemo, useState } from 'react';
-import { type TimeRangeBounds } from '@kbn/data-plugin/common';
-import { type EuiComboBoxOptionOption } from '@elastic/eui';
+import { TimeRangeBounds } from '@kbn/data-plugin/common';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useInspector } from '../../../hooks/use_inspector';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
 import { useSourcererDataView } from './use_sourcerer_data_view';
 import {
-  type ChartSeries,
+  ChartSeries,
   createFetchAggregatedIndicators,
-  type FetchAggregatedIndicatorsParams,
+  FetchAggregatedIndicatorsParams,
 } from '../services/fetch_aggregated_indicators';
 import { useDateFormat, useTimeZone } from '../../../hooks/use_kibana_ui_settings';
 

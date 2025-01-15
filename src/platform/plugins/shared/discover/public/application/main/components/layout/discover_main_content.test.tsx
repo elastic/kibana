@@ -12,20 +12,20 @@ import { BehaviorSubject, of } from 'rxjs';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { type DataView } from '@kbn/data-plugin/common';
+import { DataView } from '@kbn/data-plugin/common';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import {
-  type DataDocuments$,
-  type DataMain$,
-  type DataTotalHits$,
+  DataDocuments$,
+  DataMain$,
+  DataTotalHits$,
 } from '../../state_management/discover_data_state_container';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
-import { FetchStatus, type SidebarToggleState } from '../../../types';
+import { FetchStatus, SidebarToggleState } from '../../../types';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { DiscoverMainContent, type DiscoverMainContentProps } from './discover_main_content';
-import { type SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
+import { DiscoverMainContent, DiscoverMainContentProps } from './discover_main_content';
+import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { DiscoverDocuments } from './discover_documents';

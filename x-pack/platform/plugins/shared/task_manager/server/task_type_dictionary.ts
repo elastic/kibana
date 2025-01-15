@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { type ObjectType } from '@kbn/config-schema';
-import { type Logger } from '@kbn/core/server';
+import { ObjectType } from '@kbn/config-schema';
+import { Logger } from '@kbn/core/server';
 import {
-  type TaskDefinition,
+  TaskDefinition,
   taskDefinitionSchema,
-  type TaskRunCreatorFunction,
-  type TaskPriority,
-  type TaskCost,
+  TaskRunCreatorFunction,
+  TaskPriority,
+  TaskCost,
 } from './task';
 import { CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE } from './constants';
 

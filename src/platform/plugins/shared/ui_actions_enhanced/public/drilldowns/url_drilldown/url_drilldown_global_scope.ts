@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type CoreSetup } from '@kbn/core/public';
-import { type UrlDrilldownGlobalScope } from './types';
+import { CoreSetup } from '@kbn/core/public';
+import { UrlDrilldownGlobalScope } from './types';
 
 interface UrlDrilldownGlobalScopeDeps {
   core: CoreSetup;

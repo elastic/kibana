@@ -7,7 +7,7 @@
 
 import type { LensAppServices } from './types';
 import { LENS_EMBEDDABLE_TYPE } from '../../common/constants';
-import { type LensSerializedState } from '../react_embeddable/types';
+import { LensSerializedState } from '../react_embeddable/types';
 
 export const redirectToDashboard = ({
   embeddableInput,

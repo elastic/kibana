@@ -7,37 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { firstValueFrom, type Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 
 import {
-  type AnalyticsServiceStart,
-  type CoreSetup,
-  type CoreStart,
-  type I18nStart,
-  type NotificationsSetup,
+  AnalyticsServiceStart,
+  CoreSetup,
+  CoreStart,
+  I18nStart,
+  NotificationsSetup,
 } from '@kbn/core/public';
-import { type DataPublicPluginStart, type SerializedSearchSourceFields } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import {
   loadSharingDataHelpers,
   SEARCH_EMBEDDABLE_TYPE,
   apiPublishesSavedSearch,
-  type PublishesSavedSearch,
-  type HasTimeRange,
+  PublishesSavedSearch,
+  HasTimeRange,
 } from '@kbn/discover-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { type LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import {
   apiCanAccessViewMode,
   apiHasType,
   apiIsOfType,
-  type CanAccessViewMode,
-  type EmbeddableApiContext,
+  CanAccessViewMode,
+  EmbeddableApiContext,
   getInheritedViewMode,
-  type HasType,
+  HasType,
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { CSV_REPORTING_ACTION, type JobAppParamsCSV } from '@kbn/reporting-export-types-csv-common';
-import { type SavedSearch } from '@kbn/saved-search-plugin/public';
+import { CSV_REPORTING_ACTION, JobAppParamsCSV } from '@kbn/reporting-export-types-csv-common';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ClientConfigType } from '@kbn/reporting-public/types';

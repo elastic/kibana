@@ -21,17 +21,17 @@ import type {
 } from '@kbn/lens-plugin/public/datasources/text_based/types';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { type DataViewsCommon } from './config_builder';
+import { DataViewsCommon } from './config_builder';
 import {
-  type FormulaValueConfig,
-  type LensAnnotationLayer,
-  type LensAttributes,
-  type LensBaseConfig,
-  type LensBaseLayer,
-  type LensBaseXYLayer,
-  type LensDataset,
-  type LensDatatableDataset,
-  type LensESQLDataset,
+  FormulaValueConfig,
+  LensAnnotationLayer,
+  LensAttributes,
+  LensBaseConfig,
+  LensBaseLayer,
+  LensBaseXYLayer,
+  LensDataset,
+  LensDatatableDataset,
+  LensESQLDataset,
 } from './types';
 
 type DataSourceStateLayer =

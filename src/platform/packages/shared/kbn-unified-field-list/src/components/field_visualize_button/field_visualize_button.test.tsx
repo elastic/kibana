@@ -8,7 +8,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { type ReactWrapper } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
 import { EuiButton } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
@@ -19,7 +19,7 @@ import {
   ACTION_VISUALIZE_LENS_FIELD,
   VISUALIZE_FIELD_TRIGGER,
   VISUALIZE_GEO_FIELD_TRIGGER,
-  type VisualizeFieldContext,
+  VisualizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
 import type { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
 

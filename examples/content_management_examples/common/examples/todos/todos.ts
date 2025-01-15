@@ -8,16 +8,16 @@
  */
 
 import {
-  type CreateIn,
-  type CreateResult,
-  type DeleteIn,
-  type DeleteResult,
-  type GetIn,
-  type GetResult,
-  type SearchIn,
-  type SearchResult,
-  type UpdateIn,
-  type UpdateResult,
+  CreateIn,
+  CreateResult,
+  DeleteIn,
+  DeleteResult,
+  GetIn,
+  GetResult,
+  SearchIn,
+  SearchResult,
+  UpdateIn,
+  UpdateResult,
 } from '@kbn/content-management-plugin/common';
 
 export const TODO_CONTENT_ID = 'todos';

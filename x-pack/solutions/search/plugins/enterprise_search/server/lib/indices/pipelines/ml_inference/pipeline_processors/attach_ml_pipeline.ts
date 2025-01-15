@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { addSubPipelineToIndexSpecificMlPipeline } from '../../../../../utils/create_ml_inference_pipeline';
 

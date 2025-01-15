@@ -9,14 +9,14 @@ import { createReducer } from '@reduxjs/toolkit';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
 import {
-  type MonitorManagementListResult,
-  type MonitorFiltersResult,
-  type EncryptedSyntheticsSavedMonitor,
+  MonitorManagementListResult,
+  MonitorFiltersResult,
+  EncryptedSyntheticsSavedMonitor,
 } from '../../../../../common/runtime_types';
 
-import { type IHttpSerializedFetchError } from '../utils/http_error';
+import { IHttpSerializedFetchError } from '../utils/http_error';
 
-import { type MonitorListPageState } from './models';
+import { MonitorListPageState } from './models';
 import { getMonitorListPageStateWithDefaults } from './helpers';
 
 import {
@@ -132,7 +132,7 @@ export const monitorListReducer = createReducer(initialState, (builder) => {
 });
 
 export * from './api';
-export type * from './models';
+export * from './models';
 export * from './actions';
 export * from './effects';
 export * from './selectors';

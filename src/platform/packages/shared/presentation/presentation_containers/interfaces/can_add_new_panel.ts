@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type PanelPackage } from './presentation_container';
+import { PanelPackage } from './presentation_container';
 
 /**
  * This API can add a new panel as a child.

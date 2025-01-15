@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { type estypes } from '@elastic/elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
 import {
-  type PromptCreateProps,
-  type PromptResponse,
-  type PromptType,
-  type PromptUpdateProps,
+  PromptCreateProps,
+  PromptResponse,
+  PromptType,
+  PromptUpdateProps,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
-import { type AuthenticatedUser } from '@kbn/core-security-common';
-import { type CreatePromptSchema, type EsPromptsSchema, type UpdatePromptSchema } from './types';
+import { AuthenticatedUser } from '@kbn/core-security-common';
+import { CreatePromptSchema, EsPromptsSchema, UpdatePromptSchema } from './types';
 
 export const transformESToPrompts = (response: EsPromptsSchema[]): PromptResponse[] => {
   return response.map((promptSchema) => {

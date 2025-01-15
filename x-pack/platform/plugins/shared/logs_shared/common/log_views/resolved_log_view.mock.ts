@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { type DataViewsContract, fieldList } from '@kbn/data-views-plugin/common';
+import { DataViewsContract, fieldList } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import { defaultLogViewsStaticConfig } from './defaults';
-import { type ResolvedLogView, resolveLogView } from './resolved_log_view';
-import { type LogViewAttributes } from './types';
-import { type DataViewSpec } from '@kbn/data-views-plugin/common';
+import { ResolvedLogView, resolveLogView } from './resolved_log_view';
+import { LogViewAttributes } from './types';
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { createLogSourcesServiceMock } from '@kbn/logs-data-access-plugin/common/services/log_sources_service/log_sources_service.mocks';
 
 export const createResolvedLogViewMock = (

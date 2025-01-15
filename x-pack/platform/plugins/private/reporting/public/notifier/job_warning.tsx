@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { type CoreStart, type ToastInput } from '@kbn/core/public';
+import { CoreStart, ToastInput } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { type JobId } from '@kbn/reporting-common/types';
+import { JobId } from '@kbn/reporting-common/types';
 import React from 'react';
-import { type JobSummary } from '../types';
+import { JobSummary } from '../types';
 import { DownloadButton } from './job_download_button';
 import { ReportLink } from './report_link';
 

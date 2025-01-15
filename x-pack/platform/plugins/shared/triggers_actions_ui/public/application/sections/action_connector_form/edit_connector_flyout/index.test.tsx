@@ -11,8 +11,8 @@ import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import userEvent from '@testing-library/user-event';
 import { waitFor, act, screen } from '@testing-library/react';
 import EditConnectorFlyout from '.';
-import { type ActionConnector, EditConnectorTabs, type GenericValidationResult } from '../../../../types';
-import { type AppMockRenderer, createAppMockRenderer } from '../../test_utils';
+import { ActionConnector, EditConnectorTabs, GenericValidationResult } from '../../../../types';
+import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { TECH_PREVIEW_LABEL } from '../../translations';
 
 const updateConnectorResponse = {

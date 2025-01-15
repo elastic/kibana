@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type PublishesViewMode, type ViewMode } from '@kbn/presentation-publishing';
+import { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import { EditPanelAction, type EditPanelActionApi } from './edit_panel_action';
+import { EditPanelAction, EditPanelActionApi } from './edit_panel_action';
 
 describe('Edit panel action', () => {
   let action: EditPanelAction;

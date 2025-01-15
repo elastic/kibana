@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { type HttpSetup } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import {
-  type RulesSettingsQueryDelay,
-  type RulesSettingsQueryDelayProperties,
+  RulesSettingsQueryDelay,
+  RulesSettingsQueryDelayProperties,
 } from '@kbn/alerting-plugin/common';
-import { type AsApiContract, type RewriteRequestCase } from '@kbn/actions-plugin/common';
+import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 
 const rewriteBodyRes: RewriteRequestCase<RulesSettingsQueryDelay> = ({ ...rest }: any) => ({

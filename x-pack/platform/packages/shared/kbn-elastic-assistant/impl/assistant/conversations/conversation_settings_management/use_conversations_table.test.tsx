@@ -8,13 +8,13 @@
 import { renderHook } from '@testing-library/react';
 import {
   useConversationsTable,
-  type GetConversationsListParams,
-  type ConversationTableItem,
+  GetConversationsListParams,
+  ConversationTableItem,
 } from './use_conversations_table';
 import { alertConvo, welcomeConvo, customConvo } from '../../../mock/conversation';
 import { mockActionTypes, mockConnectors } from '../../../mock/connectors';
 import { mockSystemPrompts } from '../../../mock/system_prompt';
-import { type ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 
 const mockActionTypeRegistry: ActionTypeRegistryContract = {
   has: jest

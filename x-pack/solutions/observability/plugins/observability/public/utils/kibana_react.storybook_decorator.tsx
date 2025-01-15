@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { type ComponentType } from 'react';
+import React, { ComponentType } from 'react';
 import { of } from 'rxjs';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { type AppMountParameters } from '@kbn/core-application-browser';
+import { AppMountParameters } from '@kbn/core-application-browser';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { type CoreTheme } from '@kbn/core-theme-browser';
+import { CoreTheme } from '@kbn/core-theme-browser';
 import { MemoryRouter } from 'react-router-dom';
 import { casesFeatureId, sloFeatureId } from '@kbn/observability-shared-plugin/common';
 import { PluginContext } from '../context/plugin_context/plugin_context';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
-import { type ConfigSchema } from '../plugin';
+import { ConfigSchema } from '../plugin';
 
 export function KibanaReactStorybookDecorator(Story: ComponentType) {
   const queryClient = new QueryClient();

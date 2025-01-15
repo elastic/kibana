@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type ISavedObjectsRepository, type Logger } from '@kbn/core/server';
+import { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 
 import { partiallyUpdateAdHocRun } from './lib';
 import { AdHocTaskRunningHandler } from './ad_hoc_task_running_handler';

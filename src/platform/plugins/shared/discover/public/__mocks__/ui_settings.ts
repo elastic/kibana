@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type IUiSettingsClient } from '@kbn/core/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import {
   CONTEXT_TIE_BREAKER_FIELDS_SETTING,
   DEFAULT_COLUMNS_SETTING,

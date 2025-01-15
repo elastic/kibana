@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FilterStatusButton, type FilterStatusButtonProps } from './filter_status_button';
+import { FilterStatusButton, FilterStatusButtonProps } from './filter_status_button';
 import { renderWithRouter, shallowWithRouter, MountWithReduxProvider } from '../../../lib';
 
 describe('FilterStatusButton', () => {

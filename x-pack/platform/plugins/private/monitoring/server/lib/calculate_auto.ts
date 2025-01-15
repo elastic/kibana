@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import moment, { type Duration } from 'moment';
+import moment, { Duration } from 'moment';
 
 type RoundingRule = [number | Duration, Duration];
 

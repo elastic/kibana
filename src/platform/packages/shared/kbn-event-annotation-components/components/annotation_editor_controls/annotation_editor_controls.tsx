@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiFormRow,
   EuiSwitch,
-  type EuiSwitchEvent,
+  EuiSwitchEvent,
   EuiButtonGroup,
   EuiSpacer,
   euiPaletteColorBlind,
@@ -27,11 +27,11 @@ import {
   LineStyleSettings,
   TextDecorationSetting,
   FieldPicker,
-  type FieldOption,
+  FieldOption,
   type QueryInputServices,
 } from '@kbn/visualization-ui-components';
 import type { FieldOptionValue } from '@kbn/visualization-ui-components';
-import { type DataView } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import moment from 'moment';
 import { htmlIdGenerator } from '@elastic/eui';

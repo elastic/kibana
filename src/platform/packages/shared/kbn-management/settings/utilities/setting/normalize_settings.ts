@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type SettingType, type UiSetting, type UiSettingMetadata, type Value } from '@kbn/management-settings-types';
+import { SettingType, UiSetting, UiSettingMetadata, Value } from '@kbn/management-settings-types';
 
 type RawSettings = Record<string, UiSetting<SettingType>>;
 

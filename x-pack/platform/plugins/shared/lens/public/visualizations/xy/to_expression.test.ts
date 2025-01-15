@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type Ast, fromExpression } from '@kbn/interpreter';
+import { Ast, fromExpression } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { getXyVisualization, type XYState } from './xy_visualization';
-import { type OperationDescriptor } from '../../types';
+import { getXyVisualization, XYState } from './xy_visualization';
+import { OperationDescriptor } from '../../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
@@ -18,9 +18,9 @@ import { defaultReferenceLineColor } from './color_assignment';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { LegendSize } from '@kbn/visualizations-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { type IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { type DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 
 describe('#toExpression', () => {
   const xyVisualization = getXyVisualization({

@@ -6,18 +6,18 @@
  */
 
 import * as uuid from 'uuid';
-import { type ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 import { agentPolicyRouteService } from '@kbn/fleet-plugin/common/services';
 import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
 import {
-  type AgentPolicy,
-  type CreateAgentPolicyRequest,
-  type CreateAgentPolicyResponse,
+  AgentPolicy,
+  CreateAgentPolicyRequest,
+  CreateAgentPolicyResponse,
 } from '@kbn/fleet-plugin/common';
-import { type KbnClient } from '@kbn/test';
+import { KbnClient } from '@kbn/test';
 import { UNINSTALL_TOKENS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import { type Agent as SuperTestAgent } from 'supertest';
-import { type FtrProviderContext } from '../api_integration/ftr_provider_context';
+import { Agent as SuperTestAgent } from 'supertest';
+import { FtrProviderContext } from '../api_integration/ftr_provider_context';
 
 export function warnAndSkipTest(mochaContext: Mocha.Context, log: ToolingLog) {
   log.warning(

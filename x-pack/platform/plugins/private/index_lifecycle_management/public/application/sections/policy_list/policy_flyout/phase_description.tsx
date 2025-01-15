@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { type ComponentType } from 'react';
+import React, { ComponentType } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiDescriptionList } from '@elastic/eui';
 import { PhaseIndicator } from './phase_indicator';
-import { type ActionComponentProps } from './components/types';
+import { ActionComponentProps } from './components/types';
 import { i18nTexts } from '../../edit_policy/i18n_texts';
 
 export const PhaseDescription = ({

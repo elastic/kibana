@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
-import { Redirect, type RouteChildrenProps } from 'react-router-dom';
+import React, { FC } from 'react';
+import { Redirect, RouteChildrenProps } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { type History } from 'history';
+import { History } from 'history';
 import { parse, stringify } from 'query-string';
 import { HomeRoute } from './home';
 import { WorkpadRoute, ExportWorkpadRoute } from './workpad';

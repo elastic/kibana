@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import { type Ast } from '@kbn/interpreter';
+import { Ast } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
-import { type CoreTheme, type ThemeServiceStart } from '@kbn/core/public';
+import { CoreTheme, ThemeServiceStart } from '@kbn/core/public';
 import {
-  type PaletteRegistry,
+  PaletteRegistry,
   CUSTOM_PALETTE,
-  type PaletteOutput,
-  type CustomPaletteParams,
+  PaletteOutput,
+  CustomPaletteParams,
   applyPaletteParams,
   getOverridePaletteStops,
 } from '@kbn/coloring';

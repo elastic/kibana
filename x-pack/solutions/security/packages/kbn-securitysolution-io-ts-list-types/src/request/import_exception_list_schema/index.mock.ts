@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ImportExceptionListSchemaDecoded, type ImportExceptionsListSchema } from '.';
+import { ImportExceptionListSchemaDecoded, ImportExceptionsListSchema } from '.';
 
 export const getImportExceptionsListSchemaMock = (
   listId = 'detection_list_id'

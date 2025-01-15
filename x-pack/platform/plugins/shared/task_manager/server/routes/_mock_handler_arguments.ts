@@ -6,7 +6,7 @@
  */
 
 import type { MethodKeysOf } from '@kbn/utility-types';
-import { type RequestHandlerContext, type KibanaRequest, type KibanaResponseFactory } from '@kbn/core/server';
+import { RequestHandlerContext, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { identity } from 'lodash';
 import { httpServerMock } from '@kbn/core/server/mocks';
 

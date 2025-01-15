@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type ExpressionFunctionDefinition, type ExpressionValueBoxed } from '@kbn/expressions-plugin/common';
+import { ExpressionFunctionDefinition, ExpressionValueBoxed } from '@kbn/expressions-plugin/common';
 
 export interface Cidr {
   mask: string;

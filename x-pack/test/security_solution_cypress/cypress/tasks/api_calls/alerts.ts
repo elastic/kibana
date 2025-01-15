@@ -6,8 +6,8 @@
  */
 
 import {
-  type RuleObjectId,
-  type RuleSignatureId,
+  RuleObjectId,
+  RuleSignatureId,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { rootRequest } from './common';
 

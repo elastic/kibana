@@ -8,8 +8,8 @@
  */
 
 import expect from '@kbn/expect';
-import { type ExpressionValue } from '@kbn/expressions-plugin/common';
-import { type FtrProviderContext } from '../../../functional/ftr_provider_context';
+import { ExpressionValue } from '@kbn/expressions-plugin/common';
+import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
 declare global {
   interface Window {

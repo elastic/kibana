@@ -6,15 +6,15 @@
  */
 
 import React, { Suspense, lazy } from 'react';
-import { type CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
-import { type IndexContent } from '@kbn/index-management-shared-types';
+import { IndexContent } from '@kbn/index-management-shared-types';
 
-import { type ServerlessSearchPluginStartDependencies } from '../../../types';
+import { ServerlessSearchPluginStartDependencies } from '../../../types';
 
 const IndexDetailOverview = lazy(() => import('./index_overview'));
 

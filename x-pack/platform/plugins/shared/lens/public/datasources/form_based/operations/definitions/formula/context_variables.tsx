@@ -11,12 +11,12 @@ import { partition } from 'lodash';
 import {
   buildExpressionFunction,
   buildExpression,
-  type ExpressionFunctionDefinitions,
+  ExpressionFunctionDefinitions,
 } from '@kbn/expressions-plugin/common';
 import {
-  type ExpressionFunctionFormulaInterval,
-  type ExpressionFunctionFormulaNow,
-  type ExpressionFunctionFormulaTimeRange,
+  ExpressionFunctionFormulaInterval,
+  ExpressionFunctionFormulaNow,
+  ExpressionFunctionFormulaTimeRange,
 } from '../../../../../../common/expressions/formula_context/context_fns';
 import type {
   DateHistogramIndexPatternColumn,
@@ -30,7 +30,7 @@ import type {
   OperationDefinition,
 } from '..';
 import type { ReferenceBasedIndexPatternColumn } from '../column_types';
-import { type IndexPattern } from '../../../../../types';
+import { IndexPattern } from '../../../../../types';
 import {
   INTERVAL_OP_MISSING_DATE_HISTOGRAM_TO_COMPUTE_INTERVAL,
   INTERVAL_OP_MISSING_TIME_RANGE,

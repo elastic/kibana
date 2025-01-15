@@ -13,8 +13,8 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  type EuiComboBoxOptionOption,
-  type EuiSelectOption,
+  EuiComboBoxOptionOption,
+  EuiSelectOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
@@ -23,7 +23,7 @@ import {
   TextFieldWithMessageVariables,
   useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { type ResilientActionParams } from './types';
+import { ResilientActionParams } from './types';
 
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';

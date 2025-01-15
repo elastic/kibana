@@ -10,16 +10,16 @@ import sinon from 'sinon';
 import {
   executeAlert,
   executeRatioAlert,
-  type LogThresholdAlertReporter,
+  LogThresholdAlertReporter,
 } from '@kbn/infra-plugin/server/lib/alerting/log_threshold/log_threshold_executor';
 import {
   Comparator,
-  type TimeUnit,
-  type RatioCriteria,
-  type RuleParams,
+  TimeUnit,
+  RatioCriteria,
+  RuleParams,
 } from '@kbn/infra-plugin/common/alerting/logs/log_threshold/types';
 import { DATES } from './utils/constants';
-import { type FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

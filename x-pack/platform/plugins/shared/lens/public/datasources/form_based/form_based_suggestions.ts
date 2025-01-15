@@ -30,20 +30,20 @@ import {
   getMetricOperationTypes,
   getOperationTypesForField,
   operationDefinitionMap,
-  type BaseIndexPatternColumn,
-  type OperationType,
+  BaseIndexPatternColumn,
+  OperationType,
   getExistingColumnGroups,
   isReferenced,
   getReferencedColumnIds,
   hasTermsWithManyBuckets,
-  type FormulaIndexPatternColumn,
+  FormulaIndexPatternColumn,
   updateColumnLabel,
-  type ColumnAdvancedParams,
+  ColumnAdvancedParams,
 } from './operations';
 import { hasField } from './pure_utils';
 import type { FormBasedPrivateState, FormBasedLayer } from './types';
 import { documentField } from './document_field';
-import { type OperationDefinition } from './operations/definitions';
+import { OperationDefinition } from './operations/definitions';
 import { insertOrReplaceFormulaColumn } from './operations/definitions/formula';
 
 export type IndexPatternSuggestion = DatasourceSuggestion<FormBasedPrivateState>;

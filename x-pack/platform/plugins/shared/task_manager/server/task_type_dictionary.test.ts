@@ -6,11 +6,11 @@
  */
 
 import { get } from 'lodash';
-import { type RunContext, TaskCost, type TaskDefinition, TaskPriority } from './task';
+import { RunContext, TaskCost, TaskDefinition, TaskPriority } from './task';
 import { mockLogger } from './test_utils';
 import {
   sanitizeTaskDefinitions,
-  type TaskDefinitionRegistry,
+  TaskDefinitionRegistry,
   TaskTypeDictionary,
 } from './task_type_dictionary';
 

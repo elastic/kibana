@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ApmError } from './apm_error';
-import { type Event } from './event';
+import { ApmError } from './apm_error';
+import { Event } from './event';
 import { BaseSpan } from './base_span';
 import { generateShortId } from '../utils/generate_id';
-import { type ApmFields } from './apm_fields';
+import { ApmFields } from './apm_fields';
 import { getBreakdownMetrics } from './processors/get_breakdown_metrics';
 
 export class Transaction extends BaseSpan {

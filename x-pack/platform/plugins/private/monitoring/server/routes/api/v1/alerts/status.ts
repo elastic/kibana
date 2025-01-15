@@ -6,10 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { type CommonAlertFilter } from '../../../../../common/types/alerts';
+import { CommonAlertFilter } from '../../../../../common/types/alerts';
 import { fetchStatus } from '../../../../lib/alerts/fetch_status';
 import { handleError } from '../../../../lib/errors';
-import { type RouteDependencies } from '../../../../types';
+import { RouteDependencies } from '../../../../types';
 
 export function alertStatusRoute(npRoute: RouteDependencies) {
   npRoute.router.post(

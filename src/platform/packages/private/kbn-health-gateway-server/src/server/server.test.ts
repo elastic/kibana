@@ -14,8 +14,8 @@ import {
   hapiStopMock,
   hapiRouteMock,
 } from './server.test.mocks';
-import { configServiceMock, type IConfigServiceMock } from '@kbn/config-mocks';
-import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
+import { configServiceMock, IConfigServiceMock } from '@kbn/config-mocks';
+import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import { Server } from './server';
 
 const mockConfig = {

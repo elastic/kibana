@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import { type Capabilities } from '@kbn/core-capabilities-common';
+import { Capabilities } from '@kbn/core-capabilities-common';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import {
-  type AggregateQuery,
-  type EsQueryConfig,
-  type Filter,
-  type Query,
-  type TimeRange,
+  AggregateQuery,
+  EsQueryConfig,
+  Filter,
+  Query,
+  TimeRange,
   isOfQueryType,
 } from '@kbn/es-query';
 import {
-  type PublishingSubject,
-  type StateComparators,
+  PublishingSubject,
+  StateComparators,
   apiPublishesUnifiedSearch,
   getUnchangingComparator,
 } from '@kbn/presentation-publishing';
-import { type HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
-import { type DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
+import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { partition } from 'lodash';
-import { type Visualization } from '../..';
+import { Visualization } from '../..';
 import { combineQueryAndFilters, getLayerMetaInfo } from '../../app_plugin/show_underlying_data';
-import { type TableInspectorAdapter } from '../../editor_frame_service/types';
+import { TableInspectorAdapter } from '../../editor_frame_service/types';
 
-import { type Datasource, type IndexPatternMap } from '../../types';
+import { Datasource, IndexPatternMap } from '../../types';
 import { getMergedSearchContext } from '../expressions/merged_search_context';
 import { buildObservableVariable, isTextBasedLanguage } from '../helper';
 import type {

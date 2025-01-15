@@ -9,7 +9,7 @@
 
 import { getFormulaEquivalent } from '../metrics';
 import { createFormulaColumn } from './formula';
-import { type CommonColumnsConverterArgs } from './types';
+import { CommonColumnsConverterArgs } from './types';
 
 export const convertVarianceToFormulaColumn = (
   { series, metrics, dataView }: CommonColumnsConverterArgs,

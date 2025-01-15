@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type KibanaRequest } from '@kbn/core/server';
-import { type Query, type SearchSource } from '@kbn/data-plugin/common';
-import { type AggregateQuery, type Filter } from '@kbn/es-query';
+import { KibanaRequest } from '@kbn/core/server';
+import { Query, SearchSource } from '@kbn/data-plugin/common';
+import { AggregateQuery, Filter } from '@kbn/es-query';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { type DiscoverServerPluginLocatorService, type LocatorServiceScopedClient } from '..';
-import { type DiscoverAppLocatorParams } from '../../common';
+import { DiscoverServerPluginLocatorService, LocatorServiceScopedClient } from '..';
+import { DiscoverAppLocatorParams } from '../../common';
 
 export const createLocatorServiceMock = (): DiscoverServerPluginLocatorService => {
   const mockFields = ['@timestamp', 'mock-message'];

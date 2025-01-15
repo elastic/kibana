@@ -8,8 +8,8 @@
  */
 import React from 'react';
 import { of } from 'rxjs';
-import { type UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { type Plugin } from '.';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { Plugin } from '.';
 import { createTopNav } from './top_nav_menu';
 
 export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;

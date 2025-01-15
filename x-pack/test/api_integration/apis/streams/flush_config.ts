@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { type ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
+import { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
-import { type FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { cleanUpRootStream } from './helpers/cleanup';
 import { createStreamsRepositorySupertestClient } from './helpers/repository_client';
 import { enableStreams, indexDocument } from './helpers/requests';

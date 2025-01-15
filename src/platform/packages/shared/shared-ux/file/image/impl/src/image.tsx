@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { useState } from 'react';
-import { EuiImage, type EuiImageProps } from '@elastic/eui';
+import { EuiImage, EuiImageProps } from '@elastic/eui';
 import type { FileImageMetadata } from '@kbn/shared-ux-file-types';
 import { getBlurhashSrc } from '@kbn/shared-ux-file-util';
 import classNames from 'classnames';

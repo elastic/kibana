@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ReactNode } from 'react';
+import { ReactNode } from 'react';
 
 export type FlashMessageTypes = 'success' | 'info' | 'warning' | 'error';
 export type FlashMessageColors = 'success' | 'primary' | 'warning' | 'danger';

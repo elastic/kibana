@@ -13,17 +13,17 @@ import {
   EuiSelectable,
   EuiPopover,
   EuiFilterButton,
-  type EuiSelectableOption,
+  EuiSelectableOption,
   EuiIcon,
-  type Direction,
+  Direction,
   EuiText,
   useEuiTheme,
   EuiIconTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { type UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
-import { type State } from '../table_list_view_table';
+import { State } from '../table_list_view_table';
 
 type SortItem = EuiSelectableOption & {
   column: SortColumnField;

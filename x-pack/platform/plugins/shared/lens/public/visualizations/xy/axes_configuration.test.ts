@@ -6,9 +6,9 @@
  */
 
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { type Datatable } from '@kbn/expressions-plugin/public';
+import { Datatable } from '@kbn/expressions-plugin/public';
 import { getAxesConfiguration } from './axes_configuration';
-import { type XYDataLayerConfig } from './types';
+import { XYDataLayerConfig } from './types';
 
 describe('axes_configuration', () => {
   const tables: Record<string, Datatable> = {

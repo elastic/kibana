@@ -14,7 +14,7 @@ import {
   // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 } from '../../../shareable_runtime/constants';
 import { RenderedWorkpadSchema } from './rendered_workpad_schema';
-import { type RouteInitializerDeps } from '..';
+import { RouteInitializerDeps } from '..';
 
 export function initializeZipShareableWorkpadRoute(deps: RouteInitializerDeps) {
   const { router } = deps;

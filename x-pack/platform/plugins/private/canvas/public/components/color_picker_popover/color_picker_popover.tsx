@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
-import { EuiLink, type PopoverAnchorPosition } from '@elastic/eui';
+import { EuiLink, PopoverAnchorPosition } from '@elastic/eui';
 import tinycolor from 'tinycolor2';
 import { Popover } from '../popover';
 import { ColorDot } from '../color_dot';
-import { ColorPicker, type Props as ColorPickerProps } from '../color_picker';
+import { ColorPicker, Props as ColorPickerProps } from '../color_picker';
 
 export interface Props extends ColorPickerProps {
   anchorPosition?: PopoverAnchorPosition;

@@ -9,13 +9,13 @@
 
 import {
   createStateContainer,
-  type IKbnUrlStateStorage,
+  IKbnUrlStateStorage,
   syncState,
 } from '@kbn/kibana-utils-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
-import { type QuerySetup, type QueryStart } from '../query_service';
+import { QuerySetup, QueryStart } from '../query_service';
 import { connectToQueryState } from './connect_to_query_state';
-import { type GlobalQueryStateFromUrl } from './types';
+import { GlobalQueryStateFromUrl } from './types';
 
 const GLOBAL_STATE_STORAGE_KEY = '_g';
 

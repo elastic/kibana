@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type UserMouseEvent, type UserTouchEvent } from '../types';
+import { UserMouseEvent, UserTouchEvent } from '../types';
 
 export const isTouchEvent = (e: Event | React.UIEvent<HTMLElement>): e is UserTouchEvent => {
   return 'touches' in e;

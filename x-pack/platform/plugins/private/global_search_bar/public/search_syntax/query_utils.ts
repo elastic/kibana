@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type Query } from '@elastic/eui';
-import { type FilterValues } from './types';
+import { Query } from '@elastic/eui';
+import { FilterValues } from './types';
 
 /**
  * Return a name->values map for all the field clauses of given query.

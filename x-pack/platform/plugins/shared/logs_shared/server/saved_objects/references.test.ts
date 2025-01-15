@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type SavedObjectReference } from '@kbn/core/server';
+import { SavedObjectReference } from '@kbn/core/server';
 import {
   extractSavedObjectReferences,
   resolveSavedObjectReferences,
-  type SavedObjectAttributesWithReferences,
+  SavedObjectAttributesWithReferences,
 } from './references';
 
 it('extractSavedObjectReferences extracts references using the given extractors', () => {

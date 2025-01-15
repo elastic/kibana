@@ -11,8 +11,8 @@ import fs from 'fs';
 import path from 'path';
 import { set } from '@kbn/safer-lodash-set';
 import { get } from 'lodash';
-import { type FieldMap } from '../..';
-import { createLineWriter, type LineWriter } from './lib/line_writer';
+import { FieldMap } from '../..';
+import { createLineWriter, LineWriter } from './lib/line_writer';
 
 const PLUGIN_DIR = path.resolve(path.join(__dirname, '..'));
 

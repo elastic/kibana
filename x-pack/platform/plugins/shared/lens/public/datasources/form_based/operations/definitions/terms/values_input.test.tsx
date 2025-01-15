@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { ValuesInput } from './values_input';
-import { type RenderOptions, render, screen } from '@testing-library/react';
+import { RenderOptions, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('react-use/lib/useDebounce', () => (fn: () => void) => fn());

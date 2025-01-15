@@ -11,7 +11,7 @@ import {
   getConnectorDescriptiveTitle,
   getSelectedConnectorIcon,
 } from './helpers';
-import { type ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 
 const deprecatedConnector: ActionConnector = {
   secrets: {},

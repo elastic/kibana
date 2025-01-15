@@ -8,12 +8,12 @@
  */
 
 import { css } from '@emotion/react';
-import React, { type FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 
 import {
-  type DistributiveOmit,
+  DistributiveOmit,
   EuiAvatar,
-  type EuiAvatarProps,
+  EuiAvatarProps,
   useEuiTheme,
   useEuiShadow,
 } from '@elastic/eui';

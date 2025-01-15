@@ -8,9 +8,9 @@
  */
 
 import React from 'react';
-import { type Plugin, type CoreSetup, type CoreStart } from '@kbn/core/public';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 
-import { type PluginSetup, type PluginStart, type SetupPlugins, type StartPlugins, type DataViewEditorProps } from './types';
+import { PluginSetup, PluginStart, SetupPlugins, StartPlugins, DataViewEditorProps } from './types';
 import { getEditorOpener } from './open_editor';
 import { DataViewEditor } from './components/data_view_editor';
 

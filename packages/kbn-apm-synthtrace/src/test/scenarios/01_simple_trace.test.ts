@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apm, type ApmFields, type SynthtraceGenerator, timerange } from '@kbn/apm-synthtrace-client';
+import { apm, ApmFields, SynthtraceGenerator, timerange } from '@kbn/apm-synthtrace-client';
 
 describe('simple trace', () => {
   let iterable: SynthtraceGenerator<ApmFields>;

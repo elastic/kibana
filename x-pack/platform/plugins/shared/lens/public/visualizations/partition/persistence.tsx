@@ -7,7 +7,7 @@
 
 import { LegendValue } from '@elastic/charts';
 import { cloneDeep } from 'lodash';
-import { type PieLayerState, type PieVisualizationState } from '../../../common/types';
+import { PieLayerState, PieVisualizationState } from '../../../common/types';
 
 type PersistedPieLayerState = PieLayerState & {
   showValuesInLegend?: boolean;

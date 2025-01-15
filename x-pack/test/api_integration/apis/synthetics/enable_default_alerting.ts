@@ -6,11 +6,11 @@
  */
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-import { type HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
+import { HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '@kbn/synthetics-plugin/common/constants/settings_defaults';
 
-import { type FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { addMonitorAPIHelper, omitMonitorKeys } from './add_monitor';
 

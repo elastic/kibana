@@ -9,7 +9,7 @@
 
 import { pipe } from 'fp-ts/lib/function';
 import { uniq } from 'lodash';
-import { type AdditionalFieldGroups } from '../types';
+import { AdditionalFieldGroups } from '../types';
 
 interface FieldsInfo {
   fields: string[];

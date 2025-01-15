@@ -6,8 +6,8 @@
  */
 
 import { isEmpty } from 'lodash';
-import { type ProcessorFields } from './format_synthetics_policy';
-import { ConfigKey, type HeartbeatFields, type MonitorFields } from '../../../../common/runtime_types';
+import { ProcessorFields } from './format_synthetics_policy';
+import { ConfigKey, HeartbeatFields, MonitorFields } from '../../../../common/runtime_types';
 
 interface FieldProcessor {
   add_fields: {

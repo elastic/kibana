@@ -9,7 +9,7 @@
 
 import { functionWrapper } from './utils';
 import { variableSet } from '../var_set';
-import { type ExecutionContext } from '../../../execution/types';
+import { ExecutionContext } from '../../../execution/types';
 import { createUnitTestExecutor } from '../../../test_helpers';
 import { firstValueFrom } from 'rxjs';
 

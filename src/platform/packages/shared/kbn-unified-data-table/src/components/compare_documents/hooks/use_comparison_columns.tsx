@@ -8,11 +8,11 @@
  */
 
 import {
-  type EuiDataGridColumn,
+  EuiDataGridColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  type EuiListGroupItemProps,
+  EuiListGroupItemProps,
 } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { i18n } from '@kbn/i18n';

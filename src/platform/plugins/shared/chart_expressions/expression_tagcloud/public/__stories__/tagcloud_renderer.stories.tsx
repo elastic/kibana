@@ -12,10 +12,10 @@ import { storiesOf } from '@storybook/react';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { from } from 'rxjs';
 import { tagcloudRenderer } from '../expression_renderers';
-import { type TagcloudRendererConfig } from '../../common/types';
+import { TagcloudRendererConfig } from '../../common/types';
 import { ScaleOptions, Orientation } from '../../common/constants';
 import { palettes } from '../__mocks__/palettes';
-import { type ExpressionTagcloudRendererDependencies } from '../plugin';
+import { ExpressionTagcloudRendererDependencies } from '../plugin';
 
 const config: TagcloudRendererConfig = {
   visType: 'tagcloud',

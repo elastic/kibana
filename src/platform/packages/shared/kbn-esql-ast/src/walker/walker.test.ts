@@ -9,18 +9,18 @@
 
 import { parse } from '../parser';
 import {
-  type ESQLColumn,
-  type ESQLCommand,
-  type ESQLCommandMode,
-  type ESQLCommandOption,
-  type ESQLFunction,
-  type ESQLLiteral,
-  type ESQLSource,
-  type ESQLList,
-  type ESQLTimeInterval,
-  type ESQLInlineCast,
-  type ESQLUnknownItem,
-  type ESQLIdentifier,
+  ESQLColumn,
+  ESQLCommand,
+  ESQLCommandMode,
+  ESQLCommandOption,
+  ESQLFunction,
+  ESQLLiteral,
+  ESQLSource,
+  ESQLList,
+  ESQLTimeInterval,
+  ESQLInlineCast,
+  ESQLUnknownItem,
+  ESQLIdentifier,
 } from '../types';
 import { walk, Walker } from './walker';
 

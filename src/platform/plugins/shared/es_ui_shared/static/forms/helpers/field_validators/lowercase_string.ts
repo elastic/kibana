@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ValidationFunc } from '../../hook_form_lib';
+import { ValidationFunc } from '../../hook_form_lib';
 import { isLowerCaseString } from '../../../validators/string';
-import { type ERROR_CODE } from './types';
+import { ERROR_CODE } from './types';
 
 export const lowerCaseStringField =
   (message: string) =>

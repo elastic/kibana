@@ -6,11 +6,11 @@
  */
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import { type IKibanaResponse, type KibanaRequest, type KibanaResponseFactory } from '@kbn/core-http-server';
+import { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 
-import { type CreateExceptionListRequestDecoded, createExceptionListResponse } from '../../common/api';
-import { type SiemResponseFactory, getExceptionListClient } from '../routes';
-import { type ListsRequestHandlerContext } from '../types';
+import { CreateExceptionListRequestDecoded, createExceptionListResponse } from '../../common/api';
+import { SiemResponseFactory, getExceptionListClient } from '../routes';
+import { ListsRequestHandlerContext } from '../types';
 
 export const createExceptionListHandler = async (
   context: ListsRequestHandlerContext,

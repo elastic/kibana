@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { type FlyoutParamProps } from '../../components/monitors_page/overview/overview/types';
+import { FlyoutParamProps } from '../../components/monitors_page/overview/overview/types';
 import type { TrendTable } from '../../../../../common/types';
 import type { MonitorListSortField } from '../../../../../common/runtime_types/monitor_management/sort_field';
-import { type ConfigKey } from '../../../../../common/runtime_types';
+import { ConfigKey } from '../../../../../common/runtime_types';
 
-import { type MonitorFilterState } from '../monitor_list';
+import { MonitorFilterState } from '../monitor_list';
 
 export interface MonitorOverviewPageState extends MonitorFilterState {
   perPage: number;

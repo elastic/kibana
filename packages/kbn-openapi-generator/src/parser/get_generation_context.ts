@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type OpenAPIV3 } from 'openapi-types';
+import { OpenAPIV3 } from 'openapi-types';
 import { getApiOperationsList } from './lib/get_api_operations_list';
 import { getComponents } from './lib/get_components';
-import { getImportsMap, type ImportsMap } from './lib/get_imports_map';
+import { getImportsMap, ImportsMap } from './lib/get_imports_map';
 import { normalizeSchema } from './lib/normalize_schema';
-import { type NormalizedOperation, type OpenApiDocument, type ParsedSource } from './openapi_types';
+import { NormalizedOperation, OpenApiDocument, ParsedSource } from './openapi_types';
 import { getInfo } from './lib/get_info';
 import { getCircularRefs } from './lib/get_circular_refs';
 

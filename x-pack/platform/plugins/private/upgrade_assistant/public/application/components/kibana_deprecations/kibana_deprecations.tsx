@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { withRouter, type RouteComponentProps } from 'react-router-dom';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { EuiCode, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -16,7 +16,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { DomainDeprecationDetails } from '@kbn/core/public';
 import {
   WithPrivileges,
-  type MissingPrivileges,
+  MissingPrivileges,
   SectionLoading,
   GlobalFlyout,
 } from '../../../shared_imports';
@@ -27,7 +27,7 @@ import { DeprecationsPageLoadingError, NoDeprecationsPrompt, DeprecationCount } 
 import { KibanaDeprecationsTable } from './kibana_deprecations_table';
 import {
   DeprecationDetailsFlyout,
-  type DeprecationDetailsFlyoutProps,
+  DeprecationDetailsFlyoutProps,
 } from './deprecation_details_flyout';
 
 const { useGlobalFlyout } = GlobalFlyout;

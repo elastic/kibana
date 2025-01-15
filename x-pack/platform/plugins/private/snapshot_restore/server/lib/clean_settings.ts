@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Repository } from '../../common/types';
+import { Repository } from '../../common/types';
 
 /**
  * Utility to remove empty fields ("") from repository settings

@@ -7,12 +7,12 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { fillPool, type FillPoolResult } from './fill_pool';
+import { fillPool, FillPoolResult } from './fill_pool';
 import { TaskPoolRunResult } from '../task_pool';
-import { asOk, type Result } from './result_type';
-import { type ConcreteTaskInstance, TaskStatus } from '../task';
-import { type TaskManagerRunner } from '../task_running/task_runner';
-import { type ClaimOwnershipResult } from '../queries/task_claiming';
+import { asOk, Result } from './result_type';
+import { ConcreteTaskInstance, TaskStatus } from '../task';
+import { TaskManagerRunner } from '../task_running/task_runner';
+import { ClaimOwnershipResult } from '../queries/task_claiming';
 
 jest.mock('../task_running/task_runner');
 

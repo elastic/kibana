@@ -6,11 +6,11 @@
  */
 
 import React, { useEffect } from 'react';
-import { type EuiPageHeaderProps, type EuiPageTemplateProps } from '@elastic/eui';
+import { EuiPageHeaderProps, EuiPageTemplateProps } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
 import { CERTIFICATES_ROUTE, OVERVIEW_ROUTE, SETTINGS_ROUTE } from '../../../common/constants';
-import { type ClientPluginsStart } from '../../plugin';
+import { ClientPluginsStart } from '../../plugin';
 import { useNoDataConfig } from './use_no_data_config';
 import { EmptyStateLoading } from '../components/overview/empty_state/empty_state_loading';
 import { EmptyStateError } from '../components/overview/empty_state/empty_state_error';

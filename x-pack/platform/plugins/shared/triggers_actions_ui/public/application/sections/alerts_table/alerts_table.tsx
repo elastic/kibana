@@ -18,13 +18,13 @@ import React, {
 } from 'react';
 import {
   EuiDataGrid,
-  type EuiDataGridStyle,
+  EuiDataGridStyle,
   EuiSkeletonText,
-  type EuiDataGridRefProps,
+  EuiDataGridRefProps,
   EuiFlexGroup,
-  type EuiDataGridProps,
-  type RenderCellValue,
-  type EuiDataGridCellPopoverElementProps,
+  EuiDataGridProps,
+  RenderCellValue,
+  EuiDataGridCellPopoverElementProps,
   EuiCodeBlock,
   EuiText,
   EuiIcon,
@@ -47,7 +47,7 @@ import { ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL } from './translations';
 import './alerts_table.scss';
 import { useGetToolbarVisibility } from './toolbar';
 import { InspectButtonContainer } from './toolbar/components/inspect';
-import { type SystemCellId } from './types';
+import { SystemCellId } from './types';
 import { SystemCellFactory, systemCells } from './cells';
 import { triggersActionsUiQueriesKeys } from '../../hooks/constants';
 const AlertsFlyout = lazy(() => import('./alerts_flyout'));

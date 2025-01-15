@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { type DataTableRecord } from '@kbn/discover-utils';
+import { DataTableRecord } from '@kbn/discover-utils';
 import {
   EuiAccordion,
   EuiBadge,
@@ -19,7 +19,7 @@ import {
   EuiTitle,
   EuiBasicTable,
   useGeneratedHtmlId,
-  type EuiBasicTableColumn,
+  EuiBasicTableColumn,
   EuiHeaderLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -27,9 +27,9 @@ import { orderBy } from 'lodash';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import {
   DATA_QUALITY_DETAILS_LOCATOR_ID,
-  type DataQualityDetailsLocatorParams,
+  DataQualityDetailsLocatorParams,
 } from '@kbn/deeplinks-observability';
-import { type BrowserUrlService } from '@kbn/share-plugin/public';
+import { BrowserUrlService } from '@kbn/share-plugin/public';
 import { getUnifiedDocViewerServices } from '../../plugin';
 
 type Direction = 'asc' | 'desc';

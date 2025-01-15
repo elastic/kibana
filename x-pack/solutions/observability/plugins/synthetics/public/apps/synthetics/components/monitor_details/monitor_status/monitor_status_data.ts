@@ -11,12 +11,12 @@ import {
   tint,
   transparentize,
   VISUALIZATION_COLORS,
-  type EuiThemeComputed,
-  type EuiThemeColorModeStandard,
+  EuiThemeComputed,
+  EuiThemeColorModeStandard,
   COLOR_MODES_STANDARD,
 } from '@elastic/eui';
 import type { BrushEvent } from '@elastic/charts';
-import { type MonitorStatusHeatmapBucket } from '../../../../../../common/runtime_types';
+import { MonitorStatusHeatmapBucket } from '../../../../../../common/runtime_types';
 
 export const SUCCESS_VIZ_COLOR = VISUALIZATION_COLORS[0];
 export const DANGER_VIZ_COLOR = VISUALIZATION_COLORS[VISUALIZATION_COLORS.length - 1];

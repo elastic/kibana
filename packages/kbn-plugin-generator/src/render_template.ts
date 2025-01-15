@@ -19,7 +19,7 @@ import ejs from 'ejs';
 import { Minimatch } from 'minimatch';
 
 import { snakeCase, camelCase, upperCamelCase } from './casing';
-import { type Answers } from './ask_questions';
+import { Answers } from './ask_questions';
 
 const asyncPipeline = promisify(pipeline);
 

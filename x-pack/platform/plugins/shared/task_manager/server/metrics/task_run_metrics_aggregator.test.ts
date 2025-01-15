@@ -12,7 +12,7 @@ import { TaskStatus } from '../task';
 import {
   asTaskManagerStatEvent,
   asTaskRunEvent,
-  type TaskManagerStats,
+  TaskManagerStats,
   TaskPersistence,
 } from '../task_events';
 import { TaskRunResult } from '../task_running';

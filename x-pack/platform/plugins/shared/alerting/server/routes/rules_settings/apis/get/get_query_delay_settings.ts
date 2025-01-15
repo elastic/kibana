@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { type IRouter } from '@kbn/core/server';
-import { type ILicenseState } from '../../../../lib';
-import { type AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import { IRouter } from '@kbn/core/server';
+import { ILicenseState } from '../../../../lib';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { verifyAccessAndContext } from '../../../lib';
 import { API_PRIVILEGES } from '../../../../../common';
 import { transformQueryDelaySettingsToResponseV1 } from '../../transforms';
-import { type GetQueryDelaySettingsResponseV1 } from '../../../../../common/routes/rules_settings/apis/get';
+import { GetQueryDelaySettingsResponseV1 } from '../../../../../common/routes/rules_settings/apis/get';
 
 export const getQueryDelaySettingsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,

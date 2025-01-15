@@ -14,13 +14,13 @@ import React, {
   useContext,
   useMemo,
   useState,
-  type ReactNode,
+  ReactNode,
   useEffect,
 } from 'react';
 import type { ChromeProjectNavigationNode, PanelSelectedNode } from '@kbn/core-chrome-browser';
 
 import { DefaultContent } from './default_content';
-import { type ContentProvider } from './types';
+import { ContentProvider } from './types';
 
 export interface PanelContext {
   isOpen: boolean;

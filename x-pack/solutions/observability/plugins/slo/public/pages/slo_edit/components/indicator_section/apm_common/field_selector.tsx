@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiComboBox, type EuiComboBoxOptionOption, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { debounce } from 'lodash';
-import React, { type ReactNode, useState } from 'react';
-import { Controller, type FieldPath, useFormContext } from 'react-hook-form';
-import { type Suggestion, useFetchApmSuggestions } from '../../../../../hooks/use_fetch_apm_suggestions';
-import { type CreateSLOForm } from '../../../types';
+import React, { ReactNode, useState } from 'react';
+import { Controller, FieldPath, useFormContext } from 'react-hook-form';
+import { Suggestion, useFetchApmSuggestions } from '../../../../../hooks/use_fetch_apm_suggestions';
+import { CreateSLOForm } from '../../../types';
 
 interface Option {
   label: string;

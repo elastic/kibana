@@ -7,8 +7,8 @@
 
 import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { lastRunFromState } from './last_run_status';
-import { type RuleRunMetrics } from './rule_run_metrics_store';
-import { type RuleResultServiceResults, RuleResultService } from '../monitoring/rule_result_service';
+import { RuleRunMetrics } from './rule_run_metrics_store';
+import { RuleResultServiceResults, RuleResultService } from '../monitoring/rule_result_service';
 
 const getMetrics = ({
   hasReachedAlertLimit = false,

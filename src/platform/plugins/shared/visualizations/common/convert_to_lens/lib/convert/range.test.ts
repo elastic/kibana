@@ -8,10 +8,10 @@
  */
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { type AggParamsRange, type AggParamsHistogram } from '@kbn/data-plugin/common';
+import { AggParamsRange, AggParamsHistogram } from '@kbn/data-plugin/common';
 import { convertToRangeColumn } from './range';
-import { type RangeColumn } from './types';
-import { type DataType } from '../../types';
+import { RangeColumn } from './types';
+import { DataType } from '../../types';
 import { RANGE_MODES } from '../../constants';
 
 describe('convertToRangeColumn', () => {

@@ -12,7 +12,7 @@ import React from 'react';
 import { getDefaultWorkpad } from '../../../../state/defaults';
 
 import { SimpleTemplate } from '../simple_template';
-import { type ExpressionAstExpression } from '../../../../../types';
+import { ExpressionAstExpression } from '../../../../../types';
 
 const defaultExpression: ExpressionAstExpression = {
   type: 'expression',

@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { type KibanaRequest, type KibanaResponseFactory } from '@kbn/core/server';
+import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { identity } from 'lodash';
 import type { MethodKeysOf } from '@kbn/utility-types';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { rulesClientMock, type RulesClientMock } from '../rules_client.mock';
+import { rulesClientMock, RulesClientMock } from '../rules_client.mock';
 import {
   rulesSettingsClientMock,
-  type RulesSettingsClientMock,
+  RulesSettingsClientMock,
 } from '../rules_settings/rules_settings_client.mock';
 import {
   maintenanceWindowClientMock,
-  type MaintenanceWindowClientMock,
+  MaintenanceWindowClientMock,
 } from '../maintenance_window_client.mock';
-import { type AlertsHealth, type RuleType } from '../../common';
+import { AlertsHealth, RuleType } from '../../common';
 import type { AlertingRequestHandlerContext } from '../types';
 
 export function mockHandlerArguments(

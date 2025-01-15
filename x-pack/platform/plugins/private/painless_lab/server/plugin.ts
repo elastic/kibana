@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type CoreSetup, type Logger, type Plugin, type PluginInitializerContext } from '@kbn/core/server';
+import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 
 import { PLUGIN } from '../common/constants';
 import { License } from './services';
-import { type Dependencies } from './types';
+import { Dependencies } from './types';
 import { registerExecuteRoute } from './routes/api';
 
 export class PainlessLabServerPlugin implements Plugin {

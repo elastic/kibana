@@ -7,10 +7,10 @@
 
 import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { schema, type TypeOf } from '@kbn/config-schema';
-import { type Logger } from '@kbn/core/server';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { Logger } from '@kbn/core/server';
 import nodemailerGetService from 'nodemailer/lib/well-known';
-import type SMTPConnection from 'nodemailer/lib/smtp-connection';
+import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -30,7 +30,7 @@ import {
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { AdditionalEmailServices } from '../../../common';
-import { sendEmail, JSON_TRANSPORT_SERVICE, type SendEmailOptions, type Transport } from './send_email';
+import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './send_email';
 import { portSchema } from '../lib/schemas';
 
 export type EmailConnectorType = ConnectorType<

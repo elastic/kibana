@@ -22,8 +22,8 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
-import { type CoreStart } from '@kbn/core-lifecycle-browser';
-import { type OverlayRef } from '@kbn/core-mount-utils-browser';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { i18n } from '@kbn/i18n';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import {
@@ -34,7 +34,7 @@ import {
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React, { useState } from 'react';
 import { serializeBookAttributes } from './book_state';
-import { type BookApi, type BookAttributesManager } from './types';
+import { BookApi, BookAttributesManager } from './types';
 import { saveBookAttributes } from './saved_book_library';
 
 export const openSavedBookEditor = ({

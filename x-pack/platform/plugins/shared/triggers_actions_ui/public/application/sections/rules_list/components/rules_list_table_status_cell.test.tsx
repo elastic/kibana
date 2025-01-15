@@ -10,9 +10,9 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import {
   RulesListTableStatusCell,
-  type RulesListTableStatusCellProps,
+  RulesListTableStatusCellProps,
 } from './rules_list_table_status_cell';
-import { type RuleTableItem } from '../../../../types';
+import { RuleTableItem } from '../../../../types';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 

@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
-import { type AggregateQuery, isOfAggregateQueryType, type Query } from '@kbn/es-query';
+import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
+import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import { useCallback, useEffect, useMemo } from 'react';
 import {
-  type UnifiedHistogramChartLoadEvent,
-  type UnifiedHistogramFetchStatus,
-  type UnifiedHistogramServices,
-  type UnifiedHistogramSuggestionContext,
+  UnifiedHistogramChartLoadEvent,
+  UnifiedHistogramFetchStatus,
+  UnifiedHistogramServices,
+  UnifiedHistogramSuggestionContext,
 } from '../../types';
 import type { UnifiedHistogramStateService } from '../services/state_service';
 import {

@@ -9,13 +9,13 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { type SinonSpy, spy, assert } from 'sinon';
+import { SinonSpy, spy, assert } from 'sinon';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 import { RangeControlEditor } from './range_control_editor';
-import { type ControlParams } from '../../editor_utils';
+import { ControlParams } from '../../editor_utils';
 import { getDepsMock } from '../../test_utils/get_deps_mock';
 import { getIndexPatternMock, updateComponent } from '../../test_utils';
 

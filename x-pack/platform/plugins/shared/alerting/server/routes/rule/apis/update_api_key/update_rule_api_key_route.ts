@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { type IRouter } from '@kbn/core/server';
+import { IRouter } from '@kbn/core/server';
 import {
-  type UpdateApiKeyParamsV1,
+  UpdateApiKeyParamsV1,
   updateApiKeyParamsSchemaV1,
 } from '../../../../../common/routes/rule/apis/update_api_key';
-import { type ILicenseState, RuleTypeDisabledError } from '../../../../lib';
-import { type AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
+import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
+import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
 import { verifyAccessAndContext } from '../../../lib';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 

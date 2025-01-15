@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ITagAssignmentService } from './assignment_service';
+import { ITagAssignmentService } from './assignment_service';
 
 const createAssignmentServiceMock = () => {
   const mock: jest.Mocked<ITagAssignmentService> = {

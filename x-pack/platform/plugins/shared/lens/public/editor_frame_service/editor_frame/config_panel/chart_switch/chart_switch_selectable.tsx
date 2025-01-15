@@ -8,9 +8,9 @@ import React from 'react';
 import {
   EuiSelectable,
   EuiPopoverTitle,
-  type EuiSelectableOption,
-  type EuiSelectableProps,
-  type IconType,
+  EuiSelectableOption,
+  EuiSelectableProps,
+  IconType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

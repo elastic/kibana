@@ -6,10 +6,10 @@
  */
 
 import {
-  type ISavedObjectsRepository,
-  type SavedObjectsServiceStart,
-  type SavedObjectAttributes,
-  type Logger,
+  ISavedObjectsRepository,
+  SavedObjectsServiceStart,
+  SavedObjectAttributes,
+  Logger,
 } from '@kbn/core/server';
 
 // This throws `Error: Cannot find module 'src/core/server'` if I import it via alias ¯\_(ツ)_/¯

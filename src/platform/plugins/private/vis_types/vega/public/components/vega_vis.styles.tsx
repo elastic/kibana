@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { css, Global } from '@emotion/react';
-import { useEuiTheme, type UseEuiTheme, euiScrollBarStyles } from '@elastic/eui';
+import { useEuiTheme, UseEuiTheme, euiScrollBarStyles } from '@elastic/eui';
 
 import { vegaBaseViewStyles } from '../vega_view/vega_base_view.styles';
 import { vegaVisTooltipStyles } from '../vega_view/vega_tooltip.styles';

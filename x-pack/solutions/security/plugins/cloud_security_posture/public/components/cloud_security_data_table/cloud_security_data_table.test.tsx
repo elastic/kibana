@@ -8,7 +8,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { DataViewContext } from '../../common/contexts/data_view_context';
 import { TestProvider } from '../../test/test_provider';
-import { CloudSecurityDataTable, type CloudSecurityDataTableProps } from './cloud_security_data_table';
+import { CloudSecurityDataTable, CloudSecurityDataTableProps } from './cloud_security_data_table';
 
 const mockDataView = {
   fields: {

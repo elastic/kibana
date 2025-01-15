@@ -7,8 +7,8 @@
 
 import {
   setup as mappingsEditorSetup,
-  type MappingsEditorTestBed,
-  type DomFields,
+  MappingsEditorTestBed,
+  DomFields,
   getMappingsEditorDataFactory,
 } from './mappings_editor.helpers';
 

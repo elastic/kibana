@@ -7,7 +7,7 @@
 
 import { faker } from '@faker-js/faker';
 import { sample, range, memoize } from 'lodash';
-import { type GeneratorFunction } from '../../types';
+import { GeneratorFunction } from '../../types';
 import { replaceMetricsWithShapes } from '../../lib/replace_metrics_with_shapes';
 
 export { indexTemplate } from './ecs';

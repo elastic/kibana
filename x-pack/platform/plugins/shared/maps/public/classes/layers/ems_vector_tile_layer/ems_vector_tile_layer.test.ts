@@ -7,14 +7,14 @@
 
 import { SOURCE_TYPES } from '../../../../common/constants';
 import {
-  type DataFilters,
-  type EMSVectorTileLayerDescriptor,
-  type XYZTMSSourceDescriptor,
+  DataFilters,
+  EMSVectorTileLayerDescriptor,
+  XYZTMSSourceDescriptor,
 } from '../../../../common/descriptor_types';
-import { type ILayer } from '../layer';
+import { ILayer } from '../layer';
 import { EmsVectorTileLayer } from './ems_vector_tile_layer';
-import { type DataRequestContext } from '../../../actions';
-import { type EMSTMSSource } from '../../sources/ems_tms_source';
+import { DataRequestContext } from '../../../actions';
+import { EMSTMSSource } from '../../sources/ems_tms_source';
 
 describe('EmsVectorTileLayer', () => {
   test('should correctly inject tileLayerId in meta', async () => {

@@ -11,14 +11,14 @@ import { render, screen } from '@testing-library/react';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import {
-  type DatasourcePublicAPI,
-  type FramePublicAPI,
-  type VisualizationDimensionEditorProps,
+  DatasourcePublicAPI,
+  FramePublicAPI,
+  VisualizationDimensionEditorProps,
 } from '../../../types';
-import { type DatatableVisualizationState } from '../visualization';
+import { DatatableVisualizationState } from '../visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
 import { TableDimensionEditorAdditionalSection } from './dimension_editor_addtional_section';
-import { type ColumnState } from '../../../../common/expressions';
+import { ColumnState } from '../../../../common/expressions';
 
 describe('data table dimension editor additional section', () => {
   let frame: FramePublicAPI;

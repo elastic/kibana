@@ -10,8 +10,8 @@
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { getPercentageColumnFormulaColumn } from './percentage_formula';
-import { type FormulaColumn } from '../../types';
-import { type SchemaConfig } from '../../..';
+import { FormulaColumn } from '../../types';
+import { SchemaConfig } from '../../..';
 
 const mockGetFormulaForAgg = jest.fn();
 const mockCreateFormulaColumn = jest.fn();

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type PropsWithChildren } from 'react';
+import React, { PropsWithChildren } from 'react';
 import { EuiPage, EuiPageTemplate, EuiSideNav } from '@elastic/eui';
-import { type CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 
 export interface ExampleLink {
   title: string;

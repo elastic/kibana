@@ -8,7 +8,7 @@
  */
 
 import { camelCase } from 'lodash';
-import { type ESQLRealField } from '../validation/types';
+import { ESQLRealField } from '../validation/types';
 import { fieldTypes } from '../definitions/types';
 
 export const fields: ESQLRealField[] = [

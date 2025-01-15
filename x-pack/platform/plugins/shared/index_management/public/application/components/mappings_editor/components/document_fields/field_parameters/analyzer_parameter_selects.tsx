@@ -14,12 +14,12 @@ import {
   UseField,
   SelectField,
   SuperSelectField,
-  type FieldConfig,
-  type FieldHook,
+  FieldConfig,
+  FieldHook,
   FormDataProvider,
 } from '../../../shared_imports';
-import { type SelectOption, type SuperSelectOption } from '../../../types';
-import { type MapOptionsToSubOptions } from './analyzer_parameter';
+import { SelectOption, SuperSelectOption } from '../../../types';
+import { MapOptionsToSubOptions } from './analyzer_parameter';
 
 type Options = SuperSelectOption[] | SelectOption[];
 

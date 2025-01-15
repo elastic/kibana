@@ -12,9 +12,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   ASSET_DETAILS_LOCATOR_ID,
-  type AssetDetailsLocatorParams,
+  AssetDetailsLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
-import { type SharePluginStart } from '@kbn/share-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import { IntegrationLink } from './integration_link';
 import {
   getLegacyApmHref,
@@ -25,7 +25,7 @@ import {
   getLoggingIpHref,
   getLoggingKubernetesHref,
 } from '../../../../../lib/helper';
-import { type MonitorSummary } from '../../../../../../../common/runtime_types';
+import { MonitorSummary } from '../../../../../../../common/runtime_types';
 import { UptimeSettingsContext } from '../../../../../contexts';
 
 interface IntegrationGroupProps {

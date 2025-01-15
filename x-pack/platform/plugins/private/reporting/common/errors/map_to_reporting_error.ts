@@ -17,7 +17,7 @@ import {
   UnknownError,
   VisualReportingSoftDisabledError,
 } from '@kbn/reporting-common';
-import { type ExecutionError } from '@kbn/reporting-common/types';
+import { ExecutionError } from '@kbn/reporting-common/types';
 
 export function isExecutionError(error: ExecutionError | unknown): error is ExecutionError {
   if (typeof error !== 'object' || error === null) {

@@ -6,41 +6,41 @@
  */
 
 import {
-  type Logger,
-  type SavedObject,
-  type SavedObjectReference,
-  type SavedObjectsBulkCreateObject,
-  type SavedObjectsClientContract,
+  Logger,
+  SavedObject,
+  SavedObjectReference,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsClientContract,
   SavedObjectsErrorHelpers,
-  type SavedObjectsFindResult,
+  SavedObjectsFindResult,
 } from '@kbn/core/server';
-import { type AuditLogger } from '@kbn/security-plugin/server';
+import { AuditLogger } from '@kbn/security-plugin/server';
 import {
-  type RunContext,
-  type TaskInstance,
-  type TaskManagerSetupContract,
-  type TaskManagerStartContract,
+  RunContext,
+  TaskInstance,
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
   TaskPriority,
 } from '@kbn/task-manager-plugin/server';
 import { isNumber } from 'lodash';
 import {
-  type ScheduleBackfillError,
-  type ScheduleBackfillParam,
-  type ScheduleBackfillParams,
-  type ScheduleBackfillResult,
-  type ScheduleBackfillResults,
+  ScheduleBackfillError,
+  ScheduleBackfillParam,
+  ScheduleBackfillParams,
+  ScheduleBackfillResult,
+  ScheduleBackfillResults,
 } from '../application/backfill/methods/schedule/types';
-import { type Backfill } from '../application/backfill/result/types';
+import { Backfill } from '../application/backfill/result/types';
 import {
   transformBackfillParamToAdHocRun,
   transformAdHocRunToBackfillResult,
 } from '../application/backfill/transforms';
-import { type RuleDomain } from '../application/rule/types';
-import { type AdHocRunSO } from '../data/ad_hoc_run/types';
+import { RuleDomain } from '../application/rule/types';
+import { AdHocRunSO } from '../data/ad_hoc_run/types';
 import { AdHocRunAuditAction, adHocRunAuditEvent } from '../rules_client/common/audit_events';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
-import { type TaskRunnerFactory } from '../task_runner';
-import { type RuleTypeRegistry } from '../types';
+import { TaskRunnerFactory } from '../task_runner';
+import { RuleTypeRegistry } from '../types';
 import { createBackfillError } from './lib';
 
 export const BACKFILL_TASK_TYPE = 'ad_hoc_run-backfill';

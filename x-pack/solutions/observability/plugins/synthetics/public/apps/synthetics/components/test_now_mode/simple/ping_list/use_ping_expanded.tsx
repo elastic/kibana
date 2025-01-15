@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { type Ping } from '../../../../../../../common/runtime_types';
+import { Ping } from '../../../../../../../common/runtime_types';
 
 export const useExpandedPingList = (pings: Ping[]) => {
   const [expandedRows, setExpandedRows] = useState<Record<string, JSX.Element>>({});

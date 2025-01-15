@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type * as t from 'io-ts';
-import { left, type Either, fold, right } from 'fp-ts/lib/Either';
+import * as t from 'io-ts';
+import { left, Either, fold, right } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { isObject, get } from 'lodash/fp';
 

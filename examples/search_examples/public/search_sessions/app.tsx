@@ -30,21 +30,21 @@ import {
 import { catchError, map, tap } from 'rxjs';
 import { lastValueFrom, of } from 'rxjs';
 
-import { type CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { TimeRange } from '@kbn/es-query';
-import { type NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
 import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 
 import {
   connectToQueryState,
-  type DataPublicPluginStart,
+  DataPublicPluginStart,
   isRunningResponse,
-  type QueryState,
+  QueryState,
   SearchSessionState,
 } from '@kbn/data-plugin/public';
-import { type UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { createStateContainer, useContainerState } from '@kbn/kibana-utils-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';

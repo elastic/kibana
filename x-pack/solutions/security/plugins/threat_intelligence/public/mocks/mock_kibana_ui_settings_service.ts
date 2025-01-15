@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type IUiSettingsClient } from '@kbn/core/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../constants/common';
 
 /**

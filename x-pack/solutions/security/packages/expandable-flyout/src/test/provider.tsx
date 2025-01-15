@@ -7,7 +7,7 @@
 
 import { Provider as ReduxProvider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
-import React, { type FC, type PropsWithChildren } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import {
   savePushVsOverlayToLocalStorageMiddleware,
@@ -17,7 +17,7 @@ import {
 import { ExpandableFlyoutContextProvider } from '../context';
 import { panelsReducer, uiReducer } from '../store/reducers';
 import { Context } from '../store/redux';
-import { initialState, type State } from '../store/state';
+import { initialState, State } from '../store/state';
 
 interface TestProviderProps {
   state?: State;

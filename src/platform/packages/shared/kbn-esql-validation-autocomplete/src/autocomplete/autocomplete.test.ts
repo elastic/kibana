@@ -21,11 +21,11 @@ import {
   createCustomCallbackMocks,
   createCompletionContext,
   getPolicyFields,
-  type PartialSuggestionWithText,
+  PartialSuggestionWithText,
   TIME_PICKER_SUGGESTION,
   setup,
   attachTriggerCommand,
-  type SuggestOptions,
+  SuggestOptions,
   fields,
 } from './__tests__/helpers';
 import { METADATA_FIELDS } from '../shared/constants';

@@ -6,18 +6,18 @@
  */
 
 import {
-  type ReadStreamDefinition,
-  type FieldDefinitionConfigWithName,
+  ReadStreamDefinition,
+  FieldDefinitionConfigWithName,
   isWiredReadStream,
 } from '@kbn/streams-schema';
-import { type StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { useCallback, useMemo, useState } from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
-import { type ToastsStart } from '@kbn/core-notifications-browser';
+import { ToastsStart } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
-import { type FieldStatus } from '../field_status';
+import { FieldStatus } from '../field_status';
 
 export type SchemaEditorEditingState = ReturnType<typeof useEditingState>;
 

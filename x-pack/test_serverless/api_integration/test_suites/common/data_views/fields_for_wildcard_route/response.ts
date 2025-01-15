@@ -10,7 +10,7 @@ import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/con
 import { FIELDS_FOR_WILDCARD_PATH } from '@kbn/data-views-plugin/common/constants';
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
-import { type InternalRequestHeader, type RoleCredentials } from '../../../../../shared/services';
+import { InternalRequestHeader, RoleCredentials } from '../../../../../shared/services';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

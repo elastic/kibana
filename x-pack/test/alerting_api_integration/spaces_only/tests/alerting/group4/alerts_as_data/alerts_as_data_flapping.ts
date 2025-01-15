@@ -6,12 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { type SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { ALERT_FLAPPING, ALERT_FLAPPING_HISTORY, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import { type FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { Spaces } from '../../../../scenarios';
 import {
   getEventLog,
@@ -19,7 +19,7 @@ import {
   getUrlPrefix,
   ObjectRemover,
   resetRulesSettings,
-  type TaskManagerDoc,
+  TaskManagerDoc,
 } from '../../../../../common/lib';
 import { TEST_CACHE_EXPIRATION_TIME } from '../../create_test_data';
 

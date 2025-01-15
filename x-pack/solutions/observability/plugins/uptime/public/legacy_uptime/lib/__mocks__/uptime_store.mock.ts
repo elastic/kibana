@@ -6,7 +6,7 @@
  */
 
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
-import { type AppState } from '../../state';
+import { AppState } from '../../state';
 
 /**
  * NOTE: This variable name MUST start with 'mock*' in order for

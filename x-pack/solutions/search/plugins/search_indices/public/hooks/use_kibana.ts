@@ -6,6 +6,6 @@
  */
 
 import { useKibana as _useKibana } from '@kbn/kibana-react-plugin/public';
-import { type SearchIndicesServicesContext } from '../types';
+import { SearchIndicesServicesContext } from '../types';
 
 export const useKibana = () => _useKibana<SearchIndicesServicesContext>();

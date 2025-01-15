@@ -6,11 +6,11 @@
  */
 
 import { checkParam } from '../error_missing_required';
-import { createTimeFilter, type TimerangeFilter } from '../create_query';
+import { createTimeFilter, TimerangeFilter } from '../create_query';
 import { detectReason } from './detect_reason';
 import { detectReasonFromException } from './detect_reason_from_exception';
-import { type LegacyRequest } from '../../types';
-import { type LogsResponse } from '../../../common/types/logs';
+import { LegacyRequest } from '../../types';
+import { LogsResponse } from '../../../common/types/logs';
 import { elasticsearchLogsFilter } from './logs_filter';
 
 interface LogType {

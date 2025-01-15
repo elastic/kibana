@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
+import { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
 import {
   rawAdHocRunParamsSchemaV1,
   rawAdHocRunParamsSchemaV2,

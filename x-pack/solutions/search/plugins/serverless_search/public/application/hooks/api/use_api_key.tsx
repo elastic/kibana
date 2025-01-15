@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ApiKey } from '@kbn/security-plugin-types-common';
+import { ApiKey } from '@kbn/security-plugin-types-common';
 import { useQuery } from '@tanstack/react-query';
 import { useKibanaServices } from '../use_kibana';
 

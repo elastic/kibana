@@ -6,14 +6,14 @@
  */
 
 import sinon from 'sinon';
-import { type AwaitedProperties } from '@kbn/utility-types';
-import { type CustomElement } from '../../../types';
+import { AwaitedProperties } from '@kbn/utility-types';
+import { CustomElement } from '../../../types';
 import { CUSTOM_ELEMENT_TYPE } from '../../../common/lib/constants';
 import { initializeUpdateCustomElementRoute } from './update';
 import {
   kibanaResponseFactory,
-  type RequestHandlerContext,
-  type RequestHandler,
+  RequestHandlerContext,
+  RequestHandler,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';

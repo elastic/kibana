@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { type NormalizedField, type Field as FieldType, type ParameterName } from '../../../../types';
+import { NormalizedField, Field as FieldType, ParameterName } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
 import {
   CoerceShapeParameter,

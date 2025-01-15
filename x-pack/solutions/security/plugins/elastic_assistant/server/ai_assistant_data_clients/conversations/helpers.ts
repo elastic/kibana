@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type UpdateConversationSchema } from './update_conversation';
+import { UpdateConversationSchema } from './update_conversation';
 
 export const getUpdateScript = ({
   conversation,

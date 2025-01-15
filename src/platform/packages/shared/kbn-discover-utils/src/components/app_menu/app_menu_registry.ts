@@ -8,17 +8,17 @@
  */
 
 import {
-  type AppMenuActionBase,
-  type AppMenuActionSubmenuBase,
-  type AppMenuActionSubmenuCustom,
-  type AppMenuSubmenuHorizontalRule,
-  type AppMenuActionSubmenuSecondary,
+  AppMenuActionBase,
+  AppMenuActionSubmenuBase,
+  AppMenuActionSubmenuCustom,
+  AppMenuSubmenuHorizontalRule,
+  AppMenuActionSubmenuSecondary,
   AppMenuActionType,
-  type AppMenuItem,
-  type AppMenuItemCustom,
-  type AppMenuItemPrimary,
-  type AppMenuItemSecondary,
-  type AppMenuSubmenuActionCustom,
+  AppMenuItem,
+  AppMenuItemCustom,
+  AppMenuItemPrimary,
+  AppMenuItemSecondary,
+  AppMenuSubmenuActionCustom,
 } from './types';
 
 export class AppMenuRegistry {

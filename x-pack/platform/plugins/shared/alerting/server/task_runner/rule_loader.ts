@@ -12,15 +12,15 @@ import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { type RunRuleParams, type TaskRunnerContext } from './types';
+import { RunRuleParams, TaskRunnerContext } from './types';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import {
   RuleExecutionStatusErrorReasons,
-  type RawRule,
-  type RuleTypeRegistry,
-  type RuleTypeParamsValidator,
+  RawRule,
+  RuleTypeRegistry,
+  RuleTypeParamsValidator,
 } from '../types';
-import { MONITORING_HISTORY_LIMIT, type RuleTypeParams } from '../../common';
+import { MONITORING_HISTORY_LIMIT, RuleTypeParams } from '../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { getAlertFromRaw } from '../rules_client/lib';
 

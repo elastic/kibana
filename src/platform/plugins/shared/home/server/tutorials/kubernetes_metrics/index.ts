@@ -15,8 +15,8 @@ import {
   onPremCloudInstructions,
 } from '../instructions/metricbeat_instructions';
 import {
-  type TutorialContext,
-  type TutorialSchema,
+  TutorialContext,
+  TutorialSchema,
 } from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function kubernetesMetricsSpecProvider(context: TutorialContext): TutorialSchema {

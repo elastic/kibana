@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { type estypes } from '@elastic/elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
 import {
-  type ConversationResponse,
-  type Replacements,
+  ConversationResponse,
+  Replacements,
   replaceOriginalValuesWithUuidValues,
 } from '@kbn/elastic-assistant-common';
-import { type EsConversationSchema } from './types';
+import { EsConversationSchema } from './types';
 
 export const transformESSearchToConversations = (
   response: estypes.SearchResponse<EsConversationSchema>

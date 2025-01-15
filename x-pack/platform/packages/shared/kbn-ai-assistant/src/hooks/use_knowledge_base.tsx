@@ -9,7 +9,7 @@ import { useMemo, useState } from 'react';
 import {
   type AbortableAsyncState,
   useAbortableAsync,
-  type APIReturnType,
+  APIReturnType,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { useKibana } from './use_kibana';
 import { useAIAssistantAppService } from './use_ai_assistant_app_service';

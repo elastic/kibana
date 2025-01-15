@@ -9,16 +9,16 @@
 
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import {
-  type CoreSetup,
+  CoreSetup,
   mergeSavedObjectMigrationMaps,
-  type SavedObjectMigrationMap,
+  SavedObjectMigrationMap,
 } from '@kbn/core/server';
 
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { VISUALIZE_APP_NAME } from '@kbn/visualizations-plugin/common/constants';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 import { ANNOTATIONS_LISTING_VIEW_ID } from '../common/constants';
-import { type EventAnnotationGroupSavedObjectAttributes } from '../common';
+import { EventAnnotationGroupSavedObjectAttributes } from '../common';
 
 export function setupSavedObjects(coreSetup: CoreSetup) {
   coreSetup.savedObjects.registerType({

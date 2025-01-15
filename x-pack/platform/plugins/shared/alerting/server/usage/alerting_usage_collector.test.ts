@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { registerAlertingUsageCollector } from './alerting_usage_collector';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { type ConcreteTaskInstance, type TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { ConcreteTaskInstance, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 const taskManagerStart = taskManagerMock.createStart();
 
 beforeEach(() => jest.resetAllMocks());

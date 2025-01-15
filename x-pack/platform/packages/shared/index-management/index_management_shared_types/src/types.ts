@@ -6,16 +6,16 @@
  */
 
 import {
-  type IlmExplainLifecycleLifecycleExplain,
-  type HealthStatus,
-  type IndicesStatsIndexMetadataState,
-  type Uuid,
+  IlmExplainLifecycleLifecycleExplain,
+  HealthStatus,
+  IndicesStatsIndexMetadataState,
+  Uuid,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ScopedHistory } from '@kbn/core-application-browser';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
-import { type ExtensionsSetup } from './services/extensions_service';
-import { type PublicApiServiceSetup } from './services/public_api_service';
+import { ExtensionsSetup } from './services/extensions_service';
+import { PublicApiServiceSetup } from './services/public_api_service';
 
 export type IndexManagementLocatorParams = SerializableRecord &
   (

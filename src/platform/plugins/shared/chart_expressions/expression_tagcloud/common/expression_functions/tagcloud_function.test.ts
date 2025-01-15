@@ -10,10 +10,10 @@
 import { tagcloudFunction } from './tagcloud_function';
 
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
-import { type ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
-import { type Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
+import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { ScaleOptions, Orientation } from '../constants';
-import { type ExecutionContext } from '@kbn/expressions-plugin/common';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 
 type Arguments = Parameters<ReturnType<typeof tagcloudFunction>['fn']>[1];
 

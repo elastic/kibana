@@ -8,7 +8,7 @@
  */
 
 import { EcsFlat } from '@elastic/ecs';
-import { type EcsMetadata, type FieldMap } from './types';
+import { EcsMetadata, FieldMap } from './types';
 
 const EXCLUDED_TYPES = ['constant_keyword'];
 

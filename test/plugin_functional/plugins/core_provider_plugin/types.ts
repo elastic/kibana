@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type CoreSetup, type CoreStart } from '@kbn/core/public';
+import { CoreSetup, CoreStart } from '@kbn/core/public';
 
 declare global {
   interface Window {

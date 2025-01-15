@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type IRouter } from '@kbn/core/server';
-import { type Logger } from '@kbn/logging';
+import { IRouter } from '@kbn/core/server';
+import { Logger } from '@kbn/logging';
 import { setPostCloudSolutionDataRoute } from './set_cloud_data_route';
-import { type CloudRequestHandlerContext } from './types';
+import { CloudRequestHandlerContext } from './types';
 import { setElasticsearchRoute } from './elasticsearch_route';
 import { setGetCloudSolutionDataRoute } from './get_cloud_data_route';
 

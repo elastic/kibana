@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { type FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 
 import { UseField } from '../../form';
 
 import {
   DescribedFormRow,
-  type Props as DescribedFormRowProps,
-  type SwitchProps,
+  Props as DescribedFormRowProps,
+  SwitchProps,
 } from './described_form_row';
 
 type Props = Omit<DescribedFormRowProps, 'switchProps'> & {

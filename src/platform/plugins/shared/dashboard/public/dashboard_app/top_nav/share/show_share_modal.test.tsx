@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Capabilities } from '@kbn/core/public';
-import { convertPanelMapToPanelsArray, type DashboardContainerInput } from '../../../../common';
-import { type DashboardLocatorParams } from '../../../dashboard_container';
+import { Capabilities } from '@kbn/core/public';
+import { convertPanelMapToPanelsArray, DashboardContainerInput } from '../../../../common';
+import { DashboardLocatorParams } from '../../../dashboard_container';
 
 import { shareService } from '../../../services/kibana_services';
-import { showPublicUrlSwitch, ShowShareModal, type ShowShareModalProps } from './show_share_modal';
+import { showPublicUrlSwitch, ShowShareModal, ShowShareModalProps } from './show_share_modal';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
 
 describe('showPublicUrlSwitch', () => {

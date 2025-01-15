@@ -6,8 +6,8 @@
  */
 
 import { sample, random, times, sum } from 'lodash';
-import { type Moment } from 'moment';
-import { type EventFunction, type ParsedSchedule, type Schedule } from '../../../../../types';
+import { Moment } from 'moment';
+import { EventFunction, ParsedSchedule, Schedule } from '../../../../../types';
 import { MESSAGE_PROCESSOR_HOSTS } from '../../../common/constants';
 import { createBaseEvent } from './create_base_event';
 import { createLatencyHistogram } from './create_latency_histogram';

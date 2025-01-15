@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type AsApiContract } from '@kbn/actions-plugin/common';
+import { AsApiContract } from '@kbn/actions-plugin/common';
 import {
-  type RuleExecutionStatus,
-  type RuleMonitoring,
-  type Rule,
-  type RuleLastRun,
-  type RuleAction,
-  type RuleType,
+  RuleExecutionStatus,
+  RuleMonitoring,
+  Rule,
+  RuleLastRun,
+  RuleAction,
+  RuleType,
 } from '../../common';
 
 function transformAction(input: AsApiContract<RuleAction>): RuleAction {

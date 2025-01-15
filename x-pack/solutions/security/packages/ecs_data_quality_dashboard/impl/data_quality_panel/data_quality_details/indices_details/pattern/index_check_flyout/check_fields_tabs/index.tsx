@@ -8,15 +8,15 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
-  type EuiButtonGroup,
-  type EuiButtonGroupProps,
+  EuiButtonGroup,
+  EuiButtonGroupProps,
   EuiFlexGroup,
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { type CheckFieldsTab, type CheckFieldsTabId } from './types';
+import { CheckFieldsTab, CheckFieldsTabId } from './types';
 
 const styles = {
   tabFlexGroup: css({

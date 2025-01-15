@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ErrorBudget } from '../../domain/models';
+import { ErrorBudget } from '../../domain/models';
 
 export function createErrorBudget(params: Partial<ErrorBudget> = {}): ErrorBudget {
   return {

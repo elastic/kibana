@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty } from '@elastic/eui';
 import {
   ConfigKey,
-  type EncryptedSyntheticsSavedMonitor,
+  EncryptedSyntheticsSavedMonitor,
 } from '../../../../../../../common/runtime_types';
 
 export const BulkOperations = ({

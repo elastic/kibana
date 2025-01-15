@@ -10,17 +10,17 @@
 import expect from '@kbn/expect';
 
 import {
-  type CreateExceptionListSchema,
+  CreateExceptionListSchema,
   ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import {
   DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL,
-  type RuleReferencesSchema,
+  RuleReferencesSchema,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_exceptions';
 
-import { type FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 import { getSimpleRule, createExceptionList } from '../../../../utils';
 import {

@@ -9,7 +9,7 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiComboBox,
-  type EuiComboBoxOptionOption,
+  EuiComboBoxOptionOption,
   EuiForm,
   EuiFormRow,
   EuiPopover,
@@ -18,10 +18,10 @@ import { i18n } from '@kbn/i18n';
 
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { isRight } from 'fp-ts/lib/Either';
-import { type SloRule } from '../../hooks/use_fetch_slos_with_burn_rate_rules';
-import { type Dependency, DependencyRT } from '../../../common/types';
+import { SloRule } from '../../hooks/use_fetch_slos_with_burn_rate_rules';
+import { Dependency, DependencyRT } from '../../../common/types';
 import {
   ALERT_ACTION,
   HIGH_PRIORITY_ACTION,

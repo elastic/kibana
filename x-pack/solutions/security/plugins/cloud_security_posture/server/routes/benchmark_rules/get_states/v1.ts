@@ -5,11 +5,11 @@
  * 2.0.
  */
 import {
-  type ISavedObjectsRepository,
-  type SavedObjectsClientContract,
+  ISavedObjectsRepository,
+  SavedObjectsClientContract,
 } from '@kbn/core-saved-objects-api-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { buildMutedRulesFilter } from '@kbn/cloud-security-posture-common';
 import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import type { CspSettings } from '@kbn/cloud-security-posture-common/schema/rules/v4';

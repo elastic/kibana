@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { setup, type SetupResult, getProcessorValue, setupEnvironment } from './processor.helpers';
+import { setup, SetupResult, getProcessorValue, setupEnvironment } from './processor.helpers';
 
 const COMMUNITY_ID_TYPE = 'community_id';
 

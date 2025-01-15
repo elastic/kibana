@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { FieldSelect, type FieldSelectProps } from './field_select';
-import { type RenderOptions, render, screen, within } from '@testing-library/react';
+import { FieldSelect, FieldSelectProps } from './field_select';
+import { RenderOptions, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 describe('Layer Data Panel', () => {

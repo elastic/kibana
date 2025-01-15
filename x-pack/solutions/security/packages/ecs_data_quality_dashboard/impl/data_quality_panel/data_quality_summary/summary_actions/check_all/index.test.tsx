@@ -17,7 +17,7 @@ import {
 } from '../../../mock/test_providers/test_providers';
 import { mockUnallowedValuesResponse } from '../../../mock/unallowed_values/mock_unallowed_values';
 import { CANCEL, CHECK_ALL } from '../../../translations';
-import { type OnCheckCompleted, type UnallowedValueRequestItem } from '../../../types';
+import { OnCheckCompleted, UnallowedValueRequestItem } from '../../../types';
 import { CheckAll } from '.';
 import { EMPTY_STAT } from '../../../constants';
 

@@ -8,13 +8,13 @@
 import Fs from 'fs/promises';
 import Path from 'path';
 import fastGlob from 'fast-glob';
-import $, { load, type Cheerio, type AnyNode } from 'cheerio';
+import $, { load, Cheerio, AnyNode } from 'cheerio';
 import { partition } from 'lodash';
-import { type ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 import pLimit from 'p-limit';
-import { type ScriptInferenceClient } from '../util/kibana_client';
+import { ScriptInferenceClient } from '../util/kibana_client';
 import { convertToMarkdownPrompt } from './prompts/convert_to_markdown';
-import { bindOutput, type PromptCaller } from './utils/output_executor';
+import { bindOutput, PromptCaller } from './utils/output_executor';
 
 /**
  * The pages that will be extracted but only used as context

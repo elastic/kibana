@@ -17,7 +17,7 @@ import {
   EuiToolTip,
   EuiButtonIcon,
   EuiEmptyPrompt,
-  type Criteria,
+  Criteria,
   EuiButtonEmpty,
   EuiBadge,
   EuiPageTemplate,
@@ -36,9 +36,9 @@ import {
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import './actions_connectors_list.scss';
 import {
-  type ActionConnector,
-  type ActionConnectorTableItem,
-  type ActionTypeIndex,
+  ActionConnector,
+  ActionConnectorTableItem,
+  ActionTypeIndex,
   EditConnectorTabs,
 } from '../../../../types';
 import { EmptyConnectorsPrompt } from '../../../components/prompts/empty_connectors_prompt';

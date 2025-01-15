@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type RuleMonitoring, type RuleMonitoringHistory } from '../types';
+import { RuleMonitoring, RuleMonitoringHistory } from '../types';
 import {
   getExecutionDurationPercentiles,
   updateMonitoring,

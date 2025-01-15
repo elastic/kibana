@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type BaseParams } from './types';
+import { BaseParams } from './types';
 import { MonitorDetailsType, MonitorLocationsType } from '../../../../common/runtime_types';
-import { type QueryParams } from '../actions/types';
+import { QueryParams } from '../actions/types';
 import { apiService } from './utils';
 import { API_URLS } from '../../../../common/constants';
 

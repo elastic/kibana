@@ -15,7 +15,7 @@ import { unifiedHistogramServicesMock } from '../__mocks__/services';
 import { getLensVisMock } from '../__mocks__/lens_vis';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { createDefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import { UnifiedHistogramFetchStatus, type UnifiedHistogramInput$ } from '../types';
+import { UnifiedHistogramFetchStatus, UnifiedHistogramInput$ } from '../types';
 import { act } from 'react-dom/test-utils';
 import * as buildBucketInterval from './utils/build_bucket_interval';
 import * as useTimeRange from './hooks/use_time_range';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type LogSource, type LogSourcesService } from './types';
+import { LogSource, LogSourcesService } from './types';
 import { flattenLogSources } from './utils';
 
 const LOG_SOURCES: LogSource[] = [{ indexPattern: 'logs-*-*' }];

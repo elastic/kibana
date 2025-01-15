@@ -26,7 +26,7 @@ import {
   ENDPOINT_TRUSTED_APPS_LIST_NAME,
 } from '@kbn/securitysolution-list-constants';
 
-import { type ExceptionListSchema } from '.';
+import { ExceptionListSchema } from '.';
 
 export const getExceptionListSchemaMock = (): ExceptionListSchema => ({
   _version: _VERSION,

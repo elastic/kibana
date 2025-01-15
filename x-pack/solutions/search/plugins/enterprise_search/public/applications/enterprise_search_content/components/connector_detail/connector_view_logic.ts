@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { kea, type MakeLogicType } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
-import { type Connector, type IngestionMethod, type IngestPipelineParams } from '@kbn/search-connectors';
+import { Connector, IngestionMethod, IngestPipelineParams } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../common/types/api';
 
 import {
   CachedFetchConnectorByIdApiLogic,
-  type CachedFetchConnectorByIdApiLogicActions,
-  type CachedFetchConnectorByIdApiLogicValues,
+  CachedFetchConnectorByIdApiLogicActions,
+  CachedFetchConnectorByIdApiLogicValues,
 } from '../../api/connector/cached_fetch_connector_by_id_api_logic';
 
 import {
-  type GenerateConnectorApiKeyApiLogicActions,
+  GenerateConnectorApiKeyApiLogicActions,
   GenerateConnectorApiKeyApiLogic,
 } from '../../api/connector/generate_connector_api_key_api_logic';
 import {
   ConnectorConfigurationApiLogic,
-  type PostConnectorConfigurationActions,
+  PostConnectorConfigurationActions,
 } from '../../api/connector/update_connector_configuration_api_logic';
-import { type FetchIndexActions, FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
-import { type ElasticsearchViewIndex } from '../../types';
+import { FetchIndexActions, FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
+import { ElasticsearchViewIndex } from '../../types';
 
 import {
   hasAdvancedFilteringFeature,
@@ -41,10 +41,10 @@ import {
 } from '../../utils/connector_status_helpers';
 
 import {
-  type ConnectorNameAndDescriptionActions,
+  ConnectorNameAndDescriptionActions,
   ConnectorNameAndDescriptionLogic,
 } from './connector_name_and_description_logic';
-import { DeploymentLogic, type DeploymentLogicActions } from './deployment_logic';
+import { DeploymentLogic, DeploymentLogicActions } from './deployment_logic';
 
 export interface ConnectorViewActions {
   fetchConnector: CachedFetchConnectorByIdApiLogicActions['makeRequest'];

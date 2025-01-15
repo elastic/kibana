@@ -6,18 +6,18 @@
  */
 
 import {
-  type ExternalServiceAPI,
-  type GetChoicesHandlerArgs,
-  type GetChoicesResponse,
-  type GetCommonFieldsHandlerArgs,
-  type GetCommonFieldsResponse,
-  type GetIncidentApiHandlerArgs,
-  type HandshakeApiHandlerArgs,
-  type Incident,
-  type PushToServiceApiHandlerArgs,
-  type PushToServiceResponse,
-  type CloseIncidentApiHandlerArgs,
-  type ExternalServiceIncidentResponse,
+  ExternalServiceAPI,
+  GetChoicesHandlerArgs,
+  GetChoicesResponse,
+  GetCommonFieldsHandlerArgs,
+  GetCommonFieldsResponse,
+  GetIncidentApiHandlerArgs,
+  HandshakeApiHandlerArgs,
+  Incident,
+  PushToServiceApiHandlerArgs,
+  PushToServiceResponse,
+  CloseIncidentApiHandlerArgs,
+  ExternalServiceIncidentResponse,
 } from './types';
 
 const handshakeHandler = async ({ externalService, params }: HandshakeApiHandlerArgs) => {};

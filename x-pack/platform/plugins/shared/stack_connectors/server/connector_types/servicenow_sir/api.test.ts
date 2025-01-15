@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import { externalServiceSIRMock, sirParams } from '../lib/servicenow/mocks';
-import { type ExternalServiceSIR, ObservableTypes } from '../lib/servicenow/types';
+import { ExternalServiceSIR, ObservableTypes } from '../lib/servicenow/types';
 import { api, combineObservables, formatObservables, prepareParams } from './api';
 let mockedLogger: jest.Mocked<Logger>;
 

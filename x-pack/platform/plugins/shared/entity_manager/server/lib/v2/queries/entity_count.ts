@@ -7,7 +7,7 @@
 
 import { compact, last } from 'lodash';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { type EntitySourceDefinition } from '../types';
+import { EntitySourceDefinition } from '../types';
 import { asKeyword } from './utils';
 
 const fromCommand = ({ sources }: { sources: EntitySourceDefinition[] }) => {

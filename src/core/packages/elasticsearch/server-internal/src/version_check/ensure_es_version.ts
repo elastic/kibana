@@ -16,7 +16,7 @@ import {
   interval,
   of,
   from,
-  type Observable,
+  Observable,
   BehaviorSubject,
   map,
   distinctUntilChanged,

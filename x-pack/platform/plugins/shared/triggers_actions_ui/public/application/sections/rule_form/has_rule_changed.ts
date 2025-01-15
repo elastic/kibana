@@ -7,8 +7,8 @@
 
 import deepEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
-import { type RuleTypeParams } from '../../../types';
-import { type InitialRule } from './rule_reducer';
+import { RuleTypeParams } from '../../../types';
+import { InitialRule } from './rule_reducer';
 
 const DEEP_COMPARE_FIELDS = ['tags', 'schedule', 'actions'];
 

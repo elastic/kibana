@@ -17,7 +17,7 @@ import {
 } from '@kbn/securitysolution-exceptions-common/api';
 
 import type { ListsPluginRouter } from '../types';
-import { type ConfigType } from '../config';
+import { ConfigType } from '../config';
 
 import { buildSiemResponse, getExceptionListClient } from './utils';
 

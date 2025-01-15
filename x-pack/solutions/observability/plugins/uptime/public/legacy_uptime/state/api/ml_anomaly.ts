@@ -7,19 +7,19 @@
 
 import moment from 'moment';
 import {
-  type DataRecognizerConfigResponse,
-  type JobExistResult,
-  type MlCapabilitiesResponse,
+  DataRecognizerConfigResponse,
+  JobExistResult,
+  MlCapabilitiesResponse,
 } from '@kbn/ml-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { apiService } from './utils';
-import { type AnomalyRecords, type AnomalyRecordsParams } from '../actions';
+import { AnomalyRecords, AnomalyRecordsParams } from '../actions';
 import { API_URLS, ML_MODULE_ID } from '../../../../common/constants';
 import {
-  type CreateMLJobSuccess,
-  type DeleteJobResults,
-  type HeartbeatIndicesParam,
-  type MonitorIdParam,
+  CreateMLJobSuccess,
+  DeleteJobResults,
+  HeartbeatIndicesParam,
+  MonitorIdParam,
 } from '../actions/types';
 import { getJobPrefix, getMLJobId } from '../../../../common/lib/ml';
 

@@ -9,7 +9,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { createConfig } from './create_config';
-import { type ConfigType } from './schema';
+import { ConfigType } from './schema';
 
 describe('createConfig$', () => {
   let logger: jest.Mocked<Logger>;

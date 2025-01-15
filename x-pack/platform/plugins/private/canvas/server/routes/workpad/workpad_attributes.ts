@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type CanvasWorkpad } from '../../../types';
+import { CanvasWorkpad } from '../../../types';
 
 export type WorkpadAttributes = Pick<CanvasWorkpad, Exclude<keyof CanvasWorkpad, 'id'>> & {
   '@timestamp': string;

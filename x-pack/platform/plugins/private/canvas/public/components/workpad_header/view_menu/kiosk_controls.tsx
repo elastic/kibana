@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type ReactNode, useCallback } from 'react';
+import React, { ReactNode, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiButtonIcon,

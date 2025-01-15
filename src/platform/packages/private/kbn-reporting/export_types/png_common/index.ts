@@ -8,7 +8,7 @@
  */
 
 import type { BaseParams, BasePayload, LocatorParams } from '@kbn/reporting-common/types';
-import { type LayoutParams } from '@kbn/screenshotting-plugin/common';
+import { LayoutParams } from '@kbn/screenshotting-plugin/common';
 
 export * from './constants';
 

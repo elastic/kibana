@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useMemo, useCallback, type FormEvent } from 'react';
+import React, { useState, useMemo, useCallback, FormEvent } from 'react';
 import {
   EuiBadge,
   EuiIcon,
@@ -24,15 +24,15 @@ import {
   EuiFlexItem,
   EuiText,
   EuiCheckbox,
-  type EuiCheckboxProps,
+  EuiCheckboxProps,
 } from '@elastic/eui';
 import { useStyles } from './styles';
 import {
-  type ControlGeneralViewSelectorDeps,
-  type ControlFormErrorMap,
+  ControlGeneralViewSelectorDeps,
+  ControlFormErrorMap,
   SelectorConditionsMap,
 } from '../../types';
-import { type Selector, type SelectorCondition } from '../../../common';
+import { Selector, SelectorCondition } from '../../../common';
 import {
   getSelectorConditions,
   camelToSentenceCase,

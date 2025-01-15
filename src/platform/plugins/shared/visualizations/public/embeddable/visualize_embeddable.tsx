@@ -11,13 +11,13 @@ import { EuiEmptyPrompt, EuiFlexGroup, EuiLoadingChart, EuiText } from '@elastic
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { type EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
+import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import {
-  type EmbeddableStart,
-  type ReactEmbeddableFactory,
+  EmbeddableStart,
+  ReactEmbeddableFactory,
   SELECT_RANGE_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
-import { type ExpressionRendererParams, useExpressionRenderer } from '@kbn/expressions-plugin/public';
+import { ExpressionRendererParams, useExpressionRenderer } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { dispatchRenderComplete } from '@kbn/kibana-utils-plugin/public';
 import { apiPublishesSettings } from '@kbn/presentation-containers';
@@ -49,11 +49,11 @@ import { getExpressionRendererProps } from './get_expression_renderer_props';
 import { saveToLibrary } from './save_to_library';
 import { deserializeState, serializeState } from './state';
 import {
-  type ExtraSavedObjectProperties,
-  type VisualizeApi,
-  type VisualizeOutputState,
-  type VisualizeRuntimeState,
-  type VisualizeSerializedState,
+  ExtraSavedObjectProperties,
+  VisualizeApi,
+  VisualizeOutputState,
+  VisualizeRuntimeState,
+  VisualizeSerializedState,
   isVisualizeSavedObjectState,
 } from './types';
 import { initializeEditApi } from './initialize_edit_api';

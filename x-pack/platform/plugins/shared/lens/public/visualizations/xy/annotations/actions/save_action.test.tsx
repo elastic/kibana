@@ -8,18 +8,18 @@
 import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
-import { type EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import {
-  type XYByValueAnnotationLayerConfig,
-  type XYAnnotationLayerConfig,
-  type XYState,
-  type XYByReferenceAnnotationLayerConfig,
+  XYByValueAnnotationLayerConfig,
+  XYAnnotationLayerConfig,
+  XYState,
+  XYByReferenceAnnotationLayerConfig,
 } from '../../types';
 import { onSave, SaveModal } from './save_action';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import {
-  type EventAnnotationGroupConfig,
-  type PointInTimeEventAnnotationConfig,
+  EventAnnotationGroupConfig,
+  PointInTimeEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
 import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 import { taggingApiMock } from '@kbn/saved-objects-tagging-plugin/public/mocks';

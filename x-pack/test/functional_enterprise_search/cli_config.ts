@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import { commonFunctionalUIServices } from '@kbn/ftr-common-functional-ui-services';
 import { EnterpriseSearchCypressCliTestRunner } from './runner';

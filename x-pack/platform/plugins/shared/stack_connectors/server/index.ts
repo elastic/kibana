@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type PluginConfigDescriptor, type PluginInitializerContext } from '@kbn/core/server';
-import { configSchema, type ConfigSchema } from './config';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import { configSchema, ConfigSchema } from './config';
 import { SlackApiParamsSchema } from '../common/slack_api/schema';
 
 export { ParamsSchema as SlackParamsSchema } from './connector_types/slack';

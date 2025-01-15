@@ -6,16 +6,15 @@
  */
 
 import {
-  type EuiDataGridColumn,
-  type EuiTableActionsColumnType,
-  type EuiTableComputedColumnType,
-  type EuiTableFieldDataColumnType,
+  EuiDataGridColumn,
+  EuiTableActionsColumnType,
+  EuiTableComputedColumnType,
+  EuiTableFieldDataColumnType,
   useDataGridColumnSelector,
 } from '@elastic/eui';
-import type React from 'react';
-import { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '../../../../common/lib/kibana';
-import { type RuleTableItem } from '../../../../types';
+import { RuleTableItem } from '../../../../types';
 
 type RulesListTableColumns =
   | EuiTableFieldDataColumnType<RuleTableItem>

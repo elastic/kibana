@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { visTypeAliasRegistry, type VisTypeAlias } from './vis_type_alias_registry';
+import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
 import { BaseVisType } from './base_vis_type';
-import { type VisTypeDefinition } from './types';
-import { type VisGroups } from './vis_groups_enum';
-import { type VisParams } from '../../common';
+import { VisTypeDefinition } from './types';
+import { VisGroups } from './vis_groups_enum';
+import { VisParams } from '../../common';
 
 /**
  * Vis Types Service

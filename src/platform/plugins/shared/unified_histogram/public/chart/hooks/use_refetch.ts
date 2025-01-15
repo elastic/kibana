@@ -14,11 +14,11 @@ import { cloneDeep, isEqual } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
 import { filter, share, tap } from 'rxjs';
 import {
-  type UnifiedHistogramBreakdownContext,
-  type UnifiedHistogramChartContext,
-  type UnifiedHistogramHitsContext,
-  type UnifiedHistogramInput$,
-  type UnifiedHistogramRequestContext,
+  UnifiedHistogramBreakdownContext,
+  UnifiedHistogramChartContext,
+  UnifiedHistogramHitsContext,
+  UnifiedHistogramInput$,
+  UnifiedHistogramRequestContext,
 } from '../../types';
 
 export const useRefetch = ({

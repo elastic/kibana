@@ -8,11 +8,11 @@
 import { ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 import {
-  type SortItem,
-  type TimelineEventsAllOptions,
+  SortItem,
+  TimelineEventsAllOptions,
 } from '../../../../../../common/api/search_strategy/timeline/events_all';
 
-import { type TimerangeFilter, type TimerangeInput } from '../../../../../../common/search_strategy';
+import { TimerangeFilter, TimerangeInput } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { getPreferredEsType } from './helpers';
 

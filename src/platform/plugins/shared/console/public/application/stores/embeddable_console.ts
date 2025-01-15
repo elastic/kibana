@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Reducer } from 'react';
+import { Reducer } from 'react';
 import { produce } from 'immer';
 import { identity } from 'fp-ts/lib/function';
 
 import {
   EmbeddableConsoleView,
-  type EmbeddedConsoleAction,
-  type EmbeddedConsoleStore,
+  EmbeddedConsoleAction,
+  EmbeddedConsoleStore,
 } from '../../types/embeddable_console';
 
 export const initialValue: EmbeddedConsoleStore = produce<EmbeddedConsoleStore>(

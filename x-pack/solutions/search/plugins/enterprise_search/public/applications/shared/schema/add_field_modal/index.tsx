@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type ChangeEvent, type FormEvent, useEffect, useState } from 'react';
+import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 
 import {
   EuiButton,

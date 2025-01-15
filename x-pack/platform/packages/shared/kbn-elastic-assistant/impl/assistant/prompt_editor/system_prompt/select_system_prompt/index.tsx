@@ -19,7 +19,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 
 import { euiThemeVars } from '@kbn/ui-theme';
 import {
-  type PromptResponse,
+  PromptResponse,
   PromptTypeEnum,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { getOptions } from '../helpers';

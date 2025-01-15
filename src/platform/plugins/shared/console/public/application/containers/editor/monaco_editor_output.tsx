@@ -8,8 +8,8 @@
  */
 
 import React, {
-  type CSSProperties,
-  type FunctionComponent,
+  CSSProperties,
+  FunctionComponent,
   useCallback,
   useEffect,
   useRef,
@@ -27,7 +27,7 @@ import {
   EuiButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
-import { CONSOLE_THEME_ID, CONSOLE_OUTPUT_LANG_ID, type monaco } from '@kbn/monaco';
+import { CONSOLE_THEME_ID, CONSOLE_OUTPUT_LANG_ID, monaco } from '@kbn/monaco';
 import {
   getStatusCodeDecorations,
   isJSONContentType,

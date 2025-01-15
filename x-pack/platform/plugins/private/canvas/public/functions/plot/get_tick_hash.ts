@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { type PointSeriesColumns, type DatatableRow, type Ticks } from '../../../types';
+import { PointSeriesColumns, DatatableRow, Ticks } from '../../../types';
 
 export const getTickHash = (columns: PointSeriesColumns, rows: DatatableRow[]) => {
   const ticks: Ticks = {

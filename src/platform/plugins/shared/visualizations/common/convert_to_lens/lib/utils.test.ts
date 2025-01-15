@@ -8,9 +8,9 @@
  */
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { type IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
-import { type AggBasedColumn, type ColumnWithMeta, Operations } from '../..';
-import { type SchemaConfig } from '../../types';
+import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
+import { AggBasedColumn, ColumnWithMeta, Operations } from '../..';
+import { SchemaConfig } from '../../types';
 import {
   getCustomBucketsFromSiblingAggs,
   getFieldNameFromField,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type AssignableObject } from './assignments';
+import { AssignableObject } from './assignments';
 
 export interface FindAssignableObjectResponse {
   objects: AssignableObject[];

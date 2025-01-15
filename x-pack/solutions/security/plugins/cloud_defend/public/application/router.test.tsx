@@ -9,10 +9,10 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
 import type { CloudDefendPage, CloudDefendPageNavigationItem } from '../common/navigation/types';
-import { type CloudDefendSecuritySolutionContext } from '../types';
-import { createMemoryHistory, type MemoryHistory } from 'history';
+import { CloudDefendSecuritySolutionContext } from '../types';
+import { createMemoryHistory, MemoryHistory } from 'history';
 import * as constants from '../common/navigation/constants';
-import { type QueryClientProviderProps } from '@tanstack/react-query';
+import { QueryClientProviderProps } from '@tanstack/react-query';
 
 jest.mock('../pages/policies', () => ({
   Policies: () => <div data-test-subj="Policies">Policies</div>,

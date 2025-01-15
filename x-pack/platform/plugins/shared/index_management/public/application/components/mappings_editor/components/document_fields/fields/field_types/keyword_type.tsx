@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import type SemVer from 'semver/classes/semver';
+import SemVer from 'semver/classes/semver';
 import { i18n } from '@kbn/i18n';
 
 import { documentationService } from '../../../../../../services/documentation';
-import { type NormalizedField, type Field as FieldType } from '../../../../types';
+import { NormalizedField, Field as FieldType } from '../../../../types';
 import { UseField, Field } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
 import { PARAMETERS_OPTIONS } from '../../../../constants';

@@ -8,13 +8,13 @@
  */
 
 import React from 'react';
-import { buildDataTableRecord, type DataTableRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord, DataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { render, screen } from '@testing-library/react';
 import { DataGridDensity, ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import { getServiceNameCell } from './service_name_cell';
-import { type CellRenderersExtensionParams } from '../../../context_awareness';
+import { CellRenderersExtensionParams } from '../../../context_awareness';
 
 const core = {
   application: {

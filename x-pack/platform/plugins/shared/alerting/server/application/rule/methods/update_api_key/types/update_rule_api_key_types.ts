@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type TypeOf } from '@kbn/config-schema';
-import { type updateApiKeyParamsSchema } from '../schemas';
+import { TypeOf } from '@kbn/config-schema';
+import { updateApiKeyParamsSchema } from '../schemas';
 
 export type UpdateApiKeyParams = TypeOf<typeof updateApiKeyParamsSchema>;

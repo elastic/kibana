@@ -5,8 +5,8 @@
  * 2.0.
  */
 import {
-  type RuleRegistryPluginSetupContract as RuleRegistryPluginSetup,
-  type RuleRegistryPluginStartContract as RuleRegistryPluginStart,
+  RuleRegistryPluginSetupContract as RuleRegistryPluginSetup,
+  RuleRegistryPluginStartContract as RuleRegistryPluginStart,
 } from '@kbn/rule-registry-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 

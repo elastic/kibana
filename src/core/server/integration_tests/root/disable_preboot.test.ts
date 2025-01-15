@@ -10,7 +10,7 @@
 import {
   createRootWithCorePlugins,
   createTestServers,
-  type TestElasticsearchUtils,
+  TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 
 function createRootWithDisabledPreboot() {

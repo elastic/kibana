@@ -12,8 +12,8 @@ import {
   TEST_SESSION_START_TIME,
 } from '../../../common/mocks/constants/session_view_process.mock';
 import { sessionViewIOEventsMock } from '../../../common/mocks/responses/session_view_io_events.mock';
-import { type AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { type TTYPlayerDeps, TTYPlayer } from '.';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
+import { TTYPlayerDeps, TTYPlayer } from '.';
 import userEvent from '@testing-library/user-event';
 
 describe('TTYPlayer component', () => {

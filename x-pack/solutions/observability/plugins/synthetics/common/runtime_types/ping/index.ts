@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export type * from './histogram';
+export * from './histogram';
 export * from './ping';
 export * from './synthetics';

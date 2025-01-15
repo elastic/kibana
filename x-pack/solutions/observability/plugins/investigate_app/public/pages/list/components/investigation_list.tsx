@@ -5,17 +5,17 @@
  * 2.0.
  */
 import {
-  type Criteria,
+  Criteria,
   EuiAvatar,
   EuiBasicTable,
-  type EuiBasicTableColumn,
+  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiLink,
   EuiLoadingSpinner,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type InvestigationResponse } from '@kbn/investigation-shared/src/rest_specs/investigation';
+import { InvestigationResponse } from '@kbn/investigation-shared/src/rest_specs/investigation';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { paths } from '../../../../common/paths';

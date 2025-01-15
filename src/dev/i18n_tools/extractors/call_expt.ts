@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Opts } from '@formatjs/ts-transformer';
+import { Opts } from '@formatjs/ts-transformer';
 import ts from 'typescript';
 type TypeScript = typeof ts;
 

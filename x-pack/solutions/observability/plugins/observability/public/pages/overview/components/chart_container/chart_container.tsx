@@ -7,7 +7,7 @@
 
 import { Chart } from '@elastic/charts';
 import { EuiLoadingChart } from '@elastic/eui';
-import { type EuiLoadingChartSize } from '@elastic/eui/src/components/loading/loading_chart';
+import { EuiLoadingChartSize } from '@elastic/eui/src/components/loading/loading_chart';
 import React from 'react';
 
 interface Props {

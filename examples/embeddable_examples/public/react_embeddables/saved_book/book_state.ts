@@ -8,7 +8,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { type BookAttributes, type BookAttributesManager } from './types';
+import { BookAttributes, BookAttributesManager } from './types';
 
 export const defaultBookAttributes: BookAttributes = {
   bookTitle: 'Pillars of the earth',

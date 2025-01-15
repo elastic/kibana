@@ -6,25 +6,25 @@
  */
 
 import {
-  type IRouter,
-  type RequestHandlerContext,
-  type KibanaRequest,
-  type IKibanaResponse,
-  type KibanaResponseFactory,
+  IRouter,
+  RequestHandlerContext,
+  KibanaRequest,
+  IKibanaResponse,
+  KibanaResponseFactory,
 } from '@kbn/core/server';
-import { type IClusterClient, type DocLinksServiceSetup } from '@kbn/core/server';
-import { type Observable, Subject } from 'rxjs';
+import { IClusterClient, DocLinksServiceSetup } from '@kbn/core/server';
+import { Observable, Subject } from 'rxjs';
 import { tap, map, filter } from 'rxjs';
 import { throttleTime } from 'rxjs';
-import { type UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { type Logger, type ServiceStatus, ServiceStatusLevels } from '@kbn/core/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { Logger, ServiceStatus, ServiceStatusLevels } from '@kbn/core/server';
 import {
-  type MonitoringStats,
+  MonitoringStats,
   summarizeMonitoringStats,
   HealthStatus,
-  type RawMonitoringStats,
+  RawMonitoringStats,
 } from '../monitoring';
-import { type TaskManagerConfig } from '../config';
+import { TaskManagerConfig } from '../config';
 import { logHealthMetrics } from '../lib/log_health_metrics';
 import { calculateHealthStatus } from '../lib/calculate_health_status';
 

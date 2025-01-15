@@ -6,7 +6,7 @@
  */
 import { EuiButtonGroup, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
 import {
-  type PaletteRegistry,
+  PaletteRegistry,
   CustomizablePalette,
   CUSTOM_PALETTE,
   applyPaletteParams,

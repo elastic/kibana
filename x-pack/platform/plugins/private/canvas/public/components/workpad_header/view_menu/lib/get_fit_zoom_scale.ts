@@ -9,7 +9,7 @@ import {
   CANVAS_LAYOUT_STAGE_CONTENT_SELECTOR,
   WORKPAD_CANVAS_BUFFER,
 } from '../../../../../common/lib';
-import { type CanvasWorkpadBoundingBox } from '../../../../../types';
+import { CanvasWorkpadBoundingBox } from '../../../../../types';
 
 export const getFitZoomScale = (
   boundingBox: CanvasWorkpadBoundingBox,

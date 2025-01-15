@@ -6,8 +6,8 @@
  */
 
 import {
-  type IndicesIndexSettings,
-  type IndicesDataStreamLifecycle,
+  IndicesIndexSettings,
+  IndicesDataStreamLifecycle,
 } from '@elastic/elasticsearch/lib/api/types';
 
 export const logsSettings: IndicesIndexSettings = {

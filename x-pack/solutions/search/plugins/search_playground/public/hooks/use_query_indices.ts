@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { type IndexName } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { IndexName } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useKibana } from './use_kibana';
 import { APIRoutes } from '../types';
 

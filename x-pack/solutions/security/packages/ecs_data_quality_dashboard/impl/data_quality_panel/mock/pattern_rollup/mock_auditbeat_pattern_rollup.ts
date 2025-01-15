@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type PatternRollup } from '../../types';
+import { PatternRollup } from '../../types';
 
 /**
  * This `PatternRollup` containing the following indices:

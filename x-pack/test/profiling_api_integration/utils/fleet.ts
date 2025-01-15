@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { type PackagePolicy } from '@kbn/fleet-plugin/common';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   COLLECTOR_PACKAGE_POLICY_NAME,
   SYMBOLIZER_PACKAGE_POLICY_NAME,
 } from '@kbn/profiling-data-access-plugin/common';
-import { type BetterTest } from '../common/bettertest';
+import { BetterTest } from '../common/bettertest';
 
 export async function deletePackagePolicy(bettertest: BetterTest, packagePolicyId: string) {
   return bettertest({

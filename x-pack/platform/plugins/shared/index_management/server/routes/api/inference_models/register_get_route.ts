@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { addBasePath } from '..';
-import { type RouteDependencies } from '../../../types';
+import { RouteDependencies } from '../../../types';
 
 export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   // Get all inference models

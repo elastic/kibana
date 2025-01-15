@@ -9,7 +9,7 @@
 
 import {
   EuiInMemoryTable,
-  type EuiBasicTableColumn,
+  EuiBasicTableColumn,
   EuiButton,
   EuiButtonEmpty,
   EuiIcon,

@@ -6,7 +6,7 @@
  */
 
 import { createMockFramePublicAPI } from '../../../mocks';
-import { type FramePublicAPI } from '../../../types';
+import { FramePublicAPI } from '../../../types';
 import { getStaticDate } from './helpers';
 
 describe('annotations helpers', () => {

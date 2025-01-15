@@ -8,6 +8,6 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { type DiscoverServices } from '../build_services';
+import { DiscoverServices } from '../build_services';
 
 export const useDiscoverServices = () => useKibana<DiscoverServices>().services;

@@ -7,10 +7,10 @@
 
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import {
-  type Observable,
-  type ExternalServiceSIR,
-  type ObservableResponse,
-  type ServiceFactory,
+  Observable,
+  ExternalServiceSIR,
+  ObservableResponse,
+  ServiceFactory,
 } from '../lib/servicenow/types';
 
 import { createExternalService as createExternalServiceCommon } from '../lib/servicenow/service';

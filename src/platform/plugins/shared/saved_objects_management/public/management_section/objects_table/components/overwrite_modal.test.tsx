@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { shallowWithI18nProvider, mountWithIntl } from '@kbn/test-jest-helpers';
-import { type OverwriteModalProps, OverwriteModal } from './overwrite_modal';
+import { OverwriteModalProps, OverwriteModal } from './overwrite_modal';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 describe('OverwriteModal', () => {

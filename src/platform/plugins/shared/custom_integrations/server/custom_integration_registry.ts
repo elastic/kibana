@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Logger } from '@kbn/core/server';
-import { type IntegrationCategory, INTEGRATION_CATEGORY_DISPLAY, type CustomIntegration } from '../common';
+import { Logger } from '@kbn/core/server';
+import { IntegrationCategory, INTEGRATION_CATEGORY_DISPLAY, CustomIntegration } from '../common';
 
 function isAddable(integration: CustomIntegration): boolean {
   return !!integration.categories.length && !integration.eprOverlap;

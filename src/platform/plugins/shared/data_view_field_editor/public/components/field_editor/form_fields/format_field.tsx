@@ -12,9 +12,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   UseField,
   useFormData,
-  type ES_FIELD_TYPES,
+  ES_FIELD_TYPES,
   useFormContext,
-  type SerializedFieldFormat,
+  SerializedFieldFormat,
 } from '../../../shared_imports';
 import { useFieldEditorContext } from '../../field_editor_context';
 import { FormatSelectEditor } from '../../field_format_editor';

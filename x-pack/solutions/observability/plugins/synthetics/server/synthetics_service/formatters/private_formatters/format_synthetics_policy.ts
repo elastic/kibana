@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { cloneDeep } from 'lodash';
 import { processorsFormatter } from './processors_formatter';
 import { LegacyConfigKey } from '../../../../common/constants/monitor_management';
-import { ConfigKey, type MonitorTypeEnum, type MonitorFields } from '../../../../common/runtime_types';
+import { ConfigKey, MonitorTypeEnum, MonitorFields } from '../../../../common/runtime_types';
 import { throttlingFormatter } from './browser_formatters';
 import { replaceStringWithParams } from '../formatting_utils';
 import { syntheticsPolicyFormatters } from './formatters';

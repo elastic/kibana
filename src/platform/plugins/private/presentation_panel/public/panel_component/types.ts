@@ -7,20 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type PresentationContainer } from '@kbn/presentation-containers';
+import { PresentationContainer } from '@kbn/presentation-containers';
 import {
-  type CanLockHoverActions,
-  type HasParentApi,
-  type HasUniqueId,
-  type PublishesBlockingError,
-  type PublishesDataLoading,
-  type PublishesDisabledActionIds,
-  type PublishesPanelDescription,
-  type PublishesPanelTitle,
-  type PublishesViewMode,
+  CanLockHoverActions,
+  HasParentApi,
+  HasUniqueId,
+  PublishesBlockingError,
+  PublishesDataLoading,
+  PublishesDisabledActionIds,
+  PublishesPanelDescription,
+  PublishesPanelTitle,
+  PublishesViewMode,
 } from '@kbn/presentation-publishing';
-import { type UiActionsService } from '@kbn/ui-actions-plugin/public';
-import { type MaybePromise } from '@kbn/utility-types';
+import { UiActionsService } from '@kbn/ui-actions-plugin/public';
+import { MaybePromise } from '@kbn/utility-types';
 
 /** ------------------------------------------------------------------------------------------
  * Panel Types

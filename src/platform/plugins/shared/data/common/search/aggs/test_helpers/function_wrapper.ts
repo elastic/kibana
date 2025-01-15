@@ -9,9 +9,9 @@
 
 import { mapValues } from 'lodash';
 import {
-  type AnyExpressionFunctionDefinition,
-  type ExpressionFunctionDefinition,
-  type ExecutionContext,
+  AnyExpressionFunctionDefinition,
+  ExpressionFunctionDefinition,
+  ExecutionContext,
 } from '@kbn/expressions-plugin/common';
 
 /**

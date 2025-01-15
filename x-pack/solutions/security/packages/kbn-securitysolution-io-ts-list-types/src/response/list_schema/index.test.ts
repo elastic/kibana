@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { getListResponseMock } from './index.mock';
-import { type ListSchema, listSchema } from '.';
+import { ListSchema, listSchema } from '.';
 
 describe('list_schema', () => {
   test('it should validate a typical list response', () => {

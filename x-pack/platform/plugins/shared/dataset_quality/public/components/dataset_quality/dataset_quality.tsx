@@ -5,15 +5,15 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { type CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import React, { useMemo } from 'react';
-import { type DatasetQualityController } from '../../controller/dataset_quality';
+import { DatasetQualityController } from '../../controller/dataset_quality';
 import SummaryPanelProvider from '../../hooks/use_summary_panel';
-import { type ITelemetryClient } from '../../services/telemetry';
-import { type DatasetQualityStartDeps } from '../../types';
+import { ITelemetryClient } from '../../services/telemetry';
+import { DatasetQualityStartDeps } from '../../types';
 import { useKibanaContextForPluginProvider } from '../../utils';
-import { DatasetQualityContext, type DatasetQualityContextValue } from './context';
+import { DatasetQualityContext, DatasetQualityContextValue } from './context';
 import EmptyStateWrapper from './empty_state/empty_state';
 import Filters from './filters/filters';
 import Header from './header';

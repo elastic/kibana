@@ -6,9 +6,9 @@
  */
 
 import {
-  type MlTrainedModelDeploymentNodesStats,
-  type MlTrainedModelStats,
-  type SearchTotalHits,
+  MlTrainedModelDeploymentNodesStats,
+  MlTrainedModelStats,
+  SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -16,22 +16,22 @@ import { Document } from 'langchain/document';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import {
   DocumentEntryType,
-  type DocumentEntry,
-  type IndexEntry,
-  type KnowledgeBaseEntryCreateProps,
-  type KnowledgeBaseEntryResponse,
-  type Metadata,
+  DocumentEntry,
+  IndexEntry,
+  KnowledgeBaseEntryCreateProps,
+  KnowledgeBaseEntryResponse,
+  Metadata,
 } from '@kbn/elastic-assistant-common';
 import pRetry from 'p-retry';
-import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { type StructuredTool } from '@langchain/core/tools';
-import { type AnalyticsServiceSetup, type AuditLogger, type ElasticsearchClient } from '@kbn/core/server';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { StructuredTool } from '@langchain/core/tools';
+import { AnalyticsServiceSetup, AuditLogger, ElasticsearchClient } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { map } from 'lodash';
-import { AIAssistantDataClient, type AIAssistantDataClientParams } from '..';
-import { type GetElser } from '../../types';
+import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
+import { GetElser } from '../../types';
 import { createKnowledgeBaseEntry, transformToCreateSchema } from './create_knowledge_base_entry';
-import { type EsDocumentEntry, type EsIndexEntry, type EsKnowledgeBaseEntrySchema } from './types';
+import { EsDocumentEntry, EsIndexEntry, EsKnowledgeBaseEntrySchema } from './types';
 import { transformESSearchToKnowledgeBaseEntry } from './transforms';
 import { SECURITY_LABS_RESOURCE, USER_RESOURCE } from '../../routes/knowledge_base/constants';
 import {

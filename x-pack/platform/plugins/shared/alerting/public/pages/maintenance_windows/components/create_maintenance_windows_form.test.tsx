@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { within, fireEvent, waitFor } from '@testing-library/react';
-import { type AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
+import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 import {
-  type CreateMaintenanceWindowFormProps,
+  CreateMaintenanceWindowFormProps,
   CreateMaintenanceWindowForm,
 } from './create_maintenance_windows_form';
 

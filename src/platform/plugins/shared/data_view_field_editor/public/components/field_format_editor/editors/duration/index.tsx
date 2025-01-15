@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type FieldFormatEditorFactory } from '../types';
+import { FieldFormatEditorFactory } from '../types';
 import { formatId } from './constants';
-import { type DurationFormatEditorFormatParams } from './duration';
+import { DurationFormatEditorFormatParams } from './duration';
 
 export type { DurationFormatEditor } from './duration';
 export const durationFormatEditorFactory: FieldFormatEditorFactory<

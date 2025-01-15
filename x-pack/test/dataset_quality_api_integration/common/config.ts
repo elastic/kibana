@@ -16,17 +16,17 @@ import {
   DATASET_QUALITY_TEST_PASSWORD,
   DatasetQualityUsername,
 } from '@kbn/dataset-quality-plugin/server/test_helpers/create_dataset_quality_users/authentication';
-import { type FtrConfigProviderContext, defineDockerServersConfig } from '@kbn/test';
+import { FtrConfigProviderContext, defineDockerServersConfig } from '@kbn/test';
 import path from 'path';
 import supertest from 'supertest';
-import { type UrlObject, format } from 'url';
+import { UrlObject, format } from 'url';
 import { dockerImage } from '../../fleet_api_integration/config.base';
-import { type DatasetQualityFtrConfigName } from '../configs';
+import { DatasetQualityFtrConfigName } from '../configs';
 import { createDatasetQualityApiClient } from './dataset_quality_api_supertest';
 import {
-  type FtrProviderContext,
-  type InheritedFtrProviderContext,
-  type InheritedServices,
+  FtrProviderContext,
+  InheritedFtrProviderContext,
+  InheritedServices,
 } from './ftr_provider_context';
 import { RegistryProvider } from './registry';
 

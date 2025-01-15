@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, type TypeOf, offeringBasedSchema } from '@kbn/config-schema';
+import { schema, TypeOf, offeringBasedSchema } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   readOnly: offeringBasedSchema({

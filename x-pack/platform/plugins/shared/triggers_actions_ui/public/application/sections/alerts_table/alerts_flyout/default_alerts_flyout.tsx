@@ -10,15 +10,15 @@ import {
   type EuiDataGridColumn,
   EuiDescriptionList,
   EuiPanel,
-  type EuiTabbedContentTab,
+  EuiTabbedContentTab,
   EuiTitle,
 } from '@elastic/eui';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ScrollableFlyoutTabbedContent, AlertFieldsTable } from '@kbn/alerts-ui-shared';
-import { type RegisterFormatter } from '../cells/render_cell_value';
-import { type AlertsTableFlyoutBaseProps, type AlertTableFlyoutComponent } from '../../../..';
+import { RegisterFormatter } from '../cells/render_cell_value';
+import { AlertsTableFlyoutBaseProps, AlertTableFlyoutComponent } from '../../../..';
 
 const FlyoutHeader: AlertTableFlyoutComponent = ({ alert }: AlertsTableFlyoutBaseProps) => {
   const name = alert[ALERT_RULE_NAME];

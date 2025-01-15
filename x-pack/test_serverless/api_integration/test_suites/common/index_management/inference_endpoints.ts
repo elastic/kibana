@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { type InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { type InternalRequestHeader, type RoleCredentials } from '../../../../shared/services';
-import { type FtrProviderContext } from '../../../ftr_provider_context';
+import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const API_BASE_PATH = '/api/index_management';
 

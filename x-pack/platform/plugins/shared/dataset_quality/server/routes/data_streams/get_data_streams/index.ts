@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { streamPartsToIndexPattern } from '../../../../common/utils';
-import { type DataStreamType } from '../../../../common/types';
+import { DataStreamType } from '../../../../common/types';
 import { dataStreamService, datasetQualityPrivileges } from '../../../services';
 
 export async function getDataStreams(options: {

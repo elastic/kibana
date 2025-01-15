@@ -10,30 +10,30 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiDataGrid,
-  type EuiDataGridStyle,
-  type Pagination,
-  type EuiDataGridCellValueElementProps,
-  type EuiDataGridSorting,
-  type EuiDataGridColumn,
+  EuiDataGridStyle,
+  Pagination,
+  EuiDataGridCellValueElementProps,
+  EuiDataGridSorting,
+  EuiDataGridColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiBadge,
-  type EuiDataGridCellPopoverElementProps,
+  EuiDataGridCellPopoverElementProps,
   useEuiTheme,
   EuiToolTip,
   EuiIconTip,
   EuiText,
 } from '@elastic/eui';
 import {
-  type IExecutionLog,
+  IExecutionLog,
   executionLogSortableColumns,
-  type ExecutionLogSortFields,
+  ExecutionLogSortFields,
 } from '@kbn/alerting-plugin/common';
-import { type IExecutionLog as IConnectorsExecutionLog } from '@kbn/actions-plugin/common';
+import { IExecutionLog as IConnectorsExecutionLog } from '@kbn/actions-plugin/common';
 import { get } from 'lodash';
 import { getIsExperimentalFeatureEnabled } from '../../../../../common/get_experimental_features';
-import { EventLogListCellRenderer, type ColumnId, EventLogPaginationStatus } from '.';
+import { EventLogListCellRenderer, ColumnId, EventLogPaginationStatus } from '.';
 import { RuleActionErrorBadge } from '../../../rule_details/components/rule_action_error_badge';
 import './event_log_list.scss';
 

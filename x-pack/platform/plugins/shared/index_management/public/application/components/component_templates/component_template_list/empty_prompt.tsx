@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { type FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type RouteComponentProps } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
 
 import { reactRouterNavigate } from '../shared_imports';

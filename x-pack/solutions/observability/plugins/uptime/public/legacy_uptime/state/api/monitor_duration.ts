@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type BaseParams } from './types';
+import { BaseParams } from './types';
 import { apiService } from './utils';
 import { API_URLS } from '../../../../common/constants';
 

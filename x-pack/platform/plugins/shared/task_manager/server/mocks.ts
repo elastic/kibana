@@ -6,8 +6,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { type TaskManagerSetupContract, type TaskManagerStartContract } from './plugin';
-import { type ConcreteTaskInstance, TaskStatus } from './task';
+import { TaskManagerSetupContract, TaskManagerStartContract } from './plugin';
+import { ConcreteTaskInstance, TaskStatus } from './task';
 
 const createSetupMock = () => {
   const mock: jest.Mocked<TaskManagerSetupContract> = {

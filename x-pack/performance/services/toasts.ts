@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 import { subj } from '@kbn/test-subj-selector';
-import { type Page } from 'playwright';
+import { Page } from 'playwright';
 
 import { toMs, type TimeOrMilliseconds } from './lib/time';
 

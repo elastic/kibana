@@ -20,12 +20,12 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { getFips } from 'crypto';
 import {
   createTestEsCluster,
-  type CreateTestEsClusterOptions,
+  CreateTestEsClusterOptions,
   esTestConfig,
   kibanaServerTestUser,
   systemIndicesSuperuser,
 } from '@kbn/test';
-import { type CliArgs, Env, type RawPackageInfo } from '@kbn/config';
+import { CliArgs, Env, RawPackageInfo } from '@kbn/config';
 
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';

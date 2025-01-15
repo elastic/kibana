@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ExportExceptionDetails } from '.';
+import { ExportExceptionDetails } from '.';
 
 export interface ExportExceptionDetailsMock {
   listCount?: number;

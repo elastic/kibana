@@ -10,14 +10,14 @@
 import { i18n } from '@kbn/i18n';
 import {
   apiHasAppContext,
-  type EmbeddableApiContext,
-  type HasType,
-  type HasAppContext,
+  EmbeddableApiContext,
+  HasType,
+  HasAppContext,
 } from '@kbn/presentation-publishing';
 import { ADD_PANEL_LEGACY_GROUP } from '@kbn/embeddable-plugin/public';
-import { type Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { apiHasType } from '@kbn/presentation-publishing';
-import { apiCanAddNewPanel, type CanAddNewPanel } from '@kbn/presentation-containers';
+import { apiCanAddNewPanel, CanAddNewPanel } from '@kbn/presentation-containers';
 import { VisGroups } from '../vis_types/vis_groups_enum';
 import type { TypesStart } from '../vis_types/types_service';
 import { showNewVisModal } from '../wizard/show_new_vis';

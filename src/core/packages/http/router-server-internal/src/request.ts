@@ -13,26 +13,26 @@ import { inspect } from 'util';
 import type { Request, RouteOptions } from '@hapi/hapi';
 import { fromEvent, NEVER } from 'rxjs';
 import { shareReplay, first, filter } from 'rxjs';
-import { type RecursiveReadonly } from '@kbn/utility-types';
+import { RecursiveReadonly } from '@kbn/utility-types';
 import { deepFreeze } from '@kbn/std';
 import {
-  type KibanaRequest,
-  type Headers,
-  type RouteMethod,
-  type validBodyOutput,
-  type IKibanaSocket,
-  type RouteValidatorFullConfigRequest,
-  type KibanaRequestRoute,
-  type KibanaRequestEvents,
-  type KibanaRequestAuth,
-  type KibanaRequestState,
-  type KibanaRouteOptions,
-  type KibanaRequestRouteOptions,
-  type RawRequest,
-  type FakeRawRequest,
-  type HttpProtocol,
-  type RouteSecurityGetter,
-  type RouteSecurity,
+  KibanaRequest,
+  Headers,
+  RouteMethod,
+  validBodyOutput,
+  IKibanaSocket,
+  RouteValidatorFullConfigRequest,
+  KibanaRequestRoute,
+  KibanaRequestEvents,
+  KibanaRequestAuth,
+  KibanaRequestState,
+  KibanaRouteOptions,
+  KibanaRequestRouteOptions,
+  RawRequest,
+  FakeRawRequest,
+  HttpProtocol,
+  RouteSecurityGetter,
+  RouteSecurity,
 } from '@kbn/core-http-server';
 import {
   ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM,

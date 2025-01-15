@@ -11,7 +11,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getPluginApiDocId } from '../utils';
 import { extractImportReferences } from './extract_import_refs';
-import { ApiScope, type PluginOrPackage, type Reference } from '../types';
+import { ApiScope, PluginOrPackage, Reference } from '../types';
 import {
   getKibanaPlatformPackage,
   getKibanaPlatformPlugin,

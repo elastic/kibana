@@ -8,7 +8,7 @@
  */
 
 import type { AggConfigs } from '@kbn/data-plugin/public';
-import { type ValueAxis, type SeriesParam, ChartMode, InterpolationMode } from '../types';
+import { ValueAxis, SeriesParam, ChartMode, InterpolationMode } from '../types';
 import { ChartType } from '../../common';
 
 const makeSerie = (

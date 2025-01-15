@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type AvgColumn, type DateHistogramColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { type Vis } from '@kbn/visualizations-plugin/public';
+import { AvgColumn, DateHistogramColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { Vis } from '@kbn/visualizations-plugin/public';
 import { getConfiguration } from '.';
 import { sampleHeatmapVis } from '../../sample_vis.test.mocks';
-import { type HeatmapVisParams } from '../../types';
+import { HeatmapVisParams } from '../../types';
 
 describe('getConfiguration', () => {
   const layerId = 'layer-id';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type TIPage, type TIPageId } from '../types';
+import { TIPage, TIPageId } from '../types';
 import { threatIntelligencePages } from '../constants/navigation';
 
 /**

@@ -8,7 +8,7 @@
  */
 
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
-import { ManagementSection, type RegisterManagementSectionArgs } from './utils';
+import { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import {
   IngestSection,
   DataSection,
@@ -19,11 +19,11 @@ import {
 } from './components/management_sections';
 
 import {
-  type ManagementSectionId,
-  type SectionsServiceSetup,
-  type SectionsServiceStartDeps,
-  type DefinedSections,
-  type ManagementSectionsStartPrivate,
+  ManagementSectionId,
+  SectionsServiceSetup,
+  SectionsServiceStartDeps,
+  DefinedSections,
+  ManagementSectionsStartPrivate,
 } from './types';
 
 const [getSectionsServiceStartPrivate, setSectionsServiceStartPrivate] =

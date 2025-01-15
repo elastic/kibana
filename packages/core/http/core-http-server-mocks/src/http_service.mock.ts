@@ -24,7 +24,7 @@ import type {
   IStaticAssets,
 } from '@kbn/core-http-server';
 import { AuthStatus } from '@kbn/core-http-server';
-import { mockRouter, type RouterMock } from '@kbn/core-http-router-server-mocks';
+import { mockRouter, RouterMock } from '@kbn/core-http-router-server-mocks';
 
 import { CspConfig, ExternalUrlConfig } from '@kbn/core-http-server-internal';
 import type {

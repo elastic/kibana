@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type IRouter } from '@kbn/core/server';
-import { type ILicenseState } from '../../../../lib';
+import { IRouter } from '@kbn/core/server';
+import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import { type AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
-import { type GetScheduleFrequencyResponseV1 } from '../../../../../common/routes/rule/apis/get_schedule_frequency';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import { GetScheduleFrequencyResponseV1 } from '../../../../../common/routes/rule/apis/get_schedule_frequency';
 import { transformGetScheduleFrequencyResultV1 } from './transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 

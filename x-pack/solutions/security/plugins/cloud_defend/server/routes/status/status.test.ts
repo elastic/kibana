@@ -10,18 +10,18 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import type { ESSearchResponse } from '@kbn/es-types';
 import {
-  type AgentClient,
-  type AgentPolicyServiceInterface,
-  type AgentService,
-  type PackageClient,
-  type PackagePolicyClient,
-  type PackageService,
+  AgentClient,
+  AgentPolicyServiceInterface,
+  AgentService,
+  PackageClient,
+  PackagePolicyClient,
+  PackageService,
 } from '@kbn/fleet-plugin/server';
 import {
-  type AgentPolicy,
-  type GetAgentStatusResponse,
-  type Installation,
-  type RegistryPackage,
+  AgentPolicy,
+  GetAgentStatusResponse,
+  Installation,
+  RegistryPackage,
 } from '@kbn/fleet-plugin/common';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { createCloudDefendRequestHandlerContextMock } from '../../mocks';

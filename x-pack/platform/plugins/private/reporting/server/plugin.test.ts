@@ -6,10 +6,10 @@
  */
 
 import {
-  type CoreSetup,
-  type CoreStart,
+  CoreSetup,
+  CoreStart,
   DEFAULT_APP_CATEGORIES,
-  type Logger,
+  Logger,
   type PackageInfo,
 } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -25,7 +25,7 @@ import { ReportingPlugin } from './plugin';
 import { createMockPluginSetup, createMockPluginStart } from './test_helpers';
 import type { ReportingSetupDeps } from './types';
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
-import { type FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 const sleep = (time: number) => new Promise((r) => setTimeout(r, time));
 

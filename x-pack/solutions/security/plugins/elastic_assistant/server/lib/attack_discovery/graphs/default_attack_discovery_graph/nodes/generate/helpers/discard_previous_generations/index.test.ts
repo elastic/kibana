@@ -6,7 +6,7 @@
  */
 
 import { discardPreviousGenerations } from '.';
-import { type GraphState } from '../../../../types';
+import { GraphState } from '../../../../types';
 
 const graphState: GraphState = {
   attackDiscoveries: null,

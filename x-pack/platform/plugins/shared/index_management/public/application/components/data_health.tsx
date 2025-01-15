@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiHealth } from '@elastic/eui';
-import { type Health } from '../../../common/types';
+import { Health } from '../../../common/types';
 
 interface Props {
   health: Health;

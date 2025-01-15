@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC, useState } from 'react';
+import React, { FC, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { Capabilities } from '@kbn/core/public';

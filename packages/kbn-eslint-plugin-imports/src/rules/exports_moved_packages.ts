@@ -11,7 +11,7 @@ import type { Rule, AST } from 'eslint';
 import * as T from '@babel/types';
 import { TSESTree } from '@typescript-eslint/typescript-estree';
 
-import { visitAllImportStatements, type Importer } from '../helpers/visit_all_import_statements';
+import { visitAllImportStatements, Importer } from '../helpers/visit_all_import_statements';
 
 export interface MovedExportsRule {
   from: string;

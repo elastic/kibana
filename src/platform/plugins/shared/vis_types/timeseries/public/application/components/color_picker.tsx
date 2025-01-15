@@ -14,7 +14,7 @@ import React, { useState } from 'react';
 import {
   EuiIconTip,
   EuiColorPicker,
-  type EuiColorPickerProps,
+  EuiColorPickerProps,
   EuiColorPickerSwatch,
   useEuiTheme,
 } from '@elastic/eui';

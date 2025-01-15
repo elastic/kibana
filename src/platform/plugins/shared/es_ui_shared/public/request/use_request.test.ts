@@ -11,7 +11,7 @@ import { act } from 'react-dom/test-utils';
 import sinon from 'sinon';
 
 import {
-  type UseRequestHelpers,
+  UseRequestHelpers,
   REQUEST_TIME,
   createUseRequestHelpers,
 } from './use_request.test.helpers';

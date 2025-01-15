@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { type Meta } from '../../../../../../common/types';
+import { Meta } from '../../../../../../common/types';
 
 import {
-  type CrawlerDomain,
+  CrawlerDomain,
   CrawlerPolicies,
-  type CrawlRule,
+  CrawlRule,
   CrawlerRules,
-  type EntryPoint,
-  type Sitemap,
-  type CrawlerDomainFromServer,
-  type DomainConfigFromServer,
-  type DomainConfig,
-  type CrawlerDomainsWithMeta,
-  type CrawlerDomainsWithMetaFromServer,
+  EntryPoint,
+  Sitemap,
+  CrawlerDomainFromServer,
+  DomainConfigFromServer,
+  DomainConfig,
+  CrawlerDomainsWithMeta,
+  CrawlerDomainsWithMetaFromServer,
 } from '../types';
 
 export const CRAWL_RULE: CrawlRule = {

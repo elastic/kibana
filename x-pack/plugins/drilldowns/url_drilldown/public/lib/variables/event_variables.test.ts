@@ -8,9 +8,9 @@
 import {
   getEventScopeValues,
   getEventVariableList,
-  type ValueClickTriggerEventScope,
+  ValueClickTriggerEventScope,
 } from './event_variables';
-import { type RowClickContext, ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { RowClickContext, ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { createPoint, rowClickData } from '../test/data';
 
 describe('VALUE_CLICK_TRIGGER', () => {

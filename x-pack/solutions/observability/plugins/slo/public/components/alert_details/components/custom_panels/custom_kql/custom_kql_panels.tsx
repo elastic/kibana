@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type GetSLOResponse } from '@kbn/slo-schema';
+import { GetSLOResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { LogRateAnalysisPanel } from './log_rate_analysis_panel';
-import { type BurnRateAlert, type BurnRateRule } from '../../../types';
+import { BurnRateAlert, BurnRateRule } from '../../../types';
 import { useLicense } from '../../../../../hooks/use_license';
 
 interface Props {

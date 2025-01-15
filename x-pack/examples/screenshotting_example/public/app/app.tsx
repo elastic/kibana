@@ -25,7 +25,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { API_ENDPOINT, type ScreenshottingExpressionResponse } from '../../common';
+import { API_ENDPOINT, ScreenshottingExpressionResponse } from '../../common';
 import { useAppContext } from './http_context';
 
 export function App() {

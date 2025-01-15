@@ -10,8 +10,8 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 
-import { type Required } from '@kbn/utility-types';
-import { EuiComboBox, type EuiComboBoxProps } from '@elastic/eui';
+import { Required } from '@kbn/utility-types';
+import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
 import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import {

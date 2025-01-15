@@ -6,7 +6,7 @@
  */
 
 import {
-  type EuiBasicTableColumn,
+  EuiBasicTableColumn,
   EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
@@ -26,9 +26,9 @@ import { useSelector } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useStdErrorLogs } from './use_std_error_logs';
-import { type ClientPluginsStart } from '../../../../plugin';
+import { ClientPluginsStart } from '../../../../plugin';
 import { selectDynamicSettings } from '../../../state/selectors';
-import { type Ping } from '../../../../../common/runtime_types';
+import { Ping } from '../../../../../common/runtime_types';
 
 export const StdErrorLogs = ({
   monitorId,

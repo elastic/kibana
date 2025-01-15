@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type FlashMessageColors } from './types';
+import { FlashMessageColors } from './types';
 
 export const FLASH_MESSAGE_TYPES = {
   success: { color: 'success' as FlashMessageColors, iconType: 'check' },

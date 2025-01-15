@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { type KibanaRequest, type Logger } from '@kbn/core/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
 import {
   DEFAULT_FLAPPING_SETTINGS,
   DEFAULT_QUERY_DELAY_SETTINGS,
   DEFAULT_SERVERLESS_QUERY_DELAY_SETTINGS,
-  type RulesSettingsClientApi,
-  type RulesSettingsFlappingProperties,
-  type RulesSettingsQueryDelayProperties,
+  RulesSettingsClientApi,
+  RulesSettingsFlappingProperties,
+  RulesSettingsQueryDelayProperties,
 } from '../types';
 import { withAlertingSpan } from '../task_runner/lib';
 

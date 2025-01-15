@@ -9,15 +9,15 @@
 
 import { uniqWith } from 'lodash';
 import deepEqual from 'react-fast-compare';
-import { type Layer, Operations, type TermsColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { Layer, Operations, TermsColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import {
-  type Layer as ExtendedLayer,
+  Layer as ExtendedLayer,
   excludeMetaFromColumn,
-  type ColumnsWithoutMeta,
-  type Column,
+  ColumnsWithoutMeta,
+  Column,
 } from './lib/convert';
 import { getSeriesAgg } from './lib/series';
-import { type Metric, type Series } from '../../common/types';
+import { Metric, Series } from '../../common/types';
 
 export const excludeMetaFromLayers = (
   layers: Record<string, ExtendedLayer>

@@ -8,8 +8,8 @@
  */
 
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import { type ManagementSetup, type ManagementStart, type DefinedSections } from '../types';
-import { type ManagementSection } from '..';
+import { ManagementSetup, ManagementStart, DefinedSections } from '../types';
+import { ManagementSection } from '..';
 
 export const createManagementSectionMock = () =>
   ({

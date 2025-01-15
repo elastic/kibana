@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type OperationDocumentationType } from './types';
+import { OperationDocumentationType } from './types';
 
 export const OVERALL_MIN_ID = 'overall_min';
 export const OVERALL_MIN_NAME = i18n.translate('lensFormulaDocs.overallMin', {

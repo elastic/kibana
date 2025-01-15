@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type FlattenedBucket } from '../../types';
+import { FlattenedBucket } from '../../types';
 
 export const getPathToFlattenedBucketMap = (
   flattenedBuckets: FlattenedBucket[]

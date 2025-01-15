@@ -14,11 +14,11 @@ import {
   EuiHealth,
   EuiHighlight,
   EuiComboBox,
-  type EuiComboBoxOptionOption,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
-import { type PromptResponse } from '@kbn/elastic-assistant-common';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
 
 interface Props {

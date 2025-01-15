@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type TypeOf, schema } from '@kbn/config-schema';
+import { TypeOf, schema } from '@kbn/config-schema';
 import { searchConfigurationSchema } from '../common/search_configuration_schema';
 
 export const transactionErrorRateParamsSchema = schema.object({

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type Observable, defer, isObservable, of } from 'rxjs';
+import { Observable, defer, isObservable, of } from 'rxjs';
 import { map, concatMap } from 'rxjs';
-import { type ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {

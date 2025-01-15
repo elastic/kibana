@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type CreateSLOInput } from '@kbn/slo-schema';
+import { CreateSLOInput } from '@kbn/slo-schema';
 
 export const DEFAULT_SLO: CreateSLOInput = {
   name: 'Test SLO for api integration',

@@ -8,10 +8,10 @@
 import { combineLatest, of } from 'rxjs';
 import { pick, merge } from 'lodash';
 import { map, startWith } from 'rxjs';
-import { type JsonObject } from '@kbn/utility-types';
-import { type AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
-import { CLAIM_STRATEGY_UPDATE_BY_QUERY, type TaskManagerConfig } from '../config';
-import { type ManagedConfiguration } from '../lib/create_managed_configuration';
+import { JsonObject } from '@kbn/utility-types';
+import { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
+import { CLAIM_STRATEGY_UPDATE_BY_QUERY, TaskManagerConfig } from '../config';
+import { ManagedConfiguration } from '../lib/create_managed_configuration';
 import { getCapacityInCost, getCapacityInWorkers } from '../task_pool';
 
 const CONFIG_FIELDS_TO_EXPOSE = [

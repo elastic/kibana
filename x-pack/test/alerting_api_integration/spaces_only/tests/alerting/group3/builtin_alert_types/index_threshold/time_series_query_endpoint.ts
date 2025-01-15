@@ -7,11 +7,11 @@
 
 import expect from '@kbn/expect';
 
-import { type TimeSeriesQuery } from '@kbn/triggers-actions-ui-plugin/server';
+import { TimeSeriesQuery } from '@kbn/triggers-actions-ui-plugin/server';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 
 import { Spaces } from '../../../../../scenarios';
-import { type FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix } from '../../../../../../common/lib';
 
 import { createEsDocumentsWithGroups } from '../../../create_test_data';

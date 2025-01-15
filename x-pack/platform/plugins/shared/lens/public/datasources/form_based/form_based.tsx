@@ -8,16 +8,16 @@
 import React from 'react';
 import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { type Query, type TimeRange } from '@kbn/es-query';
+import { Query, TimeRange } from '@kbn/es-query';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { flatten, isEqual } from 'lodash';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { type DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
-import { type VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import { type ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import { type UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
+import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { EuiButton } from '@elastic/eui';
@@ -74,13 +74,13 @@ import { getUniqueLabelGenerator, isDraggedDataViewField, nonNullable } from '..
 import { hasField, normalizeOperationDataType } from './pure_utils';
 import { LayerPanel } from './layerpanel';
 import {
-  type DateHistogramIndexPatternColumn,
-  type GenericIndexPatternColumn,
+  DateHistogramIndexPatternColumn,
+  GenericIndexPatternColumn,
   getCurrentFieldsForOperation,
   getErrorMessages,
   insertNewColumn,
   operationDefinitionMap,
-  type TermsIndexPatternColumn,
+  TermsIndexPatternColumn,
 } from './operations';
 import {
   copyColumn,
@@ -88,7 +88,7 @@ import {
   getReferenceRoot,
   reorderByGroups,
 } from './operations/layer_helpers';
-import { type FormBasedPrivateState, type FormBasedPersistedState, type DataViewDragDropOperation } from './types';
+import { FormBasedPrivateState, FormBasedPersistedState, DataViewDragDropOperation } from './types';
 import { mergeLayer, mergeLayers } from './state_helpers';
 import type { Datasource, VisualizeEditorContext } from '../../types';
 import { deleteColumn, isReferenced } from './operations';
@@ -98,7 +98,7 @@ import { getPrecisionErrorWarningMessages } from './utils';
 import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
 import { isColumnOfType } from './operations/definitions/helpers';
 import { LayerSettingsPanel } from './layer_settings';
-import { type FormBasedLayer, type LastValueIndexPatternColumn } from '../..';
+import { FormBasedLayer, LastValueIndexPatternColumn } from '../..';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 import { EDITOR_INVALID_DIMENSION } from '../../user_messages_ids';
 import { getLongMessage } from '../../user_messages_utils';

@@ -6,7 +6,7 @@
  */
 
 import type { ListsPluginRouter } from '../types';
-import { type ConfigType } from '../config';
+import { ConfigType } from '../config';
 
 import {
   createEndpointListItemRoute,

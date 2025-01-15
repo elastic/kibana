@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type EuiBasicTableColumn, EuiInMemoryTable, type EuiInMemoryTableProps } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiInMemoryTable, EuiInMemoryTableProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo, type VFC } from 'react';
-import { type Indicator } from '../../../../../common/types/indicator';
+import React, { useMemo, VFC } from 'react';
+import { Indicator } from '../../../../../common/types/indicator';
 import { IndicatorFieldValue } from '../common/field_value';
 import { IndicatorValueActions } from './indicator_value_actions';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type LocatorPublic } from '@kbn/share-plugin/common';
-import { type SerializableRecord } from '@kbn/utility-types';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import { SerializableRecord } from '@kbn/utility-types';
 import { generateSourceLink } from './get_alert_source_links';
 
 describe('getAlertSourceLinks', () => {

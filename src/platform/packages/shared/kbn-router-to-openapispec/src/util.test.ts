@@ -8,7 +8,7 @@
  */
 
 import type { RouteMethod } from '@kbn/core-http-server';
-import { type OpenAPIV3 } from 'openapi-types';
+import { OpenAPIV3 } from 'openapi-types';
 import {
   buildGlobalTags,
   getXsrfHeaderForMethod,
@@ -16,7 +16,7 @@ import {
   prepareRoutes,
   getPathParameters,
   createOpIdGenerator,
-  type GetOpId,
+  GetOpId,
   assignToPaths,
   extractTags,
 } from './util';

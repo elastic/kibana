@@ -7,12 +7,12 @@
 
 import { mapValues } from 'lodash';
 import stats from 'stats-lite';
-import { type JsonObject } from '@kbn/utility-types';
-import { type Logger } from '@kbn/core/server';
-import { type RawMonitoringStats, type RawMonitoredStat, HealthStatus } from './monitoring_stats_stream';
-import { type AveragedStat } from './task_run_calculators';
-import { type TaskPersistenceTypes } from './task_run_statistics';
-import { asErr, asOk, map, type Result } from '../lib/result_type';
+import { JsonObject } from '@kbn/utility-types';
+import { Logger } from '@kbn/core/server';
+import { RawMonitoringStats, RawMonitoredStat, HealthStatus } from './monitoring_stats_stream';
+import { AveragedStat } from './task_run_calculators';
+import { TaskPersistenceTypes } from './task_run_statistics';
+import { asErr, asOk, map, Result } from '../lib/result_type';
 
 export interface CapacityEstimationStat extends JsonObject {
   observed: {

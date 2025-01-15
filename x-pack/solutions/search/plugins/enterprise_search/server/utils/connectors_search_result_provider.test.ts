@@ -7,7 +7,7 @@
 
 import { NEVER, lastValueFrom, of } from 'rxjs';
 
-import { type IScopedClusterClient } from '@kbn/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 
 import type { GlobalSearchProviderContext } from '@kbn/global-search-plugin/server';
 

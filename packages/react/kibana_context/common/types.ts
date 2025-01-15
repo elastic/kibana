@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 
 // To avoid a circular dependency with the deprecation of `CoreThemeProvider`,
 // we need to define the theme type here.

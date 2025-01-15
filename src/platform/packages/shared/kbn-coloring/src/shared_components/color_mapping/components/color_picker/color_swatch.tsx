@@ -18,10 +18,10 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { type IKbnPalette, type KbnPalettes } from '@kbn/palettes';
+import { IKbnPalette, KbnPalettes } from '@kbn/palettes';
 import { ColorPicker } from './color_picker';
 import { getAssignmentColor } from '../../color/color_handling';
-import { type ColorMapping } from '../../config';
+import { ColorMapping } from '../../config';
 import { removeGradientColorStep } from '../../state/color_mapping';
 
 import { selectColorPickerVisibility } from '../../state/selectors';

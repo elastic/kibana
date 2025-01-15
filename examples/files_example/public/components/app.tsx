@@ -16,14 +16,14 @@ import {
   EuiProvider,
   EuiPageTemplate,
   EuiInMemoryTable,
-  type EuiInMemoryTableProps,
+  EuiInMemoryTableProps,
   EuiButton,
   EuiIcon,
   EuiButtonIcon,
   EuiLink,
 } from '@elastic/eui';
 
-import { type CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { MyFilePicker } from './file_picker';
 import type { MyImageMetadata } from '../../common';
 import type { FileClients } from '../types';

@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { type IRouter } from '@kbn/core/server';
+import { IRouter } from '@kbn/core/server';
 import { RANDOM_NUMBER_BETWEEN_ROUTE_PATH } from '../../common';
 
 /**

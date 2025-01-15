@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { type ActionResult } from '@kbn/actions-plugin/server';
-import { type RuleTypeParams, type SanitizedRule } from '@kbn/alerting-plugin/common';
+import { ActionResult } from '@kbn/actions-plugin/server';
+import { RuleTypeParams, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { ALERT_ACTION_TYPE_LOG } from '../../../../../common/constants';
 import { RulesFactory } from '../../../../rules';
 import { handleError } from '../../../../lib/errors';
-import { type MonitoringCore, type RouteDependencies } from '../../../../types';
+import { MonitoringCore, RouteDependencies } from '../../../../types';
 
 const DEFAULT_SERVER_LOG_NAME = 'Monitoring: Write to Kibana log';
 

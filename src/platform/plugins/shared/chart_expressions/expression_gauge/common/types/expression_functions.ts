@@ -7,27 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type $Values } from '@kbn/utility-types';
+import { $Values } from '@kbn/utility-types';
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import {
-  type Datatable,
-  type DefaultInspectorAdapters,
-  type ExecutionContext,
-  type ExpressionFunctionDefinition,
-  type ExpressionValueRender,
+  Datatable,
+  DefaultInspectorAdapters,
+  ExecutionContext,
+  ExpressionFunctionDefinition,
+  ExpressionValueRender,
 } from '@kbn/expressions-plugin/common';
-import { type ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { type CustomPaletteState } from '@kbn/charts-plugin/common';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { CustomPaletteState } from '@kbn/charts-plugin/common';
 import type { MakeOverridesSerializable, Simplify } from '@kbn/chart-expressions-common/types';
 import type { GoalProps } from '@elastic/charts';
 import {
-  type EXPRESSION_GAUGE_NAME,
-  type GAUGE_FUNCTION_RENDERER_NAME,
-  type GaugeShapes,
-  type GaugeTicksPositions,
-  type GaugeLabelMajorModes,
-  type GaugeColorModes,
-  type GaugeCentralMajorModes,
+  EXPRESSION_GAUGE_NAME,
+  GAUGE_FUNCTION_RENDERER_NAME,
+  GaugeShapes,
+  GaugeTicksPositions,
+  GaugeLabelMajorModes,
+  GaugeColorModes,
+  GaugeCentralMajorModes,
 } from '../constants';
 export type GaugeColorMode = $Values<typeof GaugeColorModes>;
 export type GaugeShape = $Values<typeof GaugeShapes>;

@@ -9,8 +9,8 @@
 
 import React, { useCallback } from 'react';
 
-import { JsonEditor, type OnJsonEditorUpdateHandler } from '../../../../public';
-import { type FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
+import { JsonEditor, OnJsonEditorUpdateHandler } from '../../../../public';
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
 interface Props {
   field: FieldHook<any, string>;

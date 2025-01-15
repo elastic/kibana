@@ -13,7 +13,7 @@ import type {
   ExternalReferenceAttachmentType,
   PersistableStateAttachmentTypeSetup,
 } from '@kbn/cases-plugin/server/attachment_framework/types';
-import { type BulkCreateCasesRequest, type CasesPatchRequest } from '@kbn/cases-plugin/common/types/api';
+import { BulkCreateCasesRequest, CasesPatchRequest } from '@kbn/cases-plugin/common/types/api';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import { CASES_TELEMETRY_TASK_NAME } from '@kbn/cases-plugin/common/constants';
 import type { FixtureStartDeps } from './plugin';

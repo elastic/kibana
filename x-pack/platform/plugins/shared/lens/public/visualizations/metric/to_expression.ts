@@ -6,10 +6,10 @@
  */
 
 import {
-  type CustomPaletteParams,
+  CustomPaletteParams,
   CUSTOM_PALETTE,
-  type PaletteRegistry,
-  type PaletteOutput,
+  PaletteRegistry,
+  PaletteOutput,
   getOverridePaletteStops,
 } from '@kbn/coloring';
 import type {
@@ -17,15 +17,15 @@ import type {
   MetricVisExpressionFunctionDefinition,
 } from '@kbn/expression-metric-vis-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import { type Ast } from '@kbn/interpreter';
+import { Ast } from '@kbn/interpreter';
 import { LayoutDirection } from '@elastic/charts';
 import { hasIcon } from '@kbn/visualization-ui-components';
-import { type CollapseArgs, type CollapseFunction } from '../../../common/expressions';
-import { type CollapseExpressionFunction } from '../../../common/expressions/collapse/types';
-import { type DatasourceLayers } from '../../types';
+import { CollapseArgs, CollapseFunction } from '../../../common/expressions';
+import { CollapseExpressionFunction } from '../../../common/expressions/collapse/types';
+import { DatasourceLayers } from '../../types';
 import { showingBar } from './metric_visualization';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor } from './visualization';
-import { type MetricVisualizationState } from './types';
+import { MetricVisualizationState } from './types';
 import { metricStateDefaults } from './constants';
 
 // TODO - deduplicate with gauges?

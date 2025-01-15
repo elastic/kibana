@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { schema, type TypeOf } from '@kbn/config-schema';
-import { type PluginConfigDescriptor } from '@kbn/core/server';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginConfigDescriptor } from '@kbn/core/server';
 
-export type * from './types';
+export * from './types';
 
 const configSchema = schema.object({
   // Is this plugin enabled?

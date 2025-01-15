@@ -6,7 +6,7 @@
  */
 
 import { initializeGetFunctionsRoute, initializeBatchFunctionsRoute } from './functions';
-import { type RouteInitializerDeps } from '..';
+import { RouteInitializerDeps } from '..';
 
 export function initFunctionsRoutes(deps: RouteInitializerDeps) {
   initializeGetFunctionsRoute(deps);

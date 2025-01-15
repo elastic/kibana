@@ -10,32 +10,32 @@
 /* eslint-disable max-classes-per-file */
 
 import { cloneDeep, mapValues } from 'lodash';
-import { type Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { type SavedObjectReference } from '@kbn/core/types';
+import { SavedObjectReference } from '@kbn/core/types';
 import {
-  type MigrateFunctionsObject,
+  MigrateFunctionsObject,
   migrateToLatest,
-  type PersistableStateService,
-  type VersionedState,
+  PersistableStateService,
+  VersionedState,
 } from '@kbn/kibana-utils-plugin/common';
-import { type ExecutorState, type ExecutorContainer } from './container';
+import { ExecutorState, ExecutorContainer } from './container';
 import { createExecutorContainer } from './container';
-import { type AnyExpressionFunctionDefinition, ExpressionFunction } from '../expression_functions';
+import { AnyExpressionFunctionDefinition, ExpressionFunction } from '../expression_functions';
 import {
   Execution,
-  type ExecutionParams,
-  type ExecutionResult,
-  type FunctionCacheItem,
+  ExecutionParams,
+  ExecutionResult,
+  FunctionCacheItem,
 } from '../execution/execution';
-import { type IRegistry } from '../types';
+import { IRegistry } from '../types';
 import { ExpressionType } from '../expression_types/expression_type';
-import { type AnyExpressionTypeDefinition } from '../expression_types/types';
-import { type ExpressionAstExpression, type ExpressionAstFunction } from '../ast';
-import { type ExpressionValueError, typeSpecs } from '../expression_types/specs';
+import { AnyExpressionTypeDefinition } from '../expression_types/types';
+import { ExpressionAstExpression, ExpressionAstFunction } from '../ast';
+import { ExpressionValueError, typeSpecs } from '../expression_types/specs';
 import { ALL_NAMESPACES, getByAlias } from '../util';
-import { type ExpressionExecutionParams } from '../service';
+import { ExpressionExecutionParams } from '../service';
 
 export interface ExpressionExecOptions {
   /**

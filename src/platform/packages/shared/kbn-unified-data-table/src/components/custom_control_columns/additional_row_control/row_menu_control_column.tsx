@@ -12,14 +12,14 @@ import {
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  type EuiDataGridCellValueElementProps,
-  type EuiDataGridControlColumn,
+  EuiDataGridCellValueElementProps,
+  EuiDataGridControlColumn,
   EuiPopover,
   EuiScreenReaderOnly,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type RowControlColumn, type RowControlProps } from '@kbn/discover-utils';
+import { RowControlColumn, RowControlProps } from '@kbn/discover-utils';
 import { DEFAULT_CONTROL_COLUMN_WIDTH } from '../../../constants';
 import { useControlColumn } from '../../../hooks/use_control_column';
 

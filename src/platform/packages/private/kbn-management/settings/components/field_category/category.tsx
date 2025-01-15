@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ReactElement, Children } from 'react';
+import React, { ReactElement, Children } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSplitPanel, EuiTitle, useEuiTheme } from '@elastic/eui';
 
 import { getCategoryName } from '@kbn/management-settings-utilities';
 import type { FieldRowProps } from '@kbn/management-settings-components-field-row';
 import { css } from '@emotion/react';
-import { ClearQueryLink, type ClearQueryLinkProps } from './clear_query_link';
+import { ClearQueryLink, ClearQueryLinkProps } from './clear_query_link';
 
 export const DATA_TEST_SUBJ_SETTINGS_CATEGORY = 'settingsCategory';
 

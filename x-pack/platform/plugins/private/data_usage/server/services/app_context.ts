@@ -11,7 +11,7 @@ import { kibanaPackageJson } from '@kbn/repo-info';
 import type { LoggerFactory } from '@kbn/core/server';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import { type DataUsageConfigType } from '../config';
+import { DataUsageConfigType } from '../config';
 import type { DataUsageContext } from '../types';
 
 export class AppContextService {

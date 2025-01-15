@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type EventEmitter } from 'events';
+import { EventEmitter } from 'events';
 import { useEffect, useRef, useState } from 'react';
-import { type VisualizeInput } from '../../..';
-import { type ByValueVisInstance, type VisualizeServices, type IEditorController } from '../../types';
+import { VisualizeInput } from '../../..';
+import { ByValueVisInstance, VisualizeServices, IEditorController } from '../../types';
 import { getVisualizationInstanceFromInput } from '../get_visualization_instance';
 import { getEditBreadcrumbs, getEditServerlessBreadcrumbs } from '../breadcrumbs';
 

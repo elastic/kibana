@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type TimefilterContract } from '@kbn/data-plugin/public';
-import { type NavigateToLensContext, type XYConfiguration } from '@kbn/visualizations-plugin/common';
-import { type Vis } from '@kbn/visualizations-plugin/public';
-import { type VisParams } from '../types';
+import { TimefilterContract } from '@kbn/data-plugin/public';
+import { NavigateToLensContext, XYConfiguration } from '@kbn/visualizations-plugin/common';
+import { Vis } from '@kbn/visualizations-plugin/public';
+import { VisParams } from '../types';
 
 export type ConvertXYToLensVisualization = (
   vis: Vis<VisParams>,

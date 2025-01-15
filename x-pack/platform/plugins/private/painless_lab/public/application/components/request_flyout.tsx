@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 import {
   EuiCodeBlock,
   EuiTabbedContent,
@@ -18,7 +18,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type Links } from '../../links';
+import { Links } from '../../links';
 
 interface Props {
   onClose: any;

@@ -12,7 +12,7 @@ import {
   COMPARATOR_SUBJECTS_DEBOUNCE,
   initializeUnsavedChanges,
 } from './initialize_unsaved_changes';
-import { type PublishesUnsavedChanges, type StateComparators } from '@kbn/presentation-publishing';
+import { PublishesUnsavedChanges, StateComparators } from '@kbn/presentation-publishing';
 import { waitFor } from '@testing-library/react';
 
 interface TestState {

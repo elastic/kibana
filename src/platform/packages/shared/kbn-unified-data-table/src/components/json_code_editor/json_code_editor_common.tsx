@@ -11,7 +11,7 @@ import './json_code_editor.scss';
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { type monaco, XJsonLang } from '@kbn/monaco';
+import { monaco, XJsonLang } from '@kbn/monaco';
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 const codeEditorAriaLabel = i18n.translate('unifiedDataTable.json.codeEditorAriaLabel', {

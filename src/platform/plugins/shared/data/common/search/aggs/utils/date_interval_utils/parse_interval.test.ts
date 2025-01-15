@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Duration, type unitOfTime } from 'moment';
+import { Duration, unitOfTime } from 'moment';
 import { parseInterval, splitStringInterval } from './parse_interval';
 
 describe('splitStringInterval', () => {

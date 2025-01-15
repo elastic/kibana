@@ -19,10 +19,10 @@ import {
   EuiFlexItem,
   EuiHighlight,
   EuiFlexGroup,
-  type EuiComboBoxOptionOption,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 
-import { type DashboardItem } from '../../types';
+import { DashboardItem } from '../../types';
 import { DashboardLinkStrings } from './dashboard_link_strings';
 import { fetchDashboard, fetchDashboards } from './dashboard_link_tools';
 

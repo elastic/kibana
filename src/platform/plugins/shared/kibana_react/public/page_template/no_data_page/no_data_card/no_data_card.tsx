@@ -8,9 +8,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { type FunctionComponent } from 'react';
-import { EuiButton, EuiCard, type EuiCardProps } from '@elastic/eui';
-import { type NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
+import React, { FunctionComponent } from 'react';
+import { EuiButton, EuiCard, EuiCardProps } from '@elastic/eui';
+import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
 
 // Custom cards require all the props the EuiCard does
 type NoDataCard = EuiCardProps & NoDataPageActions;

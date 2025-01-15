@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { type ServiceStatus, ServiceStatusLevels } from '@kbn/core/server';
+import { ServiceStatus, ServiceStatusLevels } from '@kbn/core/server';
 
 const SNAPSHOT_REGEX = /-snapshot/i;
 

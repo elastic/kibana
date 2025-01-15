@@ -8,24 +8,24 @@
 import React from 'react';
 
 import {
-  type IExecutionLogResult,
-  type IExecutionErrorsResult,
-  type IExecutionKPIResult,
+  IExecutionLogResult,
+  IExecutionErrorsResult,
+  IExecutionKPIResult,
 } from '@kbn/alerting-plugin/common';
-import { type AlertingFrameworkHealth } from '@kbn/alerting-types';
+import { AlertingFrameworkHealth } from '@kbn/alerting-types';
 import { fetchAlertingFrameworkHealth as alertingFrameworkHealth } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerting_framework_health';
 import { resolveRule } from '@kbn/response-ops-rule-form';
 import {
-  type Rule,
-  type RuleType,
-  type RuleTaskState,
-  type RuleSummary,
-  type ResolvedRule,
-  type SnoozeSchedule,
-  type BulkEditResponse,
-  type BulkOperationResponse,
-  type BulkOperationAttributesWithoutHttp,
-  type BulkDisableParamsWithoutHttp,
+  Rule,
+  RuleType,
+  RuleTaskState,
+  RuleSummary,
+  ResolvedRule,
+  SnoozeSchedule,
+  BulkEditResponse,
+  BulkOperationResponse,
+  BulkOperationAttributesWithoutHttp,
+  BulkDisableParamsWithoutHttp,
 } from '../../../../types';
 import type {
   LoadExecutionLogAggregationsProps,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type EmbeddableSetup, type EmbeddableStart } from './plugin';
+import { EmbeddableSetup, EmbeddableStart } from './plugin';
 
 export type { EmbeddableSetup, EmbeddableStart };
 

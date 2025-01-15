@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type IMetricAggConfig, type MetricAggParam } from '../metric_agg_type';
+import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
 
 /**
  * Forwards modifyAggConfigOnSearchRequestStart calls to a nested AggConfig.

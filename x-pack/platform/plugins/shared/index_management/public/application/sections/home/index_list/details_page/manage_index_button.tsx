@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { type FunctionComponent, useCallback, useMemo, useState } from 'react';
+import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { type HttpSetup } from '@kbn/core-http-browser';
+import { HttpSetup } from '@kbn/core-http-browser';
 
-import { type Index } from '../../../../../../common';
+import { Index } from '../../../../../../common';
 import {
   clearCacheIndices as clearCacheIndicesRequest,
   closeIndices as closeIndicesRequest,
@@ -24,7 +24,7 @@ import { httpService } from '../../../../services/http';
 
 import {
   IndexActionsContextMenu,
-  type IndexActionsContextMenuProps,
+  IndexActionsContextMenuProps,
 } from '../index_actions_context_menu/index_actions_context_menu';
 
 const getIndexStatusByName = (

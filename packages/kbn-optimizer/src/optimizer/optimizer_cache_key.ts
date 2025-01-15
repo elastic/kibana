@@ -9,8 +9,8 @@
 
 import { readHashOfPackageMap } from '@kbn/repo-packages';
 
-import { type CacheableWorkerConfig, Hashes } from '../common';
-import { type OptimizerConfig } from './optimizer_config';
+import { CacheableWorkerConfig, Hashes } from '../common';
+import { OptimizerConfig } from './optimizer_config';
 import { getOptimizerBuiltPaths } from './optimizer_built_paths';
 
 export interface OptimizerCacheKey {

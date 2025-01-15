@@ -6,6 +6,6 @@
  */
 
 import { createServerRouteFactory } from '@kbn/server-route-repository';
-import { type StreamsRouteHandlerResources } from './types';
+import { StreamsRouteHandlerResources } from './types';
 
 export const createServerRoute = createServerRouteFactory<StreamsRouteHandlerResources>();

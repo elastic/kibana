@@ -12,7 +12,7 @@ import { run } from '@kbn/dev-cli-runner';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { ErrorReporter } from '../utils';
-import { type I18nCheckTaskContext, type MessageDescriptor } from '../types';
+import { I18nCheckTaskContext, MessageDescriptor } from '../types';
 import {
   checkConfigs,
   mergeConfigs,

@@ -6,13 +6,13 @@
  */
 
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
-import { type IEvent, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
 import {
   AlertingEventLogger,
-  type ContextOpts,
-  type Context,
-  type RuleContext,
+  ContextOpts,
+  Context,
+  RuleContext,
   initializeExecuteRecord,
   createExecuteTimeoutRecord,
   createAlertRecord,
@@ -20,16 +20,16 @@ import {
   updateEvent,
   executionType,
   initializeExecuteBackfillRecord,
-  type SavedObjects,
+  SavedObjects,
   updateEventWithRuleData,
 } from './alerting_event_logger';
-import { type UntypedNormalizedRuleType } from '../../rule_type_registry';
+import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import {
   RecoveredActionGroup,
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
 } from '../../types';
-import { type RuleRunMetrics } from '../rule_run_metrics_store';
+import { RuleRunMetrics } from '../rule_run_metrics_store';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
 import { TaskRunnerTimerSpan } from '../../task_runner/task_runner_timer';
 import { schema } from '@kbn/config-schema';

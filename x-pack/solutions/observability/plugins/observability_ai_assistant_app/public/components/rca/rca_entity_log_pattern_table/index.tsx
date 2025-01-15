@@ -7,12 +7,12 @@
 import {
   EuiBadge,
   EuiBasicTable,
-  type EuiBasicTableColumn,
+  EuiBasicTableColumn,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  type EuiThemeComputed,
+  EuiThemeComputed,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';

@@ -6,16 +6,15 @@
  */
 
 import { useCallback } from 'react';
-import { type MlPluginStart } from '@kbn/ml-plugin/public';
-import type React from 'react';
-import { useEffect } from 'react';
-import { type InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import { MlPluginStart } from '@kbn/ml-plugin/public';
+import React, { useEffect } from 'react';
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { ElserModels } from '@kbn/ml-trained-models-utils';
 import { i18n } from '@kbn/i18n';
 import { useDetailsPageMappingsModelManagement } from '../../../../../../../../hooks/use_details_page_mappings_model_management';
 import { useDispatch, useMappingsState } from '../../../../../mappings_state_context';
-import { type FormHook } from '../../../../../shared_imports';
-import { type CustomInferenceEndpointConfig, type Field, type SemanticTextField } from '../../../../../types';
+import { FormHook } from '../../../../../shared_imports';
+import { CustomInferenceEndpointConfig, Field, SemanticTextField } from '../../../../../types';
 import { useMLModelNotificationToasts } from '../../../../../../../../hooks/use_ml_model_status_toasts';
 
 import { getInferenceEndpoints } from '../../../../../../../services/api';

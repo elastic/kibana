@@ -20,7 +20,7 @@ import {
   useIsWithinBreakpoints,
   EuiIcon,
   EuiText,
-  type EuiContextMenuPanelProps,
+  EuiContextMenuPanelProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { type TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ExpViewActionMenuContent } from './action_menu';

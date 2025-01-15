@@ -12,12 +12,12 @@ import React, {
   useEffect,
   useMemo,
   useState,
-  type FC,
+  FC,
 } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useEvent from 'react-use/lib/useEvent';
 import moment from 'moment';
-import { type Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../common/constants/synthetics/client_defaults';
 const { AUTOREFRESH_INTERVAL_SECONDS, AUTOREFRESH_IS_PAUSED } = CLIENT_DEFAULTS_SYNTHETICS;

@@ -41,7 +41,7 @@ import {
   HelpPopover,
   ShortcutsPopover,
   ConsoleTourStep,
-  type ConsoleTourStepProps,
+  ConsoleTourStepProps,
 } from '../../components';
 import { History } from '../history';
 import { useDataInit } from '../../hooks';

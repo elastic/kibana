@@ -17,7 +17,7 @@ import {
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { type Root } from '@kbn/core-root-server-internal';
+import { Root } from '@kbn/core-root-server-internal';
 import { getFips } from 'crypto';
 
 const LOG_FILE_PREFIX = 'migration_test_multiple_es_nodes';

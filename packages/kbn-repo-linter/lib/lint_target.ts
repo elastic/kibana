@@ -8,9 +8,9 @@
  */
 
 import Path from 'path';
-import { type Package } from '@kbn/repo-packages';
+import { Package } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { type TsProject } from '@kbn/ts-projects';
+import { TsProject } from '@kbn/ts-projects';
 
 export abstract class LintTarget {
   constructor(

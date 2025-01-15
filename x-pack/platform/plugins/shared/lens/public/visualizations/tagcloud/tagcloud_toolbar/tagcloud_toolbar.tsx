@@ -12,17 +12,17 @@
  * 2.0.
  */
 
-import React, { type ChangeEvent } from 'react';
+import React, { ChangeEvent } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiSelect,
   EuiSwitch,
-  type EuiSwitchEvent,
+  EuiSwitchEvent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type $Values } from '@kbn/utility-types';
+import { $Values } from '@kbn/utility-types';
 import { Orientation } from '@kbn/expression-tagcloud-plugin/common';
 import type { VisualizationToolbarProps } from '../../../types';
 import { ToolbarPopover } from '../../../shared_components';

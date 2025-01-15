@@ -10,7 +10,7 @@
 import { Builder } from '../../../builder';
 import type { ESQLAstQueryExpression, ESQLCommand } from '../../../types';
 import * as generic from '../../generic';
-import { type Predicate } from '../../types';
+import { Predicate } from '../../types';
 
 /**
  * Lists all "LIMIT" commands in the query AST.

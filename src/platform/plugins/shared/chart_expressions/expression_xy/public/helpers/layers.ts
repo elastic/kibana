@@ -7,23 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Datatable } from '@kbn/expressions-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import {
-  type FieldFormat,
-  type FormatFactory,
-  type SerializedFieldFormat,
+  FieldFormat,
+  FormatFactory,
+  SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
-import { type ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 import {
   getAccessorByDimension,
   getColumnByAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
 import {
-  type CommonXYDataLayerConfig,
-  type CommonXYLayerConfig,
-  type ReferenceLineLayerConfig,
+  CommonXYDataLayerConfig,
+  CommonXYLayerConfig,
+  ReferenceLineLayerConfig,
 } from '../../common/types';
-import { type GroupsConfiguration } from './axes_configuration';
+import { GroupsConfiguration } from './axes_configuration';
 import { getFormat } from './format';
 import { isDataLayer, isReferenceLayer } from './visualization';
 

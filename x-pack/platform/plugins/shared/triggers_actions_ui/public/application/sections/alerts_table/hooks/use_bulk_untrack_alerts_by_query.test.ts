@@ -6,11 +6,11 @@
  */
 
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { type AppMockRenderer, createAppMockRenderer } from '../../test_utils';
+import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { useBulkUntrackAlertsByQuery } from './use_bulk_untrack_alerts_by_query';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
-import { type TriggersAndActionsUiServices } from '../../../..';
+import { TriggersAndActionsUiServices } from '../../../..';
 
 const mockUseKibanaReturnValue: TriggersAndActionsUiServices = createStartServicesMock();
 

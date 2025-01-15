@@ -6,9 +6,9 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { type DocLinksStart } from '@kbn/core/public';
+import { DocLinksStart } from '@kbn/core/public';
 import { ACTION_TYPES } from '../../common/constants';
-import { type AppDeps } from './app';
+import { AppDeps } from './app';
 
 interface ContextValue extends Omit<AppDeps, 'docLinks'> {
   links: ReturnType<typeof generateDocLinks>;

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type KibanaRequest } from '@kbn/core-http-server';
+import { KibanaRequest } from '@kbn/core-http-server';
 import type { Message } from '@kbn/elastic-assistant-common';
-import { AIMessage, type BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
-import { type ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
+import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
+import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 
 import {
   getLangChainMessage,

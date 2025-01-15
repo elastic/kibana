@@ -6,13 +6,13 @@
  */
 
 import {
-  type MappingRuntimeFields,
-  type TransformPutTransformRequest,
+  MappingRuntimeFields,
+  TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { type DataView, type DataViewsService } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 import { ALL_VALUE, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
-import { type TransformSettings } from '../../assets/transform_templates/slo_transform_template';
-import { type SLODefinition } from '../../domain/models';
+import { TransformSettings } from '../../assets/transform_templates/slo_transform_template';
+import { SLODefinition } from '../../domain/models';
 
 export abstract class TransformGenerator {
   constructor(

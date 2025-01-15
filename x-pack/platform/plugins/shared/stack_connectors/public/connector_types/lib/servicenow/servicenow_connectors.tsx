@@ -23,10 +23,10 @@ import { useGetAppInfo } from './use_get_app_info';
 import { ApplicationRequiredCallout } from './application_required_callout';
 import { isRESTApiError } from './helpers';
 import { InstallationCallout } from './installation_callout';
-import { UpdateConnector, type UpdateConnectorFormSchema } from './update_connector';
+import { UpdateConnector, UpdateConnectorFormSchema } from './update_connector';
 import { Credentials } from './credentials';
 import * as i18n from './translations';
-import { type ServiceNowActionConnector, type ServiceNowConfig, type ServiceNowSecrets } from './types';
+import { ServiceNowActionConnector, ServiceNowConfig, ServiceNowSecrets } from './types';
 
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowConnectorFields as default };

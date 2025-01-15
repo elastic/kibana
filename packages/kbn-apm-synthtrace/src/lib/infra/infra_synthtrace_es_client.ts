@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Client } from '@elastic/elasticsearch';
-import { type ESDocumentWithOperation, type InfraDocument } from '@kbn/apm-synthtrace-client';
-import { pipeline, type Readable, Transform } from 'stream';
-import { SynthtraceEsClient, type SynthtraceEsClientOptions } from '../shared/base_client';
+import { Client } from '@elastic/elasticsearch';
+import { ESDocumentWithOperation, InfraDocument } from '@kbn/apm-synthtrace-client';
+import { pipeline, Readable, Transform } from 'stream';
+import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
 import { getDedotTransform } from '../shared/get_dedot_transform';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
-import { type Logger } from '../utils/create_logger';
+import { Logger } from '../utils/create_logger';
 
 export type InfraSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
 

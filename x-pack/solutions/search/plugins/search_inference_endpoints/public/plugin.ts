@@ -8,23 +8,23 @@
 import { BehaviorSubject, type Subscription } from 'rxjs';
 
 import {
-  type AppMountParameters,
+  AppMountParameters,
   AppStatus,
-  type AppUpdater,
-  type CoreSetup,
-  type CoreStart,
-  type Plugin,
-  type PluginInitializerContext,
+  AppUpdater,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common/constants';
 import { docLinks } from '../common/doc_links';
 import {
-  type AppPluginSetupDependencies,
-  type AppPluginStartDependencies,
-  type SearchInferenceEndpointsConfigType,
-  type SearchInferenceEndpointsPluginSetup,
-  type SearchInferenceEndpointsPluginStart,
+  AppPluginSetupDependencies,
+  AppPluginStartDependencies,
+  SearchInferenceEndpointsConfigType,
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginStart,
 } from './types';
 import { registerLocators } from './locators';
 import { INFERENCE_ENDPOINTS_PATH } from './components/routes';

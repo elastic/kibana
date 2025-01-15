@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { type FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export

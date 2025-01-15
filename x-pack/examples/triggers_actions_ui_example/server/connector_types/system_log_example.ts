@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { schema, type TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-import { type LogMeta } from '@kbn/core/server';
+import { LogMeta } from '@kbn/core/server';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -18,7 +18,7 @@ import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
 } from '@kbn/actions-plugin/common/connector_feature_config';
-import { type ConnectorAdapter } from '@kbn/alerting-plugin/server';
+import { ConnectorAdapter } from '@kbn/alerting-plugin/server';
 
 // see: https://en.wikipedia.org/wiki/Unicode_control_characters
 // but don't include tabs (0x09), they're fine

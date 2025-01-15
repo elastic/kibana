@@ -6,7 +6,7 @@
  */
 /* eslint-disable import/no-default-export */
 
-import { type FtrProviderContext } from './ftr_provider_context';
+import { FtrProviderContext } from './ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Solution navigation smoke tests', function () {

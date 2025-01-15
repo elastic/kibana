@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type BaseFlameGraph } from '../flamegraph';
+import { BaseFlameGraph } from '../flamegraph';
 
 export const baseFlamegraph: BaseFlameGraph = {
   Edges: [

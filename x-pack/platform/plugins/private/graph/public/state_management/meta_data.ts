@@ -9,7 +9,7 @@ import actionCreatorFactory from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import { select, takeLatest, call } from 'redux-saga/effects';
 import { i18n } from '@kbn/i18n';
-import { type GraphState, type GraphStoreDependencies } from './store';
+import { GraphState, GraphStoreDependencies } from './store';
 import { reset } from './global';
 import { setBreadcrumbs } from '../services/url';
 

@@ -9,8 +9,8 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID } from '@kbn/management-settings-ids';
 import { flattenLogSources } from '../../../common/services/log_sources_service/utils';
-import { type LogSource, type LogSourcesService } from '../../../common/services/log_sources_service/types';
-import { type RegisterServicesParams } from '../register_services';
+import { LogSource, LogSourcesService } from '../../../common/services/log_sources_service/types';
+import { RegisterServicesParams } from '../register_services';
 
 export function createLogSourcesServiceFactory(params: RegisterServicesParams) {
   return {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type DebugState } from '@elastic/charts';
+import { DebugState } from '@elastic/charts';
 import expect from '@kbn/expect';
 import chroma from 'chroma-js';
-import { type FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

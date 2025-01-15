@@ -7,11 +7,11 @@
 
 import { expect } from 'expect';
 import {
-  type CookieCredentials,
-  type InternalRequestHeader,
-  type RoleCredentials,
+  CookieCredentials,
+  InternalRequestHeader,
+  RoleCredentials,
 } from '@kbn/ftr-common-functional-services';
-import { type FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

@@ -22,11 +22,11 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { BASE_ALERTING_API_PATH } from '../constants';
-import { type RuleFormData } from '../types';
+import { RuleFormData } from '../types';
 import {
-  type CreateRuleBody,
+  CreateRuleBody,
   UPDATE_FIELDS_WITH_ACTIONS,
-  type UpdateRuleBody,
+  UpdateRuleBody,
   transformCreateRuleBody,
   transformUpdateRuleBody,
 } from '../common/apis';

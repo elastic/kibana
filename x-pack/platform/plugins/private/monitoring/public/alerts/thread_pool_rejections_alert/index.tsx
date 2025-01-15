@@ -14,7 +14,7 @@ import type { CommonAlertParamDetails } from '../../../common/types/alerts';
 import type { MonitoringConfig } from '../../types';
 import {
   LazyExpression,
-  type LazyExpressionProps,
+  LazyExpressionProps,
 } from '../components/param_details_form/lazy_expression';
 
 interface ThreadPoolTypes {

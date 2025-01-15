@@ -27,7 +27,7 @@ import { SelectorPopover } from './sub_components/selector_popover';
 import { DataViewMenuItem } from './sub_components/data_view_menu_item';
 import { SearchControls } from './sub_components/search_controls';
 import { ESQLButton, SelectorFooter, ShowAllLogsButton } from './sub_components/selector_footer';
-import { type DataSourceSelectorProps } from './types';
+import { DataSourceSelectorProps } from './types';
 import {
   buildIntegrationsTree,
   createDataViewsStatusItem,

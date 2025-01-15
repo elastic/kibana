@@ -11,14 +11,14 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 
-import { type IAggType, AggGroupNames } from '@kbn/data-plugin/public';
+import { IAggType, AggGroupNames } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Schema } from '@kbn/visualizations-plugin/public';
 
-import { DefaultEditorAgg, type DefaultEditorAggProps } from './agg';
+import { DefaultEditorAgg, DefaultEditorAggProps } from './agg';
 import { DefaultEditorAggParams } from './agg_params';
 import { AGGS_ACTION_KEYS } from './agg_group_state';
-import { type EditorVisState } from './sidebar/state/reducers';
+import { EditorVisState } from './sidebar/state/reducers';
 
 jest.mock('./agg_params', () => ({
   DefaultEditorAggParams: () => null,

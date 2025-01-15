@@ -9,7 +9,7 @@ import React from 'react';
 import {
   EuiText,
   EuiSpacer,
-  type EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelDescriptor,
   EuiButton,
   EuiPopover,
   EuiContextMenu,

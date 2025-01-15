@@ -20,7 +20,7 @@ import {
   EuiLoadingSpinner,
   EuiRadioGroup,
   EuiSwitch,
-  type EuiSwitchEvent,
+  EuiSwitchEvent,
 } from '@elastic/eui';
 
 import { format as formatUrl, parse as parseUrl } from 'url';
@@ -30,10 +30,10 @@ import { i18n } from '@kbn/i18n';
 import type { Capabilities } from '@kbn/core/public';
 
 import type { LocatorPublic } from '../../common';
-import { type UrlParamExtension } from '../types';
+import { UrlParamExtension } from '../types';
 import {
-  type AnonymousAccessServiceContract,
-  type AnonymousAccessState,
+  AnonymousAccessServiceContract,
+  AnonymousAccessState,
 } from '../../common/anonymous_access';
 import type { BrowserUrlService } from '../types';
 

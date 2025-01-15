@@ -7,7 +7,7 @@
 
 import { CURSOR, FILTER, LIST_ID } from '../../constants/index.mock';
 
-import { type FindListItemSchema, type FindListItemSchemaDecoded } from '.';
+import { FindListItemSchema, FindListItemSchemaDecoded } from '.';
 
 export const getFindListItemSchemaMock = (): FindListItemSchema => ({
   cursor: CURSOR,

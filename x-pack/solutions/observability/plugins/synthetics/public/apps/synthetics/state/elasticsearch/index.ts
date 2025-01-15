@@ -6,9 +6,9 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import { type ESSearchResponse } from '@kbn/es-types';
+import { ESSearchResponse } from '@kbn/es-types';
 
-import { type IHttpSerializedFetchError } from '..';
+import { IHttpSerializedFetchError } from '..';
 import { executeEsQueryAction } from './actions';
 
 export interface QueriesState {

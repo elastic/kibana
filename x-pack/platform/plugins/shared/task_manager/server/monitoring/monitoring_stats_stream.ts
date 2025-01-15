@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import { merge, of, type Observable } from 'rxjs';
+import { merge, of, Observable } from 'rxjs';
 import { map, scan } from 'rxjs';
 import { set } from '@kbn/safer-lodash-set';
-import { type Logger } from '@kbn/core/server';
-import { type JsonObject } from '@kbn/utility-types';
+import { Logger } from '@kbn/core/server';
+import { JsonObject } from '@kbn/utility-types';
 import {
   createWorkloadAggregator,
   summarizeWorkloadStat,
-  type SummarizedWorkloadStat,
-  type WorkloadStat,
+  SummarizedWorkloadStat,
+  WorkloadStat,
 } from './workload_statistics';
 import {
   createTaskRunAggregator,
   summarizeTaskRunStat,
-  type TaskRunStat,
-  type SummarizedTaskRunStat,
+  TaskRunStat,
+  SummarizedTaskRunStat,
 } from './task_run_statistics';
 import {
-  type BackgroundTaskUtilizationStat,
+  BackgroundTaskUtilizationStat,
   createBackgroundTaskUtilizationAggregator,
 } from './background_task_utilization_statistics';
 
-import { type ConfigStat, createConfigurationAggregator } from './configuration_statistics';
-import { type TaskManagerConfig } from '../config';
-import { type CapacityEstimationStat, withCapacityEstimate } from './capacity_estimation';
-import { type AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
-import { type CreateMonitoringStatsOpts } from '.';
+import { ConfigStat, createConfigurationAggregator } from './configuration_statistics';
+import { TaskManagerConfig } from '../config';
+import { CapacityEstimationStat, withCapacityEstimate } from './capacity_estimation';
+import { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
+import { CreateMonitoringStatsOpts } from '.';
 
 export interface MonitoringStats {
   last_update: string;

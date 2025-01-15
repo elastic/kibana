@@ -10,17 +10,17 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   Operations,
-  type PercentileRanksParams,
+  PercentileRanksParams,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import type { Metric, Series } from '../../../../common/types';
-import { type AdditionalArgs } from '../../types';
+import { AdditionalArgs } from '../../types';
 import { createColumn, getFormat } from './column';
 import {
-  type PercentileRanksColumn,
-  type Column,
-  type PercentileRanksColumnWithExtendedMeta,
-  type CommonColumnConverterArgs,
-  type PercentileColumn,
+  PercentileRanksColumn,
+  Column,
+  PercentileRanksColumnWithExtendedMeta,
+  CommonColumnConverterArgs,
+  PercentileColumn,
 } from './types';
 
 export const isPercentileRanksColumnWithMeta = (

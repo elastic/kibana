@@ -10,20 +10,20 @@ import { fold, map } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as runtimeTypes from 'io-ts';
-import { type JsonArray } from '@kbn/utility-types';
+import { JsonArray } from '@kbn/utility-types';
 import { compact } from 'lodash';
 import type { LogsSharedPluginRequestHandlerContext } from '../../../types';
 import {
-  type LogEntriesAdapter,
-  type LogEntriesParams,
-  type LogEntryDocument,
-  type LogEntryQuery,
-  type LogSummaryBucket,
+  LogEntriesAdapter,
+  LogEntriesParams,
+  LogEntryDocument,
+  LogEntryQuery,
+  LogSummaryBucket,
   LOG_ENTRIES_PAGE_SIZE,
 } from '../../domains/log_entries_domain';
-import { type SortedSearchHit } from '../framework';
-import { type KibanaFramework } from '../framework/kibana_framework_adapter';
-import { type ResolvedLogView } from '../../../../common/log_views';
+import { SortedSearchHit } from '../framework';
+import { KibanaFramework } from '../framework/kibana_framework_adapter';
+import { ResolvedLogView } from '../../../../common/log_views';
 import { TIMESTAMP_FIELD, TIEBREAKER_FIELD } from '../../../../common/constants';
 
 const TIMESTAMP_FORMAT = 'epoch_millis';

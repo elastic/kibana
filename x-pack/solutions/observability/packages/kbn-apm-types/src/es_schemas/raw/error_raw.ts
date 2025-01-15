@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { type APMBaseDoc } from './apm_base_doc';
+import { APMBaseDoc } from './apm_base_doc';
 import {
-  type Container,
-  type Host,
-  type Http,
-  type Kubernetes,
-  type Page,
-  type Process,
-  type Service,
-  type Stackframe,
-  type TimestampUs,
-  type Url,
-  type User,
+  Container,
+  Host,
+  Http,
+  Kubernetes,
+  Page,
+  Process,
+  Service,
+  Stackframe,
+  TimestampUs,
+  Url,
+  User,
 } from './fields';
 
 export interface Processor {

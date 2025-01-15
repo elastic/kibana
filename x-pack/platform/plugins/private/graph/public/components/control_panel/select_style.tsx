@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
-import { type Workspace } from '../../types';
+import { Workspace } from '../../types';
 
 interface SelectStyleProps {
   workspace: Workspace;

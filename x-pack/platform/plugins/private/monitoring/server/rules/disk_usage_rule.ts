@@ -7,24 +7,24 @@
 
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
-import { type ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
-import { type RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import { type AlertInstanceContext, type RawAlertInstance, type SanitizedRule } from '@kbn/alerting-plugin/common';
+import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { AlertInstanceContext, RawAlertInstance, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { BaseRule } from './base_rule';
 import {
-  type AlertData,
-  type AlertCluster,
-  type AlertState,
-  type AlertMessage,
-  type AlertDiskUsageState,
-  type AlertMessageTimeToken,
-  type AlertMessageLinkToken,
-  type AlertInstanceState,
-  type CommonAlertParams,
-  type AlertDiskUsageNodeStats,
-  type CommonAlertFilter,
+  AlertData,
+  AlertCluster,
+  AlertState,
+  AlertMessage,
+  AlertDiskUsageState,
+  AlertMessageTimeToken,
+  AlertMessageLinkToken,
+  AlertInstanceState,
+  CommonAlertParams,
+  AlertDiskUsageNodeStats,
+  CommonAlertFilter,
 } from '../../common/types/alerts';
 import { RULE_DISK_USAGE, RULE_DETAILS } from '../../common/constants';
 import { ROUNDED_FLOAT } from '../../common/formatting';

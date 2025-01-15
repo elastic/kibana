@@ -13,13 +13,13 @@ import {
   apiCanAccessViewMode,
   apiHasType,
   apiIsOfType,
-  type CanAccessViewMode,
-  type EmbeddableApiContext,
+  CanAccessViewMode,
+  EmbeddableApiContext,
   getInheritedViewMode,
-  type HasType,
+  HasType,
 } from '@kbn/presentation-publishing';
 
-import { apiPublishesSavedSearch, type PublishesSavedSearch } from '../types';
+import { apiPublishesSavedSearch, PublishesSavedSearch } from '../types';
 
 type ViewSavedSearchActionApi = CanAccessViewMode & HasType & PublishesSavedSearch;
 

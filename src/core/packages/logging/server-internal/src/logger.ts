@@ -8,7 +8,7 @@
  */
 
 import apmAgent from 'elastic-apm-node';
-import { type LogLevel, type LogRecord, type LogMeta } from '@kbn/logging';
+import { LogLevel, LogRecord, LogMeta } from '@kbn/logging';
 import { AbstractLogger } from '@kbn/core-logging-common-internal';
 
 function isError(x: any): x is Error {

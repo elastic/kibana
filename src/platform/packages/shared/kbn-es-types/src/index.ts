@@ -7,22 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type * as estypesWithoutBody from '@elastic/elasticsearch/lib/api/types';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import * as estypesWithoutBody from '@elastic/elasticsearch/lib/api/types';
 import type {
   Field,
   QueryDslFieldAndFormat,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  type InferSearchResponseOf,
-  type AggregateOf as AggregationResultOf,
-  type AggregateOfMap as AggregationResultOfMap,
-  type SearchHit,
-  type ESQLColumn,
-  type ESQLRow,
-  type ESQLSearchResponse,
-  type ESQLSearchParams,
-  type ChangePointType,
+  InferSearchResponseOf,
+  AggregateOf as AggregationResultOf,
+  AggregateOfMap as AggregationResultOfMap,
+  SearchHit,
+  ESQLColumn,
+  ESQLRow,
+  ESQLSearchResponse,
+  ESQLSearchParams,
+  ChangePointType,
 } from './search';
 
 export type ESFilter = estypes.QueryDslQueryContainer;

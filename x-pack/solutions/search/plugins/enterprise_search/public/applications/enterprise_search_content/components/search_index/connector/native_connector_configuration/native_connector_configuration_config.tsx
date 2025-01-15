@@ -15,10 +15,10 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  type Connector,
+  Connector,
   ConnectorConfigurationComponent,
-  type ConnectorDefinition,
-  type ConnectorStatus,
+  ConnectorDefinition,
+  ConnectorStatus,
 } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../../../common/types/api';

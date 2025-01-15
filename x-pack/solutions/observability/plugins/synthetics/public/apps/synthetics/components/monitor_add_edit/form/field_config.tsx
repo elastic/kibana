@@ -13,19 +13,19 @@ import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import {
   EuiIcon,
   EuiCode,
-  type EuiComboBoxOptionOption,
+  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  type EuiSelectProps,
-  type EuiFieldTextProps,
-  type EuiSwitchProps,
-  type EuiComboBoxProps,
-  type EuiFieldNumberProps,
-  type EuiFieldPasswordProps,
-  type EuiCheckboxProps,
-  type EuiTextAreaProps,
-  type EuiButtonGroupProps,
+  EuiSelectProps,
+  EuiFieldTextProps,
+  EuiSwitchProps,
+  EuiComboBoxProps,
+  EuiFieldNumberProps,
+  EuiFieldPasswordProps,
+  EuiCheckboxProps,
+  EuiTextAreaProps,
+  EuiButtonGroupProps,
   EuiHighlight,
   EuiBadge,
   EuiToolTip,
@@ -33,7 +33,7 @@ import {
 import { kibanaService } from '../../../../../utils/kibana_service';
 import {
   PROFILE_OPTIONS,
-  type ThrottlingConfigFieldProps,
+  ThrottlingConfigFieldProps,
 } from '../fields/throttling/throttling_config_field';
 import {
   FieldText,
@@ -46,17 +46,17 @@ import {
   Source,
   ButtonGroup,
   FormattedComboBox,
-  type FormattedComboBoxProps,
+  FormattedComboBoxProps,
   JSONEditor,
-  type JSONCodeEditorProps,
+  JSONCodeEditorProps,
   MonitorTypeRadioGroup,
   HeaderField,
-  type HeaderFieldProps,
+  HeaderFieldProps,
   RequestBodyField,
-  type RequestBodyFieldProps,
+  RequestBodyFieldProps,
   ResponseBodyIndexField,
-  type ResponseBodyIndexFieldProps,
-  type ControlledFieldProp,
+  ResponseBodyIndexFieldProps,
+  ControlledFieldProp,
   KeyValuePairsField,
   TextArea,
   ThrottlingWrapper,
@@ -69,15 +69,15 @@ import {
   HTTPMethod,
   ScreenshotOption,
   Mode,
-  type MonitorFields,
+  MonitorFields,
   TLSVersion,
   VerificationMode,
-  type FieldMap,
-  type FormLocation,
+  FieldMap,
+  FormLocation,
   ResponseBodyIndexPolicy,
-  type ResponseCheckJSON,
-  type ThrottlingConfig,
-  type RequestBodyCheck,
+  ResponseCheckJSON,
+  ThrottlingConfig,
+  RequestBodyCheck,
   SourceType,
 } from '../types';
 import {
@@ -87,7 +87,7 @@ import {
 } from '../constants';
 import { getDefaultFormFields } from './defaults';
 import { validate, validateHeaders, WHOLE_NUMBERS_ONLY, FLOATS_ONLY } from './validation';
-import { type KeyValuePairsFieldProps } from '../fields/key_value_field';
+import { KeyValuePairsFieldProps } from '../fields/key_value_field';
 
 const getScheduleContent = (value: number, seconds?: boolean) => {
   if (seconds) {

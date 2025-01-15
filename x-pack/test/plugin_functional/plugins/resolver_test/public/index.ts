@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type PluginInitializer } from '@kbn/core/public';
+import { PluginInitializer } from '@kbn/core/public';
 import {
   ResolverTestPlugin,
-  type ResolverTestPluginSetupDependencies,
-  type ResolverTestPluginStartDependencies,
+  ResolverTestPluginSetupDependencies,
+  ResolverTestPluginStartDependencies,
 } from './plugin';
 
 export const plugin: PluginInitializer<

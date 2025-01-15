@@ -12,7 +12,7 @@ import ReactDOM from 'react-dom';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import {
   KibanaRenderContextProvider,
-  type KibanaRenderContextProviderProps,
+  KibanaRenderContextProviderProps,
 } from '@kbn/react-kibana-context-render';
 
 export type ToMountPointParams = Pick<

@@ -6,20 +6,20 @@
  */
 
 import {
-  type WorkspaceNode,
-  type WorkspaceEdge,
-  type SerializedEdge,
-  type UrlTemplate,
-  type SerializedUrlTemplate,
-  type WorkspaceField,
-  type GraphWorkspaceSavedObject,
-  type SerializedWorkspaceState,
-  type Workspace,
-  type AdvancedSettings,
-  type SerializedNode,
-  type BlockListedNode,
+  WorkspaceNode,
+  WorkspaceEdge,
+  SerializedEdge,
+  UrlTemplate,
+  SerializedUrlTemplate,
+  WorkspaceField,
+  GraphWorkspaceSavedObject,
+  SerializedWorkspaceState,
+  Workspace,
+  AdvancedSettings,
+  SerializedNode,
+  BlockListedNode,
 } from '../../types';
-import { type IndexpatternDatasource } from '../../state_management';
+import { IndexpatternDatasource } from '../../state_management';
 
 function serializeNode(
   { data, scaledSize, parent, x, y, label, color }: BlockListedNode,

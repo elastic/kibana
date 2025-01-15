@@ -8,9 +8,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { buildExpressionFunction, type ExpressionAstFunction } from '@kbn/expressions-plugin/common';
-import { type AggregateQuery } from '../../query';
-import { type EsqlExpressionFunctionDefinition } from './esql';
+import { buildExpressionFunction, ExpressionAstFunction } from '@kbn/expressions-plugin/common';
+import { AggregateQuery } from '../../query';
+import { EsqlExpressionFunctionDefinition } from './esql';
 
 export const aggregateQueryToAst = ({
   query,

@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { type HoverActionsConfig } from '@kbn/timelines-plugin/public/components/hover_actions';
+import { HoverActionsConfig } from '@kbn/timelines-plugin/public/components/hover_actions';
 import { EuiButtonIcon } from '@elastic/eui';
-import { type TimelinesUIStart } from '@kbn/timelines-plugin/public';
+import { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 
 /**
  * Returns a default object to mock the timelines plugin for our unit tests and storybook stories.

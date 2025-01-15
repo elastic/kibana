@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type CreateIndexCodeExamples } from '../types';
+import { CreateIndexCodeExamples } from '../types';
 import {
   CONNECT_CREATE_VECTOR_INDEX_CMD_DESCRIPTION,
   CONNECT_CREATE_VECTOR_INDEX_CMD_TITLE,

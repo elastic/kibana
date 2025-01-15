@@ -8,7 +8,7 @@
 import path from 'path';
 
 import {
-  type FtrConfigProviderContext,
+  FtrConfigProviderContext,
   defineDockerServersConfig,
   getKibanaCliLoggers,
 } from '@kbn/test';

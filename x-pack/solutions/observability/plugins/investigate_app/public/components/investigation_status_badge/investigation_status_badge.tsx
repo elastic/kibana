@@ -6,7 +6,7 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import { type InvestigationResponse } from '@kbn/investigation-shared';
+import { InvestigationResponse } from '@kbn/investigation-shared';
 import React from 'react';
 import { statusToColor } from '../investigation_edit_form/fields/status_field';
 

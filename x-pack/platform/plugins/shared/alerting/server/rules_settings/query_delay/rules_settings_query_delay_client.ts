@@ -7,20 +7,20 @@
 
 import Boom from '@hapi/boom';
 import {
-  type Logger,
-  type SavedObjectsClientContract,
-  type SavedObject,
+  Logger,
+  SavedObjectsClientContract,
+  SavedObject,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import {
-  type RulesSettings,
-  type RulesSettingsModificationMetadata,
+  RulesSettings,
+  RulesSettingsModificationMetadata,
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
   RULES_SETTINGS_QUERY_DELAY_SAVED_OBJECT_ID,
-  type RulesSettingsQueryDelayProperties,
+  RulesSettingsQueryDelayProperties,
   MIN_QUERY_DELAY,
   MAX_QUERY_DELAY,
-  type RulesSettingsQueryDelay,
+  RulesSettingsQueryDelay,
   DEFAULT_SERVERLESS_QUERY_DELAY_SETTINGS,
   DEFAULT_QUERY_DELAY_SETTINGS,
 } from '../../../common';

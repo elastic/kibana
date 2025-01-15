@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type FtrProviderContext } from '../../services/types';
+import { FtrProviderContext } from '../../services/types';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

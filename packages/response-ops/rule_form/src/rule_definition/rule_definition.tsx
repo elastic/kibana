@@ -24,7 +24,7 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import { type RuleSpecificFlappingProperties } from '@kbn/alerting-types';
+import { RuleSpecificFlappingProperties } from '@kbn/alerting-types';
 import {
   RuleSettingsFlappingForm,
   RuleSettingsFlappingTitleTooltip,

@@ -21,8 +21,8 @@ import {
 } from '@elastic/eui';
 import {
   CodeBox,
-  type LanguageDefinition,
-  type LanguageDefinitionSnippetArguments,
+  LanguageDefinition,
+  LanguageDefinitionSnippetArguments,
   getLanguageDefinitionCodeSnippet,
   getConsoleRequest,
 } from '@kbn/search-api-panels';

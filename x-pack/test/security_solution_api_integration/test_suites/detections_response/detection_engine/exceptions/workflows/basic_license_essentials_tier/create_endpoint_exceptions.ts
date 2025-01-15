@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 import expect from 'expect';
 
 import type SuperTest from 'supertest';
@@ -26,7 +26,7 @@ import {
   deleteListsIndex,
 } from '../../../../../lists_and_exception_lists/utils';
 
-import { type FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 interface Host {
   os: {

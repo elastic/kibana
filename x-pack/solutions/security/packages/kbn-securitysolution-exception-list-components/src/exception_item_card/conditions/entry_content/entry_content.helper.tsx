@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type ElementType } from 'react';
+import React, { ElementType } from 'react';
 import { css } from '@emotion/css';
 import { EuiExpression, EuiBadge } from '@elastic/eui';
 import type { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';

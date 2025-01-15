@@ -9,7 +9,7 @@
 
 import { getFilterRatioFormula } from '../metrics';
 import { createFormulaColumn } from './formula';
-import { type CommonColumnsConverterArgs, type FormulaColumn } from './types';
+import { CommonColumnsConverterArgs, FormulaColumn } from './types';
 
 export const convertFilterRatioToFormulaColumn = (
   { series, metrics, dataView }: CommonColumnsConverterArgs,

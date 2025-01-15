@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type IScopedClusterClient } from '@kbn/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 // @ts-ignore
 import { Settings } from '../../../models/settings';
-import { type RouteDependencies } from '../../../types';
+import { RouteDependencies } from '../../../types';
 
 function fetchClusterSettings(client: IScopedClusterClient) {
   return client.asCurrentUser.cluster.getSettings({

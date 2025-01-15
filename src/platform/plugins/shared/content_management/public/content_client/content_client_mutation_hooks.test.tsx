@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC, type PropsWithChildren } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { ContentClientProvider } from './content_client_context';
 import { ContentClient } from './content_client';

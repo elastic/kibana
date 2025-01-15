@@ -10,7 +10,7 @@
 import React, { useCallback } from 'react';
 import {
   EuiButtonGroup,
-  type EuiButtonGroupProps,
+  EuiButtonGroupProps,
   EuiFormRow,
   EuiPanel,
   EuiSpacer,
@@ -19,18 +19,18 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { type VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import {
   ColorRanges,
-  type SetColorRangeValue,
+  SetColorRangeValue,
   SwitchOption,
-  type SetColorSchemaOptionsValue,
+  SetColorSchemaOptionsValue,
   ColorSchemaOptions,
   RangeOption,
   PercentageModeOption,
 } from '@kbn/vis-default-editor-plugin/public';
 import { ColorMode, colorSchemas } from '@kbn/charts-plugin/public';
-import { type MetricVisParam, type VisParams } from '../types';
+import { MetricVisParam, VisParams } from '../types';
 
 const metricColorMode = [
   {

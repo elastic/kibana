@@ -13,15 +13,15 @@ import classNames from 'classnames';
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 import {
-  type DragDropIdentifier,
+  DragDropIdentifier,
   ReorderContext,
-  type DropHandler,
-  type Ghost,
-  type DragDropAction,
-  type DragContextState,
+  DropHandler,
+  Ghost,
+  DragDropAction,
+  DragContextState,
   useDragDropContext,
 } from './providers';
-import { type DropType } from './types';
+import { DropType } from './types';
 import './sass/droppable.scss';
 
 type DroppableEvent = React.DragEvent<HTMLElement>;

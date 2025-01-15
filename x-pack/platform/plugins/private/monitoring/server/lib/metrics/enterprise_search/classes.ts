@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Metric, type MetricOptions } from '../classes';
+import { Metric, MetricOptions } from '../classes';
 
 type EnterpriseSearchMetricOptions = Pick<
   MetricOptions,

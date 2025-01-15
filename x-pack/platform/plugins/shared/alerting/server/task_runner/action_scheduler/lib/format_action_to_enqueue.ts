@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type RuleAction, type RuleSystemAction } from '@kbn/alerting-types';
+import { RuleAction, RuleSystemAction } from '@kbn/alerting-types';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../..';
 

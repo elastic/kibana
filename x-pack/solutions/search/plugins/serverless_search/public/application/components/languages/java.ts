@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Languages, type LanguageDefinition } from '@kbn/search-api-panels';
+import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 
 export const javaDefinition: LanguageDefinition = {
   id: Languages.JAVA,

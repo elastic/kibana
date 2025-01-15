@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { type Either } from 'fp-ts/Either';
+import { Either } from 'fp-ts/Either';
 import { allOrAnyStringOrArray, dateType } from './common';
 import { durationType } from './duration';
 import { indicatorSchema } from './indicators';

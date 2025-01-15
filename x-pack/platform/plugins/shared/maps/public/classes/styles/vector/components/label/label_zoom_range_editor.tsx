@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiForm, EuiFormRow, EuiSwitch, type EuiSwitchEvent, EuiToolTip } from '@elastic/eui';
+import { EuiForm, EuiFormRow, EuiSwitch, EuiSwitchEvent, EuiToolTip } from '@elastic/eui';
 import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
-import { type LabelZoomRangeStylePropertyDescriptor } from '../../../../../../common/descriptor_types';
-import { type VECTOR_STYLES } from '../../../../../../common/constants';
+import { LabelZoomRangeStylePropertyDescriptor } from '../../../../../../common/descriptor_types';
+import { VECTOR_STYLES } from '../../../../../../common/constants';
 import { getVectorStyleLabel, getDisabledByMessage } from '../get_vector_style_label';
-import { type LabelZoomRangeProperty } from '../../properties/label_zoom_range_property';
+import { LabelZoomRangeProperty } from '../../properties/label_zoom_range_property';
 
 interface Props {
   disabled: boolean;

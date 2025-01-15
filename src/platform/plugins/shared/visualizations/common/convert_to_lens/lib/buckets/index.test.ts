@@ -9,9 +9,9 @@
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { BUCKET_TYPES, METRIC_TYPES } from '@kbn/data-plugin/common';
-import { type BucketAggs, convertBucketToColumns } from '.';
-import { type DateHistogramColumn, type FiltersColumn, type RangeColumn, type TermsColumn } from '../../types';
-import { type AggBasedColumn, type SchemaConfig } from '../../..';
+import { BucketAggs, convertBucketToColumns } from '.';
+import { DateHistogramColumn, FiltersColumn, RangeColumn, TermsColumn } from '../../types';
+import { AggBasedColumn, SchemaConfig } from '../../..';
 
 const mockConvertToDateHistogramColumn = jest.fn();
 const mockConvertToFiltersColumn = jest.fn();

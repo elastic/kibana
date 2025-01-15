@@ -8,15 +8,15 @@
  */
 
 import React from 'react';
-import { type EuiDataGridColumnCellActionProps, type EuiDataGridColumn } from '@elastic/eui';
+import { EuiDataGridColumnCellActionProps, EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import {
-  type DatatableColumn,
-  type DatatableRow,
-  type IInterpreterRenderHandlers,
+  DatatableColumn,
+  DatatableRow,
+  IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
-import { type FormattedColumns, type TableVisUiState } from '../types';
+import { FormattedColumns, TableVisUiState } from '../types';
 
 interface FilterCellData {
   /**

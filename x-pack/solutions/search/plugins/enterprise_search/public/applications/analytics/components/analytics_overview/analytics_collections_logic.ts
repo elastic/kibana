@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { kea, type MakeLogicType } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
-import { type AnalyticsCollection } from '../../../../../common/types/analytics';
+import { AnalyticsCollection } from '../../../../../common/types/analytics';
 import { Status } from '../../../../../common/types/api';
-import { type Actions } from '../../../shared/api_logic/create_api_logic';
+import { Actions } from '../../../shared/api_logic/create_api_logic';
 import {
   FetchAnalyticsCollectionsAPILogic,
-  type FetchAnalyticsCollectionsApiLogicResponse,
+  FetchAnalyticsCollectionsApiLogicResponse,
 } from '../../api/index/fetch_analytics_collections_api_logic';
 
 const SEARCH_COOLDOWN = 200;

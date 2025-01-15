@@ -8,7 +8,7 @@
  */
 
 import { type HasType, apiIsOfType } from '@kbn/presentation-publishing';
-import { type Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 
 type ExpressionVariables = Record<string, unknown> | undefined;
 

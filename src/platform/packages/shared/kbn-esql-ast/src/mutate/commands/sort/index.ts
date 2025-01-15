@@ -9,13 +9,13 @@
 
 import { Builder } from '../../../builder';
 import {
-  type ESQLAstQueryExpression,
-  type ESQLColumn,
-  type ESQLCommand,
-  type ESQLOrderExpression,
+  ESQLAstQueryExpression,
+  ESQLColumn,
+  ESQLCommand,
+  ESQLOrderExpression,
 } from '../../../types';
 import { Visitor } from '../../../visitor';
-import { type Predicate } from '../../types';
+import { Predicate } from '../../types';
 import * as util from '../../util';
 import * as generic from '../../generic';
 

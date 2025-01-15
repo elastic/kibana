@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { type CoreSetup, type CoreStart } from '@kbn/core/public';
+import { CoreSetup, CoreStart } from '@kbn/core/public';
 import { isString, startsWith } from 'lodash';
 import LRU from 'lru-cache';
 import hash from 'object-hash';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/public';
-import { type FetchOptions } from '../../../common/fetch_options';
+import { FetchOptions } from '../../../common/fetch_options';
 
 function fetchOptionsWithDebug(fetchOptions: FetchOptions, inspectableEsQueriesEnabled: boolean) {
   const debugEnabled =

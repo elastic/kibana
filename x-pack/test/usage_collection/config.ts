@@ -6,7 +6,7 @@
  */
 
 import { resolve } from 'path';
-import { type FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
+import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
 import { services } from './services';
 import { pageObjects } from './page_objects';
 

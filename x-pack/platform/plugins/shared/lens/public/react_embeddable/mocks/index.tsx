@@ -9,31 +9,31 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import deepMerge from 'deepmerge';
 import React from 'react';
 import { faker } from '@faker-js/faker';
-import { type Query, type Filter, type AggregateQuery, type TimeRange } from '@kbn/es-query';
-import { type PhaseEvent, type ViewMode } from '@kbn/presentation-publishing';
-import { type DataView } from '@kbn/data-views-plugin/common';
-import { type Adapters } from '@kbn/inspector-plugin/common';
+import { Query, Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
+import { PhaseEvent, ViewMode } from '@kbn/presentation-publishing';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { Adapters } from '@kbn/inspector-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
 import { visualizationsPluginMock } from '@kbn/visualizations-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { type ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
-import { type ReactEmbeddableDynamicActionsApi } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
+import { ReactEmbeddableDynamicActionsApi } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { DOC_TYPE } from '../../../common/constants';
 import { createEmptyLensState } from '../helper';
 import {
-  type ExpressionWrapperProps,
-  type LensApi,
-  type LensEmbeddableStartServices,
-  type LensInternalApi,
-  type LensRendererProps,
-  type LensRuntimeState,
-  type LensSerializedState,
-  type VisualizationContext,
+  ExpressionWrapperProps,
+  LensApi,
+  LensEmbeddableStartServices,
+  LensInternalApi,
+  LensRendererProps,
+  LensRuntimeState,
+  LensSerializedState,
+  VisualizationContext,
 } from '../types';
 import { createMockDatasource, createMockVisualization, makeDefaultServices } from '../../mocks';
-import { type Datasource, type DatasourceMap, type Visualization, type VisualizationMap } from '../../types';
+import { Datasource, DatasourceMap, Visualization, VisualizationMap } from '../../types';
 import { initializeInternalApi } from '../initializers/initialize_internal_api';
 
 const LensApiMock: LensApi = {

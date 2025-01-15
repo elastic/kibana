@@ -9,8 +9,8 @@
 
 import { of, Subject, throwError } from 'rxjs';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { type SearchAlertsResult, searchAlerts, type SearchAlertsParams } from './search_alerts';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { SearchAlertsResult, searchAlerts, SearchAlertsParams } from './search_alerts';
 
 const searchResponse = {
   id: '0',

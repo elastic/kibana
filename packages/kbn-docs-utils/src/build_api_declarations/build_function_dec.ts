@@ -8,18 +8,18 @@
  */
 
 import {
-  type FunctionDeclaration,
-  type MethodDeclaration,
-  type ConstructorDeclaration,
-  type MethodSignature,
-  type ConstructSignatureDeclaration,
+  FunctionDeclaration,
+  MethodDeclaration,
+  ConstructorDeclaration,
+  MethodSignature,
+  ConstructSignatureDeclaration,
 } from 'ts-morph';
 
 import { buildApiDecsForParameters } from './build_parameter_decs';
-import { type ApiDeclaration, TypeKind } from '../types';
+import { ApiDeclaration, TypeKind } from '../types';
 import { getJSDocReturnTagComment, getJSDocs } from './js_doc_utils';
 import { buildBasicApiDeclaration } from './build_basic_api_declaration';
-import { type BuildApiDecOpts } from './types';
+import { BuildApiDecOpts } from './types';
 
 /**
  * Takes the various function-like node declaration types and converts them into an ApiDeclaration.

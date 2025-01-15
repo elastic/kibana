@@ -18,17 +18,17 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiCallOut,
-  type EuiComboBoxOptionOption,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { type Query, buildEsQuery } from '@kbn/es-query';
+import { Query, buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import { type DataView } from '@kbn/data-views-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { context as contextType } from '@kbn/kibana-react-plugin/public';
-import { type IndexPatternManagmentContextValue } from '../../../../types';
-import { type ExecuteScript } from '../../types';
+import { IndexPatternManagmentContextValue } from '../../../../types';
+import { ExecuteScript } from '../../types';
 
 interface TestScriptProps {
   indexPattern: DataView;

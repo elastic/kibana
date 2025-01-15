@@ -15,8 +15,8 @@ import {
   onPremCloudInstructions,
 } from '../instructions/winlogbeat_instructions';
 import {
-  type TutorialContext,
-  type TutorialSchema,
+  TutorialContext,
+  TutorialSchema,
 } from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function windowsEventLogsSpecProvider(context: TutorialContext): TutorialSchema {

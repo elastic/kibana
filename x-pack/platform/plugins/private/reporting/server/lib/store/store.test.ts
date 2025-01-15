@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import { type elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import * as estypes from '@elastic/elasticsearch/lib/api/types';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { JOB_STATUS } from '@kbn/reporting-common';
-import { type ReportDocument } from '@kbn/reporting-common/types';
+import { ReportDocument } from '@kbn/reporting-common/types';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { Report, ReportingStore, SavedReport } from '.';
-import { type ReportingCore } from '../..';
+import { ReportingCore } from '../..';
 import { createMockReportingCore } from '../../test_helpers';
 
 describe('ReportingStore', () => {

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import moment from 'moment';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { Duration, DurationUnit } from '../domain/models';
-import { type BurnRatesClient } from './burn_rates_client';
+import { BurnRatesClient } from './burn_rates_client';
 import { createSLO } from './fixtures/slo';
 import { sevenDaysRolling, weeklyCalendarAligned } from './fixtures/time_window';
 import { createBurnRatesClientMock } from './mocks';

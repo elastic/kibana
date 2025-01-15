@@ -17,23 +17,23 @@ import type {
 import type { ISearchStrategy, PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import {
   getLogEntryCursorFromHit,
-  type LogColumn,
-  type LogEntry,
-  type LogEntryAfterCursor,
+  LogColumn,
+  LogEntry,
+  LogEntryAfterCursor,
   logEntryAfterCursorRT,
-  type LogEntryBeforeCursor,
+  LogEntryBeforeCursor,
   logEntryBeforeCursorRT,
-  type LogEntryContext,
+  LogEntryContext,
 } from '../../../common/log_entry';
 import {
-  type LogViewColumnConfiguration,
+  LogViewColumnConfiguration,
   logViewFieldColumnConfigurationRT,
 } from '../../../common/log_views';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import {
-  type LogEntriesSearchRequestParams,
+  LogEntriesSearchRequestParams,
   logEntriesSearchRequestParamsRT,
-  type LogEntriesSearchResponsePayload,
+  LogEntriesSearchResponsePayload,
   logEntriesSearchResponsePayloadRT,
 } from '../../../common/search_strategies/log_entries/log_entries';
 import {
@@ -41,9 +41,9 @@ import {
   createErrorFromShardFailure,
   jsonFromBase64StringRT,
 } from '../../utils/typed_search_strategy';
-import { type LogViewsServiceStart } from '../log_views/types';
+import { LogViewsServiceStart } from '../log_views/types';
 import {
-  type CompiledLogMessageFormattingRule,
+  CompiledLogMessageFormattingRule,
   compileFormattingRules,
   getBuiltinRules,
 } from './message';
@@ -51,7 +51,7 @@ import {
   createGetLogEntriesQuery,
   getLogEntriesResponseRT,
   getSortDirection,
-  type LogEntryHit,
+  LogEntryHit,
 } from './queries/log_entries';
 
 type LogEntriesSearchRequest = IKibanaSearchRequest<LogEntriesSearchRequestParams>;

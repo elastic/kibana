@@ -6,8 +6,8 @@
  */
 
 import {
-  type Condition,
-  type FilterCondition,
+  Condition,
+  FilterCondition,
   isAndCondition,
   isFilterCondition,
   isOrCondition,

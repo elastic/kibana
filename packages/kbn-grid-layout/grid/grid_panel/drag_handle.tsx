@@ -13,11 +13,11 @@ import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
-  type GridLayoutStateManager,
-  type PanelInteractionEvent,
-  type UserInteractionEvent,
-  type UserMouseEvent,
-  type UserTouchEvent,
+  GridLayoutStateManager,
+  PanelInteractionEvent,
+  UserInteractionEvent,
+  UserMouseEvent,
+  UserTouchEvent,
 } from '../types';
 import { isMouseEvent, isTouchEvent } from '../utils/sensors';
 

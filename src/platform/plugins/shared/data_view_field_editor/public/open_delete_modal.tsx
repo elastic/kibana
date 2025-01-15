@@ -8,17 +8,17 @@
  */
 
 import React from 'react';
-import { type CoreStart, type OverlayRef } from '@kbn/core/public';
+import { CoreStart, OverlayRef } from '@kbn/core/public';
 
 import {
   toMountPoint,
-  type DataViewsPublicPluginStart,
-  type DataView,
-  type DataViewLazy,
-  type UsageCollectionStart,
+  DataViewsPublicPluginStart,
+  DataView,
+  DataViewLazy,
+  UsageCollectionStart,
 } from './shared_imports';
 
-import { type CloseEditor } from './types';
+import { CloseEditor } from './types';
 
 import { DeleteFieldModal } from './components/confirm_modals/delete_field_modal';
 import { removeFields } from './lib/remove_fields';

@@ -11,7 +11,7 @@ import { deprecationsServiceMock } from '@kbn/core/public/mocks';
 import { APP_LOGS_COUNT_CLUSTER_PRIVILEGES } from '../../../../common/constants';
 import { setupEnvironment } from '../../helpers';
 import { kibanaDeprecationsServiceHelpers } from '../service.mock';
-import { type KibanaTestBed, setupKibanaPage } from '../kibana_deprecations.helpers';
+import { KibanaTestBed, setupKibanaPage } from '../kibana_deprecations.helpers';
 
 describe('Kibana deprecations - Deprecations table - Error handling', () => {
   let testBed: KibanaTestBed;

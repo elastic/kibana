@@ -8,10 +8,10 @@
  */
 
 import {
-  type IKibanaSearchRequest,
-  type IKibanaSearchResponse,
-  type IEsSearchRequest,
-  type IEsSearchResponse,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  IEsSearchRequest,
+  IEsSearchResponse,
 } from '@kbn/search-types';
 
 export interface IMyStrategyRequest extends IEsSearchRequest {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type CategorizedFields, type FieldDefinition } from '@kbn/management-settings-types';
+import { CategorizedFields, FieldDefinition } from '@kbn/management-settings-types';
 import { CATEGORY_ORDER } from './const';
 
 export const categorizeFields = (fields: FieldDefinition[]): CategorizedFields => {

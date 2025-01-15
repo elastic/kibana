@@ -6,7 +6,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { type RuleSummary } from '../../../types';
+import { RuleSummary } from '../../../types';
 import { loadRuleSummary } from './rule_summary';
 
 const http = httpServiceMock.createStartContract();

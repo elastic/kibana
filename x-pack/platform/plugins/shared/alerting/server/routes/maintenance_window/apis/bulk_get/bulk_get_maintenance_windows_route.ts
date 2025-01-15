@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { type IRouter } from '@kbn/core/server';
-import { type ILicenseState } from '../../../../lib';
+import { IRouter } from '@kbn/core/server';
+import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import {
-  type AlertingRequestHandlerContext,
+  AlertingRequestHandlerContext,
   INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH,
 } from '../../../../types';
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../common';
-import { type BulkGetMaintenanceWindowsResult } from '../../../../application/maintenance_window/methods/bulk_get/types';
+import { BulkGetMaintenanceWindowsResult } from '../../../../application/maintenance_window/methods/bulk_get/types';
 import {
   bulkGetBodySchemaV1,
-  type BulkGetMaintenanceWindowsRequestBodyV1,
-  type BulkGetMaintenanceWindowsResponseV1,
+  BulkGetMaintenanceWindowsRequestBodyV1,
+  BulkGetMaintenanceWindowsResponseV1,
 } from '../../../../../common/routes/maintenance_window/apis/bulk_get';
 import { transformBulkGetResultToResponseV1 } from './transforms';
 

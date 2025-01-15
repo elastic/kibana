@@ -6,9 +6,9 @@
  */
 import type { ISearchRequestParams, IEsSearchResponse } from '@kbn/search-types';
 import {
-  type TimelineFactoryQueryTypes,
-  type TimelineStrategyRequestType,
-  type TimelineStrategyResponseType,
+  TimelineFactoryQueryTypes,
+  TimelineStrategyRequestType,
+  TimelineStrategyResponseType,
 } from '../../../../common/search_strategy/timeline';
 
 export interface TimelineFactory<T extends TimelineFactoryQueryTypes> {

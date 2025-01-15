@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 
 import {
   EuiAccordion,
-  type EuiAccordionProps,
+  EuiAccordionProps,
   EuiSpacer,
   EuiText,
   EuiLink,
@@ -22,7 +22,7 @@ import { CodeBox } from '@kbn/search-api-panels';
 
 import { useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
 
-import { type ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
+import { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
 import {
   getConnectorTemplate,
   getRunFromDockerSnippet,

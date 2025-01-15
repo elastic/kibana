@@ -9,7 +9,7 @@ import { connect } from 'react-redux';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import React from 'react';
 
-import { type GraphState, metaDataSelector } from '../state_management';
+import { GraphState, metaDataSelector } from '../state_management';
 
 interface GraphTitleProps {
   title: string;

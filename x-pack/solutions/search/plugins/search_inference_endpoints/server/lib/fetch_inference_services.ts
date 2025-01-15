@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type ElasticsearchClient } from '@kbn/core/server';
-import { type InferenceProvider } from '../types';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { InferenceProvider } from '../types';
 
 export const fetchInferenceServices = async (
   client: ElasticsearchClient

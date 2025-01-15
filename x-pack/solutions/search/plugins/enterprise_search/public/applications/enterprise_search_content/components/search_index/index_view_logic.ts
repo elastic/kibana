@@ -5,44 +5,44 @@
  * 2.0.
  */
 
-import { kea, type MakeLogicType } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
 import {
-  type Connector,
+  Connector,
   FeatureName,
-  type IngestPipelineParams,
+  IngestPipelineParams,
   SyncStatus,
-  type IngestionStatus,
-  type IngestionMethod,
+  IngestionStatus,
+  IngestionMethod,
 } from '@kbn/search-connectors';
 
-import { type Status } from '../../../../../common/types/api';
-import { type Actions } from '../../../shared/api_logic/create_api_logic';
+import { Status } from '../../../../../common/types/api';
+import { Actions } from '../../../shared/api_logic/create_api_logic';
 import { flashSuccessToast } from '../../../shared/flash_messages';
 import { KibanaLogic } from '../../../shared/kibana';
 
 import {
   StartAccessControlSyncApiLogic,
-  type StartAccessControlSyncArgs,
+  StartAccessControlSyncArgs,
 } from '../../api/connector/start_access_control_sync_api_logic';
 import {
   StartIncrementalSyncApiLogic,
-  type StartIncrementalSyncArgs,
+  StartIncrementalSyncArgs,
 } from '../../api/connector/start_incremental_sync_api_logic';
-import { StartSyncApiLogic, type StartSyncArgs } from '../../api/connector/start_sync_api_logic';
+import { StartSyncApiLogic, StartSyncArgs } from '../../api/connector/start_sync_api_logic';
 import {
   ConnectorConfigurationApiLogic,
-  type PostConnectorConfigurationActions,
+  PostConnectorConfigurationActions,
 } from '../../api/connector/update_connector_configuration_api_logic';
 import {
   CachedFetchIndexApiLogic,
-  type CachedFetchIndexApiLogicActions,
+  CachedFetchIndexApiLogicActions,
 } from '../../api/index/cached_fetch_index_api_logic';
 
-import { type FetchIndexApiResponse } from '../../api/index/fetch_index_api_logic';
-import { type ElasticsearchViewIndex } from '../../types';
+import { FetchIndexApiResponse } from '../../api/index/fetch_index_api_logic';
+import { ElasticsearchViewIndex } from '../../types';
 import {
   hasDocumentLevelSecurityFeature,
   hasIncrementalSyncFeature,

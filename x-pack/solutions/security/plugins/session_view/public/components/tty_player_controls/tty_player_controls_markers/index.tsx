@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiRange, type EuiRangeProps, EuiToolTip } from '@elastic/eui';
+import { EuiRange, EuiRangeProps, EuiToolTip } from '@elastic/eui';
 import type { ProcessStartMarker } from '../../../../common';
 import { useStyles } from './styles';
 import { PlayHead } from './play_head';

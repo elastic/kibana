@@ -7,13 +7,13 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { type PromptResponse, PromptTypeEnum } from '@kbn/elastic-assistant-common';
+import { PromptResponse, PromptTypeEnum } from '@kbn/elastic-assistant-common';
 import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
-import { type QueryObserverResult, type RefetchOptions, type RefetchQueryFilters } from '@tanstack/react-query';
+import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@tanstack/react-query';
 import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
-import { type FetchConversationsResponse, useFetchPrompts } from './api';
+import { FetchConversationsResponse, useFetchPrompts } from './api';
 import {
-  type Conversation,
+  Conversation,
   mergeBaseWithPersistedConversations,
   useFetchCurrentUserConversations,
 } from '../..';

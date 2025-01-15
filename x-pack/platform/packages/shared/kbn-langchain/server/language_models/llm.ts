@@ -6,15 +6,15 @@
  */
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { type Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import { LLM } from '@langchain/core/language_models/llms';
 import { get } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
-import { type PublicMethodsOf } from '@kbn/utility-types';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { DEFAULT_TIMEOUT, getDefaultArguments } from './constants';
 
 import { getMessageContentAndRole } from './helpers';
-import { type TraceOptions } from './types';
+import { TraceOptions } from './types';
 
 const LLM_TYPE = 'ActionsClientLlm';
 

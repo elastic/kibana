@@ -10,7 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiStat,
-  type UseEuiTheme,
+  UseEuiTheme,
   euiTextTruncate,
   logicalCSS,
 } from '@elastic/eui';
@@ -20,7 +20,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { StatusIcon, type StatusIconProps } from '../status_icon';
+import { StatusIcon, StatusIconProps } from '../status_icon';
 import { AlertsStatus } from '../../alerts/status';
 import type { AlertsByName } from '../../alerts/types';
 

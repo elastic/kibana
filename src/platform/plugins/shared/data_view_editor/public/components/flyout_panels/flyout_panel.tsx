@@ -8,7 +8,7 @@
  */
 
 import React, {
-  type CSSProperties,
+  CSSProperties,
   useState,
   useLayoutEffect,
   useCallback,

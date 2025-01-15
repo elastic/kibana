@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { type FC, useMemo } from 'react';
+import React, { FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { JOB_STATUS } from '@kbn/reporting-common/constants';
 
-import { type Job } from '@kbn/reporting-public';
+import { Job } from '@kbn/reporting-public';
 import { jobHasIssues } from '../utils';
 
 interface Props {

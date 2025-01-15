@@ -8,7 +8,7 @@
  */
 
 import type { WeekdayStr, Options } from '@kbn/rrule';
-import { type CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 
 export enum MaintenanceWindowStatus {
   Running = 'running',

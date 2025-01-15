@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 import type {
   InternalRequestHeader,
   RoleCredentials,

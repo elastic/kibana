@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { type SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
 import type {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { type SavedObjectType, getSavedObjectType } from '@kbn/securitysolution-list-utils';
+import { SavedObjectType, getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
-import { type ExceptionListSoSchema } from '../../schemas/saved_objects';
+import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 import { transformSavedObjectToExceptionListItem } from './utils';
 

@@ -5,17 +5,17 @@
  * 2.0.
  */
 import {
-  type SerializedTitles,
-  type PublishesWritablePanelTitle,
-  type PublishesPanelTitle,
+  SerializedTitles,
+  PublishesWritablePanelTitle,
+  PublishesPanelTitle,
 } from '@kbn/presentation-publishing';
-import { type DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { type Subject } from 'rxjs';
+import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { Subject } from 'rxjs';
 import {
   type CoreStart,
-  type IUiSettingsClient,
-  type ApplicationStart,
-  type NotificationsStart,
+  IUiSettingsClient,
+  ApplicationStart,
+  NotificationsStart,
 } from '@kbn/core/public';
 
 export interface EmbeddableSloProps {

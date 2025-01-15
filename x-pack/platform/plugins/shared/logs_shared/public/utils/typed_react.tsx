@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type React from 'react';
+import React from 'react';
 
 export type RendererResult = React.ReactElement<any> | null;
 export type RendererFunction<RenderArgs, Result = RendererResult> = (args: RenderArgs) => Result;

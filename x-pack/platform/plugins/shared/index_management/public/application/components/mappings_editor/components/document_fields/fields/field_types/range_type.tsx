@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import type SemVer from 'semver/classes/semver';
+import SemVer from 'semver/classes/semver';
 
 import {
-  type NormalizedField,
-  type Field as FieldType,
-  type ParameterName,
-  type ComboBoxOption,
+  NormalizedField,
+  Field as FieldType,
+  ParameterName,
+  ComboBoxOption,
 } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
 import {

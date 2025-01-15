@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, type Type } from '@kbn/config-schema';
+import { schema, Type } from '@kbn/config-schema';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 
 import {
   LEGACY_COMPARATORS,
-  type TimeUnitChar,
+  TimeUnitChar,
   oneOfLiterals,
   validateIsStringElasticsearchJSONFilter,
 } from '../common/utils';

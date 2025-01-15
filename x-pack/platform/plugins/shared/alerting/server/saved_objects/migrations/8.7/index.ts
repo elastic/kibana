@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
-import { type EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { extractedSavedObjectParamReferenceNamePrefix } from '../../../rules_client/common/constants';
 import {
   createEsoMigration,
@@ -14,7 +14,7 @@ import {
   isLogThresholdRuleType,
   pipeMigrations,
 } from '../utils';
-import { type RawRule, RuleLastRunOutcomeOrderMap } from '../../../types';
+import { RawRule, RuleLastRunOutcomeOrderMap } from '../../../types';
 
 function addGroupByToEsQueryRule(
   doc: SavedObjectUnsanitizedDoc<RawRule>

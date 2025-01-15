@@ -8,9 +8,9 @@
  */
 
 import { subj } from '@kbn/test-subj-selector';
-import { type ToolingLog } from '@kbn/tooling-log';
-import { type ElementHandle, type Page } from 'playwright';
-import { type Retry } from '..';
+import { ToolingLog } from '@kbn/tooling-log';
+import { ElementHandle, Page } from 'playwright';
+import { Retry } from '..';
 
 interface WaitForRenderArgs {
   expectedItemsCount: number;

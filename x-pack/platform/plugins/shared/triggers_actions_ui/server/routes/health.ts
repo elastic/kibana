@@ -6,13 +6,13 @@
  */
 
 import {
-  type IRouter,
-  type RequestHandlerContext,
-  type KibanaRequest,
-  type IKibanaResponse,
-  type KibanaResponseFactory,
+  IRouter,
+  RequestHandlerContext,
+  KibanaRequest,
+  IKibanaResponse,
+  KibanaResponseFactory,
 } from '@kbn/core/server';
-import { type Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 
 export function createHealthRoute(
   logger: Logger,

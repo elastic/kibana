@@ -8,7 +8,7 @@
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { ServerError } from '@kbn/cases-plugin/public/types';
-import { type ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
@@ -18,7 +18,7 @@ import {
   BEDROCK_CONNECTOR_ID,
   GEMINI_CONNECTOR_ID,
 } from '@kbn/stack-connectors-plugin/public/common';
-import { type UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useKibana } from './use_kibana';
 import { LLMs } from '../types';
 

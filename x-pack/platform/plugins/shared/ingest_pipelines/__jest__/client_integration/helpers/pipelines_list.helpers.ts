@@ -6,12 +6,12 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { type HttpSetup } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
 
 import {
   registerTestBed,
-  type TestBed,
-  type AsyncTestBedConfig,
+  TestBed,
+  AsyncTestBedConfig,
   findTestSubject,
 } from '@kbn/test-jest-helpers';
 import { PipelinesList } from '../../../public/application/sections/pipelines_list';

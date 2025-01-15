@@ -6,7 +6,7 @@
  */
 
 import {
-  type SLODefinitionResponse,
+  SLODefinitionResponse,
   timeslicesBudgetingMethodSchema,
   durationType,
 } from '@kbn/slo-schema';

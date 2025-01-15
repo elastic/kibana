@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { type DeepPartial } from '@kbn/utility-types';
+import { DeepPartial } from '@kbn/utility-types';
 import { merge } from 'lodash';
-import { type AxiosResponse } from 'axios/index';
+import { AxiosResponse } from 'axios/index';
 import {
-  type ServiceParams,
-  type SubActionRequestParams,
+  ServiceParams,
+  SubActionRequestParams,
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -20,11 +20,11 @@ import { createAxiosResponseMock } from '../lib/mocks';
 import { SENTINELONE_CONNECTOR_ID } from '../../../common/sentinelone/constants';
 import { SentinelOneConnector } from './sentinelone';
 import {
-  type SentinelOneConfig,
-  type SentinelOneFetchAgentFilesResponse,
-  type SentinelOneGetAgentsResponse,
-  type SentinelOneGetRemoteScriptResults,
-  type SentinelOneSecrets,
+  SentinelOneConfig,
+  SentinelOneFetchAgentFilesResponse,
+  SentinelOneGetAgentsResponse,
+  SentinelOneGetRemoteScriptResults,
+  SentinelOneSecrets,
 } from '../../../common/sentinelone/types';
 
 const createAgentDetailsMock = (

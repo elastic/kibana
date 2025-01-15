@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type PluginInitializerContext } from '@kbn/core-plugins-server';
-import { type StreamsConfig } from '../common/config';
-import { type StreamsPluginSetup, type StreamsPluginStart, config } from './plugin';
-import { type StreamsRouteRepository } from './routes';
+import { PluginInitializerContext } from '@kbn/core-plugins-server';
+import { StreamsConfig } from '../common/config';
+import { StreamsPluginSetup, StreamsPluginStart, config } from './plugin';
+import { StreamsRouteRepository } from './routes';
 
 export type { StreamsConfig, StreamsPluginSetup, StreamsPluginStart, StreamsRouteRepository };
 export { config };

@@ -8,9 +8,9 @@
  */
 
 import {
-  type ActionContextVariablesFlatten,
-  type ActionVariable,
-  type SummaryActionContextVariablesFlatten,
+  ActionContextVariablesFlatten,
+  ActionVariable,
+  SummaryActionContextVariablesFlatten,
 } from '@kbn/alerting-types';
 import { i18n } from '@kbn/i18n';
 

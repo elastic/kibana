@@ -6,21 +6,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
-import { type RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import { type AlertInstanceContext, type SanitizedRule } from '@kbn/alerting-plugin/common';
+import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { AlertInstanceContext, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { BaseRule } from './base_rule';
 import {
-  type AlertData,
-  type AlertCluster,
-  type AlertState,
-  type AlertMessage,
-  type AlertMessageLinkToken,
-  type CommonAlertParams,
-  type AlertClusterHealth,
-  type AlertInstanceState,
+  AlertData,
+  AlertCluster,
+  AlertState,
+  AlertMessage,
+  AlertMessageLinkToken,
+  CommonAlertParams,
+  AlertClusterHealth,
+  AlertInstanceState,
 } from '../../common/types/alerts';
 import { RULE_CLUSTER_HEALTH, LEGACY_RULE_DETAILS } from '../../common/constants';
 import { AlertMessageTokenType, AlertClusterHealthType, AlertSeverity } from '../../common/enums';

@@ -10,9 +10,9 @@ import React from 'react';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
 import { ESGeoGridSource, heatmapTitle } from './es_geo_grid_source';
-import { type LayerWizard, type RenderWizardArguments } from '../../layers';
+import { LayerWizard, RenderWizardArguments } from '../../layers';
 import { HeatmapLayer } from '../../layers/heatmap_layer';
-import { type ESGeoGridSourceDescriptor } from '../../../../common/descriptor_types';
+import { ESGeoGridSourceDescriptor } from '../../../../common/descriptor_types';
 import {
   GRID_RESOLUTION,
   LAYER_WIZARD_CATEGORY,

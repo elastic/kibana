@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type UserConfiguredActionConnector } from '../../../types';
+import { UserConfiguredActionConnector } from '../../../types';
 
 /**
  * The following type is equivalent to:

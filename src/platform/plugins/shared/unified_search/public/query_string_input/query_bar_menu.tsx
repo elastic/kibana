@@ -7,19 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useEffect, useCallback, type RefObject } from 'react';
+import React, { useState, useEffect, useCallback, RefObject } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenu,
   EuiContextMenuPanel,
   EuiPopover,
   useGeneratedHtmlId,
-  type EuiButtonIconProps,
+  EuiButtonIconProps,
   EuiToolTip,
 } from '@elastic/eui';
 import {
-  type EuiContextMenuClass,
-  type EuiContextMenuPanelId,
+  EuiContextMenuClass,
+  EuiContextMenuPanelId,
 } from '@elastic/eui/src/components/context_menu/context_menu';
 import { i18n } from '@kbn/i18n';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
@@ -28,16 +28,16 @@ import type { SavedQueryService, SavedQuery, SavedQueryTimeFilter } from '@kbn/d
 import { euiThemeVars } from '@kbn/ui-theme';
 import {
   useQueryBarMenuPanels,
-  type QueryBarMenuPanelsProps,
+  QueryBarMenuPanelsProps,
   QueryBarMenuPanel,
-  type AdditionalQueryBarMenuItems,
+  AdditionalQueryBarMenuItems,
 } from './query_bar_menu_panels';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
 import {
   withCloseFilterEditorConfirmModal,
-  type WithCloseFilterEditorConfirmModalProps,
+  WithCloseFilterEditorConfirmModalProps,
 } from '../filter_bar/filter_editor';
-import { type SuggestionsAbstraction } from '../typeahead/suggestions_component';
+import { SuggestionsAbstraction } from '../typeahead/suggestions_component';
 
 export const strings = {
   getFilterSetButtonLabel: () =>

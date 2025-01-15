@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
@@ -14,13 +14,13 @@ import {
   EuiIcon,
   EuiText,
   EuiTextColor,
-  type EuiBadgeProps,
+  EuiBadgeProps,
   useEuiFontSize,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { useAppContext } from '../../../../../app_context';
-import { type Index } from '../../../../../../../common';
+import { Index } from '../../../../../../../common';
 import { OverviewCard } from './overview_card';
 
 type NormalizedHealth = 'green' | 'red' | 'yellow';

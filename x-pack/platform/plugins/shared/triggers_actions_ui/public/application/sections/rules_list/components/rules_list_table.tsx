@@ -18,16 +18,16 @@ import {
   EuiButtonEmpty,
   EuiText,
   EuiToolTip,
-  type EuiTableSortingType,
+  EuiTableSortingType,
   EuiButtonIcon,
-  type EuiSelectableOption,
+  EuiSelectableOption,
   EuiScreenReaderOnly,
   EuiCheckbox,
   RIGHT_ALIGNMENT,
   useEuiTheme,
 } from '@elastic/eui';
 import {
-  type RuleExecutionStatus,
+  RuleExecutionStatus,
   formatDuration,
   parseDuration,
   MONITORING_HISTORY_LIMIT,
@@ -41,15 +41,15 @@ import {
   CLEAR_FILTERS,
 } from '../translations';
 import {
-  type Rule,
-  type RuleTableItem,
-  type RuleTypeIndex,
-  type Pagination,
+  Rule,
+  RuleTableItem,
+  RuleTypeIndex,
+  Pagination,
   Percentiles,
-  type TriggersActionsUiConfig,
-  type RuleTypeRegistryContract,
-  type SnoozeSchedule,
-  type BulkOperationResponse,
+  TriggersActionsUiConfig,
+  RuleTypeRegistryContract,
+  SnoozeSchedule,
+  BulkOperationResponse,
 } from '../../../../types';
 import { DEFAULT_NUMBER_FORMAT } from '../../../constants';
 import { shouldShowDurationWarning } from '../../../lib/execution_duration_utils';
@@ -63,7 +63,7 @@ import { RuleStatusDropdown } from './rule_status_dropdown';
 import { RulesListNotifyBadge } from './notify_badge';
 import { RulesListTableStatusCell } from './rules_list_table_status_cell';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
-import { type RulesListColumns, useRulesListColumnSelector } from './rules_list_column_selector';
+import { RulesListColumns, useRulesListColumnSelector } from './rules_list_column_selector';
 
 interface RuleTypeState {
   isLoading: boolean;

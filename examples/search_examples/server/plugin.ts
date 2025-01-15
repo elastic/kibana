@@ -18,10 +18,10 @@ import type {
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 
 import {
-  type SearchExamplesPluginSetup,
-  type SearchExamplesPluginStart,
-  type SearchExamplesPluginSetupDeps,
-  type SearchExamplesPluginStartDeps,
+  SearchExamplesPluginSetup,
+  SearchExamplesPluginStart,
+  SearchExamplesPluginSetupDeps,
+  SearchExamplesPluginStartDeps,
 } from './types';
 import { mySearchStrategyProvider } from './my_strategy';
 import { registerRoutes } from './routes';

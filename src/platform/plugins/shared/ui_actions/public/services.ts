@@ -8,11 +8,11 @@
  */
 
 import {
-  type AnalyticsServiceStart,
-  type CoreStart,
-  type I18nStart,
-  type ThemeServiceSetup,
-  type UserProfileService,
+  AnalyticsServiceStart,
+  CoreStart,
+  I18nStart,
+  ThemeServiceSetup,
+  UserProfileService,
 } from '@kbn/core/public';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 

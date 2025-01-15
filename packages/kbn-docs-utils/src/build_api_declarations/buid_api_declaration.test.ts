@@ -8,10 +8,10 @@
  */
 
 import Path from 'path';
-import { Project, type Node } from 'ts-morph';
+import { Project, Node } from 'ts-morph';
 import { ToolingLog } from '@kbn/tooling-log';
 
-import { TypeKind, ApiScope, type PluginOrPackage } from '../types';
+import { TypeKind, ApiScope, PluginOrPackage } from '../types';
 import { getKibanaPlatformPlugin } from '../integration_tests/kibana_platform_plugin_mock';
 import { getDeclarationNodesForPluginScope } from '../get_declaration_nodes_for_plugin';
 import { buildApiDeclarationTopNode } from './build_api_declaration';

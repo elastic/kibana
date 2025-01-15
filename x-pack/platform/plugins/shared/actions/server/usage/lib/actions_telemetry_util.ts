@@ -6,10 +6,10 @@
  */
 
 import {
-  type ActionRefIdsAgg,
-  type InMemoryAggRes,
-  type ConnectorAggRes,
-  type ByActionTypeIdAgg,
+  ActionRefIdsAgg,
+  InMemoryAggRes,
+  ConnectorAggRes,
+  ByActionTypeIdAgg,
 } from '../actions_telemetry';
 
 export function getInMemoryActions(aggregation: ActionRefIdsAgg[] = []) {

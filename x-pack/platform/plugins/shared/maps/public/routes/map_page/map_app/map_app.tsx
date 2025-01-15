@@ -10,27 +10,27 @@ import _ from 'lodash';
 import { finalize, switchMap, tap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import {
-  type AppLeaveAction,
-  type AppMountParameters,
-  type KibanaExecutionContext,
-  type ScopedHistory,
+  AppLeaveAction,
+  AppMountParameters,
+  KibanaExecutionContext,
+  ScopedHistory,
 } from '@kbn/core/public';
-import { type Adapters } from '@kbn/inspector-plugin/public';
-import { type Subscription } from 'rxjs';
+import { Adapters } from '@kbn/inspector-plugin/public';
+import { Subscription } from 'rxjs';
 import { type Filter, FilterStateStore, type Query, type TimeRange } from '@kbn/es-query';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-plugin/common';
 import {
-  type GlobalQueryStateFromUrl,
-  type QueryState,
-  type QueryStateChange,
-  type SavedQuery,
+  GlobalQueryStateFromUrl,
+  QueryState,
+  QueryStateChange,
+  SavedQuery,
   syncGlobalQueryStateWithUrl,
 } from '@kbn/data-plugin/public';
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
-  type IKbnUrlStateStorage,
+  IKbnUrlStateStorage,
 } from '@kbn/kibana-utils-plugin/public';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import {
@@ -57,12 +57,12 @@ import {
 import {
   getInitialQuery,
   getInitialRefreshConfig,
-  type SavedMap,
+  SavedMap,
   unsavedChangesTitle,
   unsavedChangesWarning,
 } from '../saved_map';
 import { waitUntilTimeLayersLoad$ } from './wait_until_time_layers_load';
-import { type RefreshConfig as MapRefreshConfig, type ParsedMapStateJSON } from '../saved_map';
+import { RefreshConfig as MapRefreshConfig, ParsedMapStateJSON } from '../saved_map';
 
 export interface Props {
   savedMap: SavedMap;

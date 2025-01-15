@@ -7,7 +7,7 @@
 import { omit } from 'lodash';
 import React, {
   createContext,
-  type FunctionComponent,
+  FunctionComponent,
   useCallback,
   useContext,
   useEffect,
@@ -16,16 +16,16 @@ import React, {
   useRef,
 } from 'react';
 
-import { type Processor } from '../../../../../common/types';
+import { Processor } from '../../../../../common/types';
 
 import {
-  type EditorMode,
-  type FormValidityState,
-  type OnFormUpdateArg,
-  type OnUpdateHandlerArg,
-  type ContextValue,
-  type ContextValueState,
-  type ProcessorInternal,
+  EditorMode,
+  FormValidityState,
+  OnFormUpdateArg,
+  OnUpdateHandlerArg,
+  ContextValue,
+  ContextValueState,
+  ProcessorInternal,
 } from '../types';
 
 import { useProcessorsState, isOnFailureSelector } from '../processors_reducer';
@@ -34,13 +34,13 @@ import { deserialize } from '../deserialize';
 
 import { serialize } from '../serialize';
 
-import { type OnActionHandler } from '../components/processors_tree';
+import { OnActionHandler } from '../components/processors_tree';
 
 import {
   ProcessorRemoveModal,
   PipelineProcessorsItemTooltip,
   ProcessorForm,
-  type OnSubmitHandler,
+  OnSubmitHandler,
 } from '../components';
 
 import { getValue } from '../utils';

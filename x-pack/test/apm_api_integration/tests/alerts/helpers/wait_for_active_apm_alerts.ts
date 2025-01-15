@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { Client } from '@elastic/elasticsearch';
-import { type ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
 import { APM_ALERTS_INDEX } from '../../../../api_integration/deployment_agnostic/apis/observability/apm/alerts/helpers/alerting_helper';
 

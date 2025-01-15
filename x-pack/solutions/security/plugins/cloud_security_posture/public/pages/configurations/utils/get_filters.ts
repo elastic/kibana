@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { type DataView } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import {
   type Filter,
   buildFilter,
   FILTERS,
   FilterStateStore,
   compareFilters,
-  type FilterCompareOptions,
+  FilterCompareOptions,
 } from '@kbn/es-query';
 import type { Serializable } from '@kbn/utility-types';
 

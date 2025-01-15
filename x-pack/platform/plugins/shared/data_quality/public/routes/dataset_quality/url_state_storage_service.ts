@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type IToasts } from '@kbn/core-notifications-browser';
-import { type DatasetQualityPublicState } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality';
+import { IToasts } from '@kbn/core-notifications-browser';
+import { DatasetQualityPublicState } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality';
 import { createPlainError, formatErrors } from '@kbn/io-ts-utils';
-import { type IKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import { IKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import * as Either from 'fp-ts/lib/Either';
 import * as rt from 'io-ts';
 import { DATA_QUALITY_URL_STATE_KEY } from '../../../common/url_schema';

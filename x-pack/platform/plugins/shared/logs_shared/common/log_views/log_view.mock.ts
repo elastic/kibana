@@ -6,7 +6,7 @@
  */
 
 import { defaultLogViewAttributes } from './defaults';
-import { type LogView, type LogViewAttributes, type LogViewOrigin } from './types';
+import { LogView, LogViewAttributes, LogViewOrigin } from './types';
 
 export const createLogViewMock = (
   id: string,

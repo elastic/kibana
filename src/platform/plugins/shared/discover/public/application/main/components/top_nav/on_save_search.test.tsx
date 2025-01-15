@@ -15,9 +15,9 @@ import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_
 import { onSaveSearch } from './on_save_search';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { getDiscoverStateContainer } from '../../state_management/discover_state';
-import { type ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { discoverServiceMock } from '../../../../__mocks__/services';
-import { type SavedSearch } from '@kbn/saved-search-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { createBrowserHistory } from 'history';
 import { mockCustomizationContext } from '../../../../customizations/__mocks__/customization_context';
 

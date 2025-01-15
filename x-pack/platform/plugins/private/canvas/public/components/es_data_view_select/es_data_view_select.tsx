@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { type DataViewListItem } from '@kbn/data-views-plugin/common';
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { sortBy } from 'lodash';
-import React, { type FC, useRef, useState } from 'react';
+import React, { FC, useRef, useState } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import {
   ESDataViewSelect as Component,
-  type ESDataViewSelectProps as Props,
+  ESDataViewSelectProps as Props,
 } from './es_data_view_select.component';
 import { getDataViews } from '../../lib/data_view_helpers';
 

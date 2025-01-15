@@ -8,11 +8,11 @@
  */
 
 import {
-  type IPercentileRanksAggConfig,
+  IPercentileRanksAggConfig,
   getPercentileRanksMetricAgg,
-  type PercentileRanksMetricAggDependencies,
+  PercentileRanksMetricAggDependencies,
 } from './percentile_ranks';
-import { AggConfigs, type IAggConfigs } from '../agg_configs';
+import { AggConfigs, IAggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry, mockGetFieldFormatsStart } from '../test_helpers';
 import { METRIC_TYPES } from './metric_agg_types';
 

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { type DataViewFieldBase } from '@kbn/es-query';
+import { DataViewFieldBase } from '@kbn/es-query';
 
 import {
   ALL_OPERATORS,
   EVENT_FILTERS_OPERATORS,
-  type OperatorOption,
+  OperatorOption,
   doesNotExistOperator,
   existsOperator,
   isNotOperator,

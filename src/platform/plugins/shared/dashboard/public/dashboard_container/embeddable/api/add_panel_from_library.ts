@@ -8,7 +8,7 @@
  */
 
 import { openAddFromLibraryFlyout } from '@kbn/embeddable-plugin/public';
-import { type DashboardApi } from '../../../dashboard_api/types';
+import { DashboardApi } from '../../../dashboard_api/types';
 
 export function addFromLibrary(dashboardApi: DashboardApi) {
   dashboardApi.openOverlay(

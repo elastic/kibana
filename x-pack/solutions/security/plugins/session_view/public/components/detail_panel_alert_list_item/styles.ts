@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { useEuiTheme, transparentize } from '@elastic/eui';
-import { type CSSObject, css } from '@emotion/react';
+import { CSSObject, css } from '@emotion/react';
 
 export const useStyles = (minimal = false, isInvestigated = false) => {
   const { euiTheme } = useEuiTheme();

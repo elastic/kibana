@@ -10,17 +10,17 @@
 import * as Rx from 'rxjs';
 import { mergeMap, share, observeOn } from 'rxjs';
 
-import { summarizeEventStream, type Update } from './common';
+import { summarizeEventStream, Update } from './common';
 
 import {
-  type OptimizerConfig,
-  type OptimizerEvent,
-  type OptimizerState,
+  OptimizerConfig,
+  OptimizerEvent,
+  OptimizerState,
   getBundleCacheEvent$,
   getOptimizerCacheKey,
   watchBundlesForChanges$,
   runWorkers,
-  type OptimizerInitializedEvent,
+  OptimizerInitializedEvent,
   createOptimizerStateSummarizer,
   handleOptimizerCompletion,
 } from './optimizer';

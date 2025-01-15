@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { type TypeOf } from '@kbn/config-schema';
-import { type Logger } from '@kbn/core/server';
+import { TypeOf } from '@kbn/config-schema';
+import { Logger } from '@kbn/core/server';
 import {
-  type ExecutorParamsSchema,
-  type ExecutorSubActionPushParamsSchema,
-  type ExternalIncidentServiceConfigurationSchema,
-  type ExternalIncidentServiceSecretConfigurationSchema,
+  ExecutorParamsSchema,
+  ExecutorSubActionPushParamsSchema,
+  ExternalIncidentServiceConfigurationSchema,
+  ExternalIncidentServiceSecretConfigurationSchema,
 } from './schema';
 
 // config

@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import axios, { type AxiosResponse } from 'axios';
+import axios, { AxiosResponse } from 'axios';
 // info on nodemailer: https://nodemailer.com/about/
 import nodemailer from 'nodemailer';
 import { default as MarkdownIt } from 'markdown-it';
 
-import { type Logger } from '@kbn/core/server';
-import { type ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { type CustomHostSettings } from '@kbn/actions-plugin/server/config';
+import { Logger } from '@kbn/core/server';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { CustomHostSettings } from '@kbn/actions-plugin/server/config';
 import {
   getNodeSSLOptions,
   getSSLSettingsFromConfig,
 } from '@kbn/actions-plugin/server/lib/get_node_ssl_options';
 import {
-  type ConnectorUsageCollector,
-  type ConnectorTokenClientContract,
-  type ProxySettings,
+  ConnectorUsageCollector,
+  ConnectorTokenClientContract,
+  ProxySettings,
 } from '@kbn/actions-plugin/server/types';
 import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
 import { AdditionalEmailServices } from '../../../common';

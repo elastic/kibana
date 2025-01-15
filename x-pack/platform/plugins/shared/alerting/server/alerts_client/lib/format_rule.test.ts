@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { formatRule } from './format_rule';
-import { type UntypedNormalizedRuleType } from '../../rule_type_registry';
+import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { RecoveredActionGroup } from '../../types';
 import {
   ALERT_RULE_CATEGORY,

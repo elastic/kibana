@@ -10,10 +10,10 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { getCreateExceptionListItemSchemaMock } from './index.mock';
-import { type CreateExceptionListItemSchema, createExceptionListItemSchema } from '.';
+import { CreateExceptionListItemSchema, createExceptionListItemSchema } from '.';
 import { getCreateCommentsArrayMock } from '../../common/create_comment/index.mock';
 import { getCommentsMock } from '../../common/comment/index.mock';
-import { type CommentsArray } from '../../common/comment';
+import { CommentsArray } from '../../common/comment';
 
 describe('create_exception_list_item_schema', () => {
   test('it should pass validation when supplied a typical exception list item request not counting the auto generated uuid', () => {

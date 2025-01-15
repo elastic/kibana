@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Feature, type FeatureCollection } from 'geojson';
+import { Feature, FeatureCollection } from 'geojson';
 import { getCentroidFeatures } from './get_centroid_features';
 
 test('should not create centroid feature for point and multipoint', () => {

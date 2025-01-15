@@ -10,12 +10,12 @@ import { union, isEmpty } from 'lodash';
 import {
   EuiComboBox,
   EuiFormControlLayout,
-  type EuiComboBoxOptionOption,
+  EuiComboBoxOptionOption,
   EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { type FieldValueSelectionProps } from './types';
+import { FieldValueSelectionProps } from './types';
 const formatOptions = (values?: string[], allowAllValuesSelection?: boolean) => {
   const uniqueValues = Array.from(
     new Set(

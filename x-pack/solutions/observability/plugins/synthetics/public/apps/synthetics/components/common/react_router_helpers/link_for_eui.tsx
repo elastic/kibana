@@ -10,9 +10,9 @@ import { useHistory } from 'react-router-dom';
 import {
   EuiLink,
   EuiButton,
-  type EuiButtonProps,
-  type EuiButtonEmptyProps,
-  type EuiLinkAnchorProps,
+  EuiButtonProps,
+  EuiButtonEmptyProps,
+  EuiLinkAnchorProps,
   EuiButtonEmpty,
 } from '@elastic/eui';
 

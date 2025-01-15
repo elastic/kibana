@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALERT_DURATION } from '@kbn/rule-data-utils';
-import { type AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
 import {
   casesFeatureId,
   observabilityFeatureId,

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { type Capabilities, type Logger } from '@kbn/core/server';
-import { type FieldName, type FieldMetadata, FieldsMetadataDictionary } from '../../../common';
-import { type EcsFieldsRepository } from './repositories/ecs_fields_repository';
-import { type IntegrationFieldsRepository } from './repositories/integration_fields_repository';
-import { type MetadataFieldsRepository } from './repositories/metadata_fields_repository';
-import { type IntegrationFieldsSearchParams } from './repositories/types';
-import { type FindFieldsMetadataOptions, type IFieldsMetadataClient } from './types';
+import { Capabilities, Logger } from '@kbn/core/server';
+import { FieldName, FieldMetadata, FieldsMetadataDictionary } from '../../../common';
+import { EcsFieldsRepository } from './repositories/ecs_fields_repository';
+import { IntegrationFieldsRepository } from './repositories/integration_fields_repository';
+import { MetadataFieldsRepository } from './repositories/metadata_fields_repository';
+import { IntegrationFieldsSearchParams } from './repositories/types';
+import { FindFieldsMetadataOptions, IFieldsMetadataClient } from './types';
 
 interface FleetCapabilities {
   fleet: Capabilities[string];

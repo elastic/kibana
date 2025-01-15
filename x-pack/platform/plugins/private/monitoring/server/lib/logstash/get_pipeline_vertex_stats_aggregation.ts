@@ -6,10 +6,10 @@
  */
 
 import {
-  type PostLogstashPipelineRequestParams,
-  type PostLogstashPipelineRequestPayload,
+  PostLogstashPipelineRequestParams,
+  PostLogstashPipelineRequestPayload,
 } from '../../../common/http_api/logstash';
-import { type LegacyRequest, type PipelineVersion } from '../../types';
+import { LegacyRequest, PipelineVersion } from '../../types';
 import { getIndexPatterns, getLogstashDataset } from '../../../common/get_index_patterns';
 import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';

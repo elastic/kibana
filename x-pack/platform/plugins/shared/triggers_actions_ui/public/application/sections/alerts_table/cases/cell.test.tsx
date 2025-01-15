@@ -8,12 +8,12 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { CasesCell } from './cell';
-import { type CellComponentProps } from '../types';
-import { type Alert } from '../../../../types';
+import { CellComponentProps } from '../types';
+import { Alert } from '../../../../types';
 import { getCasesMockMap } from './index.mock';
 import { getMaintenanceWindowMockMap } from '../maintenance_windows/index.mock';
 import userEvent from '@testing-library/user-event';
-import { type AppMockRenderer, createAppMockRenderer } from '../../test_utils';
+import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { useCaseViewNavigation } from './use_case_view_navigation';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 

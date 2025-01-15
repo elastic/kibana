@@ -16,7 +16,7 @@ import {
   EuiDragDropContext,
   EuiDraggable,
   EuiDroppable,
-  type DragDropContextProps,
+  DragDropContextProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -25,7 +25,7 @@ import { RoutingLink } from '../routing';
 import { WorkpadRoutingContext } from '../../routes/workpad';
 import { PagePreview } from '../page_preview';
 
-import { type CanvasPage } from '../../../types';
+import { CanvasPage } from '../../../types';
 
 const strings = {
   getAddPageTooltip: () =>

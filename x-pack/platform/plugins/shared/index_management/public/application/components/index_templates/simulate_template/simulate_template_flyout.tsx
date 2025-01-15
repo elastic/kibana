@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 
 import { useForm, Form, getUseField, CheckBoxField, FormDataProvider } from '../shared_imports';
-import { SimulateTemplate, type Filters } from './simulate_template';
+import { SimulateTemplate, Filters } from './simulate_template';
 
 const CheckBox = getUseField({ component: CheckBoxField });
 

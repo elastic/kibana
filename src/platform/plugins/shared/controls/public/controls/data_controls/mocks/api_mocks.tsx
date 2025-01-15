@@ -9,9 +9,9 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { type DataViewField } from '@kbn/data-views-plugin/common';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 
-import { type PublishingSubject } from '@kbn/presentation-publishing';
+import { PublishingSubject } from '@kbn/presentation-publishing';
 import type {
   OptionsListDisplaySettings,
   OptionsListSearchTechnique,

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { type TypeOf } from '@kbn/config-schema';
+import { TypeOf } from '@kbn/config-schema';
 import {
-  type D3SecurityConfigSchema,
-  type D3SecuritySecretsSchema,
-  type D3SecurityRunActionParamsSchema,
-  type D3SecurityRunActionResponseSchema,
+  D3SecurityConfigSchema,
+  D3SecuritySecretsSchema,
+  D3SecurityRunActionParamsSchema,
+  D3SecurityRunActionResponseSchema,
 } from './schema';
 
 export type D3SecurityConfig = TypeOf<typeof D3SecurityConfigSchema>;

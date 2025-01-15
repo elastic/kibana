@@ -6,10 +6,10 @@
  */
 
 import {
-  type TinymathAST,
-  type TinymathFunction,
-  type TinymathNamedArgument,
-  type TinymathVariable,
+  TinymathAST,
+  TinymathFunction,
+  TinymathNamedArgument,
+  TinymathVariable,
 } from '@kbn/tinymath';
 
 export type GroupedNodes = {

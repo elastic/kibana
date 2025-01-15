@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type InterfaceDeclaration } from 'ts-morph';
-import { type ApiDeclaration, TypeKind } from '../types';
+import { InterfaceDeclaration } from 'ts-morph';
+import { ApiDeclaration, TypeKind } from '../types';
 import { buildApiDeclaration } from './build_api_declaration';
 import { isInternal } from '../utils';
 import { buildBasicApiDeclaration } from './build_basic_api_declaration';
-import { type BuildApiDecOpts } from './types';
+import { BuildApiDecOpts } from './types';
 import { getOptsForChild } from './utils';
 
 export function buildInterfaceDec(

@@ -6,20 +6,20 @@
  */
 
 import Boom from '@hapi/boom';
-import { type KibanaRequest } from '@kbn/core/server';
-import { type JsonObject } from '@kbn/utility-types';
-import { type KueryNode } from '@kbn/es-query';
-import { type SecurityPluginStart } from '@kbn/security-plugin/server';
-import { type FeaturesPluginStart } from '@kbn/features-plugin/server';
-import { type Space } from '@kbn/spaces-plugin/server';
-import { type RegistryRuleType } from '../rule_type_registry';
-import { type RuleTypeRegistry } from '../types';
+import { KibanaRequest } from '@kbn/core/server';
+import { JsonObject } from '@kbn/utility-types';
+import { KueryNode } from '@kbn/es-query';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { FeaturesPluginStart } from '@kbn/features-plugin/server';
+import { Space } from '@kbn/spaces-plugin/server';
+import { RegistryRuleType } from '../rule_type_registry';
+import { RuleTypeRegistry } from '../types';
 import {
   asFiltersByRuleTypeAndConsumer,
   asFiltersBySpaceId,
-  type AlertingAuthorizationFilterOpts,
+  AlertingAuthorizationFilterOpts,
 } from './alerting_authorization_kuery';
-import { ReadOperations, WriteOperations, type AlertingAuthorizationEntity } from './types';
+import { ReadOperations, WriteOperations, AlertingAuthorizationEntity } from './types';
 
 export interface EnsureAuthorizedOpts {
   ruleTypeId: string;

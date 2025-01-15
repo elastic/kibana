@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC } from 'react';
+import React, { FC } from 'react';
 import { EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type FetchResult } from '@kbn/newsfeed-plugin/public';
+import { FetchResult } from '@kbn/newsfeed-plugin/public';
 
 interface Props {
   newsFetchResult: FetchResult;

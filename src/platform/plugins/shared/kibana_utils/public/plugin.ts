@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type CoreSetup, type CoreStart, type Plugin } from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 
 export type KibanaUtilsPublicSetup = undefined;
 

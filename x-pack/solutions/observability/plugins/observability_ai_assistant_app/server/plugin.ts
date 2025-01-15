@@ -8,14 +8,14 @@
 import {
   type CoreSetup,
   type Logger,
-  type Plugin,
+  Plugin,
   type PluginInitializerContext,
   type CoreStart,
-  type KibanaRequest,
+  KibanaRequest,
 } from '@kbn/core/server';
 import {
-  type ObservabilityAIAssistantRequestHandlerContext,
-  type ObservabilityAIAssistantRouteHandlerResources,
+  ObservabilityAIAssistantRequestHandlerContext,
+  ObservabilityAIAssistantRouteHandlerResources,
 } from '@kbn/observability-ai-assistant-plugin/server/routes/types';
 import { mapValues } from 'lodash';
 import { firstValueFrom } from 'rxjs';

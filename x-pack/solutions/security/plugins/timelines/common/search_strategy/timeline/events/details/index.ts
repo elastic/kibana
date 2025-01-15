@@ -6,8 +6,8 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/search-types';
-import { type EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { type Inspect, type Maybe } from '../../../common';
+import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { Inspect, Maybe } from '../../../common';
 
 export interface TimelineEventsDetailsItem {
   ariaRowindex?: Maybe<number>;

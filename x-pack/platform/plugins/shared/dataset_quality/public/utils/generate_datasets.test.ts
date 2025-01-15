@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type DataStreamStatType } from '../../common/data_streams_stats';
-import { type Integration } from '../../common/data_streams_stats/integration';
+import { DataStreamStatType } from '../../common/data_streams_stats';
+import { Integration } from '../../common/data_streams_stats/integration';
 import { DEFAULT_DICTIONARY_TYPE } from '../state_machines/dataset_quality_controller';
 import { generateDatasets } from './generate_datasets';
 

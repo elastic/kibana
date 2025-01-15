@@ -12,7 +12,7 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSuperDatePicker,
-  type EuiSuperDatePickerCommonRange,
+  EuiSuperDatePickerCommonRange,
   EuiFlexGroup,
   EuiSpacer,
   EuiButtonGroup,
@@ -21,11 +21,11 @@ import {
   EuiFieldSearch,
 } from '@elastic/eui';
 
-import { type OnTimeChangeProps } from '@elastic/eui/src/components/date_picker/super_date_picker/super_date_picker';
+import { OnTimeChangeProps } from '@elastic/eui/src/components/date_picker/super_date_picker/super_date_picker';
 
 import { i18n } from '@kbn/i18n';
 
-import { type AnalyticsCollection } from '../../../../../common/types/analytics';
+import { AnalyticsCollection } from '../../../../../common/types/analytics';
 import { FilterBy } from '../../utils/get_formula_by_filter';
 import { AddAnalyticsCollection } from '../add_analytics_collections/add_analytics_collection';
 

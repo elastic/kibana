@@ -7,19 +7,19 @@
 
 import { get } from 'lodash';
 import {
-  type PostLogstashPipelineRequestParams,
-  type PostLogstashPipelineRequestPayload,
+  PostLogstashPipelineRequestParams,
+  PostLogstashPipelineRequestPayload,
 } from '../../../common/http_api/logstash';
 import { PipelineNotFoundError } from '../errors';
 import { getPipelineStateDocument } from './get_pipeline_state_document';
 import { getPipelineVertexStatsAggregation } from './get_pipeline_vertex_stats_aggregation';
 import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
-import { type LegacyRequest, type PipelineVersion } from '../../types';
+import { LegacyRequest, PipelineVersion } from '../../types';
 import {
-  type ElasticsearchSource,
-  type ElasticsearchSourceLogstashPipelineVertex,
+  ElasticsearchSource,
+  ElasticsearchSourceLogstashPipelineVertex,
 } from '../../../common/types/es';
-import { type MonitoringConfig } from '../../config';
+import { MonitoringConfig } from '../../config';
 
 export function _vertexStats(
   vertex: ElasticsearchSourceLogstashPipelineVertex,

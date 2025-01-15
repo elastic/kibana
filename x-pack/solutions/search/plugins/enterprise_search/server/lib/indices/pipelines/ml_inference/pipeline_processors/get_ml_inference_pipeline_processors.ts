@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { type IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types';
-import { type ElasticsearchClient } from '@kbn/core/server';
-import { type MlTrainedModels } from '@kbn/ml-plugin/server';
+import { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
 import {
   getMlModelTypesForModelConfig,
   parseModelStateFromStats,
   parseModelStateReasonFromStats,
 } from '../../../../../../common/ml_inference_pipeline';
-import { type InferencePipeline, TrainedModelState } from '../../../../../../common/types/pipelines';
+import { InferencePipeline, TrainedModelState } from '../../../../../../common/types/pipelines';
 import { getInferencePipelineNameFromIndexName } from '../../../../../utils/ml_inference_pipeline_utils';
 
 export type InferencePipelineData = InferencePipeline & {

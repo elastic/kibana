@@ -12,11 +12,11 @@ import { isSupportedEsServer } from '@kbn/core-elasticsearch-server-internal';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import {
-  type SavedObjectsOpenPointInTimeOptions,
-  type SavedObjectsFindInternalOptions,
-  type SavedObjectsOpenPointInTimeResponse,
+  SavedObjectsOpenPointInTimeOptions,
+  SavedObjectsFindInternalOptions,
+  SavedObjectsOpenPointInTimeResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { type ApiExecutionContext } from './types';
+import { ApiExecutionContext } from './types';
 
 export interface PerforOpenPointInTimeParams {
   type: string | string[];

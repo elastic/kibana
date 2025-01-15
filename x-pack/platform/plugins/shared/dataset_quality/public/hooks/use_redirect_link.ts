@@ -6,14 +6,14 @@
  */
 
 import { useMemo } from 'react';
-import { type DiscoverAppLocatorParams, DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
-import { type Query, type AggregateQuery, buildPhraseFilter } from '@kbn/es-query';
+import { DiscoverAppLocatorParams, DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
+import { Query, AggregateQuery, buildPhraseFilter } from '@kbn/es-query';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import { type RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
-import { type LocatorClient } from '@kbn/shared-ux-prompt-no-data-views-types';
+import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
+import { LocatorClient } from '@kbn/shared-ux-prompt-no-data-views-types';
 import { useKibanaContextForPlugin } from '../utils';
-import { type BasicDataStream, type TimeRangeConfig } from '../../common/types';
-import { type SendTelemetryFn } from './use_redirect_link_telemetry';
+import { BasicDataStream, TimeRangeConfig } from '../../common/types';
+import { SendTelemetryFn } from './use_redirect_link_telemetry';
 
 export const useRedirectLink = <T extends BasicDataStream>({
   dataStreamStat,

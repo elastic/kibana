@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { type CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import {
   createKibanaReactContext,
-  type KibanaReactContextValue,
+  KibanaReactContextValue,
   useKibana,
 } from '@kbn/kibana-react-plugin/public';
 import { useMemo } from 'react';
 import {
-  type ObservabilityLogsExplorerAppMountParameters,
-  type ObservabilityLogsExplorerPluginStart,
-  type ObservabilityLogsExplorerStartDeps,
+  ObservabilityLogsExplorerAppMountParameters,
+  ObservabilityLogsExplorerPluginStart,
+  ObservabilityLogsExplorerStartDeps,
 } from '../types';
 
 export type PluginKibanaContextValue = CoreStart &

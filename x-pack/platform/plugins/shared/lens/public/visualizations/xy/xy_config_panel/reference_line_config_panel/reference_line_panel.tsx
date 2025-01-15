@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { type FillStyle } from '@kbn/expression-xy-plugin/common';
+import { FillStyle } from '@kbn/expression-xy-plugin/common';
 import {
   IconSelectSetting,
   ColorPicker,
@@ -17,11 +17,11 @@ import {
   TextDecorationSetting,
 } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import { KbnPalette, type KbnPalettes } from '@kbn/palettes';
+import { KbnPalette, KbnPalettes } from '@kbn/palettes';
 import { referenceLineIconsSet } from '../../../../shared_components/icon_set';
 import type { VisualizationDimensionEditorProps } from '../../../../types';
-import { type State, type XYState, type XYReferenceLineLayerConfig, type YConfig } from '../../types';
-import { type FormatFactory } from '../../../../../common/types';
+import { State, XYState, XYReferenceLineLayerConfig, YConfig } from '../../types';
+import { FormatFactory } from '../../../../../common/types';
 
 import { updateLayer } from '..';
 import { idPrefix } from '../dimension_editor';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type RawRule } from '../../types';
-import { type RulesClientContext } from '../types';
+import { RawRule } from '../../types';
+import { RulesClientContext } from '../types';
 
 /**
  * @deprecated Use updateMetaAttributes instead

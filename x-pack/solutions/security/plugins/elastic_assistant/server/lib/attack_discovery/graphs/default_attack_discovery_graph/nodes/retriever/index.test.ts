@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type ElasticsearchClient, type Logger } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { type Replacements } from '@kbn/elastic-assistant-common';
+import { Replacements } from '@kbn/elastic-assistant-common';
 
 import { getRetrieveAnonymizedAlertsNode } from '.';
 import { mockAnonymizedAlerts } from '../../../../evaluation/__mocks__/mock_anonymized_alerts';

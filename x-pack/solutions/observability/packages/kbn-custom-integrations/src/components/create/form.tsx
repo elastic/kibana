@@ -19,13 +19,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useActor, useSelector } from '@xstate/react';
 import { ErrorCallout } from './error_callout';
-import { type CreateCustomIntegrationActorRef } from '../../state_machines/create/state_machine';
+import { CreateCustomIntegrationActorRef } from '../../state_machines/create/state_machine';
 import {
-  type CreateCustomIntegrationOptions,
-  type WithOptionalErrors,
-  type WithTouchedFields,
+  CreateCustomIntegrationOptions,
+  WithOptionalErrors,
+  WithTouchedFields,
 } from '../../state_machines/create/types';
-import { type Dataset, type IntegrationError } from '../../types';
+import { Dataset, IntegrationError } from '../../types';
 import { hasFailedSelector } from '../../state_machines/create/selectors';
 import {
   datasetNameWillBePrefixed,

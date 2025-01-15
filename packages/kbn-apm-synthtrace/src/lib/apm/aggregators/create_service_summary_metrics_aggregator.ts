@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ApmFields, hashKeysOf } from '@kbn/apm-synthtrace-client';
+import { ApmFields, hashKeysOf } from '@kbn/apm-synthtrace-client';
 import { identity, noop, pick } from 'lodash';
 import { createApmMetricAggregator } from './create_apm_metric_aggregator';
 

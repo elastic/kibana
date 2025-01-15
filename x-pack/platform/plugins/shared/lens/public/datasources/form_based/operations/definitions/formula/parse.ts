@@ -12,9 +12,9 @@ import { nonNullable } from '../../../../../utils';
 import type { DateRange } from '../../../../../../common/types';
 import type { IndexPattern } from '../../../../../types';
 import {
-  type OperationDefinition,
-  type GenericOperationDefinition,
-  type GenericIndexPatternColumn,
+  OperationDefinition,
+  GenericOperationDefinition,
+  GenericIndexPatternColumn,
   operationDefinitionMap,
 } from '..';
 import type { FormBasedLayer } from '../../../types';
@@ -28,7 +28,7 @@ import {
   groupArgsByType,
   mergeWithGlobalFilters,
 } from './util';
-import { type FormulaIndexPatternColumn, isFormulaIndexPatternColumn } from './formula';
+import { FormulaIndexPatternColumn, isFormulaIndexPatternColumn } from './formula';
 import { getColumnOrder } from '../../layer_helpers';
 
 /** @internal **/

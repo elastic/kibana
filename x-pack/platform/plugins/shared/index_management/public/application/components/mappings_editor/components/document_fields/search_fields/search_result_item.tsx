@@ -10,7 +10,7 @@ import classNames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { type SearchResult } from '../../../types';
+import { SearchResult } from '../../../types';
 import { TYPE_DEFINITION } from '../../../constants';
 import { useDispatch } from '../../../mappings_state_context';
 import { getTypeLabelFromField } from '../../../lib';

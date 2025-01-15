@@ -15,12 +15,12 @@ import type { CloudConfigType } from './config';
 import { registerCloudUsageCollector } from './collectors';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
-import { decodeCloudId, type DecodedCloudId } from '../common/decode_cloud_id';
+import { decodeCloudId, DecodedCloudId } from '../common/decode_cloud_id';
 import { parseOnboardingSolution } from '../common/parse_onboarding_default_solution';
 import { getFullCloudUrl } from '../common/utils';
 import { readInstanceSizeMb } from './env';
 import { defineRoutes } from './routes';
-import { type CloudRequestHandlerContext } from './routes/types';
+import { CloudRequestHandlerContext } from './routes/types';
 import { setupSavedObjects } from './saved_objects';
 
 interface PluginsSetup {

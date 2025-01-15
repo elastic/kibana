@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type IRouter, type Logger } from '@kbn/core/server';
-import { type RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
+import { IRouter, Logger } from '@kbn/core/server';
+import { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import { registerAggregateRoute } from './aggregate';
 import { registerCountRoute } from './count';
 import { registerMultiTermsAggregateRoute } from './multi_terms_aggregate';

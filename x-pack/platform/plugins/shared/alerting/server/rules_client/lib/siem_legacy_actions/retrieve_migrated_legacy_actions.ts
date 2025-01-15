@@ -8,10 +8,10 @@
 import type { SavedObjectReference } from '@kbn/core/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { RulesClientContext } from '../..';
-import { type RawRuleAction } from '../../../types';
+import { RawRuleAction } from '../../../types';
 import { findRules } from '../../../application/rule/methods/find/find_rules';
 import { deleteRule } from '../../../application/rule/methods/delete/delete_rule';
-import { type LegacyIRuleActionsAttributes, legacyRuleActionsSavedObjectType } from './types';
+import { LegacyIRuleActionsAttributes, legacyRuleActionsSavedObjectType } from './types';
 import { transformFromLegacyActions } from './transform_legacy_actions';
 
 type RetrieveMigratedLegacyActions = (

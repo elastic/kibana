@@ -17,7 +17,7 @@ import {
 } from '../repository.test.mock';
 
 import type { Payload } from '@hapi/boom';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type {
   SavedObjectsBulkUpdateObject,
@@ -28,7 +28,7 @@ import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
-  type SavedObjectsSerializer,
+  SavedObjectsSerializer,
   encodeHitVersion,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { kibanaMigratorMock } from '../../mocks';

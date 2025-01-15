@@ -8,7 +8,7 @@
  */
 
 import { PANEL_TYPES } from '../../../../common/enums';
-import { type Panel, type Series } from '../../../../common/types';
+import { Panel, Series } from '../../../../common/types';
 
 export const createSeries = (partialSeries?: Partial<Series>): Series => ({
   axis_position: 'right',

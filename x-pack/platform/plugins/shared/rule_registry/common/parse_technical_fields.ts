@@ -10,7 +10,7 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import { pick } from 'lodash';
 import {
   technicalRuleFieldMap,
-  type TechnicalRuleFieldMap,
+  TechnicalRuleFieldMap,
 } from './assets/field_maps/technical_rule_field_map';
 import { runtimeTypeFromFieldMap } from './field_map';
 

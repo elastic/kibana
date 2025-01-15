@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Duration, type unitOfTime } from 'moment-timezone';
+import { Duration, unitOfTime } from 'moment-timezone';
 
 /**
  * Returns the highest time unit of the given duration

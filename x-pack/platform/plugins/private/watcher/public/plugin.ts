@@ -6,15 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type CoreSetup, type Plugin, type CoreStart, type Capabilities } from '@kbn/core/public';
+import { CoreSetup, Plugin, CoreStart, Capabilities } from '@kbn/core/public';
 import { first, map, skip } from 'rxjs';
 import { Subject, combineLatest } from 'rxjs';
 
 import type { FeatureCatalogueEntry } from '@kbn/home-plugin/public';
-import { type ILicense } from '@kbn/licensing-plugin/public';
-import { type LicenseStatus } from '../common/types/license_status';
+import { ILicense } from '@kbn/licensing-plugin/public';
+import { LicenseStatus } from '../common/types/license_status';
 import { PLUGIN } from '../common/constants';
-import { type Dependencies } from './types';
+import { Dependencies } from './types';
 
 const licenseToLicenseStatus = (license: ILicense): LicenseStatus => {
   const { state, message } = license.check(PLUGIN.ID, PLUGIN.MINIMUM_LICENSE_REQUIRED);

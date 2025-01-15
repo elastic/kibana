@@ -11,14 +11,14 @@ import { ALERT_CASE_IDS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
 import {
   AttachmentType,
-  type UserCommentAttachmentAttributes,
-  type AlertAttachmentAttributes,
+  UserCommentAttachmentAttributes,
+  AlertAttachmentAttributes,
   CaseStatuses,
-  type ExternalReferenceSOAttachmentPayload,
-  type AlertAttachmentPayload,
+  ExternalReferenceSOAttachmentPayload,
+  AlertAttachmentPayload,
   ExternalReferenceStorageType,
 } from '@kbn/cases-plugin/common/types/domain';
-import { type FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
   postCaseReq,
@@ -69,7 +69,7 @@ import {
   createSecuritySolutionAlerts,
   getAlertById,
 } from '../../../../common/lib/alerts';
-import { type User } from '../../../../common/lib/authentication/types';
+import { User } from '../../../../common/lib/authentication/types';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

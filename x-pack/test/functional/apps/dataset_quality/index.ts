@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type DatasetQualityFtrProviderContext } from './config';
+import { DatasetQualityFtrProviderContext } from './config';
 
 export default function ({ loadTestFile }: DatasetQualityFtrProviderContext) {
   describe('Dataset Quality', function () {

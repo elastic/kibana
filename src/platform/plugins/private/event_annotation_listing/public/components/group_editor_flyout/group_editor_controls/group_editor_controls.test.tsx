@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ChangeEvent, type FormEvent } from 'react';
+import React, { ChangeEvent, FormEvent } from 'react';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { getDefaultManualAnnotation } from '@kbn/event-annotation-common';
-import { type ReactWrapper } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { GroupEditorControls } from './group_editor_controls';
-import { type EuiTextAreaProps, type EuiTextProps } from '@elastic/eui';
+import { EuiTextAreaProps, EuiTextProps } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { act } from 'react-dom/test-utils';
 import type { QueryInputServices } from '@kbn/visualization-ui-components';

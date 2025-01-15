@@ -8,7 +8,7 @@
  */
 
 import { createSeries } from '../__mocks__';
-import { type Metric, type MetricType } from '../../../../common/types';
+import { Metric, MetricType } from '../../../../common/types';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import {
   computeParentPipelineColumns,
@@ -16,11 +16,11 @@ import {
   convertMetricAggregationToColumn,
   convertParentPipelineAggToColumns,
   createParentPipelineAggregationColumn,
-  type MetricAggregationColumn,
-  type ParentPipelineAggColumn,
+  MetricAggregationColumn,
+  ParentPipelineAggColumn,
 } from './parent_pipeline';
-import { type SupportedMetric, SUPPORTED_METRICS } from '../metrics';
-import { type ColumnWithMeta, type FormulaColumn } from './types';
+import { SupportedMetric, SUPPORTED_METRICS } from '../metrics';
+import { ColumnWithMeta, FormulaColumn } from './types';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import { Operations } from '@kbn/visualizations-plugin/common';

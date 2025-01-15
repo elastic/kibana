@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { useSeriesStorage } from '../hooks/use_series_storage';
-import { type SeriesUrl } from '../types';
+import { SeriesUrl } from '../types';
 
 export function SeriesColorPicker({ seriesId, series }: { seriesId: number; series: SeriesUrl }) {
   const theme = useTheme();

@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { type MockedLogger, loggerMock } from '@kbn/logging-mocks';
+import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 
-import { type ExceptionListClient } from '../exception_lists/exception_list_client';
+import { ExceptionListClient } from '../exception_lists/exception_list_client';
 
 import { ExtensionPointStorage } from './extension_point_storage';
 import {
-  type ExceptionsListPreCreateItemServerExtension,
-  type ExceptionsListPreDeleteItemServerExtension,
-  type ExceptionsListPreExportServerExtension,
-  type ExceptionsListPreGetOneItemServerExtension,
-  type ExceptionsListPreImportServerExtension,
-  type ExceptionsListPreMultiListFindServerExtension,
-  type ExceptionsListPreSingleListFindServerExtension,
-  type ExceptionsListPreSummaryServerExtension,
-  type ExceptionsListPreUpdateItemServerExtension,
-  type ExtensionPointStorageInterface,
-  type ServerExtensionCallbackContext,
+  ExceptionsListPreCreateItemServerExtension,
+  ExceptionsListPreDeleteItemServerExtension,
+  ExceptionsListPreExportServerExtension,
+  ExceptionsListPreGetOneItemServerExtension,
+  ExceptionsListPreImportServerExtension,
+  ExceptionsListPreMultiListFindServerExtension,
+  ExceptionsListPreSingleListFindServerExtension,
+  ExceptionsListPreSummaryServerExtension,
+  ExceptionsListPreUpdateItemServerExtension,
+  ExtensionPointStorageInterface,
+  ServerExtensionCallbackContext,
 } from './types';
 
 export interface ExtensionPointStorageContextMock {

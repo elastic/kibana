@@ -18,7 +18,7 @@ import {
 
 import { msToPretty } from '../../lib';
 import { HighlightDetailsTable } from './highlight_details_table';
-import { type Operation } from '../../types';
+import { Operation } from '../../types';
 
 export interface Props {
   operation: Omit<Operation, 'children' | 'parent'>;

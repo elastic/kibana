@@ -27,12 +27,12 @@ import {
   mapToFormula,
 } from '../utils';
 import {
-  type BuildDependencies,
-  type LensAnnotationLayer,
-  type LensAttributes,
-  type LensReferenceLineLayer,
-  type LensSeriesLayer,
-  type LensXYConfig,
+  BuildDependencies,
+  LensAnnotationLayer,
+  LensAttributes,
+  LensReferenceLineLayer,
+  LensSeriesLayer,
+  LensXYConfig,
 } from '../types';
 
 const ACCESSOR = 'metric_formula_accessor';

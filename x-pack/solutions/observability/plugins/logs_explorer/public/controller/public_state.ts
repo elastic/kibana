@@ -6,20 +6,20 @@
  */
 
 import {
-  type AllDatasetSelection,
+  AllDatasetSelection,
   availableControlsPanels,
   controlPanelConfigs,
-  type ControlPanels,
+  ControlPanels,
   hydrateDataSourceSelection,
 } from '../../common';
 import {
   DEFAULT_CONTEXT,
-  type LogsExplorerControllerContext,
+  LogsExplorerControllerContext,
 } from '../state_machines/logs_explorer_controller';
 import {
-  type LogsExplorerPublicState,
-  type LogsExplorerPublicStateUpdate,
-  type OptionsListControl,
+  LogsExplorerPublicState,
+  LogsExplorerPublicStateUpdate,
+  OptionsListControl,
 } from './types';
 
 export const getPublicStateFromContext = (

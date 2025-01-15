@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type CoreStart, type IUiSettingsClient } from '@kbn/core/public';
+import { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 
 import {
-  type AggsStart,
-  type DataViewsContract,
-  type ExpressionValueSearchContext,
+  AggsStart,
+  DataViewsContract,
+  ExpressionValueSearchContext,
 } from '@kbn/data-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { type EventAnnotationService } from '..';
+import { EventAnnotationService } from '..';
 import { getFetchEventAnnotations } from '.';
-import { type FetchEventAnnotationsArgs, type QueryPointEventAnnotationOutput } from '../../common';
-import { type EventAnnotationStartDependencies } from '../plugin';
+import { FetchEventAnnotationsArgs, QueryPointEventAnnotationOutput } from '../../common';
+import { EventAnnotationStartDependencies } from '../plugin';
 import { of as mockOf } from 'rxjs';
 import { handleRequest } from '../../common/fetch_event_annotations/handle_request';
 jest.mock('../../common/fetch_event_annotations/handle_request', () => {

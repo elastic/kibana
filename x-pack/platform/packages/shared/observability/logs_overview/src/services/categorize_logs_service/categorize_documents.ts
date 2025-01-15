@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { type ISearchGeneric } from '@kbn/search-types';
+import { ISearchGeneric } from '@kbn/search-types';
 import { lastValueFrom } from 'rxjs';
 import { fromPromise } from 'xstate5';
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import { z } from '@kbn/zod';
-import { type LogCategorizationParams } from './types';
+import { LogCategorizationParams } from './types';
 import { createCategorizationRequestParams } from './queries';
-import { type LogCategory, type LogCategoryChange } from '../../types';
+import { LogCategory, LogCategoryChange } from '../../types';
 
 // the fraction of a category's histogram below which the category is considered rare
 const rarityThreshold = 0.2;

@@ -18,7 +18,7 @@ import {
   migrateIncludeExcludeFormat,
 } from './migrate_include_exclude_format';
 import { aggTermsFnName } from './terms_fn';
-import { type AggConfigSerialized, type BaseAggParams, type IAggConfig } from '../types';
+import { AggConfigSerialized, BaseAggParams, IAggConfig } from '../types';
 
 import { KBN_FIELD_TYPES } from '../../..';
 

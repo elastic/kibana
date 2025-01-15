@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiBadge, type EuiBadgeProps, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiBadgeProps, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
-  type SLODefinitionResponse,
-  type SLOWithSummaryResponse,
+  SLODefinitionResponse,
+  SLOWithSummaryResponse,
 } from '@kbn/slo-schema';
 import { euiLightVars } from '@kbn/ui-theme';
-import React, { type MouseEvent } from 'react';
+import React, { MouseEvent } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { SLOS_PATH } from '../../../../../common/locators/paths';
 import { useKibana } from '../../../../hooks/use_kibana';

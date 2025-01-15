@@ -14,23 +14,23 @@ import {
   EuiFlexGroup,
   EuiProgress,
   EuiSpacer,
-  type Pagination,
+  Pagination,
   EuiSuperDatePicker,
-  type OnTimeChangeProps,
+  OnTimeChangeProps,
   EuiBasicTable,
-  type EuiTableSortingType,
-  type EuiBasicTableColumn,
+  EuiTableSortingType,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
-import { type IExecutionErrors } from '@kbn/alerting-plugin/common';
+import { IExecutionErrors } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 
 import { RefineSearchPrompt } from '../../common/components/refine_search_prompt';
 import {
-  type ComponentOpts as RuleApis,
+  ComponentOpts as RuleApis,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
 import { EventLogListCellRenderer } from '../../common/components/event_log';
-import { type RefreshToken } from './types';
+import { RefreshToken } from './types';
 
 const getParsedDate = (date: string) => {
   if (date.includes('now')) {

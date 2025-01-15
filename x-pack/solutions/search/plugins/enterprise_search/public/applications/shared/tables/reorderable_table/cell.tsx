@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiFlexItem } from '@elastic/eui';
 
-import { type DraggableUXStyles } from './types';
+import { DraggableUXStyles } from './types';
 
 export const Cell = ({
   children,

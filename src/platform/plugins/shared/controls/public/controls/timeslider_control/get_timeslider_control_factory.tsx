@@ -13,8 +13,8 @@ import { BehaviorSubject, debounceTime, first, map } from 'rxjs';
 import { EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  type PublishingSubject,
-  type ViewMode,
+  PublishingSubject,
+  ViewMode,
   apiHasParentApi,
   apiPublishesDataLoading,
   getUnchangingComparator,
@@ -24,7 +24,7 @@ import {
 
 import { TIME_SLIDER_CONTROL } from '../../../common';
 import { initializeDefaultControlApi } from '../initialize_default_control_api';
-import { type ControlFactory } from '../types';
+import { ControlFactory } from '../types';
 import './components/index.scss';
 import { TimeSliderPopoverButton } from './components/time_slider_popover_button';
 import { TimeSliderPopoverContent } from './components/time_slider_popover_content';
@@ -37,7 +37,7 @@ import {
   roundDownToNextStepSizeFactor,
   roundUpToNextStepSizeFactor,
 } from './time_utils';
-import { type Timeslice, type TimesliderControlApi, type TimesliderControlState } from './types';
+import { Timeslice, TimesliderControlApi, TimesliderControlState } from './types';
 import { isCompressed } from '../../control_group/utils/is_compressed';
 
 const displayName = i18n.translate('controls.timesliderControl.displayName', {

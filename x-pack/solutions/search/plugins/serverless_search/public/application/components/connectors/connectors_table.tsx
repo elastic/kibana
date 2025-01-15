@@ -7,10 +7,10 @@
 
 import {
   copyToClipboard,
-  type Criteria,
+  Criteria,
   EuiBadge,
   EuiBasicTable,
-  type EuiBasicTableColumn,
+  EuiBasicTableColumn,
   EuiButtonIcon,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -28,9 +28,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  type Connector,
+  Connector,
   ConnectorStatus,
-  type SyncStatus,
+  SyncStatus,
   syncStatusToColor,
   syncStatusToText,
 } from '@kbn/search-connectors';

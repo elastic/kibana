@@ -6,11 +6,11 @@
  */
 
 import {
-  type ActionParamsProps,
+  ActionParamsProps,
   JsonEditorWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
-import { type TorqActionParams } from '../types';
+import { TorqActionParams } from '../types';
 import * as i18n from './translations';
 
 const TorqParamsFields: React.FunctionComponent<ActionParamsProps<TorqActionParams>> = ({

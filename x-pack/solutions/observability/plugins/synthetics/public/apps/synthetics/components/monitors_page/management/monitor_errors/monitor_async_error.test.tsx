@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { type SyntheticsAppState } from '../../../../state/root_reducer';
+import { SyntheticsAppState } from '../../../../state/root_reducer';
 import { screen } from '@testing-library/react';
 import React from 'react';
 import { ConfigKey, DEFAULT_THROTTLING } from '../../../../../../../common/runtime_types';
 import { render } from '../../../../utils/testing/rtl_helpers';
-import { type MonitorListState, type ServiceLocationsState } from '../../../../state';
+import { MonitorListState, ServiceLocationsState } from '../../../../state';
 import { MonitorAsyncError } from './monitor_async_error';
 
 describe('<MonitorAsyncError />', () => {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type TypeOf } from '@kbn/config-schema';
-import { type PluginInitializerContext, type PluginConfigDescriptor } from '@kbn/core/server';
+import { TypeOf } from '@kbn/config-schema';
+import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 import { configSchema } from './config';
 
 export type { MonitoringCollectionConfig } from './config';

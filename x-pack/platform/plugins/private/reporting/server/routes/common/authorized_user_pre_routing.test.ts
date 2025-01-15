@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type KibanaRequest, type KibanaResponseFactory } from '@kbn/core/server';
+import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
-import { type ReportingCore } from '../..';
-import { type ReportingInternalSetup, type ReportingInternalStart } from '../../core';
+import { ReportingCore } from '../..';
+import { ReportingInternalSetup, ReportingInternalStart } from '../../core';
 import {
   createMockPluginSetup,
   createMockPluginStart,

@@ -14,7 +14,7 @@ import {
   EuiIcon,
   EuiText,
   EuiFlyoutHeader,
-  type IconType,
+  IconType,
   EuiBetaBadge,
   EuiTab,
   EuiTabs,
@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { type SubFeature } from '@kbn/actions-plugin/common';
+import { SubFeature } from '@kbn/actions-plugin/common';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../../translations';
 import { EditConnectorTabs } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';

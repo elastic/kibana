@@ -7,20 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { waitFor, renderHook, act } from '@testing-library/react';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
-import { UnifiedHistogramFetchStatus, type UnifiedHistogramSuggestionContext } from '../../types';
+import { UnifiedHistogramFetchStatus, UnifiedHistogramSuggestionContext } from '../../types';
 import { dataViewMock } from '../../__mocks__/data_view';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { lensAdaptersMock } from '../../__mocks__/lens_adapters';
 import { unifiedHistogramServicesMock } from '../../__mocks__/services';
 import {
   createStateService,
-  type UnifiedHistogramState,
-  type UnifiedHistogramStateOptions,
+  UnifiedHistogramState,
+  UnifiedHistogramStateOptions,
 } from '../services/state_service';
 import { useStateProps } from './use_state_props';
 

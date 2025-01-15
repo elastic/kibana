@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiToolTip, type IconSize } from '@elastic/eui';
-import { type CSSInterpolation } from '@emotion/serialize';
+import { EuiIcon, EuiToolTip, IconSize } from '@elastic/eui';
+import { CSSInterpolation } from '@emotion/serialize';
 import { getCloudProviderNameFromAbbreviation } from '../../common/utils/helpers';
 import googleCloudLogo from '../assets/icons/google_cloud_logo.svg';
 

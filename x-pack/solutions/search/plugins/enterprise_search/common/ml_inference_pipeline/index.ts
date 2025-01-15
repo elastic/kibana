@@ -6,10 +6,10 @@
  */
 
 import {
-  type IngestInferenceProcessor,
-  type IngestPipeline,
-  type MlTrainedModelConfig,
-  type MlTrainedModelStats,
+  IngestInferenceProcessor,
+  IngestPipeline,
+  MlTrainedModelConfig,
+  MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
 
 import {
@@ -18,13 +18,13 @@ import {
   BUILT_IN_MODEL_TAG,
 } from '@kbn/ml-trained-models-utils';
 
-import { type MlModel } from '../types/ml';
+import { MlModel } from '../types/ml';
 
 import {
-  type MlInferencePipeline,
-  type CreateMLInferencePipeline,
+  MlInferencePipeline,
+  CreateMLInferencePipeline,
   TrainedModelState,
-  type InferencePipelineInferenceConfig,
+  InferencePipelineInferenceConfig,
 } from '../types/pipelines';
 
 export const TEXT_EXPANSION_TYPE = SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION;

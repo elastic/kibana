@@ -8,13 +8,13 @@
  */
 
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { type SavedObjectsType } from '@kbn/core/server';
+import { SavedObjectsType } from '@kbn/core/server';
 
 import { dashboardAttributesSchema as dashboardAttributesSchemaV1 } from './schema/v1';
 import { dashboardAttributesSchema as dashboardAttributesSchemaV2 } from './schema/v2';
 import {
   createDashboardSavedObjectTypeMigrations,
-  type DashboardSavedObjectTypeMigrationsDeps,
+  DashboardSavedObjectTypeMigrationsDeps,
 } from './migrations/dashboard_saved_object_migrations';
 
 export const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';

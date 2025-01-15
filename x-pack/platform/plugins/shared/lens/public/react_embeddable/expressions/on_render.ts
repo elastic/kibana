@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { type KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { canTrackContentfulRender } from '@kbn/presentation-containers';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { type TableInspectorAdapter } from '../../editor_frame_service/types';
+import { TableInspectorAdapter } from '../../editor_frame_service/types';
 
 import { getExecutionContextEvents, trackUiCounterEvents } from '../../lens_ui_telemetry';
-import { type GetStateType, type LensApi, type LensEmbeddableStartServices, type LensInternalApi } from '../types';
+import { GetStateType, LensApi, LensEmbeddableStartServices, LensInternalApi } from '../types';
 import { getSuccessfulRequestTimings } from '../../report_performance_metric_util';
 import { addLog } from '../logger';
 

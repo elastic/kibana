@@ -11,8 +11,8 @@ import { useValues, useActions } from 'kea';
 
 import {
   EuiComboBox,
-  type EuiComboBoxProps,
-  type EuiComboBoxOptionOption,
+  EuiComboBoxProps,
+  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedNumber } from '@kbn/i18n-react';
 
 import { Status } from '../../../../../../common/types/api';
-import { type ElasticsearchIndexWithIngestion } from '../../../../../../common/types/indices';
+import { ElasticsearchIndexWithIngestion } from '../../../../../../common/types/indices';
 
 import { indexHealthToHealthColor } from '../../../../shared/constants/health_colors';
 import { FetchIndicesForSearchApplicationsAPILogic } from '../../../api/search_applications/fetch_indices_api_logic';

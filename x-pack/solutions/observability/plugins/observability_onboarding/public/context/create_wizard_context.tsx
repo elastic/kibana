@@ -6,8 +6,8 @@
  */
 
 import React, {
-  type ComponentType,
-  type ReactNode,
+  ComponentType,
+  ReactNode,
   createContext,
   useContext,
   useState,
@@ -15,7 +15,7 @@ import React, {
   useEffect,
 } from 'react';
 import { useHistory } from 'react-router-dom';
-import { generateNavEvents, type NavEvent } from './nav_events';
+import { generateNavEvents, NavEvent } from './nav_events';
 import { generatePath } from './path';
 
 type Entry<T> = { [K in keyof T]: [K, T[K]] }[keyof T];

@@ -12,18 +12,18 @@ import {
 } from '@kbn/security-solution-plugin/common/endpoint/models/event';
 import { eventsIndexPattern } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import {
-  type ResolverEntityIndex,
-  type ResolverNode,
+  ResolverEntityIndex,
+  ResolverNode,
 } from '@kbn/security-solution-plugin/common/endpoint/types';
 import {
   EndpointDocGenerator,
-  type Event,
+  Event,
 } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
-import type TestAgent from 'supertest/lib/agent';
-import { type FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
+import TestAgent from 'supertest/lib/agent';
+import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import { createAncestryArray, schemaWithAncestry, HEADERS } from './common';
 import {
-  type InsertedEvents,
+  InsertedEvents,
   processEventsIndex,
 } from '../../../../config/services/security_solution_edr_workflows_resolver';
 

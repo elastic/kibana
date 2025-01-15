@@ -13,7 +13,7 @@ import { MetricAggType } from './metric_agg_type';
 import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { METRIC_TYPES } from './metric_agg_types';
-import { type AggConfigSerialized, type BaseAggParams, type IAggConfig } from '../types';
+import { AggConfigSerialized, BaseAggParams, IAggConfig } from '../types';
 
 export interface CommonAggParamsDerivative extends BaseAggParams {
   buckets_path?: string;

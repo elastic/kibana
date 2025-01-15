@@ -6,13 +6,13 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { type RouteComponentProps } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageSection } from '@elastic/eui';
-import { type ScopedHistory } from '@kbn/core/public';
+import { ScopedHistory } from '@kbn/core/public';
 
-import { PageLoading, PageError, type Error, attemptToURIDecode } from '../../../shared_imports';
-import { type TemplateDeserialized } from '../../../../common';
+import { PageLoading, PageError, Error, attemptToURIDecode } from '../../../shared_imports';
+import { TemplateDeserialized } from '../../../../common';
 import { TemplateForm } from '../../components';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../services/breadcrumbs';
 import { getTemplateDetailsLink } from '../../services/routing';

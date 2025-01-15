@@ -6,7 +6,7 @@
  */
 import Semver from 'semver';
 import Boom from '@hapi/boom';
-import { type SavedObject, SavedObjectsUtils } from '@kbn/core/server';
+import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
@@ -25,9 +25,9 @@ import {
 } from '../../../../rules_client/lib';
 import { generateAPIKeyName, apiKeyAsRuleDomainProperties } from '../../../../rules_client/common';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { type RulesClientContext } from '../../../../rules_client/types';
-import { type RuleDomain, type RuleParams } from '../../types';
-import { type RawRule, type SanitizedRule } from '../../../../types';
+import { RulesClientContext } from '../../../../rules_client/types';
+import { RuleDomain, RuleParams } from '../../types';
+import { RawRule, SanitizedRule } from '../../../../types';
 import {
   transformRuleAttributesToRuleDomain,
   transformRuleDomainToRuleAttributes,
@@ -37,7 +37,7 @@ import { ruleDomainSchema } from '../../schemas';
 import type { CreateRuleData } from './types';
 import { createRuleDataSchema } from './schemas';
 import { createRuleSavedObject } from '../../../../rules_client/lib';
-import { validateScheduleLimit, type ValidateScheduleLimitResult } from '../get_schedule_frequency';
+import { validateScheduleLimit, ValidateScheduleLimitResult } from '../get_schedule_frequency';
 
 export interface CreateRuleOptions {
   id?: string;

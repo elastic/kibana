@@ -8,7 +8,7 @@
 import { LogicMounter } from '../../../../__mocks__/kea_logic';
 
 import {
-  type Connector,
+  Connector,
   ConnectorStatus,
   DisplayType,
   FieldType,

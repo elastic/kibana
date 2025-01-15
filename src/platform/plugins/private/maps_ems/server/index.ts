@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type PluginInitializerContext, type PluginConfigDescriptor } from '@kbn/core/server';
-import { type MapConfig, mapConfigSchema } from './config';
+import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
+import { MapConfig, mapConfigSchema } from './config';
 export type { EMSSettings } from '../common';
 export type { MapsEmsPluginServerSetup } from './plugin';
 

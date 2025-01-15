@@ -6,14 +6,14 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { type KueryNode } from '@kbn/es-query';
+import { KueryNode } from '@kbn/es-query';
 import {
-  type bulkEditRuleSnoozeScheduleSchema,
-  type bulkEditOperationsSchema,
-  type bulkEditOperationSchema,
+  bulkEditRuleSnoozeScheduleSchema,
+  bulkEditOperationsSchema,
+  bulkEditOperationSchema,
 } from '../schemas';
-import { type RuleParams, type RuleDomain } from '../../../types';
-import { type Rule } from '../../../../../../common';
+import { RuleParams, RuleDomain } from '../../../types';
+import { Rule } from '../../../../../../common';
 
 export type BulkEditRuleSnoozeSchedule = TypeOf<typeof bulkEditRuleSnoozeScheduleSchema>;
 export type BulkEditOperation = TypeOf<typeof bulkEditOperationSchema>;

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type AppMountParameters, type CoreSetup, type Plugin } from '@kbn/core/public';
+import { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
 
 export class EuiProviderDevWarningPlugin
   implements Plugin<EuiProviderDevWarningPluginSetup, EuiProviderDevWarningPluginStart>

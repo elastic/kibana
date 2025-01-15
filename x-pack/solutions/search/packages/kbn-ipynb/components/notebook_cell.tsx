@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiMarkdownFormat, EuiCodeBlock, EuiTitle } from '@elastic/eui';
 
-import { type NotebookCellType } from '../types';
+import { NotebookCellType } from '../types';
 import { combineSource } from '../utils';
 
 export const NotebookCell = ({ cell, language }: { cell: NotebookCellType; language: string }) => {

@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { type TypeOf } from '@kbn/config-schema';
+import { TypeOf } from '@kbn/config-schema';
 import {
-  type ConfigSchema,
-  type SecretsSchema,
-  type StreamingResponseSchema,
-  type ChatCompleteParamsSchema,
-  type ChatCompleteResponseSchema,
-  type RerankParamsSchema,
-  type RerankResponseSchema,
-  type SparseEmbeddingParamsSchema,
-  type SparseEmbeddingResponseSchema,
-  type TextEmbeddingParamsSchema,
-  type TextEmbeddingResponseSchema,
-  type UnifiedChatCompleteParamsSchema,
-  type UnifiedChatCompleteResponseSchema,
-  type DashboardActionParamsSchema,
-  type DashboardActionResponseSchema,
+  ConfigSchema,
+  SecretsSchema,
+  StreamingResponseSchema,
+  ChatCompleteParamsSchema,
+  ChatCompleteResponseSchema,
+  RerankParamsSchema,
+  RerankResponseSchema,
+  SparseEmbeddingParamsSchema,
+  SparseEmbeddingResponseSchema,
+  TextEmbeddingParamsSchema,
+  TextEmbeddingResponseSchema,
+  UnifiedChatCompleteParamsSchema,
+  UnifiedChatCompleteResponseSchema,
+  DashboardActionParamsSchema,
+  DashboardActionResponseSchema,
 } from './schema';
-import { type ConfigProperties } from '../dynamic_config/types';
+import { ConfigProperties } from '../dynamic_config/types';
 
 export type Config = TypeOf<typeof ConfigSchema>;
 export type Secrets = TypeOf<typeof SecretsSchema>;

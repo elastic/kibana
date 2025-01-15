@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import { DEFAULT_CAPACITY } from '../config';
-import { type TaskDefinition } from '../task';
-import { type TaskRunner } from '../task_running';
-import { type CapacityOpts, type ICapacity } from './types';
+import { TaskDefinition } from '../task';
+import { TaskRunner } from '../task_running';
+import { CapacityOpts, ICapacity } from './types';
 import { getCapacityInCost } from './utils';
 
 export class CostCapacity implements ICapacity {

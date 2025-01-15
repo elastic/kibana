@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { type NormalizedFields } from '../application/components/mappings_editor/types';
+import { NormalizedFields } from '../application/components/mappings_editor/types';
 import { useDetailsPageMappingsModelManagement } from './use_details_page_mappings_model_management';
 
 jest.mock('../application/app_context', () => ({

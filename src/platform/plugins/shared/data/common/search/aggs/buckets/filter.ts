@@ -9,17 +9,17 @@
 
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { buildEsQuery, type Query } from '@kbn/es-query';
+import { buildEsQuery, Query } from '@kbn/es-query';
 
 import moment from 'moment';
-import { type GeoBoundingBox, type QueryFilter, geoBoundingBoxToAst, queryToAst } from '../../expressions';
+import { GeoBoundingBox, QueryFilter, geoBoundingBoxToAst, queryToAst } from '../../expressions';
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { aggFilterFnName } from './filter_fn';
-import { type BaseAggParams } from '../types';
+import { BaseAggParams } from '../types';
 import { getEsQueryConfig } from '../../../es_query';
 import { parseInterval } from '../utils';
-import { type CalculateBoundsFn } from '.';
+import { CalculateBoundsFn } from '.';
 
 const filterTitle = i18n.translate('data.search.aggs.buckets.filterTitle', {
   defaultMessage: 'Filter',

@@ -24,10 +24,10 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import {
-  type GuideFilterValues,
+  GuideFilterValues,
   GuideCards,
   GuideFilters,
-  type GuideCardConstants,
+  GuideCardConstants,
   guideCards,
 } from '@kbn/guided-onboarding/guide';
 import {
@@ -36,7 +36,7 @@ import {
   guideCardsClassic,
   type GuideFilterValuesClassic,
 } from '@kbn/guided-onboarding/classic';
-import { type GuideId, type GuideState } from '@kbn/guided-onboarding/src/types';
+import { GuideId, GuideState } from '@kbn/guided-onboarding/src/types';
 import { getServices } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';
 

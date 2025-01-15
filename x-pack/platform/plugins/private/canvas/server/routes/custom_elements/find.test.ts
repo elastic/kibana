@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type AwaitedProperties } from '@kbn/utility-types';
+import { AwaitedProperties } from '@kbn/utility-types';
 import { initializeFindCustomElementsRoute } from './find';
-import { kibanaResponseFactory, type RequestHandlerContext, type RequestHandler } from '@kbn/core/server';
+import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from '@kbn/core/server';
 import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import { getMockedRouterDeps } from '../test_helpers';
 

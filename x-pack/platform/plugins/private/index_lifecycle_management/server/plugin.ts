@@ -6,15 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type CoreSetup, type Plugin, type Logger, type PluginInitializerContext } from '@kbn/core/server';
-import { type IScopedClusterClient } from '@kbn/core/server';
+import { CoreSetup, Plugin, Logger, PluginInitializerContext } from '@kbn/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 
-import { type Index } from '@kbn/index-management-plugin/common/types';
+import { Index } from '@kbn/index-management-plugin/common/types';
 import { PLUGIN } from '../common/constants';
-import { type Dependencies } from './types';
+import { Dependencies } from './types';
 import { registerApiRoutes } from './routes';
 import { License } from './services';
-import { type IndexLifecycleManagementConfig } from './config';
+import { IndexLifecycleManagementConfig } from './config';
 import { handleEsError } from './shared_imports';
 
 const indexLifecycleDataEnricher = async (

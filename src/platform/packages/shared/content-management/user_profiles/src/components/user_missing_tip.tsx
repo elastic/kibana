@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiIconTip, type IconType } from '@elastic/eui';
+import { EuiIconTip, IconType } from '@elastic/eui';
 import React from 'react';
 
 const fallbackEntityNamePlural = i18n.translate(

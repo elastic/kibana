@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type CoreSetup, type CoreStart, type PluginInitializerContext } from '@kbn/core/public';
-import { type Logger } from '@kbn/logging';
+import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import { Logger } from '@kbn/logging';
 
-import { type EntityManagerPluginClass } from './types';
+import { EntityManagerPluginClass } from './types';
 import type { EntityManagerPublicConfig } from '../common/config';
 import { EntityClient } from './lib/entity_client';
 

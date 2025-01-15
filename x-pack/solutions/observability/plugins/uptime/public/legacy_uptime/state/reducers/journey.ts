@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { handleActions, type Action } from 'redux-actions';
-import { type JourneyStep, type SyntheticsJourneyApiResponse } from '../../../../common/runtime_types';
+import { handleActions, Action } from 'redux-actions';
+import { JourneyStep, SyntheticsJourneyApiResponse } from '../../../../common/runtime_types';
 import { pruneJourneyState } from '../actions/journey';
 import {
-  type FetchJourneyStepsParams,
-  type GetJourneyFailPayload,
+  FetchJourneyStepsParams,
+  GetJourneyFailPayload,
   getJourneySteps,
   getJourneyStepsFail,
   getJourneyStepsSuccess,

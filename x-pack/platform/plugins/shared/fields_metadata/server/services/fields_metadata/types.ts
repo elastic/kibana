@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { type KibanaRequest } from '@kbn/core/server';
-import { type FieldName, type FieldMetadata, type FieldsMetadataDictionary } from '../../../common';
+import { KibanaRequest } from '@kbn/core/server';
+import { FieldName, FieldMetadata, FieldsMetadataDictionary } from '../../../common';
 import {
-  type IntegrationFieldsExtractor,
-  type IntegrationFieldsSearchParams,
-  type IntegrationListExtractor,
+  IntegrationFieldsExtractor,
+  IntegrationFieldsSearchParams,
+  IntegrationListExtractor,
 } from './repositories/types';
 
-export type * from './repositories/types';
+export * from './repositories/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface FieldsMetadataServiceStartDeps {}

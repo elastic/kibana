@@ -8,11 +8,11 @@
  */
 
 import {
-  type SavedObjectsCollectMultiNamespaceReferencesObject,
-  type SavedObjectsCollectMultiNamespaceReferencesOptions,
-  type SavedObjectsCollectMultiNamespaceReferencesResponse,
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { type ApiExecutionContext } from './types';
+import { ApiExecutionContext } from './types';
 import { collectMultiNamespaceReferences } from './internals/collect_multi_namespace_references';
 
 export interface PerformCreateParams<T = unknown> {

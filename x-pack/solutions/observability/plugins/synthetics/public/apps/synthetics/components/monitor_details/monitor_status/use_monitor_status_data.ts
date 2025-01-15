@@ -18,9 +18,9 @@ import {
   createTimeBuckets,
   CHART_CELL_WIDTH,
   indexBinsByEndTime,
-  type MonitorStatusPanelProps,
+  MonitorStatusPanelProps,
   createStatusTimeBins,
-  type MonitorStatusTimeBin,
+  MonitorStatusTimeBin,
 } from './monitor_status_data';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import {

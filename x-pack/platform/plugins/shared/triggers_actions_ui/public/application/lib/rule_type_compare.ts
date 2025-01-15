@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type RuleTypeModel } from '../../types';
-import { type IsEnabledResult, type IsDisabledResult } from './check_rule_type_enabled';
+import { RuleTypeModel } from '../../types';
+import { IsEnabledResult, IsDisabledResult } from './check_rule_type_enabled';
 
 export type RuleTypeGroup = [
   string,

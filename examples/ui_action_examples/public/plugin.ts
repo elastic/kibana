@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Plugin, type CoreSetup, type CoreStart } from '@kbn/core/public';
-import { type UiActionsSetup, type UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { createHelloWorldActionDefinition } from './hello_world_action';
 import { helloWorldTrigger } from './hello_world_trigger';
 

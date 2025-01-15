@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { type HttpSetup, type IHttpFetchError, type ResponseErrorBody } from '@kbn/core/public';
+import { HttpSetup, type IHttpFetchError, type ResponseErrorBody } from '@kbn/core/public';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
-  type FindKnowledgeBaseEntriesRequestQuery,
-  type FindKnowledgeBaseEntriesResponse,
+  FindKnowledgeBaseEntriesRequestQuery,
+  FindKnowledgeBaseEntriesResponse,
 } from '@kbn/elastic-assistant-common';
 
 import { useCallback } from 'react';

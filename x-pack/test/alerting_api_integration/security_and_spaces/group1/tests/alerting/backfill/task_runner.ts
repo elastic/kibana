@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { type SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SecurityAlert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_LAST_DETECTED,
@@ -27,7 +27,7 @@ import {
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
-import { type IValidatedEvent } from '@kbn/event-log-plugin/server';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import {
   AD_HOC_RUN_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
@@ -39,14 +39,14 @@ import {
   DOCUMENT_SOURCE,
 } from '../../../../../spaces_only/tests/alerting/create_test_data';
 import { asyncForEach } from '../../../../../../functional/services/transform/api';
-import { type FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { SuperuserAtSpace1 } from '../../../../scenarios';
 import {
   getEventLog,
   getTestRuleData,
   getUrlPrefix,
   ObjectRemover,
-  type TaskManagerDoc,
+  TaskManagerDoc,
 } from '../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export

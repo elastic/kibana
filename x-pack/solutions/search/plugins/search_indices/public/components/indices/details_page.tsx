@@ -11,7 +11,7 @@ import {
   EuiFlexGroup,
   EuiButtonEmpty,
   EuiTabbedContent,
-  type EuiTabbedContentTab,
+  EuiTabbedContentTab,
   useEuiTheme,
   EuiButton,
 } from '@elastic/eui';

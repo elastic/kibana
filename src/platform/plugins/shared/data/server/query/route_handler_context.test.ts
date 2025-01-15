@@ -8,14 +8,14 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
-import { FilterStateStore, type Query } from '@kbn/es-query';
+import { FilterStateStore, Query } from '@kbn/es-query';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../common';
 import type { SavedObject, SavedQueryAttributes } from '../../common';
 import {
-  type InternalSavedQueryAttributes,
+  InternalSavedQueryAttributes,
   registerSavedQueryRouteHandlerContext,
 } from './route_handler_context';
-import { type SavedObjectsFindResponse, type SavedObjectsUpdateResponse } from '@kbn/core/server';
+import { SavedObjectsFindResponse, SavedObjectsUpdateResponse } from '@kbn/core/server';
 
 const mockContext = {
   core: coreMock.createRequestHandlerContext(),

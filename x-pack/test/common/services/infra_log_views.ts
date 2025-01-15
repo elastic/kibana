@@ -7,13 +7,13 @@
 
 import {
   getLogViewResponsePayloadRT,
-  type PutLogViewRequestPayload,
+  PutLogViewRequestPayload,
   putLogViewRequestPayloadRT,
   putLogViewResponsePayloadRT,
 } from '@kbn/logs-shared-plugin/common/http_api';
 import { getLogViewUrl } from '@kbn/logs-shared-plugin/common/http_api/log_views';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { type FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 export function InfraLogViewsServiceProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type SavedObject, type AuthorizationTypeMap } from '@kbn/core-saved-objects-server';
+import { SavedObject, AuthorizationTypeMap } from '@kbn/core-saved-objects-server';
 import {
   createMigratorMock,
   createDocumentMigratorMock,

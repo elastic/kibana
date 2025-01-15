@@ -6,21 +6,21 @@
  */
 
 import {
-  type ElasticsearchClient,
-  type ElasticsearchServiceStart,
-  type KibanaRequest,
-  type SavedObjectsClientContract,
-  type SavedObjectsServiceStart,
+  ElasticsearchClient,
+  ElasticsearchServiceStart,
+  KibanaRequest,
+  SavedObjectsClientContract,
+  SavedObjectsServiceStart,
 } from '@kbn/core/server';
-import { type PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import { type LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
-import { type LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
+import { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
+import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
 import {
-  type LogView,
-  type LogViewAttributes,
-  type LogViewReference,
-  type LogViewsStaticConfig,
-  type ResolvedLogView,
+  LogView,
+  LogViewAttributes,
+  LogViewReference,
+  LogViewsStaticConfig,
+  ResolvedLogView,
 } from '../../../common/log_views';
 
 export interface LogViewsServiceStartDeps {

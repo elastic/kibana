@@ -11,7 +11,7 @@ import { shallow, mount } from 'enzyme';
 import {
   EuiButtonGroup,
   EuiComboBox,
-  type EuiComboBoxOptionOption,
+  EuiComboBoxOptionOption,
   EuiFieldNumber,
   EuiSelect,
   EuiSwitch,
@@ -27,18 +27,18 @@ import { createMockedIndexPattern } from '../../../mocks';
 import { ValuesInput } from './values_input';
 import type { TermsIndexPatternColumn } from '.';
 import {
-  type GenericOperationDefinition,
+  GenericOperationDefinition,
   termsOperation,
-  type LastValueIndexPatternColumn,
+  LastValueIndexPatternColumn,
   operationDefinitionMap,
 } from '..';
-import { type FormBasedLayer, type FormBasedPrivateState } from '../../../types';
-import { type FramePublicAPI } from '../../../../../types';
-import { type DateHistogramIndexPatternColumn } from '../date_histogram';
+import { FormBasedLayer, FormBasedPrivateState } from '../../../types';
+import { FramePublicAPI } from '../../../../../types';
+import { DateHistogramIndexPatternColumn } from '../date_histogram';
 import { getOperationSupportMatrix } from '../../../dimension_panel/operation_support';
 import { FieldSelect } from '../../../dimension_panel/field_select';
 import { ReferenceEditor } from '../../../dimension_panel/reference_editor';
-import { type IndexPattern } from '../../../../../types';
+import { IndexPattern } from '../../../../../types';
 import { cloneDeep } from 'lodash';
 import { IncludeExcludeRow } from './include_exclude_options';
 import { TERMS_MULTI_TERMS_AND_SCRIPTED_FIELDS } from '../../../../../user_messages_ids';

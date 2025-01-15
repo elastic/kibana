@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { type ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiLink } from '@elastic/eui';
 
 import { stringifyValueDescription } from './stringify_value_description';
-import { type LicenseType } from '../../../../../types';
+import { LicenseType } from '../../../../../types';
 
 import {
   Append,
@@ -56,7 +56,7 @@ import {
   Uppercase,
   UrlDecode,
   UserAgent,
-  type FormFieldsComponent,
+  FormFieldsComponent,
   UriParts,
   Reroute,
 } from '../processor_form/processors';

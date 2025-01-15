@@ -26,7 +26,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { type CustomIntegration } from '../../../common';
+import { CustomIntegration } from '../../../common';
 import { usePlatformService } from '../../services';
 
 export interface Props {

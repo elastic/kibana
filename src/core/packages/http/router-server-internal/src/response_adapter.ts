@@ -8,17 +8,17 @@
  */
 
 import {
-  type ResponseObject as HapiResponseObject,
-  type ResponseToolkit as HapiResponseToolkit,
+  ResponseObject as HapiResponseObject,
+  ResponseToolkit as HapiResponseToolkit,
 } from '@hapi/hapi';
 import typeDetect from 'type-detect';
 import Boom from '@hapi/boom';
 import * as stream from 'stream';
 import {
-  type ElasticsearchErrorDetails,
+  ElasticsearchErrorDetails,
   isResponseError as isElasticsearchResponseError,
 } from '@kbn/es-errors';
-import { type HttpResponsePayload, type ResponseError, type ResponseErrorAttributes } from '@kbn/core-http-server';
+import { HttpResponsePayload, ResponseError, ResponseErrorAttributes } from '@kbn/core-http-server';
 import { KibanaResponse } from './response';
 
 function setHeaders(response: HapiResponseObject, headers: Record<string, string | string[]> = {}) {

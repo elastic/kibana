@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import moment from 'moment';
 
-import { type FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { testUsers } from '../test_users';
 

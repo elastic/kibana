@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 
-import { type Job, type Datafeed } from '@kbn/ml-plugin/common';
+import { Job, Datafeed } from '@kbn/ml-plugin/common';
 import { DATAFEED_STATE, JOB_STATE } from '@kbn/ml-plugin/common';
-import { type FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 

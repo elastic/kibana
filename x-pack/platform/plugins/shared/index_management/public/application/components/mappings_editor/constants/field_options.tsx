@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiText } from '@elastic/eui';
 
-import { type DataType, type ParameterName, type SelectOption, type SuperSelectOption, type ComboBoxOption } from '../types';
-import { FIELD_OPTIONS_TEXTS, LANGUAGE_OPTIONS_TEXT, type FieldOption } from './field_options_i18n';
+import { DataType, ParameterName, SelectOption, SuperSelectOption, ComboBoxOption } from '../types';
+import { FIELD_OPTIONS_TEXTS, LANGUAGE_OPTIONS_TEXT, FieldOption } from './field_options_i18n';
 import { INDEX_DEFAULT, STANDARD } from './default_values';
 import { MAIN_DATA_TYPE_DEFINITION } from './data_types_definition';
 

@@ -7,12 +7,12 @@
 
 import React, { useCallback } from 'react';
 import {
-  type DefaultEmbeddableApi,
-  type ReactEmbeddableFactory,
+  DefaultEmbeddableApi,
+  ReactEmbeddableFactory,
   VALUE_CLICK_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
 import { EuiCard, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import { type AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
+import { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
 import { BUTTON_EMBEDDABLE } from './register_button_embeddable';
 
 export const getButtonEmbeddableFactory = (uiActionsEnhanced: AdvancedUiActionsStart) => {

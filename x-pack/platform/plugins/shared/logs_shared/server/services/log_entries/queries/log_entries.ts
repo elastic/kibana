@@ -8,12 +8,12 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as rt from 'io-ts';
 import {
-  type LogEntryAfterCursor,
+  LogEntryAfterCursor,
   logEntryAfterCursorRT,
-  type LogEntryBeforeCursor,
+  LogEntryBeforeCursor,
   logEntryBeforeCursorRT,
 } from '../../../../common/log_entry';
-import { jsonArrayRT, type JsonObject } from '../../../../common/typed_json';
+import { jsonArrayRT, JsonObject } from '../../../../common/typed_json';
 import {
   commonHitFieldsRT,
   commonSearchSuccessResponseFieldsRT,

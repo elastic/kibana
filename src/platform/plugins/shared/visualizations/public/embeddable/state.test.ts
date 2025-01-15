@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type SerializedPanelState } from '@kbn/presentation-containers';
+import { SerializedPanelState } from '@kbn/presentation-containers';
 import { serializeState, deserializeSavedVisState } from './state';
-import { type VisualizeSavedVisInputState } from './types';
+import { VisualizeSavedVisInputState } from './types';
 
 describe('visualize_embeddable state', () => {
   test('extracts saved search references for search source state and does not store them in state', () => {

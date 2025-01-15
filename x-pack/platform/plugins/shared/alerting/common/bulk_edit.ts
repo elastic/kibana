@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Rule } from './rule';
+import { Rule } from './rule';
 
 export type BulkEditSkipReason = 'RULE_NOT_MODIFIED';
 

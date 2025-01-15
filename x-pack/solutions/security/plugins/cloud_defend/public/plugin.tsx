@@ -10,10 +10,10 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import React, { lazy, Suspense } from 'react';
 import type { CloudDefendRouterProps } from './application/router';
 import {
-  type CloudDefendPluginSetup,
-  type CloudDefendPluginStart,
-  type CloudDefendPluginStartDeps,
-  type CloudDefendPluginSetupDeps,
+  CloudDefendPluginSetup,
+  CloudDefendPluginStart,
+  CloudDefendPluginStartDeps,
+  CloudDefendPluginSetupDeps,
 } from './types';
 import { INTEGRATION_PACKAGE_NAME } from '../common/constants';
 import { LoadingState } from './components/loading_state';

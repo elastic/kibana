@@ -6,8 +6,8 @@
  */
 
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
-import { type DeepPartial } from '@kbn/ml-plugin/common/types/common';
-import { type FtrProviderContext } from '../../../ftr_provider_context';
+import { DeepPartial } from '@kbn/ml-plugin/common/types/common';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { LOGS_INDEX_PATTERN } from '..';
 

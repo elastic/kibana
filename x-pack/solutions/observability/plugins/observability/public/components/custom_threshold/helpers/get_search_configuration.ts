@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type Query, type SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { Query, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { isOfQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { type CustomThresholdSearchSourceFields } from '../../../../common/custom_threshold_rule/types';
+import { CustomThresholdSearchSourceFields } from '../../../../common/custom_threshold_rule/types';
 
 export const defaultQuery: Query = {
   language: 'kuery',

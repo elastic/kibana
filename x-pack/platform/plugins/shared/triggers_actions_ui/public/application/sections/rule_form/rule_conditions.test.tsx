@@ -8,8 +8,8 @@
 import * as React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import { type ReactWrapper } from 'enzyme';
-import { RuleConditions, type ActionGroupWithCondition } from './rule_conditions';
+import { ReactWrapper } from 'enzyme';
+import { RuleConditions, ActionGroupWithCondition } from './rule_conditions';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiTitle,

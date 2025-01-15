@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type StartServicesAccessor } from '@kbn/core/public';
+import { StartServicesAccessor } from '@kbn/core/public';
 import {
   getIndexPatternLoadMeta,
-  type IndexPatternLoadExpressionFunctionDefinition,
-  type IndexPatternLoadStartDependencies,
+  IndexPatternLoadExpressionFunctionDefinition,
+  IndexPatternLoadStartDependencies,
 } from '../../common/expressions';
-import { type DataViewsPublicPluginStart, type DataViewsPublicStartDependencies } from '../types';
+import { DataViewsPublicPluginStart, DataViewsPublicStartDependencies } from '../types';
 
 /**
  * Returns the expression function definition. Any stateful dependencies are accessed

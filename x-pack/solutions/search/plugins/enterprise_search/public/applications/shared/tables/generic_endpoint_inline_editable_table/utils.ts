@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ItemWithAnID } from '../types';
+import { ItemWithAnID } from '../types';
 
 export const stripIdAndCreatedAtFromItem = (item: ItemWithAnID) => {
   const itemToClean = { ...item } as Partial<ItemWithAnID>;

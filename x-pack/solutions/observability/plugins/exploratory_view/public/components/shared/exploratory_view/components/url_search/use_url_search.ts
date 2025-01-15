@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type SeriesConfig, type SeriesUrl } from '../../types';
+import { SeriesConfig, SeriesUrl } from '../../types';
 import { TRANSACTION_URL } from '../../configurations/constants/elasticsearch_fieldnames';
 import { useFilterValues } from '../../series_editor/use_filter_values';
 

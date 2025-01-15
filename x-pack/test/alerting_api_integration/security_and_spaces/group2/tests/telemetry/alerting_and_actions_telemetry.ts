@@ -13,10 +13,10 @@ import {
   getUrlPrefix,
   getEventLog,
   getTestRuleData,
-  type TaskManagerDoc,
+  TaskManagerDoc,
   ObjectRemover,
 } from '../../../../common/lib';
-import { type FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertingAndActionsTelemetryTests({ getService }: FtrProviderContext) {

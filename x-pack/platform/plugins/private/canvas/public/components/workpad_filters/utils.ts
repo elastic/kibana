@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type FilterField } from '../../../types';
+import { FilterField } from '../../../types';
 
 const strings = {
   getBlankLabel: () =>

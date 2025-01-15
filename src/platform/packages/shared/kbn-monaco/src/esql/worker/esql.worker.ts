@@ -15,7 +15,7 @@ import '@babel/runtime/regenerator';
 // @ts-ignore
 import * as worker from 'monaco-editor/esm/vs/editor/editor.worker';
 
-import { type monaco } from '../../monaco_imports';
+import { monaco } from '../../monaco_imports';
 import { ESQLWorker } from './esql_worker';
 
 self.onmessage = () => {

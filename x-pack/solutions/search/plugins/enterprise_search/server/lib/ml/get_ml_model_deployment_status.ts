@@ -6,12 +6,12 @@
  */
 
 import {
-  type MlGetTrainedModelsStatsRequest,
-  type MlGetTrainedModelsRequest,
+  MlGetTrainedModelsStatsRequest,
+  MlGetTrainedModelsRequest,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { type MlTrainedModels } from '@kbn/ml-plugin/server';
+import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
-import { type MlModelDeploymentStatus, MlModelDeploymentState } from '../../../common/types/ml';
+import { MlModelDeploymentStatus, MlModelDeploymentState } from '../../../common/types/ml';
 
 import { isNotFoundExceptionError } from './ml_model_deployment_common';
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type {
   SavedObjectsRawDocSource,
   SavedObjectsType,
@@ -19,7 +19,7 @@ import {
   clearLog,
   defaultKibanaIndex,
   startElasticsearch,
-  type KibanaMigratorTestKit,
+  KibanaMigratorTestKit,
   getKibanaMigratorTestKit,
 } from '../kibana_migrator_test_kit';
 

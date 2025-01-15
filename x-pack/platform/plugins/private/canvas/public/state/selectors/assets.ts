@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { type State, type AssetType } from '../../../types';
+import { State, AssetType } from '../../../types';
 
 const assetRoot = 'assets';
 

@@ -9,9 +9,9 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { type CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 
-import { type EmbeddableStart, type EmbeddableStartDependencies } from './types';
+import { EmbeddableStart, EmbeddableStartDependencies } from './types';
 
 export let core: CoreStart;
 export let embeddableStart: EmbeddableStart;

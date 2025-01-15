@@ -6,11 +6,11 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { type ClientPluginsStart } from '../../../plugin';
+import { ClientPluginsStart } from '../../../plugin';
 import {
-  type BrowserFields,
+  BrowserFields,
   ConfigKey,
-  type EncryptedSyntheticsMonitor,
+  EncryptedSyntheticsMonitor,
 } from '../../../../common/runtime_types';
 
 export function useFleetPermissions() {

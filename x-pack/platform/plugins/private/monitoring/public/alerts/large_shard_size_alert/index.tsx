@@ -17,7 +17,7 @@ import {
 import type { MonitoringConfig } from '../../types';
 import {
   LazyExpression,
-  type LazyExpressionProps,
+  LazyExpressionProps,
 } from '../components/param_details_form/lazy_expression';
 
 interface ValidateOptions extends RuleTypeParams {

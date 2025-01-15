@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type GenericFtrProviderContext } from '@kbn/test';
+import { GenericFtrProviderContext } from '@kbn/test';
 
 import { services as functionalTestServices } from '../functional/services';
 import { services as kibanaApiIntegrationServices } from '../api_integration/services';

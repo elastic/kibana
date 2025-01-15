@@ -8,7 +8,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useFetchSloList } from '../../../../hooks/use_fetch_slo_list';
-import { type SloItem } from '../types';
+import { SloItem } from '../types';
 
 export function SloIncludedCount({ slos }: { slos: SloItem[] }) {
   const { data: sloList } = useFetchSloList({

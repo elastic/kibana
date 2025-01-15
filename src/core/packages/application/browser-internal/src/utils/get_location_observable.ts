@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Observable, Subject, startWith, shareReplay, distinctUntilChanged } from 'rxjs';
+import { Observable, Subject, startWith, shareReplay, distinctUntilChanged } from 'rxjs';
 import type { History } from 'history';
 
 // interface compatible for both window.location and history.location...

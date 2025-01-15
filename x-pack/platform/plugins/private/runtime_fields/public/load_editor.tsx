@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { type CoreSetup, type OverlayRef } from '@kbn/core/public';
+import { CoreSetup, OverlayRef } from '@kbn/core/public';
 
 import { toMountPoint, createKibanaReactContext } from './shared_imports';
-import { type LoadEditorResponse, type RuntimeField } from './types';
-import { type RuntimeFieldEditorFlyoutContentProps } from './components';
+import { LoadEditorResponse, RuntimeField } from './types';
+import { RuntimeFieldEditorFlyoutContentProps } from './components';
 
 export interface OpenRuntimeFieldEditorProps {
   onSave(field: RuntimeField): void;

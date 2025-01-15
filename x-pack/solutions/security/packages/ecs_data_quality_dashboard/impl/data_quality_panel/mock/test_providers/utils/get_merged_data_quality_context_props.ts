@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type DataQualityProviderProps } from '../../../data_quality_context';
+import { DataQualityProviderProps } from '../../../data_quality_context';
 
 import { formatBytes as formatBytesMock, formatNumber as formatNumberMock } from './format';
 

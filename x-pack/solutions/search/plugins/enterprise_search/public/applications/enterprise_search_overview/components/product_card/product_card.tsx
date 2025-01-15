@@ -18,8 +18,8 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  type IconType,
-  type IconSize,
+  IconType,
+  IconSize,
 } from '@elastic/eui';
 
 import { EuiButtonTo, EuiButtonEmptyTo } from '../../../shared/react_router_helpers';

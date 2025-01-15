@@ -13,10 +13,10 @@ import {
   getUniqueIdsByLoc,
   getInstanceId,
 } from './status_check';
-import { type GetMonitorStatusResult } from '../requests/get_monitor_status';
+import { GetMonitorStatusResult } from '../requests/get_monitor_status';
 import { makePing } from '../../../../common/runtime_types/ping';
-import { type GetMonitorAvailabilityResult } from '../requests/get_monitor_availability';
-import { type DefaultUptimeAlertInstance } from './types';
+import { GetMonitorAvailabilityResult } from '../requests/get_monitor_availability';
+import { DefaultUptimeAlertInstance } from './types';
 import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
 import moment from 'moment';
 

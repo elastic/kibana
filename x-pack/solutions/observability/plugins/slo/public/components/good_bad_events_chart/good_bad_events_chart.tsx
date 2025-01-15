@@ -8,21 +8,21 @@ import {
   Axis,
   BarSeries,
   Chart,
-  type ElementClickListener,
+  ElementClickListener,
   Position,
   ScaleType,
   Settings,
-  type XYChartElementEvent,
+  XYChartElementEvent,
 } from '@elastic/charts';
 import { EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { type GetPreviewDataResponse, type SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { GetPreviewDataResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React, { useRef } from 'react';
 import { useAnnotations } from '@kbn/observability-plugin/public';
-import { type TimeBounds } from '../../pages/slo_details/types';
+import { TimeBounds } from '../../pages/slo_details/types';
 import { getBrushTimeBounds } from '../../utils/slo/duration';
 import { useKibana } from '../../hooks/use_kibana';
 import { openInDiscover } from '../../utils/slo/get_discover_link';

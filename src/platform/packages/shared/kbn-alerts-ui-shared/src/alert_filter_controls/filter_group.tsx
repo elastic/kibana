@@ -20,7 +20,7 @@ import type {
   DefaultDataControlState,
   ControlStateTransform,
 } from '@kbn/controls-plugin/public';
-import React, { type PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { Subscription } from 'rxjs';
 import { debounce, isEqual, isEqualWith } from 'lodash';

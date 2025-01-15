@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type DatasetQualityFtrProviderContext } from './config';
+import { DatasetQualityFtrProviderContext } from './config';
 import { getInitialTestLogs } from './data';
 
 export default function ({ getService, getPageObjects }: DatasetQualityFtrProviderContext) {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type FindConnectorsSoResult, type FindConnectorsSoParams } from './types';
+import { FindConnectorsSoResult, FindConnectorsSoParams } from './types';
 import { MAX_ACTIONS_RETURNED } from './constants';
 
 export const findConnectorsSo = async ({

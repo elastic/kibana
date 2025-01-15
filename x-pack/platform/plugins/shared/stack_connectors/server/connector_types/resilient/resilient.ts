@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { type AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 import { omitBy, isNil } from 'lodash/fp';
-import { CaseConnector, getBasicAuthHeader, type ServiceParams } from '@kbn/actions-plugin/server';
-import { schema, type Type } from '@kbn/config-schema';
+import { CaseConnector, getBasicAuthHeader, ServiceParams } from '@kbn/actions-plugin/server';
+import { schema, Type } from '@kbn/config-schema';
 import { getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { type ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import {
-  type CreateIncidentData,
-  type ExternalServiceIncidentResponse,
-  type GetIncidentResponse,
-  type GetIncidentTypesResponse,
-  type GetSeverityResponse,
-  type Incident,
-  type ResilientConfig,
-  type ResilientSecrets,
-  type UpdateIncidentParams,
+  CreateIncidentData,
+  ExternalServiceIncidentResponse,
+  GetIncidentResponse,
+  GetIncidentTypesResponse,
+  GetSeverityResponse,
+  Incident,
+  ResilientConfig,
+  ResilientSecrets,
+  UpdateIncidentParams,
 } from './types';
 import * as i18n from './translations';
 import { SUB_ACTION } from './constants';

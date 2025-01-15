@@ -6,11 +6,11 @@
  */
 
 import {
-  type AggregationsCategorizeTextAnalyzer,
-  type QueryDslQueryContainer,
+  AggregationsCategorizeTextAnalyzer,
+  QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import { calculateAuto } from '@kbn/calculate-auto';
-import { type RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
+import { RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import moment from 'moment';
 
 const isoTimestampFormat = "YYYY-MM-DD'T'HH:mm:ss.SSS'Z'";

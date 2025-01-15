@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { type Either } from 'fp-ts/Either';
+import { Either } from 'fp-ts/Either';
 import { AlertConfigsCodec } from './alert_config';
 import { ScreenshotOptionCodec } from './monitor_configs';
 

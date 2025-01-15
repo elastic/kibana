@@ -16,7 +16,7 @@ import { useParams } from 'react-router-dom';
 import type { ESSearchResponse } from '@kbn/es-types';
 import { useSelectedLocation } from './use_selected_location';
 
-import { type ClientPluginsStart } from '../../../../../plugin';
+import { ClientPluginsStart } from '../../../../../plugin';
 
 export function useFetchActiveAlerts() {
   const { http } = useKibana<ClientPluginsStart>().services;

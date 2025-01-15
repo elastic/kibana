@@ -15,9 +15,9 @@ import { _legacyBuildProcessorFunction } from '../build_processor_function';
 import { processors } from '../response_processors/series';
 import {
   createFieldsFetcher,
-  type FieldsFetcherServices,
+  FieldsFetcherServices,
 } from '../../search_strategies/lib/fields_fetcher';
-import { type VisTypeTimeseriesVisDataRequest } from '../../../types';
+import { VisTypeTimeseriesVisDataRequest } from '../../../types';
 
 export function handleResponseBody(
   panel: Panel,

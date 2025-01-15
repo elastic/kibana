@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { type FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 
 import { FormDataProvider } from '../../../../../shared_imports';
-import { type ProcessorInternal } from '../../types';
+import { ProcessorInternal } from '../../types';
 
 import { getProcessorDescriptor } from '../shared';
 import { CommonProcessorFields, ProcessorTypeField } from './processors/common_fields';

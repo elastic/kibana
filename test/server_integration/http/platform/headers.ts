@@ -10,7 +10,7 @@
 import Http from 'http';
 import Url from 'url';
 import { getUrl } from '@kbn/test';
-import { type FtrProviderContext } from '../../services/types';
+import { FtrProviderContext } from '../../services/types';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const oneSec = 1_000;

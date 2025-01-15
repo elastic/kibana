@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type estypes } from '@elastic/elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
 import type { ConnectionRequestParams } from '@elastic/transport';
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { AbstractDataView } from '@kbn/data-views-plugin/common';
-import { type Observable } from 'rxjs';
-import { type IEsSearchRequest, type IEsSearchResponse } from './es_search_types';
-import { type IKibanaSearchRequest, type IKibanaSearchResponse } from './kibana_search_types';
+import { Observable } from 'rxjs';
+import { IEsSearchRequest, IEsSearchResponse } from './es_search_types';
+import { IKibanaSearchRequest, IKibanaSearchResponse } from './kibana_search_types';
 
 export type ISearchGeneric = <
   SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,

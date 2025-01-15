@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { filterById, type HasId } from './filter_by_id';
+import { filterById, HasId } from './filter_by_id';
 
 const bundles: HasId[] = [
   { id: 'foo' },

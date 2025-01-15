@@ -8,10 +8,10 @@
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { type Filter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { EuiFormRow } from '@elastic/eui';
 import { useSyntheticsDataView } from '../../contexts/synthetics_data_view_context';
-import { type ClientPluginsStart } from '../../../../plugin';
+import { ClientPluginsStart } from '../../../../plugin';
 
 export function AlertSearchBar({
   kqlQuery,

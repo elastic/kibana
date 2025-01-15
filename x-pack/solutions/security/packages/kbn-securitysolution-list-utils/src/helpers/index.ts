@@ -13,13 +13,13 @@ import {
 } from '@kbn/securitysolution-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
-  type CreateExceptionListItemSchema,
-  type EntriesArray,
-  type Entry,
-  type EntryNested,
-  type ExceptionListType,
-  type ListSchema,
-  type NamespaceType,
+  CreateExceptionListItemSchema,
+  EntriesArray,
+  Entry,
+  EntryNested,
+  ExceptionListType,
+  ListSchema,
+  NamespaceType,
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
   createExceptionListItemSchema,
@@ -28,12 +28,12 @@ import {
   entry,
   exceptionListItemSchema,
   nestedEntryItem,
-  type CreateRuleExceptionListItemSchema,
+  CreateRuleExceptionListItemSchema,
   createRuleExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  type DataViewBase,
-  type DataViewFieldBase,
+  DataViewBase,
+  DataViewFieldBase,
   getDataViewFieldSubtypeNested,
   isDataViewFieldSubtypeNested,
 } from '@kbn/es-query';
@@ -56,16 +56,16 @@ import {
 } from '../autocomplete_operators';
 
 import {
-  type BuilderEntry,
-  type CreateExceptionListItemBuilderSchema,
-  type DataViewField,
-  type EmptyEntry,
-  type EmptyNestedEntry,
-  type ExceptionsBuilderExceptionItem,
-  type ExceptionsBuilderReturnExceptionItem,
-  type FormattedBuilderEntry,
-  type OperatorOption,
-  type SavedObjectType,
+  BuilderEntry,
+  CreateExceptionListItemBuilderSchema,
+  DataViewField,
+  EmptyEntry,
+  EmptyNestedEntry,
+  ExceptionsBuilderExceptionItem,
+  ExceptionsBuilderReturnExceptionItem,
+  FormattedBuilderEntry,
+  OperatorOption,
+  SavedObjectType,
 } from '../types';
 
 export const isEntryNested = (item: BuilderEntry): item is EntryNested => {

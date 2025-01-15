@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { type ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
-import { Duration, type SLODefinition, toDurationUnit } from '../../../../domain/models';
-import { type BurnRateRuleParams } from '../types';
+import { Duration, SLODefinition, toDurationUnit } from '../../../../domain/models';
+import { BurnRateRuleParams } from '../types';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../../../../common/constants';
 import {
   buildQuery,
-  type EvaluationAfterKey,
+  EvaluationAfterKey,
   generateAboveThresholdKey,
   generateBurnRateKey,
   generateWindowId,

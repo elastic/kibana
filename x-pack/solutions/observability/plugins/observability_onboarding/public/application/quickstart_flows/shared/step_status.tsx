@@ -8,7 +8,7 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  type EuiStepsProps,
+  EuiStepsProps,
   EuiPanel,
   EuiText,
   EuiCallOut,

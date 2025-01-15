@@ -17,10 +17,10 @@ import {
   EuiCopy,
   EuiButtonEmpty,
   EuiSpacer,
-  type CommonProps,
+  CommonProps,
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
-import { type VegaAdapter } from '../vega_adapter';
+import { VegaAdapter } from '../vega_adapter';
 
 interface SpecViewerProps extends CommonProps {
   vegaAdapter: VegaAdapter;

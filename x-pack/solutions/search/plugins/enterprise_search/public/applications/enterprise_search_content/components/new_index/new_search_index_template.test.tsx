@@ -14,7 +14,7 @@ import { shallow } from 'enzyme';
 import { UNIVERSAL_LANGUAGE_VALUE } from './constants';
 import {
   NewSearchIndexTemplate,
-  type Props as NewSearchIndexTemplateProps,
+  Props as NewSearchIndexTemplateProps,
 } from './new_search_index_template';
 
 describe('NewSearchIndexTemplate', () => {

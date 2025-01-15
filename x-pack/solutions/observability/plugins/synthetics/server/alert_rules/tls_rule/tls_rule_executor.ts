@@ -5,16 +5,16 @@
  * 2.0.
  */
 import {
-  type SavedObjectsClientContract,
-  type SavedObjectsFindResult,
+  SavedObjectsClientContract,
+  SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
-import { type ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
 import moment from 'moment';
 import { FINAL_SUMMARY_FILTER } from '../../../common/constants/client_defaults';
 import { formatFilterString } from '../common';
-import { type SyntheticsServerSetup } from '../../types';
+import { SyntheticsServerSetup } from '../../types';
 import { getSyntheticsCerts } from '../../queries/get_certs';
 import { savedObjectsAdapter } from '../../saved_objects';
 import { DYNAMIC_SETTINGS_DEFAULTS, SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
@@ -23,12 +23,12 @@ import {
   processMonitors,
 } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import {
-  type CertResult,
+  CertResult,
   ConfigKey,
-  type EncryptedSyntheticsMonitorAttributes,
-  type Ping,
+  EncryptedSyntheticsMonitorAttributes,
+  Ping,
 } from '../../../common/runtime_types';
-import { type SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { monitorAttributes } from '../../../common/types/saved_objects';
 import { AlertConfigKey } from '../../../common/constants/monitor_management';
 import { SyntheticsEsClient } from '../../lib';

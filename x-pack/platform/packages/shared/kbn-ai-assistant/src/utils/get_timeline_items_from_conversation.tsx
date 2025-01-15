@@ -15,7 +15,7 @@ import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
 import {
   ChatState,
-  type ObservabilityAIAssistantChatService,
+  ObservabilityAIAssistantChatService,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { ChatActionClickPayload } from '@kbn/observability-ai-assistant-plugin/public';
 import { RenderFunction } from '../render_function';

@@ -11,9 +11,9 @@ import Fs from 'fs';
 import Path from 'path';
 
 import type { Client } from '@elastic/elasticsearch';
-import { type ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { type KbnClient } from '@kbn/test';
+import { KbnClient } from '@kbn/test';
 import type { LoadActionPerfOptions } from './lib';
 import {
   saveAction,

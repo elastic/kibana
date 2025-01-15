@@ -6,15 +6,15 @@
  */
 
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { type MetricThresholdParams } from '@kbn/infra-plugin/common/alerting/metrics';
-import { type ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
-import { type RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { MetricThresholdParams } from '@kbn/infra-plugin/common/alerting/metrics';
+import { ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
+import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { errors, type Client } from '@elastic/elasticsearch';
 import type { TryWithRetriesOptions } from '@kbn/ftr-common-functional-services';
-import { type ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
-import { type DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
+import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
 export interface SloBurnRateRuleParams {
   sloId: string;

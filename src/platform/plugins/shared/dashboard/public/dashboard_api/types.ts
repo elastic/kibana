@@ -8,54 +8,54 @@
  */
 
 import {
-  type CanExpandPanels,
-  type HasRuntimeChildState,
-  type HasSaveNotification,
-  type HasSerializedChildState,
-  type PresentationContainer,
-  type PublishesSettings,
-  type SerializedPanelState,
-  type TrackContentfulRender,
-  type TracksOverlays,
+  CanExpandPanels,
+  HasRuntimeChildState,
+  HasSaveNotification,
+  HasSerializedChildState,
+  PresentationContainer,
+  PublishesSettings,
+  SerializedPanelState,
+  TrackContentfulRender,
+  TracksOverlays,
 } from '@kbn/presentation-containers';
 import {
-  type EmbeddableAppContext,
-  type HasAppContext,
-  type HasExecutionContext,
-  type HasType,
-  type HasUniqueId,
-  type PublishesDataLoading,
-  type PublishesDataViews,
-  type PublishesPanelDescription,
-  type PublishesPanelTitle,
-  type PublishesSavedObjectId,
-  type PublishesUnifiedSearch,
-  type PublishesViewMode,
-  type PublishesWritableViewMode,
-  type PublishingSubject,
-  type ViewMode,
+  EmbeddableAppContext,
+  HasAppContext,
+  HasExecutionContext,
+  HasType,
+  HasUniqueId,
+  PublishesDataLoading,
+  PublishesDataViews,
+  PublishesPanelDescription,
+  PublishesPanelTitle,
+  PublishesSavedObjectId,
+  PublishesUnifiedSearch,
+  PublishesViewMode,
+  PublishesWritableViewMode,
+  PublishingSubject,
+  ViewMode,
 } from '@kbn/presentation-publishing';
 import {
-  type ControlGroupApi,
-  type ControlGroupRuntimeState,
-  type ControlGroupSerializedState,
+  ControlGroupApi,
+  ControlGroupRuntimeState,
+  ControlGroupSerializedState,
 } from '@kbn/controls-plugin/public';
-import { type Filter, type Query, type TimeRange } from '@kbn/es-query';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { type Observable, type Subject } from 'rxjs';
-import { type RefreshInterval, type SearchSessionInfoProvider } from '@kbn/data-plugin/public';
-import { type IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { type PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import { type PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
-import { type LocatorPublic } from '@kbn/share-plugin/common';
+import { Observable, Subject } from 'rxjs';
+import { RefreshInterval, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
+import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
+import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import { type DashboardPanelMap, type DashboardPanelState } from '../../common';
+import { DashboardPanelMap, DashboardPanelState } from '../../common';
 import type { DashboardAttributes, DashboardOptions } from '../../server/content_management';
 import {
-  type LoadDashboardReturn,
-  type SaveDashboardReturn,
+  LoadDashboardReturn,
+  SaveDashboardReturn,
 } from '../services/dashboard_content_management_service/types';
-import { type DashboardLocatorParams } from '../dashboard_container/types';
+import { DashboardLocatorParams } from '../dashboard_container/types';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 

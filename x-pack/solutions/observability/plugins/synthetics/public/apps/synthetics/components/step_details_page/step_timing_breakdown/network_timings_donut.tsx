@@ -7,9 +7,9 @@
 
 import {
   Chart,
-  type Datum,
+  Datum,
   LEGACY_LIGHT_THEME,
-  type PartialTheme,
+  PartialTheme,
   Partition,
   PartitionLayout,
   Settings,

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type $Values } from '@kbn/utility-types';
-import { type Operations, type OperationsWithReferences, type OperationsWithSourceField } from '../constants';
+import { $Values } from '@kbn/utility-types';
+import { Operations, OperationsWithReferences, OperationsWithSourceField } from '../constants';
 
 export type Operation = $Values<typeof Operations>;
 export type OperationWithSourceField = $Values<typeof OperationsWithSourceField>;

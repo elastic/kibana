@@ -16,9 +16,9 @@ import {
 } from '@elastic/eui';
 import { useEuiTheme } from '../../../hooks';
 import {
-  type KubernetesCollectionMap,
-  type KubernetesCollection,
-  type TreeViewIconProps,
+  KubernetesCollectionMap,
+  KubernetesCollection,
+  TreeViewIconProps,
   KubernetesTreeViewLevels,
 } from '../../../types';
 import { useStyles } from './styles';

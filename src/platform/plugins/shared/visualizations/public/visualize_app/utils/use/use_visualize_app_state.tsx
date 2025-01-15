@@ -10,7 +10,7 @@
 import React, { useEffect, useState } from 'react';
 import { cloneDeep, isEqual } from 'lodash';
 import { map } from 'rxjs';
-import { type EventEmitter } from 'events';
+import { EventEmitter } from 'events';
 import { i18n } from '@kbn/i18n';
 import { FilterStateStore } from '@kbn/es-query';
 
@@ -19,9 +19,9 @@ import { Markdown } from '@kbn/shared-ux-markdown';
 import { connectToQueryState } from '@kbn/data-plugin/public';
 import { migrateLegacyQuery } from '../migrate_legacy_query';
 import {
-  type VisualizeServices,
-  type VisualizeAppStateContainer,
-  type VisualizeEditorVisInstance,
+  VisualizeServices,
+  VisualizeAppStateContainer,
+  VisualizeEditorVisInstance,
 } from '../../types';
 import { visStateToEditorState } from '../utils';
 import { createVisualizeAppState } from '../create_visualize_app_state';

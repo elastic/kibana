@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type CanvasTemplate } from '../../types';
+import { CanvasTemplate } from '../../types';
 
 export const summary: CanvasTemplate = {
   id: 'workpad-template-6181471b-147d-4397-a0d3-1c0f1600fa12',

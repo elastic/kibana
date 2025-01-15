@@ -7,10 +7,10 @@
 
 import moment from 'moment';
 import {
-  type AnalyticsServiceSetup,
-  type AuditLogger,
-  type IKibanaResponse,
-  type KibanaResponseFactory,
+  AnalyticsServiceSetup,
+  AuditLogger,
+  IKibanaResponse,
+  KibanaResponseFactory,
 } from '@kbn/core/server';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
@@ -18,10 +18,10 @@ import {
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BULK_ACTION,
   PerformKnowledgeBaseEntryBulkActionRequestBody,
   API_VERSIONS,
-  type KnowledgeBaseEntryBulkCrudActionResults,
-  type KnowledgeBaseEntryBulkCrudActionResponse,
-  type KnowledgeBaseEntryBulkCrudActionSummary,
-  type PerformKnowledgeBaseEntryBulkActionResponse,
+  KnowledgeBaseEntryBulkCrudActionResults,
+  KnowledgeBaseEntryBulkCrudActionResponse,
+  KnowledgeBaseEntryBulkCrudActionSummary,
+  PerformKnowledgeBaseEntryBulkActionResponse,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 
@@ -34,10 +34,10 @@ import { CREATE_KNOWLEDGE_BASE_ENTRY_SUCCESS_EVENT } from '../../../lib/telemetr
 import { performChecks } from '../../helpers';
 import { KNOWLEDGE_BASE_ENTRIES_TABLE_MAX_PAGE_SIZE } from '../../../../common/constants';
 import {
-  type EsKnowledgeBaseEntrySchema,
-  type UpdateKnowledgeBaseEntrySchema,
+  EsKnowledgeBaseEntrySchema,
+  UpdateKnowledgeBaseEntrySchema,
 } from '../../../ai_assistant_data_clients/knowledge_base/types';
-import { type ElasticAssistantPluginRouter } from '../../../types';
+import { ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';
 import {
   transformESSearchToKnowledgeBaseEntry,

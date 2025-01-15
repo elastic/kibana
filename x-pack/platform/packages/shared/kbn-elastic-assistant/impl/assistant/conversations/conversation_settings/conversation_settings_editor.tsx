@@ -8,21 +8,21 @@
 import { EuiFormRow, EuiLink } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import { type HttpSetup } from '@kbn/core-http-browser';
+import { HttpSetup } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 import { noop } from 'lodash/fp';
-import { type PromptResponse } from '@kbn/elastic-assistant-common';
-import { type Conversation } from '../../../..';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { Conversation } from '../../../..';
 import * as i18n from './translations';
 import * as i18nModel from '../../../connectorland/models/model_selector/translations';
 
-import { type AIConnector, ConnectorSelector } from '../../../connectorland/connector_selector';
+import { AIConnector, ConnectorSelector } from '../../../connectorland/connector_selector';
 import { SelectSystemPrompt } from '../../prompt_editor/system_prompt/select_system_prompt';
 import { ModelSelector } from '../../../connectorland/models/model_selector/model_selector';
 import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
 import { getGenAiConfig } from '../../../connectorland/helpers';
-import { type ConversationsBulkActions } from '../../api';
+import { ConversationsBulkActions } from '../../api';
 import { getDefaultSystemPrompt } from '../../use_conversation/helpers';
 
 export interface ConversationSettingsEditorProps {

@@ -9,7 +9,7 @@
 
 import * as rt from 'io-ts';
 import { arrayToStringRt } from '.';
-import { isRight, type Either, fold } from 'fp-ts/lib/Either';
+import { isRight, Either, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 function getValueOrThrow(either: Either<unknown, any>) {

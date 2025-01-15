@@ -7,10 +7,10 @@
 
 import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
-import { type CoreStart } from '@kbn/core-lifecycle-browser';
-import { type AIAssistantAppService } from '@kbn/ai-assistant';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { AIAssistantAppService } from '@kbn/ai-assistant';
 import { useIsNavControlVisible } from '../../hooks/is_nav_control_visible';
-import { type ObservabilityAIAssistantAppPluginStartDependencies } from '../../types';
+import { ObservabilityAIAssistantAppPluginStartDependencies } from '../../types';
 
 const LazyNavControlWithProvider = dynamic(() =>
   import('.').then((m) => ({ default: m.NavControlWithProvider }))

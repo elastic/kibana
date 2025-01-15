@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { type IRouter } from '@kbn/core/server';
+import { IRouter } from '@kbn/core/server';
 import { verifyAccessAndContext, handleDisabledApiKeysError } from '../../../lib';
-import { type ILicenseState, RuleTypeDisabledError } from '../../../../lib';
-import { type AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import {
   bulkEnableBodySchemaV1,
-  type BulkEnableRulesRequestBodyV1,
-  type BulkEnableRulesResponseV1,
+  BulkEnableRulesRequestBodyV1,
+  BulkEnableRulesResponseV1,
 } from '../../../../../common/routes/rule/apis/bulk_enable';
-import { type RuleParamsV1 } from '../../../../../common/routes/rule/response';
+import { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import { transformBulkEnableResponseV1 } from './transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 

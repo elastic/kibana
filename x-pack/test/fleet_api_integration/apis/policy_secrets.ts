@@ -7,7 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
-import { type FullAgentPolicy } from '@kbn/fleet-plugin/common';
+import { FullAgentPolicy } from '@kbn/fleet-plugin/common';
 import {
   AGENTS_INDEX,
   AGENT_POLICY_INDEX,
@@ -16,7 +16,7 @@ import {
 } from '@kbn/fleet-plugin/common/constants';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
-import { type FtrProviderContext } from '../../api_integration/ftr_provider_context';
+import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../helpers';
 
 const secretVar = (id: string) => `$co.elastic.secret{${id}}`;

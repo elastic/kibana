@@ -10,7 +10,7 @@ import {
   EuiBadge,
   EuiCallOut,
   EuiComboBox,
-  type EuiComboBoxOptionOption,
+  EuiComboBoxOptionOption,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,7 +18,7 @@ import {
   EuiHighlight,
   EuiSpacer,
 } from '@elastic/eui';
-import { ActionConnectorMode, type ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionConnectorMode, ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   JsonEditorWithMessageVariables,
   useSubAction,

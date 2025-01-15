@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { Query } from '@kbn/es-query';
-import { type ISearchSource } from '@kbn/data-plugin/public';
-import { type Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { ISearchSource } from '@kbn/data-plugin/public';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import {
   AGG_TYPE,
   DEFAULT_MAX_BUCKETS_LIMIT,
@@ -23,18 +23,18 @@ import {
   getField,
   addFieldToDSL,
   extractPropertiesFromBucket,
-  type BucketProperties,
+  BucketProperties,
 } from '../../../../../common/elasticsearch_util';
 import {
-  type DataFilters,
-  type ESTermSourceDescriptor,
-  type VectorSourceRequestMeta,
+  DataFilters,
+  ESTermSourceDescriptor,
+  VectorSourceRequestMeta,
 } from '../../../../../common/descriptor_types';
-import { type PropertiesMap } from '../../../../../common/elasticsearch_util';
+import { PropertiesMap } from '../../../../../common/elasticsearch_util';
 import { isValidStringConfig } from '../../../util/valid_string_config';
-import { type ITermJoinSource } from '../types';
+import { ITermJoinSource } from '../types';
 import type { IESAggSource, ESAggsSourceSyncMeta } from '../../es_agg_source';
-import { type IField } from '../../../fields/field';
+import { IField } from '../../../fields/field';
 import { mergeExecutionContext } from '../../execution_context_utils';
 import { isTermSourceComplete } from './is_term_source_complete';
 import { getJoinMetricsRequestName } from '../i18n_utils';

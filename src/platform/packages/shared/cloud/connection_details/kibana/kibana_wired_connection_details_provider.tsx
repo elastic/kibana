@@ -10,7 +10,7 @@
 import * as React from 'react';
 import {
   KibanaConnectionDetailsProvider,
-  type KibanaConnectionDetailsProviderProps,
+  KibanaConnectionDetailsProviderProps,
 } from './kibana_connection_details_provider';
 import { getGlobalDependencies } from './global';
 

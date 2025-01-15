@@ -8,25 +8,25 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { cloneDeep } from 'lodash';
-import { type InferenceServiceSettings } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { type LocalInferenceServiceSettings } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
+import { InferenceServiceSettings } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { LocalInferenceServiceSettings } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import {
-  type ChildFieldName,
-  type ComboBoxOption,
-  type DataType,
-  type Field,
-  type FieldMeta,
-  type Fields,
-  type GenericObject,
-  type MainType,
-  type NormalizedField,
-  type NormalizedFields,
-  type NormalizedRuntimeFields,
-  type State,
-  type ParameterName,
-  type RuntimeFields,
-  type SubType,
-  type SemanticTextField,
+  ChildFieldName,
+  ComboBoxOption,
+  DataType,
+  Field,
+  FieldMeta,
+  Fields,
+  GenericObject,
+  MainType,
+  NormalizedField,
+  NormalizedFields,
+  NormalizedRuntimeFields,
+  State,
+  ParameterName,
+  RuntimeFields,
+  SubType,
+  SemanticTextField,
 } from '../types';
 
 import {
@@ -39,8 +39,8 @@ import {
   TYPE_ONLY_ALLOWED_AT_ROOT_LEVEL,
 } from '../constants';
 
-import { type TreeItem } from '../components/tree';
-import { type FieldConfig } from '../shared_imports';
+import { TreeItem } from '../components/tree';
+import { FieldConfig } from '../shared_imports';
 
 export const getUniqueId = () => uuidv4();
 

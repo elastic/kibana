@@ -8,7 +8,7 @@
  */
 
 import moment from 'moment-timezone';
-import { Position, type AxisSpec } from '@elastic/charts';
+import { Position, AxisSpec } from '@elastic/charts';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
 

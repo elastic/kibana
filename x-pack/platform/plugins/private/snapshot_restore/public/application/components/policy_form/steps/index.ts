@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type SlmPolicyPayload } from '../../../../../common/types';
-import { type PolicyValidation, type ValidatePolicyHelperData } from '../../../services/validation';
+import { SlmPolicyPayload } from '../../../../../common/types';
+import { PolicyValidation, ValidatePolicyHelperData } from '../../../services/validation';
 
 export interface StepProps {
   policy: SlmPolicyPayload;

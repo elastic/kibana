@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { schema, type TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import {
-  type IRouter,
-  type RequestHandlerContext,
-  type KibanaRequest,
-  type IKibanaResponse,
-  type KibanaResponseFactory,
-  type ElasticsearchClient,
+  IRouter,
+  RequestHandlerContext,
+  KibanaRequest,
+  IKibanaResponse,
+  KibanaResponseFactory,
+  ElasticsearchClient,
 } from '@kbn/core/server';
-import { type Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import { NORMALIZED_FIELD_TYPES } from '../../../common';
 
 const bodySchema = schema.object({

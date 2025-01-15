@@ -12,7 +12,7 @@ import { promisify } from 'util';
 
 import vfs from 'vinyl-fs';
 
-import { type TaskContext } from '../task_context';
+import { TaskContext } from '../task_context';
 
 const asyncPipeline = promisify(pipeline);
 

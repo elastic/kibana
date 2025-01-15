@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ILogsSharedLogEntriesDomain } from './log_entries_domain';
+import { ILogsSharedLogEntriesDomain } from './log_entries_domain';
 
 export const createLogsSharedLogEntriesDomainMock =
   (): jest.Mocked<ILogsSharedLogEntriesDomain> => {

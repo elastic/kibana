@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { type AggregationsCompositeAggregation } from '@elastic/elasticsearch/lib/api/types';
-import { type ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { ALL_VALUE, type GetSLOGroupingsParams, type GetSLOGroupingsResponse } from '@kbn/slo-schema';
+import { AggregationsCompositeAggregation } from '@elastic/elasticsearch/lib/api/types';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { ALL_VALUE, GetSLOGroupingsParams, GetSLOGroupingsResponse } from '@kbn/slo-schema';
 import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../common/constants';
-import { type SLODefinition, type SLOSettings } from '../domain/models';
-import { type SloDefinitionClient } from './slo_definition_client';
+import { SLODefinition, SLOSettings } from '../domain/models';
+import { SloDefinitionClient } from './slo_definition_client';
 
 const DEFAULT_SIZE = 100;
 

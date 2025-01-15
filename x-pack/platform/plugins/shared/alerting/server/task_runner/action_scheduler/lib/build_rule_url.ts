@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type Logger } from '@kbn/logging';
-import { type RuleTypeParams, type SanitizedRule } from '@kbn/alerting-types';
+import { Logger } from '@kbn/logging';
+import { RuleTypeParams, SanitizedRule } from '@kbn/alerting-types';
 import { getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
-import { type GetViewInAppRelativeUrlFn } from '../../../types';
+import { GetViewInAppRelativeUrlFn } from '../../../types';
 
 interface BuildRuleUrlOpts<Params extends RuleTypeParams> {
   end?: number;

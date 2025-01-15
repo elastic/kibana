@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 
 import { createDeferred } from './deferred';
 

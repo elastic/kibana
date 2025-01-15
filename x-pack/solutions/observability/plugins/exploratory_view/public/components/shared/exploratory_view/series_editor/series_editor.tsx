@@ -10,14 +10,14 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { rgba } from 'polished';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { type AppDataType, type ReportViewType, type BuilderItem } from '../types';
-import { type SeriesContextValue, useSeriesStorage } from '../hooks/use_series_storage';
-import { type DataViewState, useAppDataViewContext } from '../hooks/use_app_data_view';
+import { AppDataType, ReportViewType, BuilderItem } from '../types';
+import { SeriesContextValue, useSeriesStorage } from '../hooks/use_series_storage';
+import { DataViewState, useAppDataViewContext } from '../hooks/use_app_data_view';
 import { getDefaultConfigs } from '../configurations/default_configs';
 import { ReportTypesSelect } from './columns/report_type_select';
 import { ViewActions } from '../views/view_actions';
 import { Series } from './series';
-import { type ReportConfigMap, useExploratoryView } from '../contexts/exploratory_view_config';
+import { ReportConfigMap, useExploratoryView } from '../contexts/exploratory_view_config';
 
 export interface ReportTypeItem {
   id: string;

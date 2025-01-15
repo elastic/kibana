@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { useValues } from 'kea';
 
 import {
-  type EuiStatProps,
+  EuiStatProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,

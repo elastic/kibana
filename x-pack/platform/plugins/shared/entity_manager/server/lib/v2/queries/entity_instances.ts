@@ -7,7 +7,7 @@
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { asKeyword } from './utils';
-import { type EntitySourceDefinition, type SortBy } from '../types';
+import { EntitySourceDefinition, SortBy } from '../types';
 
 const fromCommand = ({ source }: { source: EntitySourceDefinition }) => {
   let query = `FROM ${source.index_patterns.join(', ')}`;

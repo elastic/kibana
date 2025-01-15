@@ -15,9 +15,9 @@ jest.mock('../services', () => ({
   })),
 }));
 
-import { type Datatable } from '@kbn/expressions-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { AggTypes } from '../../common';
-import { type TableVisConfig } from '../types';
+import { TableVisConfig } from '../types';
 import { createFormattedTable } from './create_formatted_table';
 
 const visConfig: TableVisConfig = {

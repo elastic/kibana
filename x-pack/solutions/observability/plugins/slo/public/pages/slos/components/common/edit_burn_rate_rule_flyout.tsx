@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { type Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { type BurnRateRuleParams } from '../../../../typings';
+import { BurnRateRuleParams } from '../../../../typings';
 
 export function EditBurnRateRuleFlyout({
   refetchRules,

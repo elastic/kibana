@@ -8,9 +8,9 @@
 import React from 'react';
 import { EuiCode } from '@elastic/eui';
 import {
-  type SerializedColdPhase,
-  type SerializedFrozenPhase,
-  type SerializedHotPhase,
+  SerializedColdPhase,
+  SerializedFrozenPhase,
+  SerializedHotPhase,
 } from '../../../../../../common/types';
 import { i18nTexts } from '../../../edit_policy/i18n_texts';
 import { ActionDescription } from './action_description';

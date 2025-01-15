@@ -8,7 +8,7 @@
 import type { ISearchRequestParams } from '@kbn/search-types';
 import {
   LastEventIndexKey,
-  type TimelineEventsLastEventTimeRequestOptions,
+  TimelineEventsLastEventTimeRequestOptions,
 } from '../../../../../../common/api/search_strategy/timeline/timeline';
 
 import { assertUnreachable } from '../../../../../../common/utility_types';

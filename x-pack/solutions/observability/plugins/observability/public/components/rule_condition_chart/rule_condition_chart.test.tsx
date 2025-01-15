@@ -7,16 +7,16 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { type DataView } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import {
   Aggregators,
-  type CustomThresholdSearchSourceFields,
+  CustomThresholdSearchSourceFields,
 } from '../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
-import { RuleConditionChart, type RuleConditionChartExpressions } from './rule_condition_chart';
+import { RuleConditionChart, RuleConditionChartExpressions } from './rule_condition_chart';
 
 jest.mock('../../utils/kibana_react');
 

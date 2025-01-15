@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { type FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiButton, EuiPopover, EuiContextMenu, EuiPageTemplate } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
-import { type ScopedHistory } from '@kbn/core/public';
+import { ScopedHistory } from '@kbn/core/public';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { useKibana } from '../../../shared_imports';
 import { getCreateFromCsvPath, getCreatePath } from '../../services/navigation';

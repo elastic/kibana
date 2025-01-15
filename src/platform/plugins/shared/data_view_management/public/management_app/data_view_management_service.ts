@@ -7,23 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type IUiSettingsClient, type ApplicationStart } from '@kbn/core/public';
-import { BehaviorSubject, type Observable, map, distinctUntilChanged } from 'rxjs';
+import { IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
+import { BehaviorSubject, Observable, map, distinctUntilChanged } from 'rxjs';
 
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import { type FilterChecked } from '@elastic/eui';
+import { FilterChecked } from '@elastic/eui';
 
 import {
-  type SavedObjectsManagementPluginStart,
-  type SavedObjectManagementTypeInfo,
-  type SavedObjectRelation,
+  SavedObjectsManagementPluginStart,
+  SavedObjectManagementTypeInfo,
+  SavedObjectRelation,
 } from '@kbn/saved-objects-management-plugin/public';
 
 import {
-  type DataViewsPublicPluginStart,
-  type INDEX_PATTERN_TYPE,
-  type DataViewField,
-  type DataView,
+  DataViewsPublicPluginStart,
+  INDEX_PATTERN_TYPE,
+  DataViewField,
+  DataView,
 } from '@kbn/data-views-plugin/public';
 
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';

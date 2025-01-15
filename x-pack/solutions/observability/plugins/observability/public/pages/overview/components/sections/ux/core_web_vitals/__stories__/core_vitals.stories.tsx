@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { type ComponentType } from 'react';
+import React, { ComponentType } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Observable } from 'rxjs';
-import { type CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { CoreVitalItem } from '../core_vital_item';
 import { LCP_HELP_LABEL, LCP_LABEL } from '../translations';

@@ -5,13 +5,13 @@
  * 2.0.
  */
 import { useEffect, useState } from 'react';
-import { type IToasts } from '@kbn/core-notifications-browser';
-import { type HttpHandler } from '@kbn/core-http-browser';
+import { IToasts } from '@kbn/core-notifications-browser';
+import { HttpHandler } from '@kbn/core-http-browser';
 import { isEmpty } from 'lodash/fp';
 
-import { type DataQualityCheckResult } from '../../../../types';
+import { DataQualityCheckResult } from '../../../../types';
 import {
-  type GetStorageResultsOpts,
+  GetStorageResultsOpts,
   formatResultFromStorage,
   getStorageResults,
 } from '../../utils/storage';

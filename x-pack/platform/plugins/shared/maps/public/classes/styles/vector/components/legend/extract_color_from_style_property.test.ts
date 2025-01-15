@@ -7,10 +7,10 @@
 
 import { extractColorFromStyleProperty } from './extract_color_from_style_property';
 import {
-  type ColorDynamicOptions,
-  type ColorDynamicStylePropertyDescriptor,
-  type ColorStaticOptions,
-  type ColorStaticStylePropertyDescriptor,
+  ColorDynamicOptions,
+  ColorDynamicStylePropertyDescriptor,
+  ColorStaticOptions,
+  ColorStaticStylePropertyDescriptor,
 } from '../../../../../../common/descriptor_types';
 import { COLOR_MAP_TYPE, FIELD_ORIGIN, STYLE_TYPE } from '../../../../../../common/constants';
 import { euiPaletteColorBlind } from '@elastic/eui';

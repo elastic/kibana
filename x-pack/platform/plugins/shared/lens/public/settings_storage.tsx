@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 
 export interface LocalStorageLens {
   indexPatternId?: string;

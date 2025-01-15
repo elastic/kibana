@@ -9,21 +9,21 @@
 
 import { of } from '@kbn/kibana-utils-plugin/common';
 import {
-  type KibanaLocation,
+  KibanaLocation,
   Locator,
-  type LocatorGetUrlParams,
+  LocatorGetUrlParams,
   UrlService,
 } from '../../../common/url_service';
 import {
   LegacyShortUrlLocatorDefinition,
-  type LegacyShortUrlLocatorParams,
+  LegacyShortUrlLocatorParams,
   LEGACY_SHORT_URL_LOCATOR_ID,
 } from '../../../common/url_service/locators/legacy_short_url_locator';
 import { ShortUrlRedirectLocatorDefinition } from '../../../common/url_service/locators/short_url_redirect_locator';
-import { type BrowserShortUrlClientHttp, type BrowserShortUrlClient } from './short_url_client';
+import { BrowserShortUrlClientHttp, BrowserShortUrlClient } from './short_url_client';
 import {
   BrowserShortUrlClientFactory,
-  type BrowserShortUrlClientFactoryCreateParams,
+  BrowserShortUrlClientFactoryCreateParams,
 } from './short_url_client_factory';
 
 const setup = () => {

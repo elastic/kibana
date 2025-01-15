@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, type PropsWithChildren, useState } from 'react';
+import React, { FC, PropsWithChildren, useState } from 'react';
 
 import { useNotifyService } from '../../../services';
 import { ErrorStrings } from '../../../../i18n';

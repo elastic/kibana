@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type CoreSetup, type CoreStart, type PluginInitializerContext, type Plugin } from '@kbn/core/public';
-import { type SavedObjectTaggingOssPluginSetup, type SavedObjectTaggingOssPluginStart } from './types';
-import { type SavedObjectsTaggingApi } from './api';
+import { CoreSetup, CoreStart, PluginInitializerContext, Plugin } from '@kbn/core/public';
+import { SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart } from './types';
+import { SavedObjectsTaggingApi } from './api';
 
 export class SavedObjectTaggingOssPlugin
   implements Plugin<SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart, {}>

@@ -10,9 +10,9 @@ import { ProjectMonitorFormatter } from './project_monitor_formatter';
 import {
   ConfigKey,
   MonitorTypeEnum,
-  type Locations,
+  Locations,
   LocationStatus,
-  type PrivateLocation,
+  PrivateLocation,
 } from '../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 import { times } from 'lodash';
@@ -26,7 +26,7 @@ import * as telemetryHooks from '../../routes/telemetry/monitor_upgrade_sender';
 import { formatLocation } from '../../../common/utils/location_formatter';
 import * as locationsUtil from '../get_all_locations';
 import { mockEncryptedSO } from '../utils/mocks';
-import { type SyntheticsServerSetup } from '../../types';
+import { SyntheticsServerSetup } from '../../types';
 
 const testMonitors = [
   {

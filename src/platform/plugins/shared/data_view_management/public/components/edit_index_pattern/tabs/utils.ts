@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Dictionary, countBy, defaults, uniq } from 'lodash';
+import { Dictionary, countBy, defaults, uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { type DataView, type DataViewField } from '@kbn/data-views-plugin/public';
-import { type FilterChecked } from '@elastic/eui';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { FilterChecked } from '@elastic/eui';
 import {
   TAB_INDEXED_FIELDS,
   TAB_SCRIPTED_FIELDS,

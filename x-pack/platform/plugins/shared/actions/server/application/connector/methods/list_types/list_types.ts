@@ -6,10 +6,10 @@
  */
 
 import Boom from '@hapi/boom';
-import { type ActionsClientContext } from '../../../../actions_client';
-import { type ConnectorType } from '../../types';
+import { ActionsClientContext } from '../../../../actions_client';
+import { ConnectorType } from '../../types';
 import { listTypesParamsSchema } from './schemas';
-import { type ListTypesParams } from './types';
+import { ListTypesParams } from './types';
 
 export async function listTypes(
   context: ActionsClientContext,

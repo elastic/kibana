@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type PluginConfigDescriptor, type PluginInitializerContext } from '@kbn/core/server';
-import { type ConfigSchema, configSchema } from './config';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import { ConfigSchema, configSchema } from './config';
 
 export type {
   SharePublicSetup as SharePluginSetup,

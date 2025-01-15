@@ -8,11 +8,11 @@
  */
 
 import {
-  type InjectedMetadata,
-  type InjectedMetadataClusterInfo,
-  type InjectedMetadataExternalUrlPolicy,
-  type InjectedMetadataPlugin,
-  type InjectedMetadataTheme,
+  InjectedMetadata,
+  InjectedMetadataClusterInfo,
+  InjectedMetadataExternalUrlPolicy,
+  InjectedMetadataPlugin,
+  InjectedMetadataTheme,
 } from '@kbn/core-injected-metadata-common-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 

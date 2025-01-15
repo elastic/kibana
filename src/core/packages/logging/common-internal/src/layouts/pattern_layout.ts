@@ -9,7 +9,7 @@
 
 import type { LogRecord, Layout } from '@kbn/logging';
 import {
-  type Conversion,
+  Conversion,
   LoggerConversion,
   LevelConversion,
   MetaConversion,

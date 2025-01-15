@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type PerformanceObserver } from 'perf_hooks';
+import { PerformanceObserver } from 'perf_hooks';
 
 export interface Perf {
   numberOfTasksRanOverall: number;

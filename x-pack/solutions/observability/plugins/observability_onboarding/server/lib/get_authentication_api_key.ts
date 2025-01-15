@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type KibanaRequest } from '@kbn/core-http-server';
+import { KibanaRequest } from '@kbn/core-http-server';
 import { HTTPAuthorizationHeader } from '@kbn/security-plugin/server';
 
 export const getAuthenticationAPIKey = (request: KibanaRequest) => {

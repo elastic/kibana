@@ -8,8 +8,8 @@
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import { type CreateRuleExceptionListItemSchema, createRuleExceptionListItemSchema } from '.';
-import { type CreateExceptionListItemSchema } from '../create_exception_list_item_schema';
+import { CreateRuleExceptionListItemSchema, createRuleExceptionListItemSchema } from '.';
+import { CreateExceptionListItemSchema } from '../create_exception_list_item_schema';
 
 const getCreateExceptionListItemSchemaMock = (): CreateExceptionListItemSchema => ({
   comments: [],

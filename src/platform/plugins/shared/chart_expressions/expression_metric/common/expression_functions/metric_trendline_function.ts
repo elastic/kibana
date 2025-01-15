@@ -13,10 +13,10 @@ import {
   validateAccessor,
   getColumnByAccessor,
   prepareLogTable,
-  type Dimension,
+  Dimension,
 } from '@kbn/visualizations-plugin/common/utils';
-import { type DatatableRow } from '@kbn/expressions-plugin/common';
-import { type MetricWTrend } from '@elastic/charts';
+import { DatatableRow } from '@kbn/expressions-plugin/common';
+import { MetricWTrend } from '@elastic/charts';
 import type { TrendlineExpressionFunctionDefinition } from '../types';
 import { DEFAULT_TRENDLINE_NAME, EXPRESSION_METRIC_TRENDLINE_NAME } from '../constants';
 

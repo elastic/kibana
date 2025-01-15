@@ -15,7 +15,7 @@ import {
 import { extractErrors } from './extract_errors';
 import {
   LEGACY_URL_ALIAS_TYPE,
-  type LegacyUrlAlias,
+  LegacyUrlAlias,
 } from '@kbn/core-saved-objects-base-server-internal';
 
 describe('extractErrors()', () => {

@@ -14,9 +14,9 @@ import { setWorkpad } from '../../../state/actions/workpad';
 import { setAssets } from '../../../state/actions/assets';
 // @ts-expect-error
 import { setZoomScale } from '../../../state/actions/transient';
-import { type CanvasWorkpad } from '../../../../types';
+import { CanvasWorkpad } from '../../../../types';
 import {
-  type ResolveWorkpadResponse,
+  ResolveWorkpadResponse,
   getCanvasWorkpadService,
 } from '../../../services/canvas_workpad_service';
 import { spacesService } from '../../../services/kibana_services';

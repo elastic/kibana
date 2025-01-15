@@ -10,10 +10,10 @@ import { act } from 'react-dom/test-utils';
 import {
   registerTestBed,
   findTestSubject,
-  type TestBed,
-  type AsyncTestBedConfig,
+  TestBed,
+  AsyncTestBedConfig,
 } from '@kbn/test-jest-helpers';
-import { type HttpSetup } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
 
 import { registerRouter } from '../../../public/application/lib/navigation';
 import { WatchStatusPage } from '../../../public/application/sections/watch_status_page';

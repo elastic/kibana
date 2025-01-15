@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { type PluginInitializerContext, type CoreSetup, type CoreStart, type Plugin, type Logger } from '@kbn/core/server';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
-import { type SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { type SetupPlugins, type StartPlugins, type TimelinesPluginUI, type TimelinesPluginStart } from './types';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { SetupPlugins, StartPlugins, TimelinesPluginUI, TimelinesPluginStart } from './types';
 import { timelineSearchStrategyProvider } from './search_strategy/timeline';
 import { timelineEqlSearchStrategyProvider } from './search_strategy/timeline/eql';
 import { indexFieldsProvider } from './search_strategy/index_fields';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
-import { type ConfigSchema } from './config';
+import { ConfigSchema } from './config';
 
 export class TimelinesPlugin
   implements Plugin<TimelinesPluginUI, TimelinesPluginStart, SetupPlugins, StartPlugins>

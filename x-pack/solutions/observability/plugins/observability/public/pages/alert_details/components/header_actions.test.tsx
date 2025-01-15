@@ -17,8 +17,8 @@ import { alertWithGroupsAndTags, mockAlertUuid, untrackedAlert } from '../mock/a
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 
 import { HeaderActions } from './header_actions';
-import { type CasesPublicStart } from '@kbn/cases-plugin/public';
-import { type AlertStatus, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { CasesPublicStart } from '@kbn/cases-plugin/public';
+import { AlertStatus, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { OBSERVABILITY_BASE_PATH, RULES_PATH } from '../../../../common/locators/paths';
 
 jest.mock('../../../utils/kibana_react');

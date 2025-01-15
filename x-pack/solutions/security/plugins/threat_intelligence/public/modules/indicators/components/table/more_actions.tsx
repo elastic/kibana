@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, type VFC } from 'react';
+import React, { useState, VFC } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenuPanel,
@@ -16,7 +16,7 @@ import {
 import { AddToBlockListContextMenu } from '../../../block_list/components/add_to_block_list';
 import { AddToNewCase } from '../../../cases/components/add_to_new_case';
 import { AddToExistingCase } from '../../../cases/components/add_to_existing_case';
-import { type Indicator } from '../../../../../common/types/indicator';
+import { Indicator } from '../../../../../common/types/indicator';
 import { canAddToBlockList } from '../../../block_list/utils/can_add_to_block_list';
 import {
   ADD_TO_BLOCK_LIST_TEST_ID,

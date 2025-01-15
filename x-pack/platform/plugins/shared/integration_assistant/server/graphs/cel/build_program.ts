@@ -6,10 +6,10 @@
  */
 
 import { StringOutputParser } from '@langchain/core/output_parsers';
-import { type CelInputState } from '../../types';
+import { CelInputState } from '../../types';
 import { EX_ANSWER_PROGRAM, SAMPLE_CEL_PROGRAMS } from './constants';
 import { CEL_BASE_PROGRAM_PROMPT } from './prompts';
-import { type CelInputNodeParams } from './types';
+import { CelInputNodeParams } from './types';
 
 export async function handleBuildProgram({
   state,

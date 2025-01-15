@@ -12,10 +12,10 @@ import React from 'react';
 
 import AddToTimelineButton, {
   ADD_TO_TIMELINE_KEYBOARD_SHORTCUT,
-  type SuccessMessageProps,
+  SuccessMessageProps,
   AddSuccessMessage,
 } from './add_to_timeline';
-import { type DataProvider, IS_OPERATOR } from '../../../../common/types';
+import { DataProvider, IS_OPERATOR } from '../../../../common/types';
 import { TestProviders } from '../../../mock';
 import * as i18n from './translations';
 

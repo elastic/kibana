@@ -11,11 +11,11 @@ import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-p
 
 import {
   TagEnhancedSavedObjectSaveModalOrigin,
-  type OriginSaveProps,
+  OriginSaveProps,
 } from './tags_saved_object_save_modal_origin_wrapper';
 import {
   TagEnhancedSavedObjectSaveModalDashboard,
-  type DashboardSaveProps,
+  DashboardSaveProps,
 } from './tags_saved_object_save_modal_dashboard_wrapper';
 
 export type SaveProps = OriginSaveProps | DashboardSaveProps;

@@ -11,7 +11,7 @@ import React, { useEffect, useReducer, useMemo, useCallback } from 'react';
 import {
   EuiTitle,
   EuiDragDropContext,
-  type DragDropContextProps,
+  DragDropContextProps,
   EuiDroppable,
   EuiDraggable,
   EuiSpacer,
@@ -21,11 +21,11 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import type { TimeRange } from '@kbn/es-query';
-import { AggGroupNames, AggGroupLabels, type IAggConfig } from '@kbn/data-plugin/public';
+import { AggGroupNames, AggGroupLabels, IAggConfig } from '@kbn/data-plugin/public';
 import type { Schema } from '@kbn/visualizations-plugin/public';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
-import { type AddSchema, type ReorderAggs, type DefaultEditorAggCommonProps } from './agg_common_props';
+import { AddSchema, ReorderAggs, DefaultEditorAggCommonProps } from './agg_common_props';
 import {
   isInvalidAggsTouched,
   isAggRemovable,

@@ -9,10 +9,10 @@
 
 import { useDispatch } from 'react-redux';
 import React from 'react';
-import { type IKbnPalette, type KbnPalettes } from '@kbn/palettes';
+import { IKbnPalette, KbnPalettes } from '@kbn/palettes';
 import { ColorSwatch } from '../color_picker/color_swatch';
 import { updateSpecialAssignmentColor } from '../../state/color_mapping';
-import { type ColorCode, type CategoricalColor } from '../../config/types';
+import { ColorCode, CategoricalColor } from '../../config/types';
 
 export function SpecialAssignment({
   assignmentColor,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type EntryNested } from '.';
+import { EntryNested } from '.';
 import { NESTED, NESTED_FIELD } from '../../constants/index.mock';
 import { getEntryExistsMock } from '../entries_exist/index.mock';
 import { getEntryMatchExcludeMock, getEntryMatchMock } from '../entry_match/index.mock';

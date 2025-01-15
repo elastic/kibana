@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC, type PropsWithChildren } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import {
   EuiTextColor,
-  type EuiTextColorProps,
+  EuiTextColorProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,

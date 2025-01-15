@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import tinycolor from 'tinycolor2';
 import _ from 'lodash';
 
-import { type BreakdownItem, type Index, type Operation, type Shard, type Targets } from '../../types';
-import { type IndexMap } from './types';
+import { BreakdownItem, Index, Operation, Shard, Targets } from '../../types';
+import { IndexMap } from './types';
 import { MAX_TREE_DEPTH } from './constants';
 
 export const comparator = (v1: number, v2: number) => {

@@ -6,7 +6,7 @@
  */
 
 import { ACTION_STATES } from '../../../common/constants';
-import { type ServerActionStatusModel } from '../../../common/types';
+import { ServerActionStatusModel } from '../../../common/types';
 
 export const deriveState = (serverActionStatusModel: ServerActionStatusModel) => {
   const {

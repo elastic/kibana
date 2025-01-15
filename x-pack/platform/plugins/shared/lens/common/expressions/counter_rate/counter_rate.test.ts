@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { counterRate, type CounterRateArgs } from '.';
+import { counterRate, CounterRateArgs } from '.';
 
-import { type Datatable } from '@kbn/expressions-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 
 describe('lens_counter_rate', () => {

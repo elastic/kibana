@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { type EuiIconProps } from '@elastic/eui';
+import { EuiIconProps } from '@elastic/eui';
 import { colors } from './common_styles';
 import { ChartIconWrapper } from './icon_simple_wrapper';
 

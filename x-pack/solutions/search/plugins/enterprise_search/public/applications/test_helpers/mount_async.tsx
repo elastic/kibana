@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type React from 'react';
+import React from 'react';
 
-import { mount, type ReactWrapper } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 
 import { mountWithIntl } from './mount_with_i18n';

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { type RefObject, useCallback, useState } from 'react';
+import { RefObject, useCallback, useState } from 'react';
 
 import {
-  type ElementClickListener,
-  type ProjectionClickListener,
-  type ProjectedValues,
-  type XYChartElementEvent,
+  ElementClickListener,
+  ProjectionClickListener,
+  ProjectedValues,
+  XYChartElementEvent,
 } from '@elastic/charts';
 
-import { type WaterfallMetadata, type WaterfallMetadataEntry } from '../types';
+import { WaterfallMetadata, WaterfallMetadataEntry } from '../types';
 
 interface OnSidebarClickParams {
   buttonRef?: ButtonRef;

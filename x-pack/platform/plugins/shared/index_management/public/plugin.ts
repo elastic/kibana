@@ -10,23 +10,23 @@ import { Subject } from 'rxjs';
 import SemVer from 'semver/classes/semver';
 
 import {
-  type CoreSetup,
-  type CoreStart,
-  type Plugin,
-  type PluginInitializerContext,
-  type ScopedHistory,
-  type Capabilities,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+  ScopedHistory,
+  Capabilities,
 } from '@kbn/core/public';
 import {
-  type IndexManagementPluginSetup,
-  type IndexManagementPluginStart,
+  IndexManagementPluginSetup,
+  IndexManagementPluginStart,
 } from '@kbn/index-management-shared-types';
-import { type IndexManagementLocator } from '@kbn/index-management-shared-types';
-import { type Subscription } from 'rxjs';
+import { IndexManagementLocator } from '@kbn/index-management-shared-types';
+import { Subscription } from 'rxjs';
 import { setExtensionsService } from './application/store/selectors/extension_service';
 import { ExtensionsService } from './services/extensions_service';
 
-import { type ClientConfigType, type SetupDependencies, type StartDependencies } from './types';
+import { ClientConfigType, SetupDependencies, StartDependencies } from './types';
 
 // avoid import from index files in plugin.ts, use specific import paths
 import { PLUGIN } from '../common/constants/plugin';

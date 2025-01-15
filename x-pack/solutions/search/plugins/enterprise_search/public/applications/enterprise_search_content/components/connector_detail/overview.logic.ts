@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kea, type MakeLogicType } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../common/types/api';
 

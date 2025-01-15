@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { type FieldSpec } from '@kbn/data-views-plugin/common';
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 
-import { type OptionsListRequestBody } from '../../../common/options_list/types';
+import { OptionsListRequestBody } from '../../../common/options_list/types';
 import * as ExactMatch from './options_list_exact_match';
 import { getSearchSuggestionsAggregationBuilder } from './options_list_search_suggestions';
 

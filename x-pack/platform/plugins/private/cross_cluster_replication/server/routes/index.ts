@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type RouteDependencies } from '../types';
+import { RouteDependencies } from '../types';
 
 import { registerAutoFollowPatternRoutes } from './api/auto_follow_pattern';
 import { registerFollowerIndexRoutes } from './api/follower_index';

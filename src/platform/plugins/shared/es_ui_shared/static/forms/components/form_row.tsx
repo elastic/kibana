@@ -10,7 +10,7 @@
 import React from 'react';
 
 import { EuiDescribedFormGroup, EuiTitle } from '@elastic/eui';
-import { type FieldHook } from '../hook_form_lib';
+import { FieldHook } from '../hook_form_lib';
 import { Field } from './field';
 
 interface Props {

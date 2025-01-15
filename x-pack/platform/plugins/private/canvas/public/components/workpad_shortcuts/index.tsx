@@ -7,13 +7,13 @@
 
 import PropTypes from 'prop-types';
 import { withHandlers, compose } from 'react-recompose';
-import { WorkpadShortcuts as Component, type Props as WorkpadShortcutsProps } from './workpad_shortcuts';
+import { WorkpadShortcuts as Component, Props as WorkpadShortcutsProps } from './workpad_shortcuts';
 import {
   groupHandlerCreators,
   layerHandlerCreators,
   basicHandlerCreators,
   clipboardHandlerCreators,
-  type Props as HandlerCreatorProps,
+  Props as HandlerCreatorProps,
   positionHandlerCreators,
 } from '../../lib/element_handler_creators';
 

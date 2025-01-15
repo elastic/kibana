@@ -9,7 +9,7 @@
 
 import Fs from 'fs';
 
-import { type Repo } from './repos';
+import { Repo } from './repos';
 
 export interface Source {
   type: string;

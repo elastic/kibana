@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { type FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { createOpenAIConnector } from './utils/create_openai_connector';
 import { MachineLearningCommonAPIProvider } from '../../services/ml/common_api';
 
 import {
   createLlmProxy,
-  type LlmProxy,
+  LlmProxy,
 } from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 
 const esArchiveIndex = 'test/api_integration/fixtures/es_archiver/index_patterns/basic_index';

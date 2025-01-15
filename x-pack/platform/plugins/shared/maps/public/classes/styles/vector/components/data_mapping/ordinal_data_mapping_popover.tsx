@@ -14,7 +14,7 @@ import {
   EuiRange,
   EuiSuperSelect,
   EuiSwitch,
-  type EuiSwitchEvent,
+  EuiSwitchEvent,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -23,11 +23,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DEFAULT_SIGMA } from '../../vector_style_defaults';
 import { DataMappingPopover } from './data_mapping_popover';
-import { type FieldMetaOptions } from '../../../../../../common/descriptor_types';
+import { FieldMetaOptions } from '../../../../../../common/descriptor_types';
 import {
   DEFAULT_PERCENTILES,
   DATA_MAPPING_FUNCTION,
-  type VECTOR_STYLES,
+  VECTOR_STYLES,
 } from '../../../../../../common/constants';
 import { PercentilesForm } from './percentiles_form';
 

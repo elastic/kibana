@@ -8,8 +8,8 @@
  */
 
 import { identity } from 'lodash';
-import { type SerializableRecord } from '@kbn/utility-types';
-import { type EnhancementRegistryDefinition, type EnhancementRegistryItem } from './types';
+import { SerializableRecord } from '@kbn/utility-types';
+import { EnhancementRegistryDefinition, EnhancementRegistryItem } from './types';
 
 export class EnhancementsRegistry {
   private registry: Map<string, EnhancementRegistryItem> = new Map();

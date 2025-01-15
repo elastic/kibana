@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type Middleware } from 'redux';
-import { type State } from '../../../types';
+import { Middleware } from 'redux';
+import { State } from '../../../types';
 
 // @ts-expect-error untyped local
 import { setElementStats } from '../actions/transient';

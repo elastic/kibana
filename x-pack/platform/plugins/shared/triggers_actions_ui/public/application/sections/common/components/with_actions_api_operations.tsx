@@ -7,16 +7,16 @@
 
 import React from 'react';
 
-import { type IExecutionLogResult, type IExecutionKPIResult } from '@kbn/actions-plugin/common';
-import { type ActionType } from '../../../../types';
+import { IExecutionLogResult, IExecutionKPIResult } from '@kbn/actions-plugin/common';
+import { ActionType } from '../../../../types';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import {
   loadGlobalConnectorExecutionKPIAggregations,
-  type LoadGlobalConnectorExecutionKPIAggregationsProps,
+  LoadGlobalConnectorExecutionKPIAggregationsProps,
 } from '../../../lib/action_connector_api/load_execution_kpi_aggregations';
 import {
   loadGlobalConnectorExecutionLogAggregations,
-  type LoadGlobalConnectorExecutionLogAggregationsProps,
+  LoadGlobalConnectorExecutionLogAggregationsProps,
 } from '../../../lib/action_connector_api/load_execution_log_aggregations';
 import { useKibana } from '../../../../common/lib/kibana';
 

@@ -6,11 +6,11 @@
  */
 
 import {
-  type TemplateFromEs,
-  type ComponentTemplateFromEs,
-  type ComponentTemplateDeserialized,
-  type ComponentTemplateListItem,
-  type ComponentTemplateSerialized,
+  TemplateFromEs,
+  ComponentTemplateFromEs,
+  ComponentTemplateDeserialized,
+  ComponentTemplateListItem,
+  ComponentTemplateSerialized,
 } from '../types';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;

@@ -15,13 +15,13 @@ import {
   DefendInsightsPostRequestBody,
   DefendInsightsPostResponse,
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
-  type Replacements,
+  Replacements,
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { type IRouter, type Logger } from '@kbn/core/server';
+import { IRouter, Logger } from '@kbn/core/server';
 
 import { buildResponse } from '../../lib/build_response';
-import { type ElasticAssistantRequestHandlerContext } from '../../types';
+import { ElasticAssistantRequestHandlerContext } from '../../types';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
 import {
   getAssistantTool,

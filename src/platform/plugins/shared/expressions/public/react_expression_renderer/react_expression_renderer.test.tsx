@@ -14,9 +14,9 @@ import { share } from 'rxjs';
 import { ReactExpressionRenderer } from './react_expression_renderer';
 import { mount } from 'enzyme';
 import { EuiProgress } from '@elastic/eui';
-import { type IInterpreterRenderHandlers } from '../../common';
+import { IInterpreterRenderHandlers } from '../../common';
 import { ExpressionLoader } from '../loader';
-import { type RenderErrorHandlerFnType, type ExpressionRendererEvent } from '../types';
+import { RenderErrorHandlerFnType, ExpressionRendererEvent } from '../types';
 
 jest.mock('../loader', () => {
   return {

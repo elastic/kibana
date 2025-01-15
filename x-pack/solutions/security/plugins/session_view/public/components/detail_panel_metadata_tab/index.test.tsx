@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { type AppContextTestRender, createAppRootMockRenderer } from '../../test';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import type {
   ProcessEventHost,
   ProcessEventContainer,

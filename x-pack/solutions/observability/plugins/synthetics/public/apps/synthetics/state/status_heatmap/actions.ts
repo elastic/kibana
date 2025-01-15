@@ -6,10 +6,10 @@
  */
 
 import { createAction } from '@reduxjs/toolkit';
-import { type MonitorStatusHeatmapBucket } from '../../../../../common/runtime_types';
+import { MonitorStatusHeatmapBucket } from '../../../../../common/runtime_types';
 import { createAsyncAction } from '../utils/actions';
 
-import { type MonitorStatusHeatmapActionArgs } from './models';
+import { MonitorStatusHeatmapActionArgs } from './models';
 
 export const getMonitorStatusHeatmapAction = createAsyncAction<
   MonitorStatusHeatmapActionArgs,

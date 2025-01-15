@@ -7,7 +7,7 @@
 
 import {
   EuiComboBox,
-  type EuiComboBoxOptionOption,
+  EuiComboBoxOptionOption,
   EuiExpression,
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,10 +15,10 @@ import {
   EuiPopover,
   EuiSelect,
 } from '@elastic/eui';
-import { type DataViewBase } from '@kbn/es-query';
+import { DataViewBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type ValidNormalizedTypes } from '@kbn/triggers-actions-ui-plugin/public';
+import { ValidNormalizedTypes } from '@kbn/triggers-actions-ui-plugin/public';
 import { get } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
@@ -26,7 +26,7 @@ import { Aggregators } from '../../../../../common/custom_threshold_rule/types';
 import { RuleFlyoutKueryBar } from '../../../rule_kql_filter/kuery_bar';
 import { ClosablePopoverTitle } from '../closable_popover_title';
 import { MetricRowControls } from './metric_row_controls';
-import { type MetricRowBaseProps, type NormalizedFields } from './types';
+import { MetricRowBaseProps, NormalizedFields } from './types';
 
 interface MetricRowWithAggProps extends MetricRowBaseProps {
   aggType?: Aggregators;

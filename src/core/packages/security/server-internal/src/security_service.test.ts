@@ -12,7 +12,7 @@ import {
   getDefaultSecurityImplementationMock,
 } from './security_service.test.mocks';
 
-import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
 import { SecurityService } from './security_service';

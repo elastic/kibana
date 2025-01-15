@@ -9,7 +9,7 @@
 
 import moment from 'moment-timezone';
 import { DateFormat } from './date';
-import { type FieldFormatsGetConfigFn } from '../../../common';
+import { FieldFormatsGetConfigFn } from '../../../common';
 
 describe('Date Format', () => {
   let convert: Function;

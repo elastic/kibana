@@ -14,7 +14,7 @@ import {
   resolveWithMissingImage,
 } from '@kbn/presentation-util-plugin/common';
 import { CONTEXT, BASE64, URL } from '../constants';
-import { type ExpressionRepeatImageFunction } from '../types';
+import { ExpressionRepeatImageFunction } from '../types';
 
 export const strings = {
   help: i18n.translate('expressionRepeatImage.functions.repeatImageHelpText', {

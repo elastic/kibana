@@ -6,7 +6,7 @@
  */
 
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { type IKibanaResponse, type IRouter, type Logger } from '@kbn/core/server';
+import { type IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import {
   AttackDiscoveryCancelResponse,
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
@@ -17,7 +17,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { updateAttackDiscoveryStatusToCanceled } from '../../helpers/helpers';
 import { ATTACK_DISCOVERY_CANCEL_BY_CONNECTOR_ID } from '../../../../../common/constants';
 import { buildResponse } from '../../../../lib/build_response';
-import { type ElasticAssistantRequestHandlerContext } from '../../../../types';
+import { ElasticAssistantRequestHandlerContext } from '../../../../types';
 
 export const cancelAttackDiscoveryRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>

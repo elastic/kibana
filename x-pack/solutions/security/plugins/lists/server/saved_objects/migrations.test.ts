@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { type SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
 import {
   ENDPOINT_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
 
-import { type ExceptionListSoSchema } from '../schemas/saved_objects';
+import { ExceptionListSoSchema } from '../schemas/saved_objects';
 
-import { type OldExceptionListSoSchema, migrations } from './migrations';
+import { OldExceptionListSoSchema, migrations } from './migrations';
 
 const DEFAULT_EXCEPTION_LIST_SO: ExceptionListSoSchema = {
   comments: undefined,

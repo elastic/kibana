@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { concatMap, firstValueFrom, from, type Observable, of, throwError } from 'rxjs';
+import { concatMap, firstValueFrom, from, Observable, of, throwError } from 'rxjs';
 import { pick } from 'lodash';
 import moment from 'moment';
 import {
-  type CoreSetup,
-  type CoreStart,
-  type KibanaRequest,
-  type Logger,
-  type PluginInitializerContext,
-  type SharedGlobalConfig,
-  type StartServicesAccessor,
+  CoreSetup,
+  CoreStart,
+  KibanaRequest,
+  Logger,
+  PluginInitializerContext,
+  SharedGlobalConfig,
+  StartServicesAccessor,
 } from '@kbn/core/server';
 import { catchError, map, switchMap, tap } from 'rxjs';
 import type {
@@ -27,9 +27,9 @@ import type {
   IEsSearchRequest,
   IEsSearchResponse,
 } from '@kbn/search-types';
-import { type ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
-import { type FieldFormatsStart } from '@kbn/field-formats-plugin/server';
-import { type UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type {
@@ -45,7 +45,7 @@ import { AggsService } from './aggs';
 
 import { registerSearchRoute, registerSessionRoutes } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './strategies/es_search';
-import { type DataPluginStart, type DataPluginStartDependencies } from '../plugin';
+import { DataPluginStart, DataPluginStartDependencies } from '../plugin';
 import { usageProvider } from './collectors/search/usage';
 import { registerUsageCollector as registerSearchUsageCollector } from './collectors/search/register';
 import { registerUsageCollector as registerSearchSessionUsageCollector } from './collectors/search_session/register';
@@ -75,7 +75,7 @@ import {
   selectFilterFunction,
   rangeFunction,
   removeFilterFunction,
-  type SearchSourceDependencies,
+  SearchSourceDependencies,
   searchSourceRequiredUiSettings,
   SearchSourceService,
   eqlRawResponse,
@@ -89,7 +89,7 @@ import {
   SHARD_DELAY_AGG_NAME,
 } from '../../common/search/aggs/buckets/shard_delay';
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
-import { type ConfigSchema } from '../config';
+import { ConfigSchema } from '../config';
 import { SearchSessionService } from './session';
 import { enhancedEsSearchStrategyProvider } from './strategies/ese_search';
 import { eqlSearchStrategyProvider } from './strategies/eql_search';

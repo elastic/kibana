@@ -10,7 +10,7 @@
 import { Subject } from 'rxjs';
 import { errors } from '@elastic/elasticsearch';
 import { isValidConnection } from './is_valid_connection';
-import { type NodesVersionCompatibility } from './version_check/ensure_es_version';
+import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 
 describe('isValidConnection', () => {
   const esNodesCompatibilityRequired: NodesVersionCompatibility = {

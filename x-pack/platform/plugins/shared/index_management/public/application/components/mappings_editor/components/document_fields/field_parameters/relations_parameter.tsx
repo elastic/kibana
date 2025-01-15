@@ -14,7 +14,7 @@ import {
   EuiCallOut,
   EuiLink,
   EuiBasicTable,
-  type EuiBasicTableColumn,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,12 +22,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   UseField,
   UseArray,
-  type ArrayItem,
-  type FieldConfig,
+  ArrayItem,
+  FieldConfig,
   TextField,
   ComboBoxField,
 } from '../../../shared_imports';
-import { type Field } from '../../../types';
+import { Field } from '../../../types';
 
 import { documentationService } from '../../../../../services/documentation';
 import { EditFieldFormRow } from '../fields/edit_field';

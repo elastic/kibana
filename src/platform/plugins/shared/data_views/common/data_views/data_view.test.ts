@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type FieldFormat } from '@kbn/field-formats-plugin/common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
-import { type RuntimeField, type RuntimePrimitiveTypes, type FieldSpec, type DataViewSpec } from '../types';
+import { RuntimeField, RuntimePrimitiveTypes, FieldSpec, DataViewSpec } from '../types';
 import { stubLogstashFields } from '../field.stub';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import { last, map } from 'lodash';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
-import { type DataViewField } from '../fields';
+import { DataViewField } from '../fields';
 import { DataView } from './data_view';
 
 class MockFieldFormatter {}

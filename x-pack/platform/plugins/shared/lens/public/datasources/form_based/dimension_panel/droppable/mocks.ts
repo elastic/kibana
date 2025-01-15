@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { type FormBasedLayer } from '../../types';
+import { FormBasedLayer } from '../../types';
 import { documentField } from '../../document_field';
-import { type IndexPatternMap, type OperationMetadata } from '../../../../types';
+import { IndexPatternMap, OperationMetadata } from '../../../../types';
 import {
-  type DateHistogramIndexPatternColumn,
-  type GenericIndexPatternColumn,
-  type StaticValueIndexPatternColumn,
-  type TermsIndexPatternColumn,
+  DateHistogramIndexPatternColumn,
+  GenericIndexPatternColumn,
+  StaticValueIndexPatternColumn,
+  TermsIndexPatternColumn,
 } from '../../operations';
 import { getFieldByNameFactory } from '../../pure_helpers';
 jest.mock('../../../../id_generator');

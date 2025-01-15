@@ -6,20 +6,20 @@
  */
 
 import { EuiHeaderLink } from '@elastic/eui';
-import { type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { type DiscoverStart } from '@kbn/discover-plugin/public';
+import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { hydrateDataSourceSelection } from '@kbn/logs-explorer-plugin/common';
 import {
   getDiscoverColumnsWithFallbackFieldsFromDisplayOptions,
   getDiscoverFiltersFromState,
 } from '@kbn/logs-explorer-plugin/public';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import { type MatchedStateFromActor } from '@kbn/xstate-utils';
+import { MatchedStateFromActor } from '@kbn/xstate-utils';
 import { useActor } from '@xstate/react';
 import React, { useMemo } from 'react';
 import { discoverLinkTitle } from '../../common/translations';
 import {
-  type ObservabilityLogsExplorerService,
+  ObservabilityLogsExplorerService,
   useObservabilityLogsExplorerPageStateContext,
 } from '../state_machines/observability_logs_explorer/src';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';

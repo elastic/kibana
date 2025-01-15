@@ -6,7 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { type ElasticsearchClient, type Logger } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import {
   isModelAlreadyExistsError,
@@ -15,7 +15,7 @@ import {
 } from './helpers';
 import { authenticatedUser } from '../../__mocks__/user';
 import { getCreateKnowledgeBaseEntrySchemaMock } from '../../__mocks__/knowledge_base_entry_schema.mock';
-import { type IndexEntry } from '@kbn/elastic-assistant-common';
+import { IndexEntry } from '@kbn/elastic-assistant-common';
 
 // Mock dependencies
 jest.mock('@elastic/elasticsearch');

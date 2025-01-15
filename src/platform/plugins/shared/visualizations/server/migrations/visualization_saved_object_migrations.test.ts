@@ -9,9 +9,9 @@
 
 import { getAllMigrations } from './visualization_saved_object_migrations';
 import {
-  type SavedObjectMigrationContext,
-  type SavedObjectMigrationFn,
-  type SavedObjectUnsanitizedDoc,
+  SavedObjectMigrationContext,
+  SavedObjectMigrationFn,
+  SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 

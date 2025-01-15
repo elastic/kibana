@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -16,17 +16,17 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { type ActionTypeExecutorResult, isActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import { type Option, none, some } from 'fp-ts/lib/Option';
+import { ActionTypeExecutorResult, isActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { Option, none, some } from 'fp-ts/lib/Option';
 import { ReadOnlyConnectorMessage } from './read_only';
 import {
-  type ActionConnector,
-  type ActionTypeModel,
-  type ActionTypeRegistryContract,
+  ActionConnector,
+  ActionTypeModel,
+  ActionTypeRegistryContract,
   EditConnectorTabs,
-  type UserConfiguredActionConnector,
+  UserConfiguredActionConnector,
 } from '../../../../types';
-import { ConnectorForm, type ConnectorFormState } from '../connector_form';
+import { ConnectorForm, ConnectorFormState } from '../connector_form';
 import type { ConnectorFormSchema } from '../types';
 import { useUpdateConnector } from '../../../hooks/use_edit_connector';
 import { useKibana } from '../../../../common/lib/kibana';

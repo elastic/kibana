@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import type request from 'supertest';
+import request from 'supertest';
 
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
-import { type CookieCredentials, type InternalRequestHeader } from '@kbn/ftr-common-functional-services';
+import { CookieCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
 import type { ReportApiJSON } from '@kbn/reporting-common/types';
 import type { JobParamsCsvFromSavedObject } from '@kbn/reporting-export-types-csv-common';
-import { type FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');

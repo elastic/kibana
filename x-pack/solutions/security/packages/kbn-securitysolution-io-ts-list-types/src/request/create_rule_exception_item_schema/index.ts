@@ -9,25 +9,25 @@ import * as t from 'io-ts';
 import { DefaultUuid } from '@kbn/securitysolution-io-ts-types';
 
 import {
-  type CreateCommentsArray,
+  CreateCommentsArray,
   DefaultCreateCommentsArray,
   description,
-  type EntriesArray,
+  EntriesArray,
   exceptionListItemType,
-  type ItemId,
+  ItemId,
   meta,
-  type NamespaceType,
+  NamespaceType,
   namespaceType,
   nonEmptyEntriesArray,
-  type OsTypeArray,
+  OsTypeArray,
   osTypeArrayOrUndefined,
-  type Tags,
+  Tags,
   tags,
   name,
-  type ExpireTimeOrUndefined,
+  ExpireTimeOrUndefined,
   expireTimeOrUndefined,
 } from '../../common';
-import { type RequiredKeepUndefined } from '../../common/required_keep_undefined';
+import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 
 export const createRuleExceptionListItemSchema = t.intersection([
   t.exact(

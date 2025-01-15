@@ -8,7 +8,7 @@
  */
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { type DataPublicPluginStart, search, tabifyAggResponse } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, search, tabifyAggResponse } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import type { UnifiedHistogramBucketInterval } from '../../types';

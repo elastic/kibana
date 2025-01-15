@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ReactNode, Suspense, lazy } from 'react';
+import React, { ReactNode, Suspense, lazy } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
 
-import { type IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 
 export interface VisualizationContainerProps {
   'data-test-subj'?: string;

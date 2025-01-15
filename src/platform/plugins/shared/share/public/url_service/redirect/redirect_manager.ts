@@ -15,9 +15,9 @@ import { BehaviorSubject } from 'rxjs';
 import type { UrlService } from '../../../common/url_service';
 import {
   LEGACY_SHORT_URL_LOCATOR_ID,
-  type LegacyShortUrlLocatorParams,
+  LegacyShortUrlLocatorParams,
 } from '../../../common/url_service/locators/legacy_short_url_locator';
-import { parseSearchParams, type RedirectOptions } from '../../../common/url_service/locators/redirect';
+import { parseSearchParams, RedirectOptions } from '../../../common/url_service/locators/redirect';
 import { getHomeHref } from '../../lib/get_home_href';
 
 export interface RedirectManagerDependencies {

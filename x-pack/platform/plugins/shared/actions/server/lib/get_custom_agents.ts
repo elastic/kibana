@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { type Agent as HttpAgent } from 'http';
-import { Agent as HttpsAgent, type AgentOptions } from 'https';
+import { Agent as HttpAgent } from 'http';
+import { Agent as HttpsAgent, AgentOptions } from 'https';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
-import { type Logger } from '@kbn/core/server';
-import { type ActionsConfigurationUtilities } from '../actions_config';
+import { Logger } from '@kbn/core/server';
+import { ActionsConfigurationUtilities } from '../actions_config';
 import { getNodeSSLOptions, getSSLSettingsFromConfig } from './get_node_ssl_options';
-import { type SSLSettings } from '../types';
+import { SSLSettings } from '../types';
 
 interface GetCustomAgentsResponse {
   httpAgent: HttpAgent | undefined;

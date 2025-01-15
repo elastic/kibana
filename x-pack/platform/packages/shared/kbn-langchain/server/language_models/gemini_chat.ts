@@ -6,21 +6,21 @@
  */
 
 import {
-  type Content,
-  type EnhancedGenerateContentResponse,
-  type GenerateContentRequest,
-  type GenerateContentResult,
+  Content,
+  EnhancedGenerateContentResponse,
+  GenerateContentRequest,
+  GenerateContentResult,
 } from '@google/generative-ai';
-import { type ActionsClient } from '@kbn/actions-plugin/server';
-import { type PublicMethodsOf } from '@kbn/utility-types';
-import { type CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
-import { type BaseMessage, type UsageMetadata } from '@langchain/core/messages';
-import { type ChatGenerationChunk } from '@langchain/core/outputs';
+import { ActionsClient } from '@kbn/actions-plugin/server';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
+import { BaseMessage, UsageMetadata } from '@langchain/core/messages';
+import { ChatGenerationChunk } from '@langchain/core/outputs';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
-import { type Logger } from '@kbn/logging';
-import { type BaseChatModelParams } from '@langchain/core/language_models/chat_models';
+import { Logger } from '@kbn/logging';
+import { BaseChatModelParams } from '@langchain/core/language_models/chat_models';
 import { get } from 'lodash/fp';
-import { type Readable } from 'stream';
+import { Readable } from 'stream';
 import {
   convertBaseMessagesToContent,
   convertResponseBadFinishReasonToErrorMsg,

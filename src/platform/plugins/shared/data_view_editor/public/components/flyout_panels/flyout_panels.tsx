@@ -14,10 +14,10 @@ import React, {
   useCallback,
   useMemo,
   useLayoutEffect,
-  type FC,
-  type PropsWithChildren,
+  FC,
+  PropsWithChildren,
 } from 'react';
-import { EuiFlexGroup, type EuiFlexGroupProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexGroupProps } from '@elastic/eui';
 
 import './flyout_panels.scss';
 

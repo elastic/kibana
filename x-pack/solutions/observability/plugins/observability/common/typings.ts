@@ -7,12 +7,12 @@
 
 import * as t from 'io-ts';
 import {
-  type ALERT_STATUS_ACTIVE,
-  type ALERT_STATUS_RECOVERED,
-  type ALERT_STATUS_UNTRACKED,
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+  ALERT_STATUS_UNTRACKED,
 } from '@kbn/rule-data-utils';
 import type { Filter } from '@kbn/es-query';
-import { type ALERT_STATUS_ALL } from './constants';
+import { ALERT_STATUS_ALL } from './constants';
 
 export type Maybe<T> = T | null | undefined;
 

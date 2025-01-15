@@ -18,11 +18,11 @@ import {
   FriendlyTimingLabels,
   Timings,
   Metadata,
-  type WaterfallTooltipItem,
+  WaterfallTooltipItem,
 } from './types';
 import type { DateFormatter } from '../../../../../../hooks/use_date_format';
 import { mockMoment } from '../../../../utils/formatting/test_helpers';
-import { type NetworkEvent } from '../../../../../../../common/runtime_types';
+import { NetworkEvent } from '../../../../../../../common/runtime_types';
 
 export const networkItems: NetworkEvent[] = [
   {

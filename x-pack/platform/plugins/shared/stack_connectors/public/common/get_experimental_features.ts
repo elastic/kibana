@@ -6,7 +6,7 @@
  */
 
 import {
-  type ExperimentalFeatures,
+  ExperimentalFeatures,
   isValidExperimentalValue,
   getExperimentalAllowedValues,
 } from '../../common/experimental_features';

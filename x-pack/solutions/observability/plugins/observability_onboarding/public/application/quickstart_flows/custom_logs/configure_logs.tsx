@@ -31,7 +31,7 @@ import {
   ConnectedCustomIntegrationsForm,
   useConsumerCustomIntegrations,
   CustomIntegrationsProvider,
-  type Callbacks,
+  Callbacks,
 } from '@kbn/custom-integrations';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useWizard } from '.';

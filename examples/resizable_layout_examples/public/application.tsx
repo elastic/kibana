@@ -10,7 +10,7 @@
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import React, { type ReactNode, useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 import { css } from '@emotion/react';

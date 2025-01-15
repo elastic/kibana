@@ -9,11 +9,11 @@ import expect from '@kbn/expect';
 import { buildQueryFromFilters } from '@kbn/es-query';
 import moment from 'moment';
 import {
-  type APIClientRequestParamsOf,
-  type APIReturnType,
+  APIClientRequestParamsOf,
+  APIReturnType,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
-import { type RecursivePartial } from '@kbn/apm-plugin/typings/common';
+import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import { meanBy } from 'lodash';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';

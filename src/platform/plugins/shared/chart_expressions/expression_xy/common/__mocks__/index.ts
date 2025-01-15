@@ -9,15 +9,15 @@
 
 import { Position } from '@elastic/charts';
 import type { PaletteOutput } from '@kbn/coloring';
-import { type Datatable, type DatatableRow } from '@kbn/expressions-plugin/common';
+import { Datatable, DatatableRow } from '@kbn/expressions-plugin/common';
 import { LayerTypes } from '../constants';
 import {
-  type AnnotationLayerConfig,
-  type CommonXYLayerConfig,
-  type DataLayerConfig,
-  type ExtendedDataLayerConfig,
-  type ReferenceLineLayerConfig,
-  type XYProps,
+  AnnotationLayerConfig,
+  CommonXYLayerConfig,
+  DataLayerConfig,
+  ExtendedDataLayerConfig,
+  ReferenceLineLayerConfig,
+  XYProps,
 } from '../types';
 
 export const mockPaletteOutput: PaletteOutput = {

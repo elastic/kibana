@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type Theme } from '@elastic/charts';
+import { Theme } from '@elastic/charts';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { renderHook } from '@testing-library/react';
-import React, { type FC, type PropsWithChildren } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 import { DataQualityProvider, useDataQualityContext } from '.';
 

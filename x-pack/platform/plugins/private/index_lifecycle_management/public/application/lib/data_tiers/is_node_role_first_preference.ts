@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type DataTierRole, type PhaseWithAllocation } from '../../../../common/types';
+import { DataTierRole, PhaseWithAllocation } from '../../../../common/types';
 import { phaseToNodePreferenceMap } from '../../../../common/constants';
 
 export const isNodeRoleFirstPreference = (phase: PhaseWithAllocation, nodeRole: DataTierRole) => {

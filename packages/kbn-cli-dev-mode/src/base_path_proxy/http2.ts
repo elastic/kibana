@@ -8,14 +8,14 @@
  */
 
 import Url from 'url';
-import { Agent as HttpsAgent, type ServerOptions as TlsOptions } from 'https';
-import http2, { Agent as Http2Agent, type AutoRequestOptions } from 'http2-wrapper';
+import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
+import http2, { Agent as Http2Agent, AutoRequestOptions } from 'http2-wrapper';
 import http2Proxy from 'http2-proxy';
 import { take } from 'rxjs';
 import { getServerOptions, getServerTLSOptions } from '@kbn/server-http-tools';
 
-import { type DevConfig, type HttpConfig } from '../config';
-import { type Log } from '../log';
+import { DevConfig, HttpConfig } from '../config';
+import { Log } from '../log';
 import type { BasePathProxyServer, BasePathProxyServerOptions } from './types';
 import { getRandomBasePath } from './utils';
 

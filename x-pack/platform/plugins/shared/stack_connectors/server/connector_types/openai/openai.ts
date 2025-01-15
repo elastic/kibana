@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { type ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
+import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import OpenAI from 'openai';
 import { PassThrough } from 'stream';
-import { type IncomingMessage } from 'http';
+import { IncomingMessage } from 'http';
 import {
-  type ChatCompletionChunk,
-  type ChatCompletionCreateParamsStreaming,
-  type ChatCompletionMessageParam,
+  ChatCompletionChunk,
+  ChatCompletionCreateParamsStreaming,
+  ChatCompletionMessageParam,
 } from 'openai/resources/chat/completions';
-import { type Stream } from 'openai/streaming';
-import { type ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { Stream } from 'openai/streaming';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { removeEndpointFromUrl } from './lib/openai_utils';
 import {
   RunActionParamsSchema,
@@ -40,10 +40,10 @@ import {
   SUB_ACTION,
 } from '../../../common/openai/constants';
 import {
-  type DashboardActionParams,
-  type DashboardActionResponse,
-  type InvokeAIActionParams,
-  type InvokeAIActionResponse,
+  DashboardActionParams,
+  DashboardActionResponse,
+  InvokeAIActionParams,
+  InvokeAIActionResponse,
 } from '../../../common/openai/types';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {

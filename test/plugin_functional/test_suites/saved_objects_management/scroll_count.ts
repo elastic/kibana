@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { type PluginFunctionalProviderContext } from '../../services';
+import { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');

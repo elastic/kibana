@@ -12,16 +12,16 @@ import { EuiListGroupItem } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   DEFAULT_URL_DRILLDOWN_OPTIONS,
-  type UrlDrilldownOptions,
+  UrlDrilldownOptions,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 
 import {
   EXTERNAL_LINK_TYPE,
-  type LinksLayoutType,
+  LinksLayoutType,
   LINKS_VERTICAL_LAYOUT,
 } from '../../../common/content_management';
 import { coreServices, trackUiMetric } from '../../services/kibana_services';
-import { type ResolvedLink } from '../../types';
+import { ResolvedLink } from '../../types';
 
 export const ExternalLinkComponent = ({
   link,

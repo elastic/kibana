@@ -7,7 +7,7 @@
 
 import React, { createContext, useMemo, useState, useContext } from 'react';
 
-import { type SearchResult } from '@elastic/search-ui';
+import { SearchResult } from '@elastic/search-ui';
 
 export type SelectedDocument = SearchResult;
 export interface DocumentContextType {

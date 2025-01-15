@@ -26,7 +26,7 @@ import {
   NotAuthorizedSection,
   PageError,
   PageLoading,
-  type Error,
+  Error,
   useExecutionContext,
 } from '../../../../shared_imports';
 import { UIM_RESTORE_LIST_LOAD } from '../../../constants';

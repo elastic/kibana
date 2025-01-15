@@ -10,7 +10,7 @@
 import deepEqual from 'fast-deep-equal';
 import { useEffect, useRef } from 'react';
 import { resolveGridRow } from './utils/resolve_grid_row';
-import { type GridPanelData, type GridLayoutStateManager } from './types';
+import { GridPanelData, GridLayoutStateManager } from './types';
 import { isGridDataEqual } from './utils/equality_checks';
 import { isMouseEvent, isTouchEvent } from './utils/sensors';
 

@@ -8,16 +8,16 @@
  */
 
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { type Adapters } from '@kbn/inspector-plugin/public';
-import { type ExecutionContextSearch } from '@kbn/es-query';
+import { Adapters } from '@kbn/inspector-plugin/public';
+import { ExecutionContextSearch } from '@kbn/es-query';
 import {
-  type IInterpreterRenderHandlers,
-  type ExpressionValue,
-  type ExpressionsService,
-  type RenderMode,
-  type IInterpreterRenderEvent,
+  IInterpreterRenderHandlers,
+  ExpressionValue,
+  ExpressionsService,
+  RenderMode,
+  IInterpreterRenderEvent,
 } from '../../common';
-import { type ExpressionRenderHandlerParams } from '../render';
+import { ExpressionRenderHandlerParams } from '../render';
 
 /**
  * @deprecated

@@ -18,17 +18,17 @@
 // property of the object-- just as we did before-- but with the benefit of Typescript.
 
 import {
-  type ArrayUnsavedFieldChange,
-  type BooleanUnsavedFieldChange,
-  type ColorUnsavedFieldChange,
-  type ImageUnsavedFieldChange,
-  type JsonUnsavedFieldChange,
-  type MarkdownUnsavedFieldChange,
-  type NumberUnsavedFieldChange,
-  type SelectUnsavedFieldChange,
-  type StringUnsavedFieldChange,
-  type UndefinedUnsavedFieldChange,
-  type UnsavedFieldChange,
+  ArrayUnsavedFieldChange,
+  BooleanUnsavedFieldChange,
+  ColorUnsavedFieldChange,
+  ImageUnsavedFieldChange,
+  JsonUnsavedFieldChange,
+  MarkdownUnsavedFieldChange,
+  NumberUnsavedFieldChange,
+  SelectUnsavedFieldChange,
+  StringUnsavedFieldChange,
+  UndefinedUnsavedFieldChange,
+  UnsavedFieldChange,
 } from '@kbn/management-settings-types';
 
 /** Simplifed type for a {@link UnsavedFieldChange} */

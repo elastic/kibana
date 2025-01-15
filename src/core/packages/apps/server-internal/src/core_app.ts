@@ -8,7 +8,7 @@
  */
 
 import { stringify } from 'querystring';
-import { type Env, type IConfigService } from '@kbn/config';
+import { Env, IConfigService } from '@kbn/config';
 import { schema, ValidationError } from '@kbn/config-schema';
 import { fromRoot } from '@kbn/repo-info';
 import type { Logger } from '@kbn/logging';

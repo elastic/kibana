@@ -11,14 +11,14 @@ import { i18n } from '@kbn/i18n';
 import type { IndicesStatusResponse } from '../../../common';
 
 import { AnalyticsEvents } from '../../analytics/constants';
-import { type AvailableLanguages } from '../../code_examples';
+import { AvailableLanguages } from '../../code_examples';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { generateRandomIndexName } from '../../utils/indices';
 import { getDefaultCodingLanguage } from '../../utils/language';
 
 import { CreateIndexUIView } from './create_index';
 import { CreateIndexCodeView } from '../shared/create_index_code_view';
-import { type CreateIndexFormState, CreateIndexViewMode } from '../../types';
+import { CreateIndexFormState, CreateIndexViewMode } from '../../types';
 
 import { CreateIndexPanel } from '../shared/create_index_panel';
 import { useKibana } from '../../hooks/use_kibana';

@@ -7,24 +7,24 @@
 
 import { errors } from '@elastic/elasticsearch';
 import {
-  type BulkDeleteOperation,
-  type BulkIndexOperation,
-  type BulkRequest,
-  type BulkResponseItem,
-  type IndexRequest,
-  type IndicesGetAliasIndexAliases,
-  type IndicesIndexState,
-  type IndicesPutIndexTemplateRequest,
-  type IndicesSimulateIndexTemplateResponse,
-  type SearchRequest,
-  type SearchResponse,
+  BulkDeleteOperation,
+  BulkIndexOperation,
+  BulkRequest,
+  BulkResponseItem,
+  IndexRequest,
+  IndicesGetAliasIndexAliases,
+  IndicesIndexState,
+  IndicesPutIndexTemplateRequest,
+  IndicesSimulateIndexTemplateResponse,
+  SearchRequest,
+  SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { type ElasticsearchClient, type Logger } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { castArray, merge, remove } from 'lodash';
-import { type Required } from 'utility-types';
+import { Required } from 'utility-types';
 import { v4 } from 'uuid';
 import { StorageIndexAdapter } from '.';
-import { type StorageSettings } from '..';
+import { StorageSettings } from '..';
 import * as getSchemaVersionModule from '../get_schema_version';
 
 type MockedElasticsearchClient = jest.Mocked<ElasticsearchClient> & {

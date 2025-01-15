@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Component, Fragment, type ReactElement } from 'react';
+import React, { Component, Fragment, ReactElement } from 'react';
 import {
   EuiFormRow,
   EuiSelect,
@@ -16,10 +16,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getVectorStyleLabel, getDisabledByMessage } from './get_vector_style_label';
-import { STYLE_TYPE, type VECTOR_STYLES } from '../../../../../common/constants';
-import { type CustomIcon } from '../../../../../common/descriptor_types';
-import { type IStyleProperty } from '../properties/style_property';
-import { type StyleField } from '../style_fields_helper';
+import { STYLE_TYPE, VECTOR_STYLES } from '../../../../../common/constants';
+import { CustomIcon } from '../../../../../common/descriptor_types';
+import { IStyleProperty } from '../properties/style_property';
+import { StyleField } from '../style_fields_helper';
 
 export const FIXED_LABEL = i18n.translate('xpack.maps.styles.staticDynamicSelect.staticLabel', {
   defaultMessage: 'Fixed',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type RouteDependencies } from '../../plugin';
+import { RouteDependencies } from '../../plugin';
 
 import { registerApiKeysRoutes } from './api_keys';
 import { registerGatedFormRoute } from './gated_form';

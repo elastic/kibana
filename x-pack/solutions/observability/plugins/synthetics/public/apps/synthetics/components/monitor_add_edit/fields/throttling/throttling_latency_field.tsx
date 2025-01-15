@@ -8,11 +8,11 @@
 import { EuiFieldNumber, EuiFormRow, EuiText } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { type Validation } from '../../../../../../../common/types';
+import { Validation } from '../../../../../../../common/types';
 import {
   ConfigKey,
-  type ThrottlingConfig,
-  type ThrottlingConfigValue,
+  ThrottlingConfig,
+  ThrottlingConfigValue,
 } from '../../../../../../../common/runtime_types';
 import { OptionalLabel } from '../optional_label';
 

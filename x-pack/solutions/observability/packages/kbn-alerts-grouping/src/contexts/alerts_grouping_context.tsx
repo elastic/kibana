@@ -7,15 +7,15 @@
 
 import React, {
   createContext,
-  type Dispatch,
-  type PropsWithChildren,
-  type SetStateAction,
+  Dispatch,
+  PropsWithChildren,
+  SetStateAction,
   useCallback,
   useContext,
   useMemo,
   useState,
 } from 'react';
-import { type AlertsGroupingState, type GroupModel } from '../types';
+import { AlertsGroupingState, GroupModel } from '../types';
 
 const initialActiveGroups = ['none'];
 

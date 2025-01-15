@@ -9,12 +9,12 @@
 
 import React from 'react';
 import { action } from '@storybook/addon-actions';
-import { type Meta } from '@storybook/react';
+import { Meta } from '@storybook/react';
 
 import {
-  type ExpressionFunction,
-  type ExpressionFunctionParameter,
-  type Style,
+  ExpressionFunction,
+  ExpressionFunctionParameter,
+  Style,
 } from '@kbn/expressions-plugin/common';
 import { ExpressionInput } from '.';
 import { registerExpressionsLanguage } from './language';

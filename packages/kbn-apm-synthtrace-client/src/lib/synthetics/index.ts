@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Fields } from '../entity';
+import { Fields } from '../entity';
 import { Serializable } from '../serializable';
 
 export type SyntheticsMonitorDocument = Fields &

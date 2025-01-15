@@ -9,7 +9,7 @@ import { isLeft } from 'fp-ts/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { promises } from 'fs';
 import yaml from 'js-yaml';
-import { type Config, ConfigRT, DatasetRT, type Schedule, type PartialConfig, PartialConfigRT } from '../types';
+import { Config, ConfigRT, DatasetRT, Schedule, PartialConfig, PartialConfigRT } from '../types';
 import { DEFAULTS } from '../constants';
 
 export async function readConfig(filePath: string): Promise<PartialConfig> {

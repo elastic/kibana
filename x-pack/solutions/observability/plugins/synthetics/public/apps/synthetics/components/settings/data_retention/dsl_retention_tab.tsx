@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiBasicTable, type EuiBasicTableColumn, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
-import { type IHttpFetchError, type ResponseErrorBody } from '@kbn/core-http-browser';
+import { EuiBasicTable, EuiBasicTableColumn, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { type DataStreamStatus, useGetDataStreamStatuses } from '../hooks/use_get_data_stream_statuses';
+import { DataStreamStatus, useGetDataStreamStatuses } from '../hooks/use_get_data_stream_statuses';
 import { Unprivileged } from './unprivileged';
 import { useManagementLocator } from './use_management_locator';
 

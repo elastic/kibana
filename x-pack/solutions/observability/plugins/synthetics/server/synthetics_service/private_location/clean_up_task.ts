@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { type ConcreteTaskInstance, type TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { ConcreteTaskInstance, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
 import {
   BROWSER_TEST_NOW_RUN,
   LIGHTWEIGHT_TEST_NOW_RUN,
 } from '../synthetics_monitor/synthetics_monitor_client';
-import { type SyntheticsServerSetup } from '../../types';
+import { SyntheticsServerSetup } from '../../types';
 
 const SYNTHETICS_SERVICE_CLEAN_UP_TASK_TYPE = 'Synthetics:Clean-Up-Package-Policies';
 const SYNTHETICS_SERVICE_CLEAN_UP_TASK_ID = 'SyntheticsService:clean-up-package-policies-task-id';

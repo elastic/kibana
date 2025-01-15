@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type RouteOptions } from '.';
+import { RouteOptions } from '.';
 import { CLOUD_DATA_SAVED_OBJECT_ID } from './constants';
 import { CLOUD_DATA_SAVED_OBJECT_TYPE } from '../saved_objects';
-import { type CloudDataAttributes } from './types';
+import { CloudDataAttributes } from './types';
 
 export const setGetCloudSolutionDataRoute = ({ router }: RouteOptions) => {
   router.versioned

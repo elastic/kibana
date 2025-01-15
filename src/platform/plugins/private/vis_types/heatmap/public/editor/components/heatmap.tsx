@@ -18,8 +18,8 @@ import {
   SelectOption,
   SwitchOption,
   ColorRanges,
-  type SetColorRangeValue,
-  type SetColorSchemaOptionsValue,
+  SetColorRangeValue,
+  SetColorSchemaOptionsValue,
   ColorSchemaOptions,
   NumberInputOption,
   PercentageModeOption,
@@ -27,8 +27,8 @@ import {
   LegendSizeSettings,
 } from '@kbn/vis-default-editor-plugin/public';
 import { colorSchemas } from '@kbn/charts-plugin/public';
-import { LegendSize, type VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
-import { type HeatmapVisParams, type HeatmapTypeProps, type ValueAxis } from '../../types';
+import { LegendSize, VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import { HeatmapVisParams, HeatmapTypeProps, ValueAxis } from '../../types';
 import { LabelsPanel } from './labels_panel';
 import { legendPositions, scaleTypes } from '../collections';
 

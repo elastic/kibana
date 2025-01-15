@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { schema, type TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-import { type IScopedClusterClient } from '@kbn/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import {
-  type IndicesDataStream,
-  type IndicesDataStreamsStatsDataStreamsStatsItem,
-  type IndicesGetIndexTemplateIndexTemplateItem,
-  type SecurityHasPrivilegesResponse,
+  IndicesDataStream,
+  IndicesDataStreamsStatsDataStreamsStatsItem,
+  IndicesGetIndexTemplateIndexTemplateItem,
+  SecurityHasPrivilegesResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { MeteringStats } from '../../../lib/types';
 import {
   deserializeDataStream,
   deserializeDataStreamList,
 } from '../../../lib/data_stream_serialization';
-import { type EnhancedDataStreamFromEs } from '../../../../common/types';
-import { type RouteDependencies } from '../../../types';
+import { EnhancedDataStreamFromEs } from '../../../../common/types';
+import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
 interface MeteringStatsResponse {

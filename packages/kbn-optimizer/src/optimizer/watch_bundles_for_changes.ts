@@ -10,9 +10,9 @@
 import * as Rx from 'rxjs';
 import { mergeMap, toArray } from 'rxjs';
 
-import { type Bundle, maybeMap } from '../common';
+import { Bundle, maybeMap } from '../common';
 
-import { type BundleCacheEvent } from './bundle_cache';
+import { BundleCacheEvent } from './bundle_cache';
 import { Watcher } from './watcher';
 
 /**

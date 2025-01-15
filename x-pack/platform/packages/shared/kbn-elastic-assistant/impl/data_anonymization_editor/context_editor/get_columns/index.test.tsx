@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { type EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTableColumn } from '@elastic/eui';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { TestProviders } from '../../../mock/test_providers/test_providers';
-import { type ContextEditorRow } from '../types';
+import { ContextEditorRow } from '../types';
 import { getColumns } from '.';
 
 interface ColumnWithRender {

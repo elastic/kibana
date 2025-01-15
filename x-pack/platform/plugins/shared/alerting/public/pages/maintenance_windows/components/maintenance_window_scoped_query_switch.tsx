@@ -12,7 +12,7 @@ import {
   EuiFlexItem,
   EuiTextColor,
   EuiSwitch,
-  type EuiSwitchEvent,
+  EuiSwitchEvent,
 } from '@elastic/eui';
 
 import * as i18n from '../translations';

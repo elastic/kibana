@@ -9,7 +9,7 @@
 
 import { monaco } from '../monaco_imports';
 import { CONSOLE_LANG_ID } from './constants';
-import { type ConsoleParserResult, type ConsoleWorkerDefinition } from './types';
+import { ConsoleParserResult, ConsoleWorkerDefinition } from './types';
 
 /*
  * This class contains logic to create a web worker where the code for the Console parser can

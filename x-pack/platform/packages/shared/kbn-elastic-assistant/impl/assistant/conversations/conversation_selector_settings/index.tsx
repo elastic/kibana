@@ -17,10 +17,10 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 
-import { type Conversation } from '../../../..';
+import { Conversation } from '../../../..';
 import * as i18n from './translations';
-import { type SystemPromptSelectorOption } from '../../prompt_editor/system_prompt/system_prompt_modal/system_prompt_selector/system_prompt_selector';
-import { type ConversationSelectorSettingsOption } from './types';
+import { SystemPromptSelectorOption } from '../../prompt_editor/system_prompt/system_prompt_modal/system_prompt_selector/system_prompt_selector';
+import { ConversationSelectorSettingsOption } from './types';
 
 interface Props {
   conversations: Record<string, Conversation>;

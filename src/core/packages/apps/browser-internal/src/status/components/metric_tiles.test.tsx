@@ -10,7 +10,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { MetricTile } from './metric_tiles';
-import { type Metric } from '../lib';
+import { Metric } from '../lib';
 
 const untypedMetric: Metric = {
   name: 'A metric',

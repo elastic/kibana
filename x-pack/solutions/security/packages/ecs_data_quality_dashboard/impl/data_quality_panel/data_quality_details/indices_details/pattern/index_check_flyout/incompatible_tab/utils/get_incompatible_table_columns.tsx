@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { EuiCode, type EuiTableFieldDataColumnType } from '@elastic/eui';
+import { EuiCode, EuiTableFieldDataColumnType } from '@elastic/eui';
 
 import { codeDangerCss, codeSuccessCss } from '../../../../../../styles';
 import {
-  type AllowedValue,
-  type IncompatibleFieldMetadata,
-  type UnallowedValueCount,
+  AllowedValue,
+  IncompatibleFieldMetadata,
+  UnallowedValueCount,
 } from '../../../../../../types';
 import {
   DOCUMENT_VALUES_ACTUAL,

@@ -10,9 +10,9 @@
 import React, { useCallback, useImperativeHandle } from 'react';
 import {
   EuiButtonEmpty,
-  type EuiButtonEmptyProps,
+  EuiButtonEmptyProps,
   EuiButtonIcon,
-  type EuiButtonIconProps,
+  EuiButtonIconProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,

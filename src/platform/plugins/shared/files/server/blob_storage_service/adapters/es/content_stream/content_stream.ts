@@ -13,9 +13,9 @@ import { errors as esErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { defaults } from 'lodash';
-import { Duplex, type Writable, type Readable } from 'stream';
+import { Duplex, Writable, Readable } from 'stream';
 
-import { type GetResponse } from '@elastic/elasticsearch/lib/api/types';
+import { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { inspect } from 'util';
 import { wrapErrorAndReThrow } from '../../../../file_client/utils';
 import type { FileChunkDocument } from '../mappings';

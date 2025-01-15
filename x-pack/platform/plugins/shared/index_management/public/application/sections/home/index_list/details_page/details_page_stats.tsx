@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FunctionComponent, useState, useCallback, useEffect } from 'react';
+import React, { FunctionComponent, useState, useCallback, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiSpacer,
@@ -23,8 +23,8 @@ import {
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
-import { type IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
-import { SectionLoading, type Error } from '../../../../../shared_imports';
+import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
+import { SectionLoading, Error } from '../../../../../shared_imports';
 import { loadIndexStatistics, documentationService } from '../../../../services';
 
 export const DetailsPageStats: FunctionComponent<{ indexName: string; isIndexOpen: boolean }> = ({

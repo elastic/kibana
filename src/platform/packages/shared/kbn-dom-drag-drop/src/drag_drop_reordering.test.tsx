@@ -10,7 +10,7 @@
 import React from 'react';
 import { fireEvent, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Droppable, type DroppableProps } from './droppable';
+import { Droppable, DroppableProps } from './droppable';
 import { Draggable } from './draggable';
 import { dataTransfer, generateDragDropValue, renderWithDragDropContext } from './test_utils';
 import { ReorderProvider } from './providers/reorder_provider';

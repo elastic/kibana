@@ -8,11 +8,11 @@
  */
 
 import React, { useState } from 'react';
-import { EuiSelectable, EuiInputPopover, type EuiSelectableProps } from '@elastic/eui';
-import { type DataViewListItem } from '@kbn/data-views-plugin/common';
+import { EuiSelectable, EuiInputPopover, EuiSelectableProps } from '@elastic/eui';
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 
-import { ToolbarButton, type ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
+import { ToolbarButton, ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
 
 export type DataViewTriggerProps = Omit<ToolbarButtonProps<'standard'>, 'label'> & {
   label: string;

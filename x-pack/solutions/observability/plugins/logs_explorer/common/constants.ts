@@ -6,7 +6,7 @@
  */
 
 import { fieldConstants } from '@kbn/discover-utils';
-import { type SmartFieldGridColumnOptions } from './display_options';
+import { SmartFieldGridColumnOptions } from './display_options';
 
 export * from '@kbn/discover-utils/src/field_constants';
 

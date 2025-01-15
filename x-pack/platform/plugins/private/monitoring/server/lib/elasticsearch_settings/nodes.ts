@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { type LegacyRequest } from '../../types';
+import { LegacyRequest } from '../../types';
 import { findReason } from './find_reason';
 
 export function handleResponse({ nodes = {} } = {}, isCloudEnabled: boolean) {

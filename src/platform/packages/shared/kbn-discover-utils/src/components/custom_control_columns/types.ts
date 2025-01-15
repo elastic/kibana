@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type EuiButtonIconProps, type EuiDataGridControlColumn, type IconType } from '@elastic/eui';
+import { EuiButtonIconProps, EuiDataGridControlColumn, IconType } from '@elastic/eui';
 import type { Interpolation, Theme } from '@emotion/react';
-import {type FC, type ReactElement} from 'react';
-import type React from 'react';
-import { type DataTableRecord } from '../../types';
+import React, { FC, ReactElement } from 'react';
+import { DataTableRecord } from '../../types';
 
 export interface RowControlRowProps {
   rowIndex: number;

@@ -10,8 +10,8 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import * as Rx from 'rxjs';
 import {
-  type FeatureCatalogueRegistrySetup,
-  type FeatureCatalogueRegistry,
+  FeatureCatalogueRegistrySetup,
+  FeatureCatalogueRegistry,
 } from './feature_catalogue_registry';
 
 const createSetupMock = (): jest.Mocked<FeatureCatalogueRegistrySetup> => {

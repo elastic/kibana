@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ActionType, type ActionConnector } from '../../types';
+import { ActionType, ActionConnector } from '../../types';
 
 export function actionTypeCompare(
   a: ActionType,

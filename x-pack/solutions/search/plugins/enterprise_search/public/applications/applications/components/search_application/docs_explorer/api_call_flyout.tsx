@@ -17,7 +17,7 @@ import {
   EuiTabs,
   EuiTitle,
 } from '@elastic/eui';
-import { type SearchRequest, type SearchResponse } from '@elastic/search-ui-engines-connector';
+import { SearchRequest, SearchResponse } from '@elastic/search-ui-engines-connector';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { generateEncodedPath } from '../../../../shared/encode_path_params';

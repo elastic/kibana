@@ -20,13 +20,13 @@ import {
   generateAlert,
   generateRecoveredAlert,
 } from '../test_fixtures';
-import { type RuleAction } from '@kbn/alerting-types';
+import { RuleAction } from '@kbn/alerting-types';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 import {
   getErrorSource,
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server/task_running/errors';
-import { type CombinedSummarizedAlerts } from '../../../types';
+import { CombinedSummarizedAlerts } from '../../../types';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
 
 const alertingEventLogger = alertingEventLoggerMock.create();

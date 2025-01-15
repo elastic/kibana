@@ -10,23 +10,23 @@
 import React from 'react';
 import {
   EuiInMemoryTable,
-  type HorizontalAlignment,
+  HorizontalAlignment,
   EuiText,
   EuiLink,
-  type EuiTableDataType,
+  EuiTableDataType,
 } from '@elastic/eui';
-import { type CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { get } from 'lodash';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 
 import {
-  type SavedObjectRelation,
-  type SavedObjectManagementTypeInfo,
-  type SavedObjectsManagementPluginStart,
+  SavedObjectRelation,
+  SavedObjectManagementTypeInfo,
+  SavedObjectsManagementPluginStart,
 } from '@kbn/saved-objects-management-plugin/public';
 
-import { EuiToolTip, EuiIcon, type SearchFilterConfig } from '@elastic/eui';
+import { EuiToolTip, EuiIcon, SearchFilterConfig } from '@elastic/eui';
 import { IPM_APP_ID } from '../../../plugin';
 import {
   typeFieldName,

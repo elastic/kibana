@@ -15,15 +15,15 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
-import { type OverlayRef } from '@kbn/core/public';
+import { OverlayRef } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useEffect, useRef } from 'react';
-import { type TimeKey } from '@kbn/io-ts-utils';
+import { TimeKey } from '@kbn/io-ts-utils';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { type LogViewReference } from '../../../../common/log_views';
+import { LogViewReference } from '../../../../common/log_views';
 import { useLogEntry } from '../../../containers/logs/log_entry';
 import { CenteredEuiFlyoutBody } from '../../centered_flyout_body';
 import { DataSearchErrorCallout } from '../../data_search_error_callout';

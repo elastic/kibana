@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type KnowledgeBaseConfig } from '../assistant/types';
+import { KnowledgeBaseConfig } from '../assistant/types';
 
 export const ATTACK_DISCOVERY_STORAGE_KEY = 'attackDiscovery';
 export const DEFEND_INSIGHTS_STORAGE_KEY = 'defendInsights';

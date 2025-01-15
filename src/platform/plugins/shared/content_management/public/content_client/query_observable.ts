@@ -10,10 +10,10 @@
 import {
   notifyManager,
   QueryObserver,
-  type QueryObserverOptions,
-  type QueryObserverResult,
-  type QueryClient,
-  type QueryKey,
+  QueryObserverOptions,
+  QueryObserverResult,
+  QueryClient,
+  QueryKey,
 } from '@tanstack/react-query';
 import { Observable } from 'rxjs';
 

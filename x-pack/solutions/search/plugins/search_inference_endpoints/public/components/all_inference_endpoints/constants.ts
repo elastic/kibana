@@ -7,10 +7,10 @@
 
 import {
   SortFieldInferenceEndpoint,
-  type QueryParams,
-  type AllInferenceEndpointsTableState,
+  QueryParams,
+  AllInferenceEndpointsTableState,
   SortOrder,
-  type FilterOptions,
+  FilterOptions,
 } from './types';
 
 export const DEFAULT_TABLE_ACTIVE_PAGE = 1;

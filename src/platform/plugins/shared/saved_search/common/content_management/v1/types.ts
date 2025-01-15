@@ -13,8 +13,8 @@ import type {
   SavedObjectSearchOptions,
   SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
-import { type SavedSearchAttributes } from '../../types';
-import { type SavedSearchContentType } from '../../constants';
+import { SavedSearchAttributes } from '../../types';
+import { SavedSearchContentType } from '../../constants';
 
 interface SavedSearchCreateOptions {
   id?: SavedObjectCreateOptions['id'];

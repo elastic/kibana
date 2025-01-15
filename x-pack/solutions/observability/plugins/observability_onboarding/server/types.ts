@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { type CloudSetup, type CloudStart } from '@kbn/cloud-plugin/server';
-import { type CustomRequestHandlerContext } from '@kbn/core/server';
+import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
+import { CustomRequestHandlerContext } from '@kbn/core/server';
 import {
-  type PluginSetup as DataPluginSetup,
-  type PluginStart as DataPluginStart,
+  PluginSetup as DataPluginSetup,
+  PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
-import { type FleetSetupContract, type FleetStartContract } from '@kbn/fleet-plugin/server';
-import { type ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
-import { type UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { FleetSetupContract, FleetStartContract } from '@kbn/fleet-plugin/server';
+import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import {
-  type CustomIntegrationsPluginSetup,
-  type CustomIntegrationsPluginStart,
+  CustomIntegrationsPluginSetup,
+  CustomIntegrationsPluginStart,
 } from '@kbn/custom-integrations-plugin/server';
 
 export interface ObservabilityOnboardingPluginSetupDependencies {

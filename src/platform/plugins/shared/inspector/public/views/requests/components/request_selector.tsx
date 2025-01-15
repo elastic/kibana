@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
   EuiComboBox,
-  type EuiComboBoxOptionOption,
+  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 
 import { RequestStatus } from '../../../../common/adapters';
-import { type Request } from '../../../../common/adapters/request/types';
+import { Request } from '../../../../common/adapters/request/types';
 
 interface RequestSelectorProps {
   requests: Request[];

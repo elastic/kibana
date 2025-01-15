@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type DoneInvokeEvent } from 'xstate';
+import { DoneInvokeEvent } from 'xstate';
 import type { IHashedCache } from '../../../../common/hashed_cache';
-import { type SortOrder, type SearchAfter, type FindIntegrationsValue } from '../../../../common/latest';
-import { type Integration } from '../../../../common/datasets';
+import { SortOrder, SearchAfter, FindIntegrationsValue } from '../../../../common/latest';
+import { Integration } from '../../../../common/datasets';
 
 export interface IntegrationsSearchParams {
   nameQuery?: string;

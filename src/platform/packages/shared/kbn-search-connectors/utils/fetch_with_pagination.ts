@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type SearchHit, type SearchResponse, type SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import { SearchHit, SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 
-import { type Paginate } from '../types/pagination';
+import { Paginate } from '../types/pagination';
 
 const defaultResult = <T>(data: T[]) => ({
   _meta: {

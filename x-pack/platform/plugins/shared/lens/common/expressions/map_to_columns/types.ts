@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type Datatable, type ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { type SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
 export type OriginalColumn = { id: string; label: string; format?: SerializedFieldFormat } & (
   | { operationType: 'date_histogram'; sourceField: string }

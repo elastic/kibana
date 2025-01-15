@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema, type TypeOf, offeringBasedSchema } from '@kbn/config-schema';
+import { schema, TypeOf, offeringBasedSchema } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   savePolicy: schema.oneOf(

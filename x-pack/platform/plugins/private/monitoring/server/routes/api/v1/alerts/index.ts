@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type MonitoringCore, type RouteDependencies } from '../../../../types';
+import { MonitoringCore, RouteDependencies } from '../../../../types';
 import { enableAlertsRoute } from './enable';
 import { alertStatusRoute } from './status';
 

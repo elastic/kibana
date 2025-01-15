@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type IRouter } from '@kbn/core/server';
+import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import { fetchInferenceEndpoints } from './lib/fetch_inference_endpoints';
-import { APIRoutes, type InferenceEndpoint } from './types';
+import { APIRoutes, InferenceEndpoint } from './types';
 import { errorHandler } from './utils/error_handler';
 import { deleteInferenceEndpoint } from './lib/delete_inference_endpoint';
 import { addInferenceEndpoint } from './lib/add_inference_endpoint';

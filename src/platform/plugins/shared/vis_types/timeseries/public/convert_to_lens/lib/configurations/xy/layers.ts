@@ -8,19 +8,19 @@
  */
 
 import {
-  type EventAnnotationConfig,
+  EventAnnotationConfig,
   FillTypes,
-  type XYAnnotationsLayerConfig,
-  type XYLayerConfig,
-  type YAxisMode,
+  XYAnnotationsLayerConfig,
+  XYLayerConfig,
+  YAxisMode,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { type PaletteOutput } from '@kbn/coloring';
+import { PaletteOutput } from '@kbn/coloring';
 import { v4 } from 'uuid';
 import { transparentize } from '@elastic/eui';
 import Color from 'color';
 import { euiLightVars } from '@kbn/ui-theme';
 import { groupBy } from 'lodash';
-import { type DataViewsPublicPluginStart, type DataView } from '@kbn/data-plugin/public/data_views';
+import { DataViewsPublicPluginStart, DataView } from '@kbn/data-plugin/public/data_views';
 import { getDefaultQueryLanguage } from '../../../../application/components/lib/get_default_query_language';
 import { ICON_TYPES_MAP } from '../../../../application/visualizations/constants';
 import { SUPPORTED_METRICS } from '../../metrics';
@@ -29,9 +29,9 @@ import { getSeriesAgg } from '../../series';
 import {
   isPercentileRanksColumnWithMeta,
   isPercentileColumnWithMeta,
-  type Column,
-  type Layer,
-  type AnyColumnWithReferences,
+  Column,
+  Layer,
+  AnyColumnWithReferences,
 } from '../../convert';
 import { getChartType } from './chart_type';
 import { extractOrGenerateDatasourceInfo } from '../../datasource';

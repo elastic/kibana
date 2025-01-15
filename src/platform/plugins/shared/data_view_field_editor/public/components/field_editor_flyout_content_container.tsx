@@ -8,23 +8,23 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { type DocLinksStart, type NotificationsStart, type CoreStart } from '@kbn/core/public';
+import { DocLinksStart, NotificationsStart, CoreStart } from '@kbn/core/public';
 
 import { BehaviorSubject } from 'rxjs';
 import {
-  type DataView,
-  type DataViewField,
-  type DataViewLazy,
-  type DataPublicPluginStart,
-  type UsageCollectionStart,
-  type DataViewsPublicPluginStart,
-  type FieldFormatsStart,
+  DataView,
+  DataViewField,
+  DataViewLazy,
+  DataPublicPluginStart,
+  UsageCollectionStart,
+  DataViewsPublicPluginStart,
+  FieldFormatsStart,
 } from '../shared_imports';
 import type { Field, PluginStart, InternalFieldType } from '../types';
-import { getLinks, type ApiService } from '../lib';
+import { getLinks, ApiService } from '../lib';
 import {
   FieldEditorFlyoutContent,
-  type Props as FieldEditorFlyoutContentProps,
+  Props as FieldEditorFlyoutContentProps,
 } from './field_editor_flyout_content';
 import { FieldEditorProvider } from './field_editor_context';
 import { FieldPreviewProvider } from './preview';

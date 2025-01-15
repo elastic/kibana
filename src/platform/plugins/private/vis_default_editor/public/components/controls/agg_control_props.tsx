@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type VisParams } from '@kbn/visualizations-plugin/public';
-import { type IAggConfig } from '@kbn/data-plugin/public';
-import { type DefaultEditorAggCommonProps } from '../agg_common_props';
+import { VisParams } from '@kbn/visualizations-plugin/public';
+import { IAggConfig } from '@kbn/data-plugin/public';
+import { DefaultEditorAggCommonProps } from '../agg_common_props';
 
 export interface AggControlProps {
   agg: IAggConfig;

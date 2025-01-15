@@ -11,8 +11,8 @@ import { useKibana } from '../../common/lib/kibana';
 import {
   loadExecutionLogAggregations,
   loadGlobalExecutionLogAggregations,
-  type LoadExecutionLogAggregationsProps,
-  type LoadGlobalExecutionLogAggregationsProps,
+  LoadExecutionLogAggregationsProps,
+  LoadGlobalExecutionLogAggregationsProps,
 } from '../lib/rule_api/load_execution_log_aggregations';
 
 const getParsedDate = (date: string) => {

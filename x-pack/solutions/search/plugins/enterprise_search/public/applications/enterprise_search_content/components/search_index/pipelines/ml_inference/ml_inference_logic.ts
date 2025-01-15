@@ -5,65 +5,65 @@
  * 2.0.
  */
 
-import { kea, type MakeLogicType } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
-import { type IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
+import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 
 import {
-  type FieldMapping,
+  FieldMapping,
   formatPipelineName,
   generateMlInferencePipelineBody,
   getMlInferencePrefixedFieldName,
   ML_INFERENCE_PREFIX,
 } from '../../../../../../../common/ml_inference_pipeline';
 import { Status } from '../../../../../../../common/types/api';
-import { type MlModel } from '../../../../../../../common/types/ml';
-import { type MlInferencePipeline } from '../../../../../../../common/types/pipelines';
-import { type Actions } from '../../../../../shared/api_logic/create_api_logic';
+import { MlModel } from '../../../../../../../common/types/ml';
+import { MlInferencePipeline } from '../../../../../../../common/types/pipelines';
+import { Actions } from '../../../../../shared/api_logic/create_api_logic';
 
 import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/handle_api_errors';
 
 import {
   CachedFetchIndexApiLogic,
-  type CachedFetchIndexApiLogicValues,
+  CachedFetchIndexApiLogicValues,
 } from '../../../../api/index/cached_fetch_index_api_logic';
 import {
-  type GetMappingsArgs,
-  type GetMappingsResponse,
+  GetMappingsArgs,
+  GetMappingsResponse,
   MappingsApiLogic,
 } from '../../../../api/mappings/mappings_logic';
 import {
   CachedFetchModelsApiLogic,
-  type CachedFetchModlesApiLogicActions,
-  type FetchModelsApiResponse,
+  CachedFetchModlesApiLogicActions,
+  FetchModelsApiResponse,
 } from '../../../../api/ml_models/cached_fetch_models_api_logic';
 import {
   StartTextExpansionModelApiLogic,
-  type StartTextExpansionModelApiLogicActions,
+  StartTextExpansionModelApiLogicActions,
 } from '../../../../api/ml_models/text_expansion/start_text_expansion_model_api_logic';
 import {
   AttachMlInferencePipelineApiLogic,
-  type AttachMlInferencePipelineApiLogicArgs,
-  type AttachMlInferencePipelineResponse,
+  AttachMlInferencePipelineApiLogicArgs,
+  AttachMlInferencePipelineResponse,
 } from '../../../../api/pipelines/attach_ml_inference_pipeline';
 import {
   CreateMlInferencePipelineApiLogic,
-  type CreateMlInferencePipelineApiLogicArgs,
-  type CreateMlInferencePipelineResponse,
+  CreateMlInferencePipelineApiLogicArgs,
+  CreateMlInferencePipelineResponse,
 } from '../../../../api/pipelines/create_ml_inference_pipeline';
 import {
   FetchMlInferencePipelineProcessorsApiLogic,
-  type FetchMlInferencePipelineProcessorsResponse,
+  FetchMlInferencePipelineProcessorsResponse,
 } from '../../../../api/pipelines/fetch_ml_inference_pipeline_processors';
 import {
   FetchMlInferencePipelinesApiLogic,
-  type FetchMlInferencePipelinesArgs,
-  type FetchMlInferencePipelinesResponse,
+  FetchMlInferencePipelinesArgs,
+  FetchMlInferencePipelinesResponse,
 } from '../../../../api/pipelines/fetch_ml_inference_pipelines';
 import {
   FetchPipelineApiLogic,
-  type FetchPipelineResponse,
-  type FetchPipelineApiLogicActions,
+  FetchPipelineResponse,
+  FetchPipelineApiLogicActions,
 } from '../../../../api/pipelines/fetch_pipeline';
 
 import { isConnectorIndex } from '../../../../utils/indices';
@@ -71,9 +71,9 @@ import { sortSourceFields } from '../../../shared/ml_inference/utils';
 import { PipelinesLogic } from '../pipelines_logic';
 
 import {
-  type AddInferencePipelineFormErrors,
+  AddInferencePipelineFormErrors,
   AddInferencePipelineSteps,
-  type InferencePipelineConfiguration,
+  InferencePipelineConfiguration,
 } from './types';
 
 import {

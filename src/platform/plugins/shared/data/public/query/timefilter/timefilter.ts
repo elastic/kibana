@@ -10,21 +10,21 @@
 import _ from 'lodash';
 import { Subject, BehaviorSubject } from 'rxjs';
 import moment from 'moment';
-import { type PublicMethodsOf } from '@kbn/utility-types';
-import { type TimeRange } from '@kbn/es-query';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
 import type { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
-import { type NowProviderInternalContract } from '../../now_provider';
+import { NowProviderInternalContract } from '../../now_provider';
 import {
   calculateBounds,
   getAbsoluteTimeRange,
   getTime,
   getRelativeTime,
-  type RefreshInterval,
+  RefreshInterval,
 } from '../../../common';
-import { type TimeHistoryContract } from './time_history';
-import { createAutoRefreshLoop, type AutoRefreshDoneFn } from './lib/auto_refresh_loop';
+import { TimeHistoryContract } from './time_history';
+import { createAutoRefreshLoop, AutoRefreshDoneFn } from './lib/auto_refresh_loop';
 
 export type { AutoRefreshDoneFn };
 

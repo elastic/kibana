@@ -19,7 +19,7 @@ import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { GlobalToastList } from './global_toast_list';
 import { ToastsApi } from './toasts_api';
-import { type EventReporter } from './telemetry';
+import { EventReporter } from './telemetry';
 
 interface SetupDeps {
   uiSettings: IUiSettingsClient;

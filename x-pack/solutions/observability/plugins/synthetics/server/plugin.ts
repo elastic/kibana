@@ -5,27 +5,27 @@
  * 2.0.
  */
 import {
-  type PluginInitializerContext,
-  type CoreStart,
-  type CoreSetup,
-  type Plugin as PluginType,
-  type Logger,
+  PluginInitializerContext,
+  CoreStart,
+  CoreSetup,
+  Plugin as PluginType,
+  Logger,
   SavedObjectsClient,
-  type SavedObjectsClientContract,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import {
-  type SyntheticsPluginsSetupDependencies,
-  type SyntheticsPluginsStartDependencies,
-  type SyntheticsServerSetup,
+  SyntheticsPluginsSetupDependencies,
+  SyntheticsPluginsStartDependencies,
+  SyntheticsServerSetup,
 } from './types';
 import { TelemetryEventsSender } from './telemetry/sender';
 import { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { initSyntheticsServer } from './server';
 import { syntheticsFeature } from './feature';
 import { registerSyntheticsSavedObjects } from './saved_objects/saved_objects';
-import { type UptimeConfig } from './config';
+import { UptimeConfig } from './config';
 import { SyntheticsService } from './synthetics_service/synthetics_service';
 import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';

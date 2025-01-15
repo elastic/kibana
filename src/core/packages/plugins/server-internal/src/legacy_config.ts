@@ -8,20 +8,20 @@
  */
 
 import { map, shareReplay } from 'rxjs';
-import { combineLatest, type Observable } from 'rxjs';
-import { type PathConfigType, config as pathConfig } from '@kbn/utils';
+import { combineLatest, Observable } from 'rxjs';
+import { PathConfigType, config as pathConfig } from '@kbn/utils';
 import { pick, deepFreeze } from '@kbn/std';
-import { type IConfigService } from '@kbn/config';
+import { IConfigService } from '@kbn/config';
 
 import {
-  type ElasticsearchConfigType,
+  ElasticsearchConfigType,
   config as elasticsearchConfig,
 } from '@kbn/core-elasticsearch-server-internal';
 import {
   type SavedObjectsConfigType,
   savedObjectsConfig,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { type SharedGlobalConfig, SharedGlobalConfigKeys } from '@kbn/core-plugins-server';
+import { SharedGlobalConfig, SharedGlobalConfigKeys } from '@kbn/core-plugins-server';
 
 const createGlobalConfig = ({
   elasticsearch,

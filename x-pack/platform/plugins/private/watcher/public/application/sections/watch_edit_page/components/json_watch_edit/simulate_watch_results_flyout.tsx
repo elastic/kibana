@@ -21,8 +21,8 @@ import {
 } from '@elastic/eui';
 
 import {
-  type ExecutedWatchDetails,
-  type ExecutedWatchResults,
+  ExecutedWatchDetails,
+  ExecutedWatchResults,
 } from '../../../../../../common/types/watch_types';
 import { ActionStateBadge, SectionError } from '../../../../components';
 import { getTypeFromAction } from '../../watch_edit_actions';

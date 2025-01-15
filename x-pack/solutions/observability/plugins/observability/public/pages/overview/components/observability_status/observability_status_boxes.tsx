@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   CompletedStatusBox,
   EmptyStatusBox,
-  type ObservabilityStatusBoxProps,
+  ObservabilityStatusBoxProps,
 } from './observability_status_box';
 export interface ObservabilityStatusProps {
   boxes: ObservabilityStatusBoxProps[];

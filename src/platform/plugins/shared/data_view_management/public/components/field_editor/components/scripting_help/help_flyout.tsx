@@ -10,11 +10,11 @@
 import React from 'react';
 import { EuiFlyout, EuiFlyoutBody, EuiTabbedContent } from '@elastic/eui';
 
-import { type DataView } from '@kbn/data-views-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { ScriptingSyntax } from './scripting_syntax';
 import { TestScript } from './test_script';
 
-import { type ExecuteScript } from '../../types';
+import { ExecuteScript } from '../../types';
 
 interface ScriptingHelpFlyoutProps {
   indexPattern: DataView;

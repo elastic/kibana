@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type * from './mute_all_rule_types';
+export * from './mute_all_rule_types';

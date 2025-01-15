@@ -8,8 +8,8 @@ import { mockHttpValues } from '../../../__mocks__/kea_logic';
 
 import {
   attachMlInferencePipeline,
-  type AttachMlInferencePipelineApiLogicArgs,
-  type AttachMlInferencePipelineResponse,
+  AttachMlInferencePipelineApiLogicArgs,
+  AttachMlInferencePipelineResponse,
 } from './attach_ml_inference_pipeline';
 
 describe('AttachMlInferencePipelineApiLogic', () => {

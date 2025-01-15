@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type ChangeEvent } from 'react';
+import React, { ChangeEvent } from 'react';
 
 import { css } from '@emotion/react';
 import { useValues, useActions } from 'kea';
@@ -36,7 +36,7 @@ import { docLinks } from '../../../shared/doc_links';
 
 import { SUPPORTED_LANGUAGES } from './constants';
 import { NewSearchIndexLogic } from './new_search_index_logic';
-import { type LanguageForOptimization } from './types';
+import { LanguageForOptimization } from './types';
 
 export interface Props {
   buttonLoading?: boolean;

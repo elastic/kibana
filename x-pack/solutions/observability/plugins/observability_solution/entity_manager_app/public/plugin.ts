@@ -7,21 +7,21 @@
 
 import { BehaviorSubject } from 'rxjs';
 import {
-  type App,
-  type AppMountParameters,
+  App,
+  AppMountParameters,
   AppStatus,
-  type AppUpdater,
-  type CoreSetup,
+  AppUpdater,
+  CoreSetup,
   DEFAULT_APP_CATEGORIES,
-  type PluginInitializerContext,
+  PluginInitializerContext,
 } from '@kbn/core/public';
-import { type Logger } from '@kbn/logging';
+import { Logger } from '@kbn/logging';
 import { EntityClient } from '@kbn/entityManager-plugin/public';
 
 import {
-  type EntityManagerAppPluginClass,
-  type EntityManagerPluginStart,
-  type EntityManagerPluginSetup,
+  EntityManagerAppPluginClass,
+  EntityManagerPluginStart,
+  EntityManagerPluginSetup,
 } from './types';
 
 export class Plugin implements EntityManagerAppPluginClass {

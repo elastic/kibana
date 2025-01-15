@@ -6,47 +6,47 @@
  */
 
 import {
-  type AnalyticsServiceSetup,
+  AnalyticsServiceSetup,
   type AuthenticatedUser,
-  type IKibanaResponse,
-  type KibanaRequest,
-  type KibanaResponseFactory,
-  type Logger,
+  IKibanaResponse,
+  KibanaRequest,
+  KibanaResponseFactory,
+  Logger,
 } from '@kbn/core/server';
-import { type StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
+import { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 
 import {
-  type TraceData,
-  type Message,
-  type Replacements,
+  TraceData,
+  Message,
+  Replacements,
   replaceAnonymizedValuesWithOriginalValues,
   DEFEND_INSIGHTS_TOOL_ID,
 } from '@kbn/elastic-assistant-common';
-import { type ILicense } from '@kbn/licensing-plugin/server';
+import { ILicense } from '@kbn/licensing-plugin/server';
 import { i18n } from '@kbn/i18n';
-import { type AwaitedProperties, type PublicMethodsOf } from '@kbn/utility-types';
-import { type ActionsClient } from '@kbn/actions-plugin/server';
-import { type AssistantFeatureKey } from '@kbn/elastic-assistant-common/impl/capabilities';
+import { AwaitedProperties, PublicMethodsOf } from '@kbn/utility-types';
+import { ActionsClient } from '@kbn/actions-plugin/server';
+import { AssistantFeatureKey } from '@kbn/elastic-assistant-common/impl/capabilities';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import { INVOKE_ASSISTANT_SUCCESS_EVENT } from '../lib/telemetry/event_based_telemetry';
-import { type AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
-import { type FindResponse } from '../ai_assistant_data_clients/find';
-import { type EsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
-import { type AIAssistantDataClient } from '../ai_assistant_data_clients';
+import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
+import { FindResponse } from '../ai_assistant_data_clients/find';
+import { EsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
+import { AIAssistantDataClient } from '../ai_assistant_data_clients';
 import { MINIMUM_AI_ASSISTANT_LICENSE } from '../../common/constants';
 import { SECURITY_LABS_RESOURCE, SECURITY_LABS_LOADED_QUERY } from './knowledge_base/constants';
 import { buildResponse, getLlmType } from './utils';
 import {
-  type AgentExecutorParams,
-  type AssistantDataClients,
-  type StaticReturnType,
+  AgentExecutorParams,
+  AssistantDataClients,
+  StaticReturnType,
 } from '../lib/langchain/executors/types';
 import { getLangChainMessages } from '../lib/langchain/helpers';
 
-import { type AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
-import { type ElasticAssistantRequestHandlerContext, type GetElser } from '../types';
+import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
+import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
 import { callAssistantGraph } from '../lib/langchain/graphs/default_assistant_graph';
 
 interface GetPluginNameFromRequestParams {

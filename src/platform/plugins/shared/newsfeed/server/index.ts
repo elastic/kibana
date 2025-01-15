@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type PluginConfigDescriptor } from '@kbn/core/server';
-import { configSchema, type NewsfeedConfigType } from './config';
+import { PluginConfigDescriptor } from '@kbn/core/server';
+import { configSchema, NewsfeedConfigType } from './config';
 
 export const config: PluginConfigDescriptor<NewsfeedConfigType> = {
   schema: configSchema,

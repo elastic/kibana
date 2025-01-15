@@ -11,8 +11,8 @@ import { Position } from '@elastic/charts';
 import {
   LabelPositions,
   LegendDisplay,
-  type PartitionChartProps,
-  type PartitionVisParams,
+  PartitionChartProps,
+  PartitionVisParams,
   ValueFormats,
 } from '../../../common/types';
 

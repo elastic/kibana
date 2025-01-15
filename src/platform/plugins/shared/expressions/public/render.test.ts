@@ -9,11 +9,11 @@
 
 import { ExpressionRenderHandler, render } from './render';
 import { Observable } from 'rxjs';
-import { type SerializableRecord } from '@kbn/utility-types';
-import { type ExpressionRenderError } from './types';
+import { SerializableRecord } from '@kbn/utility-types';
+import { ExpressionRenderError } from './types';
 import { getRenderersRegistry } from './services';
 import { first, take, toArray } from 'rxjs';
-import { type IInterpreterRenderHandlers } from '../common';
+import { IInterpreterRenderHandlers } from '../common';
 
 const element: HTMLElement = {} as HTMLElement;
 const mockNotificationService = {

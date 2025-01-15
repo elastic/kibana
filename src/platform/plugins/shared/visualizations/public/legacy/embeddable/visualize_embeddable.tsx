@@ -8,47 +8,47 @@
  */
 
 import _, { get } from 'lodash';
-import { type Subscription, ReplaySubject, mergeMap } from 'rxjs';
+import { Subscription, ReplaySubject, mergeMap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render } from 'react-dom';
 import { EuiLoadingChart } from '@elastic/eui';
-import { type Filter, onlyDisabledFiltersChanged, type Query, type TimeRange } from '@kbn/es-query';
+import { Filter, onlyDisabledFiltersChanged, Query, TimeRange } from '@kbn/es-query';
 import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/public';
 import type { ErrorLike } from '@kbn/expressions-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { type TimefilterContract } from '@kbn/data-plugin/public';
+import { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { Warnings } from '@kbn/charts-plugin/public';
 import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
-import { type Adapters } from '@kbn/inspector-plugin/public';
-import { type EmbeddableInput } from '@kbn/embeddable-plugin/common';
-import { type SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
+import { Adapters } from '@kbn/inspector-plugin/public';
+import { EmbeddableInput } from '@kbn/embeddable-plugin/common';
+import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 import {
-  type ExpressionAstExpression,
-  type ExpressionLoader,
-  type ExpressionRenderError,
-  type IExpressionLoaderParams,
+  ExpressionAstExpression,
+  ExpressionLoader,
+  ExpressionRenderError,
+  IExpressionLoaderParams,
 } from '@kbn/expressions-plugin/public';
 import type { RenderMode } from '@kbn/expressions-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
-import { type StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { isFallbackDataView } from '../../visualize_app/utils';
 import { VisualizationMissedSavedObjectError } from '../../components/visualization_missed_saved_object_error';
 import VisualizationError from '../../components/visualization_error';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
-import { type SerializedVis, type Vis } from '../../vis';
+import { SerializedVis, Vis } from '../../vis';
 import { getApplication, getExpressions, getUiActions } from '../../services';
 import { VIS_EVENT_TO_TRIGGER } from '../../embeddable/events';
 import { getSavedVisualization } from '../../utils/saved_visualize_utils';
-import { type VisSavedObject } from '../../types';
+import { VisSavedObject } from '../../types';
 import { toExpressionAst } from '../../embeddable/to_ast';
-import { type AttributeService } from './attribute_service';
-import { type VisualizationsStartDeps } from '../../plugin';
+import { AttributeService } from './attribute_service';
+import { VisualizationsStartDeps } from '../../plugin';
 import { Embeddable } from './embeddable';
-import { type EmbeddableOutput } from './i_embeddable';
+import { EmbeddableOutput } from './i_embeddable';
 
 export interface VisualizeEmbeddableDeps {
   start: StartServicesGetter<

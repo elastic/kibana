@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { type estypes } from '@elastic/elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
 import {
-  type KnowledgeBaseEntryCreateProps,
-  type KnowledgeBaseEntryResponse,
-  type KnowledgeBaseEntryUpdateProps,
+  KnowledgeBaseEntryCreateProps,
+  KnowledgeBaseEntryResponse,
+  KnowledgeBaseEntryUpdateProps,
 } from '@kbn/elastic-assistant-common';
 import {
-  type EsKnowledgeBaseEntrySchema,
-  type EsDocumentEntry,
+  EsKnowledgeBaseEntrySchema,
+  EsDocumentEntry,
 } from '../ai_assistant_data_clients/knowledge_base/types';
 const indexEntry: EsKnowledgeBaseEntrySchema = {
   id: '1234',

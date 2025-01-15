@@ -10,7 +10,7 @@
 import { getESQLQueryColumns } from '@kbn/esql-utils';
 import {
   LensConfigBuilder,
-  type LensDataset,
+  LensDataset,
   type LensConfig,
   type LensGaugeConfig,
   type LensHeatmapConfig,
@@ -23,9 +23,9 @@ import {
   type LensTreeMapConfig,
   type LensXYConfig,
 } from '@kbn/lens-embeddable-utils/config_builder';
-import { type LensEmbeddableInput } from '@kbn/lens-plugin/public';
+import { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { useEffect } from 'react';
-import { type DashboardApi } from '../../dashboard_api/types';
+import { DashboardApi } from '../../dashboard_api/types';
 import { dataService, observabilityAssistantService } from '../../services/kibana_services';
 
 const chartTypes = [

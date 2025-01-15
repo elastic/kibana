@@ -7,15 +7,15 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
-import { type Logger } from '@kbn/logging';
+import { Logger } from '@kbn/logging';
 import type { Optional } from '@kbn/utility-types';
-import { type LayoutParams } from '../../common';
-import { type PerformanceMetrics, type TaskInstanceFields } from '../../common/types';
+import { LayoutParams } from '../../common';
+import { PerformanceMetrics, TaskInstanceFields } from '../../common/types';
 import {
-  type PdfScreenshotOptions,
-  type PdfScreenshotResult,
-  type PngScreenshotOptions,
-  type PngScreenshotResult,
+  PdfScreenshotOptions,
+  PdfScreenshotResult,
+  PngScreenshotOptions,
+  PngScreenshotResult,
 } from '../formats';
 import type { ScreenshotObservableOptions, ScreenshotObservableResult } from './observable';
 

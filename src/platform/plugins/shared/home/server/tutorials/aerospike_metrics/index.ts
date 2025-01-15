@@ -14,9 +14,9 @@ import {
   onPremCloudInstructions,
 } from '../instructions/metricbeat_instructions';
 import {
-  type TutorialContext,
+  TutorialContext,
   TutorialsCategory,
-  type TutorialSchema,
+  TutorialSchema,
 } from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function aerospikeMetricsSpecProvider(context: TutorialContext): TutorialSchema {

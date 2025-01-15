@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ExceptionListSummarySchema } from '.';
+import { ExceptionListSummarySchema } from '.';
 
 export const getListSummaryResponseMock = (): ExceptionListSummarySchema => ({
   windows: 0,

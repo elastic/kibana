@@ -11,7 +11,7 @@ import { useEuiTheme, EuiIcon, EuiText, EuiSkeletonRectangle } from '@elastic/eu
 
 import {
   getConfinedScreenshotSize,
-  type ScreenshotImageSize,
+  ScreenshotImageSize,
   THUMBNAIL_SCREENSHOT_SIZE,
 } from './screenshot_size';
 

@@ -11,7 +11,7 @@ import { debounce, isEqual } from 'lodash';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 
-import { type ColumnWidthData, type TableVisUiState, type TableVisUseUiStateProps } from '../../types';
+import { ColumnWidthData, TableVisUiState, TableVisUseUiStateProps } from '../../types';
 
 const defaultSort = {
   columnIndex: null,

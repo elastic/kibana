@@ -6,15 +6,15 @@
  */
 
 import { createAction, createReducer, current } from '@reduxjs/toolkit';
-import { type VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { mapValues, uniq } from 'lodash';
-import { type Filter, type Query } from '@kbn/es-query';
-import { type History } from 'history';
+import { Filter, Query } from '@kbn/es-query';
+import { History } from 'history';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { type EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
-import { type DragDropIdentifier, type DropType } from '@kbn/dom-drag-drop';
-import { type SeriesType } from '@kbn/visualizations-plugin/common';
-import { type TableInspectorAdapter } from '../editor_frame_service/types';
+import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
+import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
+import { SeriesType } from '@kbn/visualizations-plugin/common';
+import { TableInspectorAdapter } from '../editor_frame_service/types';
 import type {
   VisualizeEditorContext,
   Suggestion,

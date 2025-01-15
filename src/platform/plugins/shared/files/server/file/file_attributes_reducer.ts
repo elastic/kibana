@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type FileHashObj } from '../saved_objects/file';
-import { type FileJSON, type UpdatableFileMetadata } from '../../common';
+import { FileHashObj } from '../saved_objects/file';
+import { FileJSON, UpdatableFileMetadata } from '../../common';
 
 export type Action =
   | {

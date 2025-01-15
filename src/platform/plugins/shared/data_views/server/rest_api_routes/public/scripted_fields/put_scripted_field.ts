@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { type IRouter, type StartServicesAccessor } from '@kbn/core/server';
+import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { handleErrors } from '../util/handle_errors';
 import { fieldSpecSchema } from '../../../schemas';
 import type {

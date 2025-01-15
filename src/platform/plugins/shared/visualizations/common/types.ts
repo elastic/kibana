@@ -9,14 +9,14 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import {
-  type AggParamsMapping,
-  type AggConfigSerialized,
-  type SerializedSearchSourceFields,
-  type METRIC_TYPES,
-  type BUCKET_TYPES,
+  AggParamsMapping,
+  AggConfigSerialized,
+  SerializedSearchSourceFields,
+  METRIC_TYPES,
+  BUCKET_TYPES,
 } from '@kbn/data-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { type Reference } from './content_management';
+import { Reference } from './content_management';
 
 export interface VisParams {
   [key: string]: any;

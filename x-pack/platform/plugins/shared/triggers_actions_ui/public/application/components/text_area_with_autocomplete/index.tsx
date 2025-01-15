@@ -7,19 +7,19 @@
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import getCaretCoordinates from 'textarea-caret';
-import { type Properties } from 'csstype';
+import { Properties } from 'csstype';
 import {
   EuiTextArea,
   EuiFormRow,
   EuiSelectable,
-  type EuiSelectableOption,
+  EuiSelectableOption,
   EuiPortal,
   EuiHighlight,
   EuiOutsideClickDetector,
   useEuiTheme,
   useEuiBackgroundColor,
 } from '@elastic/eui';
-import { type ActionVariable } from '@kbn/alerting-plugin/common';
+import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariables } from '@kbn/alerts-ui-shared';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { filterSuggestions } from './lib/filter_suggestions_for_autocomplete';

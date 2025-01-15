@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type PersistableState, type PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
+import { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 
-import { type SerializedAction, type SerializedEvent, type DynamicActionsState } from '../common/types';
+import { SerializedAction, SerializedEvent, DynamicActionsState } from '../common/types';
 
 export type ActionFactoryRegistry = Map<string, ActionFactory>;
 

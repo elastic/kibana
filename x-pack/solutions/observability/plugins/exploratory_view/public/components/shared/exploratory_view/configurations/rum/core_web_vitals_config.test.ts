@@ -7,7 +7,7 @@
 
 import { mockAppDataView, mockDataView } from '../../rtl_helpers';
 import { getDefaultConfigs } from '../default_configs';
-import { type LayerConfig, LensAttributes } from '../lens_attributes';
+import { LayerConfig, LensAttributes } from '../lens_attributes';
 import { sampleAttributeCoreWebVital } from '../test_data/sample_attribute_cwv';
 import { LCP_FIELD, SERVICE_NAME, USER_AGENT_OS } from '../constants/elasticsearch_fieldnames';
 import { obsvReportConfigMap } from '../../obsv_exploratory_view';

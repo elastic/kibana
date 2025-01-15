@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { type SeriesConfig, type SeriesUrl } from '../../types';
+import { SeriesConfig, SeriesUrl } from '../../types';
 import { useDiscoverLink } from '../../hooks/use_discover_link';
 import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 

@@ -8,8 +8,8 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { type LocatorDefinition } from '../locators';
-import { UrlService, type UrlServiceDependencies } from '../url_service';
+import { LocatorDefinition } from '../locators';
+import { UrlService, UrlServiceDependencies } from '../url_service';
 
 export interface TestLocatorState extends SerializableRecord {
   savedObjectId: string;

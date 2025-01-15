@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse, WrappingPrettyPrinter, type WrappingPrettyPrinterOptions } from '@kbn/esql-ast';
+import { parse, WrappingPrettyPrinter, WrappingPrettyPrinterOptions } from '@kbn/esql-ast';
 import * as React from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
 

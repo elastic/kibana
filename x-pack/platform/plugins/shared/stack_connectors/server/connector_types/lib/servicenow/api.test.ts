@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import { externalServiceMock, apiParams, serviceNowCommonFields, serviceNowChoices } from './mocks';
-import { type ExternalService } from './types';
+import { ExternalService } from './types';
 import { api } from './api';
 let mockedLogger: jest.Mocked<Logger>;
 

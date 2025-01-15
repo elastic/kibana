@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { type ErrorToastOptions } from '@kbn/core-notifications-browser';
+import { ErrorToastOptions } from '@kbn/core-notifications-browser';
 
 import type { MonitorListSortField } from '../../../../../common/runtime_types/monitor_management/sort_field';
 import {
-  type EncryptedSyntheticsMonitor,
-  type FetchMonitorManagementListQueryArgs,
-  type SyntheticsMonitor,
+  EncryptedSyntheticsMonitor,
+  FetchMonitorManagementListQueryArgs,
+  SyntheticsMonitor,
 } from '../../../../../common/runtime_types';
 
-import { type IHttpSerializedFetchError } from '../utils/http_error';
+import { IHttpSerializedFetchError } from '../utils/http_error';
 
 export interface MonitorFilterState {
   query?: string;

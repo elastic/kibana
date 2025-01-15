@@ -9,9 +9,9 @@
 
 import { firstValueFrom } from 'rxjs';
 import {
-  type FeatureCatalogueEntry,
+  FeatureCatalogueEntry,
   FeatureCatalogueRegistry,
-  type FeatureCatalogueSolution,
+  FeatureCatalogueSolution,
 } from './feature_catalogue_registry';
 
 const DASHBOARD_FEATURE: FeatureCatalogueEntry = {

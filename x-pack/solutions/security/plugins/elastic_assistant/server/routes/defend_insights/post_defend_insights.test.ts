@@ -19,7 +19,7 @@ import type { DefendInsightsDataClient } from '../../ai_assistant_data_clients/d
 
 import { serverMock } from '../../__mocks__/server';
 import {
-  type ElasticAssistantRequestHandlerContextMock,
+  ElasticAssistantRequestHandlerContextMock,
   requestContextMock,
 } from '../../__mocks__/request_context';
 import { transformESSearchToDefendInsights } from '../../ai_assistant_data_clients/defend_insights/helpers';

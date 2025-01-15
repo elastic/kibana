@@ -9,7 +9,7 @@ import React from 'react';
 import { screen, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ChildDragDropProvider, Droppable, Draggable } from '@kbn/dom-drag-drop';
-import { type FramePublicAPI, type Visualization, type VisualizationConfigProps } from '../../../types';
+import { FramePublicAPI, Visualization, VisualizationConfigProps } from '../../../types';
 import { LayerPanel } from './layer_panel';
 import { coreMock } from '@kbn/core/public/mocks';
 import { faker } from '@faker-js/faker';
@@ -24,9 +24,9 @@ import {
 } from '../../../mocks';
 import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
 import { DimensionButton } from '@kbn/visualization-ui-components';
-import { type LensAppState } from '../../../state_management';
+import { LensAppState } from '../../../state_management';
 import type { ProviderProps } from '@kbn/dom-drag-drop/src';
-import { type LayerPanelProps } from './types';
+import { LayerPanelProps } from './types';
 
 jest.mock('../../../id_generator');
 

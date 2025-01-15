@@ -10,7 +10,7 @@
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import { HighlightField, type HighlightFieldProps } from './highlight_field';
+import { HighlightField, HighlightFieldProps } from './highlight_field';
 import { getUnifiedDocViewerServices } from '../../../plugin';
 
 const TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR = 'TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR';

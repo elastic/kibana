@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { type CoreSetup, type CoreStart } from '@kbn/core/public';
+import { CoreSetup, CoreStart } from '@kbn/core/public';
 import type {
   ClientRequestParamsOf,
   ReturnOf,
   RouteRepositoryClient,
 } from '@kbn/server-route-repository';
 import { formatRequest } from '@kbn/server-route-repository-utils';
-import { type FetchOptions } from '../../../common/fetch_options';
+import { FetchOptions } from '../../../common/fetch_options';
 import type {
   APIEndpoint,
   ObservabilityOnboardingServerRouteRepository,
 } from '../../../server/routes';
-import { type CallApi, callApi } from './call_api';
+import { CallApi, callApi } from './call_api';
 
 export type ObservabilityOnboardingClientOptions = Omit<
   FetchOptions,

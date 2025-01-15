@@ -11,7 +11,7 @@ import { createElasticsearchClient } from '../../clients/elasticsearch';
 import type { FunctionRegistrationParameters } from '..';
 import {
   changesFunctionParameters,
-  type ChangesFunctionResponse,
+  ChangesFunctionResponse,
 } from '../../../common/functions/changes';
 import { getMetricChanges } from './get_metric_changes';
 import { getLogChanges } from './get_log_changes';

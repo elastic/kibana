@@ -6,7 +6,7 @@
  */
 
 import { ALERT_ACTION } from '../../../common/constants';
-import { type BurnRateRuleParams, type WindowSchema } from '../../typings';
+import { BurnRateRuleParams, WindowSchema } from '../../typings';
 import { validateBurnRateRule } from './validation';
 
 const createTestParams = (windowOverride: Partial<WindowSchema> = {}): BurnRateRuleParams => ({

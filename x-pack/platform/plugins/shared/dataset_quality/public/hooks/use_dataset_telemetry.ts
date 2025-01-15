@@ -10,8 +10,8 @@ import { useCallback } from 'react';
 import { getDateISORange } from '@kbn/timerange';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { useDatasetQualityFilters } from './use_dataset_quality_filters';
-import { type DataStreamStat } from '../../common/data_streams_stats';
-import { type DatasetEbtProps, type DatasetNavigatedEbtProps } from '../services/telemetry';
+import { DataStreamStat } from '../../common/data_streams_stats';
+import { DatasetEbtProps, DatasetNavigatedEbtProps } from '../services/telemetry';
 
 export function useDatasetTelemetry() {
   const { service, telemetryClient } = useDatasetQualityContext();

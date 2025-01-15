@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type FilterViewSpec } from '../../../../types';
+import { FilterViewSpec } from '../../../../types';
 import { formatByKey } from '../utils';
 
 const strings = {

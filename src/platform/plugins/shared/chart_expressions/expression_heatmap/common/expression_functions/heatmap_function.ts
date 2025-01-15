@@ -9,10 +9,10 @@
 
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-import { type ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import {
   prepareLogTable,
-  type Dimension,
+  Dimension,
   validateAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
 import type { HeatmapExpressionFunctionDefinition, HeatmapExpressionProps } from '../types';

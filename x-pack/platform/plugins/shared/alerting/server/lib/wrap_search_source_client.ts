@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { type Logger } from '@kbn/core/server';
-import { type ISearchOptions } from '@kbn/search-types';
+import { Logger } from '@kbn/core/server';
+import { ISearchOptions } from '@kbn/search-types';
 import {
-  type ISearchSource,
-  type ISearchStartSearchSource,
-  type SearchSource,
-  type SerializedSearchSourceFields,
+  ISearchSource,
+  ISearchStartSearchSource,
+  SearchSource,
+  SerializedSearchSourceFields,
 } from '@kbn/data-plugin/common';
 import { catchError, tap, throwError } from 'rxjs';
-import { type LogSearchMetricsOpts, type RuleInfo, type SearchMetrics } from './types';
+import { LogSearchMetricsOpts, RuleInfo, SearchMetrics } from './types';
 
 interface Props {
   logger: Logger;

@@ -7,32 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type METRIC_TYPES } from '@kbn/data-plugin/common';
+import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { type SchemaConfig, type SupportedAggregation } from '../../../types';
+import { SchemaConfig, SupportedAggregation } from '../../../types';
 import {
-  type Operation,
-  type BaseColumn as GenericBaseColumn,
-  type Column as BaseColumn,
-  type GenericColumnWithMeta,
-  type PercentileColumn as BasePercentileColumn,
-  type PercentileRanksColumn as BasePercentileRanksColumn,
-  type FormulaColumn as BaseFormulaColumn,
-  type LastValueColumn as BaseLastValueColumn,
-  type AvgColumn as BaseAvgColumn,
-  type CountColumn as BaseCountColumn,
-  type CardinalityColumn as BaseCardinalityColumn,
-  type MaxColumn as BaseMaxColumn,
-  type MedianColumn as BaseMedianColumn,
-  type MinColumn as BaseMinColumn,
-  type SumColumn as BaseSumColumn,
-  type CumulativeSumColumn as BaseCumulativeSumColumn,
-  type MovingAverageColumn as BaseMovingAverageColumn,
-  type DerivativeColumn as BaseDerivativeColumn,
-  type DateHistogramColumn as BaseDateHistogramColumn,
-  type TermsColumn as BaseTermsColumn,
-  type FiltersColumn as BaseFiltersColumn,
-  type RangeColumn as BaseRangeColumn,
+  Operation,
+  BaseColumn as GenericBaseColumn,
+  Column as BaseColumn,
+  GenericColumnWithMeta,
+  PercentileColumn as BasePercentileColumn,
+  PercentileRanksColumn as BasePercentileRanksColumn,
+  FormulaColumn as BaseFormulaColumn,
+  LastValueColumn as BaseLastValueColumn,
+  AvgColumn as BaseAvgColumn,
+  CountColumn as BaseCountColumn,
+  CardinalityColumn as BaseCardinalityColumn,
+  MaxColumn as BaseMaxColumn,
+  MedianColumn as BaseMedianColumn,
+  MinColumn as BaseMinColumn,
+  SumColumn as BaseSumColumn,
+  CumulativeSumColumn as BaseCumulativeSumColumn,
+  MovingAverageColumn as BaseMovingAverageColumn,
+  DerivativeColumn as BaseDerivativeColumn,
+  DateHistogramColumn as BaseDateHistogramColumn,
+  TermsColumn as BaseTermsColumn,
+  FiltersColumn as BaseFiltersColumn,
+  RangeColumn as BaseRangeColumn,
 } from '../../types';
 
 export type MetricsWithField = Exclude<

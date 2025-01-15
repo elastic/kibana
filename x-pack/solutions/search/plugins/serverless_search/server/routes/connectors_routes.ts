@@ -13,7 +13,7 @@ import {
   fetchConnectors,
   fetchSyncJobs,
   generateConnectorName,
-  type IngestPipelineParams,
+  IngestPipelineParams,
   startConnectorSync,
   updateConnectorConfiguration,
   updateConnectorIndexName,
@@ -22,7 +22,7 @@ import {
   updateConnectorServiceType,
 } from '@kbn/search-connectors';
 import { DEFAULT_INGESTION_PIPELINE } from '../../common';
-import { type RouteDependencies } from '../plugin';
+import { RouteDependencies } from '../plugin';
 import { errorHandler } from '../utils/error_handler';
 
 export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependencies) => {

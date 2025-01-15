@@ -6,9 +6,9 @@
  */
 
 import { EcsFlat } from '@elastic/ecs';
-import { type EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { type EcsFieldMetadata, type PartitionedFieldMetadata, type SortConfig } from './types';
+import { EcsFieldMetadata, PartitionedFieldMetadata, SortConfig } from './types';
 import * as i18n from './translations';
 
 export const EcsFlatTyped = EcsFlat as unknown as Record<string, EcsFieldMetadata>;

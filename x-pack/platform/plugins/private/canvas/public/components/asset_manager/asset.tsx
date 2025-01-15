@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Dispatch } from 'redux';
+import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { set } from '@kbn/safer-lodash-set';
 
@@ -18,7 +18,7 @@ import { addElement } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
 // @ts-expect-error untyped local
 import { removeAsset } from '../../state/actions/assets';
-import { type State, type ExpressionAstExpression, type AssetType } from '../../../types';
+import { State, ExpressionAstExpression, AssetType } from '../../../types';
 
 import { Asset as Component } from './asset.component';
 

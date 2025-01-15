@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type PluginInitializerContext, type CoreSetup, type CoreStart, type Plugin, type Logger } from '@kbn/core/server';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
 import { capabilitiesProvider } from './capabilities_provider';
-import { type AdvancedSettingsConfig } from './config';
+import { AdvancedSettingsConfig } from './config';
 
 export class AdvancedSettingsServerPlugin implements Plugin<object, object> {
   private readonly logger: Logger;

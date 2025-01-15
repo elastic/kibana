@@ -6,14 +6,14 @@
  */
 
 import {
-  type ActionsClientChatOpenAI,
-  type ActionsClientSimpleChatModel,
+  ActionsClientChatOpenAI,
+  ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import { logFormatDetectionTestState } from '../../../__jest__/fixtures/log_type_detection';
 import type { LogFormatDetectionState } from '../../types';
 import { handleLogFormatDetection } from './detection';
-import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 const model = new FakeLLM({
   response: '{ "name": "structured"}',

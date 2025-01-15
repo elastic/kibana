@@ -8,9 +8,9 @@
 import {
   MonitorTypeEnum,
   ScreenshotOption,
-  type Locations,
+  Locations,
   LocationStatus,
-  type ProjectMonitor,
+  ProjectMonitor,
 } from '../../../../common/runtime_types';
 import {
   DEFAULT_FIELDS,
@@ -18,7 +18,7 @@ import {
   PROFILES_MAP,
 } from '../../../../common/constants/monitor_defaults';
 import { normalizeProjectMonitors } from '.';
-import { type PrivateLocationAttributes } from '../../../runtime_types/private_locations';
+import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 
 describe('browser normalizers', () => {
   describe('normalize push monitors', () => {

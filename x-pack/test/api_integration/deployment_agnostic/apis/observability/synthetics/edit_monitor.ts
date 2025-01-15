@@ -9,15 +9,15 @@ import { v4 as uuidv4 } from 'uuid';
 import { omit } from 'lodash';
 import {
   ConfigKey,
-  type EncryptedSyntheticsSavedMonitor,
-  type HTTPFields,
-  type MonitorFields,
-  type PrivateLocation,
+  EncryptedSyntheticsSavedMonitor,
+  HTTPFields,
+  MonitorFields,
+  PrivateLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
-import { type RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
-import { type DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { omitResponseTimestamps, omitEmptyValues } from './helpers/monitor';
 import { PrivateLocationTestService } from '../../../services/synthetics_private_location';

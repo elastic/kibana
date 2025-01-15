@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Datatable } from '@kbn/expressions-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { getFormatService } from '../services';
-import { type TableVisData, type TableGroup, type TableVisConfig, type TableContext } from '../types';
+import { TableVisData, TableGroup, TableVisConfig, TableContext } from '../types';
 import { addPercentageColumn } from './add_percentage_column';
 import { createFormattedTable } from './create_formatted_table';
 

@@ -6,30 +6,30 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { type PublicMethodsOf } from '@kbn/utility-types';
-import { type ActionsClient } from '@kbn/actions-plugin/server/actions_client';
-import { type ExecuteOptions as EnqueueExecutionOptions } from '@kbn/actions-plugin/server/create_execute_function';
-import { type IAlertsClient } from '../../alerts_client/types';
-import { type Alert } from '../../alert';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
+import { ExecuteOptions as EnqueueExecutionOptions } from '@kbn/actions-plugin/server/create_execute_function';
+import { IAlertsClient } from '../../alerts_client/types';
+import { Alert } from '../../alert';
 import {
-  type AlertInstanceContext,
-  type AlertInstanceState,
-  type RuleTypeParams,
-  type SanitizedRule,
-  type RuleTypeState,
-  type RuleAction,
-  type RuleAlertData,
-  type RuleSystemAction,
-  type ThrottledActions,
+  AlertInstanceContext,
+  AlertInstanceState,
+  RuleTypeParams,
+  SanitizedRule,
+  RuleTypeState,
+  RuleAction,
+  RuleAlertData,
+  RuleSystemAction,
+  ThrottledActions,
 } from '../../../common';
-import { type NormalizedRuleType } from '../../rule_type_registry';
-import { type CombinedSummarizedAlerts, type RawRule } from '../../types';
-import { type RuleRunMetricsStore } from '../../lib/rule_run_metrics_store';
+import { NormalizedRuleType } from '../../rule_type_registry';
+import { CombinedSummarizedAlerts, RawRule } from '../../types';
+import { RuleRunMetricsStore } from '../../lib/rule_run_metrics_store';
 import {
-  type ActionOpts,
-  type AlertingEventLogger,
+  ActionOpts,
+  AlertingEventLogger,
 } from '../../lib/alerting_event_logger/alerting_event_logger';
-import { type RuleTaskInstance, type TaskRunnerContext } from '../types';
+import { RuleTaskInstance, TaskRunnerContext } from '../types';
 
 export interface ActionSchedulerOptions<
   Params extends RuleTypeParams,

@@ -6,16 +6,16 @@
  */
 
 import { omit } from 'lodash';
-import { type ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { VisualizeInput } from '@kbn/visualizations-plugin/public';
-import { type SavedObjectReference } from '@kbn/core/types';
+import { SavedObjectReference } from '@kbn/core/types';
 import {
   EmbeddableTypes,
   EmbeddableExpressionType,
-  type EmbeddableExpression,
+  EmbeddableExpression,
 } from '../../expression_types';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
-import { type ExpressionValueFilter, type TimeRange as TimeRangeArg, type SeriesStyle } from '../../../types';
+import { ExpressionValueFilter, TimeRange as TimeRangeArg, SeriesStyle } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {

@@ -7,7 +7,7 @@
 
 import type { TextBasedLayerColumn, TextBasedPrivateState } from '../types';
 import { reorderElements } from '../../../utils';
-import { type DatasourceDimensionDropHandlerProps, isOperation } from '../../../types';
+import { DatasourceDimensionDropHandlerProps, isOperation } from '../../../types';
 import { removeColumn } from '../remove_column';
 import { retrieveLayerColumnsFromCache } from '../fieldlist_cache';
 

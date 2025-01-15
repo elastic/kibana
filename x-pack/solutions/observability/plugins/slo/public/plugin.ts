@@ -5,27 +5,27 @@
  * 2.0.
  */
 import {
-  type App,
-  type AppMountParameters,
-  type AppUpdater,
-  type CoreSetup,
-  type CoreStart,
+  App,
+  AppMountParameters,
+  AppUpdater,
+  CoreSetup,
+  CoreStart,
   DEFAULT_APP_CATEGORIES,
-  type Plugin,
-  type PluginInitializerContext,
+  Plugin,
+  PluginInitializerContext,
 } from '@kbn/core/public';
-import { type DefaultClientOptions, createRepositoryClient } from '@kbn/server-route-repository-client';
+import { DefaultClientOptions, createRepositoryClient } from '@kbn/server-route-repository-client';
 import { lazy } from 'react';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { PLUGIN_NAME, sloAppId } from '../common';
-import { type ExperimentalFeatures, type SLOConfig } from '../common/config';
+import { ExperimentalFeatures, SLOConfig } from '../common/config';
 import { SLOS_BASE_PATH } from '../common/locators/paths';
 import type { SLORouteRepository } from '../server/routes/get_slo_server_route_repository';
 import { SLO_ALERTS_EMBEDDABLE_ID } from './embeddable/slo/alerts/constants';
 import { SLO_BURN_RATE_EMBEDDABLE_ID } from './embeddable/slo/burn_rate/constants';
 import { SLO_ERROR_BUDGET_ID } from './embeddable/slo/error_budget/constants';
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from './embeddable/slo/overview/constants';
-import { type SloOverviewEmbeddableState } from './embeddable/slo/overview/types';
+import { SloOverviewEmbeddableState } from './embeddable/slo/overview/types';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
 import { SloEditLocatorDefinition } from './locators/slo_edit';
 import { SloListLocatorDefinition } from './locators/slo_list';

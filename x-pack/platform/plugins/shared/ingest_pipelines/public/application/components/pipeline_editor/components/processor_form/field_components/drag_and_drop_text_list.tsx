@@ -24,8 +24,8 @@ import {
 
 import {
   UseField,
-  type ArrayItem,
-  type ValidationFunc,
+  ArrayItem,
+  ValidationFunc,
   getFieldValidityAndErrorMessage,
 } from '../../../../../../shared_imports';
 

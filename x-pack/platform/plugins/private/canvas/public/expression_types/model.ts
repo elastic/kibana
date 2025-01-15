@@ -6,8 +6,8 @@
  */
 
 import { merge } from 'lodash';
-import { FunctionForm, type FunctionFormProps } from './function_form';
-import { type Arg, type View } from './types';
+import { FunctionForm, FunctionFormProps } from './function_form';
+import { Arg, View } from './types';
 
 const NO_NEXT_EXP = 'no next expression';
 const MISSING_MODEL_ARGS = 'missing model args';

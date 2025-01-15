@@ -6,10 +6,10 @@
  */
 
 import {
-  type IngestProcessorContainer,
-  type VersionNumber,
-  type Metadata,
-  type IngestPutPipelineRequest,
+  IngestProcessorContainer,
+  VersionNumber,
+  Metadata,
+  IngestPutPipelineRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 
 export interface Pipeline {

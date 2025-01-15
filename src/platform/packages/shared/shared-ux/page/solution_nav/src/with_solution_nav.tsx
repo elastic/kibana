@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ComponentType, type ReactNode, useState } from 'react';
+import React, { ComponentType, ReactNode, useState } from 'react';
 import classNames from 'classnames';
 import {
   useIsWithinBreakpoints,
   useEuiTheme,
   useIsWithinMinBreakpoint,
-  type EuiPageSidebarProps,
+  EuiPageSidebarProps,
 } from '@elastic/eui';
-import { SolutionNav, type SolutionNavProps } from './solution_nav';
+import { SolutionNav, SolutionNavProps } from './solution_nav';
 import { WithSolutionNavStyles } from './with_solution_nav.styles';
 
 // https://reactjs.org/docs/higher-order-components.html#convention-wrap-the-display-name-for-easy-debugging

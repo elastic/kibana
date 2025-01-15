@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type SecurityIndexPrivilege } from '@elastic/elasticsearch/lib/api/types';
-import { type ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { SecurityIndexPrivilege } from '@elastic/elasticsearch/lib/api/types';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 export const checkAnnotationsPermissions = async ({
   index,

@@ -8,7 +8,7 @@ import React from 'react';
 import { get } from 'lodash';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { EuiTitle } from '@elastic/eui';
-import { type AlertsTableFlyoutBaseProps } from '../../../../types';
+import { AlertsTableFlyoutBaseProps } from '../../../../types';
 
 type Props = AlertsTableFlyoutBaseProps;
 const AlertsFlyoutHeader = ({ alert }: Props) => {

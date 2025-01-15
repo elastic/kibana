@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type AlertingUsage } from '../types';
+import { AlertingUsage } from '../types';
 
 export function groupRulesBySearchType(
   rulesBySearchType: Record<string, number>

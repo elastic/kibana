@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type RouteDependencies } from '../../../types';
+import { RouteDependencies } from '../../../types';
 import { registerSearchRoute } from './register_search_route';
 
 export function registerSearchRoutes(dependencies: RouteDependencies) {

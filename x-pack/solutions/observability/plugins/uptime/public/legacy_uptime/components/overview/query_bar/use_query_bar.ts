@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import type React from 'react';
-import { useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { useDispatch } from 'react-redux';
 import type { Query } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useGetUrlParams, useGenerateUpdatedKueryString, useUrlParams } from '../../../hooks';
 import { setEsKueryString } from '../../../state/actions';
-import { type UptimePluginServices } from '../../../../plugin';
+import { UptimePluginServices } from '../../../../plugin';
 
 export enum SyntaxType {
   text = 'text',

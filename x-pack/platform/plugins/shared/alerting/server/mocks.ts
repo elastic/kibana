@@ -12,15 +12,15 @@ import {
 } from '@kbn/core/server/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { type SharePluginStart } from '@kbn/share-plugin/server';
+import { SharePluginStart } from '@kbn/share-plugin/server';
 import { rulesClientMock } from './rules_client.mock';
-import { type AlertingServerSetup, type AlertingServerStart } from './plugin';
-import { type Alert, type AlertFactoryDoneUtils } from './alert';
+import { AlertingServerSetup, AlertingServerStart } from './plugin';
+import { Alert, AlertFactoryDoneUtils } from './alert';
 import {
-  type AlertInstanceContext,
-  type AlertInstanceState,
-  type PublicRuleResultService,
-  type PublicRuleMonitoringService,
+  AlertInstanceContext,
+  AlertInstanceState,
+  PublicRuleResultService,
+  PublicRuleMonitoringService,
 } from './types';
 import { publicAlertsClientMock } from './alerts_client/alerts_client.mock';
 

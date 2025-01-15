@@ -9,7 +9,7 @@ import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
-import { type DeleteListSchema, deleteListSchema } from '.';
+import { DeleteListSchema, deleteListSchema } from '.';
 import { getDeleteListSchemaMock } from './index.mock';
 
 describe('delete_list_schema', () => {

@@ -6,19 +6,19 @@
  */
 
 import { mapValues } from 'lodash';
-import { type EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import {
-  type ExpressionFunctionDefinition,
-  type ExpressionAstFunction,
+  ExpressionFunctionDefinition,
+  ExpressionAstFunction,
 } from '@kbn/expressions-plugin/common';
-import { type MigrateFunction, type MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { type SavedObjectReference } from '@kbn/core/types';
-import { type ExpressionValueFilter, type EmbeddableInput } from '../../../types';
-import { EmbeddableExpressionType, type EmbeddableExpression } from '../../expression_types';
+import { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import { SavedObjectReference } from '@kbn/core/types';
+import { ExpressionValueFilter, EmbeddableInput } from '../../../types';
+import { EmbeddableExpressionType, EmbeddableExpression } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
 import { decode, encode } from '../../../common/lib/embeddable_dataurl';
-import { type InitializeArguments } from '.';
+import { InitializeArguments } from '.';
 
 export interface Arguments {
   config: string;

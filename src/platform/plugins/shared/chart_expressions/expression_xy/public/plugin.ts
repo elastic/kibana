@@ -9,13 +9,13 @@
 
 import moment from 'moment';
 import { LEGACY_TIME_AXIS } from '@kbn/charts-plugin/common';
-import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { type FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { type ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { type CoreSetup, type CoreStart, type IUiSettingsClient } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { CoreSetup, CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import type { EventAnnotationPluginStart } from '@kbn/event-annotation-plugin/public';
-import { type UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { type ExpressionXyPluginSetup, type ExpressionXyPluginStart, type SetupDeps } from './types';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { ExpressionXyPluginSetup, ExpressionXyPluginStart, SetupDeps } from './types';
 import {
   xyVisFunction,
   layeredXyVisFunction,
@@ -31,7 +31,7 @@ import {
   extendedAnnotationLayerFunction,
   referenceLineDecorationConfigFunction,
 } from '../common/expression_functions';
-import { type GetStartDeps, getXyChartRenderer } from './expression_renderers';
+import { GetStartDeps, getXyChartRenderer } from './expression_renderers';
 import { eventAnnotationsResult } from '../common/expression_functions/event_annotations_result';
 
 export interface XYPluginStartDependencies {

@@ -8,14 +8,14 @@
  */
 
 import React from 'react';
-import { type CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { EuiFieldText, EuiModalBody, EuiButton } from '@elastic/eui';
 import { useState } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
-  type ActionExecutionContext,
+  ActionExecutionContext,
   createAction,
-  type UiActionsStart,
+  UiActionsStart,
 } from '@kbn/ui-actions-plugin/public';
 
 export const USER_TRIGGER = 'USER_TRIGGER';

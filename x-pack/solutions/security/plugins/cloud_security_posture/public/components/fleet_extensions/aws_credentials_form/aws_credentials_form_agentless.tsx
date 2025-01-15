@@ -32,7 +32,7 @@ import {
 import { getAwsCredentialsType, getPosturePolicy } from '../utils';
 import { AwsInputVarFields } from './aws_input_var_fields';
 import {
-  type AwsFormProps,
+  AwsFormProps,
   AWSSetupInfoContent,
   AwsCredentialTypeSelector,
   ReadDocumentation,

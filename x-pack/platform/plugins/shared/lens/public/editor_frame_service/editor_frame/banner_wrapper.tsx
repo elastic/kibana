@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type ReactNode, memo } from 'react';
+import React, { ReactNode, memo } from 'react';
 
 interface BannerWrapperProps {
   nodes: ReactNode[];

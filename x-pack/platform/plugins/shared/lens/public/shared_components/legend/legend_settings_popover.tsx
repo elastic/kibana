@@ -11,16 +11,16 @@ import {
   EuiFormRow,
   EuiButtonGroup,
   EuiSwitch,
-  type EuiSwitchEvent,
+  EuiSwitchEvent,
   EuiFieldNumber,
   EuiFlexItem,
   EuiFlexGroup,
   EuiComboBox,
 } from '@elastic/eui';
-import { Position, type VerticalAlignment, type HorizontalAlignment, LegendValue } from '@elastic/charts';
-import { type LegendSize } from '@kbn/visualizations-plugin/public';
+import { Position, VerticalAlignment, HorizontalAlignment, LegendValue } from '@elastic/charts';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import { type XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
+import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { ToolbarDivider } from '../toolbar_divider';
 import { ToolbarPopover, type ToolbarPopoverProps } from '../toolbar_popover';
 import { LegendLocationSettings } from './location/legend_location_settings';

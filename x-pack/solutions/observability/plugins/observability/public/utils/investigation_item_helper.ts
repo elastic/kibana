@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { type Group } from '@kbn/observability-alerting-rule-utils';
+import { Group } from '@kbn/observability-alerting-rule-utils';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import {
-  type CustomThresholdExpressionMetric,
-  type CustomThresholdSearchSourceFields,
+  CustomThresholdExpressionMetric,
+  CustomThresholdSearchSourceFields,
 } from '../../common/custom_threshold_rule/types';
-import { type MetricExpression } from '../components/custom_threshold/types';
+import { MetricExpression } from '../components/custom_threshold/types';
 import { getGroupFilters } from '..';
 
 const AggMappingForLens: Record<string, string> = {

@@ -13,9 +13,9 @@ import {
   EuiPanel,
   EuiDraggable,
   EuiDroppable,
-  type EuiPanelProps,
+  EuiPanelProps,
   EuiDragDropContext,
-  type DragDropContextProps,
+  DragDropContextProps,
   euiDragDropReorder,
   useEuiTheme,
 } from '@elastic/eui';

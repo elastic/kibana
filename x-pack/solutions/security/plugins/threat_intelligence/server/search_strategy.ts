@@ -7,7 +7,7 @@
 
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { ISearchRequestParams, IEsSearchRequest } from '@kbn/search-types';
-import { type ISearchStrategy, type PluginStart, shimHitsTotal } from '@kbn/data-plugin/server';
+import { ISearchStrategy, PluginStart, shimHitsTotal } from '@kbn/data-plugin/server';
 import { map } from 'rxjs';
 import { BARCHART_AGGREGATION_NAME, FactoryQueryType } from '../common/constants';
 import { RawIndicatorFieldId } from '../common/types/indicator';

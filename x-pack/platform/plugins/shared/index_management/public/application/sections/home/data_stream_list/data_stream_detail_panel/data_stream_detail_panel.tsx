@@ -29,7 +29,7 @@ import {
   EuiToolTip,
   EuiPopover,
   EuiContextMenu,
-  type EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelDescriptor,
   EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';
@@ -38,7 +38,7 @@ import { indexModeLabels } from '../../../../lib/index_mode_labels';
 import { DiscoverLink } from '../../../../lib/discover_link';
 import { getLifecycleValue } from '../../../../lib/data_streams';
 import { SectionLoading, reactRouterNavigate } from '../../../../../shared_imports';
-import { SectionError, type Error, DataHealth } from '../../../../components';
+import { SectionError, Error, DataHealth } from '../../../../components';
 import { useLoadDataStream } from '../../../../services/api';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
 import { EditDataRetentionModal } from '../edit_data_retention_modal';

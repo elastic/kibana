@@ -6,14 +6,14 @@
  */
 
 import type { Map as MbMap } from '@kbn/mapbox-gl';
-import { type SizeDynamicOptions } from '../../../../../common/descriptor_types';
+import { SizeDynamicOptions } from '../../../../../common/descriptor_types';
 import { LABEL_POSITIONS, VECTOR_STYLES } from '../../../../../common/constants';
-import { type IField } from '../../../fields/field';
-import { type IVectorLayer } from '../../../layers/vector_layer';
+import { IField } from '../../../fields/field';
+import { IVectorLayer } from '../../../layers/vector_layer';
 import { LabelPositionProperty } from './label_position_property';
-import { type StaticIconProperty } from './static_icon_property';
+import { StaticIconProperty } from './static_icon_property';
 import { DynamicSizeProperty } from './dynamic_size_property';
-import { type StaticSizeProperty } from './static_size_property';
+import { StaticSizeProperty } from './static_size_property';
 
 describe('syncLabelPositionWithMb', () => {
   let layoutProperties: Record<string, unknown> = {};

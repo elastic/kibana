@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type PainlessContext } from '@kbn/monaco';
+import { PainlessContext } from '@kbn/monaco';
 
 export interface Store {
   payload: Payload;

@@ -8,17 +8,17 @@
  */
 
 import {
-  type AggregateQuery,
+  AggregateQuery,
   COMPARE_ALL_OPTIONS,
-  type Filter,
-  type Query,
-  type TimeRange,
+  Filter,
+  Query,
+  TimeRange,
   onlyDisabledFiltersChanged,
 } from '@kbn/es-query';
 import fastIsEqual from 'fast-deep-equal';
 import { useEffect, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { type PublishingSubject } from '../../publishing_subject';
+import { PublishingSubject } from '../../publishing_subject';
 
 export interface PublishesTimeslice {
   timeslice$: PublishingSubject<[number, number] | undefined>;

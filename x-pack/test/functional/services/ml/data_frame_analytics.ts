@@ -8,8 +8,8 @@
 import expect from '@kbn/expect';
 
 import { DATA_FRAME_TASK_STATE } from '@kbn/ml-data-frame-analytics-utils';
-import { type FtrProviderContext } from '../../ftr_provider_context';
-import { type MlApi } from './api';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { MlApi } from './api';
 
 export function MachineLearningDataFrameAnalyticsProvider(
   { getService }: FtrProviderContext,

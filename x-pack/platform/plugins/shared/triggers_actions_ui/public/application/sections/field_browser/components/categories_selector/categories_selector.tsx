@@ -15,9 +15,9 @@ import {
   EuiHighlight,
   EuiPopover,
   EuiSelectable,
-  type FilterChecked,
+  FilterChecked,
 } from '@elastic/eui';
-import { type BrowserFields } from '@kbn/rule-registry-plugin/common';
+import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import * as i18n from '../../translations';
 import { getFieldCount, isEscape } from '../../helpers';
 import { styles } from './categories_selector.styles';

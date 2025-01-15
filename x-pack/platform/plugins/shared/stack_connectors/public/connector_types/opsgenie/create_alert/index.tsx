@@ -7,7 +7,7 @@
 
 import React, { lazy, Suspense, useCallback, useState } from 'react';
 import {
-  type ActionParamsProps,
+  ActionParamsProps,
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
   SectionLoading,
@@ -19,7 +19,7 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiSwitch,
-  type EuiSwitchEvent,
+  EuiSwitchEvent,
   EuiText,
 } from '@elastic/eui';
 import type {
@@ -27,7 +27,7 @@ import type {
   OpsgenieCreateAlertParams,
 } from '../../../../server/connector_types';
 import * as i18n from './translations';
-import { type EditActionCallback } from '../types';
+import { EditActionCallback } from '../types';
 import { DisplayMoreOptions } from '../display_more_options';
 import { AdditionalOptions } from './additional_options';
 import { Tags } from './tags';

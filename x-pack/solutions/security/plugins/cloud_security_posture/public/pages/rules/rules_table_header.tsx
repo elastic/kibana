@@ -24,10 +24,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import {
-  type RuleStateAttributesWithoutStates,
+  RuleStateAttributesWithoutStates,
   useChangeCspRuleState,
 } from './use_change_csp_rule_state';
-import { type CspBenchmarkRulesWithStates } from './rules_container';
+import { CspBenchmarkRulesWithStates } from './rules_container';
 import { MultiSelectFilter } from '../../common/component/multi_select_filter';
 
 export const RULES_BULK_ACTION_BUTTON = 'bulk-action-button';

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { type IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { buildEsQuery, fromKueryExpression } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { type ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
+import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { isEmpty } from 'lodash';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import {
-  type CustomMetricExpressionParams,
-  type CustomThresholdSearchSourceFields,
+  CustomMetricExpressionParams,
+  CustomThresholdSearchSourceFields,
 } from '../../../../common/custom_threshold_rule/types';
 
 export const EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;

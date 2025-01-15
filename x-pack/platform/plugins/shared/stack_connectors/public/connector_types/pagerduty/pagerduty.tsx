@@ -18,9 +18,9 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { isPlainObject } from 'lodash';
 import {
-  type PagerDutyConfig,
-  type PagerDutySecrets,
-  type PagerDutyActionParams,
+  PagerDutyConfig,
+  PagerDutySecrets,
+  PagerDutyActionParams,
   EventActionOptions,
 } from '../types';
 

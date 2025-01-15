@@ -6,7 +6,7 @@
  */
 
 import { chunk } from 'lodash/fp';
-import { type RequestHandler } from '@kbn/core/server';
+import { RequestHandler } from '@kbn/core/server';
 import { momentDateParser } from '../../../common/utils';
 import type {
   MetricTypes,
@@ -14,7 +14,7 @@ import type {
   UsageMetricsRequestBody,
   UsageMetricsResponseSchemaBody,
 } from '../../../common/rest_types';
-import { type DataUsageContext, type DataUsageRequestHandlerContext } from '../../types';
+import { DataUsageContext, DataUsageRequestHandlerContext } from '../../types';
 
 import { errorHandler } from '../error_handler';
 import { CustomHttpRequestError } from '../../utils';

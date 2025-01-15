@@ -6,12 +6,12 @@
  */
 
 import {
-  type SavedObjectsClientContract,
-  type ISavedObjectsRepository,
+  SavedObjectsClientContract,
+  ISavedObjectsRepository,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import {
-  type PartiallyUpdateableAdHocRunAttributes,
+  PartiallyUpdateableAdHocRunAttributes,
   partiallyUpdateAdHocRun,
 } from './partially_update_ad_hoc_run';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';

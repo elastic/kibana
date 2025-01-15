@@ -12,16 +12,16 @@ import React from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
-  type InferenceServiceSettings,
-  type MappingProperty,
-  type MappingPropertyBase,
-  type MappingTypeMapping,
+  InferenceServiceSettings,
+  MappingProperty,
+  MappingPropertyBase,
+  MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
 
 import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { type LocalInferenceServiceSettings } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
+import { LocalInferenceServiceSettings } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 
 import { KibanaLogic } from '../../../shared/kibana';
 import { mappingsWithPropsApiLogic } from '../../api/mappings/mappings_logic';

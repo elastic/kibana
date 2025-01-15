@@ -8,9 +8,9 @@
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import {
   Aggregators,
-  type CustomMetricExpressionParams,
+  CustomMetricExpressionParams,
 } from '../../../../../common/custom_threshold_rule/types';
-import { type Evaluation } from '../lib/evaluate_rule';
+import { Evaluation } from '../lib/evaluate_rule';
 
 const customThresholdNonCountCriterion: CustomMetricExpressionParams = {
   comparator: COMPARATORS.GREATER_THAN,

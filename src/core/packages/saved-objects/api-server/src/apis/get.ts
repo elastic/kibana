@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type SavedObjectsBaseOptions } from './base';
+import { SavedObjectsBaseOptions } from './base';
 
 /**
  * Options for the saved objects get operation

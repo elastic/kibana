@@ -22,8 +22,8 @@ import { handleGetStateVariables } from './retrieve_state_vars';
 import { handleGetStateDetails } from './retrieve_state_details';
 
 import {
-  type ActionsClientChatOpenAI,
-  type ActionsClientSimpleChatModel,
+  ActionsClientChatOpenAI,
+  ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 
 const model = new FakeLLM({

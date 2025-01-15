@@ -12,12 +12,12 @@ import type { KeyboardEvent, ReactElement } from 'react';
 import classNames from 'classnames';
 import { keys, EuiScreenReaderOnly } from '@elastic/eui';
 import {
-  type DragDropIdentifier,
-  type DropIdentifier,
+  DragDropIdentifier,
+  DropIdentifier,
   nextValidDropTarget,
   ReorderContext,
-  type RegisteredDropTargets,
-  type DragDropAction,
+  RegisteredDropTargets,
+  DragDropAction,
   useDragDropContext,
 } from './providers';
 import { REORDER_ITEM_MARGIN } from './constants';

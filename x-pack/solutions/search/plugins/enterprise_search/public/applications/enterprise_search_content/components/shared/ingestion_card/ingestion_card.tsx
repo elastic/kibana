@@ -15,7 +15,7 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiText,
-  type IconType,
+  IconType,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

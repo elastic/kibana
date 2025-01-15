@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { times } from 'lodash';
-import { type IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
-import { type RepeatImageRendererConfig } from '../../common';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import { RepeatImageRendererConfig } from '../../common';
 
 interface RepeatImageComponentProps extends RepeatImageRendererConfig {
   onLoaded: IInterpreterRenderHandlers['done'];

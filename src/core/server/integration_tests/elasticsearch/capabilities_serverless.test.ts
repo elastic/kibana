@@ -8,7 +8,7 @@
  */
 
 import {
-  type TestServerlessESUtils,
+  TestServerlessESUtils,
   createTestServerlessInstances,
 } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';

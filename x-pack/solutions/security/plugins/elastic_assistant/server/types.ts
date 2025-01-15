@@ -22,38 +22,38 @@ import type {
 } from '@kbn/core/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
-import { type DynamicStructuredTool, type Tool } from '@langchain/core/tools';
-import { type SpacesPluginSetup, type SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { type TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import { type ElasticsearchClient } from '@kbn/core/server';
+import { DynamicStructuredTool, Tool } from '@langchain/core/tools';
+import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import {
-  type AttackDiscoveryPostRequestBody,
-  type DefendInsightsPostRequestBody,
-  type AssistantFeatures,
-  type ExecuteConnectorRequestBody,
-  type Replacements,
+  AttackDiscoveryPostRequestBody,
+  DefendInsightsPostRequestBody,
+  AssistantFeatures,
+  ExecuteConnectorRequestBody,
+  Replacements,
 } from '@kbn/elastic-assistant-common';
-import { type AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import {
-  type LicensingApiRequestHandlerContext,
-  type LicensingPluginStart,
+  LicensingApiRequestHandlerContext,
+  LicensingPluginStart,
 } from '@kbn/licensing-plugin/server';
 import {
-  type ActionsClientChatBedrockConverse,
-  type ActionsClientChatOpenAI,
-  type ActionsClientChatVertexAI,
-  type ActionsClientGeminiChatModel,
-  type ActionsClientLlm,
+  ActionsClientChatBedrockConverse,
+  ActionsClientChatOpenAI,
+  ActionsClientChatVertexAI,
+  ActionsClientGeminiChatModel,
+  ActionsClientLlm,
 } from '@kbn/langchain/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
-import { type ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
+import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 import type { GetAIAssistantKnowledgeBaseDataClientParams } from './ai_assistant_data_clients/knowledge_base';
-import { type AttackDiscoveryDataClient } from './lib/attack_discovery/persistence';
-import { type AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
+import { AttackDiscoveryDataClient } from './lib/attack_discovery/persistence';
+import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
-import { type AIAssistantDataClient } from './ai_assistant_data_clients';
-import { type AIAssistantKnowledgeBaseDataClient } from './ai_assistant_data_clients/knowledge_base';
+import { AIAssistantDataClient } from './ai_assistant_data_clients';
+import { AIAssistantKnowledgeBaseDataClient } from './ai_assistant_data_clients/knowledge_base';
 import type { DefendInsightsDataClient } from './ai_assistant_data_clients/defend_insights';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;

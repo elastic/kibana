@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-import { type ChromeBadge } from '@kbn/core/public';
+import { ChromeBadge } from '@kbn/core/public';
 export type UMUpdateBadge = (badge?: ChromeBadge) => void;

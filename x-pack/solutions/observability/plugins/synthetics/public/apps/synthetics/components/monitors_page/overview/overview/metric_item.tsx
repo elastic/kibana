@@ -8,7 +8,7 @@ import { Chart, Metric, MetricTrendShape, Settings } from '@elastic/charts';
 import {
   EuiPanel,
   EuiSpacer,
-  type EuiThemeComputed,
+  EuiThemeComputed,
   euiPaletteColorBlindBehindText,
   useEuiTheme,
 } from '@elastic/eui';
@@ -19,8 +19,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { type OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
-import { type ClientPluginsStart } from '../../../../../../plugin';
+import { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
+import { ClientPluginsStart } from '../../../../../../plugin';
 import { useLocationName, useStatusByLocationOverview } from '../../../../hooks';
 import {
   selectErrorPopoverState,
@@ -37,7 +37,7 @@ import { ActionsPopover } from './actions_popover';
 import { MetricItemBody } from './metric_item/metric_item_body';
 import { MetricItemExtra } from './metric_item/metric_item_extra';
 import { MetricItemIcon } from './metric_item_icon';
-import { type FlyoutParamProps } from './types';
+import { FlyoutParamProps } from './types';
 
 const METRIC_ITEM_HEIGHT = 160;
 

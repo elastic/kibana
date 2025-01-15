@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { cleanup, type Dataset, generate, type PartialConfig } from '@kbn/data-forge';
+import { cleanup, Dataset, generate, PartialConfig } from '@kbn/data-forge';
 import expect from '@kbn/expect';
-import { Aggregators, type MetricThresholdParams } from '@kbn/infra-plugin/common/alerting/metrics';
+import { Aggregators, MetricThresholdParams } from '@kbn/infra-plugin/common/alerting/metrics';
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { InfraRuleType } from '@kbn/rule-data-utils';
@@ -16,7 +16,7 @@ import {
   waitForDocumentInIndex,
   waitForRuleStatus,
 } from '../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
-import { type FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
 
 const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;

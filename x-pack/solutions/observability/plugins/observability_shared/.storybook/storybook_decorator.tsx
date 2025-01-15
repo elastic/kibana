@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { type ComponentType, useMemo } from 'react';
+import React, { ComponentType, useMemo } from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { getMockContext, type ObservabilitySharedKibanaContext } from './get_mock_context';
+import { getMockContext, ObservabilitySharedKibanaContext } from './get_mock_context';
 
 export function ObservabilitySharedContextProvider({
   context,

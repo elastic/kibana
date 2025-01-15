@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Fragment, type FC, type PropsWithChildren } from 'react';
+import React, { Fragment, FC, PropsWithChildren } from 'react';
 
 import {
   EuiFlexGroup,
@@ -17,7 +17,7 @@ import {
   EuiPanel,
   EuiTitle,
   EuiLink,
-  type EuiPanelProps,
+  EuiPanelProps,
 } from '@elastic/eui';
 import { LEARN_MORE_LABEL } from '../constants';
 

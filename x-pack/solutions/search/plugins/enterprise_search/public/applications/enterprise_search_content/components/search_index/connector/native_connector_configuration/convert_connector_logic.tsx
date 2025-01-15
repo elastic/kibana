@@ -11,17 +11,17 @@
  * 2.0.
  */
 
-import { kea, type MakeLogicType } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../../../common/types/api';
-import { type Actions } from '../../../../../shared/api_logic/create_api_logic';
+import { Actions } from '../../../../../shared/api_logic/create_api_logic';
 import {
   ConvertConnectorApiLogic,
-  type ConvertConnectorApiLogicArgs,
-  type ConvertConnectorApiLogicResponse,
+  ConvertConnectorApiLogicArgs,
+  ConvertConnectorApiLogicResponse,
 } from '../../../../api/connector/convert_connector_api_logic';
 import { ConnectorViewLogic } from '../../../connector_detail/connector_view_logic';
-import { type IndexViewLogic } from '../../index_view_logic';
+import { IndexViewLogic } from '../../index_view_logic';
 
 interface ConvertConnectorValues {
   connectorId: typeof IndexViewLogic.values.connectorId;

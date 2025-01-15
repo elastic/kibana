@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type MonitoringCore } from '../../../../types';
+import { MonitoringCore } from '../../../../types';
 import { apmInstanceRoute } from './instance';
 import { apmInstancesRoute } from './instances';
 import { apmOverviewRoute } from './overview';

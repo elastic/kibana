@@ -14,7 +14,7 @@ jest.mock('../doc_links', () => ({
 }));
 import React from 'react';
 
-import { shallow, type ShallowWrapper } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiLink } from '@elastic/eui';
 

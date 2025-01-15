@@ -7,7 +7,7 @@
 
 import { LIST_ID, NAMESPACE_TYPE } from '../../constants/index.mock';
 
-import { type DuplicateExceptionListQuerySchema } from '.';
+import { DuplicateExceptionListQuerySchema } from '.';
 
 export const getDuplicateExceptionListQuerySchemaMock = (): DuplicateExceptionListQuerySchema => ({
   list_id: LIST_ID,

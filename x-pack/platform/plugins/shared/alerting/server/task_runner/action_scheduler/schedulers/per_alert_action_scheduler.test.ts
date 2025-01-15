@@ -14,13 +14,13 @@ import { RuleRunMetricsStore } from '../../../lib/rule_run_metrics_store';
 import { mockAAD } from '../../fixtures';
 import { PerAlertActionScheduler } from './per_alert_action_scheduler';
 import { getRule, getRuleType, getDefaultSchedulerContext, generateAlert } from '../test_fixtures';
-import { type SanitizedRuleAction } from '@kbn/alerting-types';
+import { SanitizedRuleAction } from '@kbn/alerting-types';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { Alert } from '../../../alert';
 import {
   ActionsCompletion,
-  type AlertInstanceContext,
-  type AlertInstanceState,
+  AlertInstanceContext,
+  AlertInstanceState,
 } from '@kbn/alerting-state-types';
 
 const alertingEventLogger = alertingEventLoggerMock.create();

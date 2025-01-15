@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Plugin, type CoreSetup, type CoreStart } from '@kbn/core/server';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import { firstValueFrom, Subject } from 'rxjs';
 
 import { v4 as uuidv4 } from 'uuid';
@@ -14,11 +14,11 @@ import stats from 'stats-lite';
 import prettyMilliseconds from 'pretty-ms';
 import { performance, PerformanceObserver } from 'perf_hooks';
 import {
-  type TaskManagerSetupContract,
-  type TaskManagerStartContract,
-  type ConcreteTaskInstance,
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+  ConcreteTaskInstance,
 } from '@kbn/task-manager-plugin/server';
-import { type PerfState, type PerfApi, type PerfResult } from './types';
+import { PerfState, PerfApi, PerfResult } from './types';
 import { initRoutes } from './init_routes';
 
 // this plugin's dependendencies

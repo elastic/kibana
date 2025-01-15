@@ -10,11 +10,11 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type UiCounterMetricType } from '@kbn/analytics';
+import { UiCounterMetricType } from '@kbn/analytics';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { Draggable } from '@kbn/dom-drag-drop';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { type Filter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { fieldSupportsBreakdown } from '@kbn/field-utils';
 import { isESQLFieldGroupable } from '@kbn/esql-utils';
 import type { SearchMode } from '../../types';

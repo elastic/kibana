@@ -39,7 +39,7 @@ jest.mock('@kbn/code-editor', () => {
   };
 });
 
-import { registerTestBed, type TestBed } from '@kbn/test-jest-helpers';
+import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { LoadMappingsProvider } from './load_mappings_provider';
 
 const ComponentToTest = ({ onJson }: { onJson: () => void }) => (

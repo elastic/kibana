@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type PersistableStateAttachmentTypeSetup } from '@kbn/cases-plugin/server/attachment_framework/types';
+import { PersistableStateAttachmentTypeSetup } from '@kbn/cases-plugin/server/attachment_framework/types';
 
 export const getPersistableStateAttachmentServer = (): PersistableStateAttachmentTypeSetup => ({
   id: '.test',

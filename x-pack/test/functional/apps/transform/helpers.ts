@@ -6,8 +6,8 @@
  */
 
 import {
-  type TransformLatestConfig,
-  type TransformPivotConfig,
+  TransformLatestConfig,
+  TransformPivotConfig,
 } from '@kbn/transform-plugin/common/types/transform';
 
 export interface ComboboxOption {

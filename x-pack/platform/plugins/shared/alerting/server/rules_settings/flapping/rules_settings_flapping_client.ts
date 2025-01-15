@@ -7,9 +7,9 @@
 
 import Boom from '@hapi/boom';
 import {
-  type Logger,
-  type SavedObjectsClientContract,
-  type SavedObject,
+  Logger,
+  SavedObjectsClientContract,
+  SavedObject,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import {
@@ -19,10 +19,10 @@ import {
   MIN_STATUS_CHANGE_THRESHOLD,
 } from '@kbn/alerting-types/flapping/latest';
 import {
-  type RulesSettings,
-  type RulesSettingsFlapping,
-  type RulesSettingsFlappingProperties,
-  type RulesSettingsModificationMetadata,
+  RulesSettings,
+  RulesSettingsFlapping,
+  RulesSettingsFlappingProperties,
+  RulesSettingsModificationMetadata,
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
   RULES_SETTINGS_FLAPPING_SAVED_OBJECT_ID,
   DEFAULT_FLAPPING_SETTINGS,

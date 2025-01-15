@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ScreenshotRefImageData } from '../../../../common/runtime_types';
+import { ScreenshotRefImageData } from '../../../../common/runtime_types';
 
 export const mockRef: ScreenshotRefImageData = {
   maxSteps: 1,

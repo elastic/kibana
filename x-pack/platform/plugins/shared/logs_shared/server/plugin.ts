@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { type CoreStart, type Logger, type Plugin, type PluginInitializerContext } from '@kbn/core/server';
+import { CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { defaultLogViewId } from '../common/log_views';
-import { type LogsSharedConfig } from '../common/plugin_config';
+import { LogsSharedConfig } from '../common/plugin_config';
 import { registerDeprecations } from './deprecations';
 import { featureFlagUiSettings } from './feature_flags';
 import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapter';
 import { LogsSharedKibanaLogEntriesAdapter } from './lib/adapters/log_entries/kibana_log_entries_adapter';
 import { LogsSharedLogEntriesDomain } from './lib/domains/log_entries_domain';
-import { type LogsSharedBackendLibs, type LogsSharedDomainLibs } from './lib/logs_shared_types';
+import { LogsSharedBackendLibs, LogsSharedDomainLibs } from './lib/logs_shared_types';
 import { initLogsSharedServer } from './logs_shared_server';
 import { logViewSavedObjectType } from './saved_objects';
 import { LogEntriesService } from './services/log_entries';
 import { LogViewsService } from './services/log_views';
 import {
-  type LogsSharedPluginCoreSetup,
-  type LogsSharedPluginSetup,
-  type LogsSharedPluginStart,
-  type LogsSharedServerPluginSetupDeps,
-  type LogsSharedServerPluginStartDeps,
-  type UsageCollector,
+  LogsSharedPluginCoreSetup,
+  LogsSharedPluginSetup,
+  LogsSharedPluginStart,
+  LogsSharedServerPluginSetupDeps,
+  LogsSharedServerPluginStartDeps,
+  UsageCollector,
 } from './types';
 
 export class LogsSharedPlugin

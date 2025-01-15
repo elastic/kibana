@@ -17,7 +17,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { useActor } from '@xstate/react';
 import { hydrateDataSourceSelection } from '@kbn/logs-explorer-plugin/common';
-import { type Query, type AggregateQuery, isOfQueryType } from '@kbn/es-query';
+import { Query, AggregateQuery, isOfQueryType } from '@kbn/es-query';
 import { getDiscoverFiltersFromState } from '@kbn/logs-explorer-plugin/public';
 import type { AlertParams } from '@kbn/observability-plugin/public/components/custom_threshold/types';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';

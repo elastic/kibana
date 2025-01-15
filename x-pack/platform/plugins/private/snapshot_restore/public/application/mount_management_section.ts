@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { type CoreSetup } from '@kbn/core/public';
-import { type ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { CoreSetup } from '@kbn/core/public';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { i18n } from '@kbn/i18n';
 
-import { type ClientConfigType } from '../types';
+import { ClientConfigType } from '../types';
 import { httpService } from './services/http';
-import { type UiMetricService } from './services';
+import { UiMetricService } from './services';
 import { breadcrumbService, docTitleService } from './services/navigation';
-import { type AppDependencies } from './app_context';
+import { AppDependencies } from './app_context';
 import { renderApp } from '.';
 
 export async function mountManagementSection(

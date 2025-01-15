@@ -9,7 +9,7 @@
 
 import { getFieldPreviewChanges } from './lib';
 import { BehaviorSubject } from 'rxjs';
-import { ChangeType, type FieldPreview } from '../preview/types';
+import { ChangeType, FieldPreview } from '../preview/types';
 
 // note that periods and overlap in parent and subfield names are to test for corner cases
 const parentName = 'composite.field';

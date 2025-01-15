@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ShareMenuItemLegacy } from '../types';
+import { ShareMenuItemLegacy } from '../types';
 
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { ShareContextMenu, type ShareContextMenuProps } from './share_context_menu';
+import { ShareContextMenu, ShareContextMenuProps } from './share_context_menu';
 
 const defaultProps: ShareContextMenuProps = {
   allowEmbed: true,

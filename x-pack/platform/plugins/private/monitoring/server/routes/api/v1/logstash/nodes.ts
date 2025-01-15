@@ -8,7 +8,7 @@
 import { getClusterStatus } from '../../../../lib/logstash/get_cluster_status';
 import { getNodes } from '../../../../lib/logstash/get_nodes';
 import { handleError } from '../../../../lib/errors';
-import { type MonitoringCore } from '../../../../types';
+import { MonitoringCore } from '../../../../types';
 import {
   postLogstashNodesRequestParamsRT,
   postLogstashNodesRequestPayloadRT,

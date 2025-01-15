@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { type ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import {
-  type EuiPanelProps,
+  EuiPanelProps,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiModalBody,

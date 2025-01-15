@@ -8,9 +8,9 @@
 import { maxAttemptsFormatter, secondsToCronFormatter } from '../formatting_utils';
 import { arrayFormatter, stringToObjectFormatter } from './formatting_utils';
 import {
-  type CommonFields,
+  CommonFields,
   ConfigKey,
-  type MonitorFields,
+  MonitorFields,
   SourceType,
 } from '../../../../common/runtime_types';
 

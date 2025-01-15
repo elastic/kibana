@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type UiSetting, uiSetting } from '../ui_setting';
+import { UiSetting, uiSetting } from '../ui_setting';
 
 function createUiSetting(value: unknown, key = 'something'): UiSetting {
   return {

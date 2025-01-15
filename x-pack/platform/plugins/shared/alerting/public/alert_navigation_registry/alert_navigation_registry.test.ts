@@ -6,7 +6,7 @@
  */
 
 import { AlertNavigationRegistry } from './alert_navigation_registry';
-import { type RuleType, RecoveredActionGroup, type SanitizedRule } from '../../common';
+import { RuleType, RecoveredActionGroup, SanitizedRule } from '../../common';
 import { v4 as uuidv4 } from 'uuid';
 
 beforeEach(() => jest.resetAllMocks());

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
-import { type AlertCluster, type AlertThreadPoolRejectionsStats } from '../../../common/types/alerts';
+import { AlertCluster, AlertThreadPoolRejectionsStats } from '../../../common/types/alerts';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';

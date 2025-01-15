@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 import { EuiFlexGrid, EuiFlexItem, EuiCard, EuiStat } from '@elastic/eui';
-import { type DataType, formatNumber, type Metric } from '../lib';
+import { DataType, formatNumber, Metric } from '../lib';
 
 /*
  * Displays metadata for a metric.

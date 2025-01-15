@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import React, { Component, type ChangeEvent } from 'react';
+import React, { Component, ChangeEvent } from 'react';
 import _ from 'lodash';
 import { EuiFormRow, EuiFieldText, EuiPanel } from '@elastic/eui';
 

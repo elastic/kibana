@@ -12,7 +12,7 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { buildMockDashboardApi } from '../../../mocks';
-import { Item, type Props as DashboardGridItemProps } from './dashboard_grid_item';
+import { Item, Props as DashboardGridItemProps } from './dashboard_grid_item';
 import { DashboardContext } from '../../../dashboard_api/use_dashboard_api';
 import { DashboardInternalContext } from '../../../dashboard_api/use_dashboard_internal_api';
 

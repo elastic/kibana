@@ -6,8 +6,8 @@
  */
 
 import {
-  type GetEntitiesResponse,
-  type GetEventsResponse,
+  GetEntitiesResponse,
+  GetEventsResponse,
   createInvestigationItemParamsSchema,
   createInvestigationNoteParamsSchema,
   createInvestigationParamsSchema,
@@ -26,7 +26,7 @@ import {
   updateInvestigationNoteParamsSchema,
   updateInvestigationParamsSchema,
 } from '@kbn/investigation-shared';
-import { type ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
+import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import { createEntitiesESClient } from '../clients/create_entities_es_client';
 import { createInvestigation } from '../services/create_investigation';
 import { createInvestigationItem } from '../services/create_investigation_item';
@@ -35,7 +35,7 @@ import { deleteInvestigation } from '../services/delete_investigation';
 import { deleteInvestigationItem } from '../services/delete_investigation_item';
 import { deleteInvestigationNote } from '../services/delete_investigation_note';
 import { findInvestigations } from '../services/find_investigations';
-import { type AlertsClient, getAlertsClient } from '../services/get_alerts_client';
+import { AlertsClient, getAlertsClient } from '../services/get_alerts_client';
 import { getAllInvestigationStats } from '../services/get_all_investigation_stats';
 import { getAllInvestigationTags } from '../services/get_all_investigation_tags';
 import { getEntitiesWithSource } from '../services/get_entities';

@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type DataView, type DataViewField, type DataViewsContract } from '@kbn/data-views-plugin/public';
-import { type FieldFormatInstanceType } from '@kbn/field-formats-plugin/common';
+import { DataView, DataViewField, DataViewsContract } from '@kbn/data-views-plugin/public';
+import { FieldFormatInstanceType } from '@kbn/field-formats-plugin/common';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
-import { FieldEditor, type FieldEdiorProps } from './field_editor';
+import { FieldEditor, FieldEdiorProps } from './field_editor';
 
 import { mockManagementPlugin } from '../../mocks';
 import { createComponentWithContext } from '../test_utils';

@@ -15,13 +15,13 @@ import {
   EuiSpacer,
   EuiFormRow,
   EuiComboBox,
-  type EuiComboBoxOptionOption,
+  EuiComboBoxOptionOption,
   EuiFieldText,
   EuiButtonGroup,
   EuiLink,
 } from '@elastic/eui';
 import { useSubAction, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import { type UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type {
   PostBlockkitParams,
   PostMessageParams,

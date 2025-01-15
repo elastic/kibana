@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { type ComponentMeta, type ComponentStory } from '@storybook/react';
+import { ComponentMeta, ComponentStory } from '@storybook/react';
 
 import { AssistantBeacon as Component } from '../beacon';
 

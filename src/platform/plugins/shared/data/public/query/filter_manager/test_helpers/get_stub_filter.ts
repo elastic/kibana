@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Filter, type FilterStateStore } from '@kbn/es-query';
+import { Filter, FilterStateStore } from '@kbn/es-query';
 
 export function getFilter(
   store: FilterStateStore,

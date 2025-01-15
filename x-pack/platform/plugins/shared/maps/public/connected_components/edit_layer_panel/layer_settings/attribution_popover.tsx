@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type ChangeEvent, Component } from 'react';
+import React, { ChangeEvent, Component } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type Attribution } from '../../../../common/descriptor_types';
+import { Attribution } from '../../../../common/descriptor_types';
 import { panelStrings } from '../../panel_strings';
 
 interface Props {

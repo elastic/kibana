@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { type Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 
 import axios from 'axios';
-import { type ActionTypeConfigType, getActionType, type TorqActionType } from '.';
+import { ActionTypeConfigType, getActionType, TorqActionType } from '.';
 
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 import { validateConfig, validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { type Services } from '@kbn/actions-plugin/server/types';
+import { Services } from '@kbn/actions-plugin/server/types';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggerMock } from '@kbn/logging-mocks';
-import { type ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 
 jest.mock('axios');
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {

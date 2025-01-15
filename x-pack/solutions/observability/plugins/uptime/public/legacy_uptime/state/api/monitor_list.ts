@@ -8,8 +8,8 @@
 import { API_URLS } from '../../../../common/constants';
 import { apiService } from './utils';
 import {
-  type FetchMonitorStatesQueryArgs,
-  type MonitorSummariesResult,
+  FetchMonitorStatesQueryArgs,
+  MonitorSummariesResult,
   MonitorSummariesResultType,
 } from '../../../../common/runtime_types';
 

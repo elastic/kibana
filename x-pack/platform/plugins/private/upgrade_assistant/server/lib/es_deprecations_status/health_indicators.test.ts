@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, type ScopedClusterClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import { getHealthIndicators } from './health_indicators';
 import * as healthIndicatorsMock from '../__fixtures__/health_indicators';
 

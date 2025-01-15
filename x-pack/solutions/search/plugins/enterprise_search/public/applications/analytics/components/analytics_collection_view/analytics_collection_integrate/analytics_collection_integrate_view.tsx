@@ -22,11 +22,11 @@ import {
   EuiCodeBlock,
 } from '@elastic/eui';
 
-import { type EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
+import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
 import { i18n } from '@kbn/i18n';
 
-import { type AnalyticsCollection } from '../../../../../../common/types/analytics';
+import { AnalyticsCollection } from '../../../../../../common/types/analytics';
 import { useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
 import { docLinks } from '../../../../shared/doc_links';
 

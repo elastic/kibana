@@ -10,8 +10,8 @@
 import { Observable } from 'rxjs';
 
 import {
-  type RedirectAppLinksServices,
-  type RedirectAppLinksKibanaDependencies,
+  RedirectAppLinksServices,
+  RedirectAppLinksKibanaDependencies,
 } from '@kbn/shared-ux-link-redirect-app-types';
 
 type Params = Pick<RedirectAppLinksServices, 'navigateToUrl'>;

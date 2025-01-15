@@ -6,11 +6,11 @@
  */
 
 import datemath from '@elastic/datemath';
-import { type KibanaRequest } from '@kbn/core/server';
+import { KibanaRequest } from '@kbn/core/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/common';
 import { getRelevantFieldNames } from '@kbn/observability-ai-assistant-plugin/server/functions/get_dataset_info/get_relevant_field_names';
-import { type ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
@@ -18,7 +18,7 @@ import {
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { omit } from 'lodash';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-plugin/common/constants';
-import { type FunctionRegistrationParameters } from '.';
+import { FunctionRegistrationParameters } from '.';
 
 const defaultFields = [
   '@timestamp',

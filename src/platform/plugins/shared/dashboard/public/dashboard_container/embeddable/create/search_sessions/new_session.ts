@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { COMPARE_ALL_OPTIONS, type Filter, type TimeRange, onlyDisabledFiltersChanged } from '@kbn/es-query';
-import { combineLatest, distinctUntilChanged, type Observable, skip } from 'rxjs';
+import { COMPARE_ALL_OPTIONS, Filter, TimeRange, onlyDisabledFiltersChanged } from '@kbn/es-query';
+import { combineLatest, distinctUntilChanged, Observable, skip } from 'rxjs';
 import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { apiPublishesReload, apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import { areTimesEqual } from '../../../../dashboard_api/unified_search_manager';

@@ -13,8 +13,8 @@ import { GlobalFlyout } from '../../shared_imports';
 import {
   defaultFlyoutProps,
   EditFieldContainer,
-  type EditFieldContainerProps,
-  type SemanticTextInfo,
+  EditFieldContainerProps,
+  SemanticTextInfo,
 } from './fields';
 import { DocumentFieldsJsonEditor } from './fields_json_editor';
 import { DocumentFieldsTreeEditor } from './fields_tree_editor';

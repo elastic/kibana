@@ -12,12 +12,12 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiComboBox,
   EuiFlexGroup,
-  type EuiComboBoxProps,
+  EuiComboBoxProps,
   EuiFlexItem,
   EuiSpacer,
-  type CommonProps,
+  CommonProps,
 } from '@elastic/eui';
-import { type VegaAdapter, type InspectDataSets } from '../vega_adapter';
+import { VegaAdapter, InspectDataSets } from '../vega_adapter';
 import { InspectorDataGrid } from './inspector_data_grid';
 
 interface DataViewerProps extends CommonProps {

@@ -12,7 +12,7 @@ import { useFormContext } from 'react-hook-form';
 import styled from 'styled-components';
 import { FORM_CONFIG } from '../form/form_config';
 import { Field } from '../form/field';
-import { ConfigKey, type FormMonitorType } from '../types';
+import { ConfigKey, FormMonitorType } from '../types';
 
 export const AdvancedConfig = ({ readOnly }: { readOnly: boolean }) => {
   const { watch } = useFormContext();

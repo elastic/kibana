@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Required, type ValuesType } from 'utility-types';
+import { Required, ValuesType } from 'utility-types';
 
 interface ToolSchemaFragmentBase {
   description?: string;

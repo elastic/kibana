@@ -13,9 +13,9 @@ import { EuiColorPicker, EuiFormRow, EuiPanel, EuiSpacer, EuiTitle } from '@elas
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { type VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { SwitchOption } from '@kbn/vis-default-editor-plugin/public';
-import { type HeatmapVisParams, type ValueAxis } from '../../types';
+import { HeatmapVisParams, ValueAxis } from '../../types';
 
 const VERTICAL_ROTATION = 270;
 

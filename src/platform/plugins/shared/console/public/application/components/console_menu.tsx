@@ -9,7 +9,7 @@
 
 import React, { Component } from 'react';
 
-import { type NotificationsSetup } from '@kbn/core/public';
+import { NotificationsSetup } from '@kbn/core/public';
 
 import { EuiContextMenuPanel, EuiContextMenuItem, EuiPopover, EuiButtonIcon } from '@elastic/eui';
 

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { type MutableRefObject } from 'react';
+import React, { MutableRefObject } from 'react';
 import { EuiButtonIcon, EuiFlexItem, EuiColorPaletteDisplay, EuiToolTip } from '@elastic/eui';
 import { FIXED_PROGRESSION } from '@kbn/coloring';
 

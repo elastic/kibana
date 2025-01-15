@@ -8,7 +8,7 @@
  */
 
 import moment from 'moment';
-import { type Datatable } from '@kbn/expressions-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { normalizeTable } from './table';
 import { createSampleDatatableWithRows } from '../__mocks__';
 

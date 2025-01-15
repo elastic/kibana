@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Vis } from '@kbn/visualizations-plugin/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
 
-import { type PartitionVisParams } from '@kbn/expression-partition-vis-plugin/common';
+import { PartitionVisParams } from '@kbn/expression-partition-vis-plugin/common';
 import { samplePieVis } from './sample_vis.test.mocks';
 import { toExpressionAst } from './to_ast';
 

@@ -6,25 +6,25 @@
  */
 
 import {
-  type ElasticsearchClient,
-  type KibanaRequest,
-  type Logger,
-  type SavedObjectsClientContract,
+  ElasticsearchClient,
+  KibanaRequest,
+  Logger,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { type LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
+import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import {
   defaultLogViewAttributes,
   defaultLogViewsStaticConfig,
-  type LogView,
-  type LogViewAttributes,
-  type LogViewsStaticConfig,
+  LogView,
+  LogViewAttributes,
+  LogViewsStaticConfig,
 } from '../../../common/log_views';
 import { LogViewsClient } from './log_views_client';
 import {
-  type LogViewFallbackHandler,
-  type LogViewsServiceSetup,
-  type LogViewsServiceStart,
-  type LogViewsServiceStartDeps,
+  LogViewFallbackHandler,
+  LogViewsServiceSetup,
+  LogViewsServiceStart,
+  LogViewsServiceStartDeps,
 } from './types';
 
 export class LogViewsService {

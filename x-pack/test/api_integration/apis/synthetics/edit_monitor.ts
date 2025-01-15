@@ -9,13 +9,13 @@ import { v4 as uuidv4 } from 'uuid';
 import { omit } from 'lodash';
 import {
   ConfigKey,
-  type EncryptedSyntheticsSavedMonitor,
-  type HTTPFields,
-  type MonitorFields,
+  EncryptedSyntheticsSavedMonitor,
+  HTTPFields,
+  MonitorFields,
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
-import { type FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { omitResponseTimestamps, omitEmptyValues } from './helper/monitor';
 import { PrivateLocationTestService } from './services/private_location_test_service';

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { type FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { Spaces } from '../../scenarios';
 

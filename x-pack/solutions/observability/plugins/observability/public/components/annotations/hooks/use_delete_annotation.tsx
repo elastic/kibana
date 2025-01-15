@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { type IHttpFetchError, type ResponseErrorBody } from '@kbn/core/public';
-import { type QueryKey, useMutation } from '@tanstack/react-query';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { QueryKey, useMutation } from '@tanstack/react-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';

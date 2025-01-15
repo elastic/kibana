@@ -6,16 +6,16 @@
  */
 
 import {
-  type TransformDestination,
-  type TransformPivot,
-  type TransformPutTransformRequest,
-  type TransformSource,
-  type TransformTimeSync,
-  type QueryDslQueryContainer,
+  TransformDestination,
+  TransformPivot,
+  TransformPutTransformRequest,
+  TransformSource,
+  TransformTimeSync,
+  QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { SLO_RESOURCES_VERSION } from '../../../common/constants';
-import { type SLODefinition } from '../../domain/models';
+import { SLODefinition } from '../../domain/models';
 
 export interface TransformSettings {
   frequency: TransformPutTransformRequest['frequency'];

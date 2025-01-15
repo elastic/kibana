@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type KibanaRequest } from '@kbn/core-http-server';
-import { type ZodParamsObject, type IoTsParamsObject } from '@kbn/server-route-repository-utils';
+import { KibanaRequest } from '@kbn/core-http-server';
+import { ZodParamsObject, IoTsParamsObject } from '@kbn/server-route-repository-utils';
 import { isZod } from '@kbn/zod';
 import { decodeRequestParams } from './decode_request_params';
 import { stripNullishRequestParameters } from './strip_nullish_request_parameters';

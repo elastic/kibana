@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { SETTING_CATEGORY } from '@kbn/presentation-util-plugin/server';
-import { type UiSettingsParams } from '@kbn/core/types';
+import { UiSettingsParams } from '@kbn/core/types';
 import { UI_SETTINGS } from '../common';
 
 /**

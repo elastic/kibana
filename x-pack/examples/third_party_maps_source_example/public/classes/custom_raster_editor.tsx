@@ -7,8 +7,8 @@
 
 import React, { Component } from 'react';
 import { EuiCallOut, EuiPanel, htmlIdGenerator } from '@elastic/eui';
-import { type RenderWizardArguments } from '@kbn/maps-plugin/public';
-import { type LayerDescriptor, LAYER_TYPE } from '@kbn/maps-plugin/common';
+import { RenderWizardArguments } from '@kbn/maps-plugin/public';
+import { LayerDescriptor, LAYER_TYPE } from '@kbn/maps-plugin/common';
 import { CustomRasterSource } from './custom_raster_source';
 
 export class CustomRasterEditor extends Component<RenderWizardArguments> {

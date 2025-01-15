@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import {
-  type ActionConnectorFieldsProps,
+  ActionConnectorFieldsProps,
   SimpleConnectorForm,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';

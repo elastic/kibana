@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { esTestConfig } from '@kbn/test';
-import { type FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObject, getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');

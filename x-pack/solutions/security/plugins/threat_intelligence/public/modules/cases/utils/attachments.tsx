@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { type CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
-import { type JsonValue } from '@kbn/utility-types';
-import { type ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import { JsonValue } from '@kbn/utility-types';
+import { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import React from 'react';
 import { EuiAvatar } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CASE_ATTACHMENT_TYPE_ID } from '../../../../common/constants';
 import { EMPTY_VALUE } from '../../../constants/common';
-import { type Indicator, RawIndicatorFieldId } from '../../../../common/types/indicator';
+import { Indicator, RawIndicatorFieldId } from '../../../../common/types/indicator';
 import { getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 
 /**

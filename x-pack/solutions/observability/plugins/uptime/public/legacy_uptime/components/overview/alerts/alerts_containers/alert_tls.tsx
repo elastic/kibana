@@ -7,11 +7,11 @@
 
 import { useDispatch, useSelector } from 'react-redux';
 import React, { useCallback, useEffect } from 'react';
-import { type RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
 import { useSnapShotCount } from './use_snap_shot';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../../common/constants';
-import { type TLSParams } from '../../../../../../common/runtime_types/alerts/tls';
+import { TLSParams } from '../../../../../../common/runtime_types/alerts/tls';
 import { AlertTlsComponent } from '../alert_tls';
 import { selectDynamicSettings } from '../../../../state/selectors';
 import { getDynamicSettings } from '../../../../state/actions/dynamic_settings';

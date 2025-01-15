@@ -8,9 +8,9 @@
  */
 
 import { ColorSchemas } from '@kbn/charts-plugin/common';
-import { type CustomPaletteParams, type PaletteOutput } from '@kbn/coloring';
+import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { getConfiguration } from './gauge';
-import { type GaugeType, type GaugeVisParams } from '../../types';
+import { GaugeType, GaugeVisParams } from '../../types';
 
 const params: GaugeVisParams = {
   addTooltip: false,

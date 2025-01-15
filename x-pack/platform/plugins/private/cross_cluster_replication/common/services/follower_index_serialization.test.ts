@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ShardFromEs, type FollowerIndexFromEs, type FollowerIndex } from '../types';
+import { ShardFromEs, FollowerIndexFromEs, FollowerIndex } from '../types';
 
 import {
   deserializeShard,

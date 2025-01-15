@@ -8,7 +8,7 @@
  */
 
 import { RequestAdapter } from './request_adapter';
-import { type Request } from './types';
+import { Request } from './types';
 
 describe('RequestAdapter', () => {
   let adapter: RequestAdapter;

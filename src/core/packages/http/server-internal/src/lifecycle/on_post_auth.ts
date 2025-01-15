@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Lifecycle, type Request, type ResponseToolkit as HapiResponseToolkit } from '@hapi/hapi';
+import { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from '@hapi/hapi';
 import type { Logger } from '@kbn/logging';
 import type {
   OnPostAuthNextResult,

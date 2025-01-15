@@ -8,10 +8,10 @@
  */
 
 import React from 'react';
-import { EuiButton, type EuiButtonProps } from '@elastic/eui';
+import { EuiButton, EuiButtonProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
-import { type VisualizeInformation } from './visualize_trigger_utils';
+import { VisualizeInformation } from './visualize_trigger_utils';
 
 interface FieldVisualizeButtonInnerProps {
   field: DataViewField;

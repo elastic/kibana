@@ -5,11 +5,11 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { type Client } from '@elastic/elasticsearch';
-import { type MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import { type ToolingLog } from '@kbn/tooling-log';
+import { Client } from '@elastic/elasticsearch';
+import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import { ToolingLog } from '@kbn/tooling-log';
 import moment from 'moment';
-import { type FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export const TEST_DOC_COUNT = 100;
 export const TIME_PICKER_FORMAT = 'MMM D, YYYY [@] HH:mm:ss.SSS';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type GetSLOSettingsResponse } from '@kbn/slo-schema';
+import { GetSLOSettingsResponse } from '@kbn/slo-schema';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from './constants';
 
 export const getListOfSloSummaryIndices = (

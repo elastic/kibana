@@ -8,7 +8,7 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
-import { type GenerationContext } from './get_generation_context';
+import { GenerationContext } from './get_generation_context';
 
 interface AdditionalProperties {
   /**

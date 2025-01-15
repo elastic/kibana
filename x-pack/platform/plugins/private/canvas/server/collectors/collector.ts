@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { type CollectorFetchContext, type UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { type TelemetryCollector } from '../../types';
+import { CollectorFetchContext, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { TelemetryCollector } from '../../types';
 
-import { workpadCollector, workpadSchema, type WorkpadTelemetry } from './workpad_collector';
+import { workpadCollector, workpadSchema, WorkpadTelemetry } from './workpad_collector';
 import {
   customElementCollector,
-  type CustomElementTelemetry,
+  CustomElementTelemetry,
   customElementSchema,
 } from './custom_element_collector';
 

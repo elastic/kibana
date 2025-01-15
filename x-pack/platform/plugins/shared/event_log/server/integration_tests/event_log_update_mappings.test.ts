@@ -7,8 +7,8 @@
 
 import { type ElasticsearchClient } from '@kbn/core/server';
 import { setupKibanaServer, setupTestServers } from './lib/setup_test_servers';
-import { type IEvent } from '../types';
-import { type EsContextCtorParams } from '../es/context';
+import { IEvent } from '../types';
+import { EsContextCtorParams } from '../es/context';
 
 const { createEsContext: createEsContextMock } = jest.requireMock('../es');
 jest.mock('../es', () => {

@@ -6,13 +6,13 @@
  */
 
 import {
-  type SavedObjectsFindResult,
-  type SavedObjectsType,
+  SavedObjectsFindResult,
+  SavedObjectsType,
   SavedObjectTypeRegistry,
-  type Capabilities,
+  Capabilities,
 } from '@kbn/core/server';
 import { mapToResult, mapToResults } from './map_object_to_result';
-import { type SavedObjectReference } from '@kbn/core/types';
+import { SavedObjectReference } from '@kbn/core/types';
 
 const createType = (props: Partial<SavedObjectsType>): SavedObjectsType => {
   return {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type METRIC_TYPE } from '.';
+import { METRIC_TYPE } from '.';
 
 export type UiCounterMetricType =
   | METRIC_TYPE.CLICK

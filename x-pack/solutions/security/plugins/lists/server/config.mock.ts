@@ -14,7 +14,7 @@ import {
   MAX_IMPORT_SIZE,
 } from '../common/constants.mock';
 
-import { type ConfigType } from './config';
+import { ConfigType } from './config';
 
 export const getConfigMock = (): Partial<ConfigType> => ({
   listIndex: LIST_INDEX,

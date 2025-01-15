@@ -13,9 +13,9 @@ import type {
   Logger,
 } from '@kbn/core/server';
 
-import { type SearchNotebooksConfig } from './config';
+import { SearchNotebooksConfig } from './config';
 import { defineRoutes } from './routes';
-import { type SearchNotebooksPluginSetup, type SearchNotebooksPluginStart, type NotebooksCache } from './types';
+import { SearchNotebooksPluginSetup, SearchNotebooksPluginStart, NotebooksCache } from './types';
 import { createNotebooksCache } from './utils';
 
 export class SearchNotebooksPlugin

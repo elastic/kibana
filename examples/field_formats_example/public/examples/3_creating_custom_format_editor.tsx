@@ -10,9 +10,9 @@
 import React from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import {
-  type FieldFormatEditor,
-  type FieldFormatEditorFactory,
-  type IndexPatternFieldEditorSetup,
+  FieldFormatEditor,
+  FieldFormatEditorFactory,
+  IndexPatternFieldEditorSetup,
 } from '@kbn/data-view-field-editor-plugin/public';
 import { ExampleCurrencyFormat } from '../../common';
 

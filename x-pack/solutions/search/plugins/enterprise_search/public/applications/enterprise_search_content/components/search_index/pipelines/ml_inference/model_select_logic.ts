@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { kea, type MakeLogicType } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
-import { type HttpError, Status } from '../../../../../../../common/types/api';
+import { HttpError, Status } from '../../../../../../../common/types/api';
 import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/handle_api_errors';
 import {
   CreateModelApiLogic,
-  type CreateModelApiLogicActions,
+  CreateModelApiLogicActions,
 } from '../../../../api/ml_models/create_model_api_logic';
 import {
   StartModelApiLogic,
-  type StartModelApiLogicActions,
+  StartModelApiLogicActions,
 } from '../../../../api/ml_models/start_model_api_logic';
 import { IndexViewLogic } from '../../index_view_logic';
 
 import {
   MLInferenceLogic,
-  type MLInferenceProcessorsActions,
-  type MLInferenceProcessorsValues,
+  MLInferenceProcessorsActions,
+  MLInferenceProcessorsValues,
 } from './ml_inference_logic';
 
 export interface ModelSelectActions {

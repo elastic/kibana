@@ -15,19 +15,19 @@ import {
   EuiSpacer,
   EuiTabbedContent,
   EuiLoadingSpinner,
-  type EuiTabbedContentTab,
+  EuiTabbedContentTab,
   useEuiTheme,
   EuiFlexGroup,
 } from '@elastic/eui';
 import {
-  type AlertStatus,
+  AlertStatus,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_STATUS,
   ALERT_STATUS_UNTRACKED,
 } from '@kbn/rule-data-utils';
-import { type RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import dedent from 'dedent';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared';
@@ -35,14 +35,14 @@ import { css } from '@emotion/react';
 import { omit } from 'lodash';
 import { BetaBadge } from '../../components/experimental_badge';
 import { RelatedAlerts } from './components/related_alerts';
-import { type AlertDetailsSource } from './types';
+import { AlertDetailsSource } from './types';
 import { SourceBar } from './components';
 import { StatusBar } from './components/status_bar';
 import { observabilityFeatureId } from '../../../common';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { type AlertData, useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
+import { AlertData, useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
 import { HeaderActions } from './components/header_actions';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import { getTimeZone } from '../../utils/get_time_zone';
@@ -50,7 +50,7 @@ import { isAlertDetailsEnabledPerApp } from '../../utils/is_alert_details_enable
 import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { AlertOverview } from '../../components/alert_overview/alert_overview';
-import { type CustomThresholdRule } from '../../components/custom_threshold/components/types';
+import { CustomThresholdRule } from '../../components/custom_threshold/components/types';
 import { AlertDetailContextualInsights } from './alert_details_contextual_insights';
 import { AlertHistoryChart } from './components/alert_history';
 

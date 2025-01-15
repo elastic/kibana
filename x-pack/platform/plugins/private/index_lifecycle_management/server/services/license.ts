@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { type Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import {
-  type KibanaRequest,
-  type KibanaResponseFactory,
-  type RequestHandler,
-  type RequestHandlerContext,
+  KibanaRequest,
+  KibanaResponseFactory,
+  RequestHandler,
+  RequestHandlerContext,
 } from '@kbn/core/server';
 
-import { type LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { type LicenseType, type ILicense } from '../shared_imports';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { LicenseType, ILicense } from '../shared_imports';
 
 export interface LicenseStatus {
   isValid: boolean;

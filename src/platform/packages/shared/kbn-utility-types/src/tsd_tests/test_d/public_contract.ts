@@ -8,7 +8,7 @@
  */
 
 import { expectType } from 'tsd';
-import { type PublicContract } from '../../..';
+import { PublicContract } from '../../..';
 
 class Test {
   public str: string = '';

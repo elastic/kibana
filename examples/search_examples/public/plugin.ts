@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type AppMountParameters, type CoreSetup, type CoreStart, type Plugin } from '@kbn/core/public';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import {
-  type AppPluginSetupDependencies,
-  type AppPluginStartDependencies,
-  type SearchExamplesPluginSetup,
-  type SearchExamplesPluginStart,
+  AppPluginSetupDependencies,
+  AppPluginStartDependencies,
+  SearchExamplesPluginSetup,
+  SearchExamplesPluginStart,
 } from './types';
 import { SearchSessionsExamplesAppLocatorDefinition } from './search_sessions/app_locator';
 import { PLUGIN_NAME } from '../common';

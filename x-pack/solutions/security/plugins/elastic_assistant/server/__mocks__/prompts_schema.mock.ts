@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { type estypes } from '@elastic/elasticsearch';
-import { type EsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
+import { estypes } from '@elastic/elasticsearch';
+import { EsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
 import {
-  type PerformPromptsBulkActionRequestBody,
-  type PromptCreateProps,
-  type PromptResponse,
-  type PromptUpdateProps,
+  PerformPromptsBulkActionRequestBody,
+  PromptCreateProps,
+  PromptResponse,
+  PromptUpdateProps,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 
 export const getPromptsSearchEsMock = () => {

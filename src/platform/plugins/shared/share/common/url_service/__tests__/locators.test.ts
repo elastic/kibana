@@ -8,7 +8,7 @@
  */
 
 import { of } from '@kbn/kibana-utils-plugin/common';
-import { testLocator, type TestLocatorState, urlServiceTestSetup } from './setup';
+import { testLocator, TestLocatorState, urlServiceTestSetup } from './setup';
 
 describe('locators', () => {
   test('can start locators service', () => {

@@ -6,14 +6,14 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { type AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import {
-  type ITelemetryClient,
-  type DatasetDetailsEbtProps,
+  ITelemetryClient,
+  DatasetDetailsEbtProps,
   DatasetQualityTelemetryEventTypes,
-  type DatasetDetailsNavigatedEbtProps,
-  type DatasetDetailsTrackingState,
-  type DatasetNavigatedEbtProps,
+  DatasetDetailsNavigatedEbtProps,
+  DatasetDetailsTrackingState,
+  DatasetNavigatedEbtProps,
 } from './types';
 
 export class TelemetryClient implements ITelemetryClient {

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { kea, type MakeLogicType } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { isEqual } from 'lodash';
 
 import { Status } from '../../../../../common/types/api';
-import { type ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
+import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
 
-import { type Actions } from '../../../shared/api_logic/create_api_logic';
+import { Actions } from '../../../shared/api_logic/create_api_logic';
 import { IndexNameLogic } from '../../components/search_index/index_name_logic';
 
 import {
-  type FetchIndexApiParams,
+  FetchIndexApiParams,
   FetchIndexApiLogic,
-  type FetchIndexApiResponse,
+  FetchIndexApiResponse,
 } from './fetch_index_api_logic';
 
 const FETCH_INDEX_POLLING_DURATION = 5000; // 5 seconds

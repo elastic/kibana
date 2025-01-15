@@ -14,15 +14,15 @@ import {
   EuiPortal,
   EuiOverlayMask,
   EuiFocusTrap,
-  type EuiThemeComputed,
+  EuiThemeComputed,
 } from '@elastic/eui';
-import { type GuideConfig, type GuideStep as GuideStepType, type StepConfig } from '@kbn/guided-onboarding';
+import { GuideConfig, GuideStep as GuideStepType, StepConfig } from '@kbn/guided-onboarding';
 import { i18n } from '@kbn/i18n';
 import { GuidePanelFlyoutHeader } from './guide_panel_flyout_header';
 import { GuidePanelFlyoutBody } from './guide_panel_flyout_body';
 import type { PluginState } from '../../../common';
 import { GuidePanelFlyoutFooter } from './guide_panel_flyout_footer';
-import { type getGuidePanelStyles } from '../guide_panel.styles';
+import { getGuidePanelStyles } from '../guide_panel.styles';
 
 export const GuidePanelFlyout = ({
   isOpen,

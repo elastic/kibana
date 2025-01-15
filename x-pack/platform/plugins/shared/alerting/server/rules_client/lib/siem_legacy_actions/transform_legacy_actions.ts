@@ -8,9 +8,9 @@
 import { v4 } from 'uuid';
 import { isEmpty } from 'lodash/fp';
 import type { SavedObjectReference } from '@kbn/core/server';
-import { type RawRuleAction } from '../../../types';
+import { RawRuleAction } from '../../../types';
 import { transformToNotifyWhen } from './transform_to_notify_when';
-import { type LegacyIRuleActionsAttributes } from './types';
+import { LegacyIRuleActionsAttributes } from './types';
 import { transformToAlertThrottle } from './transform_to_alert_throttle';
 
 /**

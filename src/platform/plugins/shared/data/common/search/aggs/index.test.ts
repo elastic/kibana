@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type AggTypesDependencies, getAggTypes } from '.';
+import { AggTypesDependencies, getAggTypes } from '.';
 import { mockGetFieldFormatsStart } from './test_helpers';
 
 import { isBucketAggType } from './buckets/bucket_agg_type';

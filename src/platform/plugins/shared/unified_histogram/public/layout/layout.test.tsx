@@ -14,13 +14,13 @@ import React from 'react';
 import { of } from 'rxjs';
 import { Chart } from '../chart';
 import {
-  type UnifiedHistogramChartContext,
+  UnifiedHistogramChartContext,
   UnifiedHistogramFetchStatus,
-  type UnifiedHistogramHitsContext,
+  UnifiedHistogramHitsContext,
 } from '../types';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
-import { UnifiedHistogramLayout, type UnifiedHistogramLayoutProps } from './layout';
+import { UnifiedHistogramLayout, UnifiedHistogramLayoutProps } from './layout';
 import { ResizableLayout, ResizableLayoutMode } from '@kbn/resizable-layout';
 
 let mockBreakpoint = 'l';

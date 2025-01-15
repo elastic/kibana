@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ActionExecutorContract } from './action_executor';
+import { ActionExecutorContract } from './action_executor';
 
 const createActionExecutorMock = () => {
   const mocked: jest.Mocked<ActionExecutorContract> = {

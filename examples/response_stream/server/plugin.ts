@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Plugin, type PluginInitializerContext, type CoreSetup, type CoreStart, type Logger } from '@kbn/core/server';
+import { Plugin, PluginInitializerContext, CoreSetup, CoreStart, Logger } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 
 import {

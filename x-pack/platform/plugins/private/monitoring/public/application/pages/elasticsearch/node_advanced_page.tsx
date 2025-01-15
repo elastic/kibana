@@ -12,9 +12,9 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ItemTemplate } from './item_template';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { AdvancedNode } from '../../../components/elasticsearch/node/advanced';
-import { type ComponentProps } from '../../route_init';
+import { ComponentProps } from '../../route_init';
 import { useCharts } from '../../hooks/use_charts';
-import { type AlertsByName } from '../../../alerts/types';
+import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
 import {
   RULE_CPU_USAGE,

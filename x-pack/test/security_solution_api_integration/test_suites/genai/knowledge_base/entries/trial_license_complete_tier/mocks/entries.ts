@@ -6,9 +6,9 @@
  */
 
 import {
-  type DocumentEntryCreateFields,
+  DocumentEntryCreateFields,
   DocumentEntryType,
-  type IndexEntryCreateFields,
+  IndexEntryCreateFields,
   IndexEntryType,
 } from '@kbn/elastic-assistant-common';
 

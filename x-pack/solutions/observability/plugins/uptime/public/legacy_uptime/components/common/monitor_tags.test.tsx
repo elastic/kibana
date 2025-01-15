@@ -6,7 +6,7 @@
  */
 
 import { render, fireEvent, screen } from '@testing-library/react';
-import React, { type FC, type PropsWithChildren } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { MonitorTags } from './monitor_tags';
 import * as hooks from '../../hooks/use_url_params';

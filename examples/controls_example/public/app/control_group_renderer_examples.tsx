@@ -13,7 +13,7 @@ import useAsync from 'react-use/lib/useAsync';
 import { EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { SearchExample } from './control_group_renderer_examples/search_example';
 import { EditExample } from './control_group_renderer_examples/edit_example';
-import { type ControlsExampleStartDeps } from '../plugin';
+import { ControlsExampleStartDeps } from '../plugin';
 
 export const ControlGroupRendererExamples = ({
   data,

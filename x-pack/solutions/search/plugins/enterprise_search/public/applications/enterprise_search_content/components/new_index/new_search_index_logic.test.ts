@@ -13,7 +13,7 @@ import { IndexExistsApiLogic } from '../../api/index/index_exists_api_logic';
 
 import { UNIVERSAL_LANGUAGE_VALUE } from './constants';
 import { flashIndexCreatedToast } from './new_index_created_toast';
-import { NewSearchIndexLogic, type NewSearchIndexValues } from './new_search_index_logic';
+import { NewSearchIndexLogic, NewSearchIndexValues } from './new_search_index_logic';
 
 jest.mock('./new_index_created_toast', () => ({ flashIndexCreatedToast: jest.fn() }));
 jest.mock('../../../shared/kibana/kibana_logic', () => ({

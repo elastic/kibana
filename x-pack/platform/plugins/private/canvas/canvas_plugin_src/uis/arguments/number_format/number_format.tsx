@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { type FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
 import { FormatSelect } from '../../../../public/components/format_select/format_select';
-import { type ArgumentProps } from '../../../../types/arguments';
+import { ArgumentProps } from '../../../../types/arguments';
 
 interface NumberFormatOption {
   /** A NumeralJS format string */

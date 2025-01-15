@@ -8,7 +8,7 @@
 import { either } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
 
-import { Duration, type DurationUnit } from '../models/duration';
+import { Duration, DurationUnit } from '../models/duration';
 
 const durationType = new t.Type<Duration, string, unknown>(
   'Duration',

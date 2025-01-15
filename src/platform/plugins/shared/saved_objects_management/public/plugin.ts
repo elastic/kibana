@@ -8,23 +8,23 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type CoreSetup, type CoreStart, type Plugin } from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { type ManagementSetup } from '@kbn/management-plugin/public';
-import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { type DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { type HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { type SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import {
   SavedObjectsManagementActionService,
-  type SavedObjectsManagementActionServiceStart,
+  SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementColumnService,
-  type SavedObjectsManagementColumnServiceStart,
+  SavedObjectsManagementColumnServiceStart,
 } from './services';
 
 import type { v1 } from '../common';
 
-import { type SavedObjectManagementTypeInfo } from './types';
+import { SavedObjectManagementTypeInfo } from './types';
 import {
   getAllowedTypes,
   getDefaultTitle,

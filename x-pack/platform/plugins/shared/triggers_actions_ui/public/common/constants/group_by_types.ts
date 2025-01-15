@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type GroupByType } from '../types';
+import { GroupByType } from '../types';
 
 export const builtInGroupByTypes: { [key: string]: GroupByType } = {
   all: {

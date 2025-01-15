@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { type ChangeEvent, Component } from 'react';
+import React, { ChangeEvent, Component } from 'react';
 import {
   EuiForm,
   EuiFormRow,
   EuiSpacer,
   EuiSelect,
   EuiSwitch,
-  type EuiSwitchEvent,
+  EuiSwitchEvent,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { GeoFilePicker, type OnFileSelectParameters } from './geo_file_picker';
+import { GeoFilePicker, OnFileSelectParameters } from './geo_file_picker';
 import { IndexNameForm } from './index_name_form';
 import { validateIndexName } from '../../validate_index_name';
 

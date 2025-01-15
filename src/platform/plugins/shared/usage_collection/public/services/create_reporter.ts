@@ -8,9 +8,9 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { Reporter, type Storage } from '@kbn/analytics';
-import { type HttpSetup } from '@kbn/core/public';
-import { type UiCounters } from '../../common/types';
+import { Reporter, Storage } from '@kbn/analytics';
+import { HttpSetup } from '@kbn/core/public';
+import { UiCounters } from '../../common/types';
 
 interface AnalyticsReporterConfig {
   localStorage: Storage;

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { type DataViewListItem, indexPatterns as indexPatternsUtils } from '@kbn/data-plugin/public';
+import { DataViewListItem, indexPatterns as indexPatternsUtils } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
-  type SerializedNode,
-  type UrlTemplate,
-  type SerializedUrlTemplate,
-  type WorkspaceField,
-  type GraphWorkspaceSavedObject,
-  type SerializedWorkspaceState,
-  type AdvancedSettings,
-  type GraphData,
-  type Workspace,
-  type SerializedField,
+  SerializedNode,
+  UrlTemplate,
+  SerializedUrlTemplate,
+  WorkspaceField,
+  GraphWorkspaceSavedObject,
+  SerializedWorkspaceState,
+  AdvancedSettings,
+  GraphData,
+  Workspace,
+  SerializedField,
 } from '../../types';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
 import { getSuitableIcon, colorChoices, getIcon } from '../../helpers/style_choices';

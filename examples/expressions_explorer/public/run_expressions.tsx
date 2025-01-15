@@ -24,8 +24,8 @@ import {
   EuiButton,
   EuiSpacer,
 } from '@elastic/eui';
-import { type ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { type Adapters, type Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { Adapters, Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import { ExpressionEditor } from './editor/expression_editor';
 
 interface Props {

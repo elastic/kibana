@@ -7,10 +7,10 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import {
-  type AggDescriptor,
-  type ColorDynamicOptions,
-  type ESTermSourceDescriptor,
-  type LayerDescriptor,
+  AggDescriptor,
+  ColorDynamicOptions,
+  ESTermSourceDescriptor,
+  LayerDescriptor,
 } from '../../../common/descriptor_types';
 import {
   AGG_TYPE,

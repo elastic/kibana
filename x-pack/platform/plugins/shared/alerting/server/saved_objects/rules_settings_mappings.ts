@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
+import { SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
 
 export const rulesSettingsMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,

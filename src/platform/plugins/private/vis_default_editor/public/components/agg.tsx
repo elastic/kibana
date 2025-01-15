@@ -12,16 +12,16 @@ import {
   EuiAccordion,
   EuiToolTip,
   EuiButtonIcon,
-  type EuiButtonIconProps,
+  EuiButtonIconProps,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { TimeRange } from '@kbn/es-query';
-import { type IAggConfig } from '@kbn/data-plugin/public';
+import { IAggConfig } from '@kbn/data-plugin/public';
 import { DefaultEditorAggParams } from './agg_params';
-import { type DefaultEditorAggCommonProps } from './agg_common_props';
-import { AGGS_ACTION_KEYS, type AggsAction } from './agg_group_state';
+import { DefaultEditorAggCommonProps } from './agg_common_props';
+import { AGGS_ACTION_KEYS, AggsAction } from './agg_group_state';
 import { RowsOrColumnsControl } from './controls/rows_or_columns';
 import { RadiusRatioOptionControl } from './controls/radius_ratio_option';
 import { getSchemaByName } from '../schemas';

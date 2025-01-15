@@ -10,9 +10,9 @@ import { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs/promises';
 import path from 'path';
 import {
-  type ActionsClientChatOpenAI,
+  ActionsClientChatOpenAI,
   type ActionsClientLlm,
-  type ActionsClientSimpleChatModel,
+  ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 import type { Logger } from '@kbn/logging';
 import { ChatPromptTemplate } from '@langchain/core/prompts';

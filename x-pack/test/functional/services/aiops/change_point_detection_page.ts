@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { type FtrProviderContext } from '../../ftr_provider_context';
-import { type MlTableService } from '../ml/common_table_service';
-import { type CreateCaseParams } from '../cases/create';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { MlTableService } from '../ml/common_table_service';
+import { CreateCaseParams } from '../cases/create';
 
 export interface DashboardAttachmentOptions {
   applyTimeRange: boolean;

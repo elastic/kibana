@@ -6,9 +6,9 @@
  */
 
 import {
-  type SendRequestConfig,
-  type SendRequestResponse,
-  type UseRequestConfig,
+  SendRequestConfig,
+  SendRequestResponse,
+  UseRequestConfig,
   sendRequest as _sendRequest,
   useRequest as _useRequest,
 } from '../shared_imports';

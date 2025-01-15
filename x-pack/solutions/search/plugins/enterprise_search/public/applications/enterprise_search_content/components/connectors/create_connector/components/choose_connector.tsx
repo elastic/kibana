@@ -15,7 +15,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiComboBox,
-  type EuiComboBoxOptionOption,
+  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiText,
   useEuiTheme,
@@ -33,7 +33,7 @@ import {
 } from '../../../../../shared/constants';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { NewConnectorLogic } from '../../../new_index/method_connector/new_connector_logic';
-import { type SelfManagePreference } from '../create_connector';
+import { SelfManagePreference } from '../create_connector';
 
 interface ChooseConnectorSelectableProps {
   selfManaged: SelfManagePreference;

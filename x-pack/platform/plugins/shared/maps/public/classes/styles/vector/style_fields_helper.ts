@@ -12,10 +12,10 @@ import {
   ORDINAL_DATA_TYPES,
   VECTOR_STYLES,
 } from '../../../../common/constants';
-import { type IField } from '../../fields/field';
+import { IField } from '../../fields/field';
 import { getVectorStyleLabel } from './components/get_vector_style_label';
-import { type IStyleProperty } from './properties/style_property';
-import { type IDynamicStyleProperty } from './properties/dynamic_style_property';
+import { IStyleProperty } from './properties/style_property';
+import { IDynamicStyleProperty } from './properties/dynamic_style_property';
 
 export interface StyleField {
   label: string;

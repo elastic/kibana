@@ -8,9 +8,9 @@
  */
 
 import { schema, ValidationError } from '@kbn/config-schema';
-import { type KibanaRequest, type KibanaResponseFactory } from '@kbn/core-http-server';
+import { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { type IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type {
   InternalUiSettingsRequestHandlerContext,
   InternalUiSettingsRouter,

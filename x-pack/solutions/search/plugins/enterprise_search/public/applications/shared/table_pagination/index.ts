@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Meta } from '../../../../common/types';
+import { Meta } from '../../../../common/types';
 
 /**
  * Note: App Search's API pages start at 1 & EuiBasicTables' pages start at 0

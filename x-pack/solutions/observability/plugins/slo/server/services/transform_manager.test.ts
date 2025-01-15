@@ -7,12 +7,12 @@
 /* eslint-disable max-classes-per-file */
 
 import {
-  type ScopedClusterClientMock,
+  ScopedClusterClientMock,
   elasticsearchServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
-import { type MockedLogger } from '@kbn/logging-mocks';
-import { type TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import { MockedLogger } from '@kbn/logging-mocks';
+import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 
 import { DefaultTransformManager } from './transform_manager';
@@ -20,14 +20,14 @@ import {
   ApmTransactionErrorRateTransformGenerator,
   TransformGenerator,
 } from './transform_generators';
-import { type SLODefinition, type IndicatorTypes } from '../domain/models';
+import { SLODefinition, IndicatorTypes } from '../domain/models';
 import {
   createAPMTransactionDurationIndicator,
   createAPMTransactionErrorRateIndicator,
   createSLO,
 } from './fixtures/slo';
 import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
-import { type DataViewsService } from '@kbn/data-views-plugin/common';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 
 describe('TransformManager', () => {
   let scopedClusterClientMock: ScopedClusterClientMock;

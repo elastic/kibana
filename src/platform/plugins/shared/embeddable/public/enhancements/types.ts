@@ -8,7 +8,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { type PersistableState, type PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
+import { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 
 export interface EnhancementRegistryDefinition<P extends SerializableRecord = SerializableRecord>
   extends PersistableStateDefinition<P> {

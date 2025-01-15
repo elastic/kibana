@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { type TypeOf } from '@kbn/config-schema';
+import { TypeOf } from '@kbn/config-schema';
 import {
-  type TinesConfigSchema,
-  type TinesSecretsSchema,
-  type TinesRunActionParamsSchema,
-  type TinesRunActionResponseSchema,
-  type TinesStoriesActionResponseSchema,
-  type TinesWebhooksActionResponseSchema,
-  type TinesWebhooksActionParamsSchema,
-  type TinesWebhookObjectSchema,
-  type TinesStoryObjectSchema,
+  TinesConfigSchema,
+  TinesSecretsSchema,
+  TinesRunActionParamsSchema,
+  TinesRunActionResponseSchema,
+  TinesStoriesActionResponseSchema,
+  TinesWebhooksActionResponseSchema,
+  TinesWebhooksActionParamsSchema,
+  TinesWebhookObjectSchema,
+  TinesStoryObjectSchema,
 } from './schema';
 
 export type TinesConfig = TypeOf<typeof TinesConfigSchema>;

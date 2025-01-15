@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
-import { type RawAction } from '../../../types';
-import { type Connector } from '../types';
+import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
+import { RawAction } from '../../../types';
+import { Connector } from '../types';
 
 export function connectorFromSavedObject(
   savedObject: SavedObject<RawAction>,

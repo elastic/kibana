@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonIcon,
   EuiComboBox,
-  type EuiComboBoxOptionOption,
+  EuiComboBoxOptionOption,
   EuiExpression,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,14 +21,14 @@ import {
   EuiPopoverTitle,
   EuiSelect,
 } from '@elastic/eui';
-import { type HttpSetup } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   firstFieldOption,
   getFields,
   getIndexOptions,
   getTimeFieldOptions,
-  type IErrorObject,
+  IErrorObject,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 interface KibanaDeps {

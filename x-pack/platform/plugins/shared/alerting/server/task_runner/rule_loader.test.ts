@@ -17,9 +17,9 @@ import {
   getFakeKibanaRequest,
   validateRuleAndCreateFakeRequest,
 } from './rule_loader';
-import { type TaskRunnerContext } from './types';
+import { TaskRunnerContext } from './types';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
-import { type Rule } from '../types';
+import { Rule } from '../types';
 import { MONITORING_HISTORY_LIMIT, RuleExecutionStatusErrorReasons } from '../../common';
 import { getReasonFromError } from '../lib/error_with_reason';
 import { mockedRawRuleSO, mockedRule } from './fixtures';

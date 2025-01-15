@@ -8,20 +8,20 @@
  */
 
 import {
-  type GetIn,
-  type CreateIn,
-  type SearchIn,
-  type UpdateIn,
-  type DeleteIn,
-  type DeleteResult,
-  type SearchResult,
-  type GetResult,
-  type CreateResult,
-  type UpdateResult,
+  GetIn,
+  CreateIn,
+  SearchIn,
+  UpdateIn,
+  DeleteIn,
+  DeleteResult,
+  SearchResult,
+  GetResult,
+  CreateResult,
+  UpdateResult,
 } from '@kbn/content-management-plugin/common';
 import type { ContentManagementCrudTypes } from '@kbn/content-management-utils';
 
-import { type VisualizationContentType } from '../types';
+import { VisualizationContentType } from '../types';
 
 export interface Reference {
   type: string;

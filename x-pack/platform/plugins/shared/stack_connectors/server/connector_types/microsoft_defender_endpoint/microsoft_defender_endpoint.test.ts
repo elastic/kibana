@@ -6,7 +6,7 @@
  */
 
 import {
-  type CreateMicrosoftDefenderConnectorMockResponse,
+  CreateMicrosoftDefenderConnectorMockResponse,
   microsoftDefenderEndpointConnectorMocks,
 } from './mocks';
 

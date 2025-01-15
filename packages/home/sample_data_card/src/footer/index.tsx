@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { type SampleDataSet, type InstalledStatus } from '@kbn/home-sample-data-types';
+import { SampleDataSet, InstalledStatus } from '@kbn/home-sample-data-types';
 import { INSTALLED_STATUS, UNINSTALLED_STATUS } from '../constants';
 
 import { DisabledFooter } from './disabled_footer';

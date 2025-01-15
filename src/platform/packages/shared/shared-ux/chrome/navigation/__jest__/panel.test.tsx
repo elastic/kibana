@@ -15,7 +15,7 @@ import type {
   NavigationTreeDefinitionUI,
 } from '@kbn/core-chrome-browser';
 
-import { type PanelContentProvider } from '../src/ui';
+import { PanelContentProvider } from '../src/ui';
 import { renderNavigation } from './utils';
 
 describe('Panel', () => {

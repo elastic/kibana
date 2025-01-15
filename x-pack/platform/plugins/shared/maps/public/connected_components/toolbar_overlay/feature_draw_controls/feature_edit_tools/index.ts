@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { type AnyAction } from 'redux';
-import { type ThunkDispatch } from 'redux-thunk';
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import {
   FeatureEditTools,
-  type ReduxDispatchProps,
-  type ReduxStateProps,
-  type OwnProps,
+  ReduxDispatchProps,
+  ReduxStateProps,
+  OwnProps,
 } from './feature_edit_tools';
 import { updateEditShape } from '../../../../actions';
-import { type MapStoreState } from '../../../../reducers/store';
-import { type DRAW_SHAPE } from '../../../../../common/constants';
+import { MapStoreState } from '../../../../reducers/store';
+import { DRAW_SHAPE } from '../../../../../common/constants';
 import { getEditState } from '../../../../selectors/map_selectors';
 
 function mapStateToProps(state: MapStoreState): ReduxStateProps {

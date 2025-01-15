@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { type Observable, timer, merge, throwError, EMPTY } from 'rxjs';
+import { Observable, timer, merge, throwError, EMPTY } from 'rxjs';
 import { map, takeUntil, catchError } from 'rxjs';
 import { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { type KibanaRequest, type CoreStart, type IBasePath } from '@kbn/core/server';
+import { KibanaRequest, CoreStart, IBasePath } from '@kbn/core/server';
 import {
-  type GlobalSearchProviderResult,
-  type GlobalSearchBatchedResults,
-  type GlobalSearchFindParams,
+  GlobalSearchProviderResult,
+  GlobalSearchBatchedResults,
+  GlobalSearchFindParams,
 } from '../../common/types';
 import { GlobalSearchFindError } from '../../common/errors';
 import { takeInArray } from '../../common/operators';
 import { defaultMaxProviderResults } from '../../common/constants';
-import { type ILicenseChecker } from '../../common/license_checker';
+import { ILicenseChecker } from '../../common/license_checker';
 import { processProviderResult } from '../../common/process_result';
-import { type GlobalSearchConfigType } from '../config';
-import { getContextFactory, type GlobalSearchContextFactory } from './context';
-import { type GlobalSearchResultProvider, type GlobalSearchFindOptions } from '../types';
+import { GlobalSearchConfigType } from '../config';
+import { getContextFactory, GlobalSearchContextFactory } from './context';
+import { GlobalSearchResultProvider, GlobalSearchFindOptions } from '../types';
 import { getRequestBasePath } from './utils';
 
 /** @public */

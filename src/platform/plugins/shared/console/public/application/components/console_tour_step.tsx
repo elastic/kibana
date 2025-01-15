@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ReactNode, type ReactElement, useState, useEffect } from 'react';
-import { EuiTourStep, type PopoverAnchorPosition } from '@elastic/eui';
+import React, { ReactNode, ReactElement, useState, useEffect } from 'react';
+import { EuiTourStep, PopoverAnchorPosition } from '@elastic/eui';
 import { WELCOME_TOUR_DELAY } from '../../../common/constants';
 
 export interface ConsoleTourStepProps {

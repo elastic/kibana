@@ -10,17 +10,17 @@
 import { Chart, LineAnnotation, RectAnnotation } from '@elastic/charts';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { type Datatable } from '@kbn/expressions-plugin/common';
-import { type FieldFormat } from '@kbn/field-formats-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { LayerTypes } from '../../../common/constants';
 import {
-  type ReferenceLineLayerArgs,
-  type ReferenceLineLayerConfig,
-  type ExtendedReferenceLineDecorationConfig,
-  type ReferenceLineArgs,
-  type ReferenceLineConfig,
+  ReferenceLineLayerArgs,
+  ReferenceLineLayerConfig,
+  ExtendedReferenceLineDecorationConfig,
+  ReferenceLineArgs,
+  ReferenceLineConfig,
 } from '../../../common/types';
-import { ReferenceLines, type ReferenceLinesProps } from './reference_lines';
+import { ReferenceLines, ReferenceLinesProps } from './reference_lines';
 import { ReferenceLineLayer } from './reference_line_layer';
 import { ReferenceLine } from './reference_line';
 import { ReferenceLineAnnotations } from './reference_line_annotations';

@@ -28,12 +28,12 @@ import {
 } from '@kbn/core-ui-settings-common';
 import { Template } from './views';
 import {
-  type IRenderOptions,
-  type RenderingPrebootDeps,
-  type RenderingSetupDeps,
-  type InternalRenderingServicePreboot,
-  type InternalRenderingServiceSetup,
-  type RenderingMetadata,
+  IRenderOptions,
+  RenderingPrebootDeps,
+  RenderingSetupDeps,
+  InternalRenderingServicePreboot,
+  InternalRenderingServiceSetup,
+  RenderingMetadata,
 } from './types';
 import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
 import {

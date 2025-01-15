@@ -8,56 +8,56 @@
 import { type ExtraAppendLayerArg, getXyVisualization } from './visualization';
 import { LegendValue, Position } from '@elastic/charts';
 import {
-  type Operation,
-  type OperationDescriptor,
-  type DatasourcePublicAPI,
-  type FramePublicAPI,
-  type UserMessage,
-  type AnnotationGroups,
+  Operation,
+  OperationDescriptor,
+  DatasourcePublicAPI,
+  FramePublicAPI,
+  UserMessage,
+  AnnotationGroups,
 } from '../../types';
 import {
-  type State,
-  type XYState,
-  type XYLayerConfig,
-  type XYDataLayerConfig,
-  type XYReferenceLineLayerConfig,
-  type SeriesType,
-  type XYByValueAnnotationLayerConfig,
-  type XYByReferenceAnnotationLayerConfig,
-  type XYAnnotationLayerConfig,
+  State,
+  XYState,
+  XYLayerConfig,
+  XYDataLayerConfig,
+  XYReferenceLineLayerConfig,
+  SeriesType,
+  XYByValueAnnotationLayerConfig,
+  XYByReferenceAnnotationLayerConfig,
+  XYAnnotationLayerConfig,
 } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { IconChartBar, IconCircle } from '@kbn/chart-icons';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { type Datatable } from '@kbn/expressions-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import {
-  type EventAnnotationConfig,
-  type PointInTimeEventAnnotationConfig,
+  EventAnnotationConfig,
+  PointInTimeEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { type IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { type DataViewsState } from '../../state_management';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { DataViewsState } from '../../state_management';
 import { createMockedIndexPattern } from '../../datasources/form_based/mocks';
 import { createMockDataViewsState } from '../../data_views_service/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { layerTypes, type Visualization } from '../..';
+import { layerTypes, Visualization } from '../..';
 import { set } from '@kbn/safer-lodash-set';
-import { type SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import {
   getAnnotationsLayers,
   isAnnotationsLayer,
   isByReferenceAnnotationsLayer,
 } from './visualization_helpers';
 import { cloneDeep } from 'lodash';
-import { type DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import {
-  type XYPersistedByReferenceAnnotationLayerConfig,
-  type XYPersistedByValueAnnotationLayerConfig,
-  type XYPersistedLinkedByValueAnnotationLayerConfig,
-  type XYPersistedState,
+  XYPersistedByReferenceAnnotationLayerConfig,
+  XYPersistedByValueAnnotationLayerConfig,
+  XYPersistedLinkedByValueAnnotationLayerConfig,
+  XYPersistedState,
 } from './persistence';
 import { LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS } from '../../user_messages_ids';
 

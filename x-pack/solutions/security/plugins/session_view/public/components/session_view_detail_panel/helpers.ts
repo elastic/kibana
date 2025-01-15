@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type EuiTabProps } from '../../types';
+import { EuiTabProps } from '../../types';
 
 export const getSelectedTabContent = (tabs: EuiTabProps[], selectedTabId: string) => {
   const selectedTab = tabs.find((tab) => tab.id === selectedTabId);

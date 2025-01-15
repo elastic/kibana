@@ -8,9 +8,9 @@
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { API_BASE_PATH } from '../../common/constants';
 import {
-  type ListNodesRouteResponse,
-  type ListSnapshotReposResponse,
-  type NodesDetailsResponse,
+  ListNodesRouteResponse,
+  ListSnapshotReposResponse,
+  NodesDetailsResponse,
 } from '../../common/types';
 import { getDefaultHotPhasePolicy } from '../edit_policy/constants';
 

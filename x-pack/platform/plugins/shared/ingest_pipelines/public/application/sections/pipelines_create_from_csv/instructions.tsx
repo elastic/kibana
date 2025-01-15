@@ -6,7 +6,7 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { type FC } from 'react';
+import React, { FC } from 'react';
 import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
 export const Instructions: FC = () => {

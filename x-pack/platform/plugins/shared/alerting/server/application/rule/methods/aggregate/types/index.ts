@@ -5,9 +5,9 @@
  * 2.0.
  */
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { type TypeOf } from '@kbn/config-schema';
-import { type KueryNode } from '@kbn/es-query';
-import { type aggregateOptionsSchema } from '../schemas';
+import { TypeOf } from '@kbn/config-schema';
+import { KueryNode } from '@kbn/es-query';
+import { aggregateOptionsSchema } from '../schemas';
 
 export type AggregateOptions = TypeOf<typeof aggregateOptionsSchema> & {
   // Adding filter as in schema it's defined as any instead of KueryNode

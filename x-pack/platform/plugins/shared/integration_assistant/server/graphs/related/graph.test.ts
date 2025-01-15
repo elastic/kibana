@@ -24,8 +24,8 @@ import { handleRelated } from './related';
 import { handleErrors } from './errors';
 import { testPipeline, combineProcessors } from '../../util';
 import {
-  type ActionsClientChatOpenAI,
-  type ActionsClientSimpleChatModel,
+  ActionsClientChatOpenAI,
+  ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 
 const model = new FakeLLM({

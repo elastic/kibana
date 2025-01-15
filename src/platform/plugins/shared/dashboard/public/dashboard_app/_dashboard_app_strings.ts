@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type ViewMode } from '@kbn/presentation-publishing';
+import { ViewMode } from '@kbn/presentation-publishing';
 
 export const getDashboardPageTitle = () =>
   i18n.translate('dashboard.dashboardPageTitle', {

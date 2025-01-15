@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { type UMServerLibs } from '../../lib/lib';
-import { type UMRestApiRouteFactory } from '../types';
+import { UMServerLibs } from '../../lib/lib';
+import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../../common/constants';
 
 export const createNetworkEventsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({

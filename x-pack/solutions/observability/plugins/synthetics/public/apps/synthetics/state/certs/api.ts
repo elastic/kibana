@@ -6,7 +6,7 @@
  */
 
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
-import { type CertResult, type GetCertsParams } from '../../../../../common/runtime_types';
+import { CertResult, GetCertsParams } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service/api_service';
 
 export const getCertsList = async (queryParams: GetCertsParams): Promise<CertResult> => {

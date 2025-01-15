@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type VFC } from 'react';
+import React, { VFC } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,

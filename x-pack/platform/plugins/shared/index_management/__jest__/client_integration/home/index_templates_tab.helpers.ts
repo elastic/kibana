@@ -9,14 +9,14 @@ import { act } from 'react-dom/test-utils';
 
 import {
   registerTestBed,
-  type TestBed,
-  type AsyncTestBedConfig,
+  TestBed,
+  AsyncTestBedConfig,
   findTestSubject,
 } from '@kbn/test-jest-helpers';
-import { type HttpSetup } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import { TemplateList } from '../../../public/application/sections/home/template_list';
-import { type TemplateDeserialized } from '../../../common';
-import { WithAppDependencies, type TestSubjects } from '../helpers';
+import { TemplateDeserialized } from '../../../common';
+import { WithAppDependencies, TestSubjects } from '../helpers';
 
 const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {

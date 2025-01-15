@@ -8,7 +8,7 @@
  */
 
 import { EuiFlexGroup, EuiIconTip } from '@elastic/eui';
-import { type PartialFieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
+import { PartialFieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import { FieldIcon } from '@kbn/react-field';
 import React from 'react';
 

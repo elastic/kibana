@@ -9,7 +9,7 @@
 
 import { parseKbnImportReq } from '@kbn/repo-packages';
 
-import { type Bundle } from './bundle';
+import { Bundle } from './bundle';
 import { isObj } from './ts_helpers';
 
 export interface BundleRemote {

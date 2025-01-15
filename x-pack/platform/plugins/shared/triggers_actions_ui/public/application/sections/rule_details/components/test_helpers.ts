@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { type Rule, type RuleSummary, type RuleType } from '../../../../types';
+import { Rule, RuleSummary, RuleType } from '../../../../types';
 
 export const getMockLogResponse = () => {
   return {

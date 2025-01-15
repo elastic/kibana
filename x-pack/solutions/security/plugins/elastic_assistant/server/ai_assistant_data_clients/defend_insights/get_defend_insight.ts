@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type AuthenticatedUser, type ElasticsearchClient, type Logger } from '@kbn/core/server';
-import { type DefendInsightsResponse } from '@kbn/elastic-assistant-common';
+import { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
+import { DefendInsightsResponse } from '@kbn/elastic-assistant-common';
 
-import { type EsDefendInsightSchema } from './types';
+import { EsDefendInsightSchema } from './types';
 import { transformESSearchToDefendInsights } from './helpers';
 
 export interface GetDefendInsightParams {

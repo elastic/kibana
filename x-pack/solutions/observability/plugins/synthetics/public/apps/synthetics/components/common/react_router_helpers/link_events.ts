@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type MouseEvent } from 'react';
+import { MouseEvent } from 'react';
 
 /**
  * Helper functions for determining which events we should

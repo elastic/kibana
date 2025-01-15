@@ -9,7 +9,7 @@
 
 import { responseFormatter } from './response_formatter';
 import { SERVICE_KEY, SERVICE_KEY_LEGACY } from '../../../constants';
-import { type DataViewLazy, type DataViewField } from '../../../../common';
+import { DataViewLazy, DataViewField } from '../../../../common';
 
 const dataView = {
   toSpec: async () => {

@@ -9,10 +9,10 @@
 
 import {
   getDiscoverStateContainer,
-  type DiscoverStateContainer,
+  DiscoverStateContainer,
   createSearchSessionRestorationDataProvider,
 } from './discover_state';
-import { createBrowserHistory, createMemoryHistory, type History } from 'history';
+import { createBrowserHistory, createMemoryHistory, History } from 'history';
 import { createSearchSourceMock, dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import {
@@ -29,7 +29,7 @@ import { waitFor } from '@testing-library/react';
 import { FetchStatus } from '../../types';
 import { dataViewAdHoc, dataViewComplexMock } from '../../../__mocks__/data_view_complex';
 import { copySavedSearch } from './discover_saved_search_container';
-import { createKbnUrlStateStorage, type IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { createKbnUrlStateStorage, IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../common/data_sources';
 

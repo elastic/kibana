@@ -7,7 +7,7 @@
 
 import type { AstFunction } from '@kbn/interpreter';
 import { identity } from 'lodash';
-import { type ExpressionAstArgument, type Filter, FilterType } from '../../types';
+import { ExpressionAstArgument, Filter, FilterType } from '../../types';
 
 const functionToFilter: Record<string, FilterType> = {
   timefilter: FilterType.time,

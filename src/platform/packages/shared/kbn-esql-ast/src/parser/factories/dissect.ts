@@ -8,8 +8,8 @@
  */
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-import esql_parser, { type CommandOptionsContext, type DissectCommandContext } from '../../antlr/esql_parser';
-import { type ESQLCommand, type ESQLCommandOption } from '../../types';
+import esql_parser, { CommandOptionsContext, DissectCommandContext } from '../../antlr/esql_parser';
+import { ESQLCommand, ESQLCommandOption } from '../../types';
 import {
   createCommand,
   createLiteralString,

@@ -8,14 +8,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type ExpressionFunctionDefinition } from '../types';
-import { openSans, type FontLabel as FontFamily } from '../../fonts';
+import { ExpressionFunctionDefinition } from '../types';
+import { openSans, FontLabel as FontFamily } from '../../fonts';
 import {
-  type CSSStyle,
+  CSSStyle,
   FontSizeUnit,
   FontStyle,
   FontWeight,
-  type Style,
+  Style,
   TextAlignment,
   TextDecoration,
 } from '../../types';

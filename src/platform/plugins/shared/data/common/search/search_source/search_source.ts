@@ -77,26 +77,26 @@ import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   buildEsQuery,
-  type Filter,
+  Filter,
   isOfQueryType,
   isPhraseFilter,
   isPhrasesFilter,
 } from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
-import { type DataView, type DataViewLazy, type DataViewsContract } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewLazy, DataViewsContract } from '@kbn/data-views-plugin/common';
 import {
-  type ExpressionAstExpression,
+  ExpressionAstExpression,
   buildExpression,
   buildExpressionFunction,
 } from '@kbn/expressions-plugin/common';
 import type { ISearchGeneric, IKibanaSearchResponse, IEsSearchResponse } from '@kbn/search-types';
 import { normalizeSortRequest } from './normalize_sort_request';
 
-import { type AggConfigSerialized, type DataViewField, type SerializedSearchSourceFields } from '../..';
+import { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
 import { queryToFields } from './query_to_fields';
 
-import { AggConfigs, type EsQuerySortValue } from '../..';
+import { AggConfigs, EsQuerySortValue } from '../..';
 import type {
   ISearchSource,
   SearchFieldValue,
@@ -109,11 +109,11 @@ import type { FetchHandlers, SearchRequest } from './fetch';
 import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
 import { getEsQueryConfig, isRunningResponse, UI_SETTINGS } from '../..';
-import { type AggsStart } from '../aggs';
+import { AggsStart } from '../aggs';
 import { extractReferences } from './extract_references';
 import {
-  type EsdslExpressionFunctionDefinition,
-  type ExpressionFunctionKibanaContext,
+  EsdslExpressionFunctionDefinition,
+  ExpressionFunctionKibanaContext,
   filtersToAst,
   queryToAst,
 } from '../expressions';

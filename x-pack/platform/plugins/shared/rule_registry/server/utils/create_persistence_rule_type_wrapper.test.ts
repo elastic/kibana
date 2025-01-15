@@ -18,7 +18,7 @@ import {
   suppressAlertsInMemory,
   isExistingDateGtEqThanAlert,
   getUpdatedSuppressionBoundaries,
-  type BackendAlertWithSuppressionFields870,
+  BackendAlertWithSuppressionFields870,
 } from './create_persistence_rule_type_wrapper';
 
 describe('suppressAlertsInMemory', () => {

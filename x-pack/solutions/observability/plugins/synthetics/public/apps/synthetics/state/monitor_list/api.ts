@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { type UpsertMonitorRequest } from '..';
-import { type UpsertMonitorResponse } from '../monitor_management/api';
+import { UpsertMonitorRequest } from '..';
+import { UpsertMonitorResponse } from '../monitor_management/api';
 import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import {
-  type EncryptedSyntheticsMonitor,
-  type FetchMonitorManagementListQueryArgs,
-  type MonitorManagementListResult,
-  type SyntheticsMonitor,
-  type MonitorFiltersResult,
+  EncryptedSyntheticsMonitor,
+  FetchMonitorManagementListQueryArgs,
+  MonitorManagementListResult,
+  SyntheticsMonitor,
+  MonitorFiltersResult,
 } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service';
 
-import { type MonitorListPageState } from './models';
+import { MonitorListPageState } from './models';
 
 function toMonitorManagementListQueryArgs(
   pageState: MonitorListPageState

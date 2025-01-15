@@ -6,8 +6,8 @@
  */
 
 import { createSelector } from 'reselect';
-import { type SyntheticsAppState } from '../root_reducer';
-import { type AppState } from '..';
+import { SyntheticsAppState } from '../root_reducer';
+import { AppState } from '..';
 
 export const selectDynamicSettings = (state: SyntheticsAppState) => state.dynamicSettings;
 const getState = (appState: AppState) => appState.agentPolicies;

@@ -6,10 +6,10 @@
  */
 
 import type { Logger, PackageInfo } from '@kbn/core/server';
-import { type SerializableRecord } from '@kbn/utility-types';
+import { SerializableRecord } from '@kbn/utility-types';
 import path from 'path';
-import { type Content, type ContentImage, type ContentText } from 'pdfmake/interfaces';
-import { MessageChannel, type MessagePort, Worker } from 'worker_threads';
+import { Content, ContentImage, ContentText } from 'pdfmake/interfaces';
+import { MessageChannel, MessagePort, Worker } from 'worker_threads';
 import type { Layout } from '../../../layouts';
 import { errors } from '../../../../common';
 import {
@@ -26,7 +26,7 @@ import {
   GeneratePdfResponseType,
   type GeneratePdfRequest,
   type WorkerData,
-  type GeneratePdfResponse,
+  GeneratePdfResponse,
 } from './worker';
 
 // Ensure that all dependencies are included in the release bundle.

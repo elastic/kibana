@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type Workspace, type WorkspaceNode } from '../../types';
+import { Workspace, WorkspaceNode } from '../../types';
 import { IconRenderer } from '../icon_renderer';
 
 interface SelectedNodeEditorProps {

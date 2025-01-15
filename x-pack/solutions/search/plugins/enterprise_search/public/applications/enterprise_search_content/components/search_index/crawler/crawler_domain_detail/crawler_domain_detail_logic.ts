@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { kea, type MakeLogicType } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../../../common/types/api';
-import { type ExtractionRule } from '../../../../../../../common/types/extraction_rules';
+import { ExtractionRule } from '../../../../../../../common/types/extraction_rules';
 
 import { generateEncodedPath } from '../../../../../shared/encode_path_params';
 
@@ -18,16 +18,16 @@ import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import {
   DeleteCrawlerDomainApiLogic,
-  type DeleteCrawlerDomainArgs,
-  type DeleteCrawlerDomainResponse,
+  DeleteCrawlerDomainArgs,
+  DeleteCrawlerDomainResponse,
 } from '../../../../api/crawler/delete_crawler_domain_api_logic';
 import {
-  type CrawlerAuth,
-  type CrawlerDomain,
-  type CrawlerDomainFromServer,
-  type CrawlRule,
-  type EntryPoint,
-  type Sitemap,
+  CrawlerAuth,
+  CrawlerDomain,
+  CrawlerDomainFromServer,
+  CrawlRule,
+  EntryPoint,
+  Sitemap,
 } from '../../../../api/crawler/types';
 import { crawlerDomainServerToClient } from '../../../../api/crawler/utils';
 import { SEARCH_INDEX_TAB_PATH } from '../../../../routes';

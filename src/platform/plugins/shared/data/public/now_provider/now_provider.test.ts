@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { NowProvider, type NowProviderInternalContract } from './now_provider';
+import { NowProvider, NowProviderInternalContract } from './now_provider';
 
 let mockDateFromUrl: undefined | Date;
 let nowProvider: NowProviderInternalContract;

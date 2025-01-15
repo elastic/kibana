@@ -6,11 +6,11 @@
  */
 
 import {
-  type GetInvestigationParams,
-  type GetInvestigationResponse,
+  GetInvestigationParams,
+  GetInvestigationResponse,
   getInvestigationResponseSchema,
 } from '@kbn/investigation-shared';
-import { type InvestigationRepository } from './investigation_repository';
+import { InvestigationRepository } from './investigation_repository';
 
 export async function getInvestigation(
   params: GetInvestigationParams,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type DatabaseType, type DatabaseNameOption } from '../../../../common/types';
+import { DatabaseType, DatabaseNameOption } from '../../../../common/types';
 import { GEOIP_NAME_OPTIONS, IPINFO_NAME_OPTIONS } from './constants';
 
 const getDatabaseNameOptions = (type?: DatabaseType): DatabaseNameOption[] => {

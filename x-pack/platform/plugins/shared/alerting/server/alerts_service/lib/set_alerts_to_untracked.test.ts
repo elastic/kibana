@@ -5,7 +5,7 @@
  * 2.0.
  */
 import {
-  type ElasticsearchClientMock,
+  ElasticsearchClientMock,
   elasticsearchServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';

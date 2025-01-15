@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiSteps, EuiPanel, EuiText, EuiSpacer } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { InspectMonitorPortal } from './inspect_monitor_portal';
-import { ConfigKey, type FormMonitorType, type StepMap } from '../types';
+import { ConfigKey, FormMonitorType, StepMap } from '../types';
 import { format } from '../form/formatter';
 import { AdvancedConfig } from '../advanced';
 import { MonitorTypePortal } from './monitor_type_portal';

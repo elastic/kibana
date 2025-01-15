@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 export function trackLegacyRouteUsage(route: string, usageCounter?: UsageCounter) {
   if (usageCounter) {

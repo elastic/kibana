@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { type RulesClientContext } from '../../../../rules_client/types';
-import { type RuleDomain } from '../../types';
+import { RulesClientContext } from '../../../../rules_client/types';
+import { RuleDomain } from '../../types';
 import { convertDurationToFrequency } from '../../../../../common/parse_duration';
-import { type GetScheduleFrequencyResult } from './types';
+import { GetScheduleFrequencyResult } from './types';
 import { getSchemaFrequencyResultSchema } from './schema';
 
 export interface SchedulesIntervalAggregationResult {

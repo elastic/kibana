@@ -12,11 +12,10 @@ import {
   type Action,
   addPanelMenuTrigger,
 } from '@kbn/ui-actions-plugin/public';
-import { type PresentationContainer } from '@kbn/presentation-containers';
+import { PresentationContainer } from '@kbn/presentation-containers';
 import { ADD_PANEL_OTHER_GROUP } from '@kbn/embeddable-plugin/public';
 import type { IconType, CommonProps } from '@elastic/eui';
-import type React from 'react';
-import { type MouseEventHandler } from 'react';
+import React, { type MouseEventHandler } from 'react';
 
 export interface PanelSelectionMenuItem extends Pick<CommonProps, 'data-test-subj'> {
   id: string;

@@ -6,7 +6,7 @@
  */
 
 import { random } from 'lodash';
-import { type ConcreteTaskInstance, DEFAULT_TIMEOUT, type TaskDefinition } from '../task';
+import { ConcreteTaskInstance, DEFAULT_TIMEOUT, TaskDefinition } from '../task';
 import { isRetryableError } from '../task_running';
 import { intervalFromDate, maxIntervalFromDate } from './intervals';
 

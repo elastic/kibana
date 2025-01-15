@@ -11,9 +11,9 @@ import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import {
-  type ColumnHeaderOptions,
-  type TimelineItem,
-  type TimelineNonEcsData,
+  ColumnHeaderOptions,
+  TimelineItem,
+  TimelineNonEcsData,
 } from '@kbn/timelines-plugin/common';
 import type { SortColumnTable, SortDirectionTable } from '../../common/types';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ReportingStart } from '../types';
+import { ReportingStart } from '../types';
 
 export const reportingMock = {
   createStart: (): ReportingStart => ({

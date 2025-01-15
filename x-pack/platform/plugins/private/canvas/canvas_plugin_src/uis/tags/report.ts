@@ -6,7 +6,7 @@
  */
 
 import { euiPaletteColorBlind } from '@elastic/eui';
-import { type TagFactory } from '../../../public/lib/tag';
+import { TagFactory } from '../../../public/lib/tag';
 import { TagStrings as strings } from '../../../i18n';
 const euiVisPalette = euiPaletteColorBlind();
 

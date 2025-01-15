@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, type FunctionComponent } from 'react';
+import React, { useState, FunctionComponent } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 interface Props {

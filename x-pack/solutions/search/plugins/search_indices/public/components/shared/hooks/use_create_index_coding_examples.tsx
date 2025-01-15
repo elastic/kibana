@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type CreateIndexCodeExamples } from '../../../types';
+import { CreateIndexCodeExamples } from '../../../types';
 import { DenseVectorSeverlessCodeExamples } from '../../../code_examples/create_index';
 
 export const useCreateIndexCodingExamples = (): CreateIndexCodeExamples => {

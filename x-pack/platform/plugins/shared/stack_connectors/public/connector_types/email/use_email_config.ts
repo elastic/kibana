@@ -7,10 +7,10 @@
 
 import { isEmpty } from 'lodash';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { type HttpSetup, type IToasts } from '@kbn/core/public';
+import { HttpSetup, IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { AdditionalEmailServices } from '../../../common';
-import { type EmailConfig } from '../types';
+import { EmailConfig } from '../types';
 import { getServiceConfig } from './api';
 
 interface Props {

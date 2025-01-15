@@ -31,7 +31,7 @@ import { searchDocumentsApiLogic } from '../../api/search_documents/search_docum
 
 import {
   AccessControlIndexSelector,
-  type AccessControlSelectorOption,
+  AccessControlSelectorOption,
 } from './components/access_control_index_selector/access_control_index_selector';
 import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';

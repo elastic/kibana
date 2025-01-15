@@ -13,10 +13,10 @@ import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-m
 import {
   CORE_USAGE_STATS_TYPE,
   CORE_USAGE_STATS_ID,
-  type BaseIncrementOptions,
-  type IncrementSavedObjectsImportOptions,
-  type IncrementSavedObjectsResolveImportErrorsOptions,
-  type IncrementSavedObjectsExportOptions,
+  BaseIncrementOptions,
+  IncrementSavedObjectsImportOptions,
+  IncrementSavedObjectsResolveImportErrorsOptions,
+  IncrementSavedObjectsExportOptions,
 } from '@kbn/core-usage-data-base-server-internal';
 import {
   BULK_CREATE_STATS_PREFIX,

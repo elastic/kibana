@@ -17,13 +17,13 @@ import {
   EuiSkeletonRectangle,
   EuiSpacer,
   EuiSteps,
-  type EuiStepsProps,
+  EuiStepsProps,
   EuiSwitch,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Buffer } from 'buffer';
-import React, { type ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { intersection } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { StepStatus } from './step_status';

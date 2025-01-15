@@ -8,14 +8,14 @@
  */
 
 import React, { useCallback, useContext } from 'react';
-import { type DataView, type DataViewField } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { EuiToolTip, EuiFormRow } from '@elastic/eui';
-import { type FilterMetaParams } from '@kbn/es-query/src/filters/build_filters';
+import { FilterMetaParams } from '@kbn/es-query/src/filters/build_filters';
 import type { Operator } from '../../filter_bar/filter_editor';
 import { getFieldValidityAndErrorMessage } from '../../filter_bar/filter_editor/lib';
 import { FiltersBuilderContextType } from '../context';
-import { ParamsEditorInput, type ParamsEditorInputProps } from './params_editor_input';
+import { ParamsEditorInput, ParamsEditorInputProps } from './params_editor_input';
 
 interface ParamsEditorProps {
   dataView: DataView;

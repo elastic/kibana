@@ -7,9 +7,9 @@
 
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { STACK_AAD_INDEX_NAME } from '@kbn/stack-alerts-plugin/server/rule_types';
-import { type FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { Spaces } from '../../../../../scenarios';
-import { getUrlPrefix, type ObjectRemover } from '../../../../../../common/lib';
+import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
 import { createEsDocuments, createEsDocumentsWithGroups } from '../../../create_test_data';
 
 export const RULE_TYPE_ID = '.es-query';

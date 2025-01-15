@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 import {
   DATA_DATASETS_INDEX_PATTERNS_UNIQUE,
-  type DataPatternName,
-  type DataTelemetryType,
+  DataPatternName,
+  DataTelemetryType,
 } from './constants';
 
 /**

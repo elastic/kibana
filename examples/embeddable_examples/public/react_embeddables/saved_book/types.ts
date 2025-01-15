@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import {
-  type HasEditCapabilities,
-  type HasInPlaceLibraryTransforms,
-  type SerializedTitles,
-  type StateComparators,
+  HasEditCapabilities,
+  HasInPlaceLibraryTransforms,
+  SerializedTitles,
+  StateComparators,
 } from '@kbn/presentation-publishing';
-import { type BehaviorSubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 export interface BookAttributes {
   bookTitle: string;

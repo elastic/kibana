@@ -9,7 +9,7 @@
 
 import type { PaletteOutput } from '@kbn/coloring';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
-import { palette, type CustomPaletteState, type CustomPaletteArguments } from '.';
+import { palette, CustomPaletteState, CustomPaletteArguments } from '.';
 import { defaultCustomColors } from '../../constants';
 
 describe('palette', () => {

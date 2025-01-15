@@ -8,13 +8,13 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { type Filter, type TimeRange, type Query, type AggregateQuery, isOfAggregateQueryType } from '@kbn/es-query';
+import { Filter, TimeRange, Query, AggregateQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
-import { type DataViewSpec } from '@kbn/data-views-plugin/common';
-import { type setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
-import { type VIEW_MODE } from './constants';
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
+import { VIEW_MODE } from './constants';
 import type { DiscoverAppState } from '../public';
 import { createDataViewDataSource, createEsqlDataSource } from './data_sources';
 

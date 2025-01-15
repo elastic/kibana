@@ -8,7 +8,7 @@
 import type { PackageInfo } from '@kbn/core/server';
 import type { Layout } from '../../../layouts';
 import type { CaptureResult } from '../../../screenshots';
-import { Actions, type EventLogger, Transactions } from '../../../screenshots/event_logger';
+import { Actions, EventLogger, Transactions } from '../../../screenshots/event_logger';
 import { PdfMaker } from './pdfmaker';
 
 interface PngsToPdfArgs {

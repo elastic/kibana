@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type RulesConfig } from '../config';
+import { RulesConfig } from '../config';
 
 export const DEFAULT_EXECUTION_TIMEOUT = '5m';
 

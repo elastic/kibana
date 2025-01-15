@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { type GenericBuckets, type GroupingQuery, type RootAggregation } from '@kbn/grouping/src';
+import { GenericBuckets, GroupingQuery, RootAggregation } from '@kbn/grouping/src';
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
 import { CDR_MISCONFIGURATIONS_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';

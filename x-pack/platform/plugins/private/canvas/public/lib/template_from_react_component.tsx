@@ -6,9 +6,9 @@
  */
 
 import React, {
-  type ComponentType,
+  ComponentType,
   forwardRef,
-  type ForwardRefRenderFunction,
+  ForwardRefRenderFunction,
   useImperativeHandle,
   useState,
 } from 'react';
@@ -16,7 +16,7 @@ import { unmountComponentAtNode, createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ErrorBoundary } from '../components/enhance/error_boundary';
-import { type ArgumentHandlers, type UpdatePropsRef } from '../../types/arguments';
+import { ArgumentHandlers, UpdatePropsRef } from '../../types/arguments';
 
 export interface Props {
   renderError: Function;

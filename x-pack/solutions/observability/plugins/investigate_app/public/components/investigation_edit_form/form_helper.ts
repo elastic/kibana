@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type CreateInvestigationParams, type UpdateInvestigationParams } from '@kbn/investigation-shared';
+import { CreateInvestigationParams, UpdateInvestigationParams } from '@kbn/investigation-shared';
 import { v4 as uuidv4 } from 'uuid';
 import type { InvestigationForm } from './investigation_edit_form';
 

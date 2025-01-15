@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { type ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { type Feature } from 'geojson';
+import { Feature } from 'geojson';
 import type {
   AggregationsCompositeAggregate,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { type ISearchSource } from '@kbn/data-plugin/common/search/search_source';
-import { type DataView } from '@kbn/data-plugin/common';
-import { type Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { ISearchSource } from '@kbn/data-plugin/common/search/search_source';
+import { DataView } from '@kbn/data-plugin/common';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
 import { type Filter, buildExistsFilter } from '@kbn/es-query';
@@ -40,26 +40,26 @@ import {
 } from '../../../../common/constants';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
 import { buildGeoGridFilter } from '../../../../common/elasticsearch_util';
-import { AbstractESAggSource, type ESAggsSourceSyncMeta } from '../es_agg_source';
+import { AbstractESAggSource, ESAggsSourceSyncMeta } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
 import { getHttp } from '../../../kibana_services';
 import {
-  type GetFeatureActionsArgs,
-  type GeoJsonWithMeta,
-  type IMvtVectorSource,
+  GetFeatureActionsArgs,
+  GeoJsonWithMeta,
+  IMvtVectorSource,
   getLayerFeaturesRequestName,
 } from '../vector_source';
 import {
-  type DataFilters,
-  type ESGeoGridSourceDescriptor,
-  type MapExtent,
-  type SizeDynamicOptions,
-  type TooltipFeatureAction,
-  type VectorSourceRequestMeta,
+  DataFilters,
+  ESGeoGridSourceDescriptor,
+  MapExtent,
+  SizeDynamicOptions,
+  TooltipFeatureAction,
+  VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import { type ImmutableSourceProperty, type OnSourceChangeArgs, type SourceEditorArgs } from '../source';
+import { ImmutableSourceProperty, OnSourceChangeArgs, SourceEditorArgs } from '../source';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { getExecutionContextId, mergeExecutionContext } from '../execution_context_utils';
 import { isMvt } from './is_mvt';

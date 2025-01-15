@@ -8,7 +8,7 @@
  */
 
 import chalk from 'chalk';
-import { type LogRecord, LogLevel } from '@kbn/logging';
+import { LogRecord, LogLevel } from '@kbn/logging';
 import type { Conversion } from '@kbn/core-logging-common-internal';
 
 const LEVEL_COLORS = new Map([

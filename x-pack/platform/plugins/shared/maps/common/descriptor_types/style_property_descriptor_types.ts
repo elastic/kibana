@@ -8,15 +8,15 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import {
-  type COLOR_MAP_TYPE,
-  type FIELD_ORIGIN,
-  type ICON_SOURCE,
-  type LABEL_BORDER_SIZES,
-  type LABEL_POSITIONS,
-  type SYMBOLIZE_AS_TYPES,
-  type VECTOR_STYLES,
-  type DATA_MAPPING_FUNCTION,
-  type STYLE_TYPE,
+  COLOR_MAP_TYPE,
+  FIELD_ORIGIN,
+  ICON_SOURCE,
+  LABEL_BORDER_SIZES,
+  LABEL_POSITIONS,
+  SYMBOLIZE_AS_TYPES,
+  VECTOR_STYLES,
+  DATA_MAPPING_FUNCTION,
+  STYLE_TYPE,
 } from '../constants';
 
 // Non-static/dynamic options

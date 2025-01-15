@@ -19,12 +19,12 @@ import {
   EuiTabbedContent,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { type ReactNode } from 'react';
+import { ReactNode } from 'react';
 import React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { isEmpty } from 'lodash';
-import { type EsQuerySnapshot } from '@kbn/alerts-ui-shared';
+import { EsQuerySnapshot } from '@kbn/alerts-ui-shared';
 import * as i18n from './translations';
 
 export interface ModalInspectProps {

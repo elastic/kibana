@@ -34,13 +34,13 @@ import {
   SearchBox,
   SearchProvider,
 } from '@elastic/react-search-ui';
-import { type SearchDriverOptions } from '@elastic/search-ui';
+import { SearchDriverOptions } from '@elastic/search-ui';
 import EnginesAPIConnector, {
-  type Transporter,
-  type SearchRequest,
-  type SearchResponse,
+  Transporter,
+  SearchRequest,
+  SearchResponse,
 } from '@elastic/search-ui-engines-connector';
-import { type HttpSetup } from '@kbn/core-http-browser';
+import { HttpSetup } from '@kbn/core-http-browser';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -61,7 +61,7 @@ import { EnterpriseSearchApplicationsPageTemplate } from '../../layout/page_temp
 import { SearchApplicationIndicesLogic } from '../search_application_indices_logic';
 import { SearchApplicationViewLogic } from '../search_application_view_logic';
 
-import { type APICallData, APICallFlyout } from './api_call_flyout';
+import { APICallData, APICallFlyout } from './api_call_flyout';
 
 import { SearchApplicationDocsExplorerLogic } from './docs_explorer_logic';
 import { DocumentProvider } from './document_context';

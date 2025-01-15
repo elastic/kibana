@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type sloDefinitionSchema, type sloIdSchema } from '@kbn/slo-schema';
-import type * as t from 'io-ts';
+import { sloDefinitionSchema, sloIdSchema } from '@kbn/slo-schema';
+import * as t from 'io-ts';
 
 type SLODefinition = t.TypeOf<typeof sloDefinitionSchema>;
 type StoredSLODefinition = t.OutputOf<typeof sloDefinitionSchema>;

@@ -6,11 +6,11 @@
  */
 
 import {
-  type CoreSetup,
+  CoreSetup,
   DEFAULT_APP_CATEGORIES,
-  type Logger,
-  type Plugin,
-  type PluginInitializerContext,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
 } from '@kbn/core/server';
 import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -18,13 +18,13 @@ import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { OBSERVABILITY_AI_ASSISTANT_FEATURE_ID } from '../common/feature';
 import type { ObservabilityAIAssistantConfig } from './config';
 import { registerServerRoutes } from './routes/register_routes';
-import { type ObservabilityAIAssistantRouteHandlerResources } from './routes/types';
+import { ObservabilityAIAssistantRouteHandlerResources } from './routes/types';
 import { ObservabilityAIAssistantService } from './service';
 import {
-  type ObservabilityAIAssistantServerSetup,
-  type ObservabilityAIAssistantServerStart,
-  type ObservabilityAIAssistantPluginSetupDependencies,
-  type ObservabilityAIAssistantPluginStartDependencies,
+  ObservabilityAIAssistantServerSetup,
+  ObservabilityAIAssistantServerStart,
+  ObservabilityAIAssistantPluginSetupDependencies,
+  ObservabilityAIAssistantPluginStartDependencies,
 } from './types';
 import { registerFunctions } from './functions';
 import { recallRankingEvent } from './analytics/recall_ranking';

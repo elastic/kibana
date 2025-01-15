@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type GenericFtrProviderContext } from '@kbn/test';
-import { type ApmApiClient, getApmApiClientService } from './apm_api_supertest';
+import { GenericFtrProviderContext } from '@kbn/test';
+import { ApmApiClient, getApmApiClientService } from './apm_api_supertest';
 import {
-  type InheritedServices,
-  type InheritedFtrProviderContext,
+  InheritedServices,
+  InheritedFtrProviderContext,
   services as inheritedServices,
 } from '../../../../services';
 

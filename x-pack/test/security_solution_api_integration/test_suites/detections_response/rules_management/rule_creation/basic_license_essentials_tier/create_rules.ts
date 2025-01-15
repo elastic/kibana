@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-import { type RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import {
   getCustomQueryRuleParams,
@@ -23,7 +23,7 @@ import {
   deleteAllRules,
   deleteAllAlerts,
 } from '../../../../../../common/utils/security_solution';
-import { type FtrProviderContext } from '../../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {

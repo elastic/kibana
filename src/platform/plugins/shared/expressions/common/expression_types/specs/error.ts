@@ -8,10 +8,10 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { type ExpressionTypeDefinition, type ExpressionValueBoxed } from '../types';
-import { type ExpressionValueRender } from './render';
+import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
+import { ExpressionValueRender } from './render';
 import { getType } from '../get_type';
-import { type ErrorLike } from '../../util';
+import { ErrorLike } from '../../util';
 
 const name = 'error';
 

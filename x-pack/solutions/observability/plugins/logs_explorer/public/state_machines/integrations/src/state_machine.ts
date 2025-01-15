@@ -8,15 +8,15 @@
 import { assign, createMachine } from 'xstate';
 import { isEmpty, isError, omitBy } from 'lodash';
 import { createComparatorByField } from '../../../utils/comparator_by_field';
-import { type Dataset, Integration } from '../../../../common/datasets';
-import { type IDatasetsClient } from '../../../services/datasets';
+import { Dataset, Integration } from '../../../../common/datasets';
+import { IDatasetsClient } from '../../../services/datasets';
 import { createDefaultContext } from './defaults';
 import {
-  type DefaultIntegrationsContext,
-  type IntegrationsContext,
-  type IntegrationsEvent,
-  type IntegrationsSearchParams,
-  type IntegrationTypestate,
+  DefaultIntegrationsContext,
+  IntegrationsContext,
+  IntegrationsEvent,
+  IntegrationsSearchParams,
+  IntegrationTypestate,
 } from './types';
 
 export const createPureIntegrationsStateMachine = (

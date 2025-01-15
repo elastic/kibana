@@ -9,9 +9,9 @@
 
 import { countBy } from 'lodash';
 import {
-  type RuleTypeIndexWithDescriptions,
-  type RuleTypeCountsByProducer,
-  type RuleTypeWithDescription,
+  RuleTypeIndexWithDescriptions,
+  RuleTypeCountsByProducer,
+  RuleTypeWithDescription,
 } from '../../types';
 
 export const filterAndCountRuleTypes: (

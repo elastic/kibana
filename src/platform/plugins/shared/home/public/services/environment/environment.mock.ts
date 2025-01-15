@@ -8,7 +8,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { type EnvironmentService, type EnvironmentServiceSetup } from './environment';
+import { EnvironmentService, EnvironmentServiceSetup } from './environment';
 
 const createSetupMock = (): jest.Mocked<EnvironmentServiceSetup> => {
   const setup = {

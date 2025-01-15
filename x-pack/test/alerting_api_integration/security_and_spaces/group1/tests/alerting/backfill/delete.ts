@@ -8,15 +8,15 @@
 import expect from '@kbn/expect';
 import moment from 'moment';
 import { asyncForEach } from '@kbn/std';
-import { type GetResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { GetResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UserAtSpaceScenarios } from '../../../../scenarios';
 import {
   getTestRuleData,
   getUrlPrefix,
   ObjectRemover,
-  type TaskManagerDoc,
+  TaskManagerDoc,
 } from '../../../../../common/lib';
-import { type FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function deleteBackfillTests({ getService }: FtrProviderContext) {

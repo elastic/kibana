@@ -6,10 +6,10 @@
  */
 
 import {
-  type IndexName,
-  type IndicesGetMappingResponse,
-  type IndicesStatsResponse,
-  type Metadata,
+  IndexName,
+  IndicesGetMappingResponse,
+  IndicesStatsResponse,
+  Metadata,
 } from '@elastic/elasticsearch/lib/api/types';
 
 export interface DatasetIndexPattern {

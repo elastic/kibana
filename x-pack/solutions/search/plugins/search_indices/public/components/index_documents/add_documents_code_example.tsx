@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { type MappingDenseVectorProperty, type MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import { MappingDenseVectorProperty, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
@@ -14,12 +14,12 @@ import { isEqual } from 'lodash';
 
 import { useSearchApiKey } from '@kbn/search-api-keys-components';
 import { useKibana } from '../../hooks/use_kibana';
-import { type IngestCodeSnippetParameters } from '../../types';
+import { IngestCodeSnippetParameters } from '../../types';
 import { LanguageSelector } from '../shared/language_selector';
 import { useIngestCodeExamples } from './hooks/use_ingest_code_examples';
 import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
-import { type AvailableLanguages, LanguageOptions, Languages } from '../../code_examples';
+import { AvailableLanguages, LanguageOptions, Languages } from '../../code_examples';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { CodeSample } from '../shared/code_sample';
 import { generateSampleDocument } from '../../utils/document_generation';

@@ -7,7 +7,7 @@
 
 import { EuiConfirmModal } from '@elastic/eui';
 import PropTypes from 'prop-types';
-import React, { type FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 
 export interface Props {
   isOpen: boolean;

@@ -7,12 +7,12 @@
 import moment from 'moment';
 import { isRight } from 'fp-ts/lib/Either';
 import Mustache from 'mustache';
-import { type IBasePath } from '@kbn/core/server';
+import { IBasePath } from '@kbn/core/server';
 import {
-  type ActionGroupIdsOf,
-  type AlertInstanceContext as AlertContext,
-  type AlertInstanceState as AlertState,
-  type IRuleTypeAlerts,
+  ActionGroupIdsOf,
+  AlertInstanceContext as AlertContext,
+  AlertInstanceState as AlertState,
+  IRuleTypeAlerts,
 } from '@kbn/alerting-plugin/server';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
@@ -20,28 +20,28 @@ import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import {
-  type PublicAlertsClient,
-  type RecoveredAlertData,
+  PublicAlertsClient,
+  RecoveredAlertData,
 } from '@kbn/alerting-plugin/server/alerts_client/types';
 import {
-  type SyntheticsMonitorStatusRuleParams as StatusRuleParams,
-  type TimeWindow,
+  SyntheticsMonitorStatusRuleParams as StatusRuleParams,
+  TimeWindow,
 } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { syntheticsRuleFieldMap } from '../../common/rules/synthetics_rule_field_map';
 import { combineFiltersAndUserSearch, stringifyKueries } from '../../common/lib';
 import {
-  type MonitorStatusActionGroup,
+  MonitorStatusActionGroup,
   SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,
 } from '../../common/constants/synthetics_alerts';
-import { getUptimeIndexPattern, type IndexPatternTitleAndFields } from '../queries/get_index_pattern';
-import { type OverviewPing, type StatusCheckFilters } from '../../common/runtime_types';
-import { type SyntheticsEsClient } from '../lib';
+import { getUptimeIndexPattern, IndexPatternTitleAndFields } from '../queries/get_index_pattern';
+import { OverviewPing, StatusCheckFilters } from '../../common/runtime_types';
+import { SyntheticsEsClient } from '../lib';
 import { getMonitorSummary } from './status_rule/message_utils';
 import {
-  type AlertOverviewStatus,
-  type SyntheticsCommonState,
+  AlertOverviewStatus,
+  SyntheticsCommonState,
   SyntheticsCommonStateCodec,
-  type SyntheticsMonitorStatusAlertState,
+  SyntheticsMonitorStatusAlertState,
 } from '../../common/runtime_types/alert_rules/common';
 import { getSyntheticsErrorRouteFromMonitorId } from '../../common/utils/get_synthetics_monitor_url';
 import { ALERT_DETAILS_URL, RECOVERY_REASON } from './action_variables';

@@ -18,12 +18,12 @@ import { WhereExpression } from './where_expression';
 import { GlobalFilterCheckbox } from '../../../../components/global_filter_checkbox';
 import { GlobalTimeCheckbox } from '../../../../components/global_time_checkbox';
 import {
-  type AbstractESJoinSourceDescriptor,
-  type AggDescriptor,
-  type ESDistanceSourceDescriptor,
-  type ESTermSourceDescriptor,
-  type JoinDescriptor,
-  type JoinSourceDescriptor,
+  AbstractESJoinSourceDescriptor,
+  AggDescriptor,
+  ESDistanceSourceDescriptor,
+  ESTermSourceDescriptor,
+  JoinDescriptor,
+  JoinSourceDescriptor,
 } from '../../../../../common/descriptor_types';
 
 import { getIndexPatternService } from '../../../../kibana_services';

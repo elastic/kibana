@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type GetCookieOptions, SamlSessionManager } from '@kbn/test';
+import { GetCookieOptions, SamlSessionManager } from '@kbn/test';
 import expect from '@kbn/expect';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { resolve } from 'path';
-import { type FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../ftr_provider_context';
 import { getAuthProvider } from './get_auth_provider';
-import { type InternalRequestHeader } from './default_request_headers';
+import { InternalRequestHeader } from './default_request_headers';
 
 export interface RoleCredentials {
   apiKey: { id: string; name: string };

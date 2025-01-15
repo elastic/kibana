@@ -10,15 +10,15 @@
 import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 
 import {
-  type FormHook,
-  type FieldHook,
-  type FieldConfig,
-  type FieldValidateResponse,
-  type ValidationError,
-  type FormData,
-  type ValidationConfig,
-  type FieldValidationData,
-  type ValidationCancelablePromise,
+  FormHook,
+  FieldHook,
+  FieldConfig,
+  FieldValidateResponse,
+  ValidationError,
+  FormData,
+  ValidationConfig,
+  FieldValidationData,
+  ValidationCancelablePromise,
 } from '../types';
 import { FIELD_TYPES, VALIDATION_TYPES } from '../constants';
 

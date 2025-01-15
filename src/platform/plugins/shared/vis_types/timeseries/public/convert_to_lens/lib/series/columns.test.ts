@@ -9,7 +9,7 @@
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { Operations } from '@kbn/visualizations-plugin/common';
-import { type Column } from '../convert';
+import { Column } from '../convert';
 import { getValidColumns } from './columns';
 
 describe('getValidColumns', () => {

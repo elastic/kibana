@@ -12,14 +12,14 @@ import {
   buildInlineScriptForPhraseFilter,
   buildPhraseFilter,
   getPhraseFilterField,
-  type PhraseFilter,
+  PhraseFilter,
   isPhraseFilter,
   isScriptedPhraseFilter,
 } from './phrase_filter';
 import { fields, getField } from '../stubs';
-import { type DataViewBase } from '../../es_query';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { type Filter } from './types';
+import { DataViewBase } from '../../es_query';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Filter } from './types';
 
 describe('Phrase filter builder', () => {
   let indexPattern: DataViewBase;

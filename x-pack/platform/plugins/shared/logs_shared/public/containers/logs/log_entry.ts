@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { type LogViewReference } from '../../../common/log_views';
+import { LogViewReference } from '../../../common/log_views';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import {
   logEntrySearchRequestParamsRT,

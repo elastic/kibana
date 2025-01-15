@@ -9,7 +9,7 @@ import moment from 'moment';
 import expect from '@kbn/expect';
 import { get } from 'lodash';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import { type IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
+import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { ES_TEST_INDEX_NAME, ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
@@ -21,7 +21,7 @@ import {
   getEventLog,
   resetRulesSettings,
 } from '../../../../common/lib';
-import { type FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { TEST_CACHE_EXPIRATION_TIME } from '../create_test_data';
 
 const InstanceActions = new Set<string | undefined>([

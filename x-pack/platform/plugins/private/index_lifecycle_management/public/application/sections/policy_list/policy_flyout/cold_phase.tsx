@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { PhaseDescription } from './phase_description';
-import { type Phases } from '../../../../../common/types';
+import { Phases } from '../../../../../common/types';
 import {
   MinAge,
   Replicas,

@@ -9,9 +9,9 @@ import React from 'react';
 
 import { notificationServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 
-import { type LocationDescriptorObject } from 'history';
+import { LocationDescriptorObject } from 'history';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { ProcessorsEditorContextProvider, type Props, PipelineEditor } from '..';
+import { ProcessorsEditorContextProvider, Props, PipelineEditor } from '..';
 
 import {
   breadcrumbService,

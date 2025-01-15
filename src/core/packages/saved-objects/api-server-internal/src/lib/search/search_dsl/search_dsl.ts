@@ -9,7 +9,7 @@
 
 import Boom from '@hapi/boom';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObjectsPitParams } from '@kbn/core-saved-objects-api-server';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';

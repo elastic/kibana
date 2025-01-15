@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defineConfig, type PlaywrightTestConfig, devices } from '@playwright/test';
+import { defineConfig, PlaywrightTestConfig, devices } from '@playwright/test';
 import { scoutPlaywrightReporter } from '@kbn/scout-reporting';
 import { SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
-import { type ScoutPlaywrightOptions, type ScoutTestOptions, VALID_CONFIG_MARKER } from '../types';
+import { ScoutPlaywrightOptions, ScoutTestOptions, VALID_CONFIG_MARKER } from '../types';
 
 export function createPlaywrightConfig(options: ScoutPlaywrightOptions): PlaywrightTestConfig {
   return defineConfig<ScoutTestOptions>({

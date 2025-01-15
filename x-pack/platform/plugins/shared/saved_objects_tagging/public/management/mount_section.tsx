@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { type FC, type PropsWithChildren } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import ReactDOM from 'react-dom';
-import { type CoreSetup, type ApplicationStart } from '@kbn/core/public';
+import { CoreSetup, ApplicationStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { type ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { getTagsCapabilities } from '../../common';
-import { type SavedObjectTaggingPluginStart } from '../types';
-import { type ITagInternalClient, type ITagAssignmentService, type ITagsCache } from '../services';
+import { SavedObjectTaggingPluginStart } from '../types';
+import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../services';
 import { TagManagementPage } from './tag_management_page';
 
 interface MountSectionParams {

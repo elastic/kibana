@@ -11,14 +11,14 @@ import * as Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import {
-  type CiStatsReporter,
-  type CiStatsReportTestsOptions,
-  type CiStatsTestType,
+  CiStatsReporter,
+  CiStatsReportTestsOptions,
+  CiStatsTestType,
 } from '@kbn/ci-stats-reporter';
 
-import { type Config } from '../../config';
-import { type Runner, type Runnable } from '../../../fake_mocha_types';
-import { type Lifecycle } from '../../lifecycle';
+import { Config } from '../../config';
+import { Runner, Runnable } from '../../../fake_mocha_types';
+import { Lifecycle } from '../../lifecycle';
 import { getSnapshotOfRunnableLogs } from '../../../../mocha';
 
 function getHookType(hook: Runnable): CiStatsTestType {

@@ -20,12 +20,12 @@ import {
   DraggableBucketContainer,
   isQueryValid,
 } from '@kbn/visualization-ui-components';
-import { type IndexPattern } from '../../../../../types';
+import { IndexPattern } from '../../../../../types';
 import { updateColumnParam } from '../../layer_helpers';
 import type { OperationDefinition } from '..';
 import type { BaseIndexPatternColumn } from '../column_types';
 import { FilterPopover } from './filter_popover';
-import { type TermsIndexPatternColumn } from '../terms';
+import { TermsIndexPatternColumn } from '../terms';
 import { isColumnOfType } from '../helpers';
 
 const generateId = htmlIdGenerator();

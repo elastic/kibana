@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
 } from '../../../../common/constants/client_defaults';
-import { type UMElasticsearchQueryFn } from '../adapters';
-import { type Ping } from '../../../../common/runtime_types';
+import { UMElasticsearchQueryFn } from '../adapters';
+import { Ping } from '../../../../common/runtime_types';
 
 export interface GetLatestMonitorParams {
   /** @member dateRangeStart timestamp bounds */

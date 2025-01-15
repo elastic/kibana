@@ -17,7 +17,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ILicense } from '@kbn/licensing-plugin/public';
 import {
-  type ClientConfigType,
+  ClientConfigType,
   InternalApiClientProvider,
   Job,
   ReportingAPIClient,
@@ -25,12 +25,12 @@ import {
 import type { LocatorPublic, SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { registerTestBed } from '@kbn/test-jest-helpers';
-import { type SerializableRecord } from '@kbn/utility-types';
+import { SerializableRecord } from '@kbn/utility-types';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { type Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 
-import { type ListingProps as Props, ReportListing } from '..';
+import { ListingProps as Props, ReportListing } from '..';
 import { mockJobs } from '../../../common/test';
 import { IlmPolicyStatusContextProvider } from '../../lib/ilm_policy_status_context';
 import { ReportDiagnostic } from '../components';

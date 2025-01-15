@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type PartialTheme } from '@elastic/charts';
+import { PartialTheme } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { useMemo } from 'react';
 

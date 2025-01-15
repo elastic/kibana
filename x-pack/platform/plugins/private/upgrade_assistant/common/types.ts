@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type HealthReportImpact } from '@elastic/elasticsearch/lib/api/types';
+import { HealthReportImpact } from '@elastic/elasticsearch/lib/api/types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { type SavedObject } from '@kbn/core/types';
+import { SavedObject } from '@kbn/core/types';
 
 export type DeprecationSource = 'Kibana' | 'Elasticsearch';
 

@@ -23,7 +23,7 @@ import {
   getCodeOwnersEntries,
   type CodeOwnersEntry,
 } from '@kbn/code-owners';
-import { type Runner, type Test } from '../../../fake_mocha_types';
+import { Runner, Test } from '../../../fake_mocha_types';
 
 /**
  * Configuration options for the Scout Mocha reporter

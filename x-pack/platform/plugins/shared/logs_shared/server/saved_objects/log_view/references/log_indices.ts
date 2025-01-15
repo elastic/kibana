@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { type SavedObjectReference } from '@kbn/core/server';
+import { SavedObjectReference } from '@kbn/core/server';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import {
-  type SavedObjectAttributesWithReferences,
+  SavedObjectAttributesWithReferences,
   SavedObjectReferenceResolutionError,
 } from '../../references';
-import { type LogViewSavedObjectAttributes } from '../types';
+import { LogViewSavedObjectAttributes } from '../types';
 
 export const logIndicesDataViewReferenceName = 'log-indices-data-view-0';
 

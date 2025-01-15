@@ -6,12 +6,12 @@
  */
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import { type ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
-  type FetchContext,
+  FetchContext,
   fetch$,
   initializeTitles,
   useBatchedPublishingSubjects,
@@ -23,10 +23,10 @@ import { createBrowserHistory } from 'history';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { PluginContext } from '../../../context/plugin_context';
-import { type SLOPublicPluginsStart, type SLORepositoryClient } from '../../../types';
+import { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import { SLO_ALERTS_EMBEDDABLE_ID } from './constants';
 import { SloAlertsWrapper } from './slo_alerts_wrapper';
-import { type SloAlertsApi, type SloAlertsEmbeddableState } from './types';
+import { SloAlertsApi, SloAlertsEmbeddableState } from './types';
 const history = createBrowserHistory();
 const queryClient = new QueryClient();
 

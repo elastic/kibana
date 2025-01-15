@@ -7,9 +7,9 @@
 
 import { EuiFieldNumber, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { type ChangeEvent, useState } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 
-import { type Duration } from '../../typings';
+import { Duration } from '../../typings';
 import { toMinutes } from '../../utils/slo/duration';
 
 interface Props {

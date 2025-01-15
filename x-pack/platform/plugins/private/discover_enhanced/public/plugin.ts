@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { type CoreSetup, type CoreStart, type Plugin } from '@kbn/core/public';
-import { type PluginInitializerContext } from '@kbn/core/public';
-import { type UiActionsSetup, type UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { type DiscoverSetup, type DiscoverStart } from '@kbn/discover-plugin/public';
-import { type SharePluginSetup, type SharePluginStart } from '@kbn/share-plugin/public';
+import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import {
-  type EmbeddableSetup,
-  type EmbeddableStart,
+  EmbeddableSetup,
+  EmbeddableStart,
   CONTEXT_MENU_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
 import { ExploreDataContextMenuAction, ExploreDataChartAction } from './actions';
-import { type Config } from '../common';
+import { Config } from '../common';
 
 export interface DiscoverEnhancedSetupDependencies {
   discover: DiscoverSetup;

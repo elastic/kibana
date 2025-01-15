@@ -14,9 +14,9 @@ import type { EsHitRecord } from '@kbn/discover-utils/types';
 import type { IndicesGetMappingResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
-import { type Pagination as PaginationTypeEui } from '@elastic/eui';
+import { Pagination as PaginationTypeEui } from '@elastic/eui';
 import { useKibana } from '../../hooks/use_kibana';
-import { type Pagination } from '../../types';
+import { Pagination } from '../../types';
 
 export interface ResultListArgs {
   searchResults: SearchHit[];

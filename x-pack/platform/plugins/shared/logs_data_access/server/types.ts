@@ -5,10 +5,10 @@
  * 2.0.
  */
 import {
-  type PluginSetup as DataPluginSetup,
-  type PluginStart as DataPluginStart,
+  PluginSetup as DataPluginSetup,
+  PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
-import { type PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
+import { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 
 export interface LogsDataAccessPluginSetupDeps {
   data: DataPluginSetup;

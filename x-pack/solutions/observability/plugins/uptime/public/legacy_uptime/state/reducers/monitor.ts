@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { type Action } from 'redux-actions';
+import { Action } from 'redux-actions';
 import {
-  type MonitorDetailsState,
+  MonitorDetailsState,
   getMonitorDetailsAction,
   getMonitorLocationsAction,
   getMonitorLocationsActionSuccess,
   getMonitorLocationsActionFail,
 } from '../actions/monitor';
-import { type MonitorLocations } from '../../../../common/runtime_types';
+import { MonitorLocations } from '../../../../common/runtime_types';
 
 type MonitorLocationsList = Map<string, MonitorLocations>;
 

@@ -10,10 +10,10 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  type IconType,
+  IconType,
   EuiCard,
 } from '@elastic/eui';
-import React, { type MouseEventHandler, type ReactNode, useMemo } from 'react';
+import React, { MouseEventHandler, ReactNode, useMemo } from 'react';
 import { css } from '@emotion/react';
 
 interface EmptyPageActions {

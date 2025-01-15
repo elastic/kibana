@@ -6,9 +6,9 @@
  */
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { type AppContextTestRender, createAppRootMockRenderer } from '../../test';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { DEFAULT_TTY_FONT_SIZE } from '../../../common/constants';
-import { TTYTextSizer, type TTYTextSizerDeps } from '.';
+import { TTYTextSizer, TTYTextSizerDeps } from '.';
 
 const FULL_SCREEN_FONT_SIZE = 12;
 

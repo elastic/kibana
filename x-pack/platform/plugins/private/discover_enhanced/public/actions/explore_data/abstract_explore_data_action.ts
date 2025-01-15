@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { type CoreStart } from '@kbn/core/public';
-import { type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { type DiscoverStart } from '@kbn/discover-plugin/public';
+import { CoreStart } from '@kbn/core/public';
+import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { type StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { DOC_TYPE as LENS_DOC_TYPE } from '@kbn/lens-plugin/common/constants';
 import {
   apiCanAccessViewMode,
@@ -19,13 +19,13 @@ import {
   apiIsOfType,
   apiPublishesDataViews,
   apiPublishesPartialUnifiedSearch,
-  type CanAccessViewMode,
-  type EmbeddableApiContext,
+  CanAccessViewMode,
+  EmbeddableApiContext,
   getInheritedViewMode,
-  type HasType,
-  type PublishesDataViews,
+  HasType,
+  PublishesDataViews,
 } from '@kbn/presentation-publishing';
-import { type KibanaLocation } from '@kbn/share-plugin/public';
+import { KibanaLocation } from '@kbn/share-plugin/public';
 
 import * as shared from './shared';
 

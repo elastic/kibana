@@ -9,19 +9,19 @@
 
 import { AnnotationDomainType, LineAnnotation, Position, RectAnnotation } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
-import React, { type FC } from 'react';
-import { type FieldFormat } from '@kbn/field-formats-plugin/common';
+import React, { FC } from 'react';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import {
-  type AxesMap,
-  type AxisConfiguration,
+  AxesMap,
+  AxisConfiguration,
   getOriginalAxisPosition,
   LINES_MARKER_SIZE,
 } from '../../helpers';
 import {
-  type AvailableReferenceLineIcon,
-  type FillStyle,
-  type IconPosition,
-  type LineStyle,
+  AvailableReferenceLineIcon,
+  FillStyle,
+  IconPosition,
+  LineStyle,
 } from '../../../common/types';
 import {
   getBaseIconPlacement,

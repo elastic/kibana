@@ -8,13 +8,13 @@
 import { isEmpty, isString } from 'lodash';
 import { api as commonApi } from '../lib/servicenow/api';
 import {
-  type ExecutorSubActionPushParamsSIR,
-  type ExternalServiceAPI,
-  type ExternalServiceSIR,
+  ExecutorSubActionPushParamsSIR,
+  ExternalServiceAPI,
+  ExternalServiceSIR,
   ObservableTypes,
-  type PushToServiceApiHandlerArgs,
-  type PushToServiceApiParamsSIR,
-  type PushToServiceResponse,
+  PushToServiceApiHandlerArgs,
+  PushToServiceApiParamsSIR,
+  PushToServiceResponse,
 } from '../lib/servicenow/types';
 
 const SPLIT_REGEX = /[ ,|\r\n\t]+/;

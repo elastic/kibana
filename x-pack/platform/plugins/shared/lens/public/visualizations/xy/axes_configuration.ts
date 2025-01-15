@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type Datatable } from '@kbn/expressions-plugin/public';
+import { Datatable } from '@kbn/expressions-plugin/public';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { type FormatFactory } from '../../../common/types';
+import { FormatFactory } from '../../../common/types';
 import { getDataBounds } from '../../shared_components';
-import { type XYDataLayerConfig } from './types';
+import { XYDataLayerConfig } from './types';
 
 interface FormattedMetric {
   layer: string;

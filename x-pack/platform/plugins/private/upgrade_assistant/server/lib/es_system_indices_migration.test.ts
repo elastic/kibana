@@ -6,7 +6,7 @@
  */
 
 import { convertFeaturesToIndicesArray } from './es_system_indices_migration';
-import { type SystemIndicesMigrationStatus } from '../../common/types';
+import { SystemIndicesMigrationStatus } from '../../common/types';
 
 const esUpgradeSystemIndicesStatusMock: SystemIndicesMigrationStatus = {
   features: [

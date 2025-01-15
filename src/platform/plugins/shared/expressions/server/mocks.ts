@@ -8,7 +8,7 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
-import { type ExpressionsServerSetup, type ExpressionsServerStart } from '.';
+import { ExpressionsServerSetup, ExpressionsServerStart } from '.';
 import { plugin as pluginInitializer } from '.';
 
 export type Setup = jest.Mocked<ExpressionsServerSetup>;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type Agent as SuperTestAgent } from 'supertest';
-import { type ToolingLog } from '@kbn/tooling-log';
+import { Agent as SuperTestAgent } from 'supertest';
+import { ToolingLog } from '@kbn/tooling-log';
 
 export const createDataView = async ({
   supertest,

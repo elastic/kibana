@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Vis } from '@kbn/visualizations-plugin/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
 import { buildExpression } from '@kbn/expressions-plugin/public';
 
-import { type BasicVislibParams } from './types';
+import { BasicVislibParams } from './types';
 import { toExpressionAst } from './to_ast';
 import { sampleAreaVis } from '@kbn/vis-type-xy-plugin/public/sample_vis.test.mocks';
 

@@ -8,8 +8,8 @@
 import expect from '@kbn/expect';
 import url from 'url';
 import supertest from 'supertest';
-import { type ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { type FtrProviderContext } from '../../ftr_provider_context';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export interface RawDoc {
   _id: string;

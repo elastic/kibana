@@ -13,17 +13,17 @@ import {
   builtInAggregationTypes,
   ForLastExpression,
   GroupByExpression,
-  type IErrorObject,
+  IErrorObject,
   OfExpression,
   ThresholdExpression,
   ValueExpression,
   WhenExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { builtInGroupByTypes, type FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
+import { builtInGroupByTypes, FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { SourceFields } from '../../components/source_fields_select';
-import { type CommonRuleParams, type SourceField } from '../types';
+import { CommonRuleParams, SourceField } from '../types';
 import { DEFAULT_VALUES } from '../constants';
-import { TestQueryRow, type TestQueryRowProps } from '../test_query_row';
+import { TestQueryRow, TestQueryRowProps } from '../test_query_row';
 import { QueryThresholdHelpPopover } from './threshold_help_popover';
 
 export interface RuleCommonExpressionsProps extends CommonRuleParams {

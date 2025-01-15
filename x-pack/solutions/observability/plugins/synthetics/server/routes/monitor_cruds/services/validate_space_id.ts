@@ -6,7 +6,7 @@
  */
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { type RouteContext } from '../../types';
+import { RouteContext } from '../../types';
 
 export const validateSpaceId = async (routeContext: RouteContext) => {
   const { server, request, spaceId } = routeContext;

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ExpressionValueError } from '..';
+import { ExpressionValueError } from '..';
 
 export type SerializedError = {
   name: string;

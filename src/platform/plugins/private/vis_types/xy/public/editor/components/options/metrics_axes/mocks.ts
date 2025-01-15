@@ -9,17 +9,17 @@
 
 import { Position } from '@elastic/charts';
 
-import { type Vis } from '@kbn/visualizations-plugin/public';
-import { type Style } from '@kbn/charts-plugin/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
+import { Style } from '@kbn/charts-plugin/public';
 
 import {
-  type ValueAxis,
-  type SeriesParam,
+  ValueAxis,
+  SeriesParam,
   ChartMode,
   InterpolationMode,
   ScaleType,
   AxisType,
-  type CategoryAxis,
+  CategoryAxis,
 } from '../../../../types';
 import { ChartType } from '../../../../../common';
 

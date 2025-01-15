@@ -11,7 +11,7 @@ import { Subject } from 'rxjs';
 import { materialize, take, toArray } from 'rxjs';
 
 import { UiSettingsClient } from './ui_settings_client';
-import { type ValidationApiResponse } from './ui_settings_api';
+import { ValidationApiResponse } from './ui_settings_api';
 
 const TEST_VALIDATION_ERROR_MESSAGE = 'Test validation message.';
 

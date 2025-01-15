@@ -11,7 +11,7 @@ import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { type InferencePipeline } from '../../../../../../common/types/pipelines';
+import { InferencePipeline } from '../../../../../../common/types/pipelines';
 
 export interface DeleteInferencePipelineButtonProps {
   'data-telemetry-id'?: string;

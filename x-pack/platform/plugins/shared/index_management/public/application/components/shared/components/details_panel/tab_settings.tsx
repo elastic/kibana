@@ -8,7 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCodeBlock, EuiCallOut } from '@elastic/eui';
-import { type IndexSettings } from '../../../../../../common';
+import { IndexSettings } from '../../../../../../common';
 
 interface Props {
   settings: IndexSettings | undefined;

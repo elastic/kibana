@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type EndpointEntryMatch } from '.';
+import { EndpointEntryMatch } from '.';
 import { ENTRY_VALUE, FIELD, MATCH, OPERATOR } from '../../../constants/index.mock';
 
 export const getEndpointEntryMatchMock = (): EndpointEntryMatch => ({

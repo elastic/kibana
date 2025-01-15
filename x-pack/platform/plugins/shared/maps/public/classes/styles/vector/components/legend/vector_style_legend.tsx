@@ -10,12 +10,12 @@ import { EuiText } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { StyleError } from './style_error';
 import {
-  type DynamicStyleProperty,
-  type IDynamicStyleProperty,
+  DynamicStyleProperty,
+  IDynamicStyleProperty,
 } from '../../properties/dynamic_style_property';
 import { FIELD_ORIGIN } from '../../../../../../common/constants';
-import { type Mask } from '../../../../layers/vector_layer/mask';
-import { type IStyleProperty } from '../../properties/style_property';
+import { Mask } from '../../../../layers/vector_layer/mask';
+import { IStyleProperty } from '../../properties/style_property';
 import { MaskLegend } from './mask_legend';
 
 interface Props {

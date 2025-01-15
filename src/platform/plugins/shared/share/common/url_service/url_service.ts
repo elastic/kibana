@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LocatorClient, type LocatorClientDependencies } from './locators';
+import { LocatorClient, LocatorClientDependencies } from './locators';
 import {
-  type IShortUrlClientFactoryProvider,
-  type IShortUrlClientFactory,
-  type IShortUrlClient,
+  IShortUrlClientFactoryProvider,
+  IShortUrlClientFactory,
+  IShortUrlClient,
 } from './short_urls';
 
 export interface UrlServiceDependencies<

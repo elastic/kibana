@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type IndicesQuerySourceFields } from '../types';
+import { IndicesQuerySourceFields } from '../types';
 import {
   createQuery,
   getDefaultQueryFields,

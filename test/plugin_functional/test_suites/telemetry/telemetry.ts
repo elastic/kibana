@@ -13,7 +13,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { type PluginFunctionalProviderContext } from '../../services';
+import { PluginFunctionalProviderContext } from '../../services';
 
 const TELEMETRY_SO_TYPE = 'telemetry';
 const TELEMETRY_SO_ID = 'telemetry';

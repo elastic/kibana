@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type IRouter, type Logger } from '@kbn/core/server';
+import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 
@@ -13,14 +13,14 @@ import { schema } from '@kbn/config-schema';
 import {
   API_VERSIONS,
   ExecuteConnectorRequestBody,
-  type Message,
-  type Replacements,
+  Message,
+  Replacements,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import { buildResponse } from '../lib/build_response';
-import { type ElasticAssistantRequestHandlerContext, type GetElser } from '../types';
+import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
 import {
   appendAssistantMessageToConversation,
   getIsKnowledgeBaseInstalled,

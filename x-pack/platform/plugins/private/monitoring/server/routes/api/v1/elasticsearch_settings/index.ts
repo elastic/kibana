@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type MonitoringCore, type RouteDependencies } from '../../../../types';
+import { MonitoringCore, RouteDependencies } from '../../../../types';
 import { clusterSettingsCheckRoute } from './check/cluster';
 import { internalMonitoringCheckRoute } from './check/internal_monitoring';
 import { nodesSettingsCheckRoute } from './check/nodes';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { map, takeUntil, firstValueFrom, type Observable, Subject } from 'rxjs';
+import { map, takeUntil, firstValueFrom, Observable, Subject } from 'rxjs';
 
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
@@ -26,11 +26,11 @@ import type {
 import { ClusterClient, AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
 
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
-import { ElasticsearchConfig, type ElasticsearchConfigType } from './elasticsearch_config';
+import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
 import {
-  type InternalElasticsearchServicePreboot,
-  type InternalElasticsearchServiceSetup,
-  type InternalElasticsearchServiceStart,
+  InternalElasticsearchServicePreboot,
+  InternalElasticsearchServiceSetup,
+  InternalElasticsearchServiceStart,
 } from './types';
 import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { pollEsNodesVersion } from './version_check/ensure_es_version';

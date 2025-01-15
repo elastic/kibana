@@ -13,9 +13,9 @@ import type { Logger } from '@kbn/logging';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import {
   getLatestMappingsVirtualVersionMap,
-  type IndexMapping,
-  type IndexTypesMap,
-  type SavedObjectsMigrationConfigType,
+  IndexMapping,
+  IndexTypesMap,
+  SavedObjectsMigrationConfigType,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
 import {

@@ -24,13 +24,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { type Repository, type RepositoryType, type EmptyRepository } from '../../../../common/types';
+import { Repository, RepositoryType, EmptyRepository } from '../../../../common/types';
 import { REPOSITORY_TYPES } from '../../../../common';
-import { SectionError, type Error } from '../../../shared_imports';
+import { SectionError, Error } from '../../../shared_imports';
 
 import { useLoadRepositoryTypes } from '../../services/http';
 import { textService } from '../../services/text';
-import { type RepositoryValidation } from '../../services/validation';
+import { RepositoryValidation } from '../../services/validation';
 import { SectionLoading, RepositoryTypeLogo } from '..';
 import { useCore } from '../../app_context';
 import { getRepositoryTypeDocUrl } from '../../lib/type_to_doc_url';

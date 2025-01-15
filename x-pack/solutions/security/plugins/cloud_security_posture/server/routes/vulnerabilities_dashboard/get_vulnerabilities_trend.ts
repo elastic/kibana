@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { BENCHMARK_SCORE_INDEX_DEFAULT_NS } from '../../../common/constants';
-import { type VulnStatsTrend } from '../../../common/types_old';
+import { VulnStatsTrend } from '../../../common/types_old';
 
 interface LastDocBucket {
   key_as_string: string;

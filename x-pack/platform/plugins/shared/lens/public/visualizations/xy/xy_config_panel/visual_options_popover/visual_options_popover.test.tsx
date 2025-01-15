@@ -9,12 +9,12 @@ import React from 'react';
 import { Position } from '@elastic/charts';
 import type { FramePublicAPI } from '../../../../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../../mocks';
-import { type SeriesType, type State } from '../../types';
-import { VisualOptionsPopover, type VisualOptionsPopoverProps } from '.';
+import { SeriesType, State } from '../../types';
+import { VisualOptionsPopover, VisualOptionsPopoverProps } from '.';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { type XYDataLayerConfig } from '@kbn/visualizations-plugin/common';
+import { XYDataLayerConfig } from '@kbn/visualizations-plugin/common';
 
 describe('Visual options popover', () => {
   let frame: FramePublicAPI;

@@ -7,17 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  type SubActionConnectorType,
+  SubActionConnectorType,
   ValidatorType,
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import {
   GenerativeAIForSearchPlaygroundConnectorFeatureId,
   GenerativeAIForSecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
-import { type ValidatorServices } from '@kbn/actions-plugin/server/types';
+import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
-import { type InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import { type ElasticsearchClient, type Logger } from '@kbn/core/server';
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   INFERENCE_CONNECTOR_TITLE,
   INFERENCE_CONNECTOR_ID,
@@ -25,7 +25,7 @@ import {
   SUB_ACTION,
 } from '../../../common/inference/constants';
 import { ConfigSchema, SecretsSchema } from '../../../common/inference/schema';
-import { type Config, type Secrets } from '../../../common/inference/types';
+import { Config, Secrets } from '../../../common/inference/types';
 import { InferenceConnector } from './inference';
 import { unflattenObject } from '../lib/unflatten_object';
 

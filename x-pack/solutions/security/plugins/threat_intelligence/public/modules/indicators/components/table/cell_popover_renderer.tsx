@@ -6,7 +6,7 @@
  */
 
 import {
-  type EuiDataGridCellPopoverElementProps,
+  EuiDataGridCellPopoverElementProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopoverTitle,
@@ -17,8 +17,8 @@ import { FilterInButtonEmpty } from '../../../query_bar/components/filter_in';
 import { FilterOutButtonEmpty } from '../../../query_bar/components/filter_out';
 import { AddToTimelineButtonEmpty } from '../../../timeline/components/add_to_timeline';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../utils/field_value';
-import { type Indicator } from '../../../../../common/types/indicator';
-import { type Pagination } from '../../services/fetch_indicators';
+import { Indicator } from '../../../../../common/types/indicator';
+import { Pagination } from '../../services/fetch_indicators';
 import { useStyles } from './styles';
 import {
   CELL_POPOVER_FILTER_IN_BUTTON_TEST_ID,

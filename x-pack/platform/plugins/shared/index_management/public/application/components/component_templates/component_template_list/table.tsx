@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { type FunctionComponent, useState, useMemo } from 'react';
+import React, { FunctionComponent, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiInMemoryTable,
   EuiButton,
-  type EuiInMemoryTableProps,
+  EuiInMemoryTableProps,
   EuiTextColor,
   EuiIcon,
   EuiLink,
@@ -21,12 +21,12 @@ import {
   EuiFilterGroup,
   EuiSelectable,
   EuiFilterButton,
-  type EuiSelectableOption,
+  EuiSelectableOption,
 } from '@elastic/eui';
-import { type ScopedHistory } from '@kbn/core/public';
+import { ScopedHistory } from '@kbn/core/public';
 
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
-import { type ComponentTemplateListItem, reactRouterNavigate } from '../shared_imports';
+import { ComponentTemplateListItem, reactRouterNavigate } from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_DETAILS } from '../constants';
 import { useComponentTemplatesContext } from '../component_templates_context';
 import { DeprecatedBadge } from '../components';

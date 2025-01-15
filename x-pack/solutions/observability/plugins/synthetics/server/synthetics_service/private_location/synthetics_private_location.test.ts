@@ -4,21 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   MonitorTypeEnum,
-  type MonitorFields,
+  MonitorFields,
   ScheduleUnit,
   SourceType,
-  type HeartbeatConfig,
+  HeartbeatConfig,
 } from '../../../common/runtime_types';
 import { SyntheticsPrivateLocation } from './synthetics_private_location';
 import { testMonitorPolicy } from './test_policy';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
-import { type SyntheticsServerSetup } from '../../types';
-import { type PrivateLocationAttributes } from '../../runtime_types/private_locations';
+import { SyntheticsServerSetup } from '../../types';
+import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 describe('SyntheticsPrivateLocation', () => {

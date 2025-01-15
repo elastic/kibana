@@ -15,7 +15,7 @@ import {
   EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
-import { getFields, type RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { fetchFieldsFromESQL } from '@kbn/esql-editor';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
@@ -27,7 +27,7 @@ import {
   getTimeOptions,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
-import { type EsQueryRuleParams, type EsQueryRuleMetaData, SearchType } from '../types';
+import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { useTriggerUiActionServices } from '../util';
 import { hasExpressionValidationErrors } from '../validation';

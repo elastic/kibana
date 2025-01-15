@@ -8,7 +8,7 @@
  */
 
 import { PRESET_TIMER } from 'listr2';
-import { type TaskSignature } from '../../types';
+import { TaskSignature } from '../../types';
 import { runForNamespacePath } from './per_namespace';
 import { ErrorReporter } from '../../utils/error_reporter';
 

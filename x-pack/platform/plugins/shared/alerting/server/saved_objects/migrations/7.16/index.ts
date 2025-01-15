@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { type SavedObjectReference } from '@kbn/core-saved-objects-server';
-import { type SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
-import { type EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { SavedObjectReference } from '@kbn/core-saved-objects-server';
+import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { isString } from 'lodash/fp';
 import { RULE_SAVED_OBJECT_TYPE } from '../..';
-import { type RawRule, type RawRuleAction } from '../../../types';
+import { RawRule, RawRuleAction } from '../../../types';
 import { extractRefsFromGeoContainmentAlert } from '../../geo_containment/migrations';
 import { createEsoMigration, isSecuritySolutionLegacyNotification, pipeMigrations } from '../utils';
 

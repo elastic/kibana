@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { SemVer } from 'semver';
-import { type CoreStart, type CoreSetup, type Logger, type Plugin, type PluginInitializerContext } from '@kbn/core/server';
+import { CoreStart, CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 
 import { PLUGIN, INDEX_NAMES } from '../common/constants';
 

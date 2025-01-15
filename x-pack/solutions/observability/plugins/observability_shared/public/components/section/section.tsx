@@ -10,13 +10,13 @@ import {
   EuiListGroup,
   EuiSpacer,
   EuiListGroupItem,
-  type EuiListGroupItemProps,
+  EuiListGroupItemProps,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import React, { type ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import styled from 'styled-components';
-import { type EuiListGroupProps } from '@elastic/eui';
+import { EuiListGroupProps } from '@elastic/eui';
 
 export function SectionTitle({ children }: { children?: ReactNode }) {
   return (

@@ -13,13 +13,13 @@ import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfi
 import { cloneDeep } from 'lodash';
 import { useEuiTheme } from '@elastic/eui';
 import {
-  type ActivePanel,
-  type GridAccessMode,
-  type GridLayoutData,
-  type GridLayoutStateManager,
-  type GridSettings,
-  type PanelInteractionEvent,
-  type RuntimeGridSettings,
+  ActivePanel,
+  GridAccessMode,
+  GridLayoutData,
+  GridLayoutStateManager,
+  GridSettings,
+  PanelInteractionEvent,
+  RuntimeGridSettings,
 } from './types';
 import { shouldShowMobileView } from './utils/mobile_view';
 import { resolveGridRow } from './utils/resolve_grid_row';

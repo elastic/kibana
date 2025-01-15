@@ -7,13 +7,13 @@
 
 import {
   CHUNK_SIZE,
-  type ChunkFetcher,
-  type ChunkResult,
+  ChunkFetcher,
+  ChunkResult,
   MonitorSummaryIterator,
 } from './monitor_summary_iterator';
 import { simpleQueryContext } from './test_helpers';
-import { type QueryContext } from './query_context';
-import { type MonitorSummary } from '../../../../../common/runtime_types';
+import { QueryContext } from './query_context';
+import { MonitorSummary } from '../../../../../common/runtime_types';
 
 describe('iteration', () => {
   let iterator: MonitorSummaryIterator | null = null;

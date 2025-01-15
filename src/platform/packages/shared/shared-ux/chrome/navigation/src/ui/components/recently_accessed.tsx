@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC, useMemo } from 'react';
+import React, { FC, useMemo } from 'react';
 import { EuiCollapsibleNavItem, type EuiCollapsibleNavItemProps } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import type { ChromeRecentlyAccessedHistoryItem } from '@kbn/core-chrome-browser';

@@ -8,11 +8,11 @@
  */
 
 import React from 'react';
-import { type ReactWrapper } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { type NoDataViewsPromptServices } from '@kbn/shared-ux-prompt-no-data-views-types';
+import { NoDataViewsPromptServices } from '@kbn/shared-ux-prompt-no-data-views-types';
 import { getNoDataViewsPromptServicesMock } from '@kbn/shared-ux-prompt-no-data-views-mocks';
 
 import { NoDataViewsPrompt } from './no_data_views';

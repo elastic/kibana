@@ -8,7 +8,7 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import { getExceptionExportDetailsMock } from './index.mock';
-import { exportExceptionDetailsSchema, type ExportExceptionDetails } from '.';
+import { exportExceptionDetailsSchema, ExportExceptionDetails } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('exportExceptionDetails', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useState, useCallback, useMemo, useEffect } from 'react';
+import React, { FC, useState, useCallback, useMemo, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fromExpression } from '@kbn/interpreter';
 import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
@@ -14,7 +14,7 @@ import { setExpression, flushContext } from '../../state/actions/elements';
 // @ts-expect-error
 import { ElementNotSelected } from './element_not_selected';
 import { Expression as Component } from './expression';
-import { type State, type CanvasElement } from '../../../types';
+import { State, CanvasElement } from '../../../types';
 import { getCanvasExpressionService } from '../../services/canvas_expressions_service';
 
 interface ExpressionProps {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import { get } from 'lodash';
-import { type PartitionLabelsArguments } from './types';
+import { PartitionLabelsArguments } from './types';
 
 export const getFieldPath = (field: keyof PartitionLabelsArguments) =>
   `chain.0.arguments.${field}.0`;

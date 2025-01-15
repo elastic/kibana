@@ -7,20 +7,20 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { type ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { copyPersistentState } from '../../reducers/copy_persistent_state';
-import { type IField } from '../fields/field';
-import { type FieldFormatter, type LAYER_TYPE, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
+import { IField } from '../fields/field';
+import { FieldFormatter, LAYER_TYPE, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
 import {
-  type AbstractSourceDescriptor,
-  type Attribution,
-  type DataFilters,
-  type DataRequestMeta,
-  type StyleDescriptor,
-  type Timeslice,
+  AbstractSourceDescriptor,
+  Attribution,
+  DataFilters,
+  DataRequestMeta,
+  StyleDescriptor,
+  Timeslice,
 } from '../../../common/descriptor_types';
-import { type IStyle } from '../styles/style';
-import { type LICENSED_FEATURES } from '../../licensed_features';
+import { IStyle } from '../styles/style';
+import { LICENSED_FEATURES } from '../../licensed_features';
 
 export type OnSourceChangeArgs = {
   propName: string;

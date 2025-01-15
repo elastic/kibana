@@ -6,8 +6,8 @@
  */
 import expect from '@kbn/expect';
 import {
-  type APIClientRequestParamsOf,
-  type APIReturnType,
+  APIClientRequestParamsOf,
+  APIReturnType,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import { sumBy, first, last } from 'lodash';

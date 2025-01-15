@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type CoreSetup, type CoreStart } from '@kbn/core/public';
+import { CoreSetup, CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { type AdvancedUiActionsSetup, type AdvancedUiActionsStart } from '.';
+import { AdvancedUiActionsSetup, AdvancedUiActionsStart } from '.';
 import { plugin as pluginInitializer } from '.';
-import { type StartDependencies } from './plugin';
+import { StartDependencies } from './plugin';
 
 export type Setup = jest.Mocked<AdvancedUiActionsSetup>;
 export type Start = jest.Mocked<AdvancedUiActionsStart>;

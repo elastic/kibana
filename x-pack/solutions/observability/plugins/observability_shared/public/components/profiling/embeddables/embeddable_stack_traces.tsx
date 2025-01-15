@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { type TopNType } from '@kbn/profiling-utils';
+import { TopNType } from '@kbn/profiling-utils';
 import { EMBEDDABLE_STACK_TRACES } from '.';
 import { getProfilingComponent } from '../helpers/component_registry';
 

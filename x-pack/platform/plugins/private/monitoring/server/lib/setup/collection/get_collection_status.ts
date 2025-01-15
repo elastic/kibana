@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { type CollectorFetchContext, type UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { CollectorFetchContext, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { get, uniq } from 'lodash';
 import {
-  type INDEX_PATTERN_TYPES,
+  INDEX_PATTERN_TYPES,
   KIBANA_STATS_TYPE_MONITORING,
   METRICBEAT_INDEX_NAME_UNIQUE_TOKEN,
 } from '../../../../common/constants';
-import { type TimeRange } from '../../../../common/http_api/shared';
-import { type LegacyRequest } from '../../../types';
+import { TimeRange } from '../../../../common/http_api/shared';
+import { LegacyRequest } from '../../../types';
 import { getLegacyIndexPattern } from '../../../../common/get_index_patterns';
 import { getLivesNodes } from '../../elasticsearch/nodes/get_nodes/get_live_nodes';
 

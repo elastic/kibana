@@ -11,25 +11,25 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
 import { showMemoizedErrorNotification } from '../../lens_ui_errors';
 import {
-  type Visualization,
-  type Datasource,
-  type TableSuggestion,
-  type DatasourceSuggestion,
-  type DatasourceMap,
-  type VisualizationMap,
-  type VisualizeEditorContext,
-  type Suggestion,
-  type DatasourceLayers,
-  type SuggestionRequest,
+  Visualization,
+  Datasource,
+  TableSuggestion,
+  DatasourceSuggestion,
+  DatasourceMap,
+  VisualizationMap,
+  VisualizeEditorContext,
+  Suggestion,
+  DatasourceLayers,
+  SuggestionRequest,
 } from '../../types';
 import type { LayerType } from '../../../common/types';
 import {
-  type LensDispatch,
+  LensDispatch,
   switchVisualization,
-  type DatasourceStates,
-  type VisualizationState,
+  DatasourceStates,
+  VisualizationState,
   applyChanges,
-  type DataViewsState,
+  DataViewsState,
 } from '../../state_management';
 
 /**

@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { type PreviewBanner, PreviewSection } from './preview_section';
+import { PreviewBanner, PreviewSection } from './preview_section';
 import {
   PREVIEW_SECTION_BACK_BUTTON_TEST_ID,
   PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID,
   PREVIEW_SECTION_TEST_ID,
 } from './test_ids';
 import { TestProvider } from '../test/provider';
-import { initialUiState, type State } from '../store/state';
+import { initialUiState, State } from '../store/state';
 
 describe('PreviewSection', () => {
   const context: State = {

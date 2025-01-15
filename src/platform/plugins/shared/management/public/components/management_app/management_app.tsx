@@ -10,27 +10,27 @@
 import './management_app.scss';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { type BehaviorSubject, type Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
-import { type AppMountParameters, type ChromeBreadcrumb, type ScopedHistory } from '@kbn/core/public';
-import { type CoreStart } from '@kbn/core/public';
+import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { KibanaPageTemplate, type KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
+import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import useObservable from 'react-use/lib/useObservable';
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import { AppContextProvider } from './management_context';
 import {
-  type ManagementSection,
+  ManagementSection,
   MANAGEMENT_BREADCRUMB,
   MANAGEMENT_BREADCRUMB_NO_HREF,
 } from '../../utils';
 import { ManagementRouter } from './management_router';
 import { managementSidebarNav } from '../management_sidebar_nav/management_sidebar_nav';
-import { type SectionsServiceStart, type NavigationCardsSubject, type AppDependencies } from '../../types';
+import { SectionsServiceStart, NavigationCardsSubject, AppDependencies } from '../../types';
 
 interface ManagementAppProps {
   appBasePath: string;

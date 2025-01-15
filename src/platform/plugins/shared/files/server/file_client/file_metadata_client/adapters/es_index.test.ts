@@ -8,11 +8,11 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { type Logger } from '@kbn/logging';
+import { Logger } from '@kbn/logging';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { EsIndexFilesMetadataClient } from '../..';
-import { type FileMetadata } from '@kbn/shared-ux-file-types';
-import { type estypes } from '@elastic/elasticsearch';
+import { FileMetadata } from '@kbn/shared-ux-file-types';
+import { estypes } from '@elastic/elasticsearch';
 
 describe('EsIndexFilesMetadataClient', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;

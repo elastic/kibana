@@ -6,21 +6,21 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { type Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import {
   ELASTIC_AI_ASSISTANT_CHAT_COMPLETE_URL,
   ChatCompleteProps,
   API_VERSIONS,
-  type Message,
-  type Replacements,
+  Message,
+  Replacements,
   transformRawData,
   getAnonymizedValue,
-  type ConversationResponse,
+  ConversationResponse,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../lib/telemetry/event_based_telemetry';
-import { type ElasticAssistantPluginRouter, type GetElser } from '../../types';
+import { ElasticAssistantPluginRouter, GetElser } from '../../types';
 import { buildResponse } from '../../lib/build_response';
 import {
   appendAssistantMessageToConversation,
@@ -30,7 +30,7 @@ import {
   performChecks,
 } from '../helpers';
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
-import { type EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
+import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
 import { isOpenSourceModel } from '../utils';
 
 export const SYSTEM_PROMPT_CONTEXT_NON_I18N = (context: string) => {

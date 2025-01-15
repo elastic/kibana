@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ListItemIndexExistSchema } from '.';
+import { ListItemIndexExistSchema } from '.';
 
 export const getListItemIndexExistSchemaResponseMock = (): ListItemIndexExistSchema => ({
   list_index: true,

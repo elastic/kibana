@@ -8,7 +8,7 @@
  */
 
 import type { GetDeprecationsContext } from '@kbn/core-deprecations-server';
-import { DeprecationsFactory, type DeprecationsFactoryConfig } from './deprecations_factory';
+import { DeprecationsFactory, DeprecationsFactoryConfig } from './deprecations_factory';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { DeprecationsDetails } from '@kbn/core-deprecations-common';
 

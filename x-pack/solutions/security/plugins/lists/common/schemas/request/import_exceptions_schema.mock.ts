@@ -6,10 +6,10 @@
  */
 
 import {
-  type ImportExceptionListItemSchema,
-  type ImportExceptionListItemSchemaDecoded,
-  type ImportExceptionListSchemaDecoded,
-  type ImportExceptionsListSchema,
+  ImportExceptionListItemSchema,
+  ImportExceptionListItemSchemaDecoded,
+  ImportExceptionListSchemaDecoded,
+  ImportExceptionsListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import { ENTRIES, EXPIRE_TIME } from '../../constants.mock';

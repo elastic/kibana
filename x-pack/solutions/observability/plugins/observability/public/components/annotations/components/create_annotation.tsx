@@ -19,8 +19,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
-import { type Moment } from 'moment';
-import { type Annotation, type CreateAnnotationParams } from '../../../../common/annotations';
+import { Moment } from 'moment';
+import { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
 import { AnnotationForm } from '../annotation_form';
 
 export type CreateAnnotationForm = Omit<CreateAnnotationParams, '@timestamp' | 'event'> & {

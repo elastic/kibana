@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type FieldDescriptor, IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import { FieldDescriptor, IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { SYNTHETICS_INDEX_PATTERN } from '../../common/constants';
-import { type SyntheticsEsClient } from '../lib';
+import { SyntheticsEsClient } from '../lib';
 
 export interface IndexPatternTitleAndFields {
   title: string;

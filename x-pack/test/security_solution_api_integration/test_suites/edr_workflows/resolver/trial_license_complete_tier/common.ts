@@ -7,11 +7,11 @@
 
 import expect from '@kbn/expect';
 import { firstNonNullValue } from '@kbn/security-solution-plugin/common/endpoint/models/ecs_safety_helpers';
-import { type NodeID } from '@kbn/security-solution-plugin/server/endpoint/routes/resolver/tree/utils';
+import { NodeID } from '@kbn/security-solution-plugin/server/endpoint/routes/resolver/tree/utils';
 import {
-  type SafeResolverEvent,
-  type ResolverNode,
-  type ResolverSchema,
+  SafeResolverEvent,
+  ResolverNode,
+  ResolverSchema,
 } from '@kbn/security-solution-plugin/common/endpoint/types';
 import {
   parentEntityIDSafeVersion,
@@ -21,10 +21,10 @@ import {
   timestampAsDateSafeVersion,
 } from '@kbn/security-solution-plugin/common/endpoint/models/event';
 import {
-  type Event,
-  type Tree,
-  type TreeNode,
-  type RelatedEventInfo,
+  Event,
+  Tree,
+  TreeNode,
+  RelatedEventInfo,
   categoryMapping,
 } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
 

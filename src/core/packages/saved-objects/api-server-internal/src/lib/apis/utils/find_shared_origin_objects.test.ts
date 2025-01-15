@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { savedObjectsPointInTimeFinderMock } from '../../../mocks/point_in_time_finder.mock';
-import { type CreatePointInTimeFinderFn, type PointInTimeFinder } from '../../point_in_time_finder';
+import { CreatePointInTimeFinderFn, PointInTimeFinder } from '../../point_in_time_finder';
 import { findSharedOriginObjects } from './find_shared_origin_objects';
-import { type SavedObjectsPointInTimeFinderClient } from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsPointInTimeFinderClient } from '@kbn/core-saved-objects-api-server';
 
 interface MockFindResultParams {
   type: string;

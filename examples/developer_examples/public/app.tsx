@@ -24,14 +24,14 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import {
-  type AnalyticsServiceStart,
-  type AppMountParameters,
-  type I18nStart,
-  type ThemeServiceStart,
-  type UserProfileService,
+  AnalyticsServiceStart,
+  AppMountParameters,
+  I18nStart,
+  ThemeServiceStart,
+  UserProfileService,
 } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { type ExampleDefinition } from './types';
+import { ExampleDefinition } from './types';
 
 interface StartServices {
   analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;

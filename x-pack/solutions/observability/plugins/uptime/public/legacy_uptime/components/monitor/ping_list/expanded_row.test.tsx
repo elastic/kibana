@@ -8,7 +8,7 @@
 import { mountWithIntl, renderWithI18nProvider, shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { PingListExpandedRowComponent } from './expanded_row';
-import { type Ping } from '../../../../../common/runtime_types';
+import { Ping } from '../../../../../common/runtime_types';
 import { DocLinkForBody } from './doc_link_body';
 
 describe('PingListExpandedRow', () => {

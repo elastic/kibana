@@ -8,7 +8,7 @@
 import {
   MVT_GETGRIDTILE_API_PATH,
   MVT_GETTILE_API_PATH,
-  type RENDER_AS,
+  RENDER_AS,
 } from '../../../../common/constants';
 import { getAggsTileRequest, getHitsTileRequest } from '../../../../common/mvt_request_body';
 import type { TileRequest } from '../types';

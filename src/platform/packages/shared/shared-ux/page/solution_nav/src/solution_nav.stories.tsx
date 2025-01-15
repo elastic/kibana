@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { action } from '@storybook/addon-actions';
-import { SolutionNav as Component, type SolutionNavProps } from './solution_nav';
+import { SolutionNav as Component, SolutionNavProps } from './solution_nav';
 
 export default {
   title: 'Page/Solution Nav',

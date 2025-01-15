@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type EntityDefinition, ENTITY_SCHEMA_VERSION_V1, type MetadataField } from '@kbn/entities-schema';
+import { EntityDefinition, ENTITY_SCHEMA_VERSION_V1, MetadataField } from '@kbn/entities-schema';
 import {
   initializePathScript,
   cleanScript,

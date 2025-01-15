@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type OnCheckCompleted, type PatternRollup } from '../../types';
+import { OnCheckCompleted, PatternRollup } from '../../types';
 
 export interface UseResultsRollupReturnValue {
   onCheckCompleted: OnCheckCompleted;

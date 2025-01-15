@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type CursorDirection, type SortOrder } from '../../../../../common/runtime_types';
+import { CursorDirection, SortOrder } from '../../../../../common/runtime_types';
 
 export interface CursorPagination {
   cursorKey?: any;

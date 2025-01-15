@@ -9,10 +9,10 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  type ExpressionFunctionDefinition,
-  type ExpressionValueBoxed,
-  type Datatable,
-  type DatatableColumn,
+  ExpressionFunctionDefinition,
+  ExpressionValueBoxed,
+  Datatable,
+  DatatableColumn,
 } from '@kbn/expressions-plugin/common';
 import { findAccessorOrFail } from '../utils/accessors';
 

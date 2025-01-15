@@ -9,14 +9,14 @@
 
 import { useEffect, useState } from 'react';
 import { isEqual } from 'lodash';
-import { type EventEmitter } from 'events';
-import { type Query } from '@kbn/es-query';
+import { EventEmitter } from 'events';
+import { Query } from '@kbn/es-query';
 import {
-  type VisualizeServices,
-  type VisualizeAppState,
-  type VisualizeAppStateContainer,
-  type VisualizeEditorVisInstance,
-  type IEditorController,
+  VisualizeServices,
+  VisualizeAppState,
+  VisualizeAppStateContainer,
+  VisualizeEditorVisInstance,
+  IEditorController,
 } from '../../types';
 import { convertFromSerializedVis } from '../../../utils/saved_visualize_utils';
 

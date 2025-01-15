@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type EntityDataStreamType, type EntityFields } from '.';
+import { EntityDataStreamType, EntityFields } from '.';
 import { Serializable } from '../serializable';
 
 class ContainerEntity extends Serializable<EntityFields> {

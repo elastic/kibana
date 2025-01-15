@@ -6,12 +6,12 @@
  */
 
 import { fromExpression } from '@kbn/interpreter';
-import { type FC } from 'react';
+import { FC } from 'react';
 import {
-  type Filter as FilterType,
-  type FilterViewInstance,
-  type FlattenFilterViewInstance,
-  type SimpleFilterViewField,
+  Filter as FilterType,
+  FilterViewInstance,
+  FlattenFilterViewInstance,
+  SimpleFilterViewField,
 } from '../../types';
 import {
   defaultFormatter,

@@ -7,24 +7,24 @@
 
 import React, { useCallback, useState } from 'react';
 import {
-  type Criteria,
+  Criteria,
   EuiBasicTable,
-  type EuiTableSortingType,
+  EuiTableSortingType,
   EuiPanel,
   EuiHorizontalRule,
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
+import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { MonitorListHeader } from './monitor_list_header';
 import type { MonitorListSortField } from '../../../../../../../common/runtime_types/monitor_management/sort_field';
 import { DeleteMonitor } from './delete_monitor';
-import { type IHttpSerializedFetchError } from '../../../../state/utils/http_error';
-import { type MonitorListPageState } from '../../../../state';
+import { IHttpSerializedFetchError } from '../../../../state/utils/http_error';
+import { MonitorListPageState } from '../../../../state';
 import {
   ConfigKey,
-  type EncryptedSyntheticsSavedMonitor,
-  type OverviewStatusState,
+  EncryptedSyntheticsSavedMonitor,
+  OverviewStatusState,
   SourceType,
 } from '../../../../../../../common/runtime_types';
 import { useMonitorListColumns } from './columns';

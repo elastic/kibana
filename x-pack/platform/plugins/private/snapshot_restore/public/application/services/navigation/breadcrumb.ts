@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { textService } from '../text';
 import {
   linkToHome,

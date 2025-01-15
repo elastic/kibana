@@ -9,10 +9,10 @@
 
 import { useCallback, useEffect } from 'react';
 import { once } from 'lodash';
-import { type IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { type SearchSessionIndicatorRef } from '../search_session_indicator';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { SearchSessionIndicatorRef } from '../search_session_indicator';
 import { SearchSessionState } from '../../search_session_state';
-import { type SearchUsageCollector } from '../../../collectors';
+import { SearchUsageCollector } from '../../../collectors';
 
 const TOUR_TAKING_TOO_LONG_TIMEOUT = 10000;
 export const TOUR_TAKING_TOO_LONG_STEP_KEY = `data.searchSession.tour.takingTooLong`;

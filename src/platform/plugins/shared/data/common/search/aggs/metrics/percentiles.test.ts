@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type IPercentileAggConfig, getPercentilesMetricAgg } from './percentiles';
-import { AggConfigs, type IAggConfigs } from '../agg_configs';
+import { IPercentileAggConfig, getPercentilesMetricAgg } from './percentiles';
+import { AggConfigs, IAggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { METRIC_TYPES } from './metric_agg_types';
 import type { IResponseAggConfig } from './lib/get_response_agg_config_class';

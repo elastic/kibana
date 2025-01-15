@@ -6,15 +6,15 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { type AuthenticatedUser, type ElasticsearchClient, type Logger } from '@kbn/core/server';
+import { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import {
   ConversationCategoryEnum,
-  type ConversationCreateProps,
-  type ConversationResponse,
+  ConversationCreateProps,
+  ConversationResponse,
 } from '@kbn/elastic-assistant-common';
 import { getConversation } from './get_conversation';
-import { type CreateMessageSchema } from './types';
+import { CreateMessageSchema } from './types';
 
 export interface CreateConversationParams {
   esClient: ElasticsearchClient;

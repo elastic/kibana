@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC, type PropsWithChildren, useContext } from 'react';
+import React, { FC, PropsWithChildren, useContext } from 'react';
 
 import type {
   NoDataViewsPromptServices,

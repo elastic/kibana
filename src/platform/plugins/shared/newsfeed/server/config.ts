@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, type TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import {
   NEWSFEED_DEFAULT_SERVICE_PATH,
   NEWSFEED_DEFAULT_SERVICE_BASE_URL,

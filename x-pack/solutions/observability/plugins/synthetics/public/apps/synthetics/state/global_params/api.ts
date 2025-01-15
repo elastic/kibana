@@ -8,9 +8,9 @@
 import { isEmpty } from 'lodash';
 import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import {
-  type DeleteParamsResponse,
-  type SyntheticsParamRequest,
-  type SyntheticsParams,
+  DeleteParamsResponse,
+  SyntheticsParamRequest,
+  SyntheticsParams,
   SyntheticsParamsCodec,
   SyntheticsParamsReadonlyCodec,
   SyntheticsParamsReadonlyCodecList,

@@ -9,12 +9,12 @@
 
 import { action } from '@storybook/addon-actions';
 
-import { type SampleDataSet } from '@kbn/home-sample-data-types';
+import { SampleDataSet } from '@kbn/home-sample-data-types';
 import previewImagePath from './dashboard.png';
 import darkPreviewImagePath from './dashboard_dark.png';
 import iconPath from './icon.svg';
 
-import { type Services } from '../services';
+import { Services } from '../services';
 
 /**
  * A set of e-commerce images for use in Storybook stories.

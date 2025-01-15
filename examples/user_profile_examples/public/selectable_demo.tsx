@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FunctionComponent, useState } from 'react';
-import { UserProfilesSelectable, type UserProfileWithAvatar } from '@kbn/user-profile-components';
+import React, { FunctionComponent, useState } from 'react';
+import { UserProfilesSelectable, UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { PanelWithCodeBlock } from './panel_with_code_block';
 
 export const SelectableDemo: FunctionComponent = () => {

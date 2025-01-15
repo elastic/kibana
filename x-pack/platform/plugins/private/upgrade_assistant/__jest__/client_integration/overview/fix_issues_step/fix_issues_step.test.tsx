@@ -10,7 +10,7 @@ import { deprecationsServiceMock } from '@kbn/core/public/mocks';
 
 import { setupEnvironment } from '../../helpers';
 import { kibanaDeprecationsServiceHelpers } from '../../kibana_deprecations/service.mock';
-import { type OverviewTestBed, setupOverviewPage } from '../overview.helpers';
+import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 import { esCriticalAndWarningDeprecations, esNoDeprecations } from './mock_es_issues';
 
 describe('Overview - Fix deprecation issues step', () => {

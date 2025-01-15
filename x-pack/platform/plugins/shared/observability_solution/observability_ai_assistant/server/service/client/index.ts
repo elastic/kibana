@@ -21,7 +21,7 @@ import {
   from,
   map,
   merge as mergeOperator,
-  type Observable,
+  Observable,
   of,
   shareReplay,
   switchMap,
@@ -35,18 +35,18 @@ import { ToolChoiceType } from '@kbn/inference-common';
 
 import { resourceNames } from '..';
 import {
-  type ChatCompletionChunkEvent,
-  type ChatCompletionMessageEvent,
-  type ChatCompletionErrorEvent,
-  type ConversationCreateEvent,
-  type ConversationUpdateEvent,
+  ChatCompletionChunkEvent,
+  ChatCompletionMessageEvent,
+  ChatCompletionErrorEvent,
+  ConversationCreateEvent,
+  ConversationUpdateEvent,
   createConversationNotFoundError,
   StreamingChatResponseEventType,
-  type TokenCountEvent,
+  TokenCountEvent,
   type StreamingChatResponseEvent,
 } from '../../../common/conversation_complete';
 import { convertMessagesForInference } from '../../../common/convert_messages_for_inference';
-import { type CompatibleJSONSchema } from '../../../common/functions/types';
+import { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
   type AdHocInstruction,
   type Conversation,
@@ -61,7 +61,7 @@ import {
 import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 import type { ChatFunctionClient } from '../chat_function_client';
-import { type KnowledgeBaseService, type RecalledEntry } from '../knowledge_base_service';
+import { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
 import { getAccessQuery } from '../util/get_access_query';
 import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
 import { replaceSystemMessage } from '../util/replace_system_message';
@@ -78,8 +78,8 @@ import {
   runSemanticTextKnowledgeBaseMigration,
   scheduleSemanticTextMigration,
 } from '../task_manager_definitions/register_migrate_knowledge_base_entries_task';
-import { type ObservabilityAIAssistantPluginStartDependencies } from '../../types';
-import { type ObservabilityAIAssistantConfig } from '../../config';
+import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
+import { ObservabilityAIAssistantConfig } from '../../config';
 import { getElserModelId } from '../knowledge_base_service/get_elser_model_id';
 
 const MAX_FUNCTION_CALLS = 8;

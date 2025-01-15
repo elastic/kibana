@@ -11,14 +11,14 @@ import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
   AttachmentType,
-  type CaseCustomFields,
-  type Cases,
+  CaseCustomFields,
+  Cases,
   CaseSeverity,
   CaseStatuses,
   ConnectorTypes,
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
-import { type FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
   getPostCaseRequest,

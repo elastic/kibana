@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type RequestHandler } from '@kbn/core/server';
-import { schema, type TypeOf } from '@kbn/config-schema';
+import { RequestHandler } from '@kbn/core/server';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { convertRequests } from '@elastic/request-converter';
-import { type RouteDependencies } from '../../..';
+import { RouteDependencies } from '../../..';
 
 import { acceptedHttpVerb, nonEmptyString } from '../proxy/validation_config';
 

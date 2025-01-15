@@ -8,10 +8,10 @@
  */
 
 import {
-  type ShareContext,
-  type ShareMenuProvider,
-  type ShareMenuProviderV2,
-  type ShareMenuProviderLegacy,
+  ShareContext,
+  ShareMenuProvider,
+  ShareMenuProviderV2,
+  ShareMenuProviderLegacy,
 } from '../types';
 
 export class ShareMenuRegistry {

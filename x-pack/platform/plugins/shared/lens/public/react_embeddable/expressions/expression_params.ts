@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { type KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { type RenderMode } from '@kbn/expressions-plugin/common';
-import { type ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
+import { RenderMode } from '@kbn/expressions-plugin/common';
+import { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import { toExpression } from '@kbn/interpreter';
 import { noop } from 'lodash';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import {
-  type CellValueContext,
+  CellValueContext,
   cellValueTrigger,
   CELL_VALUE_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
-import { type DocumentToExpressionReturnType } from '../../async_services';
-import { type LensDocument } from '../../persistence';
+import { DocumentToExpressionReturnType } from '../../async_services';
+import { LensDocument } from '../../persistence';
 import {
-  type GetCompatibleCellValueActions,
-  type IndexPatternMap,
-  type IndexPatternRef,
-  type UserMessage,
-  type VisualizationDisplayOptions,
+  GetCompatibleCellValueActions,
+  IndexPatternMap,
+  IndexPatternRef,
+  UserMessage,
+  VisualizationDisplayOptions,
   isLensFilterEvent,
   isLensMultiFilterEvent,
   isLensTableRowContextMenuClickEvent,

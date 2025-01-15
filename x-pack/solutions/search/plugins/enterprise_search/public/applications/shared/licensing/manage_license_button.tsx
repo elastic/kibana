@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiButton, type EuiButtonProps } from '@elastic/eui';
+import { EuiButton, EuiButtonProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { docLinks } from '../doc_links';

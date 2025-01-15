@@ -11,8 +11,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { IndexDetails } from './index_details';
 import { ShardDetails } from './shard_details';
 import { initDataFor } from './init_data';
-import { type Targets, type ShardSerialized, type Index } from '../../types';
-import { HighlightContextProvider, type OnHighlightChangeArgs } from './highlight_context';
+import { Targets, ShardSerialized, Index } from '../../types';
+import { HighlightContextProvider, OnHighlightChangeArgs } from './highlight_context';
 
 export interface Props {
   target: Targets;

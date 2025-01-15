@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import {
   createAction,
   ACTION_VISUALIZE_LENS_FIELD,
-  type VisualizeFieldContext,
+  VisualizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
 

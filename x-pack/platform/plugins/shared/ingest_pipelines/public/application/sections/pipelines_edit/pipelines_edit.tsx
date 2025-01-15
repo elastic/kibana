@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { type RouteComponentProps } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiPageHeader,
@@ -17,7 +17,7 @@ import {
   EuiPageTemplate,
 } from '@elastic/eui';
 
-import { type Pipeline } from '../../../../common/types';
+import { Pipeline } from '../../../../common/types';
 import { useKibana, SectionLoading, attemptToURIDecode } from '../../../shared_imports';
 
 import { getListPath } from '../../services/navigation';

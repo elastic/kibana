@@ -8,11 +8,11 @@
  * Author Tobias Koppers @sokra
  */
 
-import { type KbnImportReq } from '@kbn/repo-packages';
+import { KbnImportReq } from '@kbn/repo-packages';
 
 // @ts-ignore not typed by @types/webpack
 import Module from 'webpack/lib/Module';
-import { type BundleRemote } from '../common';
+import { BundleRemote } from '../common';
 
 export class BundleRemoteModule extends Module {
   public built = false;

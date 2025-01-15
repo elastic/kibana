@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type TestBed, type SetupFunc } from '@kbn/test-jest-helpers';
+import { TestBed, SetupFunc } from '@kbn/test-jest-helpers';
 
 export interface PolicyFormTestBed extends TestBed<PolicyFormTestSubjects> {
   actions: {

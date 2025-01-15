@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import { get } from 'lodash';
-import { type LegacyRequest } from '../../types';
+import { LegacyRequest } from '../../types';
 import { standaloneClusterFilter } from '.';
 import { Globals } from '../../static_globals';
 import {

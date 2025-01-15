@@ -25,7 +25,7 @@ import {
   type EuiLinkButtonProps,
   type EuiTextProps,
   EuiToolTip,
-  type EuiToolTipProps,
+  EuiToolTipProps,
   type CommonProps,
 } from '@elastic/eui';
 import { FormattedDate, FormattedTime } from '@kbn/i18n-react';

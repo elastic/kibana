@@ -11,7 +11,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import React from 'react';
 import {
-  type UseFetchCurrentUserConversationsParams,
+  UseFetchCurrentUserConversationsParams,
   useFetchCurrentUserConversations,
 } from './use_fetch_current_user_conversations';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';

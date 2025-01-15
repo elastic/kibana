@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { type PluginInitializer } from '@kbn/core/public';
+import { PluginInitializer } from '@kbn/core/public';
 import {
   LogsDataAccessPlugin,
-  type LogsDataAccessPluginSetup,
-  type LogsDataAccessPluginStart,
+  LogsDataAccessPluginSetup,
+  LogsDataAccessPluginStart,
 } from './plugin';
 
 export type { LogsDataAccessPluginSetup, LogsDataAccessPluginStart };
 
-import { type LogsDataAccessPluginSetupDeps, type LogsDataAccessPluginStartDeps } from './types';
+import { LogsDataAccessPluginSetupDeps, LogsDataAccessPluginStartDeps } from './types';
 export { LogSourcesProvider, useLogSourcesContext } from './hooks/use_log_sources';
 export { LogSourcesSettingSynchronisationInfo } from './components/logs_sources_setting';
 

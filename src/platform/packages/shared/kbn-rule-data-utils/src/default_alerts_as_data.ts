@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ValuesType } from 'utility-types';
+import { ValuesType } from 'utility-types';
 
 const TIMESTAMP = '@timestamp' as const;
 

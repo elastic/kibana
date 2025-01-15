@@ -6,11 +6,11 @@
  */
 
 import {
-  type Replacements,
+  Replacements,
   replaceAnonymizedValuesWithOriginalValues,
 } from '@kbn/elastic-assistant-common';
-import { type AgentState, type NodeParamsBase } from '../types';
-import { type AIAssistantConversationsDataClient } from '../../../../../ai_assistant_data_clients/conversations';
+import { AgentState, NodeParamsBase } from '../types';
+import { AIAssistantConversationsDataClient } from '../../../../../ai_assistant_data_clients/conversations';
 import { getLangChainMessages } from '../../../helpers';
 import { NodeType } from '../constants';
 

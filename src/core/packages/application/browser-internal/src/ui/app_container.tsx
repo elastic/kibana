@@ -8,8 +8,8 @@
  */
 
 import { css, keyframes } from '@emotion/react';
-import { type Observable } from 'rxjs';
-import React, { Fragment, type FC, useLayoutEffect, useRef, useState, type MutableRefObject } from 'react';
+import { Observable } from 'rxjs';
+import React, { Fragment, FC, useLayoutEffect, useRef, useState, MutableRefObject } from 'react';
 import { EuiLoadingElastic, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

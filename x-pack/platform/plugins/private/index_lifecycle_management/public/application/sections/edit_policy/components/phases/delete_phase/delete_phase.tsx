@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 import { DeleteSearchableSnapshotField } from './delete_searchable_snapshot_field';
 import { Phase } from '../phase';
 import { SnapshotPoliciesField } from '../shared_fields';

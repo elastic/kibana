@@ -11,16 +11,16 @@ import type { TransportResult } from '@elastic/elasticsearch';
 import { tap } from 'rxjs';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
-import { type SearchConfigSchema } from '../../../config';
+import { SearchConfigSchema } from '../../../config';
 import {
-  type EqlSearchStrategyRequest,
-  type EqlSearchStrategyResponse,
-  type IAsyncSearchOptions,
+  EqlSearchStrategyRequest,
+  EqlSearchStrategyResponse,
+  IAsyncSearchOptions,
   pollSearch,
 } from '../../../../common';
 import { toEqlKibanaSearchResponse } from './response_utils';
-import { type EqlSearchResponse } from './types';
-import { type ISearchStrategy } from '../../types';
+import { EqlSearchResponse } from './types';
+import { ISearchStrategy } from '../../types';
 import { getDefaultSearchParams } from '../es_search';
 import { getIgnoreThrottled } from '../ese_search/request_utils';
 import { getCommonDefaultAsyncGetParams } from '../common/async_utils';

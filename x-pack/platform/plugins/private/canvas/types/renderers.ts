@@ -6,8 +6,8 @@
  */
 
 import {
-  type ExpressionRenderDefinition,
-  type IInterpreterRenderHandlers,
+  ExpressionRenderDefinition,
+  IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
 
 type GenericRendererCallback = (callback: () => void) => void;

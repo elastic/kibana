@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type FieldFormatEditorFactory } from '../types';
+import { FieldFormatEditorFactory } from '../types';
 import { formatId } from './constants';
-import { type NumberFormatEditorParams } from './number';
+import { NumberFormatEditorParams } from './number';
 
 export type { NumberFormatEditor } from './number';
 export const numberFormatEditorFactory: FieldFormatEditorFactory<NumberFormatEditorParams> = () =>

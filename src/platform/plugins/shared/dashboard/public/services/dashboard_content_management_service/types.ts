@@ -9,19 +9,19 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { Query, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { type ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
-import { type SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
+import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
+import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 
-import { type DashboardContainerInput } from '../../../common';
+import { DashboardContainerInput } from '../../../common';
 import type { DashboardAttributes, DashboardGetOut } from '../../../server/content_management';
-import { type DashboardDuplicateTitleCheckProps } from './lib/check_for_duplicate_dashboard_title';
+import { DashboardDuplicateTitleCheckProps } from './lib/check_for_duplicate_dashboard_title';
 import {
-  type FindDashboardsByIdResponse,
-  type SearchDashboardsArgs,
-  type SearchDashboardsResponse,
+  FindDashboardsByIdResponse,
+  SearchDashboardsArgs,
+  SearchDashboardsResponse,
 } from './lib/find_dashboards';
-import { type DashboardState } from '../../dashboard_api/types';
-import { type UpdateDashboardMetaProps } from './lib/update_dashboard_meta';
+import { DashboardState } from '../../dashboard_api/types';
+import { UpdateDashboardMetaProps } from './lib/update_dashboard_meta';
 
 export interface DashboardContentManagementService {
   findDashboards: FindDashboardsService;

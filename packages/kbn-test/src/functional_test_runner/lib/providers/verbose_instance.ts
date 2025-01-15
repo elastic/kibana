@@ -9,7 +9,7 @@
 
 import { inspect } from 'util';
 
-import { type ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 
 function printArgs(args: any[]): string {
   return args

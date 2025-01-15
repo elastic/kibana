@@ -8,8 +8,8 @@
 import { lastValueFrom } from 'rxjs';
 
 import {
-  type ExpressionFunctionDefinition,
-  type ExpressionValueFilter,
+  ExpressionFunctionDefinition,
+  ExpressionValueFilter,
 } from '@kbn/expressions-plugin/common';
 
 // @ts-expect-error untyped local

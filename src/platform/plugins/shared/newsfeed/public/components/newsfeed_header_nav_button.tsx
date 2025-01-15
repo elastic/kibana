@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useEffect, useMemo, useCallback, useRef, type ComponentProps } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef, ComponentProps } from 'react';
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import type { NewsfeedApi } from '../lib/api';
 import { NewsfeedFlyout } from './flyout_list';
-import { type FetchResult } from '../types';
+import { FetchResult } from '../types';
 
 export interface INewsfeedContext {
   setFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;

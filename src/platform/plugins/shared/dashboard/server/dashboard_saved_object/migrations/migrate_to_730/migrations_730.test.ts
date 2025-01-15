@@ -12,10 +12,10 @@ import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 
 import {
-  type DashboardDocPre700,
-  type DashboardDoc700To720,
-  type DashboardDoc730ToLatest,
-  type RawSavedDashboardPanel730ToLatest,
+  DashboardDocPre700,
+  DashboardDoc700To720,
+  DashboardDoc730ToLatest,
+  RawSavedDashboardPanel730ToLatest,
 } from './types';
 import { migrations730 } from './migrations_730';
 import { createDashboardSavedObjectTypeMigrations } from '../dashboard_saved_object_migrations';

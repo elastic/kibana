@@ -7,9 +7,9 @@
 
 import Boom from '@hapi/boom';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
-import { type AdHocRunSO } from '../../../../data/ad_hoc_run/types';
+import { AdHocRunSO } from '../../../../data/ad_hoc_run/types';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { type RulesClientContext } from '../../../../rules_client';
+import { RulesClientContext } from '../../../../rules_client';
 import { AlertingAuthorizationEntity, WriteOperations } from '../../../../authorization';
 import {
   AdHocRunAuditAction,

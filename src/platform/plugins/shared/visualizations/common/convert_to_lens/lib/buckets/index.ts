@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BUCKET_TYPES, type IAggConfig, type METRIC_TYPES } from '@kbn/data-plugin/common';
+import { BUCKET_TYPES, IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { convertToSchemaConfig } from '../../../vis_schemas';
-import { type AggBasedColumn, type SchemaConfig } from '../../..';
+import { AggBasedColumn, SchemaConfig } from '../../..';
 import {
-  type CommonBucketConverterArgs,
+  CommonBucketConverterArgs,
   convertToDateHistogramColumn,
   convertToFiltersColumn,
   convertToTermsColumn,

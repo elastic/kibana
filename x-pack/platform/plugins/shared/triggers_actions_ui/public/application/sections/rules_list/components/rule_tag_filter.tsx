@@ -13,8 +13,8 @@ import {
   EuiFilterButton,
   EuiFilterGroup,
   EuiPopover,
-  type EuiSelectableProps,
-  type EuiSelectableOption,
+  EuiSelectableProps,
+  EuiSelectableOption,
   EuiSpacer,
 } from '@elastic/eui';
 import { useLoadTagsQuery } from '../../../hooks/use_load_tags_query';

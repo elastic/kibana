@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { type IToasts } from '@kbn/core-notifications-browser';
-import { type DatasetQualityDetailsPublicState } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
+import { IToasts } from '@kbn/core-notifications-browser';
+import { DatasetQualityDetailsPublicState } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
 import { createPlainError, formatErrors } from '@kbn/io-ts-utils';
-import { type IKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import { IKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import * as Either from 'fp-ts/lib/Either';
-import { type DatasetQualityDetailsPublicStateUpdate } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
+import { DatasetQualityDetailsPublicStateUpdate } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
 import * as rt from 'io-ts';
 import { DATA_QUALITY_URL_STATE_KEY } from '../../../common/url_schema';
 import * as urlSchemaV1 from './url_schema_v1';

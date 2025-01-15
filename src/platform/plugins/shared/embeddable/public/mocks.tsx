@@ -12,23 +12,23 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { type Query } from '@kbn/es-query';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import {
-  type SavedObjectManagementTypeInfo,
-  type SavedObjectsManagementPluginStart,
+  SavedObjectManagementTypeInfo,
+  SavedObjectsManagementPluginStart,
 } from '@kbn/saved-objects-management-plugin/public';
 import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
-import { type SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 
-import { type EmbeddableStateTransfer } from '.';
+import { EmbeddableStateTransfer } from '.';
 import { setKibanaServices } from './kibana_services';
 import { EmbeddablePublicPlugin } from './plugin';
 import { registerReactEmbeddableFactory } from './react_embeddable_system';
 import { registerAddFromLibraryType } from './add_from_library/registry';
 import {
-  type EmbeddableSetup,
-  type EmbeddableSetupDependencies,
-  type EmbeddableStart,
-  type EmbeddableStartDependencies,
+  EmbeddableSetup,
+  EmbeddableSetupDependencies,
+  EmbeddableStart,
+  EmbeddableStartDependencies,
 } from './types';
 
 export type Setup = jest.Mocked<EmbeddableSetup>;

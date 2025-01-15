@@ -8,10 +8,10 @@
 import type { CoreSetup, Plugin, AppMountParameters, CoreStart } from '@kbn/core/public';
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_TITLE } from '../common';
 import {
-  type AppPluginSetupDependencies,
-  type AppPluginStartDependencies,
-  type SearchSynonymsPluginSetup,
-  type SearchSynonymsPluginStart,
+  AppPluginSetupDependencies,
+  AppPluginStartDependencies,
+  SearchSynonymsPluginSetup,
+  SearchSynonymsPluginStart,
 } from './types';
 import { SYNONYMS_UI_FLAG } from '../common/ui_flags';
 import { docLinks } from '../common/doc_links';

@@ -9,7 +9,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 
 import { AlertsSettings } from './alerts_settings';
-import { type KnowledgeBaseConfig } from '../../types';
+import { KnowledgeBaseConfig } from '../../types';
 import { DEFAULT_LATEST_ALERTS } from '../../../assistant_context/constants';
 
 describe('AlertsSettings', () => {

@@ -19,8 +19,8 @@ import {
   skip,
 } from 'rxjs';
 
-import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, type Filter } from '@kbn/es-query';
-import { type PublishingSubject, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
+import { PublishingSubject, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { OPTIONS_LIST_CONTROL } from '../../../../common';
 import type {

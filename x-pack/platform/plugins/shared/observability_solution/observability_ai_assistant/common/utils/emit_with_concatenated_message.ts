@@ -10,8 +10,8 @@ import {
   from,
   last,
   mergeMap,
-  type Observable,
-  type OperatorFunction,
+  Observable,
+  OperatorFunction,
   shareReplay,
   withLatestFrom,
   filter,
@@ -19,14 +19,14 @@ import {
 import { withoutTokenCountEvents } from './without_token_count_events';
 import {
   type ChatCompletionChunkEvent,
-  type ChatEvent,
-  type MessageAddEvent,
+  ChatEvent,
+  MessageAddEvent,
   StreamingChatResponseEventType,
-  type StreamingChatResponseEvent,
+  StreamingChatResponseEvent,
 } from '../conversation_complete';
 import {
   concatenateChatCompletionChunks,
-  type ConcatenatedMessage,
+  ConcatenatedMessage,
 } from './concatenate_chat_completion_chunks';
 
 type ConcatenateMessageCallback = (

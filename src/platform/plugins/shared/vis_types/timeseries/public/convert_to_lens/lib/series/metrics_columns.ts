@@ -12,7 +12,7 @@ import type { Metric, Series } from '../../../../common/types';
 import { getSeriesAgg } from './series_agg';
 import { SUPPORTED_METRICS } from '../metrics';
 import {
-  type Column,
+  Column,
   convertToPercentileColumns,
   convertToPercentileRankColumns,
   convertMathToFormulaColumn,

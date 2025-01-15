@@ -8,8 +8,8 @@
  */
 
 import React, { createContext, useCallback, useContext } from 'react';
-import { type LegendColorPicker, Position } from '@elastic/charts';
-import { type PopoverAnchorPosition, EuiWrappingPopover, EuiOutsideClickDetector } from '@elastic/eui';
+import { LegendColorPicker, Position } from '@elastic/charts';
+import { PopoverAnchorPosition, EuiWrappingPopover, EuiOutsideClickDetector } from '@elastic/eui';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { ColorPicker } from '@kbn/charts-plugin/public';
 

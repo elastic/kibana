@@ -6,8 +6,8 @@
  */
 
 import React, { useCallback } from 'react';
-import { type SpacesContextProps } from '@kbn/spaces-plugin/public';
-import { RuleEventLogListTable, type RuleEventLogListCommonProps } from './rule_event_log_list_table';
+import { SpacesContextProps } from '@kbn/spaces-plugin/public';
+import { RuleEventLogListTable, RuleEventLogListCommonProps } from './rule_event_log_list_table';
 import { useKibana } from '../../../../common/lib/kibana';
 
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;

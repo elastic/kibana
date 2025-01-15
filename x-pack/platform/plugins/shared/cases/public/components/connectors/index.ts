@@ -22,7 +22,7 @@ import type {
   TheHiveFieldsType,
 } from '../../../common/types/domain';
 
-export type * from './types';
+export * from './types';
 
 interface GetCaseConnectorsReturn {
   caseConnectorsRegistry: CaseConnectorsRegistry;

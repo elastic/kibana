@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type EntityDefinition, type EntityDefinitionUpdate } from '@kbn/entities-schema';
+import { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
 import { mergeWith, omit } from 'lodash';
 
 export function mergeEntityDefinitionUpdate(

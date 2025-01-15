@@ -6,12 +6,12 @@
  */
 
 import {
-  type BrowserFields,
+  BrowserFields,
   ConfigKey,
   MonitorTypeEnum,
   FormMonitorType,
-  type ProjectMonitor,
-  type ThrottlingConfig,
+  ProjectMonitor,
+  ThrottlingConfig,
 } from '../../../../common/runtime_types';
 import {
   PROFILE_VALUES_ENUM,
@@ -21,8 +21,8 @@ import {
   CUSTOM_LABEL,
 } from '../../../../common/constants/monitor_defaults';
 import {
-  type NormalizedProjectProps,
-  type NormalizerResult,
+  NormalizedProjectProps,
+  NormalizerResult,
   getNormalizeCommonFields,
   getValueInSeconds,
 } from './common_fields';

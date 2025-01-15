@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import {
-  type InfraMetadata,
-  type InfraMetadataRequest,
+  InfraMetadata,
+  InfraMetadataRequest,
 } from '@kbn/infra-plugin/common/http_api/metadata_api';
 import type { SupertestWithRoleScopeType } from '../../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';

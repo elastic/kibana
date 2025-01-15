@@ -8,7 +8,7 @@
  */
 
 import { createContext, useContext } from 'react';
-import { type DashboardInternalApi } from './types';
+import { DashboardInternalApi } from './types';
 
 export const DashboardInternalContext = createContext<DashboardInternalApi | undefined>(undefined);
 

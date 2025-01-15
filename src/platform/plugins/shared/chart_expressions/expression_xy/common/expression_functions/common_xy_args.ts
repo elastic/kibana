@@ -16,7 +16,7 @@ import {
   Y_AXIS_CONFIG,
 } from '../constants';
 import { strings } from '../i18n';
-import { type LayeredXyVisFn, type XyVisFn } from '../types';
+import { LayeredXyVisFn, XyVisFn } from '../types';
 
 type CommonXYFn = XyVisFn | LayeredXyVisFn;
 

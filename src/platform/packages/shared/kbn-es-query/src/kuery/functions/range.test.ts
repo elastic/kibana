@@ -9,12 +9,12 @@
 
 import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
-import { type DataViewBase } from '../../..';
+import { DataViewBase } from '../../..';
 
 import * as range from './range';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { KQL_NODE_TYPE_LITERAL } from '../node_types/literal';
-import { type KqlRangeFunctionNode } from './range';
+import { KqlRangeFunctionNode } from './range';
 
 describe('kuery functions', () => {
   describe('range', () => {

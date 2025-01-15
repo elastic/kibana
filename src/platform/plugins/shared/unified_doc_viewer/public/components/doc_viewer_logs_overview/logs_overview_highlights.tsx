@@ -8,10 +8,10 @@
  */
 
 import React from 'react';
-import { type CloudProvider, CloudProviderIcon } from '@kbn/custom-icons';
+import { CloudProvider, CloudProviderIcon } from '@kbn/custom-icons';
 import { first } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { type DataTableRecord, type LogDocumentOverview, fieldConstants } from '@kbn/discover-utils';
+import { DataTableRecord, LogDocumentOverview, fieldConstants } from '@kbn/discover-utils';
 import { HighlightField } from './sub_components/highlight_field';
 import { HighlightSection } from './sub_components/highlight_section';
 import { getUnifiedDocViewerServices } from '../../plugin';

@@ -14,14 +14,14 @@ import {
   createGetApiDeprecations,
 } from './register_api_depercation_info';
 import { buildApiDeprecationId } from './api_deprecation_id';
-import { type RouterDeprecatedApiDetails } from '@kbn/core-http-server';
+import { RouterDeprecatedApiDetails } from '@kbn/core-http-server';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import {
   coreUsageDataServiceMock,
   coreUsageStatsClientMock,
 } from '@kbn/core-usage-data-server-mocks';
 import _ from 'lodash';
-import { type CoreDeprecatedApiUsageStats } from '@kbn/core-usage-data-server';
+import { CoreDeprecatedApiUsageStats } from '@kbn/core-usage-data-server';
 
 describe('#registerApiDeprecationsInfo', () => {
   const deprecationsFactory = mockDeprecationsFactory.create();

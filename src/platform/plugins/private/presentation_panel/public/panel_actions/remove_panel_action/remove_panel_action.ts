@@ -11,15 +11,15 @@ import { i18n } from '@kbn/i18n';
 import {
   apiCanAccessViewMode,
   apiHasUniqueId,
-  type EmbeddableApiContext,
+  EmbeddableApiContext,
   getInheritedViewMode,
-  type HasParentApi,
-  type HasUniqueId,
-  type PublishesViewMode,
+  HasParentApi,
+  HasUniqueId,
+  PublishesViewMode,
 } from '@kbn/presentation-publishing';
-import { type Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { getContainerParentFromAPI, type PresentationContainer } from '@kbn/presentation-containers';
+import { getContainerParentFromAPI, PresentationContainer } from '@kbn/presentation-containers';
 
 export const ACTION_REMOVE_PANEL = 'deletePanel';
 

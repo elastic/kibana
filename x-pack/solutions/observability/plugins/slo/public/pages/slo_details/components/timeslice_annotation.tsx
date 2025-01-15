@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { AnnotationDomainType, LineAnnotation, RectAnnotation } from '@elastic/charts';
 import React from 'react';
 import { useEuiTheme } from '@elastic/eui';

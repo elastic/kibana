@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { getSelectedTabContent } from './helpers';
-import { type EuiTabProps } from '../../types';
+import { EuiTabProps } from '../../types';
 
 const TABS: EuiTabProps[] = [
   {

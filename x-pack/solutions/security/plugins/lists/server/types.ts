@@ -6,17 +6,17 @@
  */
 
 import {
-  type CustomRequestHandlerContext,
-  type ElasticsearchClient,
-  type IContextProvider,
-  type IRouter,
-  type SavedObjectsClientContract,
+  CustomRequestHandlerContext,
+  ElasticsearchClient,
+  IContextProvider,
+  IRouter,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
-import { type ListClient } from './services/lists/list_client';
-import { type ExceptionListClient } from './services/exception_lists/exception_list_client';
+import { ListClient } from './services/lists/list_client';
+import { ExceptionListClient } from './services/exception_lists/exception_list_client';
 import type {
   ExtensionPointStorageClientInterface,
   ListsServerExtensionRegistrar,

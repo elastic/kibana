@@ -6,15 +6,15 @@
  */
 
 import {
-  type SearchResponse,
-  type FieldCapsResponse,
-  type IndicesGetMappingResponse,
-  type FieldCapsFieldCapability,
-  type MappingPropertyBase,
+  SearchResponse,
+  FieldCapsResponse,
+  IndicesGetMappingResponse,
+  FieldCapsFieldCapability,
+  MappingPropertyBase,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { type IndicesQuerySourceFields } from '../types';
+import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { IndicesQuerySourceFields } from '../types';
 
 interface FieldModelId {
   field: string;

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { type Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import {
-  type GlobalSearchProviderFindOptions,
-  type GlobalSearchProviderResult,
-  type GlobalSearchProviderFindParams,
+  GlobalSearchProviderFindOptions,
+  GlobalSearchProviderResult,
+  GlobalSearchProviderFindParams,
 } from '../common/types';
-import { type SearchServiceSetup, type SearchServiceStart } from './services';
+import { SearchServiceSetup, SearchServiceStart } from './services';
 
 export type GlobalSearchPluginSetup = Pick<SearchServiceSetup, 'registerResultProvider'>;
 export type GlobalSearchPluginStart = Pick<SearchServiceStart, 'find' | 'getSearchableTypes'>;

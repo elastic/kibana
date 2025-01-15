@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ExpressionRenderDefinition } from './types';
+import { ExpressionRenderDefinition } from './types';
 
 export class ExpressionRenderer<Config = unknown> {
   public readonly name: string;

@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { type IRouter, type StartServicesAccessor } from '@kbn/core/server';
-import { type FeatureUsageTestStartDependencies, type FeatureUsageTestPluginStart } from '../plugin';
+import { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import { FeatureUsageTestStartDependencies, FeatureUsageTestPluginStart } from '../plugin';
 
 export function registerFeatureHitRoute(
   router: IRouter,

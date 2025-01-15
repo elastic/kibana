@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Index } from '../../../public';
+import { Index } from '../../../public';
 
 export const testIndexName = 'test_index';
 export const testIndexMock: Index = {

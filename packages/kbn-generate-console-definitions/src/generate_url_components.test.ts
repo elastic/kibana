@@ -9,7 +9,7 @@
 
 import { generateUrlComponents } from './generate_url_components';
 import { getMockProperty, mockRequestType, mockSchema } from './helpers/test_helpers';
-import { type SpecificationTypes } from './types';
+import { SpecificationTypes } from './types';
 
 describe('generateUrlComponents', () => {
   it('generates url components from path', () => {

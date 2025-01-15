@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type CoreSetup, type CoreStart } from '@kbn/core/public';
+import { CoreSetup, CoreStart } from '@kbn/core/public';
 import type {
   ClientRequestParamsOf,
   ReturnOf,
@@ -14,9 +14,9 @@ import type {
 } from '@kbn/server-route-repository';
 import { formatRequest } from '@kbn/server-route-repository-utils';
 import type { APMServerRouteRepository, APIEndpoint } from '@kbn/apm-plugin/server';
-import { type InspectResponse } from '@kbn/observability-plugin/typings/common';
-import { type CallApi, callApi } from './call_api';
-import { type FetchOptions } from '../../../common/fetch_options';
+import { InspectResponse } from '@kbn/observability-plugin/typings/common';
+import { CallApi, callApi } from './call_api';
+import { FetchOptions } from '../../../common/fetch_options';
 
 export type APMClientOptions = Omit<FetchOptions, 'query' | 'body' | 'pathname' | 'signal'> & {
   signal: AbortSignal | null;

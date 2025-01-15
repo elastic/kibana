@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Integration } from '../hooks/use_integrations';
+import { Integration } from '../hooks/use_integrations';
 
 export const INSTALLATION_STATUS = {
   Installed: 'installed',

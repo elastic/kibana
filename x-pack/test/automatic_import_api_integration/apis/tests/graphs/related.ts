@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { type FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { postRelated } from '../../../common/lib/api/related';
-import { type User } from '../../../common/lib/authentication/types';
+import { User } from '../../../common/lib/authentication/types';
 import { BadRequestError } from '../../../common/lib/error/error';
 
 export default function (providerContext: FtrProviderContext) {

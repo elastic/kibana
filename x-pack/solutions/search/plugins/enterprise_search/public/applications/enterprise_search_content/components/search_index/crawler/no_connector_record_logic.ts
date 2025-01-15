@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { kea, type MakeLogicType } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { KibanaLogic } from '../../../../shared/kibana';
 
 import {
-  type RecreateCrawlerConnectorActions,
+  RecreateCrawlerConnectorActions,
   RecreateCrawlerConnectorApiLogic,
 } from '../../../api/crawler/recreate_crawler_connector_api_logic';
 import {
-  type DeleteIndexApiActions,
+  DeleteIndexApiActions,
   DeleteIndexApiLogic,
 } from '../../../api/index/delete_index_api_logic';
 import { SEARCH_INDICES_PATH } from '../../../routes';
-import { type IndexViewActions, IndexViewLogic } from '../index_view_logic';
+import { IndexViewActions, IndexViewLogic } from '../index_view_logic';
 
 type NoConnectorRecordActions = RecreateCrawlerConnectorActions['apiSuccess'] & {
   deleteSuccess: DeleteIndexApiActions['apiSuccess'];

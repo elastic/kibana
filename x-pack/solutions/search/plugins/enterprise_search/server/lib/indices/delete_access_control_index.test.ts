@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type IScopedClusterClient } from '@kbn/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 
-import { type ElasticsearchResponseError } from '../../utils/identify_exceptions';
+import { ElasticsearchResponseError } from '../../utils/identify_exceptions';
 
 import { deleteAccessControlIndex } from './delete_access_control_index';
 

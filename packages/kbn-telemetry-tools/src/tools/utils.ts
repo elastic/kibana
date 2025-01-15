@@ -22,7 +22,7 @@ import {
 } from 'lodash';
 import * as path from 'path';
 import normalize from 'normalize-path';
-import { type Optional } from '@kbn/utility-types';
+import { Optional } from '@kbn/utility-types';
 
 export function isPropertyWithKey(property: ts.Node, identifierName: string) {
   if (ts.isPropertyAssignment(property) || ts.isMethodDeclaration(property)) {

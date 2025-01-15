@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { kea, type MakeLogicType } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../common/types/api';
 
-import { type Page } from '../../../../../common/types/pagination';
+import { Page } from '../../../../../common/types/pagination';
 import {
-  type EnterpriseSearchApplication,
-  type EnterpriseSearchApplicationDetails,
-  type EnterpriseSearchApplicationsResponse,
+  EnterpriseSearchApplication,
+  EnterpriseSearchApplicationDetails,
+  EnterpriseSearchApplicationsResponse,
 } from '../../../../../common/types/search_applications';
 
-import { type Actions } from '../../../shared/api_logic/create_api_logic';
+import { Actions } from '../../../shared/api_logic/create_api_logic';
 
 import {
   DeleteSearchApplicationAPILogic,
-  type DeleteSearchApplicationApiLogicActions,
+  DeleteSearchApplicationApiLogicActions,
 } from '../../api/search_applications/delete_search_application_api_logic';
 
 import {
-  type SearchApplicationsListAPIArguments,
+  SearchApplicationsListAPIArguments,
   FetchSearchApplicationsAPILogic,
 } from '../../api/search_applications/fetch_search_applications_api_logic';
 

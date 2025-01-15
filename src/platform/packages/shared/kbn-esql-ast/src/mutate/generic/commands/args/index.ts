@@ -9,10 +9,10 @@
 
 import { isOptionNode } from '../../../../ast/util';
 import {
-  type ESQLAstQueryExpression,
-  type ESQLCommand,
-  type ESQLProperNode,
-  type ESQLSingleAstItem,
+  ESQLAstQueryExpression,
+  ESQLCommand,
+  ESQLProperNode,
+  ESQLSingleAstItem,
 } from '../../../../types';
 import { Visitor } from '../../../../visitor';
 

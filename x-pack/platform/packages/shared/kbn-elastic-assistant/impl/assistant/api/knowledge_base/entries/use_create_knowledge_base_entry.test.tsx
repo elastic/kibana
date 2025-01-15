@@ -8,7 +8,7 @@
 import { renderHook, act } from '@testing-library/react';
 import {
   useCreateKnowledgeBaseEntry,
-  type UseCreateKnowledgeBaseEntryParams,
+  UseCreateKnowledgeBaseEntryParams,
 } from './use_create_knowledge_base_entry';
 import { useInvalidateKnowledgeBaseEntries } from './use_knowledge_base_entries';
 

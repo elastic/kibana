@@ -7,7 +7,7 @@
 
 import { embeddableFunctionFactory } from './embeddable';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
-import { type ExpressionValueFilter } from '../../../types';
+import { ExpressionValueFilter } from '../../../types';
 import { encode } from '../../../common/lib/embeddable_dataurl';
 
 const filterContext: ExpressionValueFilter = {

@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { type FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const TEST_INDEX_PATTERN = 'date-nanos';
 const TEST_DEFAULT_CONTEXT_SIZE = 1;

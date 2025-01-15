@@ -25,7 +25,7 @@ import {
   waitForRuleSuccess,
   waitForAlertsToBePresent,
 } from '../../../../../../../../common/utils/security_solution';
-import { type FtrProviderContext } from '../../../../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

@@ -7,7 +7,7 @@
 
 import { createContext, useContext } from 'react';
 
-import { type UseResultsRollupReturnValue } from '../../hooks/use_results_rollup/types';
+import { UseResultsRollupReturnValue } from '../../hooks/use_results_rollup/types';
 
 export const ResultsRollupContext = createContext<UseResultsRollupReturnValue | null>(null);
 

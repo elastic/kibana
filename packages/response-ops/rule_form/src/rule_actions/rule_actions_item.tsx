@@ -23,29 +23,29 @@ import {
   EuiTab,
   EuiToolTip,
   EuiBadge,
-  type RecursivePartial,
+  RecursivePartial,
   EuiBetaBadge,
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import {
-  type ActionVariable,
-  type AlertsFilter,
-  type AlertsFilterTimeframe,
-  type RuleAction,
-  type RuleActionFrequency,
-  type RuleActionParam,
-  type RuleActionParams,
+  ActionVariable,
+  AlertsFilter,
+  AlertsFilterTimeframe,
+  RuleAction,
+  RuleActionFrequency,
+  RuleActionParam,
+  RuleActionParams,
 } from '@kbn/alerting-types';
 import {
-  type ActionConnector,
+  ActionConnector,
   checkActionFormActionTypeEnabled,
   getAvailableActionVariables,
 } from '@kbn/alerts-ui-shared';
 import { isEmpty, some } from 'lodash';
 import { css } from '@emotion/react';
-import { type SavedObjectAttribute } from '@kbn/core/types';
+import { SavedObjectAttribute } from '@kbn/core/types';
 import { useRuleFormDispatch, useRuleFormState } from '../hooks';
-import { type RuleFormParamsErrors } from '../common/types';
+import { RuleFormParamsErrors } from '../common/types';
 import { validateAction, validateParamsForWarnings } from '../validation';
 
 import { RuleActionsSettings } from './rule_actions_settings';

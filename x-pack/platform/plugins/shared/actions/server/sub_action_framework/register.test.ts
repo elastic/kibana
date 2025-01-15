@@ -11,12 +11,12 @@ import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import {
   TestSecretsSchema,
   TestConfigSchema,
-  type TestConfig,
-  type TestSecrets,
+  TestConfig,
+  TestSecrets,
   TestSubActionConnector,
 } from './mocks';
 import { register } from './register';
-import { type ServiceParams } from './types';
+import { ServiceParams } from './types';
 
 describe('Registration', () => {
   const renderedVariables = { body: '' };

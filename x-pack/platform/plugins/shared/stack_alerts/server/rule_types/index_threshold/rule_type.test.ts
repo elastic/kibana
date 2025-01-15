@@ -9,12 +9,12 @@ import { v4 as uuidv4 } from 'uuid';
 import sinon from 'sinon';
 import type { Writable } from '@kbn/utility-types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { type RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import { getRuleType, type ActionGroupId } from './rule_type';
-import { type ActionContext } from './action_context';
-import { type Params } from './rule_type_params';
+import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { getRuleType, ActionGroupId } from './rule_type';
+import { ActionContext } from './action_context';
+import { Params } from './rule_type_params';
 import { TIME_SERIES_BUCKET_SELECTOR_FIELD } from '@kbn/triggers-actions-ui-plugin/server';
-import { type RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { Comparator } from '../../../common/comparator_types';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 

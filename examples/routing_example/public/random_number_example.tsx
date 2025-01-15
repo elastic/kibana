@@ -11,7 +11,7 @@ import React, { useCallback } from 'react';
 import { useState } from 'react';
 import { EuiText, EuiButton, EuiLoadingSpinner, EuiCallOut } from '@elastic/eui';
 import { type IHttpFetchError, isHttpFetchError } from '@kbn/core-http-browser';
-import { type Services } from './services';
+import { Services } from './services';
 
 interface Props {
   fetchRandomNumber: Services['fetchRandomNumber'];

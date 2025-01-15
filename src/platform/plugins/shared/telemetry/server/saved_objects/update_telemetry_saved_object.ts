@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectsErrorHelpers, type SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, SavedObjectsClientContract } from '@kbn/core/server';
 import { TELEMETRY_SAVED_OBJECT_TYPE, TELEMETRY_SAVED_OBJECT_ID } from './constants';
 import type { TelemetrySavedObjectAttributes } from './types';
 

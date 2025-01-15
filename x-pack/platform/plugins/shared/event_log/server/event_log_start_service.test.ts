@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type KibanaRequest } from '@kbn/core/server';
+import { KibanaRequest } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { EventLogClientService } from './event_log_start_service';

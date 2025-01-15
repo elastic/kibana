@@ -8,11 +8,11 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { type BehaviorSubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import {
   DndContext,
-  type DragEndEvent,
+  DragEndEvent,
   DragOverlay,
   KeyboardSensor,
   MeasuringStrategy,
@@ -33,7 +33,7 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import type { ControlLabelPosition } from '../../../common';
 import type { DefaultControlApi } from '../../controls/types';
 import { ControlGroupStrings } from '../control_group_strings';
-import { type ControlsInOrder } from '../init_controls_manager';
+import { ControlsInOrder } from '../init_controls_manager';
 import type { ControlGroupApi } from '../types';
 import { ControlClone } from './control_clone';
 import { ControlRenderer } from './control_renderer';

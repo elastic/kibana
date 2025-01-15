@@ -10,7 +10,7 @@
 import { routeValidationConfig } from './validation_config';
 import { createHandler } from './create_handler';
 
-import { type RouteDependencies } from '../../..';
+import { RouteDependencies } from '../../..';
 
 export const registerProxyRoute = (deps: RouteDependencies) => {
   deps.router.post(

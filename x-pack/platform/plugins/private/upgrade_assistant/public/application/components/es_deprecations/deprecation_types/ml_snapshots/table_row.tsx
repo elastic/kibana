@@ -7,13 +7,13 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { EuiTableRowCell } from '@elastic/eui';
-import { type EnrichedDeprecationInfo, type MlAction } from '../../../../../../common/types';
+import { EnrichedDeprecationInfo, MlAction } from '../../../../../../common/types';
 import { GlobalFlyout } from '../../../../../shared_imports';
 import { useAppContext } from '../../../../app_context';
-import { type DeprecationTableColumns } from '../../../types';
+import { DeprecationTableColumns } from '../../../types';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
 import { MlSnapshotsResolutionCell } from './resolution_table_cell';
-import { FixSnapshotsFlyout, type FixSnapshotsFlyoutProps } from './flyout';
+import { FixSnapshotsFlyout, FixSnapshotsFlyoutProps } from './flyout';
 import { MlSnapshotsStatusProvider, useMlSnapshotContext } from './context';
 
 const { useGlobalFlyout } = GlobalFlyout;

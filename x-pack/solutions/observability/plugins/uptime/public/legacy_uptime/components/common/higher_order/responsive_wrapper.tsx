@@ -6,7 +6,7 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import React, { type FC } from 'react';
+import React, { FC } from 'react';
 import styled from 'styled-components';
 
 const ResponsiveWrapper = styled.div`

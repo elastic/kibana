@@ -13,10 +13,10 @@ import {
   INDICATOR_NAME_TEST_ID,
   INDICATOR_TYPE_TEST_ID,
 } from './comment_children';
-import { type AttachmentMetadata } from '../utils/attachments';
+import { AttachmentMetadata } from '../utils/attachments';
 import { TestProvidersComponent } from '../../../mocks/test_providers';
 import { useIndicatorById } from '../hooks/use_indicator_by_id';
-import { generateMockFileIndicator, type Indicator } from '../../../../common/types/indicator';
+import { generateMockFileIndicator, Indicator } from '../../../../common/types/indicator';
 import { LOADING_LOGO_TEST_ID } from './test_ids';
 
 jest.mock('../hooks/use_indicator_by_id');

@@ -9,7 +9,7 @@
 
 // Merge rollup capabilities information with field information
 
-import { type FieldDescriptor } from '../index_patterns_fetcher';
+import { FieldDescriptor } from '../index_patterns_fetcher';
 
 export const mergeCapabilitiesWithFields = (
   rollupIndexCapabilities: Record<string, {}>,

@@ -11,7 +11,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiTabbedContent,
-  type EuiTabbedContentTab,
+  EuiTabbedContentTab,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';

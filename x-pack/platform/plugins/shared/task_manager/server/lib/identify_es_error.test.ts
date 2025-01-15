@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { identifyEsError, type ESErrorCausedBy } from './identify_es_error';
+import { identifyEsError, ESErrorCausedBy } from './identify_es_error';
 
 describe('identifyEsError', () => {
   test('extracts messages from root cause', () => {

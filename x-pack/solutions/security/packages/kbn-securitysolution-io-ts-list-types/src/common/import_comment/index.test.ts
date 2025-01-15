@@ -11,9 +11,9 @@ import { getCommentsArrayMock, getCommentsMock } from '../comment/index.mock';
 import { getCreateCommentsArrayMock } from '../create_comment/index.mock';
 import {
   importComment,
-  type ImportCommentsArray,
+  ImportCommentsArray,
   importCommentsArray,
-  type ImportCommentsArrayOrUndefined,
+  ImportCommentsArrayOrUndefined,
   importCommentsArrayOrUndefined,
 } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';

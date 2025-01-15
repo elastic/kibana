@@ -13,14 +13,14 @@ import { paginate } from '../pagination/paginate';
 import { getMetrics } from '../details/get_metrics';
 import { getLogstashDataset } from '../../../common/get_index_patterns';
 import {
-  type LegacyRequest,
-  type Pipeline,
-  type PipelineMetricKey,
-  type PipelineMetricsRes,
-  type PipelineNodeCountMetricKey,
-  type PipelinesResponse,
-  type PipelineThroughputMetricKey,
-  type PipelineWithMetrics,
+  LegacyRequest,
+  Pipeline,
+  PipelineMetricKey,
+  PipelineMetricsRes,
+  PipelineNodeCountMetricKey,
+  PipelinesResponse,
+  PipelineThroughputMetricKey,
+  PipelineWithMetrics,
 } from '../../types';
 
 /**

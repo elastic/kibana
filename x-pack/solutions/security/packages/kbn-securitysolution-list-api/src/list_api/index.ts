@@ -10,16 +10,16 @@ import { flow } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { validateEither } from '@kbn/securitysolution-io-ts-utils';
 import {
-  type AcknowledgeSchema,
-  type DeleteListSchemaEncoded,
-  type ExportListItemQuerySchemaEncoded,
-  type FindListSchemaEncoded,
-  type FoundListSchema,
-  type ImportListItemQuerySchemaEncoded,
-  type ImportListItemSchemaEncoded,
-  type ListItemIndexExistSchema,
-  type ListSchema,
-  type ReadListSchema,
+  AcknowledgeSchema,
+  DeleteListSchemaEncoded,
+  ExportListItemQuerySchemaEncoded,
+  FindListSchemaEncoded,
+  FoundListSchema,
+  ImportListItemQuerySchemaEncoded,
+  ImportListItemSchemaEncoded,
+  ListItemIndexExistSchema,
+  ListSchema,
+  ReadListSchema,
   acknowledgeSchema,
   deleteListSchema,
   readListSchema,
@@ -31,7 +31,7 @@ import {
   listItemIndexExistSchema,
   listSchema,
   foundListsBySizeSchema,
-  type FoundListsBySizeSchema,
+  FoundListsBySizeSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   LIST_INDEX,
@@ -43,12 +43,12 @@ import {
 import { toError, toPromise } from '../fp_utils';
 
 import {
-  type ApiParams,
-  type DeleteListParams,
-  type ExportListParams,
-  type FindListsParams,
-  type ImportListParams,
-  type GetListByIdParams,
+  ApiParams,
+  DeleteListParams,
+  ExportListParams,
+  FindListsParams,
+  ImportListParams,
+  GetListByIdParams,
 } from '../types';
 
 export type {

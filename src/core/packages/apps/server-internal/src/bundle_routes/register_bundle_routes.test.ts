@@ -14,7 +14,7 @@ import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import type { InternalPluginInfo, UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { registerBundleRoutes } from './register_bundle_routes';
 import { FileHashCache } from './file_hash_cache';
-import { type BasePath, StaticAssets } from '@kbn/core-http-server-internal';
+import { BasePath, StaticAssets } from '@kbn/core-http-server-internal';
 
 const createPackageInfo = (parts: Partial<PackageInfo> = {}): PackageInfo => ({
   buildNum: 42,

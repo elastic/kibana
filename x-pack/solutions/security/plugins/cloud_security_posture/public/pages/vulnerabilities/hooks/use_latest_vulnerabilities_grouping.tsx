@@ -6,11 +6,11 @@
  */
 import { getGroupingQuery } from '@kbn/grouping';
 import {
-  type GroupingAggregation,
-  type GroupPanelRenderer,
-  type GetGroupStats,
+  GroupingAggregation,
+  GroupPanelRenderer,
+  GetGroupStats,
   isNoneGroup,
-  type NamedAggregation,
+  NamedAggregation,
   parseGroupingQuery,
 } from '@kbn/grouping/src';
 import { useMemo } from 'react';
@@ -18,7 +18,7 @@ import {
   CDR_3RD_PARTY_RETENTION_POLICY,
   VULNERABILITIES_SEVERITY,
 } from '@kbn/cloud-security-posture-common';
-import { buildEsQuery, type Filter } from '@kbn/es-query';
+import { buildEsQuery, Filter } from '@kbn/es-query';
 import {
   LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY,
   VULNERABILITY_GROUPING_OPTIONS,
@@ -27,8 +27,8 @@ import {
 } from '../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import {
-  type VulnerabilitiesGroupingAggregation,
-  type VulnerabilitiesRootGroupingAggregation,
+  VulnerabilitiesGroupingAggregation,
+  VulnerabilitiesRootGroupingAggregation,
   useGroupedVulnerabilities,
 } from './use_grouped_vulnerabilities';
 import { defaultGroupingOptions, getDefaultQuery } from '../constants';

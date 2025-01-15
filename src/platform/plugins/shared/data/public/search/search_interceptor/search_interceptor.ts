@@ -14,9 +14,9 @@ import {
   EMPTY,
   from,
   fromEvent,
-  type Observable,
+  Observable,
   of,
-  type Subscription,
+  Subscription,
   throwError,
 } from 'rxjs';
 import {
@@ -31,9 +31,9 @@ import {
   takeUntil,
   tap,
 } from 'rxjs';
-import { type estypes } from '@elastic/elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
-import { type PublicMethodsOf } from '@kbn/utility-types';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 import { type Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
 
@@ -51,7 +51,7 @@ import type {
 } from '@kbn/core/public';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { AbortError, type KibanaServerError } from '@kbn/kibana-utils-plugin/public';
+import { AbortError, KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import type {
   SanitizedConnectionRequestParams,
   IKibanaSearchRequest,
@@ -60,25 +60,25 @@ import type {
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
 import {
-  type AsyncSearchGetResponse,
-  type ErrorResponseBase,
-  type SqlGetAsyncResponse,
+  AsyncSearchGetResponse,
+  ErrorResponseBase,
+  SqlGetAsyncResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   ESQL_ASYNC_SEARCH_STRATEGY,
   getTotalLoaded,
-  type IAsyncSearchOptions,
+  IAsyncSearchOptions,
   isRunningResponse,
   pollSearch,
   shimHitsTotal,
   UI_SETTINGS,
 } from '../../../common';
-import { type SearchUsageCollector } from '../collectors';
+import { SearchUsageCollector } from '../collectors';
 import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
 import { SearchSessionIncompleteWarning } from './search_session_incomplete_warning';
 import { toPartialResponseAfterTimeout } from './to_partial_response';
-import { type ISessionService, SearchSessionState } from '../session';
+import { ISessionService, SearchSessionState } from '../session';
 import { SearchResponseCache } from './search_response_cache';
 import { SearchAbortController } from './search_abort_controller';
 import type { SearchConfigSchema } from '../../../server/config';

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type RulesClient } from '@kbn/alerting-plugin/server';
-import { type AlertInstanceState } from '../../../common/types/alerts';
+import { RulesClient } from '@kbn/alerting-plugin/server';
+import { AlertInstanceState } from '../../../common/types/alerts';
 import { RulesFactory } from '../../rules';
-import { type CommonAlertState, type CommonAlertFilter, type RulesByType } from '../../../common/types/alerts';
+import { CommonAlertState, CommonAlertFilter, RulesByType } from '../../../common/types/alerts';
 import { RULES } from '../../../common/constants';
 
 export async function fetchStatus(

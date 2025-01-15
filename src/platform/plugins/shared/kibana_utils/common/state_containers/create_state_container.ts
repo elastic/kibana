@@ -11,11 +11,11 @@ import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs';
 import deepFreeze from 'deep-freeze-strict';
 import {
-  type PureTransitionsToTransitions,
-  type PureTransition,
-  type ReduxLikeStateContainer,
-  type PureSelectorsToSelectors,
-  type BaseState,
+  PureTransitionsToTransitions,
+  PureTransition,
+  ReduxLikeStateContainer,
+  PureSelectorsToSelectors,
+  BaseState,
 } from './types';
 
 const $$observable = (typeof Symbol === 'function' && (Symbol as any).observable) || '@@observable';

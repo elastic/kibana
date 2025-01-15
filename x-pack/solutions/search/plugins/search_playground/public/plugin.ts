@@ -9,12 +9,12 @@ import { BehaviorSubject, type Subscription } from 'rxjs';
 
 import {
   type CoreSetup,
-  type Plugin,
+  Plugin,
   type CoreStart,
   type AppMountParameters,
   type PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
-  type AppUpdater,
+  AppUpdater,
   AppStatus,
 } from '@kbn/core/public';
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH } from '../common';

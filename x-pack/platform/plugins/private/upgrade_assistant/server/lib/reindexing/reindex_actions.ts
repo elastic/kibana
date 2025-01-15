@@ -8,20 +8,20 @@
 import moment from 'moment';
 
 import {
-  type SavedObjectsFindResponse,
-  type SavedObjectsClientContract,
-  type ElasticsearchClient,
+  SavedObjectsFindResponse,
+  SavedObjectsClientContract,
+  ElasticsearchClient,
 } from '@kbn/core/server';
 import {
   REINDEX_OP_TYPE,
-  type ReindexOperation,
-  type ReindexOptions,
-  type ReindexSavedObject,
+  ReindexOperation,
+  ReindexOptions,
+  ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
 import { generateNewIndexName } from './index_settings';
-import { type FlatSettings } from './types';
+import { FlatSettings } from './types';
 
 // TODO: base on elasticsearch.requestTimeout?
 export const LOCK_WINDOW = moment.duration(90, 'seconds');

@@ -13,7 +13,7 @@ import {
   getFindEndpointListItemSchemaDecodedMock,
   getFindEndpointListItemSchemaMock,
 } from './index.mock';
-import { type FindEndpointListItemSchema, findEndpointListItemSchema } from '.';
+import { FindEndpointListItemSchema, findEndpointListItemSchema } from '.';
 
 describe('find_endpoint_list_item_schema', () => {
   test('it should validate a typical find item request', () => {

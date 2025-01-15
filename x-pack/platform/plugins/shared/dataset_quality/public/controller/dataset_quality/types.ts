@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import {
-  type DatasetQualityControllerStateService,
-  type WithFilters,
-  type WithTableOptions,
+  DatasetQualityControllerStateService,
+  WithFilters,
+  WithTableOptions,
 } from '../../state_machines/dataset_quality_controller';
 
 export interface DatasetQualityController {

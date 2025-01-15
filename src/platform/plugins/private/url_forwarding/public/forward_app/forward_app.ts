@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type App, type AppMountParameters, type CoreSetup } from '@kbn/core/public';
+import { App, AppMountParameters, CoreSetup } from '@kbn/core/public';
 import { navigateToLegacyKibanaUrl } from './navigate_to_legacy_kibana_url';
-import { type ForwardDefinition, type UrlForwardingStart } from '../plugin';
+import { ForwardDefinition, UrlForwardingStart } from '../plugin';
 
 export const createLegacyUrlForwardApp = (
   core: CoreSetup<{}, UrlForwardingStart>,

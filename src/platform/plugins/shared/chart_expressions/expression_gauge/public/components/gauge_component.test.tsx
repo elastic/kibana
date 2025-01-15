@@ -8,15 +8,15 @@
  */
 
 import React from 'react';
-import { type ColorStop } from '@kbn/coloring';
+import { ColorStop } from '@kbn/coloring';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import { type DatatableColumn, type DatatableColumnMeta, type DatatableRow } from '@kbn/expressions-plugin/common';
+import { DatatableColumn, DatatableColumnMeta, DatatableRow } from '@kbn/expressions-plugin/common';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import {
-  type GaugeRenderProps,
-  type GaugeArguments,
+  GaugeRenderProps,
+  GaugeArguments,
   GaugeLabelMajorModes,
   GaugeTicksPositions,
   GaugeColorModes,
@@ -26,11 +26,11 @@ import {
   Chart,
   Bullet,
   Settings,
-  type BulletProps,
-  type ColorBandSimpleConfig,
-  type Color,
+  BulletProps,
+  ColorBandSimpleConfig,
+  Color,
 } from '@elastic/charts';
-import { type ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 
 const numberColumn = (id = 'metric-accessor'): DatatableColumn => ({
   id,

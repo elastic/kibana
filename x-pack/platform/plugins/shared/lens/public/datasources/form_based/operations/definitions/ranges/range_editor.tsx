@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { type RangeColumnParams, type UpdateParamsFnType, type MODES_TYPES } from './ranges';
+import { RangeColumnParams, UpdateParamsFnType, MODES_TYPES } from './ranges';
 import { AdvancedRangeEditor } from './advanced_editor';
 import { TYPING_DEBOUNCE_TIME, MODES, MIN_HISTOGRAM_BARS } from './constants';
 import { useDebounceWithOptions } from '../../../../../shared_components';

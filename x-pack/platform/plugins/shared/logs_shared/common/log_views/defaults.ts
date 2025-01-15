@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type DefaultLogViewsStaticConfig, type LogViewAttributes } from './types';
+import { DefaultLogViewsStaticConfig, LogViewAttributes } from './types';
 
 export const defaultLogViewId = 'default';
 export const defaultFilterStateKey = 'logFilter';

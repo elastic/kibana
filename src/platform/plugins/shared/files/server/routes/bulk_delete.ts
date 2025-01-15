@@ -9,9 +9,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { FILES_MANAGE_PRIVILEGE } from '../../common/constants';
-import { type FilesClient } from '../../common/files_client';
+import { FilesClient } from '../../common/files_client';
 import type { CreateHandler, FilesRouter } from './types';
-import { FILES_API_ROUTES, type CreateRouteDefinition } from './api_routes';
+import { FILES_API_ROUTES, CreateRouteDefinition } from './api_routes';
 
 const method = 'delete' as const;
 

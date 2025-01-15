@@ -8,12 +8,12 @@
  */
 
 import {
-  type StateContainer,
+  StateContainer,
   createStateContainer,
 } from '@kbn/kibana-utils-plugin/common/state_containers';
-import { type ExecutorState, defaultState as executorDefaultState } from '../executor';
-import { type ExpressionAstExpression } from '../ast';
-import { type ExpressionValue } from '../expression_types';
+import { ExecutorState, defaultState as executorDefaultState } from '../executor';
+import { ExpressionAstExpression } from '../ast';
+import { ExpressionValue } from '../expression_types';
 
 export interface ExecutionState<Output = ExpressionValue> extends ExecutorState {
   ast: ExpressionAstExpression;

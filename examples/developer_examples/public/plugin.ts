@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type CoreSetup, type Plugin, type AppMountParameters, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { CoreSetup, Plugin, AppMountParameters, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
-import { type ExampleDefinition } from './types';
+import { ExampleDefinition } from './types';
 
 export interface DeveloperExamplesSetup {
   register: (def: ExampleDefinition) => void;

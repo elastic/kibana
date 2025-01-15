@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type CreateIndexCodeDefinition, type IngestDataCodeDefinition } from '../types';
+import { CreateIndexCodeDefinition, IngestDataCodeDefinition } from '../types';
 
 export interface CreateIndexLanguageExamples {
   default: CreateIndexCodeDefinition;

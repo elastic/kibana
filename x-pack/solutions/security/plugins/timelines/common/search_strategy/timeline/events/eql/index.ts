@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
 import type { RuntimeFieldSpec, RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
-import { type EqlSearchResponse, type Inspect, type Maybe, type PaginationInputPaginated } from '../../..';
-import { type TimelineEdges } from '../..';
+import { EqlSearchResponse, Inspect, Maybe, PaginationInputPaginated } from '../../..';
+import { TimelineEdges } from '../..';
 
 export type RunTimeMappings =
   | Record<string, Omit<RuntimeFieldSpec, 'type'> & { type: RuntimePrimitiveTypes }>

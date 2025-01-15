@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type IRouter } from '@kbn/core/server';
+import { IRouter } from '@kbn/core/server';
 import {
   scheduleBodySchemaV1,
-  type ScheduleBackfillRequestBodyV1,
-  type ScheduleBackfillResponseV1,
+  ScheduleBackfillRequestBodyV1,
+  ScheduleBackfillResponseV1,
 } from '../../../../../common/routes/backfill/apis/schedule';
-import { type ILicenseState } from '../../../../lib';
+import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import { type AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { transformRequestV1, transformResponseV1 } from './transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 

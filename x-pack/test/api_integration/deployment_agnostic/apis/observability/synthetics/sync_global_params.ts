@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { type RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import {
   ConfigKey,
-  type HTTPFields,
+  HTTPFields,
   LocationStatus,
-  type PrivateLocation,
-  type ServiceLocation,
-  type SyntheticsParams,
+  PrivateLocation,
+  ServiceLocation,
+  SyntheticsParams,
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { type PackagePolicy } from '@kbn/fleet-plugin/common';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import expect from '@kbn/expect';
 import { syntheticsParamType } from '@kbn/synthetics-plugin/common/types/saved_objects';
-import { type DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { PrivateLocationTestService } from '../../../services/synthetics_private_location';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';

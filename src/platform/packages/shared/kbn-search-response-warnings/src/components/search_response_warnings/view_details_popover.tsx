@@ -13,7 +13,7 @@ import {
   EuiIcon,
   EuiLink,
   EuiContextMenu,
-  type EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelDescriptor,
   EuiPopover,
 } from '@elastic/eui';
 import { viewDetailsLabel } from './i18n_utils';

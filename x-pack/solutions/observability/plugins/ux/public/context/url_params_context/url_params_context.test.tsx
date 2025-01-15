@@ -7,7 +7,7 @@
 
 import { waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
-import { type History, type Location } from 'history';
+import { History, Location } from 'history';
 import moment from 'moment-timezone';
 import * as React from 'react';
 import { MemoryRouter, Router } from '@kbn/shared-ux-router';

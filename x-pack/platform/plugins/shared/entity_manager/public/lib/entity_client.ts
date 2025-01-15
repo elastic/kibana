@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type CoreSetup, type CoreStart } from '@kbn/core/public';
+import { CoreSetup, CoreStart } from '@kbn/core/public';
 import {
-  type ClientRequestParamsOf,
-  type RouteRepositoryClient,
+  ClientRequestParamsOf,
+  RouteRepositoryClient,
   createRepositoryClient,
   isHttpFetchError,
 } from '@kbn/server-route-repository-client';
@@ -16,9 +16,9 @@ import { type KueryNode, nodeTypes, toKqlExpression } from '@kbn/es-query';
 import type { EntityDefinition } from '@kbn/entities-schema';
 import type { EntityDefinitionWithState } from '../../server/lib/entities/types';
 import {
-  type DisableManagedEntityResponse,
-  type EnableManagedEntityResponse,
-  type ManagedEntityEnabledResponse,
+  DisableManagedEntityResponse,
+  EnableManagedEntityResponse,
+  ManagedEntityEnabledResponse,
 } from '../../common/types_api';
 import type { EntityManagerRouteRepository } from '../../server';
 import { EntityManagerUnauthorizedError } from './errors';

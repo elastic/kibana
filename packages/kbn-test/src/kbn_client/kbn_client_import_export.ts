@@ -15,11 +15,11 @@ import Path from 'path';
 import FormData from 'form-data';
 import { isAxiosResponseError } from '@kbn/dev-utils';
 import { createFailError } from '@kbn/dev-cli-errors';
-import { type ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import { type KbnClientRequester, uriencode, type ReqOptions } from './kbn_client_requester';
-import { type KbnClientSavedObjects } from './kbn_client_saved_objects';
+import { KbnClientRequester, uriencode, ReqOptions } from './kbn_client_requester';
+import { KbnClientSavedObjects } from './kbn_client_saved_objects';
 import { parseArchive } from './import_export/parse_archive';
 
 interface ImportApiResponse {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 import {
-  type ExpressionAstExpression,
-  type ExpressionExecutionParams,
-  type ExpressionValue,
+  ExpressionAstExpression,
+  ExpressionExecutionParams,
+  ExpressionValue,
 } from '@kbn/expressions-plugin/common';
 import { fromExpression, getType } from '@kbn/interpreter';
 import { pluck } from 'rxjs';

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { kea, type MakeLogicType } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
-import { type AnalyticsCollection } from '../../../../../common/types/analytics';
+import { AnalyticsCollection } from '../../../../../common/types/analytics';
 import { Status } from '../../../../../common/types/api';
-import { type Actions } from '../../../shared/api_logic/create_api_logic';
+import { Actions } from '../../../shared/api_logic/create_api_logic';
 import { KibanaLogic } from '../../../shared/kibana';
 import {
   DeleteAnalyticsCollectionAPILogic,
-  type DeleteAnalyticsCollectionApiLogicResponse,
+  DeleteAnalyticsCollectionApiLogicResponse,
 } from '../../api/delete_analytics_collection/delete_analytics_collection_api_logic';
 import { ROOT_PATH } from '../../routes';
 

@@ -6,11 +6,11 @@
  */
 
 import { useEffect, useState } from 'react';
-import { type LocatorClient } from '@kbn/share-plugin/common/url_service/locators';
+import { LocatorClient } from '@kbn/share-plugin/common/url_service/locators';
 import { syntheticsEditMonitorLocatorID } from '@kbn/observability-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useKibanaSpace } from '../../../hooks/use_kibana_space';
-import { type ClientPluginsStart } from '../../../plugin';
+import { ClientPluginsStart } from '../../../plugin';
 
 export function useEditMonitorLocator({
   configId,

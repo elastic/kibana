@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { apiIsPresentationContainer, type PresentationContainer } from '@kbn/presentation-containers';
-import { type EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { apiIsPresentationContainer, PresentationContainer } from '@kbn/presentation-containers';
+import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 
 export const compatibilityCheck = (
   api: EmbeddableApiContext['embeddable']

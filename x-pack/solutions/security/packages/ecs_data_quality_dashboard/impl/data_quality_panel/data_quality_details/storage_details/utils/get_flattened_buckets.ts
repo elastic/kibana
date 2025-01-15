@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type PatternRollup } from '../../../types';
+import { PatternRollup } from '../../../types';
 import { getIlmPhase } from '../../../utils/get_ilm_phase';
 import { getDocsCount, getSizeInBytes } from '../../../utils/stats';
-import { type FlattenedBucket } from '../types';
+import { FlattenedBucket } from '../types';
 
 export const getFlattenedBuckets = ({
   ilmPhases,

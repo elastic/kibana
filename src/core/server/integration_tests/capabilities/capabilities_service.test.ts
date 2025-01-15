@@ -15,9 +15,9 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import {
-  type HttpService,
-  type InternalHttpServicePreboot,
-  type InternalHttpServiceSetup,
+  HttpService,
+  InternalHttpServicePreboot,
+  InternalHttpServiceSetup,
 } from '@kbn/core-http-server-internal';
 import { createHttpService } from '@kbn/core-http-server-mocks';
 import type { CapabilitiesSetup } from '@kbn/core-capabilities-server';

@@ -8,14 +8,14 @@
  */
 
 import React from 'react';
-import { type CoreStart, type OverlayRef } from '@kbn/core/public';
+import { CoreStart, OverlayRef } from '@kbn/core/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { createKibanaReactContext, type DataPublicPluginStart } from './shared_imports';
+import { createKibanaReactContext, DataPublicPluginStart } from './shared_imports';
 
-import { type CloseEditor, type DataViewEditorContext, type DataViewEditorProps } from './types';
+import { CloseEditor, DataViewEditorContext, DataViewEditorProps } from './types';
 import { DataViewEditorLazy } from './components/data_view_editor_lazy';
 
 interface Dependencies {

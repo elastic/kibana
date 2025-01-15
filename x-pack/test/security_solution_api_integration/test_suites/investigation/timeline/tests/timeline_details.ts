@@ -9,12 +9,12 @@ import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 import {
   TimelineEventsQueries,
-  type TimelineEventsDetailsStrategyResponse,
-  type TimelineKpiStrategyResponse,
+  TimelineEventsDetailsStrategyResponse,
+  TimelineKpiStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
-import type TestAgent from 'supertest/lib/agent';
-import { type SearchService } from '@kbn/ftr-common-functional-services';
-import { type FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
+import TestAgent from 'supertest/lib/agent';
+import { SearchService } from '@kbn/ftr-common-functional-services';
+import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 import { timelineDetailsFilebeatExpectedResults as EXPECTED_DATA } from '../mocks/timeline_details';
 
 // typical values that have to change after an update from "scripts/es_archiver"

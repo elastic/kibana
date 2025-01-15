@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 import { set } from '@kbn/safer-lodash-set';
 import {
   controlGroupSavedObjectStateToSerializableRuntimeState,
   getDefaultControlGroupState,
 } from './control_group_persistence';
 import {
-  type ControlGroupSavedObjectState,
-  type ControlGroupTelemetry,
-  type SerializableControlGroupState,
+  ControlGroupSavedObjectState,
+  ControlGroupTelemetry,
+  SerializableControlGroupState,
 } from './types';
 
 export const initializeControlGroupTelemetry = (

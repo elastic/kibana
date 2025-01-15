@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 import { panAnimationDuration } from '@kbn/security-solution-plugin/public/resolver/store/camera/scaling_constants';
-import { type WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 
-import { type FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const expectedDifference = 0.096;
 

@@ -7,7 +7,7 @@
 
 import { LIST_ID } from '../../constants/index.mock';
 
-import { type DeleteListSchema } from '.';
+import { DeleteListSchema } from '.';
 
 export const getDeleteListSchemaMock = (): DeleteListSchema => ({
   deleteReferences: false,

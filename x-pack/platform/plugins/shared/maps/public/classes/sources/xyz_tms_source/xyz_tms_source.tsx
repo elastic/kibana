@@ -6,20 +6,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type ReactElement } from 'react';
-import { type RasterTileSource } from 'maplibre-gl';
+import { ReactElement } from 'react';
+import { RasterTileSource } from 'maplibre-gl';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 import { SOURCE_TYPES } from '../../../../common/constants';
 import {
-  type XYZTMSSourceDescriptor,
-  type DataRequestMeta,
-  type Timeslice,
+  XYZTMSSourceDescriptor,
+  DataRequestMeta,
+  Timeslice,
 } from '../../../../common/descriptor_types';
-import { AbstractSource, type ImmutableSourceProperty } from '../source';
-import { type XYZTMSSourceConfig } from './xyz_tms_editor';
+import { AbstractSource, ImmutableSourceProperty } from '../source';
+import { XYZTMSSourceConfig } from './xyz_tms_editor';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
-import { type DataRequest } from '../../util/data_request';
-import { type IRasterSource, type RasterTileSourceData } from '../raster_source';
+import { DataRequest } from '../../util/data_request';
+import { IRasterSource, RasterTileSourceData } from '../raster_source';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzTitle', {
   defaultMessage: 'Tile Map Service',

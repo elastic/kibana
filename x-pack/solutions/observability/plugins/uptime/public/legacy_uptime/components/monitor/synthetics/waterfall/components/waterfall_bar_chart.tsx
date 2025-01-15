@@ -9,15 +9,15 @@ import React, { useMemo, useCallback } from 'react';
 import {
   Axis,
   BarSeries,
-  type BarStyleAccessor,
+  BarStyleAccessor,
   Chart,
-  type DomainRange,
+  DomainRange,
   Position,
   ScaleType,
   Settings,
-  type TickFormatter,
+  TickFormatter,
   TooltipContainer,
-  type CustomTooltip as CustomChartTooltip,
+  CustomTooltip as CustomChartTooltip,
   Tooltip,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
@@ -25,7 +25,7 @@ import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { BAR_HEIGHT } from './constants';
 import { WaterfallChartChartContainer, WaterfallChartTooltip } from './styles';
-import { useWaterfallContext, type WaterfallData } from '..';
+import { useWaterfallContext, WaterfallData } from '..';
 import { WaterfallTooltipContent } from './waterfall_tooltip_content';
 import { formatTooltipHeading } from '../../step_detail/waterfall/data_formatting';
 import { WaterfallChartMarkers } from './waterfall_markers';

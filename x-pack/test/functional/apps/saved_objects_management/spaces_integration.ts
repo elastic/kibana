@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { type FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const getSpacePrefix = (spaceId: string) => {
   return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;

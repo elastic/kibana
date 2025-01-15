@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type DiscoverStart } from '@kbn/discover-plugin/public';
-import { ALL_VALUE, kqlWithFiltersSchema, type SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { type Filter, FilterStateStore, type TimeRange } from '@kbn/es-query';
+import { DiscoverStart } from '@kbn/discover-plugin/public';
+import { ALL_VALUE, kqlWithFiltersSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { Filter, FilterStateStore, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery } from '@kbn/observability-plugin/public';
 import { v4 } from 'uuid';
 import { isEmpty } from 'lodash';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import { type IUiSettingsClient } from '@kbn/core/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 
 function createDiscoverLocator({
   slo,

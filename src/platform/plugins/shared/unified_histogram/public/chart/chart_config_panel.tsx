@@ -7,21 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ComponentProps, useCallback, useEffect, useRef, useState } from 'react';
+import React, { ComponentProps, useCallback, useEffect, useRef, useState } from 'react';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isEqual, isObject } from 'lodash';
 import type { LensEmbeddableOutput, Suggestion } from '@kbn/lens-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { type EditLensConfigPanelComponent } from '@kbn/lens-plugin/public/plugin';
+import { EditLensConfigPanelComponent } from '@kbn/lens-plugin/public/plugin';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { deriveLensSuggestionFromLensAttributes } from '../utils/external_vis_context';
 
 import {
-  type UnifiedHistogramChartLoadEvent,
-  type UnifiedHistogramServices,
-  type UnifiedHistogramSuggestionContext,
+  UnifiedHistogramChartLoadEvent,
+  UnifiedHistogramServices,
+  UnifiedHistogramSuggestionContext,
   UnifiedHistogramSuggestionType,
-  type UnifiedHistogramVisContext,
+  UnifiedHistogramVisContext,
 } from '../types';
 
 export function ChartConfigPanel({

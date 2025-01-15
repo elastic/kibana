@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import { OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE } from '@kbn/management-settings-ids';
-import { HighlightField, type HighlightFieldProps } from './highlight_field';
+import { HighlightField, HighlightFieldProps } from './highlight_field';
 import { getUnifiedDocViewerServices } from '../../../plugin';
 
 const SERVICE_ENTITY_LOCATOR = 'SERVICE_ENTITY_LOCATOR';

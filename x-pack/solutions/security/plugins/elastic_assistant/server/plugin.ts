@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { type PluginInitializerContext, type CoreStart, type Plugin, type Logger } from '@kbn/core/server';
+import { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
-import { type AssistantFeatures } from '@kbn/elastic-assistant-common';
+import { AssistantFeatures } from '@kbn/elastic-assistant-common';
 import { ReplaySubject, type Subject } from 'rxjs';
-import { type MlPluginSetup } from '@kbn/ml-plugin/server';
+import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { events } from './lib/telemetry/event_based_telemetry';
 import {
-  type AssistantTool,
-  type ElasticAssistantPluginCoreSetupDependencies,
-  type ElasticAssistantPluginSetup,
-  type ElasticAssistantPluginSetupDependencies,
-  type ElasticAssistantPluginStart,
-  type ElasticAssistantPluginStartDependencies,
-  type ElasticAssistantRequestHandlerContext,
+  AssistantTool,
+  ElasticAssistantPluginCoreSetupDependencies,
+  ElasticAssistantPluginSetup,
+  ElasticAssistantPluginSetupDependencies,
+  ElasticAssistantPluginStart,
+  ElasticAssistantPluginStartDependencies,
+  ElasticAssistantRequestHandlerContext,
 } from './types';
 import { AIAssistantService } from './ai_assistant_service';
 import { RequestContextFactory } from './routes/request_context_factory';

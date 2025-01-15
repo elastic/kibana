@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import { type EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
+import { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
 import type {
   DataSourceSelectionChangeHandler,
   DataSourceSelection,
   AllDatasetSelection,
 } from '../../../common/data_source_selection';
-import { type SortOrder } from '../../../common/latest';
-import { type Dataset, type Integration, type IntegrationId } from '../../../common/datasets';
-import { type DataViewDescriptor } from '../../../common/data_views/models/data_view_descriptor';
-import { type LoadDatasets, type ReloadDatasets, type SearchDatasets } from '../../hooks/use_datasets';
+import { SortOrder } from '../../../common/latest';
+import { Dataset, Integration, IntegrationId } from '../../../common/datasets';
+import { DataViewDescriptor } from '../../../common/data_views/models/data_view_descriptor';
+import { LoadDatasets, ReloadDatasets, SearchDatasets } from '../../hooks/use_datasets';
 import {
-  type LoadMoreIntegrations,
-  type ReloadIntegrations,
-  type SearchIntegrations,
+  LoadMoreIntegrations,
+  ReloadIntegrations,
+  SearchIntegrations,
 } from '../../hooks/use_integrations';
 import {
-  type DATA_VIEWS_TAB_ID,
-  type INTEGRATIONS_PANEL_ID,
-  type INTEGRATIONS_TAB_ID,
-  type UNCATEGORIZED_TAB_ID,
+  DATA_VIEWS_TAB_ID,
+  INTEGRATIONS_PANEL_ID,
+  INTEGRATIONS_TAB_ID,
+  UNCATEGORIZED_TAB_ID,
 } from './constants';
 import {
-  type FilterDataViews,
-  type IsDataViewAllowed,
-  type IsDataViewAvailable,
-  type LoadDataViews,
-  type ReloadDataViews,
-  type SearchDataViews,
+  FilterDataViews,
+  IsDataViewAllowed,
+  IsDataViewAvailable,
+  LoadDataViews,
+  ReloadDataViews,
+  SearchDataViews,
 } from '../../hooks/use_data_views';
-import { type DiscoverEsqlUrlProps } from '../../hooks/use_esql';
-import { type DataViewsFilterParams } from '../../state_machines/data_views';
+import { DiscoverEsqlUrlProps } from '../../hooks/use_esql';
+import { DataViewsFilterParams } from '../../state_machines/data_views';
 
 export interface DataSourceSelectorProps {
   /* The generic data stream list */

@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { PageTemplate, type TabMenuItem, type PageTemplateProps } from '../page_template';
+import { PageTemplate, TabMenuItem, PageTemplateProps } from '../page_template';
 
 export const KibanaTemplate: React.FC<React.PropsWithChildren<PageTemplateProps>> = ({
   ...props

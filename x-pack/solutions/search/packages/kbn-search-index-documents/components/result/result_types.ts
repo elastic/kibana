@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type MappingProperty, type SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { type IconType } from '@elastic/eui';
+import { MappingProperty, SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { IconType } from '@elastic/eui';
 
 export interface ResultFieldProps {
   fieldName: string;

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { type FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { type DeprecationSource } from '../../../../common/types';
+import { DeprecationSource } from '../../../../common/types';
 
 interface Props {
   deprecationSource: DeprecationSource;

@@ -11,7 +11,7 @@ import {
   defaultConfig,
   defaultConfigWebFinal,
   mergeWebpackFinal,
-  type StorybookConfig,
+  StorybookConfig,
 } from './src/lib/default_config';
 export { defaultConfig, defaultConfigWebFinal, mergeWebpackFinal };
 export type { StorybookConfig };

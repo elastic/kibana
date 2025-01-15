@@ -6,15 +6,15 @@
  */
 import { getGroupingQuery } from '@kbn/grouping';
 import {
-  type GroupingAggregation,
-  type GroupPanelRenderer,
-  type GetGroupStats,
+  GroupingAggregation,
+  GroupPanelRenderer,
+  GetGroupStats,
   isNoneGroup,
-  type NamedAggregation,
+  NamedAggregation,
   parseGroupingQuery,
 } from '@kbn/grouping/src';
 import { useMemo } from 'react';
-import { buildEsQuery, type Filter } from '@kbn/es-query';
+import { buildEsQuery, Filter } from '@kbn/es-query';
 import {
   CDR_3RD_PARTY_RETENTION_POLICY,
   buildMutedRulesFilter,
@@ -26,10 +26,10 @@ import {
   LOCAL_STORAGE_FINDINGS_GROUPING_KEY,
 } from '../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
-import { type Evaluation } from '../../../../common/types_old';
+import { Evaluation } from '../../../../common/types_old';
 import {
-  type FindingsGroupingAggregation,
-  type FindingsRootGroupingAggregation,
+  FindingsGroupingAggregation,
+  FindingsRootGroupingAggregation,
   useGroupedFindings,
 } from './use_grouped_findings';
 import {

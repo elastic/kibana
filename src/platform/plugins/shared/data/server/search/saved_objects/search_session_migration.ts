@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type SavedObjectMigrationMap, type SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { SavedObjectMigrationMap, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import {
-  type SearchSessionSavedObjectAttributes as SearchSessionSavedObjectAttributesLatest,
+  SearchSessionSavedObjectAttributes as SearchSessionSavedObjectAttributesLatest,
   SearchSessionStatus,
 } from '../../../common';
 

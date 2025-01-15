@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { type Rule, type RuleTypeParams, type SanitizedRule } from '@kbn/alerting-plugin/common';
+import { Rule, RuleTypeParams, SanitizedRule } from '@kbn/alerting-plugin/common';
 import {
-  type AlertParamType,
-  type AlertMessageTokenType,
-  type AlertSeverity,
-  type AlertClusterHealthType,
+  AlertParamType,
+  AlertMessageTokenType,
+  AlertSeverity,
+  AlertClusterHealthType,
 } from '../enums';
 
 export type CommonAlert = Rule<RuleTypeParams> | SanitizedRule<RuleTypeParams>;

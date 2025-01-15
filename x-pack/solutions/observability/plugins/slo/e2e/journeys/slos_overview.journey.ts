@@ -6,7 +6,7 @@
  */
 
 import { journey, step, before, expect } from '@elastic/synthetics';
-import { type RetryService } from '@kbn/ftr-common-functional-services';
+import { RetryService } from '@kbn/ftr-common-functional-services';
 import { SLoDataService } from '../services/slo_data_service';
 import { sloAppPageProvider } from '../page_objects/slo_app';
 

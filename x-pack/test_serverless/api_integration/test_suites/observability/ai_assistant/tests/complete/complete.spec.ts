@@ -4,29 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type Response } from 'supertest';
+import { Response } from 'supertest';
 import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { omit, pick } from 'lodash';
 import { PassThrough } from 'stream';
 import expect from '@kbn/expect';
 import {
-  type ChatCompletionChunkEvent,
-  type ConversationCreateEvent,
-  type ConversationUpdateEvent,
-  type MessageAddEvent,
-  type StreamingChatResponseEvent,
+  ChatCompletionChunkEvent,
+  ConversationCreateEvent,
+  ConversationUpdateEvent,
+  MessageAddEvent,
+  StreamingChatResponseEvent,
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
-import { type ObservabilityAIAssistantScreenContextRequest } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { ObservabilityAIAssistantScreenContextRequest } from '@kbn/observability-ai-assistant-plugin/common/types';
 import {
   createLlmProxy,
   isFunctionTitleRequest,
-  type LlmProxy,
-  type LlmResponseSimulator,
+  LlmProxy,
+  LlmResponseSimulator,
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/common/create_llm_proxy';
 import { createOpenAiChunk } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/common/create_openai_chunk';
-import { type SupertestWithRoleScope } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
-import { type FtrProviderContext } from '../../common/ftr_provider_context';
+import { SupertestWithRoleScope } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   decodeEvents,
   getConversationCreatedEvent,

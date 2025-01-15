@@ -7,7 +7,7 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import React from 'react';
-import { type OverviewStatusState, type ServiceLocations } from '../../../../../../../common/runtime_types';
+import { OverviewStatusState, ServiceLocations } from '../../../../../../../common/runtime_types';
 import { LocationStatusBadges } from '../../../common/components/location_status_badges';
 
 interface Props {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Dispatch, type SetStateAction, useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 
 function parseJsonOrDefault<Obj>(value: string | null, defaultValue: Obj): Obj {
   if (!value) {

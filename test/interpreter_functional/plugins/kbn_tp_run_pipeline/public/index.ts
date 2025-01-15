@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type PluginInitializer, type PluginInitializerContext } from '@kbn/core/public';
-import { Plugin, type StartDeps } from './plugin';
+import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import { Plugin, StartDeps } from './plugin';
 export type { StartDeps };
 
 export const plugin: PluginInitializer<void, void, {}, StartDeps> = (

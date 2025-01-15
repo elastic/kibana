@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type * from './alerts';
+export * from './alerts';
 export * from './rule_response_actions';
 export * from './rule_schema';
 export * from './error_schema.gen';

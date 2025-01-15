@@ -9,7 +9,7 @@ import { get } from 'lodash';
 import { mapNodesInfo } from './map_nodes_info';
 import { mapNodesMetrics } from './map_nodes_metrics';
 import { uncovertMetricNames } from '../../convert_metric_names';
-import { type ElasticsearchResponse, type ElasticsearchModifiedSource } from '../../../../../common/types/es';
+import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../../../common/types/es';
 
 /*
  * Process the response from the get_nodes query

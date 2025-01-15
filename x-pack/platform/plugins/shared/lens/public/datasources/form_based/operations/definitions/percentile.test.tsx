@@ -6,28 +6,28 @@
  */
 
 import React from 'react';
-import { type IUiSettingsClient, type HttpSetup } from '@kbn/core/public';
+import { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { type IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { faker } from '@faker-js/faker';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMockedIndexPattern } from '../../mocks';
-import { type LastValueIndexPatternColumn, percentileOperation } from '.';
-import { type FormBasedLayer } from '../../types';
-import { type PercentileIndexPatternColumn } from './percentile';
-import { type TermsIndexPatternColumn } from './terms';
+import { LastValueIndexPatternColumn, percentileOperation } from '.';
+import { FormBasedLayer } from '../../types';
+import { PercentileIndexPatternColumn } from './percentile';
+import { TermsIndexPatternColumn } from './terms';
 import {
   buildExpressionFunction,
   buildExpression,
-  type ExpressionAstExpressionBuilder,
+  ExpressionAstExpressionBuilder,
   parseExpression,
 } from '@kbn/expressions-plugin/public';
 import type { OriginalColumn } from '../../to_expression';
-import { type IndexPattern } from '../../../../types';
+import { IndexPattern } from '../../../../types';
 
 const uiSettingsMock = {} as IUiSettingsClient;
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Document } from 'langchain/document';
+import { Document } from 'langchain/document';
 
 /**
  * Mock LangChain `Document`s loaded from a LangChain `DirectoryLoader`

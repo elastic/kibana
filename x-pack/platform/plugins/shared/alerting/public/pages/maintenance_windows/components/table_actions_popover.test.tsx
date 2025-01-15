@@ -8,7 +8,7 @@
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
-import { type AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
+import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 import { TableActionsPopover } from './table_actions_popover';
 import { MaintenanceWindowStatus } from '../../../../common';
 

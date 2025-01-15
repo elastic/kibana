@@ -8,7 +8,7 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import axios, { type AxiosRequestConfig } from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 
 jest.mock('axios');
 import {

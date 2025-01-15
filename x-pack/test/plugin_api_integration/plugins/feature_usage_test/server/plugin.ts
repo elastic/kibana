@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type Plugin, type CoreSetup } from '@kbn/core/server';
-import { type LicensingPluginSetup, type LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { Plugin, CoreSetup } from '@kbn/core/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { registerRoutes } from './routes';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

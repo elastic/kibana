@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, type ReactElement, useState, useMemo } from 'react';
+import React, { useCallback, ReactElement, useState, useMemo } from 'react';
 import {
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
-  type EuiSelectableProps,
-  type EuiSelectableOption,
+  EuiSelectableProps,
+  EuiSelectableOption,
   useEuiTheme,
   EuiPanel,
   EuiToolTip,

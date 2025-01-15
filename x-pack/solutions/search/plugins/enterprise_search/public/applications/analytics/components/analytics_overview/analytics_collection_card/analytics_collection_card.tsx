@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type MouseEvent } from 'react';
+import React, { MouseEvent } from 'react';
 
 import { parsePath } from 'history';
 import { useValues } from 'kea';
@@ -30,14 +30,14 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import { type EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
+import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 
 import { i18n } from '@kbn/i18n';
 
-import { type DateHistogramIndexPatternColumn } from '@kbn/lens-plugin/public';
+import { DateHistogramIndexPatternColumn } from '@kbn/lens-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { type AnalyticsCollection } from '../../../../../../common/types/analytics';
+import { AnalyticsCollection } from '../../../../../../common/types/analytics';
 
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 
@@ -45,7 +45,7 @@ import { KibanaLogic } from '../../../../shared/kibana';
 import { withLensData } from '../../../hoc/with_lens_data';
 import { COLLECTION_OVERVIEW_PATH } from '../../../routes';
 
-import { type FilterBy, getFormulaByFilter } from '../../../utils/get_formula_by_filter';
+import { FilterBy, getFormulaByFilter } from '../../../utils/get_formula_by_filter';
 
 import { AnalyticsCollectionCardStyles } from './analytics_collection_card.styles';
 

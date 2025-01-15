@@ -7,10 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 import { serializeAdvancedSettings } from '../../../../common/services/follower_index_serialization';
-import { type FollowerIndexAdvancedSettings } from '../../../../common/types';
+import { FollowerIndexAdvancedSettings } from '../../../../common/types';
 import { removeEmptyFields } from '../../../../common/services/utils';
 import { addBasePath } from '../../../services';
-import { type RouteDependencies } from '../../../types';
+import { RouteDependencies } from '../../../types';
 
 /**
  * Update a follower index

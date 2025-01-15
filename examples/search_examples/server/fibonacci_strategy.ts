@@ -8,9 +8,9 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { type ISearchStrategy } from '@kbn/data-plugin/server';
+import { ISearchStrategy } from '@kbn/data-plugin/server';
 import { of } from 'rxjs';
-import { type FibonacciRequest, type FibonacciResponse } from '../common/types';
+import { FibonacciRequest, FibonacciResponse } from '../common/types';
 
 export const fibonacciStrategyProvider = (): ISearchStrategy<
   FibonacciRequest,

@@ -11,9 +11,9 @@ import {
   getSavedObjectFromSourceMock,
   rawDocExistsInNamespaceMock,
 } from './bulk_get.isolated.test.mocks';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { type SavedObject, type CheckAuthorizationResult } from '@kbn/core-saved-objects-server';
-import { apiContextMock, type ApiExecutionContextMock } from '../../mocks';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SavedObject, CheckAuthorizationResult } from '@kbn/core-saved-objects-server';
+import { apiContextMock, ApiExecutionContextMock } from '../../mocks';
 import { performBulkGet } from './bulk_get';
 
 interface ObjectInfo {

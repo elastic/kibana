@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { schema, type TypeOf } from '@kbn/config-schema';
-import { type KibanaRequest, type KibanaResponseFactory } from '@kbn/core-http-server';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { ALLOWED_JOB_CONTENT_TYPES } from '@kbn/reporting-common';
 import { getCounters } from '..';
-import { type ReportingCore } from '../../..';
+import { ReportingCore } from '../../..';
 import { getContentStream } from '../../../lib';
-import { type ReportingRequestHandlerContext, type ReportingUser } from '../../../types';
+import { ReportingRequestHandlerContext, ReportingUser } from '../../../types';
 import { handleUnavailable } from '../generate';
 import { jobManagementPreRouting } from './job_management_pre_routing';
 import { jobsQueryFactory } from './jobs_query';

@@ -8,7 +8,7 @@
  */
 
 import * as Either from 'fp-ts/lib/Either';
-import { errors as EsErrors, type TransportResult } from '@elastic/elasticsearch';
+import { errors as EsErrors, TransportResult } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { waitForTask } from './wait_for_task';
 

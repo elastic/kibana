@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type AnalyticsServiceSetup, type AuthenticatedUser, type Logger } from '@kbn/core/server';
-import { type ApiConfig, type Replacements } from '@kbn/elastic-assistant-common';
+import { AnalyticsServiceSetup, AuthenticatedUser, Logger } from '@kbn/core/server';
+import { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { type AttackDiscoveryDataClient } from '../../../../../lib/attack_discovery/persistence';
+import { AttackDiscoveryDataClient } from '../../../../../lib/attack_discovery/persistence';
 import { attackDiscoveryStatus } from '../../../helpers/helpers';
 import { ATTACK_DISCOVERY_ERROR_EVENT } from '../../../../../lib/telemetry/event_based_telemetry';
 

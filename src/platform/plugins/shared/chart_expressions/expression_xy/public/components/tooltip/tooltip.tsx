@@ -7,20 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type TooltipInfo, type XYChartSeriesIdentifier } from '@elastic/charts';
-import { type FormatFactory } from '@kbn/field-formats-plugin/common';
+import { TooltipInfo, XYChartSeriesIdentifier } from '@elastic/charts';
+import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
-import React, { type FC } from 'react';
-import { type CommonXYDataLayerConfig } from '../../../common';
+import React, { FC } from 'react';
+import { CommonXYDataLayerConfig } from '../../../common';
 import {
-  type DatatablesWithFormatInfo,
+  DatatablesWithFormatInfo,
   getMetaFromSeriesId,
-  type LayersAccessorsTitles,
-  type LayersFieldFormats,
+  LayersAccessorsTitles,
+  LayersFieldFormats,
 } from '../../helpers';
-import { type XDomain } from '../x_domain';
+import { XDomain } from '../x_domain';
 import { EndzoneTooltipHeader } from './endzone_tooltip_header';
-import { type TooltipData, TooltipRow } from './tooltip_row';
+import { TooltipData, TooltipRow } from './tooltip_row';
 import { isEndzoneBucket } from './utils';
 
 import './tooltip.scss';

@@ -8,9 +8,9 @@
  */
 
 import { InspectorViewRegistry } from './view_registry';
-import { type InspectorViewDescription } from './types';
+import { InspectorViewDescription } from './types';
 
-import { type Adapters } from '../common';
+import { Adapters } from '../common';
 
 function createMockView(
   params: {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { offeringBasedSchema, schema, type TypeOf } from '@kbn/config-schema';
-import { type PluginInitializerContext, type PluginConfigDescriptor } from '@kbn/core/server';
+import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
+import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 
 export const configSchema = schema.object({
   enabled: offeringBasedSchema({

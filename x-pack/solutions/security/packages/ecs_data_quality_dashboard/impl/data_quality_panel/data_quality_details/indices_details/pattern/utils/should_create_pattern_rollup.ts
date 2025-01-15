@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
+import { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
 
-import { type MeteringStatsIndex, type PatternRollup } from '../../../../types';
+import { MeteringStatsIndex, PatternRollup } from '../../../../types';
 
 export const shouldCreatePatternRollup = ({
   error,

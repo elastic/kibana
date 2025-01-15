@@ -8,7 +8,7 @@
  */
 
 import type { ServiceStatusLevelId } from '@kbn/core-status-common';
-import { type FormattedStatus, type StatusState, STATUS_LEVEL_UI_ATTRS } from './load_status';
+import { FormattedStatus, StatusState, STATUS_LEVEL_UI_ATTRS } from './load_status';
 
 export const orderedLevels: ServiceStatusLevelId[] = [
   'critical',

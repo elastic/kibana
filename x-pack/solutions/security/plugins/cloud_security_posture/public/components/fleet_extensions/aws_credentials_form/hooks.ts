@@ -6,13 +6,13 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { type NewPackagePolicy, type PackageInfo } from '@kbn/fleet-plugin/common';
+import { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
 import {
   getAwsCredentialsType,
   getCspmCloudFormationDefaultValue,
   getPosturePolicy,
-  type NewPackagePolicyPostureInput,
+  NewPackagePolicyPostureInput,
 } from '../utils';
 import {
   DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
@@ -20,8 +20,8 @@ import {
   getInputVarsFields,
 } from './get_aws_credentials_form_options';
 import { CLOUDBEAT_AWS } from '../../../../common/constants';
-import { type AwsCredentialsType } from '../../../../common/types_old';
-import { AWS_CREDENTIALS_TYPE, AWS_SETUP_FORMAT, type SetupFormat } from './aws_credentials_form';
+import { AwsCredentialsType } from '../../../../common/types_old';
+import { AWS_CREDENTIALS_TYPE, AWS_SETUP_FORMAT, SetupFormat } from './aws_credentials_form';
 /**
  * Update CloudFormation template and stack name in the Agent Policy
  * based on the selected policy template

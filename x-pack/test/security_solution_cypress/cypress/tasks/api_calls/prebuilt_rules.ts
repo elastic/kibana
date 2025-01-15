@@ -6,7 +6,7 @@
  */
 
 import {
-  type PerformRuleInstallationResponseBody,
+  PerformRuleInstallationResponseBody,
   PERFORM_RULE_INSTALLATION_URL,
   BOOTSTRAP_PREBUILT_RULES_URL,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';

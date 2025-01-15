@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
 import {
-  type AzureCredentialsFormProps,
+  AzureCredentialsFormProps,
   AzureSetupInfoContent,
   AzureInputVarFields,
   ARM_TEMPLATE_EXTERNAL_DOC_URL,

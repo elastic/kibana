@@ -9,41 +9,41 @@ import React, { lazy } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import {
-  type ChromeBreadcrumb,
-  type CoreStart,
-  type I18nStart,
-  type ScopedHistory,
-  type ThemeServiceStart,
+  ChromeBreadcrumb,
+  CoreStart,
+  I18nStart,
+  ScopedHistory,
+  ThemeServiceStart,
 } from '@kbn/core/public';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { type KibanaFeature } from '@kbn/features-plugin/common';
+import { KibanaFeature } from '@kbn/features-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { type ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { type DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import { type UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { type PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 
-import { type Storage } from '@kbn/kibana-utils-plugin/public';
-import { type ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { ruleDetailsRoute, createRuleRoute, editRuleRoute } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { type DashboardStart } from '@kbn/dashboard-plugin/public';
-import { type ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { type CloudSetup } from '@kbn/cloud-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import {
-  type ActionTypeRegistryContract,
-  type AlertsTableConfigurationRegistryContract,
-  type RuleTypeRegistryContract,
+  ActionTypeRegistryContract,
+  AlertsTableConfigurationRegistryContract,
+  RuleTypeRegistryContract,
 } from '../types';
 import {
-  type Section,
+  Section,
   legacyRouteToRuleDetails,
   routeToConnectors,
   legacyRouteToAlerts,

@@ -7,11 +7,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type RouteComponentProps } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 import { EuiPageSection, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 
-import { type SnapshotDetails, type RestoreSettings } from '../../../../common/types';
-import { SectionError, type Error, PageError } from '../../../shared_imports';
+import { SnapshotDetails, RestoreSettings } from '../../../../common/types';
+import { SectionError, Error, PageError } from '../../../shared_imports';
 import { BASE_PATH } from '../../constants';
 import { PageLoading, RestoreSnapshotForm } from '../../components';
 import { useServices } from '../../app_context';

@@ -6,7 +6,7 @@
  */
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { type UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
 import { UIM_APP_NAME } from '../constants';
 

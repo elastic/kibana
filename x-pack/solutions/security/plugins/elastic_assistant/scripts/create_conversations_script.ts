@@ -11,7 +11,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import axios from 'axios';
 import {
   API_VERSIONS,
-  type ConversationCreateProps,
+  ConversationCreateProps,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
 } from '@kbn/elastic-assistant-common';
 import pLimit from 'p-limit';

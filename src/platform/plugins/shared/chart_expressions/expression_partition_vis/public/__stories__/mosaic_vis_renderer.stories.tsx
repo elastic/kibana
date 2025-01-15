@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC, type PropsWithChildren } from 'react';
-import { type ComponentStory } from '@storybook/react';
+import React, { FC, PropsWithChildren } from 'react';
+import { ComponentStory } from '@storybook/react';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getPartitionVisRenderer } from '../expression_renderers';
-import { ChartTypes, type PartitionChartProps } from '../../common/types';
+import { ChartTypes, PartitionChartProps } from '../../common/types';
 import { getStartDeps } from '../__mocks__';
 import { mosaicArgTypes, treemapMosaicConfig, data } from './shared';
 

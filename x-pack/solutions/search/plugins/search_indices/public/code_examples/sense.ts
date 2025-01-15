@@ -6,8 +6,8 @@
  */
 
 import { INDEX_PLACEHOLDER } from '../constants';
-import { type IngestDataCodeDefinition } from '../types';
-import { type CreateIndexLanguageExamples } from './types';
+import { IngestDataCodeDefinition } from '../types';
+import { CreateIndexLanguageExamples } from './types';
 
 export const ConsoleCreateIndexExamples: CreateIndexLanguageExamples = {
   default: {

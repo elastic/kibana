@@ -17,7 +17,7 @@ import { categorizeFields } from '@kbn/management-settings-utilities';
 import { FieldRow } from '@kbn/management-settings-components-field-row';
 
 import { FieldCategory as Component, type FieldCategoryProps as ComponentProps } from '../category';
-import { type Params, useCategoryStory } from './use_category_story';
+import { Params, useCategoryStory } from './use_category_story';
 import { FieldCategoryProvider } from '../services';
 
 const settings = getSettingsMock();

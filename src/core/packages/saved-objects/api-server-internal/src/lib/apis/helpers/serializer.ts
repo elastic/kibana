@@ -15,9 +15,9 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import {
-  type SavedObject,
-  type SavedObjectsRawDoc,
-  type SavedObjectsRawDocParseOptions,
+  SavedObject,
+  SavedObjectsRawDoc,
+  SavedObjectsRawDocParseOptions,
 } from '@kbn/core-saved-objects-server';
 
 export type ISerializerHelper = PublicMethodsOf<SerializerHelper>;

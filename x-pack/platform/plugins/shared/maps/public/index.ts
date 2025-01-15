@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type PluginInitializer } from '@kbn/core/public';
-import { type PluginInitializerContext } from '@kbn/core/public';
-import { MapsPlugin, type MapsPluginSetup, type MapsPluginStart } from './plugin';
+import { PluginInitializer } from '@kbn/core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
+import { MapsPlugin, MapsPluginSetup, MapsPluginStart } from './plugin';
 import type { MapsXPackConfig } from '../server/config';
 
 export const plugin: PluginInitializer<MapsPluginSetup, MapsPluginStart> = (

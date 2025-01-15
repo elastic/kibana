@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type CreateEndpointListItemResponse } from '@kbn/securitysolution-endpoint-exceptions-common/api';
+import { CreateEndpointListItemResponse } from '@kbn/securitysolution-endpoint-exceptions-common/api';
 import type {
   ExceptionListSchema,
   ExceptionListItemSchema,

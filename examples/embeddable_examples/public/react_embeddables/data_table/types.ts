@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import {
-  type PublishesDataLoading,
-  type SerializedTimeRange,
-  type SerializedTitles,
+  PublishesDataLoading,
+  SerializedTimeRange,
+  SerializedTitles,
 } from '@kbn/presentation-publishing';
 
 export type DataTableSerializedState = SerializedTitles & SerializedTimeRange;

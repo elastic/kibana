@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Filter, FILTERS } from '@kbn/es-query';
+import { Filter, FILTERS } from '@kbn/es-query';
 export const getEmptyValue = () => '—';
 
 type StrictFilter = Filter & {

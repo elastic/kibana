@@ -31,8 +31,8 @@ import { WatchHistoryItem } from '../../../../models/watch_history_item';
 import { ACTION_MODES, TIME_UNITS } from '../../../../../../common/constants';
 import { ExecuteDetails } from '../../../../models/execute_details';
 import {
-  type ExecutedWatchDetails,
-  type ExecutedWatchResults,
+  ExecutedWatchDetails,
+  ExecutedWatchResults,
 } from '../../../../../../common/types/watch_types';
 import { ErrableFormRow } from '../../../../components';
 import { executeWatch } from '../../../../lib/api';

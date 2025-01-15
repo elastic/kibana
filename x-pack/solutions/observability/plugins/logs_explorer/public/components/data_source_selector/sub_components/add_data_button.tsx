@@ -8,7 +8,7 @@
 import { EuiButtonEmpty } from '@elastic/eui';
 import {
   OBSERVABILITY_ONBOARDING_LOCATOR,
-  type ObservabilityOnboardingLocatorParams,
+  ObservabilityOnboardingLocatorParams,
 } from '@kbn/deeplinks-observability';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import React from 'react';

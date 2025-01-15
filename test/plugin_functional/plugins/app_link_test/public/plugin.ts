@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Plugin, type CoreSetup, type AppMountParameters } from '@kbn/core/public';
+import { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
 import { renderApp } from './app';
 
 export class CoreAppLinkPlugin implements Plugin<CoreAppLinkPluginSetup, CoreAppLinkPluginStart> {

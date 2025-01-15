@@ -9,7 +9,7 @@ import { registerRoutesMock, registerSettingsMock } from './plugin.test.mocks';
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { BannersPlugin } from './plugin';
-import { type BannersConfigType } from './config';
+import { BannersConfigType } from './config';
 
 describe('BannersPlugin', () => {
   let plugin: BannersPlugin;

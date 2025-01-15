@@ -21,9 +21,9 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 
-import { type EnvironmentName, type Project, type ProjectID, type ProjectStatus, type SolutionName } from '../../../common';
+import { EnvironmentName, Project, ProjectID, ProjectStatus, SolutionName } from '../../../common';
 import { LabsStrings } from '../../i18n';
 
 import { getPresentationLabsService } from '../../services/presentation_labs_service';

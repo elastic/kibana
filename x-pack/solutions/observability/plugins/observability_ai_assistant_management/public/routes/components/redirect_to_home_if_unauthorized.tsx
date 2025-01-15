@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { aiAssistantCapabilities } from '@kbn/observability-ai-assistant-plugin/public';
 export function RedirectToHomeIfUnauthorized({

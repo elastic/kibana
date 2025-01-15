@@ -10,7 +10,7 @@ import {
   getLoggingKubernetesHref,
   getLoggingIpHref,
 } from './get_logging_href';
-import { type MonitorSummary, makePing } from '../../../../../common/runtime_types';
+import { MonitorSummary, makePing } from '../../../../../common/runtime_types';
 
 describe('getLoggingHref', () => {
   let summary: MonitorSummary;

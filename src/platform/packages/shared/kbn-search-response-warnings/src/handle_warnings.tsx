@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { EuiButtonEmpty, EuiText } from '@elastic/eui';
-import { type estypes } from '@elastic/elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
 import type {
   AnalyticsServiceStart,
   NotificationsStart,
@@ -20,9 +20,9 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
 import {
-  type SearchResponseIncompleteWarning,
-  type SearchResponseWarning,
-  type WarningHandlerCallback,
+  SearchResponseIncompleteWarning,
+  SearchResponseWarning,
+  WarningHandlerCallback,
 } from './types';
 import { extractWarnings } from './extract_warnings';
 import {

@@ -10,7 +10,7 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import {
-  type SLOWithSummaryResponse,
+  SLOWithSummaryResponse,
   occurrencesBudgetingMethodSchema,
   querySchema,
   rollingTimeWindowTypeSchema,

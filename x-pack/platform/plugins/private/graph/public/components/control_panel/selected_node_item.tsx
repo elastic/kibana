@@ -7,7 +7,7 @@
 
 import classNames from 'classnames';
 import React from 'react';
-import { type WorkspaceNode } from '../../types';
+import { WorkspaceNode } from '../../types';
 import { getIconOffset, IconRenderer } from '../icon_renderer';
 
 interface SelectedNodeItemProps {

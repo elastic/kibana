@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type GenericFtrProviderContext } from '@kbn/test';
+import { GenericFtrProviderContext } from '@kbn/test';
 import { services } from '../../functional/services';
 import { pageObjects } from '../../functional/page_objects';
 

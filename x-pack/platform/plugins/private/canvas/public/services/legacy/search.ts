@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { type CanvasServiceFactory } from '.';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { CanvasServiceFactory } from '.';
 
 export interface SearchService {
   search: DataPublicPluginStart['search'];

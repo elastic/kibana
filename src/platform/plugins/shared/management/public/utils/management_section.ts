@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Assign } from '@kbn/utility-types';
-import { type CreateManagementItemArgs, type ManagementSectionId } from '../types';
+import { Assign } from '@kbn/utility-types';
+import { CreateManagementItemArgs, ManagementSectionId } from '../types';
 import { ManagementItem } from './management_item';
-import { ManagementApp, type RegisterManagementAppArgs } from './management_app';
+import { ManagementApp, RegisterManagementAppArgs } from './management_app';
 
 export type RegisterManagementSectionArgs = Assign<
   CreateManagementItemArgs,

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo, type FC } from 'react';
+import React, { useState, useCallback, useMemo, FC } from 'react';
 import {
   EuiPopover,
   EuiFlexItem,
   EuiFlexGroup,
   EuiContextMenu,
-  type EuiContextMenuPanelItemDescriptor,
+  EuiContextMenuPanelItemDescriptor,
   EuiText,
   EuiLink,
   EuiIcon,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type TagBulkAction } from '../types';
+import { TagBulkAction } from '../types';
 
 import './_action_bar.scss';
 

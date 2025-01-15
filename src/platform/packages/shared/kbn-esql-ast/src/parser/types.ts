@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ESQLAstComment } from '../types';
+import { ESQLAstComment } from '../types';
 
 /**
  * Lines of decorations per *whitespace line*. A *whitespace line* is a line

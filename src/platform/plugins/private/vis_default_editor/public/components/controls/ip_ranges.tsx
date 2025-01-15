@@ -10,10 +10,10 @@
 import React, { useCallback } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 
-import { FromToList, type FromToObject } from './components/from_to_list';
-import { MaskList, type MaskObject } from './components/mask_list';
+import { FromToList, FromToObject } from './components/from_to_list';
+import { MaskList, MaskObject } from './components/mask_list';
 import { IpRangeTypes } from './ip_range_type';
-import { type AggParamEditorProps } from '../agg_param_props';
+import { AggParamEditorProps } from '../agg_param_props';
 
 interface IpRange {
   fromTo: FromToObject[];

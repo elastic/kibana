@@ -8,10 +8,10 @@
 import { schema } from '@kbn/config-schema';
 
 import { difference } from 'lodash';
-import { type Capabilities as UICapabilities } from '@kbn/core/server';
-import { type KibanaFeatureConfig, KibanaFeatureScope } from '../common';
-import { type FeatureKibanaPrivileges, type ElasticsearchFeatureConfig } from '.';
-import { type AlertingKibanaPrivilege } from '../common/alerting_kibana_privilege';
+import { Capabilities as UICapabilities } from '@kbn/core/server';
+import { KibanaFeatureConfig, KibanaFeatureScope } from '../common';
+import { FeatureKibanaPrivileges, ElasticsearchFeatureConfig } from '.';
+import { AlertingKibanaPrivilege } from '../common/alerting_kibana_privilege';
 
 // Each feature gets its own property on the UICapabilities object,
 // but that object has a few built-in properties which should not be overwritten.

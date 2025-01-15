@@ -9,15 +9,15 @@ import * as t from 'io-ts';
 
 import {
   DefaultVersionNumber,
-  type DefaultVersionNumberDecoded,
+  DefaultVersionNumberDecoded,
   OnlyFalseAllowed,
 } from '@kbn/securitysolution-io-ts-types';
 
 import { exceptionListType } from '../../common/exception_list';
-import { type OsTypeArray, osTypeArrayOrUndefined } from '../../common/os_type';
-import { type Tags, tags } from '../../common/tags';
-import { type ListId, list_id } from '../../common/list_id';
-import { type NamespaceType } from '../../common/default_namespace';
+import { OsTypeArray, osTypeArrayOrUndefined } from '../../common/os_type';
+import { Tags, tags } from '../../common/tags';
+import { ListId, list_id } from '../../common/list_id';
+import { NamespaceType } from '../../common/default_namespace';
 import { name } from '../../common/name';
 import { description } from '../../common/description';
 import { namespace_type } from '../../common/namespace_type';

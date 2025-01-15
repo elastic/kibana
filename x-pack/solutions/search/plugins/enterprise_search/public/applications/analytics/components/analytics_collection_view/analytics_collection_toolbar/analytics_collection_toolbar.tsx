@@ -18,11 +18,11 @@ import {
   EuiPopover,
   EuiPopoverFooter,
   EuiSuperDatePicker,
-  type EuiSuperDatePickerCommonRange,
+  EuiSuperDatePickerCommonRange,
 } from '@elastic/eui';
-import { type OnTimeChangeProps } from '@elastic/eui/src/components/date_picker/super_date_picker/super_date_picker';
+import { OnTimeChangeProps } from '@elastic/eui/src/components/date_picker/super_date_picker/super_date_picker';
 
-import { type OnRefreshChangeProps } from '@elastic/eui/src/components/date_picker/types';
+import { OnRefreshChangeProps } from '@elastic/eui/src/components/date_picker/types';
 
 import { i18n } from '@kbn/i18n';
 

@@ -6,12 +6,12 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import moment, { type Moment } from 'moment';
+import moment, { Moment } from 'moment';
 import { EuiDatePicker, EuiDatePickerRange, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import {
   useFormData,
   useFormContext,
-  type FieldHook,
+  FieldHook,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import * as i18n from '../../translations';
 import { getSelectedForDatePicker as getSelected } from '../../helpers/get_selected_for_date_picker';

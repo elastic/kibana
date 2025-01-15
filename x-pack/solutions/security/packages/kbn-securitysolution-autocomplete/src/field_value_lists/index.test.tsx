@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { EuiComboBox, type EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { waitFor } from '@testing-library/react';
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 

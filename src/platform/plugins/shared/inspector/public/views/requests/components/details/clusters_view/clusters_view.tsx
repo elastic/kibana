@@ -8,10 +8,10 @@
  */
 
 import React, { Component } from 'react';
-import { type estypes } from '@elastic/elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
 import { EuiSearchBar, type EuiSearchBarOnChangeArgs, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type Request } from '../../../../../../common/adapters/request/types';
+import { Request } from '../../../../../../common/adapters/request/types';
 import type { DetailViewProps } from '../types';
 import { ClusterHealth, ClustersHealth } from './clusters_health';
 import { ClustersTable } from './clusters_table';

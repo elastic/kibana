@@ -9,7 +9,7 @@
 
 import Chalk from 'chalk';
 import moment from 'moment';
-import { type Writable } from 'stream';
+import { Writable } from 'stream';
 import { tap } from 'rxjs';
 import {
   ToolingLog,
@@ -24,7 +24,7 @@ import {
   OptimizerConfig,
   logOptimizerState,
   logOptimizerProgress,
-  type OptimizerUpdate,
+  OptimizerUpdate,
 } from '@kbn/optimizer';
 
 export interface Options {

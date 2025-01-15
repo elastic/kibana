@@ -8,11 +8,11 @@
 import moment from 'moment-timezone';
 import React from 'react';
 import { render } from '@testing-library/react';
-import { type TimeRangeBounds } from '@kbn/data-plugin/common';
+import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { TestProvidersComponent } from '../../../../mocks/test_providers';
 import { IndicatorsBarChart } from './barchart';
-import { type ChartSeries } from '../../services/fetch_aggregated_indicators';
-import { type EuiComboBoxOptionOption } from '@elastic/eui';
+import { ChartSeries } from '../../services/fetch_aggregated_indicators';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 
 moment.suppressDeprecationWarnings = true;
 moment.tz.setDefault('UTC');

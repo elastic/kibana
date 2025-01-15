@@ -7,17 +7,17 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { ALERTING_CASES_SAVED_OBJECT_INDEX, type SavedObject } from '@kbn/core-saved-objects-server';
-import { type AdHocRunSO } from '@kbn/alerting-plugin/server/data/ad_hoc_run/types';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX, SavedObject } from '@kbn/core-saved-objects-server';
+import { AdHocRunSO } from '@kbn/alerting-plugin/server/data/ad_hoc_run/types';
 import { get } from 'lodash';
 import { SuperuserAtSpace1 } from '../../../../scenarios';
 import {
   getTestRuleData,
   getUrlPrefix,
   ObjectRemover,
-  type TaskManagerDoc,
+  TaskManagerDoc,
 } from '../../../../../common/lib';
-import { type FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function deleteRuleForBackfillTests({ getService }: FtrProviderContext) {

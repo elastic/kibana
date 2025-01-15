@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Readable } from 'stream';
+import { Readable } from 'stream';
 import {
   createSplitStream,
   createMapStream,
@@ -19,9 +19,9 @@ import {
 import Boom from '@hapi/boom';
 import type { KibanaRequest, RequestHandlerWrapper } from '@kbn/core-http-server';
 import {
-  type SavedObject,
-  type ISavedObjectTypeRegistry,
-  type SavedObjectsExportResultDetails,
+  SavedObject,
+  ISavedObjectTypeRegistry,
+  SavedObjectsExportResultDetails,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
 import type { Logger } from '@kbn/logging';

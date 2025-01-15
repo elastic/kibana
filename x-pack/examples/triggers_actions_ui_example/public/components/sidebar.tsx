@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiPageSidebar, EuiSideNav } from '@elastic/eui';
-import { type ScopedHistory } from '@kbn/core/public';
+import { ScopedHistory } from '@kbn/core/public';
 
 export const Sidebar = ({ history }: { history: ScopedHistory }) => {
   return (

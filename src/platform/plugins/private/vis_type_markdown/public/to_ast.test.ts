@@ -8,7 +8,7 @@
  */
 
 import { toExpressionAst } from './to_ast';
-import { type Vis } from '@kbn/visualizations-plugin/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
 
 describe('markdown vis toExpressionAst function', () => {
   let vis: Vis;

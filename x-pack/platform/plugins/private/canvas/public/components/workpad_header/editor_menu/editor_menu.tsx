@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   VisGroups,
@@ -13,11 +13,11 @@ import {
   type VisTypeAlias,
   type VisParams,
 } from '@kbn/visualizations-plugin/public';
-import { type Action, type ActionExecutionContext } from '@kbn/ui-actions-plugin/public/actions';
+import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public/actions';
 
 import { trackCanvasUiMetric, METRIC_TYPE } from '../../../lib/ui_metric';
 import { CANVAS_APP } from '../../../../common/lib';
-import { type ElementSpec } from '../../../../types';
+import { ElementSpec } from '../../../../types';
 import { EditorMenu as Component } from './editor_menu.component';
 import { useCanvasApi } from '../../hooks/use_canvas_api';
 import { ADD_CANVAS_ELEMENT_TRIGGER } from '../../../state/triggers/add_canvas_element_trigger';

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { getColorFactory, type ColorMappingInputCategoricalData } from '@kbn/coloring';
-import { type KbnPalettes } from '@kbn/palettes';
-import { type CellColorFn } from './get_cell_color_fn';
+import { getColorFactory, ColorMappingInputCategoricalData } from '@kbn/coloring';
+import { KbnPalettes } from '@kbn/palettes';
+import { CellColorFn } from './get_cell_color_fn';
 
 /**
  * Return a color accessor function for XY charts depending on the split accessors received.

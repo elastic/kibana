@@ -9,7 +9,7 @@
 
 import { ColorSchemas } from '@kbn/charts-plugin/common';
 import { getPercentageModeConfig } from './percentage_mode';
-import { type ExtendedPaletteParams } from './types';
+import { ExtendedPaletteParams } from './types';
 
 const params: ExtendedPaletteParams = {
   percentageMode: false,

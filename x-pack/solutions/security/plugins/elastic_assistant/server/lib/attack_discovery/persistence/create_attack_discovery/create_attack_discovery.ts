@@ -6,11 +6,11 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { type AuthenticatedUser, type ElasticsearchClient, type Logger } from '@kbn/core/server';
+import { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import { type AttackDiscoveryCreateProps, type AttackDiscoveryResponse } from '@kbn/elastic-assistant-common';
+import { AttackDiscoveryCreateProps, AttackDiscoveryResponse } from '@kbn/elastic-assistant-common';
 import { getAttackDiscovery } from '../get_attack_discovery/get_attack_discovery';
-import { type CreateAttackDiscoverySchema } from '../types';
+import { CreateAttackDiscoverySchema } from '../types';
 
 export interface CreateAttackDiscoveryParams {
   esClient: ElasticsearchClient;

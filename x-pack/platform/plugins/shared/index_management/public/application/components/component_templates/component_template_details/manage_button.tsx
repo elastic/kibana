@@ -12,9 +12,9 @@ import {
   EuiPopover,
   EuiButton,
   EuiContextMenu,
-  type EuiContextMenuPanelItemDescriptor,
+  EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import { type ComponentTemplateDeserialized } from '../shared_imports';
+import { ComponentTemplateDeserialized } from '../shared_imports';
 
 export interface ManageAction {
   name: string;

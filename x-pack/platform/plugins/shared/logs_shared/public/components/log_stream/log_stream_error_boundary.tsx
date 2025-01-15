@@ -7,9 +7,9 @@
 
 import { EuiCodeBlock, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { type FC, type PropsWithChildren } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { KQLSyntaxError } from '@kbn/es-query';
-import { type RenderErrorFunc, ResettableErrorBoundary } from '../resettable_error_boundary';
+import { RenderErrorFunc, ResettableErrorBoundary } from '../resettable_error_boundary';
 
 export const LogStreamErrorBoundary: FC<
   PropsWithChildren<{

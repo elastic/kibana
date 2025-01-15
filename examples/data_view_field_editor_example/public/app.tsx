@@ -9,7 +9,7 @@
 
 import {
   EuiProvider,
-  type DefaultItemAction,
+  DefaultItemAction,
   EuiButton,
   EuiCheckbox,
   EuiFlexGroup,
@@ -20,11 +20,11 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { type AppMountParameters } from '@kbn/core/public';
-import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { type IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import { AppMountParameters } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { type DataViewField } from '@kbn/data-views-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 

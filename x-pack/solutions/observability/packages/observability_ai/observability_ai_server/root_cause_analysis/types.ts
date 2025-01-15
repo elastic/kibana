@@ -6,27 +6,27 @@
  */
 
 import {
-  type ToolMessage,
-  type UserMessage,
-  type ToolCallsOf,
-  type ToolChoice,
-  type AssistantMessageOf,
+  ToolMessage,
+  UserMessage,
+  ToolCallsOf,
+  ToolChoice,
+  AssistantMessageOf,
 } from '@kbn/inference-common';
-import { type InferenceClient } from '@kbn/inference-plugin/server';
-import { type Logger } from '@kbn/logging';
-import { type AlertsClient } from '@kbn/rule-registry-plugin/server';
-import { type RulesClient } from '@kbn/alerting-plugin/server';
-import { type ObservabilityAIAssistantClient } from '@kbn/observability-ai-assistant-plugin/server';
-import { type ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import { InferenceClient } from '@kbn/inference-plugin/server';
+import { Logger } from '@kbn/logging';
+import { AlertsClient } from '@kbn/rule-registry-plugin/server';
+import { RulesClient } from '@kbn/alerting-plugin/server';
+import { ObservabilityAIAssistantClient } from '@kbn/observability-ai-assistant-plugin/server';
+import { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import {
-  type RCA_END_PROCESS_TOOL_NAME,
-  type RCA_INVESTIGATE_ENTITY_TOOL_NAME,
-  type RCA_OBSERVE_TOOL_NAME,
+  RCA_END_PROCESS_TOOL_NAME,
+  RCA_INVESTIGATE_ENTITY_TOOL_NAME,
+  RCA_OBSERVE_TOOL_NAME,
 } from '@kbn/observability-ai-common/root_cause_analysis';
-import { type ObservationStepSummary } from './tasks/observe_investigation_results';
-import { type EntityInvestigation } from './tasks/investigate_entity';
-import { type SignificantEventsTimeline } from './tasks/generate_timeline';
-import { type RCA_TOOLS } from './tools';
+import { ObservationStepSummary } from './tasks/observe_investigation_results';
+import { EntityInvestigation } from './tasks/investigate_entity';
+import { SignificantEventsTimeline } from './tasks/generate_timeline';
+import { RCA_TOOLS } from './tools';
 
 export type EndProcessToolMessage = ToolMessage<
   typeof RCA_END_PROCESS_TOOL_NAME,

@@ -9,7 +9,7 @@
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import { EmptyStringArray, type EmptyStringArrayEncoded } from '.';
+import { EmptyStringArray, EmptyStringArrayEncoded } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('empty_string_array', () => {

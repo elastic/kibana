@@ -9,9 +9,9 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
-  type SavedObjectsManagementActionService,
-  type SavedObjectsManagementActionServiceSetup,
-  type SavedObjectsManagementActionServiceStart,
+  SavedObjectsManagementActionService,
+  SavedObjectsManagementActionServiceSetup,
+  SavedObjectsManagementActionServiceStart,
 } from './action_service';
 
 const createSetupMock = (): jest.Mocked<SavedObjectsManagementActionServiceSetup> => {

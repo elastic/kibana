@@ -9,18 +9,18 @@
 
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Query } from '@kbn/data-plugin/common';
-import { type Filter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
 import {
-  type DrawState,
-  type EditState,
-  type Goto,
-  type LayerDescriptor,
-  type MapCenter,
-  type MapExtent,
-  type MapSettings,
-  type Timeslice,
-  type TooltipState,
+  DrawState,
+  EditState,
+  Goto,
+  LayerDescriptor,
+  MapCenter,
+  MapExtent,
+  MapSettings,
+  Timeslice,
+  TooltipState,
 } from '../../../common/descriptor_types';
 
 export interface MapExtentState {

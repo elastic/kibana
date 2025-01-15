@@ -18,17 +18,17 @@
 // property of the object-- just as we did before-- but with the benefit of Typescript.
 
 import {
-  type ArrayFieldDefinition,
-  type BooleanFieldDefinition,
-  type ColorFieldDefinition,
-  type FieldDefinition,
-  type ImageFieldDefinition,
-  type JsonFieldDefinition,
-  type MarkdownFieldDefinition,
-  type NumberFieldDefinition,
-  type SelectFieldDefinition,
-  type StringFieldDefinition,
-  type UndefinedFieldDefinition,
+  ArrayFieldDefinition,
+  BooleanFieldDefinition,
+  ColorFieldDefinition,
+  FieldDefinition,
+  ImageFieldDefinition,
+  JsonFieldDefinition,
+  MarkdownFieldDefinition,
+  NumberFieldDefinition,
+  SelectFieldDefinition,
+  StringFieldDefinition,
+  UndefinedFieldDefinition,
 } from '@kbn/management-settings-types';
 
 /** Simplifed type for a {@link FieldDefinition} */

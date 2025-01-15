@@ -6,15 +6,15 @@
  */
 
 import type { Map as MbMap, RasterTileSource } from '@kbn/mapbox-gl';
-import { type ReactElement } from 'react';
+import { ReactElement } from 'react';
 import _ from 'lodash';
 import { AbstractLayer } from '../layer';
 import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE, LAYER_STYLE_TYPE } from '../../../../common/constants';
-import { type LayerDescriptor } from '../../../../common/descriptor_types';
+import { LayerDescriptor } from '../../../../common/descriptor_types';
 import { TileStyle } from '../../styles/tile/tile_style';
-import { type DataRequestContext } from '../../../actions';
+import { DataRequestContext } from '../../../actions';
 
-import { type IRasterSource, type RasterTileSourceData } from '../../sources/raster_source';
+import { IRasterSource, RasterTileSourceData } from '../../sources/raster_source';
 
 export class RasterTileLayer extends AbstractLayer {
   static createDescriptor(options: Partial<LayerDescriptor>) {

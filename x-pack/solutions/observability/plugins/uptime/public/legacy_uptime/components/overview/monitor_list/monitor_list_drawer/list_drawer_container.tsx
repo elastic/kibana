@@ -7,12 +7,12 @@
 
 import React, { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { type AppState } from '../../../../state';
+import { AppState } from '../../../../state';
 import { monitorDetailsLoadingSelector, monitorDetailsSelector } from '../../../../state/selectors';
 import { getMonitorDetailsAction } from '../../../../state/actions/monitor';
 import { MonitorListDrawerComponent } from './monitor_list_drawer';
 import { useGetUrlParams } from '../../../../hooks';
-import { type MonitorSummary } from '../../../../../../common/runtime_types';
+import { MonitorSummary } from '../../../../../../common/runtime_types';
 import { alertsSelector } from '../../../../state/alerts/alerts';
 import { UptimeRefreshContext } from '../../../../contexts';
 

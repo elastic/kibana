@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ESQLAstExpression, type ESQLAstItem, type ESQLProperNode, type ESQLSingleAstItem } from '../types';
+import { ESQLAstExpression, ESQLAstItem, ESQLProperNode, ESQLSingleAstItem } from '../types';
 
 /**
  * Normalizes AST "item" list to only contain *single* items.

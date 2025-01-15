@@ -13,13 +13,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import {
-  type StepsProgress,
+  StepsProgress,
   useFlowProgressTelemetry,
 } from '../../../hooks/use_flow_progress_telemetry';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { ProgressIndicator } from '../shared/progress_indicator';
 import { GetStartedPanel } from '../shared/get_started_panel';
-import { type ObservabilityOnboardingContextValue } from '../../../plugin';
+import { ObservabilityOnboardingContextValue } from '../../../plugin';
 
 interface Props {
   onboardingId: string;

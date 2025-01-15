@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type AggregationType } from '../types';
+import { AggregationType } from '../types';
 
 export enum AGGREGATION_TYPES {
   COUNT = 'count',

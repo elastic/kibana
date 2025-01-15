@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Schema } from '..';
+import { Schema } from '..';
 import { K8sEntity } from '.';
 
 export function k8sPodEntity({

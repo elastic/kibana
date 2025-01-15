@@ -6,11 +6,11 @@
  */
 
 import {
-  type CoreSetup,
-  type Plugin,
-  type CoreStart,
-  type AppMountParameters,
-  type PluginInitializerContext,
+  CoreSetup,
+  Plugin,
+  CoreStart,
+  AppMountParameters,
+  PluginInitializerContext,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../common';
@@ -18,12 +18,12 @@ import { PLUGIN_ID } from '../common';
 import { SearchHomepage } from './embeddable';
 import { isHomepageEnabled } from './feature_flags';
 import {
-  type SearchHomepageConfigType,
-  type SearchHomepagePluginSetup,
-  type SearchHomepagePluginStart,
-  type SearchHomepageAppPluginStartDependencies,
-  type SearchHomepageAppInfo,
-  type SearchHomepageServicesContext,
+  SearchHomepageConfigType,
+  SearchHomepagePluginSetup,
+  SearchHomepagePluginStart,
+  SearchHomepageAppPluginStartDependencies,
+  SearchHomepageAppInfo,
+  SearchHomepageServicesContext,
 } from './types';
 
 const appInfo: SearchHomepageAppInfo = {

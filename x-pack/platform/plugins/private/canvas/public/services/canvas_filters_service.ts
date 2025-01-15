@@ -7,7 +7,7 @@
 
 // @ts-expect-error untyped local
 import { getState, getStore } from '../state/store';
-import { type State } from '../../types';
+import { State } from '../../types';
 import { getGlobalFilters, getWorkpadVariablesAsObject } from '../state/selectors/workpad';
 // @ts-expect-error untyped local
 import { setFilter } from '../state/actions/filters';

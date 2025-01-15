@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type AnalyticsServiceStart } from '@kbn/core/server';
+import { AnalyticsServiceStart } from '@kbn/core/server';
 import { EventType, FieldType } from '@kbn/reporting-server';
 
 interface CompletionOpts {

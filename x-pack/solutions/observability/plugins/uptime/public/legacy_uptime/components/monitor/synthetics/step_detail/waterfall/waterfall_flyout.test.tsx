@@ -14,7 +14,7 @@ import {
   REQUEST_HEADERS,
   RESPONSE_HEADERS,
 } from './waterfall_flyout';
-import { type WaterfallMetadataEntry } from '../../waterfall/types';
+import { WaterfallMetadataEntry } from '../../waterfall/types';
 
 describe('WaterfallFlyout', () => {
   const flyoutData: WaterfallMetadataEntry = {

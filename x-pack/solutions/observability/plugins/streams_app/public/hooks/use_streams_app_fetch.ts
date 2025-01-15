@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  type UseAbortableAsync,
+  UseAbortableAsync,
   useAbortableAsync,
 } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { omit } from 'lodash';

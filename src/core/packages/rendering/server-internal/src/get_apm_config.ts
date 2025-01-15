@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import agent, { type AgentConfigOptions } from 'elastic-apm-node';
+import agent, { AgentConfigOptions } from 'elastic-apm-node';
 import { getConfiguration, shouldInstrumentClient } from '@kbn/apm-config-loader';
 
 const OMIT_APM_CONFIG: Array<keyof AgentConfigOptions> = [

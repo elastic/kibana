@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import {
   filteringPolicyToText,
   filteringRuleToText,
-  type FilteringRule,
+  FilteringRule,
   FilteringRuleRuleValues,
 } from '@kbn/search-connectors';
 
@@ -35,13 +35,13 @@ import { docLinks } from '../../../../../shared/doc_links';
 import { InlineEditableTable } from '../../../../../shared/tables/inline_editable_table/inline_editable_table';
 import {
   InlineEditableTableLogic,
-  type InlineEditableTableProps,
+  InlineEditableTableProps,
 } from '../../../../../shared/tables/inline_editable_table/inline_editable_table_logic';
 import {
-  type FormErrors,
-  type InlineEditableTableColumn,
+  FormErrors,
+  InlineEditableTableColumn,
 } from '../../../../../shared/tables/inline_editable_table/types';
-import { type ItemWithAnID } from '../../../../../shared/tables/types';
+import { ItemWithAnID } from '../../../../../shared/tables/types';
 
 import { IndexViewLogic } from '../../index_view_logic';
 

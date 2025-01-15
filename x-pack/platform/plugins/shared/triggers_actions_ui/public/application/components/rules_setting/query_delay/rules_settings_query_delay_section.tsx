@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import {
   MAX_QUERY_DELAY,
   MIN_QUERY_DELAY,
-  type RulesSettingsQueryDelayProperties,
+  RulesSettingsQueryDelayProperties,
 } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

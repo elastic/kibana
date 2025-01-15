@@ -6,10 +6,10 @@
  */
 
 import _ from 'lodash';
-import React, { type ChangeEvent, Component } from 'react';
-import { EuiComboBox, type EuiComboBoxOptionOption, EuiFieldText } from '@elastic/eui';
+import React, { ChangeEvent, Component } from 'react';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFieldText } from '@elastic/eui';
 import { SINGLE_SELECTION_AS_TEXT_PROPS } from '../../../../../common/constants';
-import { type IField } from '../../../fields/field';
+import { IField } from '../../../fields/field';
 
 interface Props {
   dataTestSubj: string;

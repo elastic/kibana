@@ -10,7 +10,7 @@
 import React, { useMemo } from 'react';
 import { SourceDocument, type DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import {
-  type ShouldShowFieldInTableHandler,
+  ShouldShowFieldInTableHandler,
   getLogDocumentOverview,
   getMessageFieldWithFallbacks,
 } from '@kbn/discover-utils';

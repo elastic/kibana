@@ -9,7 +9,7 @@ import { of } from 'rxjs';
 import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { License } from './license';
-import { type LicenseCheckState, licensingMock, type LicenseType } from './shared_imports';
+import { LicenseCheckState, licensingMock, LicenseType } from './shared_imports';
 
 describe('License API guard', () => {
   const pluginName = 'testPlugin';

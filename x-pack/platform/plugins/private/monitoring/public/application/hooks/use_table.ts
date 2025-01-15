@@ -6,7 +6,7 @@
  */
 
 import { useState, useCallback } from 'react';
-import { type EuiTableSortingType } from '@elastic/eui';
+import { EuiTableSortingType } from '@elastic/eui';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { euiTableStorageGetter, euiTableStorageSetter } from '../../components/table';
 import { EUI_SORT_ASCENDING } from '../../../common/constants';

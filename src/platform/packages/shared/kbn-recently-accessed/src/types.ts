@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 
 /** @public */
 export interface RecentlyAccessedHistoryItem {

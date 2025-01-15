@@ -15,7 +15,7 @@ import { DraggableBodyRow } from './draggable_body_row';
 import { DraggableBodyRows } from './draggable_body_rows';
 import { HeaderRow } from './header_row';
 import { ReorderableTable } from './reorderable_table';
-import { type Column } from './types';
+import { Column } from './types';
 
 interface Foo {
   id: number;

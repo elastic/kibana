@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type BoolQuery } from '@kbn/es-query';
+import { BoolQuery } from '@kbn/es-query';
 
 export const mergeBoolQueries = (
   firstQuery: { bool: BoolQuery },

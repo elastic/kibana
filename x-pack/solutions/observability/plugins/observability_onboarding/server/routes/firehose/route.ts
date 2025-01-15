@@ -11,7 +11,7 @@ import * as t from 'io-ts';
 import { termQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
 import {
-  type AWSIndexName,
+  AWSIndexName,
   AWS_INDEX_NAME_LIST,
   FIREHOSE_CLOUDFORMATION_TEMPLATE_URL,
 } from '../../../common/aws_firehose';

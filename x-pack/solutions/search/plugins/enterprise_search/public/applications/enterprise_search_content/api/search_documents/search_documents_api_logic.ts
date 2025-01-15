@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { type Pagination } from '@elastic/eui';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { Pagination } from '@elastic/eui';
 import { pageToPagination } from '@kbn/search-index-documents';
 
-import { type Paginate } from '../../../../../common/types/pagination';
+import { Paginate } from '../../../../../common/types/pagination';
 
-import { type Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface SearchDocumentsApiLogicArgs {

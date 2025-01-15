@@ -7,7 +7,7 @@
 
 import { action } from '@storybook/addon-actions';
 import React, { useRef, useEffect } from 'react';
-import { type RendererFactory, type RendererHandlers } from '../../../types';
+import { RendererFactory, RendererHandlers } from '../../../types';
 
 export const defaultHandlers: RendererHandlers = {
   destroy: () => action('destroy'),

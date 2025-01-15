@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { type ApmApiClientKey, type UserApiClient } from '../../../common/config';
-import { type FtrProviderContext } from '../../../common/ftr_provider_context';
-import { type ApmApiError } from '../../../common/apm_api_supertest';
+import { ApmApiClientKey, UserApiClient } from '../../../common/config';
+import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { ApmApiError } from '../../../common/apm_api_supertest';
 
 export default function apiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');

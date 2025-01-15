@@ -8,9 +8,9 @@
  */
 
 import Path from 'path';
-import { type ToolingLog } from '@kbn/tooling-log';
-import { type Project, type SourceFile, type Node } from 'ts-morph';
-import { type ApiScope, type PluginOrPackage } from './types';
+import { ToolingLog } from '@kbn/tooling-log';
+import { Project, SourceFile, Node } from 'ts-morph';
+import { ApiScope, PluginOrPackage } from './types';
 import { isNamedNode, getSourceFileMatching } from './tsmorph_utils';
 
 /**

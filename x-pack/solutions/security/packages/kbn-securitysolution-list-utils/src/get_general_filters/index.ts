@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type ExceptionListFilter } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListFilter } from '@kbn/securitysolution-io-ts-list-types';
 import { isArray } from 'lodash';
 import { get } from 'lodash/fp';
-import { type SavedObjectType } from '../types';
+import { SavedObjectType } from '../types';
 
 export const getGeneralFilters = (
   filters: ExceptionListFilter,

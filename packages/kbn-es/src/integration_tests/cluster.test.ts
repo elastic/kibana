@@ -17,10 +17,10 @@ import * as waitClusterUtil from '../utils/wait_until_cluster_ready';
 import { Cluster } from '../cluster';
 import { ES_NOPASSWORD_P12_PATH } from '@kbn/dev-utils/src/certs';
 import {
-  type DownloadSnapshotOptions,
-  type InstallArchiveOptions,
-  type InstallSnapshotOptions,
-  type InstallSourceOptions,
+  DownloadSnapshotOptions,
+  InstallArchiveOptions,
+  InstallSnapshotOptions,
+  InstallSourceOptions,
 } from '../install/types';
 import { Client } from '@elastic/elasticsearch';
 

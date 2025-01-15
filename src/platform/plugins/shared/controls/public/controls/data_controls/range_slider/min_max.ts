@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type estypes } from '@elastic/elasticsearch';
-import { type DataView, type DataViewField } from '@kbn/data-views-plugin/public';
-import { type AggregateQuery, type Filter, type Query, type TimeRange } from '@kbn/es-query';
-import { type PublishesDataViews, type PublishingSubject } from '@kbn/presentation-publishing';
+import { estypes } from '@elastic/elasticsearch';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { PublishesDataViews, PublishingSubject } from '@kbn/presentation-publishing';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import { type Observable, combineLatest, lastValueFrom, of, startWith, switchMap, tap } from 'rxjs';
+import { Observable, combineLatest, lastValueFrom, of, startWith, switchMap, tap } from 'rxjs';
 import { dataService } from '../../../services/kibana_services';
-import { type ControlFetchContext } from '../../../control_group/control_fetch';
-import { type ControlGroupApi } from '../../../control_group/types';
+import { ControlFetchContext } from '../../../control_group/control_fetch';
+import { ControlGroupApi } from '../../../control_group/types';
 
 export function minMax$({
   controlFetch$,

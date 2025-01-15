@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { type FunctionComponent, memo } from 'react';
+import React, { FunctionComponent, memo } from 'react';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { type ProcessorInternal } from '../../types';
+import { ProcessorInternal } from '../../types';
 import { getProcessorDescriptor } from '../shared';
 
 interface Props {

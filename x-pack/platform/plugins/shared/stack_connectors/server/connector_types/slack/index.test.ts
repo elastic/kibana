@@ -5,22 +5,22 @@
  * 2.0.
  */
 import { IncomingWebhook } from '@slack/webhook';
-import { type Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import {
-  type Services,
-  type ActionTypeExecutorResult as ConnectorTypeExecutorResult,
+  Services,
+  ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ConnectorUsageCollector,
 } from '@kbn/actions-plugin/server/types';
 import { validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import {
   getConnectorType,
-  type SlackConnectorType,
-  type SlackConnectorTypeExecutorOptions,
+  SlackConnectorType,
+  SlackConnectorTypeExecutorOptions,
   ConnectorTypeId,
 } from '.';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { type ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { loggerMock } from '@kbn/logging-mocks';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 

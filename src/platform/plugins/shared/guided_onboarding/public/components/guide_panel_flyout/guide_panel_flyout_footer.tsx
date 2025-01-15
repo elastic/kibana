@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, type EuiThemeComputed } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, EuiThemeComputed } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { type getGuidePanelStyles } from '../guide_panel.styles';
+import { getGuidePanelStyles } from '../guide_panel.styles';
 
 export const GuidePanelFlyoutFooter = ({
   styles,

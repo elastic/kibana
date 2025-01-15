@@ -10,7 +10,7 @@
 import { from } from 'rxjs';
 import { mergeMap } from 'rxjs';
 
-import { type IterableInput, type AsyncMapFn } from './types';
+import { IterableInput, AsyncMapFn } from './types';
 
 /**
  * Creates an observable whose values are the result of calling `fn` for each

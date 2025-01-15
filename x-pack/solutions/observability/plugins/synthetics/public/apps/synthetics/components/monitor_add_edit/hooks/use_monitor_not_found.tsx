@@ -7,7 +7,7 @@
 
 import { useEffect } from 'react';
 import { useGetUrlParams, useUrlParams } from '../../../hooks';
-import { type IHttpSerializedFetchError } from '../../../state';
+import { IHttpSerializedFetchError } from '../../../state';
 
 export const useMonitorNotFound = (error?: IHttpSerializedFetchError | null, id?: string) => {
   const { packagePolicyId } = useGetUrlParams();

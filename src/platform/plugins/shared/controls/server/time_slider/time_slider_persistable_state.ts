@@ -8,10 +8,10 @@
  */
 
 import {
-  type EmbeddableStateWithType,
-  type EmbeddablePersistableStateService,
+  EmbeddableStateWithType,
+  EmbeddablePersistableStateService,
 } from '@kbn/embeddable-plugin/common';
-import { type SavedObjectReference } from '@kbn/core/types';
+import { SavedObjectReference } from '@kbn/core/types';
 
 export const createTimeSliderInject = (): EmbeddablePersistableStateService['inject'] => {
   return (state: EmbeddableStateWithType, references: SavedObjectReference[]) => {

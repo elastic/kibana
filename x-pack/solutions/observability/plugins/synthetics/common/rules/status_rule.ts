@@ -6,8 +6,8 @@
  */
 
 import {
-  type StatusRuleCondition,
-  type TimeWindow,
+  StatusRuleCondition,
+  TimeWindow,
 } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { isEmpty } from 'lodash';
 

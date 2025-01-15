@@ -10,26 +10,26 @@
 import type { PartitionProps } from '@elastic/charts';
 import type { MakeOverridesSerializable, Simplify } from '@kbn/chart-expressions-common/types';
 import {
-  type ExpressionFunctionDefinition,
-  type Datatable,
-  type ExpressionValueRender,
-  type ExpressionValueBoxed,
-  type DefaultInspectorAdapters,
-  type ExecutionContext,
+  ExpressionFunctionDefinition,
+  Datatable,
+  ExpressionValueRender,
+  ExpressionValueBoxed,
+  DefaultInspectorAdapters,
+  ExecutionContext,
 } from '@kbn/expressions-plugin/common';
 import {
-  type PARTITION_LABELS_VALUE,
-  type PIE_VIS_EXPRESSION_NAME,
-  type TREEMAP_VIS_EXPRESSION_NAME,
-  type MOSAIC_VIS_EXPRESSION_NAME,
-  type WAFFLE_VIS_EXPRESSION_NAME,
-  type PARTITION_LABELS_FUNCTION,
+  PARTITION_LABELS_VALUE,
+  PIE_VIS_EXPRESSION_NAME,
+  TREEMAP_VIS_EXPRESSION_NAME,
+  MOSAIC_VIS_EXPRESSION_NAME,
+  WAFFLE_VIS_EXPRESSION_NAME,
+  PARTITION_LABELS_FUNCTION,
 } from '../constants';
 import {
   type PartitionChartProps,
   type PieVisConfig,
-  type LabelPositions,
-  type ValueFormats,
+  LabelPositions,
+  ValueFormats,
   type TreemapVisConfig,
   type MosaicVisConfig,
   type WaffleVisConfig,

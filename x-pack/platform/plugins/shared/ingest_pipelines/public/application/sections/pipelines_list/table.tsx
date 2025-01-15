@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FunctionComponent, useState, useMemo, useEffect } from 'react';
+import React, { FunctionComponent, useState, useMemo, useEffect } from 'react';
 import qs from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, omit } from 'lodash';
@@ -16,22 +16,22 @@ import {
   EuiLink,
   EuiButton,
   EuiButtonIcon,
-  type EuiInMemoryTableProps,
-  type EuiTableFieldDataColumnType,
+  EuiInMemoryTableProps,
+  EuiTableFieldDataColumnType,
   EuiPopover,
   EuiBadge,
   EuiToolTip,
   EuiFilterGroup,
   EuiSelectable,
   EuiFilterButton,
-  type EuiSelectableOption,
+  EuiSelectableOption,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
-import { type Pipeline } from '../../../../common/types';
+import { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
 
 export interface Props {

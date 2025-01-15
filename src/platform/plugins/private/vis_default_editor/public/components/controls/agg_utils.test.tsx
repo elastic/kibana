@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FunctionComponent } from 'react';
-import { mount, type ReactWrapper } from 'enzyme';
+import React, { FunctionComponent } from 'react';
+import { mount, ReactWrapper } from 'enzyme';
 
-import { type IAggConfig } from '@kbn/data-plugin/public';
+import { IAggConfig } from '@kbn/data-plugin/public';
 import {
   safeMakeLabel,
   useAvailableOptions,

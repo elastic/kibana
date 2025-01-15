@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { type TypeOf } from '@kbn/config-schema';
-import { type ValidatorServices } from '@kbn/actions-plugin/server/types';
+import { TypeOf } from '@kbn/config-schema';
+import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import {
-  type ExecutorSubActionPushParamsSchema,
-  type ExternalIncidentServiceConfigurationSchema,
-  type ExternalIncidentServiceSecretConfigurationSchema,
-  type ExternalServiceIncidentResponseSchema,
-  type GetIncidentResponseSchema,
+  ExecutorSubActionPushParamsSchema,
+  ExternalIncidentServiceConfigurationSchema,
+  ExternalIncidentServiceSecretConfigurationSchema,
+  ExternalServiceIncidentResponseSchema,
+  GetIncidentResponseSchema,
 } from './schema';
 
 export interface ExternalServiceCredentials {

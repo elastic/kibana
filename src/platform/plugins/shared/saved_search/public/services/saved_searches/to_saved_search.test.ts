@@ -10,7 +10,7 @@
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
-import { type SavedSearchByValueAttributes, byValueToSavedSearch } from '.';
+import { SavedSearchByValueAttributes, byValueToSavedSearch } from '.';
 
 const mockServices = {
   contentManagement: contentManagementMock.createStartContract().client,

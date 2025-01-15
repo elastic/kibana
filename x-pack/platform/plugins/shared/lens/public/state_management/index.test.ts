@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type Action, type Dispatch, type MiddlewareAPI } from '@reduxjs/toolkit';
+import { Action, Dispatch, MiddlewareAPI } from '@reduxjs/toolkit';
 import { makeConfigureStore, onActiveDataChange, setExecutionContext } from '.';
 import { mockStoreDeps } from '../mocks';
-import { type TableInspectorAdapter } from '../editor_frame_service/types';
-import { type Filter } from '@kbn/es-query';
+import { TableInspectorAdapter } from '../editor_frame_service/types';
+import { Filter } from '@kbn/es-query';
 
 describe('state management initialization and middlewares', () => {
   let store: ReturnType<typeof makeConfigureStore>;

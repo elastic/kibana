@@ -14,10 +14,10 @@ import { handleError } from '../../../../lib/errors';
 import {
   getMetrics,
   isNamedMetricDescriptor,
-  type NamedMetricDescriptor,
+  NamedMetricDescriptor,
 } from '../../../../lib/details/get_metrics';
 import { metricSets } from './metric_set_node';
-import { type MonitoringCore } from '../../../../types';
+import { MonitoringCore } from '../../../../types';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getLogstashDataset } from '../../../../../common/get_index_patterns';
 

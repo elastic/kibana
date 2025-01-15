@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type Observable, type Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 
-import { type CloudSetup } from '@kbn/cloud-plugin/server';
-import { type ElasticsearchConfig } from '@kbn/core/server';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
+import { ElasticsearchConfig } from '@kbn/core/server';
 
 export class GlobalConfigService {
   /**

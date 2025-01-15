@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useState, type VFC } from 'react';
+import React, { useState, VFC } from 'react';
 import {
   EuiButtonIcon,
-  type EuiComboBoxOptionOption,
+  EuiComboBoxOptionOption,
   EuiContextMenuPanel,
   EuiPopover,
   EuiToolTip,

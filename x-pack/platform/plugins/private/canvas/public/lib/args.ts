@@ -10,11 +10,11 @@ import {
   modelRegistry,
   viewRegistry,
   transformRegistry,
-  type Model,
-  type View,
-  type Transform,
+  Model,
+  View,
+  Transform,
 } from '../expression_types';
-import { type ArgUiConfig } from '../expression_types/arg';
+import { ArgUiConfig } from '../expression_types/arg';
 
 type ArgType = Model | View | Transform;
 

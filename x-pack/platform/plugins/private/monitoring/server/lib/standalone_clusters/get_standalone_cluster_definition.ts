@@ -6,7 +6,7 @@
  */
 
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
-import { type Cluster } from '../../types';
+import { Cluster } from '../../types';
 
 export const getStandaloneClusterDefinition: () => Cluster = () => {
   return {

@@ -6,7 +6,7 @@
  */
 
 import { EuiFormRow } from '@elastic/eui';
-import React, { Children, cloneElement, Fragment, type ReactElement } from 'react';
+import React, { Children, cloneElement, Fragment, ReactElement } from 'react';
 export const ErrableFormRow = ({
   errorKey,
   isShowingErrors,

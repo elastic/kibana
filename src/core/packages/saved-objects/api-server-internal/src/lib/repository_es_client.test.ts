@@ -9,7 +9,7 @@
 
 import { retryCallClusterMock } from './repository_es_client.test.mock';
 
-import { createRepositoryEsClient, type RepositoryEsClient } from './repository_es_client';
+import { createRepositoryEsClient, RepositoryEsClient } from './repository_es_client';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 

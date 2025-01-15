@@ -7,4 +7,4 @@
 
 export * from './provider';
 export * from './state_machine';
-export type * from './types';
+export * from './types';

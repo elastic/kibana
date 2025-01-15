@@ -8,7 +8,7 @@
  */
 
 import {
-  type EuiThemeComputed,
+  EuiThemeComputed,
   euiPaletteForTemperature,
   euiPaletteForStatus,
   euiPaletteRed,

@@ -18,9 +18,9 @@ import { getSelectedPage } from '../../state/selectors/workpad';
 import { trackCanvasUiMetric, METRIC_TYPE } from '../../lib/ui_metric';
 import {
   SavedElementsModal as Component,
-  type Props as ComponentProps,
+  Props as ComponentProps,
 } from './saved_elements_modal.component';
-import { type PositionedElement, type CustomElement } from '../../../types';
+import { PositionedElement, CustomElement } from '../../../types';
 import { getCustomElementService } from '../../services/canvas_custom_element_service';
 
 const customElementAdded = 'elements-custom-added';

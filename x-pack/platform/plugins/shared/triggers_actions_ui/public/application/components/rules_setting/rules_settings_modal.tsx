@@ -7,9 +7,9 @@
 
 import React, { memo, useCallback, useState, useRef } from 'react';
 import {
-  type RulesSettingsFlappingProperties,
-  type RulesSettingsProperties,
-  type RulesSettingsQueryDelayProperties,
+  RulesSettingsFlappingProperties,
+  RulesSettingsProperties,
+  RulesSettingsQueryDelayProperties,
 } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

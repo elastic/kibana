@@ -10,9 +10,9 @@
 // TODO: https://github.com/elastic/kibana/issues/110891
 
 import {
-  type RangeSelectContext,
-  type ValueClickContext,
-  type MultiValueClickContext,
+  RangeSelectContext,
+  ValueClickContext,
+  MultiValueClickContext,
 } from '@kbn/embeddable-plugin/public';
 import { ChartsPlugin } from './plugin';
 

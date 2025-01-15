@@ -6,13 +6,13 @@
  */
 
 import {
-  type TreeOptions,
-  type Tree,
+  TreeOptions,
+  Tree,
   EndpointDocGenerator,
-  type Event,
+  Event,
 } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
 import { firstNonNullValue } from '@kbn/security-solution-plugin/common/endpoint/models/ecs_safety_helpers';
-import { type FtrProviderContext } from '../../ftr_provider_context_edr_workflows';
+import { FtrProviderContext } from '../../ftr_provider_context_edr_workflows';
 
 export const processEventsIndex = 'logs-endpoint.events.process-default';
 

@@ -7,8 +7,8 @@
 
 import { makeDecorator } from '@storybook/addons';
 import { storiesOf } from '@storybook/react';
-import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
-import React, { type ReactNode } from 'react';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
@@ -27,8 +27,8 @@ import { emptyResponse as emptyMetricsResponse, fetchMetricsData } from './mock/
 import { newsFeedFetchData } from './mock/news_feed.mock';
 import { emptyResponse as emptyUptimeResponse, fetchUptimeData } from './mock/uptime.mock';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
-import { type ApmIndicesConfig } from '../../../common/typings';
-import { type ConfigSchema } from '../../plugin';
+import { ApmIndicesConfig } from '../../../common/typings';
+import { ConfigSchema } from '../../plugin';
 
 function unregisterAll() {
   unregisterDataHandler({ appName: 'apm' });

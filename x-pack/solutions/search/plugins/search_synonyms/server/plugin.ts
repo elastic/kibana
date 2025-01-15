@@ -6,19 +6,19 @@
  */
 
 import {
-  type PluginInitializerContext,
-  type CoreSetup,
-  type CoreStart,
-  type Plugin,
-  type Logger,
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
 
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import {
-  type SearchSynonymsPluginSetup,
-  type SearchSynonymsPluginSetupDependencies,
-  type SearchSynonymsPluginStart,
+  SearchSynonymsPluginSetup,
+  SearchSynonymsPluginSetupDependencies,
+  SearchSynonymsPluginStart,
 } from './types';
 
 import { defineRoutes } from './routes';

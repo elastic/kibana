@@ -12,9 +12,9 @@ import React, {
   useEffect,
   useLayoutEffect,
   useState,
-  type ComponentType,
+  ComponentType,
   useMemo,
-  type CSSProperties,
+  CSSProperties,
 } from 'react';
 import { throttle } from 'lodash';
 import { useResizeObserver } from '@elastic/eui';

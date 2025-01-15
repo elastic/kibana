@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type AggParamsFilters } from '@kbn/data-plugin/common';
+import { AggParamsFilters } from '@kbn/data-plugin/common';
 import { convertToFiltersColumn } from './filters';
-import { type FiltersColumn } from './types';
+import { FiltersColumn } from './types';
 
 describe('convertToFiltersColumn', () => {
   const aggId = `some-id`;

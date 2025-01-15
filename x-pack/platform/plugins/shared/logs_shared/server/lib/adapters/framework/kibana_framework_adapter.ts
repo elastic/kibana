@@ -6,8 +6,8 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { type TransportRequestParams } from '@elastic/elasticsearch';
-import { type CoreSetup, type IRouter, type RouteMethod } from '@kbn/core/server';
+import { TransportRequestParams } from '@elastic/elasticsearch';
+import { CoreSetup, IRouter, RouteMethod } from '@kbn/core/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/server';
 import type {
   LogsSharedPluginRequestHandlerContext,
@@ -15,12 +15,12 @@ import type {
   LogsSharedServerPluginStartDeps,
 } from '../../../types';
 import {
-  type CallWithRequestParams,
-  type LogsSharedDatabaseGetIndicesAliasResponse,
-  type LogsSharedDatabaseGetIndicesResponse,
-  type LogsSharedDatabaseMultiResponse,
-  type LogsSharedDatabaseSearchResponse,
-  type LogsSharedVersionedRouteConfig,
+  CallWithRequestParams,
+  LogsSharedDatabaseGetIndicesAliasResponse,
+  LogsSharedDatabaseGetIndicesResponse,
+  LogsSharedDatabaseMultiResponse,
+  LogsSharedDatabaseSearchResponse,
+  LogsSharedVersionedRouteConfig,
 } from './adapter_types';
 
 interface FrozenIndexParams {

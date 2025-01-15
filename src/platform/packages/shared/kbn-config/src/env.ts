@@ -11,7 +11,7 @@ import { resolve, join } from 'path';
 import loadJsonFile from 'load-json-file';
 import { getPluginSearchPaths } from '@kbn/repo-packages';
 import type { Package } from '@kbn/repo-packages';
-import { type PackageInfo, type EnvironmentMode } from './types';
+import { PackageInfo, EnvironmentMode } from './types';
 
 /** @internal */
 export interface EnvOptions {

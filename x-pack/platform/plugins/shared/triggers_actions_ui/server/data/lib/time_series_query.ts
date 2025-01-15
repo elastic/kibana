@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { type Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getEsErrorMessage } from '@kbn/alerting-plugin/server';
 import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
@@ -18,10 +18,10 @@ import {
 } from '../../../common';
 
 import {
-  type TimeSeriesQuery,
-  type TimeSeriesResult,
-  type TimeSeriesResultRow,
-  type TimeSeriesCondition,
+  TimeSeriesQuery,
+  TimeSeriesResult,
+  TimeSeriesResultRow,
+  TimeSeriesCondition,
 } from './time_series_types';
 export type { TimeSeriesQuery, TimeSeriesResult } from './time_series_types';
 

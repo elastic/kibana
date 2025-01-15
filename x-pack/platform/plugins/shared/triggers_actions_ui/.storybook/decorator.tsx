@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { type FC, type PropsWithChildren } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { action } from '@storybook/addon-actions';
-import { type DecoratorFn } from '@storybook/react';
+import { DecoratorFn } from '@storybook/react';
 import { EMPTY, of } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaThemeProvider, type KibanaServices } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider, KibanaServices } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { NotificationsStart, ApplicationStart } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';

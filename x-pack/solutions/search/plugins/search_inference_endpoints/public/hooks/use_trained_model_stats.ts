@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { type InferenceStatsResponse } from '@kbn/ml-plugin/public/application/services/ml_api_service/trained_models';
+import { InferenceStatsResponse } from '@kbn/ml-plugin/public/application/services/ml_api_service/trained_models';
 import { useKibana } from './use_kibana';
 import { TRAINED_MODEL_STATS_QUERY_KEY } from '../../common/constants';
 

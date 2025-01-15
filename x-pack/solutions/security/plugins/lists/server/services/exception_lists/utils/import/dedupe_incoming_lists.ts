@@ -7,8 +7,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import {
-  type BulkErrorSchema,
-  type ImportExceptionListSchemaDecoded,
+  BulkErrorSchema,
+  ImportExceptionListSchemaDecoded,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 /**

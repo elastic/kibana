@@ -8,25 +8,25 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 import {
-  type LngLat,
-  type Map as MbMap,
-  type MapGeoJSONFeature,
-  type MapMouseEvent,
-  type MapSourceDataEvent,
-  type Point2D,
-  type PointLike,
+  LngLat,
+  Map as MbMap,
+  MapGeoJSONFeature,
+  MapMouseEvent,
+  MapSourceDataEvent,
+  Point2D,
+  PointLike,
 } from '@kbn/mapbox-gl';
 import { v4 as uuidv4 } from 'uuid';
-import { type Geometry } from 'geojson';
+import { Geometry } from 'geojson';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { type Filter } from '@kbn/es-query';
-import { type ActionExecutionContext, type Action } from '@kbn/ui-actions-plugin/public';
-import { LON_INDEX, type RawValue, SPATIAL_FILTERS_LAYER_ID } from '../../../../common/constants';
-import { type TooltipFeature, type TooltipState } from '../../../../common/descriptor_types';
+import { Filter } from '@kbn/es-query';
+import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import { LON_INDEX, RawValue, SPATIAL_FILTERS_LAYER_ID } from '../../../../common/constants';
+import { TooltipFeature, TooltipState } from '../../../../common/descriptor_types';
 import { TooltipPopover } from './tooltip_popover';
-import { type ILayer } from '../../../classes/layers/layer';
-import { type IVectorLayer, isVectorLayer } from '../../../classes/layers/vector_layer';
-import { type RenderToolTipContent } from '../../../classes/tooltips/tooltip_property';
+import { ILayer } from '../../../classes/layers/layer';
+import { IVectorLayer, isVectorLayer } from '../../../classes/layers/vector_layer';
+import { RenderToolTipContent } from '../../../classes/tooltips/tooltip_property';
 
 function justifyAnchorLocation(
   mbLngLat: LngLat,

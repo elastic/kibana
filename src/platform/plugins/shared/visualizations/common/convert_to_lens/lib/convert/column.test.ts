@@ -9,9 +9,9 @@
 
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { type SchemaConfig } from '../../..';
+import { SchemaConfig } from '../../..';
 import { createColumn } from './column';
-import { type GeneralColumnWithMeta } from './types';
+import { GeneralColumnWithMeta } from './types';
 
 describe('createColumn', () => {
   const field = stubLogstashDataView.fields[0];

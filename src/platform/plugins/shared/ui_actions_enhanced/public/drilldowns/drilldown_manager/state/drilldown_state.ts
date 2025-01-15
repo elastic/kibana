@@ -8,16 +8,16 @@
  */
 
 import useObservable from 'react-use/lib/useObservable';
-import { type Observable, BehaviorSubject, combineLatest } from 'rxjs';
+import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
 import { map } from 'rxjs';
 import {
-  type ActionFactory,
-  type BaseActionConfig,
-  type BaseActionFactoryContext,
-  type SerializedAction,
+  ActionFactory,
+  BaseActionConfig,
+  BaseActionFactoryContext,
+  SerializedAction,
 } from '../../../dynamic_actions';
 import { useSyncObservable } from '../hooks/use_sync_observable';
-import { type ActionFactoryPlaceContext } from '../types';
+import { ActionFactoryPlaceContext } from '../types';
 
 export interface DrilldownStateDeps {
   /**

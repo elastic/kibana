@@ -7,17 +7,17 @@
 
 import { isObjectLike, isEmpty } from 'lodash';
 import {
-  type AxiosInstance,
-  type Method,
-  type AxiosResponse,
-  type AxiosRequestConfig,
+  AxiosInstance,
+  Method,
+  AxiosResponse,
+  AxiosRequestConfig,
   AxiosHeaders,
-  type AxiosHeaderValue,
+  AxiosHeaderValue,
 } from 'axios';
-import { type Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import { getCustomAgents } from './get_custom_agents';
-import { type ActionsConfigurationUtilities } from '../actions_config';
-import { type ConnectorUsageCollector, type SSLSettings } from '../types';
+import { ActionsConfigurationUtilities } from '../actions_config';
+import { ConnectorUsageCollector, SSLSettings } from '../types';
 import { combineHeadersWithBasicAuthHeader } from './get_basic_auth_header';
 
 export const request = async <T = unknown>({

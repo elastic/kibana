@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { injectI18n } from '@kbn/i18n-react';
-import { type Filter, buildPhrasesFilter, buildPhraseFilter } from '@kbn/es-query';
+import { Filter, buildPhrasesFilter, buildPhraseFilter } from '@kbn/es-query';
 import { FilterItem } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { type ObservabilityAppServices } from '../../../application/types';
+import { ObservabilityAppServices } from '../../../application/types';
 
 export function buildFilterLabel({
   field,

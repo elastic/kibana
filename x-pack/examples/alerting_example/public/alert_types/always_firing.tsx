@@ -18,15 +18,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { omit, pick } from 'lodash';
 import {
-  type ActionGroupWithCondition,
+  ActionGroupWithCondition,
   AlertConditions,
   AlertConditionsGroup,
-  type RuleTypeModel,
-  type RuleTypeParamsExpressionProps,
+  RuleTypeModel,
+  RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  type AlwaysFiringParams,
-  type AlwaysFiringActionGroupIds,
+  AlwaysFiringParams,
+  AlwaysFiringActionGroupIds,
   DEFAULT_INSTANCES_TO_GENERATE,
 } from '../../common/constants';
 

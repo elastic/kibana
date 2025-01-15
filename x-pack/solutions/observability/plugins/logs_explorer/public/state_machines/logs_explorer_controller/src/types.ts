@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { type ControlGroupRendererApi } from '@kbn/controls-plugin/public';
-import { type QueryState, type RefreshInterval, type TimeRange } from '@kbn/data-plugin/common';
+import { ControlGroupRendererApi } from '@kbn/controls-plugin/public';
+import { QueryState, RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
 import type {
   DiscoverAppState,
   DiscoverStateContainer,
   DataDocumentsMsg,
 } from '@kbn/discover-plugin/public';
-import { type DoneInvokeEvent } from 'xstate';
+import { DoneInvokeEvent } from 'xstate';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
-import { type ControlPanels, type DisplayOptions } from '../../../../common';
+import { ControlPanels, DisplayOptions } from '../../../../common';
 import type {
   AllDatasetSelection,
   DatasetSelection,

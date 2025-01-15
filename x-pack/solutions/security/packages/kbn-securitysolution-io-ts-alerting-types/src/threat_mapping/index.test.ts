@@ -10,9 +10,9 @@ import { left } from 'fp-ts/lib/Either';
 import {
   concurrent_searches,
   items_per_search,
-  type ThreatMapping,
+  ThreatMapping,
   threatMappingEntries,
-  type ThreatMappingEntries,
+  ThreatMappingEntries,
   threat_mapping,
 } from '.';
 import { foldLeftRight, getPaths, exactCheck } from '@kbn/securitysolution-io-ts-utils';

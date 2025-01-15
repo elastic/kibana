@@ -7,12 +7,12 @@
 
 import * as t from 'io-ts';
 import {
-  type IScopedClusterClient,
-  type IUiSettingsClient,
-  type KibanaRequest,
-  type SavedObjectsClientContract,
+  IScopedClusterClient,
+  IUiSettingsClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { type LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import { flatten } from 'lodash';
 
 export const alertDetailsContextRt = t.intersection([

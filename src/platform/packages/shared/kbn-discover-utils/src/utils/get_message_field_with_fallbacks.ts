@@ -9,7 +9,7 @@
 
 import { unescape } from 'lodash';
 import { fieldConstants } from '..';
-import { type LogDocumentOverview } from '../types';
+import { LogDocumentOverview } from '../types';
 
 export const getMessageFieldWithFallbacks = (
   doc: LogDocumentOverview,

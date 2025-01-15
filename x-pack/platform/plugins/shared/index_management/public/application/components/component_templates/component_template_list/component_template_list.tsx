@@ -6,11 +6,11 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { type RouteComponentProps } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type ScopedHistory } from '@kbn/core/public';
+import { ScopedHistory } from '@kbn/core/public';
 import { EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../services/breadcrumbs';
@@ -20,13 +20,13 @@ import {
   PageError,
   attemptToURIDecode,
 } from '../../../../shared_imports';
-import { type ComponentTemplateDeserialized, GlobalFlyout } from '../shared_imports';
+import { ComponentTemplateDeserialized, GlobalFlyout } from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_LIST_LOAD } from '../constants';
 import { useComponentTemplatesContext } from '../component_templates_context';
 import {
   ComponentTemplateDetailsFlyoutContent,
   defaultFlyoutProps,
-  type ComponentTemplateDetailsProps,
+  ComponentTemplateDetailsProps,
 } from '../component_template_details';
 import { EmptyPrompt } from './empty_prompt';
 import { ComponentTable } from './table';

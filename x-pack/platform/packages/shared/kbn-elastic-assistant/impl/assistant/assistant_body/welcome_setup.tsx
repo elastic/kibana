@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AssistantBeacon } from '@kbn/ai-assistant-icon';
-import { type Conversation } from '../../..';
+import { Conversation } from '../../..';
 import { ConnectorSetup } from '../../connectorland/connector_setup';
 import * as i18n from '../translations';
 

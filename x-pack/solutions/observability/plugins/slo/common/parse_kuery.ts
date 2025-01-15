@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kqlQuerySchema, type QuerySchema } from '@kbn/slo-schema';
+import { kqlQuerySchema, QuerySchema } from '@kbn/slo-schema';
 import { buildEsQuery, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 export function getElasticsearchQueryOrThrow(kuery: QuerySchema = '') {

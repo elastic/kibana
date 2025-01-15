@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type EuiTableFieldDataColumnType } from '@elastic/eui';
+import { EuiTableFieldDataColumnType } from '@elastic/eui';
 import type { Capabilities } from '@kbn/core/public';
-import { type SavedObjectsManagementRecord } from '.';
+import { SavedObjectsManagementRecord } from '.';
 
 interface ColumnContext {
   capabilities: Capabilities;

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type httpProxy from 'http-proxy';
+import httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
-import { type IValidatedEvent } from '@kbn/event-log-plugin/server';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
 import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
 } from '@kbn/actions-simulators-plugin/server/plugin';
-import { type FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog } from '../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export

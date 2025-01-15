@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import {
   KbnCategoricalPalette,
-  type KbnCategoricalPaletteConfig,
+  KbnCategoricalPaletteConfig,
 } from '../../classes/categorical_palette';
 import { KbnPalette } from '../../constants';
 

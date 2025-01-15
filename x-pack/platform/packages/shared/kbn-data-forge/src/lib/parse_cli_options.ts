@@ -7,7 +7,7 @@
 
 import { Command } from 'commander';
 import { FAKE_LOGS, FAKE_HOSTS, FAKE_STACK, DEFAULTS } from '../constants';
-import { type CliOptions } from '../types';
+import { CliOptions } from '../types';
 
 const parseCliInt = (value: string) => parseInt(value, 10);
 

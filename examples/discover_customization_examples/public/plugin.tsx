@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButton, EuiContextMenu, EuiFlexItem, EuiPopover, type IconType } from '@elastic/eui';
-import { type CoreSetup, type CoreStart, type Plugin, type SimpleSavedObject } from '@kbn/core/public';
+import { EuiButton, EuiContextMenu, EuiFlexItem, EuiPopover, IconType } from '@elastic/eui';
+import { CoreSetup, CoreStart, Plugin, SimpleSavedObject } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type {
   CustomizationCallback,
@@ -18,13 +18,13 @@ import type {
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
-import { type ControlGroupRendererApi, ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import { ControlGroupRendererApi, ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { css } from '@emotion/react';
 import type { ControlPanelsState } from '@kbn/controls-plugin/common';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import image from './discover_customization_examples.png';
 
 export interface DiscoverCustomizationExamplesSetupPlugins {

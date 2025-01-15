@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import { generateMockFileIndicator, type Indicator } from '../../../../common/types/indicator';
+import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import { generateMockFileIndicator, Indicator } from '../../../../common/types/indicator';
 import {
-  type AttachmentMetadata,
+  AttachmentMetadata,
   generateAttachmentsMetadata,
   generateAttachmentsWithoutOwner,
 } from './attachments';

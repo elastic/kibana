@@ -12,15 +12,15 @@ import { cloneDeep } from 'lodash';
 
 import { LegendValue } from '@elastic/charts';
 import { layerTypes } from '../../../common/layer_types';
-import { type AnnotationGroups } from '../../types';
+import { AnnotationGroups } from '../../types';
 import {
-  type XYLayerConfig,
-  type XYDataLayerConfig,
-  type XYReferenceLineLayerConfig,
-  type XYState,
-  type XYAnnotationLayerConfig,
-  type XYByReferenceAnnotationLayerConfig,
-  type XYByValueAnnotationLayerConfig,
+  XYLayerConfig,
+  XYDataLayerConfig,
+  XYReferenceLineLayerConfig,
+  XYState,
+  XYAnnotationLayerConfig,
+  XYByReferenceAnnotationLayerConfig,
+  XYByValueAnnotationLayerConfig,
 } from './types';
 import { isAnnotationsLayer, isByReferenceAnnotationsLayer } from './visualization_helpers';
 import { nonNullable } from '../../utils';

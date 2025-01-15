@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { type AuthenticatedUser } from '@kbn/core-security-common';
+import { AuthenticatedUser } from '@kbn/core-security-common';
 import {
-  type ConversationCreateProps,
-  type ConversationResponse,
-  type ConversationUpdateProps,
-  type Message,
+  ConversationCreateProps,
+  ConversationResponse,
+  ConversationUpdateProps,
+  Message,
 } from '@kbn/elastic-assistant-common';
 import { createConversation } from './create_conversation';
 import { updateConversation } from './update_conversation';
 import { getConversation } from './get_conversation';
 import { deleteConversation } from './delete_conversation';
 import { appendConversationMessages } from './append_conversation_messages';
-import { AIAssistantDataClient, type AIAssistantDataClientParams } from '..';
+import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
 export class AIAssistantConversationsDataClient extends AIAssistantDataClient {
   constructor(public readonly options: AIAssistantDataClientParams) {
     super(options);

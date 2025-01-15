@@ -23,10 +23,10 @@ import {
   EuiSpacer,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { type SearchFilterConfig } from '@elastic/eui';
+import { SearchFilterConfig } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type IBasePath } from '@kbn/core/public';
+import { IBasePath } from '@kbn/core/public';
 import {
   withEuiTablePersist,
   type EuiTablePersistInjectedProps,
@@ -35,10 +35,10 @@ import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
 import type { v1 } from '../../../../common';
 import {
-  type SavedObjectWithMetadata,
-  type SavedObjectRelationKind,
-  type SavedObjectRelation,
-  type SavedObjectInvalidRelation,
+  SavedObjectWithMetadata,
+  SavedObjectRelationKind,
+  SavedObjectRelation,
+  SavedObjectInvalidRelation,
 } from '../../../types';
 
 export interface RelationshipsProps {

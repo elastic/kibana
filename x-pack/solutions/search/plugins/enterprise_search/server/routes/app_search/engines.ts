@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { type RouteDependencies } from '../../plugin';
+import { RouteDependencies } from '../../plugin';
 
 interface EnginesResponse {
   results: object[];

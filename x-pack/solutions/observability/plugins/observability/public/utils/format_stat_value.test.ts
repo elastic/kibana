@@ -6,7 +6,7 @@
  */
 
 import { formatStatValue } from './format_stat_value';
-import { type Stat } from '../typings';
+import { Stat } from '../typings';
 
 describe('formatStatValue', () => {
   it('formats value as number', () => {

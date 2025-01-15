@@ -9,9 +9,9 @@
 
 import Url from 'url';
 
-import Axios, { type AxiosRequestConfig, type AxiosInstance, AxiosHeaders, type AxiosHeaderValue } from 'axios';
+import Axios, { AxiosRequestConfig, AxiosInstance, AxiosHeaders, AxiosHeaderValue } from 'axios';
 import { isAxiosResponseError, isAxiosRequestError } from '@kbn/dev-utils';
-import { type ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 
 const BASE_URL = 'https://api.github.com/repos/elastic/kibana/';
 

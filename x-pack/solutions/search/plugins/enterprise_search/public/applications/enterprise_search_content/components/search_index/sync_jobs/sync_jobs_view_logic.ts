@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import { kea, type MakeLogicType } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { isEqual } from 'lodash';
 import moment from 'moment';
 
-import { type Pagination } from '@elastic/eui';
-import { type ConnectorSyncJob, pageToPagination } from '@kbn/search-connectors';
+import { Pagination } from '@elastic/eui';
+import { ConnectorSyncJob, pageToPagination } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../../common/types/api';
 
-import { type Paginate } from '../../../../../../common/types/pagination';
-import { type Actions } from '../../../../shared/api_logic/create_api_logic';
+import { Paginate } from '../../../../../../common/types/pagination';
+import { Actions } from '../../../../shared/api_logic/create_api_logic';
 import {
-  type CancelSyncApiActions,
+  CancelSyncApiActions,
   CancelSyncApiLogic,
 } from '../../../api/connector/cancel_sync_api_logic';
 import {
   FetchSyncJobsApiLogic,
-  type FetchSyncJobsArgs,
-  type FetchSyncJobsResponse,
+  FetchSyncJobsArgs,
+  FetchSyncJobsResponse,
 } from '../../../api/connector/fetch_sync_jobs_api_logic';
 
-import { SyncsLogic, type SyncsLogicActions } from '../../shared/header_actions/syncs_logic';
+import { SyncsLogic, SyncsLogicActions } from '../../shared/header_actions/syncs_logic';
 
 const UI_REFRESH_INTERVAL = 2000;
 

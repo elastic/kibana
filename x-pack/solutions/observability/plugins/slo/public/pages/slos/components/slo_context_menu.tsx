@@ -12,12 +12,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
-  type EuiSelectableOption,
+  EuiSelectableOption,
   useGeneratedHtmlId,
   EuiTitle,
 } from '@elastic/eui';
 
-import { type EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
+import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 
 export interface Option {
   label: string;

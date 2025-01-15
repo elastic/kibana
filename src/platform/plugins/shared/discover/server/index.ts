@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type KibanaRequest, type PluginInitializerContext } from '@kbn/core/server';
-import { type DataPluginStart } from '@kbn/data-plugin/server/plugin';
+import { KibanaRequest, PluginInitializerContext } from '@kbn/core/server';
+import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import {
-  type ColumnsFromLocatorFn,
-  type SearchSourceFromLocatorFn,
-  type TitleFromLocatorFn,
-  type QueryFromLocatorFn,
-  type FiltersFromLocatorFn,
+  ColumnsFromLocatorFn,
+  SearchSourceFromLocatorFn,
+  TitleFromLocatorFn,
+  QueryFromLocatorFn,
+  FiltersFromLocatorFn,
 } from './locator';
 
 export interface DiscoverServerPluginStartDeps {

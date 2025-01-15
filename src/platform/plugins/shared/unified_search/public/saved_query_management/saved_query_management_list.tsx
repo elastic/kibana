@@ -17,7 +17,7 @@ import {
   EuiPopoverFooter,
   EuiButtonIcon,
   EuiConfirmModal,
-  type ShortDate,
+  ShortDate,
   EuiPagination,
   EuiBadge,
   EuiToolTip,
@@ -25,11 +25,11 @@ import {
   EuiHorizontalRule,
   EuiProgress,
   PrettyDuration,
-  type EuiSelectableProps,
+  EuiSelectableProps,
 } from '@elastic/eui';
-import { type EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
+import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useState, useRef, useEffect, useMemo, type RefObject } from 'react';
+import React, { useCallback, useState, useRef, useEffect, useMemo, RefObject } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';

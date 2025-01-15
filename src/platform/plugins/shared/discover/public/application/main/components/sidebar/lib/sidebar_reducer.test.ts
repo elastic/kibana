@@ -14,7 +14,7 @@ import {
 import {
   discoverSidebarReducer,
   DiscoverSidebarReducerActionType,
-  type DiscoverSidebarReducerState,
+  DiscoverSidebarReducerState,
   DiscoverSidebarReducerStatus,
   getInitialState,
 } from './sidebar_reducer';

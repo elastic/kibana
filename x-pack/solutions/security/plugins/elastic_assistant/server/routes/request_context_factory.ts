@@ -11,12 +11,12 @@ import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/ser
 
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import {
-  type ElasticAssistantApiRequestHandlerContext,
-  type ElasticAssistantPluginCoreSetupDependencies,
-  type ElasticAssistantPluginSetupDependencies,
-  type ElasticAssistantRequestHandlerContext,
+  ElasticAssistantApiRequestHandlerContext,
+  ElasticAssistantPluginCoreSetupDependencies,
+  ElasticAssistantPluginSetupDependencies,
+  ElasticAssistantRequestHandlerContext,
 } from '../types';
-import { type AIAssistantService } from '../ai_assistant_service';
+import { AIAssistantService } from '../ai_assistant_service';
 import { appContextService } from '../services/app_context';
 
 export interface IRequestContextFactory {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type PluginInitializer } from '@kbn/core/public';
-import { GlobalSearchProvidersPlugin, type GlobalSearchProvidersPluginSetupDeps } from './plugin';
+import { PluginInitializer } from '@kbn/core/public';
+import { GlobalSearchProvidersPlugin, GlobalSearchProvidersPluginSetupDeps } from './plugin';
 
 export const plugin: PluginInitializer<{}, {}, GlobalSearchProvidersPluginSetupDeps, {}> = () =>
   new GlobalSearchProvidersPlugin();

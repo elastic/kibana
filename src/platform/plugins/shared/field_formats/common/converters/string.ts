@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { asPrettyString, getHighlightHtml, shortenDottedString } from '../utils';
 import { FieldFormat } from '../field_format';
-import { type TextContextTypeConvert, FIELD_FORMAT_IDS, type HtmlContextTypeConvert } from '../types';
+import { TextContextTypeConvert, FIELD_FORMAT_IDS, HtmlContextTypeConvert } from '../types';
 
 const emptyLabel = i18n.translate('fieldFormats.string.emptyLabel', {
   defaultMessage: '(empty)',

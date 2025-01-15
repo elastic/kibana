@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ApiKeyFlyout, type ApiKeyFlyoutProps } from '@kbn/security-api-key-management';
+import { ApiKeyFlyout, ApiKeyFlyoutProps } from '@kbn/security-api-key-management';
 import type { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 const API_KEY_NAME = 'Unrestricted API Key';

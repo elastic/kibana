@@ -11,16 +11,16 @@ import React, { memo } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import {
-  type AnalyticsServiceStart,
-  type AppMountParameters,
-  type ChromeBreadcrumb,
-  type ScopedHistory,
-  type ThemeServiceStart,
+  AnalyticsServiceStart,
+  AppMountParameters,
+  ChromeBreadcrumb,
+  ScopedHistory,
+  ThemeServiceStart,
 } from '@kbn/core/public';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { ManagementAppWrapper } from '../management_app_wrapper';
 import { ManagementLandingPage } from '../landing';
-import { type ManagementSection } from '../../utils';
+import { ManagementSection } from '../../utils';
 
 interface ManagementRouterProps {
   history: AppMountParameters['history'];

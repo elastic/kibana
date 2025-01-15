@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
+import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
-import { type SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { type ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { type Stream } from 'stream';
+import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { Stream } from 'stream';
 import type {
   SentinelOneConfig,
   SentinelOneSecrets,
@@ -47,13 +47,13 @@ import {
 } from '../../../common/sentinelone/schema';
 import { SUB_ACTION } from '../../../common/sentinelone/constants';
 import {
-  type SentinelOneFetchAgentFilesParams,
-  type SentinelOneDownloadAgentFileParams,
-  type SentinelOneGetActivitiesParams,
-  type SentinelOneGetRemoteScriptResultsParams,
-  type SentinelOneDownloadRemoteScriptResultsParams,
-  type SentinelOneGetRemoteScriptResultsApiResponse,
-  type SentinelOneGetRemoteScriptStatusApiResponse,
+  SentinelOneFetchAgentFilesParams,
+  SentinelOneDownloadAgentFileParams,
+  SentinelOneGetActivitiesParams,
+  SentinelOneGetRemoteScriptResultsParams,
+  SentinelOneDownloadRemoteScriptResultsParams,
+  SentinelOneGetRemoteScriptResultsApiResponse,
+  SentinelOneGetRemoteScriptStatusApiResponse,
 } from '../../../common/sentinelone/types';
 
 export const API_MAX_RESULTS = 1000;

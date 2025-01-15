@@ -6,19 +6,19 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { type Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { get } from 'lodash/fp';
 
 import { ChatOpenAI } from '@langchain/openai';
-import { type Stream } from 'openai/streaming';
+import { Stream } from 'openai/streaming';
 import type OpenAI from 'openai';
-import { type PublicMethodsOf } from '@kbn/utility-types';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { DEFAULT_OPEN_AI_MODEL, DEFAULT_TIMEOUT } from './constants';
 import {
-  type InferenceChatCompleteParamsSchema,
-  type InvokeAIActionParamsSchema,
-  type RunActionParamsSchema,
+  InferenceChatCompleteParamsSchema,
+  InvokeAIActionParamsSchema,
+  RunActionParamsSchema,
 } from './types';
 
 const LLM_TYPE = 'ActionsClientChatOpenAI';

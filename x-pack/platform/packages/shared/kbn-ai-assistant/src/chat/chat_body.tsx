@@ -15,7 +15,7 @@ import {
   euiScrollBarStyles,
   EuiSpacer,
   useEuiTheme,
-  type UseEuiTheme,
+  UseEuiTheme,
 } from '@elastic/eui';
 import { css, keyframes } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
@@ -36,9 +36,9 @@ import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../i18n';
 import { useAIAssistantChatService } from '../hooks/use_ai_assistant_chat_service';
 import { useSimulatedFunctionCalling } from '../hooks/use_simulated_function_calling';
-import { type useGenAIConnectors } from '../hooks/use_genai_connectors';
+import { useGenAIConnectors } from '../hooks/use_genai_connectors';
 import { useConversation } from '../hooks/use_conversation';
-import { type FlyoutPositionMode } from './chat_flyout';
+import { FlyoutPositionMode } from './chat_flyout';
 import { ChatHeader } from './chat_header';
 import { ChatTimeline } from './chat_timeline';
 import { IncorrectLicensePanel } from './incorrect_license_panel';

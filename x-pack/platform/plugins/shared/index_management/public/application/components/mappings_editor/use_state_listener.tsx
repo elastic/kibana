@@ -7,16 +7,16 @@
 
 import { useEffect, useMemo } from 'react';
 
-import { type EuiSelectableOption } from '@elastic/eui';
+import { EuiSelectableOption } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import {
-  type DocumentFieldsStatus,
-  type Field,
-  type Mappings,
-  type MappingsConfiguration,
-  type MappingsTemplates,
-  type OnUpdateHandler,
-  type RuntimeFields,
+  DocumentFieldsStatus,
+  Field,
+  Mappings,
+  MappingsConfiguration,
+  MappingsTemplates,
+  OnUpdateHandler,
+  RuntimeFields,
 } from './types';
 import {
   normalize,

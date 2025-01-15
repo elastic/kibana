@@ -8,8 +8,8 @@
 import { transparentize, useEuiTheme } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { type TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { ALL_VALUE, type SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';

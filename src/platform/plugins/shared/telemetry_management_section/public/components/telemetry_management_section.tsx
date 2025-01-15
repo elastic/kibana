@@ -25,9 +25,9 @@ import type { DocLinksStart, ToastsStart } from '@kbn/core/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
-import { type UiSettingMetadata } from '@kbn/management-settings-types';
+import { UiSettingMetadata } from '@kbn/management-settings-types';
 import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
-import { type ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
+import { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
 import { OptInExampleFlyout } from './opt_in_example_flyout';
 
 type TelemetryService = TelemetryPluginSetup['telemetryService'];

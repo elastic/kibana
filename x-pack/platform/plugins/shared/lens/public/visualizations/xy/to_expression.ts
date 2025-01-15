@@ -5,41 +5,41 @@
  * 2.0.
  */
 
-import { type Ast } from '@kbn/interpreter';
+import { Ast } from '@kbn/interpreter';
 import { Position, ScaleType } from '@elastic/charts';
-import { type PaletteRegistry } from '@kbn/coloring';
+import { PaletteRegistry } from '@kbn/coloring';
 import {
   buildExpression,
   buildExpressionFunction,
-  type ExpressionFunctionTheme,
+  ExpressionFunctionTheme,
 } from '@kbn/expressions-plugin/common';
-import { type EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import {
   isManualPointAnnotationConfig,
   isRangeAnnotationConfig,
 } from '@kbn/event-annotation-common';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import {
-  type AvailableReferenceLineIcon,
-  type DataDecorationConfigFn,
-  type EventAnnotationResultFn,
-  type ExtendedAnnotationLayerFn,
-  type ExtendedDataLayerFn,
-  type LayeredXyVisFn,
-  type LegendConfigFn,
-  type ReferenceLineDecorationConfigFn,
-  type ReferenceLineLayerFn,
-  type SeriesType,
-  type XAxisConfigFn,
-  type XScaleType,
-  type XYCurveType,
-  type YAxisConfigFn,
+  AvailableReferenceLineIcon,
+  DataDecorationConfigFn,
+  EventAnnotationResultFn,
+  ExtendedAnnotationLayerFn,
+  ExtendedDataLayerFn,
+  LayeredXyVisFn,
+  LegendConfigFn,
+  ReferenceLineDecorationConfigFn,
+  ReferenceLineLayerFn,
+  SeriesType,
+  XAxisConfigFn,
+  XScaleType,
+  XYCurveType,
+  YAxisConfigFn,
 } from '@kbn/expression-xy-plugin/common';
 
 import { FittingFunctions } from '@kbn/expression-xy-plugin/public';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { type SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
+import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
 import type {
   State as XYState,
   YConfig,

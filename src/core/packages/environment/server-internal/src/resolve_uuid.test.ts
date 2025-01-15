@@ -8,11 +8,11 @@
  */
 
 import { join } from 'path';
-import { type PathConfigType } from '@kbn/utils';
+import { PathConfigType } from '@kbn/utils';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { readFile, writeFile } from './fs';
 import { resolveInstanceUuid, UUID_7_6_0_BUG } from './resolve_uuid';
-import { type HttpConfigType } from './types';
+import { HttpConfigType } from './types';
 
 jest.mock('uuid', () => ({
   v4: () => 'NEW_UUID',

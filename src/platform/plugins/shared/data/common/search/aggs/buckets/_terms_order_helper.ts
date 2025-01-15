@@ -8,7 +8,7 @@
  */
 
 import moment from 'moment-timezone';
-import { type IBucketAggConfig, type BucketAggParam } from './bucket_agg_type';
+import { IBucketAggConfig, BucketAggParam } from './bucket_agg_type';
 
 export const termsAggFilter = [
   '!top_hits',

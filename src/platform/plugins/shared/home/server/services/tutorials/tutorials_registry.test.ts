@@ -10,16 +10,16 @@
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { TutorialsRegistry } from './tutorials_registry';
 import { coreMock } from '@kbn/core/server/mocks';
-import { type CoreSetup } from '@kbn/core/server';
+import { CoreSetup } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 
 import {
-  type TutorialProvider,
-  type TutorialSchema,
-  type TutorialsCategory,
-  type ScopedTutorialContextFactory,
+  TutorialProvider,
+  TutorialSchema,
+  TutorialsCategory,
+  ScopedTutorialContextFactory,
 } from './lib/tutorials_registry_types';
-import { type CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { customIntegrationsMock } from '@kbn/custom-integrations-plugin/server/mocks';
 
 const INVALID_TUTORIAL: TutorialSchema = {

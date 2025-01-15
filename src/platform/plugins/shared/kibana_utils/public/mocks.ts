@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type KibanaUtilsPublicSetup, type KibanaUtilsPublicStart } from './plugin';
+import { KibanaUtilsPublicSetup, KibanaUtilsPublicStart } from './plugin';
 
 export type Setup = jest.Mocked<KibanaUtilsPublicSetup>;
 export type Start = jest.Mocked<KibanaUtilsPublicStart>;

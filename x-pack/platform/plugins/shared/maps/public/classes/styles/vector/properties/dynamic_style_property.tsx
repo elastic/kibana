@@ -7,10 +7,10 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { type FeatureCollection } from 'geojson';
+import { FeatureCollection } from 'geojson';
 import type { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
-import { type DataRequest } from '../../../util/data_request';
-import { AbstractStyleProperty, type IStyleProperty } from './style_property';
+import { DataRequest } from '../../../util/data_request';
+import { AbstractStyleProperty, IStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import {
   DEFAULT_PERCENTILES,
@@ -19,25 +19,25 @@ import {
   SOURCE_META_DATA_REQUEST_ID,
   DATA_MAPPING_FUNCTION,
   STYLE_TYPE,
-  type VECTOR_STYLES,
-  type RawValue,
-  type FieldFormatter,
+  VECTOR_STYLES,
+  RawValue,
+  FieldFormatter,
 } from '../../../../../common/constants';
 import {
   CategoricalDataMappingPopover,
   OrdinalDataMappingPopover,
 } from '../components/data_mapping';
 import {
-  type Category,
-  type FieldMetaOptions,
-  type PercentilesFieldMeta,
-  type RangeFieldMeta,
-  type StyleMetaData,
+  Category,
+  FieldMetaOptions,
+  PercentilesFieldMeta,
+  RangeFieldMeta,
+  StyleMetaData,
 } from '../../../../../common/descriptor_types';
-import { type IField } from '../../../fields/field';
-import { type IVectorLayer } from '../../../layers/vector_layer';
-import { type InnerJoin } from '../../../joins/inner_join';
-import { type IVectorStyle } from '../vector_style';
+import { IField } from '../../../fields/field';
+import { IVectorLayer } from '../../../layers/vector_layer';
+import { InnerJoin } from '../../../joins/inner_join';
+import { IVectorStyle } from '../vector_style';
 import { getComputedFieldName } from '../style_util';
 
 export const OTHER_CATEGORY_KEY = '__other_bucket__';

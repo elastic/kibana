@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { type RouteValidator } from '@kbn/core-http-server';
+import { RouteValidator } from '@kbn/core-http-server';
 import { injectResponseHeaders, prepareResponseValidation } from './util';
 import { kibanaResponseFactory } from './response';
 

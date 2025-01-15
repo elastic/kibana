@@ -6,9 +6,9 @@
  */
 
 import {
-  type Datatable,
-  type DatatableColumnType,
-  type ExpressionFunctionDefinition,
+  Datatable,
+  DatatableColumnType,
+  ExpressionFunctionDefinition,
   getType,
 } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';

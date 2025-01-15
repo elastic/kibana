@@ -8,7 +8,7 @@
 import type { Headers } from '@kbn/core/server';
 import type { Context, HeadlessChromiumDriver } from '../browsers';
 import { CONTEXT_DEBUG, DEFAULT_PAGELOAD_SELECTOR } from './constants';
-import { Actions, type EventLogger } from './event_logger';
+import { Actions, EventLogger } from './event_logger';
 
 export const openUrl = async (
   browser: HeadlessChromiumDriver,

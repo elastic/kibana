@@ -9,7 +9,7 @@
 
 import { identity } from 'lodash';
 
-import { FieldFormat, type IFieldFormat, type SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import { FieldFormat, IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { MultiFieldKey } from '../buckets/multi_field_key';
 import { getAggsFormats } from './get_aggs_formats';
 

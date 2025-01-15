@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { type UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { type ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
-import { type SUB_ACTION } from '../../../common/inference/constants';
+import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import { SUB_ACTION } from '../../../common/inference/constants';
 import {
-  type ChatCompleteParams,
-  type RerankParams,
-  type SparseEmbeddingParams,
-  type TextEmbeddingParams,
-  type UnifiedChatCompleteParams,
+  ChatCompleteParams,
+  RerankParams,
+  SparseEmbeddingParams,
+  TextEmbeddingParams,
+  UnifiedChatCompleteParams,
 } from '../../../common/inference/types';
 
 export type InferenceActionParams =

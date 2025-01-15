@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { type IBasePath } from '@kbn/core/server';
+import { IBasePath } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
-import { type SLODefinition } from '../../domain/models';
+import { SLODefinition } from '../../domain/models';
 import {
   createTempSummaryDocument,
-  type EsSummaryDocument,
+  EsSummaryDocument,
 } from '../summary_transform_generator/helpers/create_temp_summary';
 
 export const aSummaryDocument = (

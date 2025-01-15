@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Datafeed, type Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 
 // @ts-expect-error not full interface
 export const JOB_CONFIG: Job = {

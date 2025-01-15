@@ -12,7 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
-  type EuiInMemoryTableProps,
+  EuiInMemoryTableProps,
   EuiPageTemplate,
   EuiSpacer,
   EuiTitle,

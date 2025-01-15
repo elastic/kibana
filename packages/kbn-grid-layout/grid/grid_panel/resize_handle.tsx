@@ -12,7 +12,7 @@ import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { type UserInteractionEvent, type PanelInteractionEvent } from '../types';
+import { UserInteractionEvent, PanelInteractionEvent } from '../types';
 
 export const ResizeHandle = ({
   interactionStart,

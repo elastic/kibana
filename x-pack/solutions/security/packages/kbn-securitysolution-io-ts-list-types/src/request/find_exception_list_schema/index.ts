@@ -8,8 +8,8 @@
 import * as t from 'io-ts';
 import { StringToPositiveNumber } from '@kbn/securitysolution-io-ts-types';
 
-import { DefaultNamespaceArray, type NamespaceTypeArray } from '../../common/default_namespace_array';
-import { type RequiredKeepUndefined } from '../../common/required_keep_undefined';
+import { DefaultNamespaceArray, NamespaceTypeArray } from '../../common/default_namespace_array';
+import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 import { filter } from '../../common/filter';
 import { sort_field } from '../../common/sort_field';
 import { sort_order } from '../../common/sort_order';

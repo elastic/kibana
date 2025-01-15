@@ -8,10 +8,10 @@
  */
 
 import { identity } from 'lodash';
-import { type CoreSetup, type Plugin } from '@kbn/core/server';
-import { type EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { CoreSetup, Plugin } from '@kbn/core/server';
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { dynamicActionEnhancement } from './dynamic_action_enhancement';
-import { type ActionFactoryRegistry, type SerializedEvent, type ActionFactoryDefinition } from './types';
+import { ActionFactoryRegistry, SerializedEvent, ActionFactoryDefinition } from './types';
 
 export interface UiActionsEnhancedServerSetup {
   registerActionFactory: (definition: ActionFactoryDefinition) => void;

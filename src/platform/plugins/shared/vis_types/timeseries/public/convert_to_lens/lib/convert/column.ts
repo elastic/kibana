@@ -9,11 +9,11 @@
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import {
-  type BaseColumn,
-  type Operation,
-  type DataType,
-  type GenericColumnWithMeta,
-  type FormatParams,
+  BaseColumn,
+  Operation,
+  DataType,
+  GenericColumnWithMeta,
+  FormatParams,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -25,7 +25,7 @@ import {
 import type { Metric, Series } from '../../../../common/types';
 import { DATA_FORMATTERS } from '../../../../common/enums';
 import { getTimeScale } from '../metrics';
-import { type ColumnWithMeta, type Meta, type Column } from './types';
+import { ColumnWithMeta, Meta, Column } from './types';
 
 type GeneralColumn = Omit<BaseColumn<Operation, unknown>, 'operationType' | 'params'>;
 type GeneralColumnWithMeta = GenericColumnWithMeta<GeneralColumn, Meta>;

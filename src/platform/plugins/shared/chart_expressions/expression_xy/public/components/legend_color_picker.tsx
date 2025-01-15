@@ -8,17 +8,17 @@
  */
 
 import React, { createContext, useCallback, useContext } from 'react';
-import { type LegendColorPicker, Position, type XYChartSeriesIdentifier } from '@elastic/charts';
-import { type PopoverAnchorPosition, EuiWrappingPopover, EuiOutsideClickDetector } from '@elastic/eui';
+import { LegendColorPicker, Position, XYChartSeriesIdentifier } from '@elastic/charts';
+import { PopoverAnchorPosition, EuiWrappingPopover, EuiOutsideClickDetector } from '@elastic/eui';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { ColorPicker } from '@kbn/charts-plugin/public';
 import {
-  type DatatablesWithFormatInfo,
+  DatatablesWithFormatInfo,
   getMetaFromSeriesId,
   getSeriesName,
   hasMultipleLayersWithSplits,
-  type LayersAccessorsTitles,
-  type LayersFieldFormats,
+  LayersAccessorsTitles,
+  LayersFieldFormats,
 } from '../helpers';
 import type { CommonXYDataLayerConfig } from '../../common/types';
 

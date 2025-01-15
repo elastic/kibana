@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type CoreSetup, type CoreStart, type Plugin } from '@kbn/core/public';
-import { type KubernetesSecurityDeps, type KubernetesSecurityServices } from './types';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { KubernetesSecurityDeps, KubernetesSecurityServices } from './types';
 import { getKubernetesSecurityLazy } from './methods';
 
 export type { KubernetesSecurityStart } from './types';

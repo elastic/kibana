@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
@@ -15,10 +15,10 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import {
   aggsRequiredUiSettings,
-  type AggsCommonStartDependencies,
+  AggsCommonStartDependencies,
   AggsCommonService,
 } from '../../../common/search/aggs';
-import { calculateBounds, type TimeRange } from '../../../common';
+import { calculateBounds, TimeRange } from '../../../common';
 import type { AggsSetup, AggsStart } from './types';
 import type { NowProviderInternalContract } from '../../now_provider';
 

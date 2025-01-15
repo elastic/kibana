@@ -8,11 +8,11 @@
  */
 
 import { EuiScreenReaderOnly } from '@elastic/eui';
-import { type ViewMode } from '@kbn/presentation-publishing';
+import { ViewMode } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
 import React, { useCallback } from 'react';
 import { getAriaLabelForTitle } from '../presentation_panel_strings';
-import { type DefaultPresentationPanelApi, type PresentationPanelInternalProps } from '../types';
+import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 import { PresentationPanelTitle } from './presentation_panel_title';
 import { usePresentationPanelHeaderActions } from './use_presentation_panel_header_actions';
 

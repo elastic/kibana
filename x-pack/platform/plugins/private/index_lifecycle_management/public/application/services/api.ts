@@ -7,13 +7,13 @@
 
 import { METRIC_TYPE } from '@kbn/analytics';
 
-import { type IndexSettings } from '@kbn/index-management-plugin/common';
+import { IndexSettings } from '@kbn/index-management-plugin/common';
 
 import {
-  type PolicyFromES,
-  type SerializedPolicy,
-  type ListNodesRouteResponse,
-  type ListSnapshotReposResponse,
+  PolicyFromES,
+  SerializedPolicy,
+  ListNodesRouteResponse,
+  ListSnapshotReposResponse,
 } from '../../../common/types';
 import {
   UIM_POLICY_DELETE,

@@ -8,14 +8,14 @@
  */
 
 import React from 'react';
-import { type Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import { PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
 import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
 
-import { type StartServices } from '..';
-import { type ReportingAPIClient } from '../..';
-import { type ReportingPanelProps } from '../share_context_menu/reporting_panel_content';
+import { StartServices } from '..';
+import { ReportingAPIClient } from '../..';
+import { ReportingPanelProps } from '../share_context_menu/reporting_panel_content';
 import { ScreenCapturePanelContent } from '../share_context_menu/screen_capture_panel_content_lazy';
 
 /**

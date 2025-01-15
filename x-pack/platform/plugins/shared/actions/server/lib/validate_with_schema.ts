@@ -7,11 +7,11 @@
 
 import Boom from '@hapi/boom';
 import {
-  type ActionType,
-  type ActionTypeConfig,
-  type ActionTypeSecrets,
-  type ActionTypeParams,
-  type ValidatorServices,
+  ActionType,
+  ActionTypeConfig,
+  ActionTypeSecrets,
+  ActionTypeParams,
+  ValidatorServices,
 } from '../types';
 
 export function validateParams<

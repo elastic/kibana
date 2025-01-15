@@ -6,17 +6,17 @@
  */
 
 import {
-  type CrawlConfig,
-  type CrawlConfigFromServer,
+  CrawlConfig,
+  CrawlConfigFromServer,
   CrawlerStatus,
-  type CrawlEvent,
-  type CrawlEventFromServer,
-  type CrawlRequest,
-  type CrawlRequestFromServer,
-  type CrawlRequestStats,
-  type CrawlRequestStatsFromServer,
-  type CrawlRequestWithDetails,
-  type CrawlRequestWithDetailsFromServer,
+  CrawlEvent,
+  CrawlEventFromServer,
+  CrawlRequest,
+  CrawlRequestFromServer,
+  CrawlRequestStats,
+  CrawlRequestStatsFromServer,
+  CrawlRequestWithDetails,
+  CrawlRequestWithDetailsFromServer,
   CrawlType,
 } from '../types';
 

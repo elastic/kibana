@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
-import { type Ping } from '../../../../common/runtime_types';
+import { Ping } from '../../../../common/runtime_types';
 
 export const useMonitorDetail = (
   configId: string,

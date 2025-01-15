@@ -6,11 +6,11 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { type RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { type IRouter } from '@kbn/core-http-server';
+import { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import { IRouter } from '@kbn/core-http-server';
 import {
-  type FieldsMetadataPluginStartServicesAccessor,
-  type FieldsMetadataServerPluginSetupDeps,
+  FieldsMetadataPluginStartServicesAccessor,
+  FieldsMetadataServerPluginSetupDeps,
 } from '../types';
 
 export interface FieldsMetadataBackendLibs {

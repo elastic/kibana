@@ -8,24 +8,24 @@
 import { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
 import {
-  type ApmSynthtraceEsClient,
-  type ApmSynthtraceKibanaClient,
+  ApmSynthtraceEsClient,
+  ApmSynthtraceKibanaClient,
   LogsSynthtraceEsClient,
   EntitiesSynthtraceEsClient,
   createLogger,
   LogLevel,
 } from '@kbn/apm-synthtrace';
-import { type FtrConfigProviderContext, kbnTestConfig } from '@kbn/test';
+import { FtrConfigProviderContext, kbnTestConfig } from '@kbn/test';
 import supertest from 'supertest';
-import { format, type UrlObject } from 'url';
+import { format, UrlObject } from 'url';
 import { MachineLearningAPIProvider } from '../../functional/services/ml/api';
-import { type APMFtrConfigName } from '../configs';
+import { APMFtrConfigName } from '../configs';
 import { createApmApiClient } from './apm_api_supertest';
 import { getApmSynthtraceEsClient, getApmSynthtraceKibanaClient } from './bootstrap_apm_synthtrace';
 import {
-  type FtrProviderContext,
-  type InheritedFtrProviderContext,
-  type InheritedServices,
+  FtrProviderContext,
+  InheritedFtrProviderContext,
+  InheritedServices,
 } from './ftr_provider_context';
 import { RegistryProvider } from './registry';
 

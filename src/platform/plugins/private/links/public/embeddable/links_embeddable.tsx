@@ -13,31 +13,31 @@ import { BehaviorSubject } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { EuiListGroup, EuiPanel } from '@elastic/eui';
 
-import { PanelIncompatibleError, type ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { PanelIncompatibleError, ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   initializeTitles,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 
-import { type SerializedPanelState } from '@kbn/presentation-containers';
+import { SerializedPanelState } from '@kbn/presentation-containers';
 
 import {
   CONTENT_ID,
   DASHBOARD_LINK_TYPE,
-  type LinksLayoutType,
+  LinksLayoutType,
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
 } from '../../common/content_management';
 import { DashboardLinkComponent } from '../components/dashboard_link/dashboard_link_component';
 import { ExternalLinkComponent } from '../components/external_link/external_link_component';
 import {
-  type LinksApi,
-  type LinksByReferenceSerializedState,
-  type LinksByValueSerializedState,
-  type LinksParentApi,
-  type LinksRuntimeState,
-  type LinksSerializedState,
-  type ResolvedLink,
+  LinksApi,
+  LinksByReferenceSerializedState,
+  LinksByValueSerializedState,
+  LinksParentApi,
+  LinksRuntimeState,
+  LinksSerializedState,
+  ResolvedLink,
 } from '../types';
 import { DISPLAY_NAME } from '../../common';
 import { injectReferences } from '../../common/persistable_state';

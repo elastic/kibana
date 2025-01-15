@@ -8,8 +8,8 @@
 import React, { useMemo } from 'react';
 import { EuiAvatar, EuiPageTemplate, EuiTitle, useEuiShadow, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { type DataViewsContract } from '@kbn/data-views-plugin/public';
-import { type Conversation } from '../../..';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { Conversation } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
@@ -31,7 +31,7 @@ import {
 } from './const';
 import { KnowledgeBaseSettingsManagement } from '../../knowledge_base/knowledge_base_settings_management';
 import { EvaluationSettings } from '.';
-import { type SettingsTabs } from './types';
+import { SettingsTabs } from './types';
 
 interface Props {
   dataViews: DataViewsContract;

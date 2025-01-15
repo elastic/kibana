@@ -5,12 +5,12 @@
  * 2.0.
  */
 import { coreMock } from '@kbn/core/public/mocks';
-import { type CoreSetup } from '@kbn/core/server';
+import { CoreSetup } from '@kbn/core/server';
 import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
-import { type Metric } from '@kbn/monitoring-collection-plugin/server';
+import { Metric } from '@kbn/monitoring-collection-plugin/server';
 import { registerClusterCollector } from './register_cluster_collector';
-import { type ActionsPluginsStart } from '../plugin';
-import { type ClusterActionsMetric } from './types';
+import { ActionsPluginsStart } from '../plugin';
+import { ClusterActionsMetric } from './types';
 
 jest.useFakeTimers();
 jest.setSystemTime(new Date('2020-03-09').getTime());

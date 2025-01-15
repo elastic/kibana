@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 import { EuiLoadingSpinner, EuiPageSection } from '@elastic/eui';
 
 export const EditorContentSpinner: FunctionComponent = () => {

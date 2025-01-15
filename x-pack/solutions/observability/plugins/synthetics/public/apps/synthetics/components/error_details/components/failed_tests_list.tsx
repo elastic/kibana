@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { type MouseEvent, useState } from 'react';
+import React, { MouseEvent, useState } from 'react';
 import { EuiBasicTable, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
-import { type Ping } from '../../../../../../common/runtime_types';
+import { Ping } from '../../../../../../common/runtime_types';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { getTestRunDetailRelativeLink } from '../../common/links/test_details_link';

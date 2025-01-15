@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useState } from 'react';
 import { EuiButton, EuiContextMenu, EuiPopover, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 

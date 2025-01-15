@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react';
-import { type ListDetails } from '../types';
+import { ListDetails } from '../types';
 
 interface UseExceptionListHeaderProps {
   name: string;

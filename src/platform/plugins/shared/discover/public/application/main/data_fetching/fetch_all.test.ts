@@ -8,18 +8,18 @@
  */
 
 import { FetchStatus } from '../../types';
-import { BehaviorSubject, firstValueFrom, type Subject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
 import { reduce } from 'rxjs';
-import { type SearchSource } from '@kbn/data-plugin/public';
+import { SearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { fetchAll, fetchMoreDocuments } from './fetch_all';
 import {
-  type DataDocumentsMsg,
-  type DataMainMsg,
-  type DataTotalHitsMsg,
-  type SavedSearchData,
+  DataDocumentsMsg,
+  DataMainMsg,
+  DataTotalHitsMsg,
+  SavedSearchData,
 } from '../state_management/discover_data_state_container';
 import { fetchDocuments } from './fetch_documents';
 import { fetchEsql } from './fetch_esql';

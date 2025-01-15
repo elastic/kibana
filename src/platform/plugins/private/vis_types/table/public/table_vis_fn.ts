@@ -8,9 +8,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type ExpressionFunctionDefinition, type Datatable, type Render } from '@kbn/expressions-plugin/public';
-import { prepareLogTable, type Dimension } from '@kbn/visualizations-plugin/public';
-import { type TableVisData, type TableVisConfig } from './types';
+import { ExpressionFunctionDefinition, Datatable, Render } from '@kbn/expressions-plugin/public';
+import { prepareLogTable, Dimension } from '@kbn/visualizations-plugin/public';
+import { TableVisData, TableVisConfig } from './types';
 import { VIS_TYPE_TABLE } from '../common';
 import { tableVisResponseHandler } from './utils';
 

@@ -6,7 +6,7 @@
  */
 
 import { mockHistoricalResult } from '../../mock/historical_results/mock_historical_results_response';
-import { type HistoricalResult } from '../../types';
+import { HistoricalResult } from '../../types';
 
 const dayInMs = 24 * 60 * 60 * 1000;
 

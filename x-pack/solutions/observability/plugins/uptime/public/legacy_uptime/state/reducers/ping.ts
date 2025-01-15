@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { handleActions, type Action } from 'redux-actions';
+import { handleActions, Action } from 'redux-actions';
 import { getPingHistogram } from '../actions';
-import { type HistogramResult } from '../../../../common/runtime_types';
+import { HistogramResult } from '../../../../common/runtime_types';
 
 export interface PingState {
   pingHistogram: HistogramResult | null;

@@ -8,11 +8,11 @@
  */
 
 import React from 'react';
-import { type ReactWrapper, mount, shallow } from 'enzyme';
+import { ReactWrapper, mount, shallow } from 'enzyme';
 import {
   TabbedTableListView,
-  type TableListTabParentProps,
-  type TableListTab,
+  TableListTabParentProps,
+  TableListTab,
 } from './tabbed_table_list_view';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiPageTemplate } from '@elastic/eui';

@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen, within, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { IncludeExcludeRow, type IncludeExcludeRowProps } from './include_exclude_options';
+import { IncludeExcludeRow, IncludeExcludeRowProps } from './include_exclude_options';
 
 const tableRows = [
   {

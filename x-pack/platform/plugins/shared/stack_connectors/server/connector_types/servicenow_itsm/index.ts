@@ -6,7 +6,7 @@
  */
 
 import { curry } from 'lodash';
-import { type TypeOf } from '@kbn/config-schema';
+import { TypeOf } from '@kbn/config-schema';
 
 import type {
   ActionType as ConnectorType,
@@ -29,19 +29,19 @@ import { createExternalService } from './service';
 import { api as apiITSM } from './api';
 import * as i18n from '../lib/servicenow/translations';
 import {
-  type ExecutorParams,
-  type ExecutorSubActionPushParams,
-  type ServiceFactory,
-  type ExternalServiceAPI,
-  type ServiceNowPublicConfigurationBaseType,
-  type ExternalService,
-  type ExecutorSubActionCommonFieldsParams,
-  type ExecutorSubActionGetChoicesParams,
-  type PushToServiceResponse,
-  type ServiceNowExecutorResultData,
-  type ServiceNowPublicConfigurationType,
-  type ServiceNowSecretConfigurationType,
-  type ExecutorSubActionCloseIncidentParams,
+  ExecutorParams,
+  ExecutorSubActionPushParams,
+  ServiceFactory,
+  ExternalServiceAPI,
+  ServiceNowPublicConfigurationBaseType,
+  ExternalService,
+  ExecutorSubActionCommonFieldsParams,
+  ExecutorSubActionGetChoicesParams,
+  PushToServiceResponse,
+  ServiceNowExecutorResultData,
+  ServiceNowPublicConfigurationType,
+  ServiceNowSecretConfigurationType,
+  ExecutorSubActionCloseIncidentParams,
 } from '../lib/servicenow/types';
 import {
   ServiceNowITSMConnectorTypeId,

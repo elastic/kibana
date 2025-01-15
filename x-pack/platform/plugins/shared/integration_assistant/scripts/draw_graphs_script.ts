@@ -7,11 +7,11 @@
 
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import {
-  type ActionsClientChatOpenAI,
-  type ActionsClientSimpleChatModel,
+  ActionsClientChatOpenAI,
+  ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 import { ToolingLog } from '@kbn/tooling-log';
-import { type Graph as RunnableGraph } from '@langchain/core/runnables/graph';
+import { Graph as RunnableGraph } from '@langchain/core/runnables/graph';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import fs from 'fs/promises';
 import path from 'path';

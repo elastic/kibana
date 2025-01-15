@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ArgumentType } from '@kbn/expressions-plugin/common';
+import { ArgumentType } from '@kbn/expressions-plugin/common';
 import { SeriesTypes, XScaleTypes, DATA_DECORATION_CONFIG, XYCurveTypes } from '../constants';
 import { strings } from '../i18n';
-import { type DataLayerArgs, type ExtendedDataLayerArgs } from '../types';
+import { DataLayerArgs, ExtendedDataLayerArgs } from '../types';
 
 type CommonDataLayerArgs = ExtendedDataLayerArgs | DataLayerArgs;
 type CommonDataLayerFnArgs = {

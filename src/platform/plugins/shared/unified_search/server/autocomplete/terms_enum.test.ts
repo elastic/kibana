@@ -9,10 +9,10 @@
 
 import { termsEnumSuggestions } from './terms_enum';
 import { coreMock } from '@kbn/core/server/mocks';
-import { type ElasticsearchClient, type SavedObjectsClientContract } from '@kbn/core/server';
-import { type ConfigSchema } from '../config';
+import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { ConfigSchema } from '../config';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import { type TermsEnumResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { TermsEnumResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 
 let savedObjectsClientMock: jest.Mocked<SavedObjectsClientContract>;

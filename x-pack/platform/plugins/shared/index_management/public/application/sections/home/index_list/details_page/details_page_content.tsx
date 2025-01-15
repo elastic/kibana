@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import React, { type FunctionComponent, useCallback, useMemo } from 'react';
+import React, { FunctionComponent, useCallback, useMemo } from 'react';
 import {
   EuiButton,
   EuiPageHeader,
-  type EuiPageHeaderProps,
+  EuiPageHeaderProps,
   EuiPageSection,
   EuiSpacer,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { type RouteComponentProps } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 
 import { useIndexErrors } from '../../../../hooks/use_index_errors';
 import { resetIndexUrlParams } from './reset_index_url_params';
 import { renderBadges } from '../../../../lib/render_badges';
-import { type Index } from '../../../../../../common';
+import { Index } from '../../../../../../common';
 import {
   INDEX_OPEN,
   IndexDetailsSection,
-  type IndexDetailsTab,
-  type IndexDetailsTabId,
+  IndexDetailsTab,
+  IndexDetailsTabId,
 } from '../../../../../../common/constants';
 import { getIndexDetailsLink } from '../../../../services/routing';
 import { useAppContext } from '../../../../app_context';

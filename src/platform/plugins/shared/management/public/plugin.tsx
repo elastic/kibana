@@ -10,20 +10,20 @@
 import { i18n as kbnI18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import { type HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { type ServerlessPluginStart } from '@kbn/serverless/public';
+import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { ServerlessPluginStart } from '@kbn/serverless/public';
 import {
-  type CoreSetup,
-  type CoreStart,
-  type Plugin,
+  CoreSetup,
+  CoreStart,
+  Plugin,
   DEFAULT_APP_CATEGORIES,
-  type PluginInitializerContext,
-  type AppMountParameters,
-  type AppUpdater,
+  PluginInitializerContext,
+  AppMountParameters,
+  AppUpdater,
   AppStatus,
-  type AppDeepLink,
+  AppDeepLink,
 } from '@kbn/core/public';
-import { type ConfigSchema, type ManagementSetup, type ManagementStart, type NavigationCardsSubject } from './types';
+import { ConfigSchema, ManagementSetup, ManagementStart, NavigationCardsSubject } from './types';
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
 import { ManagementAppLocatorDefinition } from '../common/locator';
@@ -31,7 +31,7 @@ import {
   ManagementSectionsService,
   getSectionsServiceStartPrivate,
 } from './management_sections_service';
-import { type ManagementSection } from './utils';
+import { ManagementSection } from './utils';
 
 interface ManagementSetupDependencies {
   home?: HomePublicPluginSetup;

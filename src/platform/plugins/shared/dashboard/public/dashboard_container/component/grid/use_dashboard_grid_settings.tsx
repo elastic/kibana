@@ -12,7 +12,7 @@ import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { type DashboardPanelMap } from '../../../../common';
+import { DashboardPanelMap } from '../../../../common';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../dashboard_constants';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 

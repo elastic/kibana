@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type Snapshot } from '../../../../common/runtime_types';
+import { Snapshot } from '../../../../common/runtime_types';
 import { createAsyncAction } from './utils';
-import { type SnapShotQueryParams } from '../api';
+import { SnapShotQueryParams } from '../api';
 
 export const getSnapshotCountAction = createAsyncAction<SnapShotQueryParams, Snapshot>(
   'GET_SNAPSHOT_COUNT'

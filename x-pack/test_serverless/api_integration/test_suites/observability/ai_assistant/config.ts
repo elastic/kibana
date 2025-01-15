@@ -6,7 +6,7 @@
  */
 
 import { createTestConfig } from '../../../config.base';
-import { type ObservabilityAIAssistantServices } from './common/ftr_provider_context';
+import { ObservabilityAIAssistantServices } from './common/ftr_provider_context';
 import { services as inheritedServices } from '../../../services';
 import { getObservabilityAIAssistantApiClientService } from './common/observability_ai_assistant_api_client';
 

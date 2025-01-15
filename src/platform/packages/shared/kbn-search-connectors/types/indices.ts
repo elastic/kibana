@@ -8,12 +8,12 @@
  */
 
 import {
-  type HealthStatus,
-  type IndexName,
-  type IndicesStatsIndexMetadataState,
-  type Uuid,
+  HealthStatus,
+  IndexName,
+  IndicesStatsIndexMetadataState,
+  Uuid,
 } from '@elastic/elasticsearch/lib/api/types';
-import { type Connector } from './connectors';
+import { Connector } from './connectors';
 
 export enum IngestionStatus {
   CONFIGURED,

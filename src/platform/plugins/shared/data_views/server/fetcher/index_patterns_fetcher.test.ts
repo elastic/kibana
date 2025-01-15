@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IndexPatternsFetcher } from '.';
 import { elasticsearchServiceMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
-import { type SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import { DataViewMissingIndices, DataViewType } from '../../common';
 
 const rollupResponse = {

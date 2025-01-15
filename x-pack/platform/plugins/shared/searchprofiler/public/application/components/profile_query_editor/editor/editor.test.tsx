@@ -6,7 +6,7 @@
  */
 
 import { registerTestBed } from '@kbn/test-jest-helpers';
-import { Editor, type Props } from './editor';
+import { Editor, Props } from './editor';
 
 describe('Editor Component', () => {
   it('renders', async () => {

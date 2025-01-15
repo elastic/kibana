@@ -12,7 +12,7 @@ import type { Query } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
-import { type MapExtent } from './map_descriptor';
+import { MapExtent } from './map_descriptor';
 
 export type Timeslice = {
   from: number;

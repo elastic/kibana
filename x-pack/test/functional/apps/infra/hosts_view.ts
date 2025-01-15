@@ -8,14 +8,14 @@
 import moment from 'moment';
 import expect from '@kbn/expect';
 import {
-  type ApmSynthtraceEsClient,
-  type InfraSynthtraceEsClient,
-  type LogsSynthtraceEsClient,
+  ApmSynthtraceEsClient,
+  InfraSynthtraceEsClient,
+  LogsSynthtraceEsClient,
 } from '@kbn/apm-synthtrace';
 import { enableInfrastructureAssetCustomDashboards } from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
-import { type WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { type FtrProviderContext } from '../../ftr_provider_context';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   DATES,
   HOSTS_LINK_LOCAL_STORAGE_KEY,

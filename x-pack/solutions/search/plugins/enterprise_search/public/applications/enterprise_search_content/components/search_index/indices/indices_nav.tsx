@@ -9,7 +9,7 @@ import { useParams, useRouteMatch } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
-import { type EuiSideNavItemType } from '@elastic/eui';
+import { EuiSideNavItemType } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 

@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   createStateContainer,
   createStateContainerReactHelpers,
-  type ReduxLikeStateContainer,
+  ReduxLikeStateContainer,
 } from '@kbn/kibana-utils-plugin/common';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';

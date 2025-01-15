@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Metric, type MetricOptions } from './metric';
+import { Metric, MetricOptions } from './metric';
 
 export type ClusterMetricOptions = MetricOptions & {
   uuidField: string;

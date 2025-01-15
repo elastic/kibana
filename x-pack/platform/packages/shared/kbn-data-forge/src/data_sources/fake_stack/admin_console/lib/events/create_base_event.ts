@@ -8,9 +8,9 @@
 import { sample } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { faker } from '@faker-js/faker';
-import { type Moment } from 'moment';
+import { Moment } from 'moment';
 import { ADMIN_CONSOLE_HOSTS, DOMAINS } from '../../../common/constants';
-import { type User } from '../login_cache';
+import { User } from '../login_cache';
 
 export function createEvent(
   timestamp: Moment,

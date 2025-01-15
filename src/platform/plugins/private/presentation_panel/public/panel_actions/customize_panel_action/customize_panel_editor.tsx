@@ -36,11 +36,11 @@ import {
   getInheritedViewMode,
   getPanelDescription,
   getPanelTitle,
-  type PublishesUnifiedSearch,
+  PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 
 import { core } from '../../kibana_services';
-import { type CustomizePanelActionApi } from './customize_panel_action';
+import { CustomizePanelActionApi } from './customize_panel_action';
 import { FiltersDetails } from './filters_details';
 
 interface TimePickerQuickRange {

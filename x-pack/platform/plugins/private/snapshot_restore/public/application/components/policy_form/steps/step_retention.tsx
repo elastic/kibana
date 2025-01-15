@@ -19,9 +19,9 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { type SlmPolicyPayload } from '../../../../../common/types';
+import { SlmPolicyPayload } from '../../../../../common/types';
 import { TIME_UNITS } from '../../../../../common/constants';
-import { type StepProps } from '.';
+import { StepProps } from '.';
 import { textService } from '../../../services/text';
 import { useCore } from '../../../app_context';
 

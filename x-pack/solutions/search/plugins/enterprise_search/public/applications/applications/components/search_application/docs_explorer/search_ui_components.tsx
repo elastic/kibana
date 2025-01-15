@@ -12,7 +12,7 @@ import { useValues } from 'kea';
 import {
   EuiBadge,
   EuiBasicTable,
-  type EuiBasicTableColumn,
+  EuiBasicTableColumn,
   EuiButton,
   EuiComboBox,
   EuiFieldSearch,
@@ -41,7 +41,7 @@ import { indexHealthToHealthColor } from '../../../../shared/constants/health_co
 
 import { SearchApplicationViewLogic } from '../search_application_view_logic';
 
-import { convertResultToFieldsAndIndex, type ConvertedResult, type FieldValue } from './convert_results';
+import { convertResultToFieldsAndIndex, ConvertedResult, FieldValue } from './convert_results';
 import { useSelectedDocument } from './document_context';
 import { FieldValueCell } from './field_value_cell';
 

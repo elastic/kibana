@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { type LayerWizard, type RenderWizardArguments } from '../layer_wizard_registry';
+import { LayerWizard, RenderWizardArguments } from '../layer_wizard_registry';
 import { LayerGroupWizard } from './wizard';
 import { WIZARD_ID } from '../../../../../common/constants';
 

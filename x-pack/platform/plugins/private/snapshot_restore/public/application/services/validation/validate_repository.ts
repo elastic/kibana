@@ -7,14 +7,14 @@
 
 import { textService } from '../text';
 import {
-  type Repository,
-  type RepositoryType,
-  type FSRepository,
-  type ReadonlyRepository,
-  type S3Repository,
-  type GCSRepository,
-  type HDFSRepository,
-  type EmptyRepository,
+  Repository,
+  RepositoryType,
+  FSRepository,
+  ReadonlyRepository,
+  S3Repository,
+  GCSRepository,
+  HDFSRepository,
+  EmptyRepository,
 } from '../../../../common/types';
 import { REPOSITORY_TYPES } from '../../../../common/constants';
 

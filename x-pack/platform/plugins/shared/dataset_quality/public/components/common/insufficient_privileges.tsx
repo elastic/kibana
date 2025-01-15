@@ -12,12 +12,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiLink,
   EuiButtonIcon,
-  type EuiButtonIconProps,
+  EuiButtonIconProps,
   EuiPopover,
   EuiToolTip,
   EuiIcon,
   EuiFlexGroup,
-  type EuiButtonIconPropsForButton,
+  EuiButtonIconPropsForButton,
 } from '@elastic/eui';
 
 const insufficientPrivilegesText = i18n.translate(

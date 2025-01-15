@@ -6,11 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { type IScopedClusterClient } from '@kbn/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { fetchAllFromScroll } from '../../../lib/fetch_all_from_scroll';
 import { INDEX_NAMES, ES_SCROLL_SETTINGS } from '../../../../common/constants';
-import { type RouteDependencies } from '../../../types';
+import { RouteDependencies } from '../../../types';
 // @ts-ignore
 import { WatchHistoryItem } from '../../../models/watch_history_item';
 

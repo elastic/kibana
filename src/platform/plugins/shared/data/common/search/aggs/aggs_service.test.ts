@@ -9,12 +9,12 @@
 
 import {
   AggsCommonService,
-  type AggsCommonSetupDependencies,
-  type AggsCommonStartDependencies,
+  AggsCommonSetupDependencies,
+  AggsCommonStartDependencies,
 } from './aggs_service';
 import { getAggTypes } from './agg_types';
-import { type BucketAggType } from './buckets/bucket_agg_type';
-import { type MetricAggType } from './metrics/metric_agg_type';
+import { BucketAggType } from './buckets/bucket_agg_type';
+import { MetricAggType } from './metrics/metric_agg_type';
 
 describe('Aggs service', () => {
   let service: AggsCommonService;

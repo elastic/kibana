@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { type FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiDescribedFormGroup,
   EuiFormRow,
   EuiSwitch,
-  type EuiSwitchEvent,
+  EuiSwitchEvent,
   EuiTitle,
-  type EuiComboBoxOptionOption,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 
 import { FEATURE_STATES_NONE_OPTION } from '../../../../../../../../common/constants';
-import { type SlmPolicyPayload } from '../../../../../../../../common/types';
-import { type PolicyValidation } from '../../../../../../services/validation';
+import { SlmPolicyPayload } from '../../../../../../../../common/types';
+import { PolicyValidation } from '../../../../../../services/validation';
 
 interface Props {
   policy: SlmPolicyPayload;

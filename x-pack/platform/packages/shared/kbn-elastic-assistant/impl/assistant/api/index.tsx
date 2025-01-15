@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type HttpSetup } from '@kbn/core/public';
-import { API_VERSIONS, type ApiConfig, type Replacements } from '@kbn/elastic-assistant-common';
+import { HttpSetup } from '@kbn/core/public';
+import { API_VERSIONS, ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
 import { API_ERROR } from '../translations';
 import { getOptionalRequestParams } from '../helpers';
-import { type TraceOptions } from '../types';
+import { TraceOptions } from '../types';
 export * from './conversations';
 export * from './prompts';
 

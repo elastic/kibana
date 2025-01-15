@@ -8,19 +8,19 @@
  */
 
 import {
-  type CoreStart,
-  type KibanaRequest,
-  type SavedObject,
-  type SavedObjectsFindOptions,
-  type SavedObjectsUpdateResponse,
+  CoreStart,
+  KibanaRequest,
+  SavedObject,
+  SavedObjectsFindOptions,
+  SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/search-types';
 import {
-  type SearchSessionsFindResponse,
-  type SearchSessionSavedObjectAttributes,
-  type SearchSessionStatusResponse,
+  SearchSessionsFindResponse,
+  SearchSessionSavedObjectAttributes,
+  SearchSessionStatusResponse,
 } from '../../../common/search';
-import { type SearchSessionsConfigSchema } from '../../config';
+import { SearchSessionsConfigSchema } from '../../config';
 
 export { SearchStatus } from '../../../common/search';
 

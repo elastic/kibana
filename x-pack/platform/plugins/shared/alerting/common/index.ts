@@ -9,7 +9,7 @@
 
 export * from './rule';
 export * from './rules_settings';
-export type * from './rule_type';
+export * from './rule_type';
 export * from './lib';
 export type {
   ThrottledActions,
@@ -24,15 +24,15 @@ export type {
   RuleTaskParams,
 } from '@kbn/alerting-state-types';
 export type { AlertingFrameworkHealth, Flapping } from '@kbn/alerting-types';
-export type * from './alert_summary';
+export * from './alert_summary';
 export * from './builtin_action_groups';
-export type * from './bulk_edit';
+export * from './bulk_edit';
 export * from './disabled_action_groups';
 export * from './rule_notify_when_type';
 export * from './parse_duration';
 export * from './execution_log_types';
-export type * from './rule_snooze_type';
-export type * from './rrule_type';
+export * from './rule_snooze_type';
+export * from './rrule_type';
 export * from './rule_tags_aggregation';
 export * from './iso_weekdays';
 export * from './saved_objects/rules/mappings';

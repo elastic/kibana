@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type CoreSetup } from '@kbn/core/server';
+import { CoreSetup } from '@kbn/core/server';
 
-import { type UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { getTelemetry, initTelemetry, type Telemetry } from './telemetry';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { getTelemetry, initTelemetry, Telemetry } from './telemetry';
 import { telemetryMappingsType } from './mappings';
 import { getInternalRepository, setInternalRepository } from './internal_repository';
 

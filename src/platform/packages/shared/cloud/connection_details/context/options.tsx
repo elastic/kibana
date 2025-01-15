@@ -9,7 +9,7 @@
 
 import * as React from 'react';
 import { ConnectionDetailsService } from '../service';
-import { type ConnectionDetailsOpts } from '../types';
+import { ConnectionDetailsOpts } from '../types';
 import { context as serviceContext } from './service';
 
 export const context = React.createContext<ConnectionDetailsOpts>({});

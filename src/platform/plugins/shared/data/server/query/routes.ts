@@ -8,9 +8,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { type CoreSetup } from '@kbn/core/server';
+import { CoreSetup } from '@kbn/core/server';
 import { reportServerError } from '@kbn/kibana-utils-plugin/server';
-import { type SavedQueryRouteHandlerContext } from './route_handler_context';
+import { SavedQueryRouteHandlerContext } from './route_handler_context';
 import { SAVED_QUERY_BASE_URL } from '../../common/constants';
 
 const SAVED_QUERY_ID_CONFIG = schema.object({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Mappings, type IndexSettings, type Aliases } from '../../../../../../common';
+import { Mappings, IndexSettings, Aliases } from '../../../../../../common';
 
 export interface CommonWizardSteps {
   settings?: IndexSettings;

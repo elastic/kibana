@@ -18,13 +18,13 @@ import {
   EuiText,
   EuiSpacer,
   EuiSuperSelect,
-  type EuiSuperSelectOption,
+  EuiSuperSelectOption,
 } from '@elastic/eui';
 import { some, filter, map } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { type InitialRule } from './rule_reducer';
+import { InitialRule } from './rule_reducer';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
-import { type RuleNotifyWhenType } from '../../../types';
+import { RuleNotifyWhenType } from '../../../types';
 
 const DEFAULT_NOTIFY_WHEN_VALUE: RuleNotifyWhenType = 'onActionGroupChange';
 

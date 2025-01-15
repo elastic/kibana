@@ -7,15 +7,15 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { type HttpSetup } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  type IExecutionLog,
-  type ExecutionLogSortFields,
-  type IExecutionLogResult,
-  type AsApiContract,
+  IExecutionLog,
+  ExecutionLogSortFields,
+  IExecutionLogResult,
+  AsApiContract,
   INTERNAL_BASE_ACTION_API_PATH,
-  type RewriteRequestCase,
+  RewriteRequestCase,
 } from '@kbn/actions-plugin/common';
 import { getFilter } from '../rule_api/get_filter';
 

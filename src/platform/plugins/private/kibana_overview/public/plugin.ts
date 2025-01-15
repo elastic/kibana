@@ -11,18 +11,18 @@ import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
 import { distinct, map, switchMap } from 'rxjs';
 import {
-  type AppMountParameters,
-  type CoreSetup,
-  type CoreStart,
-  type Plugin,
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin,
   DEFAULT_APP_CATEGORIES,
   AppStatus,
 } from '@kbn/core/public';
 import {
-  type KibanaOverviewPluginSetup,
-  type KibanaOverviewPluginStart,
-  type AppPluginSetupDependencies,
-  type AppPluginStartDependencies,
+  KibanaOverviewPluginSetup,
+  KibanaOverviewPluginStart,
+  AppPluginSetupDependencies,
+  AppPluginStartDependencies,
 } from './types';
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH, PLUGIN_ICON } from '../common';
 import { init as initStatsReporter } from './lib/ui_metric';

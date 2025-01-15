@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { ALERT_START } from '@kbn/rule-data-utils';
-import { type SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  type AlertsTableConfigurationRegistry,
-  type RenderCustomActionsRowArgs,
+  AlertsTableConfigurationRegistry,
+  RenderCustomActionsRowArgs,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { RULE_DETAILS_ALERTS_TABLE_CONFIG_ID } from '../../../constants';
 import { casesFeatureId, observabilityFeatureId } from '../../../../common';

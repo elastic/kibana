@@ -9,7 +9,7 @@
 
 import './index.scss';
 
-import { type PluginInitializerContext } from '@kbn/core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new NavigationPublicPlugin(initializerContext);
 }

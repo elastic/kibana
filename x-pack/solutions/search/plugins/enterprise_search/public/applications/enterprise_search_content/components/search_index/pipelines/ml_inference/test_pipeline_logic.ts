@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import { kea, type MakeLogicType } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
-import { type IngestSimulateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { IngestSimulateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { Status, type HttpError } from '../../../../../../../common/types/api';
-import { type MlInferencePipeline } from '../../../../../../../common/types/pipelines';
+import { Status, HttpError } from '../../../../../../../common/types/api';
+import { MlInferencePipeline } from '../../../../../../../common/types/pipelines';
 
-import { type Actions } from '../../../../../shared/api_logic/create_api_logic';
+import { Actions } from '../../../../../shared/api_logic/create_api_logic';
 import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/handle_api_errors';
 import {
   GetDocumentsApiLogic,
-  type GetDocumentsArgs,
-  type GetDocumentsResponse,
+  GetDocumentsArgs,
+  GetDocumentsResponse,
 } from '../../../../api/documents/get_document_logic';
 import {
   SimulateExistingMlInterfacePipelineApiLogic,
-  type SimulateExistingMlInterfacePipelineArgs,
-  type SimulateExistingMlInterfacePipelineResponse,
+  SimulateExistingMlInterfacePipelineArgs,
+  SimulateExistingMlInterfacePipelineResponse,
 } from '../../../../api/pipelines/simulate_existing_ml_inference_pipeline';
 import {
   SimulateMlInterfacePipelineApiLogic,
-  type SimulateMlInterfacePipelineArgs,
-  type SimulateMlInterfacePipelineResponse,
+  SimulateMlInterfacePipelineArgs,
+  SimulateMlInterfacePipelineResponse,
 } from '../../../../api/pipelines/simulate_ml_inference_pipeline_processors';
 
-import { type AddInferencePipelineModal, MLInferenceLogic } from './ml_inference_logic';
+import { AddInferencePipelineModal, MLInferenceLogic } from './ml_inference_logic';
 
 export interface TestPipelineActions {
   getDocumentApiError: Actions<GetDocumentsArgs, GetDocumentsResponse>['apiError'];

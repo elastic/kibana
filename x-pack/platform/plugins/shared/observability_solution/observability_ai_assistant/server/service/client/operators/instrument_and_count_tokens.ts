@@ -10,7 +10,7 @@ import {
   catchError,
   ignoreElements,
   merge,
-  type OperatorFunction,
+  OperatorFunction,
   shareReplay,
   tap,
   last,

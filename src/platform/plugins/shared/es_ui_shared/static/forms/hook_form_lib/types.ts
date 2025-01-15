@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ReactNode, type ChangeEvent, type FormEvent, type MouseEvent } from 'react';
-import { type Subject, type Subscription } from './lib';
+import { ReactNode, ChangeEvent, FormEvent, MouseEvent } from 'react';
+import { Subject, Subscription } from './lib';
 
 // This type will convert all optional property to required ones
 // Comes from https://github.com/microsoft/TypeScript/issues/15012#issuecomment-365453623

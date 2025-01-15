@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type ToolingLog } from '@kbn/tooling-log';
-import { type KbnClient } from '@kbn/test';
+import { ToolingLog } from '@kbn/tooling-log';
+import { KbnClient } from '@kbn/test';
 import {
-  type StartedFleetServer,
+  StartedFleetServer,
   startFleetServer,
 } from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_server/fleet_server_services';
 import { Manager } from './resource_manager';

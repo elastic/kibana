@@ -6,12 +6,12 @@
  */
 
 import {
-  type RuleTypeModel,
-  type RuleTypeParams,
-  type RuleTypeRegistryContract,
+  RuleTypeModel,
+  RuleTypeParams,
+  RuleTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { type ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
-import { type AsDuration, type AsPercent } from '../../common/utils/formatters';
+import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
+import { AsDuration, AsPercent } from '../../common/utils/formatters';
 
 export type ObservabilityRuleTypeFormatter = (options: {
   fields: ParsedTechnicalFields & Record<string, any>;

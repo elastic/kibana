@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type BudgetingMethod, type Indicator, type TimeWindowType } from '@kbn/slo-schema';
+import { BudgetingMethod, Indicator, TimeWindowType } from '@kbn/slo-schema';
 
 export interface CreateSLOForm<IndicatorType = Indicator> {
   name: string;

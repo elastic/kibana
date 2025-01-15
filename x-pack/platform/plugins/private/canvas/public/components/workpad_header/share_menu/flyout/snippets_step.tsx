@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React, { FC } from 'react';
 import {
   EuiText,
   EuiSpacer,
@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { CANVAS, URL, JSON } from '../../../../../i18n/constants';
 
 import { Clipboard } from '../../../clipboard';
-import { type OnCopyFn } from './flyout';
+import { OnCopyFn } from './flyout';
 
 const strings = {
   getAutoplayParameterDescription: () =>

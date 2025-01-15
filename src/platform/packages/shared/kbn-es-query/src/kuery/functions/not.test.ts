@@ -9,11 +9,11 @@
 
 import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
-import { type DataViewBase } from '../../..';
+import { DataViewBase } from '../../..';
 
 import * as ast from '../ast';
 import * as not from './not';
-import { type KqlNotFunctionNode } from './not';
+import { KqlNotFunctionNode } from './not';
 
 const childNode = nodeTypes.function.buildNode('is', 'extension', 'jpg');
 

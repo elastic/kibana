@@ -10,13 +10,13 @@ import { notImplemented } from '@hapi/boom';
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import {
-  type InferenceInferenceEndpointInfo,
-  type MlDeploymentAllocationState,
-  type MlDeploymentAssignmentState,
+  InferenceInferenceEndpointInfo,
+  MlDeploymentAllocationState,
+  MlDeploymentAssignmentState,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import moment from 'moment';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import { type Instruction, type KnowledgeBaseEntry, KnowledgeBaseEntryRole } from '../../../common/types';
+import { Instruction, KnowledgeBaseEntry, KnowledgeBaseEntryRole } from '../../../common/types';
 
 const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/kb/status',

@@ -16,9 +16,9 @@ import {
   EuiPopoverTitle,
   EuiSelectable,
   EuiText,
-  type EuiSelectableOption,
+  EuiSelectableOption,
 } from '@elastic/eui';
-import { type UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
+import { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import {
   txtAddVariableButtonTitle,
   txtUrlTemplateVariablesHelpLinkText,

@@ -11,7 +11,7 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 
 import { wrap } from '../mocks';
-import { InputResetLink, type InputResetLinkProps } from './reset_link';
+import { InputResetLink, InputResetLinkProps } from './reset_link';
 
 describe('InputResetLink', () => {
   const defaultProps: InputResetLinkProps = {

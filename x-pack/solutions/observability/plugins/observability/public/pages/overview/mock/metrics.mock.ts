@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type MetricsFetchDataResponse, type FetchData } from '../../../typings';
+import { MetricsFetchDataResponse, FetchData } from '../../../typings';
 
 export const fetchMetricsData: FetchData<MetricsFetchDataResponse> = () => {
   return Promise.resolve(response);

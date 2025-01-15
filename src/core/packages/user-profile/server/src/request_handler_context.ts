@@ -8,9 +8,9 @@
  */
 
 import {
-  type UserProfileData,
-  type UserProfileLabels,
-  type UserProfileWithSecurity,
+  UserProfileData,
+  UserProfileLabels,
+  UserProfileWithSecurity,
 } from '@kbn/core-user-profile-common';
 
 export interface UserProfileRequestHandlerContext {

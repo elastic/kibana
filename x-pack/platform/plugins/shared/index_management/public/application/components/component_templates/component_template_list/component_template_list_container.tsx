@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { type RouteComponentProps } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 
 import qs from 'query-string';
 import { useExecutionContext } from '../shared_imports';

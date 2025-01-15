@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, Fragment, useState, useEffect } from 'react';
+import React, { FC, Fragment, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiSpacer,

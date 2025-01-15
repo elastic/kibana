@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { map, distinctUntilChanged, type Observable } from 'rxjs';
+import { map, distinctUntilChanged, Observable } from 'rxjs';
 
 export const stateSelectorFactory =
   <S>(state$: Observable<S>) =>

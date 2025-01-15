@@ -8,7 +8,7 @@
 import expect from 'expect';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import moment from 'moment';
-import { type FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const CF_COMMAND_REGEXP =
   /aws cloudformation create-stack --stack-name (\S+) --template-url \S+ --parameters ParameterKey=FirehoseStreamName,ParameterValue=(\S+) .+? --capabilities CAPABILITY_IAM/;

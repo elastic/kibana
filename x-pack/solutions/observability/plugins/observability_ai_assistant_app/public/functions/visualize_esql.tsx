@@ -46,7 +46,7 @@ import type {
   VisualizeESQLFunctionArguments,
   VisualizeQueryResponse,
 } from '../../common/functions/visualize_esql';
-import { type ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
+import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 
 interface VisualizeESQLProps {
   /** Lens start contract, get the ES|QL charts suggestions api */

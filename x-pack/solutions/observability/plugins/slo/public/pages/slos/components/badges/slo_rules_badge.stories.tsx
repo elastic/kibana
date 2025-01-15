@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { type ComponentStory } from '@storybook/react';
+import { ComponentStory } from '@storybook/react';
 
 import { EuiFlexGroup } from '@elastic/eui';
-import { type Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
-import { SloRulesBadge as Component, type Props } from './slo_rules_badge';
-import { type BurnRateRuleParams } from '../../../../typings';
+import { SloRulesBadge as Component, Props } from './slo_rules_badge';
+import { BurnRateRuleParams } from '../../../../typings';
 
 export default {
   component: Component,

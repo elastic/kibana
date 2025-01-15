@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse, type ParsedQuery } from 'query-string';
-import { type Location } from 'history';
+import { parse, ParsedQuery } from 'query-string';
+import { Location } from 'history';
 
 export function getQueryParams(location: Location): ParsedQuery {
   const search = (location.search || '').replace(/^\?/, '');

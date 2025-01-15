@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { QueryStringInput, type QueryStringInputProps } from '.';
+import { QueryStringInput, QueryStringInputProps } from '.';
 
 export function createQueryStringInput(deps: QueryStringInputProps['deps']) {
   return (props: Omit<QueryStringInputProps, 'deps'>) => {

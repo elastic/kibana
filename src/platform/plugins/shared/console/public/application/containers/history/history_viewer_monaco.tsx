@@ -9,11 +9,11 @@
 
 import React, { useCallback, useRef } from 'react';
 import { css } from '@emotion/react';
-import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, type monaco } from '@kbn/monaco';
+import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, monaco } from '@kbn/monaco';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { formatRequestBodyDoc } from '../../../lib/utils';
-import { type DevToolsSettings } from '../../../services';
+import { DevToolsSettings } from '../../../services';
 import { useResizeCheckerUtils } from '../editor/hooks';
 
 export const HistoryViewer = ({

@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PANEL_TYPES } from '../../../common/enums';
-import { type TimeseriesVisParams } from '../../types';
+import { TimeseriesVisParams } from '../../types';
 
 const tabs = [
   {

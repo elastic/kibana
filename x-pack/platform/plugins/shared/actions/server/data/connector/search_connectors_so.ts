@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type SearchConnectorsSoParams } from './types';
+import { SearchConnectorsSoParams } from './types';
 
 export const searchConnectorsSo = async ({
   esClient,

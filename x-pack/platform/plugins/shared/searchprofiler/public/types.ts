@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { type HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { type DevToolsSetup } from '@kbn/dev-tools-plugin/public';
-import { type SharePluginSetup } from '@kbn/share-plugin/public';
-import { type LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { DevToolsSetup } from '@kbn/dev-tools-plugin/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import {
-  type AnalyticsServiceStart,
-  type I18nStart,
-  type ThemeServiceStart,
-  type UserProfileService,
+  AnalyticsServiceStart,
+  I18nStart,
+  ThemeServiceStart,
+  UserProfileService,
 } from '@kbn/core/public';
 
 export interface SearchProfilerStartServices {

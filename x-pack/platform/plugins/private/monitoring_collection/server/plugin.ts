@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { type JsonObject } from '@kbn/utility-types';
+import { JsonObject } from '@kbn/utility-types';
 import {
-  type CoreSetup,
-  type Plugin,
-  type PluginInitializerContext,
-  type Logger,
-  type ServiceStatus,
+  CoreSetup,
+  Plugin,
+  PluginInitializerContext,
+  Logger,
+  ServiceStatus,
 } from '@kbn/core/server';
-import { type MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import { metrics } from '@opentelemetry/api-metrics';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
 import { MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics-base';
 import { Resource } from '@opentelemetry/resources';
-import { diag, type DiagLogger, DiagLogLevel } from '@opentelemetry/api';
+import { diag, DiagLogger, DiagLogLevel } from '@opentelemetry/api';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import * as grpc from '@grpc/grpc-js';
 import { PrometheusExporter } from './lib/prometheus_exporter';
-import { type MonitoringCollectionConfig } from './config';
+import { MonitoringCollectionConfig } from './config';
 import { registerDynamicRoute, registerV1PrometheusRoute, PROMETHEUS_PATH } from './routes';
 import { TYPE_ALLOWLIST } from './constants';
 

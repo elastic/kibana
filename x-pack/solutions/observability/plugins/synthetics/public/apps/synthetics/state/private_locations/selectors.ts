@@ -6,7 +6,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { type AppState } from '..';
+import { AppState } from '..';
 
 const getState = (appState: AppState) => appState.agentPolicies;
 export const selectAgentPolicies = createSelector(getState, (state) => state);

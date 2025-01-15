@@ -9,8 +9,8 @@
 
 import type { PluginName } from '@kbn/core-base-common';
 import { PluginsStatusService } from './plugins_status';
-import { of, type Observable, BehaviorSubject, ReplaySubject, firstValueFrom } from 'rxjs';
-import { ServiceStatusLevels, type CoreStatus, type ServiceStatus } from '@kbn/core-status-common';
+import { of, Observable, BehaviorSubject, ReplaySubject, firstValueFrom } from 'rxjs';
+import { ServiceStatusLevels, CoreStatus, ServiceStatus } from '@kbn/core-status-common';
 import { first, skip } from 'rxjs';
 import { ServiceStatusLevelSnapshotSerializer } from './test_helpers';
 

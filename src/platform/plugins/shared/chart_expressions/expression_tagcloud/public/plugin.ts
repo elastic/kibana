@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type CoreSetup, type CoreStart, type Plugin } from '@kbn/core/public';
-import { type ExpressionsStart, type ExpressionsSetup } from '@kbn/expressions-plugin/public';
-import { type ChartsPluginSetup, type ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { type FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { type UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { createStartServicesGetter, type StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { ExpressionsStart, ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { createStartServicesGetter, StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { tagcloudRenderer } from './expression_renderers';
 import { tagcloudFunction } from '../common/expression_functions';
 import { setFormatService } from './format_service';

@@ -15,10 +15,10 @@ import {
   EuiFlyoutHeader,
   EuiSelect,
   EuiSuperDatePicker,
-  type EuiSuperDatePickerProps,
+  EuiSuperDatePickerProps,
   EuiTitle,
 } from '@elastic/eui';
-import { type TimeRange } from '@kbn/es-query';
+import { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -26,9 +26,9 @@ import type {
   EmbeddableComponent as LensEmbeddableComponent,
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
-import { type EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
+import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { css } from '@emotion/react';
-import { type DataView } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { getLensAttributes } from './lens_attributes';
 

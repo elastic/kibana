@@ -6,7 +6,7 @@
  */
 
 import {
-  type PromptResponse,
+  PromptResponse,
   PromptTypeEnum,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 

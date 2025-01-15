@@ -10,8 +10,8 @@
 import {
   format as urlFormat,
   parse as urlParse,
-  type UrlWithParsedQuery,
-  type UrlWithStringQuery,
+  UrlWithParsedQuery,
+  UrlWithStringQuery,
 } from 'url';
 
 import type { ReportingServerInfo } from '@kbn/reporting-common/types';

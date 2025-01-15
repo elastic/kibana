@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultState, pureTransitions, type TodoActions, type TodoState } from '../state_containers/todomvc';
-import { type BaseState, type BaseStateContainer, createStateContainer } from '../../common/state_containers';
+import { defaultState, pureTransitions, TodoActions, TodoState } from '../state_containers/todomvc';
+import { BaseState, BaseStateContainer, createStateContainer } from '../../common/state_containers';
 import {
   createKbnUrlStateStorage,
   syncState,
-  type INullableBaseStateContainer,
+  INullableBaseStateContainer,
   // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 } from '../../public/state_sync';
 

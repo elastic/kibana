@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type RuleStatus } from '../../../types';
+import { RuleStatus } from '../../../types';
 
 export const mapFiltersToKql = ({
   typesFilter,

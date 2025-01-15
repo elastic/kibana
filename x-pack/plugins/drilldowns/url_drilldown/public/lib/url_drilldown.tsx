@@ -6,29 +6,29 @@
  */
 
 import React from 'react';
-import { type IExternalUrl, type ThemeServiceStart } from '@kbn/core/public';
+import { IExternalUrl, ThemeServiceStart } from '@kbn/core/public';
 import {
   type EmbeddableApiContext,
   getInheritedViewMode,
   apiCanAccessViewMode,
 } from '@kbn/presentation-publishing';
 import {
-  type ChartActionContext,
+  ChartActionContext,
   CONTEXT_MENU_TRIGGER,
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
 import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/public';
-import { type ActionExecutionContext, ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { ActionExecutionContext, ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';
-import { KibanaContextProvider, type UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import {
-  type UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
-  type UiActionsEnhancedDrilldownDefinition as Drilldown,
+  UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
+  UiActionsEnhancedDrilldownDefinition as Drilldown,
   UrlDrilldownCollectConfig,
   urlDrilldownCompileUrl,
-  type UrlDrilldownConfig,
-  type UrlDrilldownGlobalScope,
+  UrlDrilldownConfig,
+  UrlDrilldownGlobalScope,
   urlDrilldownValidateUrlTemplate,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { SerializedAction } from '@kbn/ui-actions-enhanced-plugin/common/types';

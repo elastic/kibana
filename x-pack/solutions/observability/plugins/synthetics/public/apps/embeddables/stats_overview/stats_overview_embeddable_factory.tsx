@@ -8,21 +8,21 @@
 import { i18n } from '@kbn/i18n';
 
 import React, { useEffect } from 'react';
-import { type DefaultEmbeddableApi, type ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { DefaultEmbeddableApi, ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   initializeTitles,
   useBatchedPublishingSubjects,
   fetch$,
-  type PublishesWritablePanelTitle,
-  type PublishesPanelTitle,
-  type SerializedTitles,
-  type HasEditCapabilities,
+  PublishesWritablePanelTitle,
+  PublishesPanelTitle,
+  SerializedTitles,
+  HasEditCapabilities,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-import { type MonitorFilters } from '../monitors_overview/types';
+import { MonitorFilters } from '../monitors_overview/types';
 import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../constants';
-import { type ClientPluginsStart } from '../../../plugin';
+import { ClientPluginsStart } from '../../../plugin';
 import { StatsOverviewComponent } from './stats_overview_component';
 
 export const getOverviewPanelTitle = () =>

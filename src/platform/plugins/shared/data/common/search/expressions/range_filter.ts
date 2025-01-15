@@ -8,11 +8,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { buildFilter, FILTERS } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { type KibanaField, type KibanaFilter } from './kibana_context_type';
-import { type KibanaRange } from './range';
+import { KibanaField, KibanaFilter } from './kibana_context_type';
+import { KibanaRange } from './range';
 
 interface Arguments {
   field: KibanaField;

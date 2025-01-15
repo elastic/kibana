@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { type IRouter } from '@kbn/core/server';
-import { type ILicenseState, RuleTypeDisabledError } from '../../../../lib';
+import { IRouter } from '@kbn/core/server';
+import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
 import { verifyAccessAndContext, handleDisabledApiKeysError } from '../../../lib';
-import { type AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import {
   cloneRuleRequestParamsSchemaV1,
-  type CloneRuleRequestParamsV1,
-  type CloneRuleResponseV1,
+  CloneRuleRequestParamsV1,
+  CloneRuleResponseV1,
 } from '../../../../../common/routes/rule/apis/clone';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
-import { type Rule } from '../../../../application/rule/types';
+import { Rule } from '../../../../application/rule/types';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 

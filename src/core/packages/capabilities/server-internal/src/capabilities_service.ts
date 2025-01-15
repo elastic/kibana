@@ -23,7 +23,7 @@ import type {
 } from '@kbn/core-capabilities-server';
 import type { SwitcherWithOptions } from './types';
 import { mergeCapabilities } from './merge_capabilities';
-import { getCapabilitiesResolver, type CapabilitiesResolver } from './resolve_capabilities';
+import { getCapabilitiesResolver, CapabilitiesResolver } from './resolve_capabilities';
 import { registerRoutes } from './routes';
 
 interface PrebootSetupDeps {

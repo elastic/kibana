@@ -9,9 +9,9 @@ import { URL } from 'url';
 import HttpProxyAgent from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { i18n } from '@kbn/i18n';
-import { type Logger } from '@kbn/core/server';
-import { schema, type TypeOf } from '@kbn/config-schema';
-import { IncomingWebhook, type IncomingWebhookResult } from '@slack/webhook';
+import { Logger } from '@kbn/core/server';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
 import type {

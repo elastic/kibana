@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import { type EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { debounce, findIndex } from 'lodash';
-import { type SimpleSavedObject } from '@kbn/core/public';
-import { type CollectConfigProps } from '@kbn/kibana-utils-plugin/public';
+import { SimpleSavedObject } from '@kbn/core/public';
+import { CollectConfigProps } from '@kbn/kibana-utils-plugin/public';
 import { DashboardDrilldownConfig } from './dashboard_drilldown_config';
 import { txtDestinationDashboardNotFound } from './i18n';
-import { type Config } from '../types';
-import { type Params } from '../abstract_dashboard_drilldown';
+import { Config } from '../types';
+import { Params } from '../abstract_dashboard_drilldown';
 
 const mergeDashboards = (
   dashboards: Array<EuiComboBoxOptionOption<string>>,

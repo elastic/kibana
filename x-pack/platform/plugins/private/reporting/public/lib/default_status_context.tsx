@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type ClientConfigType } from '@kbn/reporting-public';
-import React, { createContext, type FC, type PropsWithChildren } from 'react';
+import { ClientConfigType } from '@kbn/reporting-public';
+import React, { createContext, FC, PropsWithChildren } from 'react';
 import { IlmPolicyStatusContextProvider } from './ilm_policy_status_context';
 
 const PolicyStatusContext = createContext<undefined>(undefined);

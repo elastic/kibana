@@ -12,10 +12,10 @@ import {
   savedObjectsServiceMock,
 } from '@kbn/core/server/mocks';
 import { CLEANUP_INTERVAL, taskRunner } from './delete_inactive_nodes_task';
-import { type BackgroundTaskNode } from '../saved_objects/schemas/background_task_node';
+import { BackgroundTaskNode } from '../saved_objects/schemas/background_task_node';
 import {
-  type SavedObjectsFindResponse,
-  type SavedObjectsFindResult,
+  SavedObjectsFindResponse,
+  SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import { BACKGROUND_TASK_NODE_SO_NAME } from '../saved_objects';
 

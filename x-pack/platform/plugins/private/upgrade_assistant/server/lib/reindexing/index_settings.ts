@@ -6,9 +6,9 @@
  */
 
 import { flow, omit } from 'lodash';
-import { type ReindexWarning } from '../../../common/types';
+import { ReindexWarning } from '../../../common/types';
 import { versionService } from '../version';
-import { type FlatSettings } from './types';
+import { FlatSettings } from './types';
 export interface ParsedIndexName {
   cleanIndexName: string;
   baseName: string;

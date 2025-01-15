@@ -8,9 +8,9 @@
  */
 
 import { functionWrapper } from './utils';
-import { cumulativeSum, type CumulativeSumArgs } from '../cumulative_sum';
-import { type ExecutionContext } from '../../../execution/types';
-import { type Datatable } from '../../../expression_types/specs/datatable';
+import { cumulativeSum, CumulativeSumArgs } from '../cumulative_sum';
+import { ExecutionContext } from '../../../execution/types';
+import { Datatable } from '../../../expression_types/specs/datatable';
 
 describe('interpreter/functions#cumulative_sum', () => {
   const fn = functionWrapper(cumulativeSum);

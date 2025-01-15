@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type SavedObjectsTaggingApi } from './api';
+import { SavedObjectsTaggingApi } from './api';
 
 export interface SavedObjectTaggingOssPluginSetup {
   /**

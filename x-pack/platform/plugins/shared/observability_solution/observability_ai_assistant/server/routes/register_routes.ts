@@ -6,10 +6,10 @@
  */
 import type { CoreSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { type DefaultRouteHandlerResources, registerRoutes } from '@kbn/server-route-repository';
+import { DefaultRouteHandlerResources, registerRoutes } from '@kbn/server-route-repository';
 import { getGlobalObservabilityAIAssistantServerRouteRepository } from './get_global_observability_ai_assistant_route_repository';
 import type { ObservabilityAIAssistantRouteHandlerResources } from './types';
-import { type ObservabilityAIAssistantPluginStartDependencies } from '../types';
+import { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 
 export function registerServerRoutes({
   core,

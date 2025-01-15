@@ -9,7 +9,7 @@
 
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 import { createMarkdownVisFn } from './markdown_fn';
-import { type Arguments } from './types';
+import { Arguments } from './types';
 
 describe('interpreter/functions#markdown', () => {
   const fn = functionWrapper(createMarkdownVisFn());

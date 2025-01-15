@@ -12,7 +12,7 @@ import {
   TELEMETRY_INDEX_STATS_EVENT,
 } from '@kbn/security-solution-plugin/server/lib/telemetry/event_based/events';
 
-import { type FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   cleanupDatastreams,
   cleanupPolicies,

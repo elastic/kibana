@@ -12,10 +12,10 @@ import { getTopNavUnsavedChangesBadge } from '@kbn/unsaved-changes-badge';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import { i18n } from '@kbn/i18n';
 import { dismissFlyouts, DiscoverFlyouts } from '@kbn/discover-utils';
-import { type DiscoverStateContainer } from '../../state_management/discover_state';
+import { DiscoverStateContainer } from '../../state_management/discover_state';
 import type { TopNavCustomization } from '../../../../customizations';
 import { onSaveSearch } from './on_save_search';
-import { type DiscoverServices } from '../../../../build_services';
+import { DiscoverServices } from '../../../../build_services';
 
 /**
  * Helper function to build the top nav badges

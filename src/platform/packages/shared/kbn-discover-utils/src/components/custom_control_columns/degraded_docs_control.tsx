@@ -12,10 +12,10 @@ import { i18n } from '@kbn/i18n';
 import { EuiCode, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  type RowControlColumn,
-  type RowControlComponent,
-  type RowControlProps,
-  type RowControlRowProps,
+  RowControlColumn,
+  RowControlComponent,
+  RowControlProps,
+  RowControlRowProps,
 } from './types';
 import { DEGRADED_DOCS_FIELDS } from '../../field_constants';
 

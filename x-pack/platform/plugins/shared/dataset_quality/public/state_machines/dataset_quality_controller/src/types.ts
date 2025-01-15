@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { type DoneInvokeEvent } from 'xstate';
+import { DoneInvokeEvent } from 'xstate';
 import {
-  type DataStreamDocsStat,
-  type DatasetUserPrivileges,
-  type NonAggregatableDatasets,
+  DataStreamDocsStat,
+  DatasetUserPrivileges,
+  NonAggregatableDatasets,
 } from '../../../../common/api_types';
 import {
-  type DataStreamDetails,
-  type DataStreamStat,
-  type DataStreamStatServiceResponse,
-  type DataStreamStatType,
+  DataStreamDetails,
+  DataStreamStat,
+  DataStreamStatServiceResponse,
+  DataStreamStatType,
 } from '../../../../common/data_streams_stats';
-import { type Integration } from '../../../../common/data_streams_stats/integration';
+import { Integration } from '../../../../common/data_streams_stats/integration';
 import {
-  type DataStreamType,
-  type QualityIndicators,
-  type TableCriteria,
-  type TimeRangeConfig,
+  DataStreamType,
+  QualityIndicators,
+  TableCriteria,
+  TimeRangeConfig,
 } from '../../../../common/types';
-import { type DatasetTableSortField } from '../../../hooks';
+import { DatasetTableSortField } from '../../../hooks';
 
 interface FiltersCriteria {
   inactive: boolean;

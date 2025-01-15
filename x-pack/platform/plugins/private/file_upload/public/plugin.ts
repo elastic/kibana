@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type CoreStart, type Plugin } from '@kbn/core/public';
+import { CoreStart, Plugin } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
-  type FileUploadStartApi,
+  FileUploadStartApi,
   FileUploadComponent,
   importerFactory,
   hasImportPermission,

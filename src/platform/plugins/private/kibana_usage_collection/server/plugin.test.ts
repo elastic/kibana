@@ -13,7 +13,7 @@ import {
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import {
-  type CollectorOptions,
+  CollectorOptions,
   createUsageCollectionSetupMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
 import { cloudDetailsMock, registerEbtCountersMock } from './plugin.test.mocks';

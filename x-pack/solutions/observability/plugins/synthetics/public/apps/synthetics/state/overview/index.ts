@@ -6,7 +6,7 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import { type MonitorOverviewState } from './models';
+import { MonitorOverviewState } from './models';
 
 import {
   setFlyoutConfig,
@@ -75,6 +75,6 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
     });
 });
 
-export type * from './models';
+export * from './models';
 export * from './actions';
 export * from './selectors';

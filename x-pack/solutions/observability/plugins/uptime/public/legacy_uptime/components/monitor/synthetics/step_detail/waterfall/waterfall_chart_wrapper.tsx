@@ -9,13 +9,13 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiHealth } from '@elastic/eui';
 import { useTrackMetric, METRIC_TYPE } from '@kbn/observability-shared-plugin/public';
 import { getSeriesAndDomain, getSidebarItems, getLegendItems } from './data_formatting';
-import { type SidebarItem, type LegendItem, type NetworkItems } from './types';
-import { WaterfallProvider, WaterfallChart, type RenderItem, useFlyout } from '../../waterfall';
+import { SidebarItem, LegendItem, NetworkItems } from './types';
+import { WaterfallProvider, WaterfallChart, RenderItem, useFlyout } from '../../waterfall';
 import { WaterfallFilter } from './waterfall_filter';
 import { WaterfallFlyout } from './waterfall_flyout';
 import { WaterfallSidebarItem } from './waterfall_sidebar_item';
-import { type MarkerItems } from '../../waterfall/context/waterfall_chart';
-import { type JourneyStep } from '../../../../../../../common/runtime_types';
+import { MarkerItems } from '../../waterfall/context/waterfall_chart';
+import { JourneyStep } from '../../../../../../../common/runtime_types';
 
 export const renderLegendItem: RenderItem<LegendItem> = (item) => {
   return (

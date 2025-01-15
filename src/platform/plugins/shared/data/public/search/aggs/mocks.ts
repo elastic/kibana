@@ -9,11 +9,11 @@
 
 import {
   AggConfigs,
-  type AggTypesRegistrySetup,
-  type AggTypesRegistryStart,
+  AggTypesRegistrySetup,
+  AggTypesRegistryStart,
   getCalculateAutoTimeExpression,
 } from '../../../common';
-import { type AggsSetup, type AggsStart } from './types';
+import { AggsSetup, AggsStart } from './types';
 
 import { mockAggTypesRegistry } from '../../../common/search/aggs/test_helpers';
 

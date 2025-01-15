@@ -7,7 +7,7 @@
 
 import React, { Fragment, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type RouteComponentProps } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 import { EuiButton, EuiCallOut, EuiSpacer, EuiPageTemplate, EuiLink } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
@@ -16,13 +16,13 @@ import { i18n } from '@kbn/i18n';
 import {
   PageLoading,
   PageError,
-  type Error,
+  Error,
   WithPrivileges,
   NotAuthorizedSection,
   useExecutionContext,
 } from '../../../../shared_imports';
 
-import { type SlmPolicy } from '../../../../../common/types';
+import { SlmPolicy } from '../../../../../common/types';
 import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common';
 import { BASE_PATH, SLM_STATE, UIM_POLICY_LIST_LOAD } from '../../../constants';
 import { useDecodedParams } from '../../../lib';

@@ -8,7 +8,7 @@
  */
 
 import { fieldList } from '@kbn/data-views-plugin/common';
-import { type FieldSpec } from '@kbn/data-views-plugin/public';
+import { FieldSpec } from '@kbn/data-views-plugin/public';
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
 const fields = [

@@ -13,8 +13,8 @@ import { createStubIndexPattern } from '@kbn/data-views-plugin/common/data_view.
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
 import {
   DataSourceCategory,
-  type DataSourceProfileProviderParams,
-  type RootContext,
+  DataSourceProfileProviderParams,
+  RootContext,
   SolutionType,
 } from '../../../profiles';
 import { createContextAwarenessMocks } from '../../../__mocks__';

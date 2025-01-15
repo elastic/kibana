@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type NotificationsStart } from '@kbn/core/public';
+import { NotificationsStart } from '@kbn/core/public';
 
 export class NotificationService {
   private _toasts: any;

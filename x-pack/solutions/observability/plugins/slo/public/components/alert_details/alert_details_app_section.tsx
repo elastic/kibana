@@ -8,12 +8,12 @@
 import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type AlertDetailsAppSectionProps } from '@kbn/observability-plugin/public';
+import { AlertDetailsAppSectionProps } from '@kbn/observability-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
 import { CustomAlertDetailsPanel } from './components/custom_panels/custom_panels';
 import { ErrorRatePanel } from './components/error_rate/error_rate_panel';
-import { type BurnRateAlert, type BurnRateRule } from './types';
+import { BurnRateAlert, BurnRateRule } from './types';
 
 interface AppSectionProps extends AlertDetailsAppSectionProps {
   alert: BurnRateAlert;

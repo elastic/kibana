@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type IScopedClusterClient } from '@kbn/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 
 import {
-  type Connector,
+  Connector,
   CONNECTORS_INDEX,
   MANAGED_CONNECTOR_INDEX_PREFIX,
 } from '@kbn/search-connectors';

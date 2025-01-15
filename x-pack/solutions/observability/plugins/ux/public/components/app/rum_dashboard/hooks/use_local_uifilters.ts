@@ -15,8 +15,8 @@ import { getExcludedName } from '../local_uifilters';
 import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
 import {
   uxFiltersByName,
-  type UxLocalUIFilter,
-  type UxLocalUIFilterName,
+  UxLocalUIFilter,
+  UxLocalUIFilterName,
 } from '../../../../../common/ux_ui_filter';
 
 export type FiltersUIHook = ReturnType<typeof useLocalUIFilters>;

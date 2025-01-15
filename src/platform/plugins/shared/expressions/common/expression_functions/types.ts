@@ -7,23 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
-import { type ArgumentType } from './arguments';
-import { type TypeToString, type TypeString, type UnmappedTypeStrings } from '../types/common';
-import { type ExecutionContext } from '../execution/types';
+import { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
+import { ArgumentType } from './arguments';
+import { TypeToString, TypeString, UnmappedTypeStrings } from '../types/common';
+import { ExecutionContext } from '../execution/types';
 import {
-  type ExpressionFunctionClog,
-  type ExpressionFunctionFont,
-  type ExpressionFunctionVarSet,
-  type ExpressionFunctionVar,
-  type ExpressionFunctionTheme,
-  type ExpressionFunctionCumulativeSum,
-  type ExpressionFunctionDerivative,
-  type ExpressionFunctionMovingAverage,
-  type ExpressionFunctionOverallMetric,
-  type ExpressionFunctionMathColumn,
+  ExpressionFunctionClog,
+  ExpressionFunctionFont,
+  ExpressionFunctionVarSet,
+  ExpressionFunctionVar,
+  ExpressionFunctionTheme,
+  ExpressionFunctionCumulativeSum,
+  ExpressionFunctionDerivative,
+  ExpressionFunctionMovingAverage,
+  ExpressionFunctionOverallMetric,
+  ExpressionFunctionMathColumn,
 } from './specs';
-import { type ExpressionAstFunction } from '../ast';
+import { ExpressionAstFunction } from '../ast';
 
 /**
  * `ExpressionFunctionDefinition` is the interface plugins have to implement to

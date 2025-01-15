@@ -12,7 +12,7 @@ import {
   Position,
   ScaleType,
   Settings,
-  type XYBrushEvent,
+  XYBrushEvent,
 } from '@elastic/charts';
 import { timeFormatter } from '@elastic/charts/dist/utils/data/formatters';
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiIcon } from '@elastic/eui';

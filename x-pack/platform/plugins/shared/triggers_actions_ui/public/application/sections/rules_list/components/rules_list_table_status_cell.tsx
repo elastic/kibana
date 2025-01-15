@@ -15,7 +15,7 @@ import {
   EuiToolTip,
   EuiStat,
 } from '@elastic/eui';
-import { type RuleTableItem } from '../../../../types';
+import { RuleTableItem } from '../../../../types';
 import {
   getRuleHealthColor,
   getIsLicenseError,

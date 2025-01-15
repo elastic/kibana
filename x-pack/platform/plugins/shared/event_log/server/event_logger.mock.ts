@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type IEventLogger } from './types';
+import { IEventLogger } from './types';
 
 const createEventLoggerMock = () => {
   const mock: jest.Mocked<IEventLogger> = {

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { type Dispatch } from 'redux';
+import { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
 import { createThunk } from '../../lib/create_thunk';
 // @ts-expect-error untyped local
 import { fetchRenderable } from './elements';
-import { type State } from '../../../types';
+import { State } from '../../../types';
 
 export const UpdateEmbeddableExpressionActionType = 'updateEmbeddableExpression';
 export interface UpdateEmbeddableExpressionPayload {

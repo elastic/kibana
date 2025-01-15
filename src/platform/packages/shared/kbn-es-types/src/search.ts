@@ -8,8 +8,8 @@
  */
 
 import type { ValuesType, UnionToIntersection } from 'utility-types';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type * as estypesWithoutBodyKey from '@elastic/elasticsearch/lib/api/types';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import * as estypesWithoutBodyKey from '@elastic/elasticsearch/lib/api/types';
 
 interface AggregationsAggregationContainer extends Record<string, any> {
   aggs?: any;

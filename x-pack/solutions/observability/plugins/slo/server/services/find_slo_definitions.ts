@@ -6,13 +6,13 @@
  */
 
 import {
-  type FindSLODefinitionsParams,
-  type FindSLODefinitionsResponse,
+  FindSLODefinitionsParams,
+  FindSLODefinitionsResponse,
   findSloDefinitionsResponseSchema,
-  type Pagination,
+  Pagination,
 } from '@kbn/slo-schema';
 import { IllegalArgumentError } from '../errors';
-import { type SLORepository } from './slo_repository';
+import { SLORepository } from './slo_repository';
 
 const MAX_PER_PAGE = 1000;
 const DEFAULT_PER_PAGE = 100;

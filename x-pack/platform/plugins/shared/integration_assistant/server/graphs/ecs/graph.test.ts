@@ -20,8 +20,8 @@ import { handleDuplicates } from './duplicates';
 import { handleMissingKeys } from './missing';
 import { handleInvalidEcs } from './invalid';
 import {
-  type ActionsClientChatOpenAI,
-  type ActionsClientSimpleChatModel,
+  ActionsClientChatOpenAI,
+  ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 
 const model = new FakeLLM({

@@ -8,11 +8,11 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import { type OperationDefinition } from '.';
+import { OperationDefinition } from '.';
 import {
-  type ReferenceBasedIndexPatternColumn,
-  type GenericIndexPatternColumn,
-  type ValueFormatConfig,
+  ReferenceBasedIndexPatternColumn,
+  GenericIndexPatternColumn,
+  ValueFormatConfig,
 } from './column_types';
 import type { IndexPattern } from '../../../../types';
 import { getFormatFromPreviousColumn, isValidNumber } from './helpers';

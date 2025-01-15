@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { URL } from 'url';
-import { type FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const SERVICE_ID = '49a18510598271e924253ed2581d7ada';
 

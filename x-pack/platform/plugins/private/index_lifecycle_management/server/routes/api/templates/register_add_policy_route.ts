@@ -6,13 +6,13 @@
  */
 
 import { merge } from 'lodash';
-import { schema, type TypeOf } from '@kbn/config-schema';
-import { type ElasticsearchClient } from '@kbn/core/server';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 
-import { type TemplateFromEs, type TemplateSerialized } from '@kbn/index-management-plugin/common/types';
-import { type LegacyTemplateSerialized } from '@kbn/index-management-plugin/server';
-import { type RouteDependencies } from '../../../types';
+import { TemplateFromEs, TemplateSerialized } from '@kbn/index-management-plugin/common/types';
+import { LegacyTemplateSerialized } from '@kbn/index-management-plugin/server';
+import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
 async function getLegacyIndexTemplate(

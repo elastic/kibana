@@ -31,7 +31,7 @@ import type {
   ESQLTimeInterval,
   ESQLUnknownItem,
 } from '../types';
-import { type NodeMatchTemplate, templateToPredicate } from './helpers';
+import { NodeMatchTemplate, templateToPredicate } from './helpers';
 
 type Node = ESQLAstNode | ESQLAstNode[];
 

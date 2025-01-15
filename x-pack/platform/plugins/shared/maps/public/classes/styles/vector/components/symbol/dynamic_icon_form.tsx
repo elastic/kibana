@@ -6,14 +6,14 @@
  */
 
 import _ from 'lodash';
-import React, { Fragment, type ReactNode } from 'react';
+import React, { Fragment, ReactNode } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { type VECTOR_STYLES } from '../../../../../../common/constants';
-import { type CustomIcon, type IconDynamicOptions } from '../../../../../../common/descriptor_types';
+import { VECTOR_STYLES } from '../../../../../../common/constants';
+import { CustomIcon, IconDynamicOptions } from '../../../../../../common/descriptor_types';
 import { FieldSelect } from '../field_select';
-import { IconMapSelect, type StyleOptionChanges } from './icon_map_select';
-import { type StyleField } from '../../style_fields_helper';
-import { type DynamicIconProperty } from '../../properties/dynamic_icon_property';
+import { IconMapSelect, StyleOptionChanges } from './icon_map_select';
+import { StyleField } from '../../style_fields_helper';
+import { DynamicIconProperty } from '../../properties/dynamic_icon_property';
 
 interface Props {
   customIcons: CustomIcon[];

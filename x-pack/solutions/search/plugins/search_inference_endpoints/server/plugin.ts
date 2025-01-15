@@ -6,20 +6,20 @@
  */
 
 import {
-  type CoreSetup,
-  type CoreStart,
+  CoreSetup,
+  CoreStart,
   DEFAULT_APP_CATEGORIES,
-  type Logger,
-  type Plugin,
-  type PluginInitializerContext,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
 } from '@kbn/core/server';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { defineRoutes } from './routes';
 import {
-  type SearchInferenceEndpointsPluginSetup,
-  type SearchInferenceEndpointsPluginSetupDependencies,
-  type SearchInferenceEndpointsPluginStart,
-  type SearchInferenceEndpointsPluginStartDependencies,
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginSetupDependencies,
+  SearchInferenceEndpointsPluginStart,
+  SearchInferenceEndpointsPluginStartDependencies,
 } from './types';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common/constants';
 

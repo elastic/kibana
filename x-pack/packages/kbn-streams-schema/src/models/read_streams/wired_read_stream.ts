@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type z } from '@kbn/zod';
+import { z } from '@kbn/zod';
 import { wiredStreamDefinitonSchema } from '../streams';
 import { inheritedFieldDefinitionSchema, lifecycleSchema } from '../common';
 

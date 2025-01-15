@@ -9,7 +9,7 @@ import React, { Fragment } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FilterLabel } from '../../components/filter_label';
-import { type SeriesConfig, type SeriesUrl, type UrlFilter } from '../../types';
+import { SeriesConfig, SeriesUrl, UrlFilter } from '../../types';
 import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 import { useSeriesFilters } from '../../hooks/use_series_filters';
 import { useSeriesStorage } from '../../hooks/use_series_storage';

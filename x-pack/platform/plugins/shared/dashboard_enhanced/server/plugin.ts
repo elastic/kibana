@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type CoreSetup, type CoreStart, type Plugin, type PluginInitializerContext } from '@kbn/core/server';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import {
-  type AdvancedUiActionsSetup,
-  type AdvancedUiActionsStart,
+  AdvancedUiActionsSetup,
+  AdvancedUiActionsStart,
 } from '@kbn/ui-actions-enhanced-plugin/server';
 import { EMBEDDABLE_TO_DASHBOARD_DRILLDOWN, createExtract, createInject } from '../common';
 

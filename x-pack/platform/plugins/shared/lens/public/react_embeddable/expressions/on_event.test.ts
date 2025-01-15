@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
+import { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import { getLensApiMock, getLensRuntimeStateMock, makeEmbeddableServices } from '../mocks';
-import { type LensApi, type LensEmbeddableStartServices, type LensPublicCallbacks } from '../types';
+import { LensApi, LensEmbeddableStartServices, LensPublicCallbacks } from '../types';
 import { prepareEventHandler } from './on_event';
 import { faker } from '@faker-js/faker';
 import {

@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { type Story } from '@storybook/react';
-import { ObservabilityStatusBoxes, type ObservabilityStatusProps } from './observability_status_boxes';
+import { Story } from '@storybook/react';
+import { ObservabilityStatusBoxes, ObservabilityStatusProps } from './observability_status_boxes';
 
 export default {
   title: 'app/ObservabilityStatusBoxes',

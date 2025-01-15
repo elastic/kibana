@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import {
   INDEX_PATTERN_LOGSTASH,
   METRICBEAT_INDEX_NAME_UNIQUE_TOKEN,
@@ -15,9 +15,9 @@ import { LogstashSelfMonitoring } from './logstash_self_monitoring';
 import { LogstashMetricbeatMonitoring } from './logstash_metricbeat_monitoring';
 import { LogstashAgentMonitoring } from './logstash_agent_monitoring';
 import {
-  type LogstashMonitoring,
-  type LogstashProcessOptions,
-  type LogstashStatsByClusterUuid,
+  LogstashMonitoring,
+  LogstashProcessOptions,
+  LogstashStatsByClusterUuid,
 } from './logstash_monitoring';
 
 const SELF_MONITORING: string = 'self';

@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { type AppContextTestRender, createAppRootMockRenderer } from '../../../test';
-import { type KubernetesCollectionMap } from '../../../types';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../../test';
+import { KubernetesCollectionMap } from '../../../types';
 import { Breadcrumb } from '.';
 
 const MOCK_TREE_SELECTION: KubernetesCollectionMap = {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { isEmpty } from 'lodash/fp';
-import { type Config, type ConfigEntryView } from '../types/types';
+import { Config, ConfigEntryView } from '../types/types';
 import * as LABELS from '../translations';
 
 export interface TaskTypeOption {

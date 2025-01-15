@@ -17,7 +17,7 @@ import {
   ObjectRemover,
   getEventLog,
 } from '../../../../common/lib';
-import { type FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 const getSnoozeSchedule = () => {
   return {

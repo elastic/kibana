@@ -6,27 +6,27 @@
  */
 
 import {
-  type Query,
-  type Filter,
-  type DataViewBase,
+  Query,
+  Filter,
+  DataViewBase,
   buildCustomFilter,
   buildEsQuery,
   FilterStateStore,
-  type TimeRange,
-  type EsQueryConfig,
+  TimeRange,
+  EsQueryConfig,
   isOfQueryType,
-  type AggregateQuery,
+  AggregateQuery,
   isOfAggregateQueryType,
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { type RecursiveReadonly } from '@kbn/utility-types';
-import { type Capabilities } from '@kbn/core/public';
+import { RecursiveReadonly } from '@kbn/utility-types';
+import { Capabilities } from '@kbn/core/public';
 import { partition } from 'lodash';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { showMemoizedErrorNotification } from '../lens_ui_errors';
-import { type TableInspectorAdapter } from '../editor_frame_service/types';
-import { type Datasource, type DatasourcePublicAPI, type IndexPatternMap } from '../types';
-import { type Visualization } from '..';
+import { TableInspectorAdapter } from '../editor_frame_service/types';
+import { Datasource, DatasourcePublicAPI, IndexPatternMap } from '../types';
+import { Visualization } from '..';
 
 function getLayerType(visualization: Visualization, state: unknown, layerId: string) {
   return visualization.getLayerType(layerId, state) || LayerTypes.DATA;

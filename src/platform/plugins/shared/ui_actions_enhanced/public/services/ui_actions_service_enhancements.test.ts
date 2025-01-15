@@ -9,9 +9,9 @@
 
 import {
   UiActionsServiceEnhancements,
-  type UiActionsServiceEnhancementsParams,
+  UiActionsServiceEnhancementsParams,
 } from './ui_actions_service_enhancements';
-import { type ActionFactoryDefinition, ActionFactory } from '../dynamic_actions';
+import { ActionFactoryDefinition, ActionFactory } from '../dynamic_actions';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 const deps: UiActionsServiceEnhancementsParams = {

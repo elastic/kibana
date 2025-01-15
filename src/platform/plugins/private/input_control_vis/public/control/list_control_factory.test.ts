@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { listControlFactory, type ListControl } from './list_control_factory';
-import { type ControlParams, CONTROL_TYPES } from '../editor_utils';
+import { listControlFactory, ListControl } from './list_control_factory';
+import { ControlParams, CONTROL_TYPES } from '../editor_utils';
 import { getDepsMock, getSearchSourceMock } from '../test_utils';
 
 describe('listControlFactory', () => {

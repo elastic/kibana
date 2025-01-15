@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { cloneDeep, omit } from 'lodash';
 import moment from 'moment';
-import { type OpsMetrics } from '@kbn/core/server';
-import { type UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { OpsMetrics } from '@kbn/core/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { KIBANA_STATS_TYPE } from '../../../common/constants';
 interface OpsStatsMetrics extends Omit<OpsMetrics, 'response_times' | 'collected_at'> {
   timestamp: string;

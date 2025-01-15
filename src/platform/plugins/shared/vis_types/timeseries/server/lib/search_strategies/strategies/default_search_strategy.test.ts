@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type FetchedIndexPattern } from '../../../../common/types';
+import { FetchedIndexPattern } from '../../../../common/types';
 import {
-  type VisTypeTimeseriesRequestHandlerContext,
-  type VisTypeTimeseriesVisDataRequest,
+  VisTypeTimeseriesRequestHandlerContext,
+  VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
 import { DefaultSearchStrategy } from './default_search_strategy';
 

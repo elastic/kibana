@@ -13,15 +13,15 @@ import {
   movingAverageOperation,
   cumulativeSumOperation,
   derivativeOperation,
-  type AvgIndexPatternColumn,
-  type DerivativeIndexPatternColumn,
+  AvgIndexPatternColumn,
+  DerivativeIndexPatternColumn,
 } from './definitions';
 import { getFieldByNameFactory } from '../pure_helpers';
 import { documentField } from '../document_field';
-import { type FormBasedLayer } from '../types';
-import { type IndexPattern, type IndexPatternField } from '../../../types';
-import { type GenericIndexPatternColumn } from '.';
-import { type DateHistogramIndexPatternColumn } from './definitions/date_histogram';
+import { FormBasedLayer } from '../types';
+import { IndexPattern, IndexPatternField } from '../../../types';
+import { GenericIndexPatternColumn } from '.';
+import { DateHistogramIndexPatternColumn } from './definitions/date_histogram';
 
 const indexPatternFields = [
   {

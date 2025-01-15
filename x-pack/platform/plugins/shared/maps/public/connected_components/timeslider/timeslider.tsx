@@ -6,17 +6,17 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { type Observable, switchMap, tap } from 'rxjs';
+import { Observable, switchMap, tap } from 'rxjs';
 
 import {
   ControlGroupRenderer,
-  type ControlGroupRendererApi,
+  ControlGroupRendererApi,
   type ControlGroupRuntimeState,
   type ControlGroupStateBuilder,
 } from '@kbn/controls-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 
-import { type Timeslice } from '../../../common/descriptor_types';
+import { Timeslice } from '../../../common/descriptor_types';
 
 export interface Props {
   setTimeslice: (timeslice?: Timeslice) => void;

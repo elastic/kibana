@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { type HttpSetup } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
 
 import {
-  type UseRequestConfig,
-  type UseRequestResponse,
-  type SendRequestConfig,
-  type SendRequestResponse,
+  UseRequestConfig,
+  UseRequestResponse,
+  SendRequestConfig,
+  SendRequestResponse,
   sendRequest as _sendRequest,
   useRequest as _useRequest,
-  type Error,
+  Error,
 } from '../shared_imports';
 
 export type UseRequestHook = <T = any, E = Error>(

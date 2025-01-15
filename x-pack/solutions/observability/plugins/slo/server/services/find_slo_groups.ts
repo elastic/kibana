@@ -4,19 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type ElasticsearchClient, type Logger, type SavedObjectsClientContract } from '@kbn/core/server';
+import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import {
-  type FindSLOGroupsParams,
-  type FindSLOGroupsResponse,
+  FindSLOGroupsParams,
+  FindSLOGroupsResponse,
   findSLOGroupsResponseSchema,
-  type Pagination,
+  Pagination,
   sloGroupWithSummaryResponseSchema,
 } from '@kbn/slo-schema';
 import { getListOfSummaryIndices, getSloSettings } from './slo_settings';
 import { DEFAULT_SLO_GROUPS_PAGE_SIZE } from '../../common/constants';
 import { IllegalArgumentError } from '../errors';
 import { typedSearch } from '../utils/queries';
-import { type EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
+import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { getElasticsearchQueryOrThrow, parseStringFilters } from './transform_generators';
 
 const DEFAULT_PAGE = 1;

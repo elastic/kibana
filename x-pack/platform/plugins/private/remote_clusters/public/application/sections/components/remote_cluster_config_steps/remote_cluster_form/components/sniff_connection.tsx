@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { type FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiComboBox,
-  type EuiComboBoxOptionOption,
+  EuiComboBoxOptionOption,
   EuiFieldNumber,
   EuiFormRow,
   EuiLink,
@@ -18,7 +18,7 @@ import {
 
 import { transportPortUrl } from '../../../../../services/documentation';
 import { validateSeed } from '../validators';
-import { type Props } from './connection_mode';
+import { Props } from './connection_mode';
 
 export const SniffConnection: FunctionComponent<Props> = ({
   fields,

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type CoreSetup, type KibanaRequest, type Logger } from '@kbn/core/server';
+import { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { StorageIndexAdapter } from '@kbn/observability-utils-server/es/storage';
-import { type Observable, defer, from, lastValueFrom, shareReplay } from 'rxjs';
-import { type StreamsPluginStartDependencies } from '../../../types';
+import { Observable, defer, from, lastValueFrom, shareReplay } from 'rxjs';
+import { StreamsPluginStartDependencies } from '../../../types';
 import { AssetClient } from './asset_client';
 import { assetStorageSettings } from './storage_settings';
 

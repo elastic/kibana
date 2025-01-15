@@ -8,7 +8,7 @@
  */
 
 import { parse } from '../../parser';
-import { WrappingPrettyPrinter, type WrappingPrettyPrinterOptions } from '../wrapping_pretty_printer';
+import { WrappingPrettyPrinter, WrappingPrettyPrinterOptions } from '../wrapping_pretty_printer';
 
 const reprint = (src: string, opts?: WrappingPrettyPrinterOptions) => {
   const { root } = parse(src, { withFormatting: true });

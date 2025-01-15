@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type EMSClient, type FileLayer, type TMSService } from '@elastic/ems-client';
+import { EMSClient, FileLayer, TMSService } from '@elastic/ems-client';
 import { getEMSSettings, getMapsEmsStart } from './kibana_services';
 import { getLicenseId } from './licensed_features';
 

@@ -14,28 +14,28 @@ import {
   EuiHeaderSectionItem,
   EuiLoadingSpinner,
   useEuiTheme,
-  type EuiThemeComputed,
+  EuiThemeComputed,
   EuiImage,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import {
-  type ChromeBreadcrumb,
-  type ChromeGlobalHelpExtensionMenuLink,
-  type ChromeHelpExtension,
-  type ChromeHelpMenuLink,
-  type ChromeNavControl,
-  type ChromeUserBanner,
+  ChromeBreadcrumb,
+  ChromeGlobalHelpExtensionMenuLink,
+  ChromeHelpExtension,
+  ChromeHelpMenuLink,
+  ChromeNavControl,
+  ChromeUserBanner,
 } from '@kbn/core-chrome-browser/src';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
-import { type MountPoint } from '@kbn/core-mount-utils-browser';
+import { MountPoint } from '@kbn/core-mount-utils-browser';
 import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Router } from '@kbn/shared-ux-router';
 import React, { useCallback, type ComponentProps } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { debounceTime, type Observable } from 'rxjs';
+import { debounceTime, Observable } from 'rxjs';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
 import { useHeaderActionMenuMounter } from '../header/header_action_menu';

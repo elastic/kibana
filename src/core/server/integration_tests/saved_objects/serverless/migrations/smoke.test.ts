@@ -9,8 +9,8 @@
 
 import {
   request,
-  type TestServerlessESUtils,
-  type TestServerlessKibanaUtils,
+  TestServerlessESUtils,
+  TestServerlessKibanaUtils,
   createTestServerlessInstances,
 } from '@kbn/core-test-helpers-kbn-server';
 import { getFips } from 'crypto';

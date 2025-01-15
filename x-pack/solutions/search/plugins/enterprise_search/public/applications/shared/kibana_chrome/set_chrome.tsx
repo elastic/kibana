@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type React from 'react';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 
 import { useValues } from 'kea';
 
@@ -23,7 +22,7 @@ import {
   useElasticsearchBreadcrumbs,
   useAppSearchBreadcrumbs,
   useWorkplaceSearchBreadcrumbs,
-  type BreadcrumbTrail,
+  BreadcrumbTrail,
   useSearchExperiencesBreadcrumbs,
   useVectorSearchBreadcrumbs,
   useSemanticSearchBreadcrumbs,

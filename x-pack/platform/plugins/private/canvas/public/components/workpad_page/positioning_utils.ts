@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type PositionedElement, type ElementPosition } from '../../../types';
+import { PositionedElement, ElementPosition } from '../../../types';
 import { multiply, rotateZ, translate } from '../../lib/aeroelastic/matrix';
 import { isGroupId } from '../../lib/workpad';
 

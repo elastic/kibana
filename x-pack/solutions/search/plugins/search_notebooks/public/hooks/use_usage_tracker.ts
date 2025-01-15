@@ -6,7 +6,7 @@
  */
 
 import { useKibanaServices } from './use_kibana';
-import { type AppMetricsTracker } from '../types';
+import { AppMetricsTracker } from '../types';
 
 export const useUsageTracker = (): AppMetricsTracker => {
   const { usageTracker } = useKibanaServices();

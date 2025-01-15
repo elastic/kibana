@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiFieldSearch,
-  type EuiFieldSearchProps,
+  EuiFieldSearchProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageHeader,
@@ -29,7 +29,7 @@ import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { BenchmarksTable } from './benchmarks_table';
 import {
   useCspBenchmarkIntegrationsV2,
-  type UseCspBenchmarkIntegrationsProps,
+  UseCspBenchmarkIntegrationsProps,
 } from './use_csp_benchmark_integrations';
 import { getBenchmarkCisName } from '../../../common/utils/helpers';
 import * as TEST_SUBJ from './test_subjects';

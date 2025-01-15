@@ -7,8 +7,8 @@
 
 import { firstValueFrom, isObservable, of, toArray } from 'rxjs';
 import {
-  type ChatCompleteResponse,
-  type ChatCompletionEvent,
+  ChatCompleteResponse,
+  ChatCompletionEvent,
   ChatCompletionEventType,
 } from '@kbn/inference-common';
 import { createOutputApi } from './create_output_api';

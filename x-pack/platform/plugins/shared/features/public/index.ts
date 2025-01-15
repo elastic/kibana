@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type PluginInitializer } from '@kbn/core/public';
-import { FeaturesPlugin, type FeaturesPluginSetup, type FeaturesPluginStart } from './plugin';
+import { PluginInitializer } from '@kbn/core/public';
+import { FeaturesPlugin, FeaturesPluginSetup, FeaturesPluginStart } from './plugin';
 
 export type {
   KibanaFeatureConfig,

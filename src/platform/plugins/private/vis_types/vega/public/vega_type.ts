@@ -14,7 +14,7 @@ import { DefaultEditorSize } from '@kbn/vis-default-editor-plugin/public';
 import {
   VIS_EVENT_TO_TRIGGER,
   VisGroups,
-  type VisTypeDefinition,
+  VisTypeDefinition,
 } from '@kbn/visualizations-plugin/public';
 
 import { getDefaultSpec } from './default_spec';

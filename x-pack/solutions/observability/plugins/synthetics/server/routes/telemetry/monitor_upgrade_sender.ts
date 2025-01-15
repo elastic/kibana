@@ -6,21 +6,21 @@
  */
 import { sha256 } from 'js-sha256';
 import type { Logger } from '@kbn/core/server';
-import { type SavedObjectsUpdateResponse, type SavedObject } from '@kbn/core/server';
+import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import type { MonitorUpdateEvent } from '../../telemetry/types';
 
-import { type TelemetryEventsSender } from '../../telemetry/sender';
+import { TelemetryEventsSender } from '../../telemetry/sender';
 import {
   MONITOR_UPDATE_CHANNEL,
   MONITOR_CURRENT_CHANNEL,
   MONITOR_ERROR_EVENTS_CHANNEL,
 } from '../../telemetry/constants';
-import { type MonitorErrorEvent } from '../../telemetry/types';
+import { MonitorErrorEvent } from '../../telemetry/types';
 import {
-  type MonitorFields,
-  type EncryptedSyntheticsMonitorAttributes,
+  MonitorFields,
+  EncryptedSyntheticsMonitorAttributes,
   ConfigKey,
-  type ServiceLocationErrors,
+  ServiceLocationErrors,
   SourceType,
 } from '../../../common/runtime_types';
 import { scheduleToMilli } from '../../../common/lib/schedule_to_time';

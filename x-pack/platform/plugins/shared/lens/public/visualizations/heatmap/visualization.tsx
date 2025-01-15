@@ -8,24 +8,24 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type Ast } from '@kbn/interpreter';
+import { Ast } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
 import { IconChartHeatmap } from '@kbn/chart-icons';
 import {
   CUSTOM_PALETTE,
-  type PaletteRegistry,
-  type CustomPaletteParams,
-  type PaletteOutput,
+  PaletteRegistry,
+  CustomPaletteParams,
+  PaletteOutput,
   getOverridePaletteStops,
 } from '@kbn/coloring';
-import { type ThemeServiceStart } from '@kbn/core/public';
+import { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { type HeatmapConfiguration } from '@kbn/visualizations-plugin/common';
+import { HeatmapConfiguration } from '@kbn/visualizations-plugin/common';
 import {
-  type HeatmapExpressionFunctionDefinition,
-  type HeatmapGridExpressionFunctionDefinition,
-  type HeatmapLegendExpressionFunctionDefinition,
+  HeatmapExpressionFunctionDefinition,
+  HeatmapGridExpressionFunctionDefinition,
+  HeatmapLegendExpressionFunctionDefinition,
 } from '@kbn/expression-heatmap-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import type { OperationMetadata, Suggestion, UserMessage, Visualization } from '../../types';
@@ -43,7 +43,7 @@ import {
 import { HeatmapToolbar } from './toolbar_component';
 import { HeatmapDimensionEditor } from './dimension_editor';
 import { getSafePaletteParams } from './utils';
-import { type FormBasedPersistedState } from '../..';
+import { FormBasedPersistedState } from '../..';
 import { HEATMAP_RENDER_ARRAY_VALUES, HEATMAP_X_MISSING_AXIS } from '../../user_messages_ids';
 
 interface HeatmapVisualizationDeps {

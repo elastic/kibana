@@ -11,10 +11,10 @@ import { EuiBadge, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  type AllocateAction,
-  type PhaseWithAllocation,
-  type SerializedColdPhase,
-  type SerializedWarmPhase,
+  AllocateAction,
+  PhaseWithAllocation,
+  SerializedColdPhase,
+  SerializedWarmPhase,
 } from '../../../../../../common/types';
 import { determineDataTierAllocationType } from '../../../../lib';
 import type { ActionComponentProps } from './types';

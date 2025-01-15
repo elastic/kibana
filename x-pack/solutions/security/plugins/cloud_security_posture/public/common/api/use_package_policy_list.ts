@@ -6,14 +6,14 @@
  */
 
 import {
-  type PackagePolicy,
+  PackagePolicy,
   packagePolicyRouteService,
   SO_SEARCH_LIMIT,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { type CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { DETECTION_RULE_RULES_API_CURRENT_VERSION } from '../../../common/constants';
 
 interface PackagePolicyListData {

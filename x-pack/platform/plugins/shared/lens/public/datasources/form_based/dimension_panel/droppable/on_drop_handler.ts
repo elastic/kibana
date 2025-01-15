@@ -4,19 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type DropType } from '@kbn/dom-drag-drop';
+import { DropType } from '@kbn/dom-drag-drop';
 import {
   isDraggedDataViewField,
   reorderElements,
   shouldRemoveSource as shouldRemoveSourceChecker,
 } from '../../../../utils';
 import {
-  type DatasourceDimensionDropHandlerProps,
-  type DragDropOperation,
-  type IndexPatternMap,
+  DatasourceDimensionDropHandlerProps,
+  DragDropOperation,
+  IndexPatternMap,
   isOperation,
-  type VisualizationDimensionGroupConfig,
-  type DraggedField,
+  VisualizationDimensionGroupConfig,
+  DraggedField,
 } from '../../../../types';
 import {
   insertOrReplaceColumn,
@@ -29,7 +29,7 @@ import {
 } from '../../operations';
 import { mergeLayer, mergeLayers } from '../../state_helpers';
 import { getNewOperation, getField } from './get_drop_props';
-import { type FormBasedPrivateState, type DataViewDragDropOperation } from '../../types';
+import { FormBasedPrivateState, DataViewDragDropOperation } from '../../types';
 import { removeColumn } from '../../form_based';
 
 interface DropHandlerProps<T = DataViewDragDropOperation> {

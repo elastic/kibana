@@ -4,23 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type DataViewDescriptor } from '../../../../common/data_views/models/data_view_descriptor';
-import { type FilterDataViews, type SearchDataViews } from '../../../hooks/use_data_views';
+import { DataViewDescriptor } from '../../../../common/data_views/models/data_view_descriptor';
+import { FilterDataViews, SearchDataViews } from '../../../hooks/use_data_views';
 import {
-  type AllDatasetSelection,
-  type DataSourceSelection,
-  type DataSourceSelectionChangeHandler,
+  AllDatasetSelection,
+  DataSourceSelection,
+  DataSourceSelectionChangeHandler,
 } from '../../../../common/data_source_selection';
-import { type Dataset } from '../../../../common/datasets/models/dataset';
-import { type ReloadDatasets, type SearchDatasets } from '../../../hooks/use_datasets';
+import { Dataset } from '../../../../common/datasets/models/dataset';
+import { ReloadDatasets, SearchDatasets } from '../../../hooks/use_datasets';
 import {
-  type LoadMoreIntegrations,
-  type ReloadIntegrations,
-  type SearchIntegrations,
+  LoadMoreIntegrations,
+  ReloadIntegrations,
+  SearchIntegrations,
 } from '../../../hooks/use_integrations';
 import type { IHashedCache } from '../../../../common/hashed_cache';
-import { type DataSourceSelectorSearchParams, type PanelId, type TabId } from '../types';
-import { type DataViewsFilterParams } from '../../../state_machines/data_views';
+import { DataSourceSelectorSearchParams, PanelId, TabId } from '../types';
+import { DataViewsFilterParams } from '../../../state_machines/data_views';
 
 export interface DefaultDataSourceSelectorContext {
   selection: DataSourceSelection;

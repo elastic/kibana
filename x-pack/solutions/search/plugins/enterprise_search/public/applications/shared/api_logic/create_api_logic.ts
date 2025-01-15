@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { kea, type MakeLogicType } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
-import { type ApiStatus, Status, type HttpError } from '../../../../common/types/api';
+import { ApiStatus, Status, HttpError } from '../../../../common/types/api';
 import { clearFlashMessages, flashAPIErrors, flashSuccessToast } from '../flash_messages';
 
 export interface Values<T> {

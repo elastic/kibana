@@ -6,9 +6,9 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { type HttpSetup } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
 
-import { registerTestBed, type TestBed, type AsyncTestBedConfig } from '@kbn/test-jest-helpers';
+import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { ManageProcessors } from '../../../public/application/sections';
 import { WithAppDependencies } from './setup_environment';
 import { getManageProcessorsPath, ROUTES } from '../../../public/application/services/navigation';

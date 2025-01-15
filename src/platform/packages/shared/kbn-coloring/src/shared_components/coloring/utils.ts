@@ -8,9 +8,9 @@
  */
 
 import {
-  type DataBounds,
-  type PaletteOutput,
-  type PaletteRegistry,
+  DataBounds,
+  PaletteOutput,
+  PaletteRegistry,
   checkIsMinContinuity,
   reversePalette,
   checkIsMaxContinuity,
@@ -18,7 +18,7 @@ import {
   roundValue,
   getPaletteStops,
   getDataMinMax,
-  type CustomPaletteParams,
+  CustomPaletteParams,
   CUSTOM_PALETTE,
   DEFAULT_RANGE_TYPE,
   DEFAULT_COLOR_STEPS,

@@ -11,10 +11,10 @@ import {
   ConfigKey,
   MonitorTypeEnum,
   FormMonitorType,
-  type SyntheticsMonitor,
-  type BrowserFields,
-  type HTTPFields,
-  type ScheduleUnit,
+  SyntheticsMonitor,
+  BrowserFields,
+  HTTPFields,
+  ScheduleUnit,
 } from '../types';
 
 export const getDefaultFormFields = (

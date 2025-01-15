@@ -13,8 +13,8 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import {
   mergeMigrationFunctionMaps,
-  type MigrateFunctionsObject,
-  type MigrateFunction,
+  MigrateFunctionsObject,
+  MigrateFunction,
 } from '@kbn/kibana-utils-plugin/common';
 import {
   commonAddSupportOfDualIndexSelectionModeInTSVB,
@@ -30,7 +30,7 @@ import {
   commonPreserveOldLegendSizeDefault,
   commonRemoveExclamationCircleIcon,
 } from '../migrations/visualization_common_migrations';
-import { type SerializedVis } from '../../common';
+import { SerializedVis } from '../../common';
 
 const byValueAddSupportOfDualIndexSelectionModeInTSVB = (state: SerializableRecord) => {
   return {

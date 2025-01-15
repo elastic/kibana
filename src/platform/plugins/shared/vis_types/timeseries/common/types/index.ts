@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Filter } from '@kbn/es-query';
-import { type KBN_FIELD_TYPES, type Query } from '@kbn/data-plugin/common';
+import { Filter } from '@kbn/es-query';
+import { KBN_FIELD_TYPES, Query } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { type Panel } from './panel_model';
+import { Panel } from './panel_model';
 
 export type { Metric, Series, Panel, MetricType, Percentile } from './panel_model';
 export type {

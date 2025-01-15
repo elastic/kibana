@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 import { get } from 'lodash';
 
 import {
@@ -19,10 +19,10 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { type Phase } from '../../../../../../../common/types';
+import { Phase } from '../../../../../../../common/types';
 import { ToggleField, useFormData } from '../../../../../../shared_imports';
 import { i18nTexts } from '../../../i18n_texts';
-import { type FormInternal } from '../../../types';
+import { FormInternal } from '../../../types';
 import { UseField, useFormErrorsContext, usePhaseTimings } from '../../../form';
 import { MinAgeField } from '../shared_fields';
 

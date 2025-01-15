@@ -8,6 +8,6 @@
  */
 
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
-import { type ExpressionsStart } from './types';
+import { ExpressionsStart } from './types';
 
 export const [getExpressions, setExpressions] = createGetterSetter<ExpressionsStart>('Expressions');

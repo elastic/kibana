@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { type ServiceParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { ServiceParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
 import {
-  type MicrosoftDefenderEndpointConfig,
-  type MicrosoftDefenderEndpointMachine,
-  type MicrosoftDefenderEndpointMachineAction,
-  type MicrosoftDefenderEndpointSecrets,
+  MicrosoftDefenderEndpointConfig,
+  MicrosoftDefenderEndpointMachine,
+  MicrosoftDefenderEndpointMachineAction,
+  MicrosoftDefenderEndpointSecrets,
 } from '../../../common/microsoft_defender_endpoint/types';
 import { MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID } from '../../../common/microsoft_defender_endpoint/constants';
 import { MicrosoftDefenderEndpointConnector } from './microsoft_defender_endpoint';
 import {
-  type ConnectorInstanceMock,
+  ConnectorInstanceMock,
   createAxiosResponseMock,
   createConnectorInstanceMock,
 } from '../lib/mocks';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ApplicationStart, type IBasePath } from '@kbn/core/public';
+import { ApplicationStart, IBasePath } from '@kbn/core/public';
 import React, { PureComponent, Fragment } from 'react';
 import moment from 'moment';
 import {
@@ -23,21 +23,21 @@ import {
   EuiSwitch,
   EuiFormRow,
   EuiText,
-  type EuiTableFieldDataColumnType,
-  type EuiTableActionsColumnType,
-  type QueryType,
-  type CriteriaWithPagination,
+  EuiTableFieldDataColumnType,
+  EuiTableActionsColumnType,
+  QueryType,
+  CriteriaWithPagination,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
-import { type SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
-import { type SavedObjectWithMetadata } from '../../../types';
+import { SavedObjectWithMetadata } from '../../../types';
 import {
-  type SavedObjectsManagementActionServiceStart,
-  type SavedObjectsManagementAction,
-  type SavedObjectsManagementColumnServiceStart,
+  SavedObjectsManagementActionServiceStart,
+  SavedObjectsManagementAction,
+  SavedObjectsManagementColumnServiceStart,
 } from '../../../services';
 
 export type ItemId<T> = string | number | ((item: T) => string);

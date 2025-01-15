@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Plugin, type CoreSetup, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { Plugin, CoreSetup, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
 export class CoreAppLeavePlugin
   implements Plugin<CoreAppLeavePluginSetup, CoreAppLeavePluginStart>

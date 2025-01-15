@@ -8,7 +8,7 @@
  */
 
 import { formatRequestBodyDoc } from '../../lib/utils';
-import { type ESRequest } from '../../types';
+import { ESRequest } from '../../types';
 
 export function getFormattedRequest(req: ESRequest) {
   let res = req.method + ' ' + req.endpoint;

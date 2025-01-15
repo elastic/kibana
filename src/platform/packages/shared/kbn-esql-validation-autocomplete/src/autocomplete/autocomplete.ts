@@ -89,7 +89,7 @@ import {
   getPolicyHelper,
   getSourcesHelper,
 } from '../shared/resources_helpers';
-import { type ESQLCallbacks, type ESQLSourceResult } from '../shared/types';
+import { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
 import {
   getFunctionsToIgnoreForStats,
   getQueryForFields,
@@ -104,7 +104,7 @@ import {
   getSuggestionsToRightOfOperatorExpression,
   checkFunctionInvocationComplete,
 } from './helper';
-import { type FunctionParameter, isParameterType } from '../definitions/types';
+import { FunctionParameter, isParameterType } from '../definitions/types';
 import { metadataOption } from '../definitions/options';
 import { comparisonFunctions } from '../definitions/builtin';
 import { getRecommendedQueriesSuggestions } from './recommended_queries/suggestions';

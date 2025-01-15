@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type SyntheticsEsClient } from '../lib';
-import { type ScreenshotBlockDoc } from '../../common/runtime_types';
+import { SyntheticsEsClient } from '../lib';
+import { ScreenshotBlockDoc } from '../../common/runtime_types';
 
 interface ScreenshotBlockResultType {
   _id: string;

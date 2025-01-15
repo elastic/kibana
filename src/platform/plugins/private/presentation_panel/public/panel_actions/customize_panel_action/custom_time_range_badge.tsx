@@ -9,14 +9,14 @@
 
 import { PrettyDuration } from '@elastic/eui';
 import {
-  type Action,
-  type FrequentCompatibilityChangeAction,
+  Action,
+  FrequentCompatibilityChangeAction,
   IncompatibleActionError,
 } from '@kbn/ui-actions-plugin/public';
 import React from 'react';
 
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { apiPublishesTimeRange, type EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { apiPublishesTimeRange, EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { core } from '../../kibana_services';
 import { customizePanelAction } from '../panel_actions';
 

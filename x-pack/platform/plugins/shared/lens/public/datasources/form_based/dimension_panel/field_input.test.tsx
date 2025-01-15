@@ -11,24 +11,24 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 import { EuiComboBox } from '@elastic/eui';
 import userEvent from '@testing-library/user-event';
-import { type GenericOperationDefinition } from '../operations';
+import { GenericOperationDefinition } from '../operations';
 import {
   averageOperation,
   countOperation,
   derivativeOperation,
-  type FieldBasedIndexPatternColumn,
+  FieldBasedIndexPatternColumn,
   termsOperation,
   staticValueOperation,
   minOperation,
-  type FieldInputProps,
+  FieldInputProps,
 } from '../operations/definitions';
 import { FieldInput, getErrorMessage } from './field_input';
 import { createMockedIndexPattern, createMockedIndexPatternWithAdditionalFields } from '../mocks';
 import { getOperationSupportMatrix } from '.';
-import { type GenericIndexPatternColumn, type FormBasedLayer, type FormBasedPrivateState } from '../types';
-import { type ReferenceBasedIndexPatternColumn } from '../operations/definitions/column_types';
+import { GenericIndexPatternColumn, FormBasedLayer, FormBasedPrivateState } from '../types';
+import { ReferenceBasedIndexPatternColumn } from '../operations/definitions/column_types';
 import { FieldSelect } from './field_select';
-import { type IndexPattern, type VisualizationDimensionGroupConfig } from '../../../types';
+import { IndexPattern, VisualizationDimensionGroupConfig } from '../../../types';
 
 function getStringBasedOperationColumn(field = 'source') {
   return {

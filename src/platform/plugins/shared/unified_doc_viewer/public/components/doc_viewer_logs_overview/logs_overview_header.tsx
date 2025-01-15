@@ -18,7 +18,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import {
-  type LogDocumentOverview,
+  LogDocumentOverview,
   fieldConstants,
   getMessageFieldWithFallbacks,
 } from '@kbn/discover-utils';

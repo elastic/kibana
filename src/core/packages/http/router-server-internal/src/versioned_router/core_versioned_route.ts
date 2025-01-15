@@ -45,7 +45,7 @@ import { validRouteSecurity } from '../security_route_config_validator';
 import { resolvers } from './handler_resolvers';
 import { prepareVersionedRouteValidation, unwrapVersionedResponseBodyValidation } from './util';
 import type { RequestLike } from './route_version_utils';
-import { type Router } from '../router';
+import { Router } from '../router';
 
 interface InternalVersionedRouteConfig<M extends RouteMethod> extends VersionedRouteConfig<M> {
   isDev: boolean;

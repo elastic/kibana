@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { type DataViewsPublicPluginStart, type DataView } from '@kbn/data-views-plugin/public';
+import { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import { prefixIndexPatternWithCcs } from '../../../../common/ccs_utils';
 import {
   CCS_REMOTE_PATTERN,
@@ -15,7 +15,7 @@ import {
   INDEX_PATTERN_KIBANA,
   INDEX_PATTERN_LOGSTASH_MONITORING,
 } from '../../../../common/constants';
-import { type MonitoringConfig } from '../../../types';
+import { MonitoringConfig } from '../../../types';
 
 const INDEX_PATTERNS = `${INDEX_PATTERN_ELASTICSEARCH},${INDEX_PATTERN_KIBANA},${INDEX_PATTERN_LOGSTASH_MONITORING},${INDEX_PATTERN_BEATS}`;
 

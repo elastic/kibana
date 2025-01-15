@@ -10,7 +10,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLoadingSpinner,
-  type EuiPanel,
+  EuiPanel,
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/css';

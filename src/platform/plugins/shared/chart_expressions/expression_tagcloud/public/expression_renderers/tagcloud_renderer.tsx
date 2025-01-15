@@ -13,7 +13,7 @@ import { ClassNames } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
-import { type ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   type ChartSizeEvent,
@@ -21,8 +21,8 @@ import {
   extractVisualizationType,
 } from '@kbn/chart-expressions-common';
 
-import { type ExpressionTagcloudRendererDependencies } from '../plugin';
-import { type TagcloudRendererConfig } from '../../common/types';
+import { ExpressionTagcloudRendererDependencies } from '../plugin';
+import { TagcloudRendererConfig } from '../../common/types';
 import { EXPRESSION_NAME } from '../../common';
 
 export const strings = {

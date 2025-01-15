@@ -8,9 +8,9 @@
  */
 
 import React from 'react';
-import { EuiButtonGroup, type EuiColorPalettePickerPaletteProps } from '@elastic/eui';
+import { EuiButtonGroup, EuiColorPalettePickerPaletteProps } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { type ReactWrapper } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
 import type {
   PaletteOutput,
   PaletteRegistry,

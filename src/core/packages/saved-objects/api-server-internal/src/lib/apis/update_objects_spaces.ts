@@ -8,11 +8,11 @@
  */
 
 import {
-  type SavedObjectsUpdateObjectsSpacesObject,
-  type SavedObjectsUpdateObjectsSpacesOptions,
-  type SavedObjectsUpdateObjectsSpacesResponse,
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
+  SavedObjectsUpdateObjectsSpacesResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { type ApiExecutionContext } from './types';
+import { ApiExecutionContext } from './types';
 import { updateObjectsSpaces } from './internals/update_objects_spaces';
 
 export interface PerformCreateParams<T = unknown> {

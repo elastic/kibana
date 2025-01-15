@@ -19,7 +19,7 @@ import {
   type ESQLCallbacks,
   getPolicyHelper,
   collectVariables,
-  type ESQLRealField,
+  ESQLRealField,
 } from '@kbn/esql-validation-autocomplete';
 import { correctQuerySyntax } from '@kbn/esql-validation-autocomplete/src/shared/helpers';
 import type { EditorContext } from '@kbn/esql-validation-autocomplete/src/autocomplete/types';

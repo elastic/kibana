@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { type IHttpFetchError, type ResponseErrorBody } from '@kbn/core/public';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import {
-  type CreateInvestigationNoteParams,
-  type CreateInvestigationNoteResponse,
+  CreateInvestigationNoteParams,
+  CreateInvestigationNoteResponse,
 } from '@kbn/investigation-shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useKibana } from './use_kibana';

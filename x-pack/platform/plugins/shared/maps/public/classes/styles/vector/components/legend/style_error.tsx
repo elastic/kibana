@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type DynamicStyleProperty } from '../../properties/dynamic_style_property';
+import { DynamicStyleProperty } from '../../properties/dynamic_style_property';
 
 interface Props {
   error: Error;

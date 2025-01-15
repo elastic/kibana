@@ -10,16 +10,16 @@
 import { Position } from '@elastic/charts';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
-import { type FormatFactory } from '../types';
+import { FormatFactory } from '../types';
 import {
-  type CommonXYDataLayerConfig,
-  type DataDecorationConfig,
-  type YAxisConfig,
-  type ReferenceLineDecorationConfig,
-  type YAxisConfigResult,
-  type XAxisConfigResult,
+  CommonXYDataLayerConfig,
+  DataDecorationConfig,
+  YAxisConfig,
+  ReferenceLineDecorationConfig,
+  YAxisConfigResult,
+  XAxisConfigResult,
 } from '../../common';
-import { type LayersFieldFormats } from './layers';
+import { LayersFieldFormats } from './layers';
 
 export interface Series {
   layer: string;

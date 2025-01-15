@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type FieldFormat } from '../../types';
+import { FieldFormat } from '../../types';
 import {
   FCP_FIELD,
   FID_FIELD,

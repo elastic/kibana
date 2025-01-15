@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type RuleTypeWithDescription } from '../common';
+import { RuleTypeWithDescription } from '../common';
 import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
 
 export const getInitialConsumer = ({

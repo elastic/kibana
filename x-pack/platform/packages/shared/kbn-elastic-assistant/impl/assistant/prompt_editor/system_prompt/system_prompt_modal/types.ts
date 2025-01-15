@@ -5,12 +5,12 @@
  * 2.0.
  */
 import {
-  type PromptResponse,
-  type PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
+  PromptResponse,
+  PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
-import { type AIConnector } from '../../../../connectorland/connector_selector';
-import { type Conversation } from '../../../../..';
-import { type ConversationsBulkActions } from '../../../api';
+import { AIConnector } from '../../../../connectorland/connector_selector';
+import { Conversation } from '../../../../..';
+import { ConversationsBulkActions } from '../../../api';
 
 export interface SystemPromptSettingsProps {
   connectors: AIConnector[] | undefined;

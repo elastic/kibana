@@ -9,8 +9,8 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { type ReactWrapper } from 'enzyme';
-import { TruncateLabelsOption, type TruncateLabelsOptionProps } from './truncate_labels';
+import { ReactWrapper } from 'enzyme';
+import { TruncateLabelsOption, TruncateLabelsOptionProps } from './truncate_labels';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 describe('TruncateLabelsOption', function () {

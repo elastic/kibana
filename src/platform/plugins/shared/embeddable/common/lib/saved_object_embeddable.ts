@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type EmbeddableInput } from '../types';
+import { EmbeddableInput } from '../types';
 
 export interface SavedObjectEmbeddableInput extends EmbeddableInput {
   savedObjectId: string;

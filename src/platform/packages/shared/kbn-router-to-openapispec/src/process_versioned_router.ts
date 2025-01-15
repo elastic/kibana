@@ -28,7 +28,7 @@ import {
   mergeResponseContent,
   getXsrfHeaderForMethod,
   setXState,
-  type GetOpId,
+  GetOpId,
 } from './util';
 import { isReferenceObject } from './oas_converter/common';
 

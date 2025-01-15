@@ -8,7 +8,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { type ExpandPanelActionApi, ExpandPanelAction } from './expand_panel_action';
+import { ExpandPanelActionApi, ExpandPanelAction } from './expand_panel_action';
 
 describe('Expand panel action', () => {
   let action: ExpandPanelAction;

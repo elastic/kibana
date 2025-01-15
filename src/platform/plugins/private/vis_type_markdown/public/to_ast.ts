@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type VisToExpressionAst } from '@kbn/visualizations-plugin/public';
+import { VisToExpressionAst } from '@kbn/visualizations-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import { type MarkdownVisExpressionFunctionDefinition } from './markdown_fn';
-import { type MarkdownVisParams } from './types';
+import { MarkdownVisExpressionFunctionDefinition } from './markdown_fn';
+import { MarkdownVisParams } from './types';
 
 export const toExpressionAst: VisToExpressionAst<MarkdownVisParams> = (vis) => {
   const { markdown, fontSize, openLinksInNewTab } = vis.params;

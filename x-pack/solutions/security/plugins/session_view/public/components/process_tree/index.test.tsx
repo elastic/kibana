@@ -12,8 +12,8 @@ import {
   deepNullMockData,
 } from '../../../common/mocks/constants/session_view_process.mock';
 import type { Process } from '../../../common';
-import { type AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { type ProcessTreeDeps, ProcessTree } from '.';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
+import { ProcessTreeDeps, ProcessTree } from '.';
 import { useDateFormat } from '../../hooks';
 
 jest.mock('../../hooks/use_date_format');

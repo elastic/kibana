@@ -8,7 +8,7 @@
  */
 
 import { CspConfig } from './csp_config';
-import { cspConfig, type CspConfigType } from './config';
+import { cspConfig, CspConfigType } from './config';
 
 // CSP rules aren't strictly additive, so any change can potentially expand or
 // restrict the policy in a way we consider a breaking change. For that reason,

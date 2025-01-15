@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type CoreSetup } from '@kbn/core/server';
-import { type RuleType } from '@kbn/alerting-plugin/server';
+import { CoreSetup } from '@kbn/core/server';
+import { RuleType } from '@kbn/alerting-plugin/server';
 import { schema } from '@kbn/config-schema';
-import { type FixtureStartDeps, type FixtureSetupDeps } from './plugin';
+import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 
 export function defineAlertTypes(
   core: CoreSetup<FixtureStartDeps>,

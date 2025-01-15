@@ -14,8 +14,8 @@ import type { DiscoverSavedSearchContainer } from '../discover_saved_search_cont
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
 import type { DiscoverStateContainer } from '../discover_state';
 import {
-  type DiscoverAppState,
-  type DiscoverAppStateContainer,
+  DiscoverAppState,
+  DiscoverAppStateContainer,
   isEqualState,
 } from '../discover_app_state_container';
 import { addLog } from '../../../../utils/add_log';

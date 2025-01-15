@@ -23,11 +23,11 @@ import React, { useRef } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { useAnnotations } from '@kbn/observability-plugin/public';
-import { type SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { getBrushTimeBounds } from '../../../utils/slo/duration';
-import { type TimeBounds } from '../types';
+import { TimeBounds } from '../types';
 import { useKibana } from '../../../hooks/use_kibana';
-import { type ChartData } from '../../../typings';
+import { ChartData } from '../../../typings';
 
 type ChartType = 'area' | 'line';
 type State = 'success' | 'error';

@@ -9,14 +9,14 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { isEmpty } from 'lodash';
 import {
   Form,
-  type FormHook,
+  FormHook,
   useForm,
   useFormIsModified,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiSpacer } from '@elastic/eui';
-import { type ActionTypeModel, type ConnectorValidationFunc } from '../../../types';
+import { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
 import { ConnectorFormFields } from './connector_form_fields';
-import { type ConnectorFormSchema } from './types';
+import { ConnectorFormSchema } from './types';
 import { EncryptedFieldsCallout } from './encrypted_fields_callout';
 
 export interface ConnectorFormState {

@@ -8,9 +8,9 @@
  */
 
 import expect from '@kbn/expect';
-import { type Response } from 'supertest';
+import { Response } from 'supertest';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
-import { type FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

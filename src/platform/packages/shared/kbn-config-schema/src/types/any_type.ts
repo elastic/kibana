@@ -10,7 +10,7 @@
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
 import { META_FIELD_X_OAS_ANY } from '../oas_meta_fields';
-import { Type, type TypeOptions } from './type';
+import { Type, TypeOptions } from './type';
 
 export class AnyType extends Type<any> {
   constructor(options?: TypeOptions<any>) {

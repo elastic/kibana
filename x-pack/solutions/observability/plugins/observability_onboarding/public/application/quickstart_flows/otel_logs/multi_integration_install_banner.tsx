@@ -9,7 +9,7 @@ import { EuiCallOut, EuiCodeBlock, EuiFlexGroup, EuiFlexItem } from '@elastic/eu
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  type IntegrationInstallationError,
+  IntegrationInstallationError,
   useInstallIntegrations,
 } from '../../../hooks/use_install_integrations';
 

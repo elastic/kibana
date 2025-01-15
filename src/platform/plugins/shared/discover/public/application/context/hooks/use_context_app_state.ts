@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type DataView } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { useEffect, useMemo, useState } from 'react';
 
 import { CONTEXT_DEFAULT_SIZE_SETTING } from '@kbn/discover-utils';
-import { type DiscoverServices } from '../../../build_services';
-import { type AppState, getState, type GlobalState } from '../services/context_state';
+import { DiscoverServices } from '../../../build_services';
+import { AppState, getState, GlobalState } from '../services/context_state';
 
 export function useContextAppState({
   services,

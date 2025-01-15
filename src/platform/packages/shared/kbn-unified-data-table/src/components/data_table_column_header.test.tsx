@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 import { FieldIcon } from '@kbn/field-utils';
 import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
 import {

@@ -13,10 +13,10 @@ import {
   builtInAggregationTypes,
   builtInComparators,
   getTimeUnitLabel,
-  type TIME_UNITS,
+  TIME_UNITS,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { DEFAULT_VALUES } from '../constants';
-import { type CommonEsQueryRuleParams } from '../types';
+import { CommonEsQueryRuleParams } from '../types';
 
 const errors = {
   index: new Array<string>(),

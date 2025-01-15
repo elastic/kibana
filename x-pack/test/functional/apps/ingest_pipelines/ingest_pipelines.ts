@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { type IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import expect from '@kbn/expect';
-import { type FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const TEST_PIPELINE_NAME = 'test_pipeline';
 

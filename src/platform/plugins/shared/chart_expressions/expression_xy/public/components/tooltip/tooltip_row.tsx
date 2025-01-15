@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC } from 'react';
+import React, { FC } from 'react';
 
 export interface TooltipData {
   label?: string;

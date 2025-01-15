@@ -19,7 +19,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
-  type EuiPopoverProps,
+  EuiPopoverProps,
   useEuiTheme,
 } from '@elastic/eui';
 

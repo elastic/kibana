@@ -7,9 +7,9 @@
 
 import { createMockDatasource, createMockVisualization } from '../mocks';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
-import { type Filter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { createMockedIndexPattern } from '../datasources/form_based/mocks';
-import { type LayerType } from '..';
+import { LayerType } from '..';
 
 describe('getLayerMetaInfo', () => {
   const capabilities = {

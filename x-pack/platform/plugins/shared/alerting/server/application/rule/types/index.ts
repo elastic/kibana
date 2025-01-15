@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type * from './rule';
-export type * from './action';
+export * from './rule';
+export * from './action';

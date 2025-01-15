@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type RootSchema, type EventTypeOpts } from '@kbn/core/server';
+import { RootSchema, EventTypeOpts } from '@kbn/core/server';
 
 interface ScoredDocument {
   content: string;

@@ -12,9 +12,9 @@ import {
   isOfAggregateQueryType,
   type Query,
   type TimeRange,
-  type ExecutionContextSearch,
+  ExecutionContextSearch,
 } from '@kbn/es-query';
-import { type PublishingSubject, apiPublishesTimeslice } from '@kbn/presentation-publishing';
+import { PublishingSubject, apiPublishesTimeslice } from '@kbn/presentation-publishing';
 import type { LensRuntimeState } from '../types';
 import { nonNullable } from '../../utils';
 

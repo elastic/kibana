@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { type Values } from '@kbn/utility-types';
+import { Values } from '@kbn/utility-types';
 import {
   ALERT_INSTANCE_ID,
   ALERT_UUID,
-  type ALERT_RULE_CATEGORY,
-  type ALERT_RULE_CONSUMER,
-  type ALERT_RULE_EXECUTION_UUID,
-  type ALERT_RULE_NAME,
-  type ALERT_RULE_PRODUCER,
-  type ALERT_RULE_TYPE_ID,
-  type ALERT_RULE_UUID,
-  type SPACE_IDS,
-  type ALERT_RULE_TAGS,
-  type TIMESTAMP,
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_EXECUTION_UUID,
+  ALERT_RULE_NAME,
+  ALERT_RULE_PRODUCER,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
+  SPACE_IDS,
+  ALERT_RULE_TAGS,
+  TIMESTAMP,
 } from '@kbn/rule-data-utils';
 
 /* DO NOT MODIFY THIS SCHEMA TO ADD NEW FIELDS. These types represent the alerts that shipped in 8.0.0.

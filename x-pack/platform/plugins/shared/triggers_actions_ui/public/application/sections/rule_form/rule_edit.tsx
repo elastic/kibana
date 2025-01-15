@@ -31,17 +31,17 @@ import { cloneDeep, omit } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
 import {
-  type IErrorObject,
-  type Rule,
-  type RuleAction,
-  type RuleEditProps,
+  IErrorObject,
+  Rule,
+  RuleAction,
+  RuleEditProps,
   RuleFlyoutCloseReason,
-  type RuleNotifyWhenType,
-  type RuleType,
-  type RuleTypeMetaData,
-  type RuleTypeParams,
-  type RuleUiAction,
-  type TriggersActionsUiConfig,
+  RuleNotifyWhenType,
+  RuleType,
+  RuleTypeMetaData,
+  RuleTypeParams,
+  RuleUiAction,
+  TriggersActionsUiConfig,
 } from '../../../types';
 import { HealthCheck } from '../../components/health_check';
 import { ToastWithCircuitBreakerContent } from '../../components/toast_with_circuit_breaker_content';

@@ -8,7 +8,7 @@
 import React from 'react';
 import { TreeViewContainer } from '.';
 import { DEFAULT_FILTER_QUERY } from '../../../common/constants';
-import { type AppContextTestRender, createAppRootMockRenderer } from '../../test';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import * as context from './contexts';
 
 describe('TreeNav component', () => {

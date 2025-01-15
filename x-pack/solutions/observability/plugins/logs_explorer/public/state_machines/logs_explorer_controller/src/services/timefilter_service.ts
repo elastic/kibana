@@ -6,8 +6,8 @@
  */
 
 import type { QueryStart } from '@kbn/data-plugin/public';
-import { map, merge, type Observable } from 'rxjs';
-import { type ActionFunction, actions } from 'xstate';
+import { map, merge, Observable } from 'rxjs';
+import { ActionFunction, actions } from 'xstate';
 import type { LogsExplorerControllerContext, LogsExplorerControllerEvent } from '../types';
 
 export const subscribeToTimefilterService =

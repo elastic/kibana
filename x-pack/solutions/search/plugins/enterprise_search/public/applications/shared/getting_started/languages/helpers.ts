@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type LanguageDefinitionSnippetArguments } from '@kbn/search-api-panels';
+import { LanguageDefinitionSnippetArguments } from '@kbn/search-api-panels';
 
 export const ingestKeysToJSON = (
   extraIngestDocumentValues: LanguageDefinitionSnippetArguments['extraIngestDocumentValues']

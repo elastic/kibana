@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC, type PropsWithChildren, useContext } from 'react';
+import React, { FC, PropsWithChildren, useContext } from 'react';
 
 import {
   FormProvider,
@@ -15,15 +15,15 @@ import {
   type FormKibanaDependencies,
   type FormServices,
 } from '@kbn/management-settings-components-form';
-import { type SettingsCapabilities, type UiSettingMetadata } from '@kbn/management-settings-types';
-import { type IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { SettingsCapabilities, UiSettingMetadata } from '@kbn/management-settings-types';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { normalizeSettings } from '@kbn/management-settings-utilities';
-import { type Subscription } from 'rxjs';
-import { type ApplicationStart, type ScopedHistory } from '@kbn/core-application-browser';
-import { type UiSettingsScope } from '@kbn/core-ui-settings-common';
-import { type RegistryEntry, type SectionRegistryStart } from '@kbn/management-settings-section-registry';
-import { type ToastsStart } from '@kbn/core-notifications-browser';
-import { type ChromeBadge, type ChromeStart } from '@kbn/core-chrome-browser';
+import { Subscription } from 'rxjs';
+import { ApplicationStart, ScopedHistory } from '@kbn/core-application-browser';
+import { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import { RegistryEntry, SectionRegistryStart } from '@kbn/management-settings-section-registry';
+import { ToastsStart } from '@kbn/core-notifications-browser';
+import { ChromeBadge, ChromeStart } from '@kbn/core-chrome-browser';
 
 export interface Services {
   getAllowlistedSettings: (scope: UiSettingsScope) => Record<string, UiSettingMetadata>;

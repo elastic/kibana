@@ -9,7 +9,7 @@
 
 import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
-import { type EmbeddableConsoleDependencies } from '../../../types/embeddable_console';
+import { EmbeddableConsoleDependencies } from '../../../types/embeddable_console';
 
 type EmbeddableConsoleInternalProps = EmbeddableConsoleDependencies;
 const Console = dynamic(async () => ({

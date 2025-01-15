@@ -8,8 +8,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { type IRouter } from '@kbn/core/server';
-import { type ServerUrlService } from '../../types';
+import { IRouter } from '@kbn/core/server';
+import { ServerUrlService } from '../../types';
 
 export const registerGetRoute = (router: IRouter, url: ServerUrlService) => {
   router.get(

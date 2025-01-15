@@ -7,17 +7,17 @@
 
 import React from 'react';
 import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
-import { EuiComboBox, type EuiComboBoxProps, type EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import {
-  type FIELD_ORIGIN,
+  FIELD_ORIGIN,
   MIDDLE_TRUNCATION_PROPS,
   SINGLE_SELECTION_AS_TEXT_PROPS,
-  type VECTOR_STYLES,
+  VECTOR_STYLES,
 } from '../../../../../common/constants';
-import { type StyleField } from '../style_fields_helper';
+import { StyleField } from '../style_fields_helper';
 
 function groupFieldsByOrigin(fields: StyleField[]) {
   const fieldsByOriginMap = new Map<FIELD_ORIGIN, StyleField[]>();

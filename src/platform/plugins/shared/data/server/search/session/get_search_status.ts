@@ -9,10 +9,10 @@
 
 import { i18n } from '@kbn/i18n';
 import type { TransportResult } from '@elastic/elasticsearch';
-import { type ElasticsearchClient } from '@kbn/core/server';
-import { type SearchSessionRequestStatus } from '../../../common';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { SearchSessionRequestStatus } from '../../../common';
 import { SearchStatus } from './types';
-import { type AsyncSearchStatusResponse } from '../..';
+import { AsyncSearchStatusResponse } from '../..';
 
 export async function getSearchStatus(
   internalClient: ElasticsearchClient,

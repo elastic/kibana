@@ -12,8 +12,8 @@ import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import {
-  type ContentManagementPublicSetup,
-  type ContentManagementPublicStart,
+  ContentManagementPublicSetup,
+  ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public/types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';

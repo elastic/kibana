@@ -10,12 +10,12 @@
 import { cloneDeep, get, omit, has, flow, forOwn, mapValues } from 'lodash';
 import type { SavedObjectMigrationFn, SavedObjectMigrationMap } from '@kbn/core/server';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
-import { type MigrateFunctionsObject, type MigrateFunction } from '@kbn/kibana-utils-plugin/common';
+import { MigrateFunctionsObject, MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 
 import {
   DEFAULT_QUERY_LANGUAGE,
   isSerializedSearchSource,
-  type SerializedSearchSourceFields,
+  SerializedSearchSourceFields,
 } from '@kbn/data-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import {
@@ -32,7 +32,7 @@ import {
   commonPreserveOldLegendSizeDefault,
   commonRemoveExclamationCircleIcon,
 } from './visualization_common_migrations';
-import { type VisualizationSavedObjectAttributes } from '../../common/content_management';
+import { VisualizationSavedObjectAttributes } from '../../common/content_management';
 
 const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');

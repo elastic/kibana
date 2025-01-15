@@ -7,21 +7,21 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { Writable } from '@kbn/utility-types';
-import { type RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import { type RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getRuleType } from './rule_type';
-import { type EsQueryRuleParams, type EsQueryRuleState } from './rule_type_params';
-import { type ActionContext } from './action_context';
+import { EsQueryRuleParams, EsQueryRuleState } from './rule_type_params';
+import { ActionContext } from './action_context';
 import type { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
 import {
-  type OnlyEsqlQueryRuleParams,
-  type OnlyEsQueryRuleParams,
-  type OnlySearchSourceRuleParams,
+  OnlyEsqlQueryRuleParams,
+  OnlyEsQueryRuleParams,
+  OnlySearchSourceRuleParams,
 } from './types';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { Comparator } from '../../../common/comparator_types';

@@ -8,7 +8,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { type AddDataService, type AddDataServiceSetup } from './add_data_service';
+import { AddDataService, AddDataServiceSetup } from './add_data_service';
 
 const createSetupMock = (): jest.Mocked<AddDataServiceSetup> => {
   const setup = {

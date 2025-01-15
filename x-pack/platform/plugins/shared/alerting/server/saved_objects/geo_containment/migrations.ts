@@ -6,13 +6,13 @@
  */
 
 import {
-  type SavedObjectAttributes,
-  type SavedObjectReference,
-  type SavedObjectUnsanitizedDoc,
+  SavedObjectAttributes,
+  SavedObjectReference,
+  SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
-import { type Query } from '@kbn/data-plugin/common/query';
-import { type RuleTypeParams } from '../..';
-import { type RawRule } from '../../types';
+import { Query } from '@kbn/data-plugin/common/query';
+import { RuleTypeParams } from '../..';
+import { RawRule } from '../../types';
 
 // These definitions are dupes of the SO-types in stack_alerts/geo_containment
 // There are not exported to avoid deep imports from stack_alerts plugins into here

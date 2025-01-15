@@ -8,7 +8,7 @@
  */
 
 import type { Serializable } from '@kbn/utility-types';
-import { type AnyExpressionTypeDefinition, type ExpressionValue, type ExpressionValueConverter } from './types';
+import { AnyExpressionTypeDefinition, ExpressionValue, ExpressionValueConverter } from './types';
 import { getType } from './get_type';
 
 export class ExpressionType {

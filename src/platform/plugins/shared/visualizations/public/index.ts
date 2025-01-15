@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type PublicContract } from '@kbn/utility-types';
-import { type PluginInitializerContext } from '@kbn/core/public';
-import { VisualizationsPlugin, type VisualizationsSetup, type VisualizationsStart } from './plugin';
+import { PublicContract } from '@kbn/utility-types';
+import { PluginInitializerContext } from '@kbn/core/public';
+import { VisualizationsPlugin, VisualizationsSetup, VisualizationsStart } from './plugin';
 import type { VisualizeEmbeddable } from './legacy/embeddable';
 
 export function plugin(initializerContext: PluginInitializerContext) {

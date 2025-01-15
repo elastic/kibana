@@ -8,12 +8,12 @@
 import sinon from 'sinon';
 import { v4 as uuidv4 } from 'uuid';
 import { getMigrations } from '.';
-import { type RawRule, type RawRuleAction } from '../../types';
-import { type SavedObjectMigrationContext, type SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { RawRule, RawRuleAction } from '../../types';
+import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { migrationMocks } from '@kbn/core/server/mocks';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import { type RuleType, ruleTypeMappings } from '@kbn/securitysolution-rules';
+import { RuleType, ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { isAnyActionSupportIncidents } from './7.11';
 import { RULE_SAVED_OBJECT_TYPE } from '..';
 

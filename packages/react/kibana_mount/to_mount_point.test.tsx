@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC, useEffect } from 'react';
+import React, { FC, useEffect } from 'react';
 import { act } from 'react-dom/test-utils';
 import { of, BehaviorSubject } from 'rxjs';
 import { useEuiTheme } from '@elastic/eui';

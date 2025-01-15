@@ -6,12 +6,12 @@
  */
 
 import { useReducer, useCallback } from 'react';
-import { type OnCheckCompleted } from '../../types';
+import { OnCheckCompleted } from '../../types';
 import { MappingsError } from '../../utils/fetch_mappings';
 import { UnallowedValuesError } from '../../utils/fetch_unallowed_values';
-import { checkIndex as _checkIndex, type CheckIndexProps } from '../../utils/check_index';
+import { checkIndex as _checkIndex, CheckIndexProps } from '../../utils/check_index';
 import { initialState, reducer } from './reducer';
-import { type UseIndicesCheckReturnValue } from './types';
+import { UseIndicesCheckReturnValue } from './types';
 import { useIsMountedRef } from '../use_is_mounted_ref';
 
 export const useIndicesCheck = ({

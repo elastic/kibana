@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
+import { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import type OpenAI from 'openai';
 
 export interface InvokeAIActionParamsSchema {

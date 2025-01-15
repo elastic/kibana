@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { type HttpSetup } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import { useQuery } from '@tanstack/react-query';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
-import { type Conversation } from '../../../assistant_context/types';
+import { Conversation } from '../../../assistant_context/types';
 
 export interface FetchConversationsResponse {
   page: number;

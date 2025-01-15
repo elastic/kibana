@@ -10,12 +10,12 @@
 import React, { useState } from 'react';
 import {
   EuiInMemoryTable,
-  type EuiBasicTableColumn,
+  EuiBasicTableColumn,
   EuiButtonEmpty,
   EuiSpacer,
   EuiButton,
   EuiText,
-  type EuiSearchBarProps,
+  EuiSearchBarProps,
 } from '@elastic/eui';
 import {
   txtNameColumnTitle,

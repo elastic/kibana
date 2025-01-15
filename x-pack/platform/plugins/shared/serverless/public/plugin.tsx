@@ -6,27 +6,27 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import { type InternalChromeStart } from '@kbn/core-chrome-browser-internal';
-import { type CoreSetup, type CoreStart, type Plugin, type PluginInitializerContext } from '@kbn/core/public';
+import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ProjectSwitcher, ProjectSwitcherKibanaProvider } from '@kbn/serverless-project-switcher';
-import { type ProjectType } from '@kbn/serverless-types';
+import { ProjectType } from '@kbn/serverless-types';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { API_SWITCH_PROJECT as projectChangeAPIUrl } from '../common';
-import { type ServerlessConfig } from './config';
+import { ServerlessConfig } from './config';
 import {
   generateManageOrgMembersNavCard,
   manageOrgMembersNavCardName,
   SideNavComponent,
 } from './navigation';
 import {
-  type ServerlessPluginSetup,
-  type ServerlessPluginSetupDependencies,
-  type ServerlessPluginStart,
-  type ServerlessPluginStartDependencies,
+  ServerlessPluginSetup,
+  ServerlessPluginSetupDependencies,
+  ServerlessPluginStart,
+  ServerlessPluginStartDependencies,
 } from './types';
 
 export class ServerlessPlugin

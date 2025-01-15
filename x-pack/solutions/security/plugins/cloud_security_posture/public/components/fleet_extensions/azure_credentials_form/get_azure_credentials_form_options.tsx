@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { type NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
-import { type AzureCredentialsType } from '../../../../common/types_old';
+import { AzureCredentialsType } from '../../../../common/types_old';
 import { CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS } from '../../test_subjects';
 import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form';
 

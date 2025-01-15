@@ -43,7 +43,7 @@ import {
   EXECUTION_RUN_TYPE_FILTER_ITEM,
   RULE_BACKFILLS_TABLE,
 } from '../screens/rule_details';
-import { type RuleDetailsTabs, ruleDetailsUrl } from '../urls/rule_details';
+import { RuleDetailsTabs, ruleDetailsUrl } from '../urls/rule_details';
 import {
   addExceptionConditions,
   addExceptionFlyoutItemName,

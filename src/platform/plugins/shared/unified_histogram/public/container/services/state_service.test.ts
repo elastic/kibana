@@ -17,7 +17,7 @@ import {
   setChartHidden,
   setTopPanelHeight,
 } from '../utils/local_storage_utils';
-import { createStateService, type UnifiedHistogramState } from './state_service';
+import { createStateService, UnifiedHistogramState } from './state_service';
 
 jest.mock('../utils/local_storage_utils', () => {
   const originalModule = jest.requireActual('../utils/local_storage_utils');

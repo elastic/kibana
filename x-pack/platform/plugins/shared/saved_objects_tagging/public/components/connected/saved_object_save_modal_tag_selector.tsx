@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback, useState } from 'react';
+import React, { FC, useCallback, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiFormRow, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type SavedObjectSaveModalTagSelectorComponentProps } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { type TagsCapabilities } from '../../../common';
+import { SavedObjectSaveModalTagSelectorComponentProps } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { TagsCapabilities } from '../../../common';
 import { TagSelector } from '../base';
-import { type ITagsCache } from '../../services';
-import { type CreateModalOpener } from '../edition_modal';
+import { ITagsCache } from '../../services';
+import { CreateModalOpener } from '../edition_modal';
 
 interface GetConnectedTagSelectorOptions {
   cache: ITagsCache;

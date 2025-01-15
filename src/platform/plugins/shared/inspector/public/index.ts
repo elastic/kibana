@@ -11,7 +11,7 @@
 
 import './index.scss';
 
-import { type PluginInitializerContext } from '@kbn/core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { InspectorPublicPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
@@ -32,4 +32,4 @@ export {
 } from './adapters/has_inspector_adapters';
 export { InspectorPublicPlugin as Plugin } from './plugin';
 export type { Setup, Start } from './plugin';
-export type * from './types';
+export * from './types';

@@ -9,7 +9,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { combineLatest, debounceTime, skip } from 'rxjs';
-import { type AnyPublishingSubject, type PublishingSubject, type UnwrapPublishingSubjectTuple } from './types';
+import { AnyPublishingSubject, PublishingSubject, UnwrapPublishingSubjectTuple } from './types';
 
 const hasSubjectsArrayChanged = (
   subjectsA: AnyPublishingSubject[],

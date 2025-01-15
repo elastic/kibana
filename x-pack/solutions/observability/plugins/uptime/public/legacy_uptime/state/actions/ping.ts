@@ -7,10 +7,10 @@
 
 import { createAction } from 'redux-actions';
 import {
-  type GetPingHistogramParams,
-  type HistogramResult,
-  type PingsResponse,
-  type GetPingsParams,
+  GetPingHistogramParams,
+  HistogramResult,
+  PingsResponse,
+  GetPingsParams,
 } from '../../../../common/runtime_types';
 import { createAsyncAction } from './utils';
 

@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ExpressionAstExpression, type ExpressionAstFunction } from './types';
+import { ExpressionAstExpression, ExpressionAstFunction } from './types';
 import {
-  type AnyExpressionFunctionDefinition,
-  type ExpressionFunctionDefinition,
+  AnyExpressionFunctionDefinition,
+  ExpressionFunctionDefinition,
 } from '../expression_functions/types';
 import {
   buildExpression,
-  type ExpressionAstExpressionBuilder,
+  ExpressionAstExpressionBuilder,
   isExpressionAstBuilder,
   isExpressionAst,
 } from './build_expression';

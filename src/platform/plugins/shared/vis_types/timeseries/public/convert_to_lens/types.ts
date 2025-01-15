@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Vis } from '@kbn/visualizations-plugin/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
 import {
-  type MetricVisConfiguration,
-  type NavigateToLensContext,
-  type XYConfiguration,
-  type TableVisConfiguration,
+  MetricVisConfiguration,
+  NavigateToLensContext,
+  XYConfiguration,
+  TableVisConfiguration,
 } from '@kbn/visualizations-plugin/common';
-import { type TimeRange } from '@kbn/data-plugin/common';
+import { TimeRange } from '@kbn/data-plugin/common';
 import type { Panel } from '../../common/types';
 
 export type ConvertTsvbToLensVisualization = (

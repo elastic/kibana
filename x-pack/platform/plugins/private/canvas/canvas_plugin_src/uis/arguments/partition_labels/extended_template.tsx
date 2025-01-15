@@ -6,10 +6,10 @@
  */
 
 import React, {
-  type ChangeEvent,
-  type MouseEvent,
-  type KeyboardEvent,
-  type FunctionComponent,
+  ChangeEvent,
+  MouseEvent,
+  KeyboardEvent,
+  FunctionComponent,
   useCallback,
   useEffect,
 } from 'react';
@@ -18,16 +18,16 @@ import {
   EuiFormRow,
   EuiRange,
   EuiSelect,
-  type EuiSelectOption,
+  EuiSelectOption,
   EuiSpacer,
   EuiSwitch,
-  type EuiSwitchEvent,
+  EuiSwitchEvent,
   EuiText,
 } from '@elastic/eui';
-import { type ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import { set } from '@kbn/safer-lodash-set';
 import { defaultExpression } from './default_expression';
-import { type Fields } from './types';
+import { Fields } from './types';
 import { getFieldPath, getFieldValue } from './utils';
 import { ArgumentStrings } from '../../../../i18n';
 

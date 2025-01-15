@@ -8,7 +8,7 @@
 import { getAnonymizedAlertsFromState } from '.';
 
 import { mockAnonymizedAlerts } from '../../../../../../evaluation/__mocks__/mock_anonymized_alerts';
-import { type GraphState } from '../../../../types';
+import { GraphState } from '../../../../types';
 
 const graphState: GraphState = {
   attackDiscoveries: null,

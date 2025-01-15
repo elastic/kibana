@@ -6,11 +6,11 @@
  */
 
 import {
-  type TransportRequestOptions,
-  type TransportResult,
-  type TransportRequestOptionsWithMeta,
-  type TransportRequestOptionsWithOutMeta,
-  type TransportRequestParams,
+  TransportRequestOptions,
+  TransportResult,
+  TransportRequestOptionsWithMeta,
+  TransportRequestOptionsWithOutMeta,
+  TransportRequestParams,
 } from '@elastic/elasticsearch';
 import type {
   SearchRequest,
@@ -25,7 +25,7 @@ import type {
   EqlSearchRequest as EqlSearchRequestWithBody,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IScopedClusterClient, ElasticsearchClient, Logger } from '@kbn/core/server';
-import { type SearchMetrics, type RuleInfo } from './types';
+import { SearchMetrics, RuleInfo } from './types';
 
 interface WrapScopedClusterClientFactoryOpts {
   scopedClusterClient: IScopedClusterClient;

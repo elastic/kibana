@@ -7,15 +7,15 @@
 
 import {
   BedrockRuntimeClient as _BedrockRuntimeClient,
-  type BedrockRuntimeClientConfig,
-  type ConverseCommand,
-  type ConverseResponse,
-  type ConverseStreamCommand,
-  type ConverseStreamResponse,
+  BedrockRuntimeClientConfig,
+  ConverseCommand,
+  ConverseResponse,
+  ConverseStreamCommand,
+  ConverseStreamResponse,
 } from '@aws-sdk/client-bedrock-runtime';
 import { constructStack } from '@smithy/middleware-stack';
-import { type HttpHandlerOptions } from '@smithy/types';
-import { type PublicMethodsOf } from '@kbn/utility-types';
+import { HttpHandlerOptions } from '@smithy/types';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import { prepareMessages } from '../../utils/bedrock';

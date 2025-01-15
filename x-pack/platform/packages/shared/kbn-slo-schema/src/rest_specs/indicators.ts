@@ -4,24 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as t from 'io-ts';
+import * as t from 'io-ts';
 import {
-  type apmTransactionDurationIndicatorSchema,
-  type apmTransactionErrorRateIndicatorSchema,
-  type histogramIndicatorSchema,
-  type indicatorSchema,
-  type indicatorTypesSchema,
-  type kqlCustomIndicatorSchema,
-  type kqlWithFiltersSchema,
-  type metricCustomIndicatorSchema,
-  type querySchema,
-  type filtersSchema,
-  type groupingsSchema,
-  type syntheticsAvailabilityIndicatorSchema,
-  type timesliceMetricBasicMetricWithField,
-  type timesliceMetricDocCountMetric,
-  type timesliceMetricIndicatorSchema,
-  type timesliceMetricPercentileMetric,
+  apmTransactionDurationIndicatorSchema,
+  apmTransactionErrorRateIndicatorSchema,
+  histogramIndicatorSchema,
+  indicatorSchema,
+  indicatorTypesSchema,
+  kqlCustomIndicatorSchema,
+  kqlWithFiltersSchema,
+  metricCustomIndicatorSchema,
+  querySchema,
+  filtersSchema,
+  groupingsSchema,
+  syntheticsAvailabilityIndicatorSchema,
+  timesliceMetricBasicMetricWithField,
+  timesliceMetricDocCountMetric,
+  timesliceMetricIndicatorSchema,
+  timesliceMetricPercentileMetric,
 } from '../schema';
 
 type IndicatorType = t.OutputOf<typeof indicatorTypesSchema>;

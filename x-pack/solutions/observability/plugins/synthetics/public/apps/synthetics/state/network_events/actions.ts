@@ -6,7 +6,7 @@
  */
 
 import { createAsyncAction } from '../utils/actions';
-import { type SyntheticsNetworkEventsApiResponse } from '../../../../../common/runtime_types';
+import { SyntheticsNetworkEventsApiResponse } from '../../../../../common/runtime_types';
 
 export interface FetchNetworkEventsParams {
   checkGroup: string;

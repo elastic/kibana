@@ -9,7 +9,7 @@ import React from 'react';
 import { render, renderHook } from '@testing-library/react';
 import { AssistantNavLink } from './assistant_nav_link';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
-import { type ChromeNavControl } from '@kbn/core/public';
+import { ChromeNavControl } from '@kbn/core/public';
 import { createHtmlPortalNode, OutPortal } from 'react-reverse-portal';
 import { of } from 'rxjs';
 import { useAssistantContext } from '.';

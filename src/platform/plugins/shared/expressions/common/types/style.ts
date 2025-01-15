@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type FontLabel } from '../fonts';
+import { FontLabel } from '../fonts';
 
 /**
  * Enum of supported CSS `background-repeat` properties.

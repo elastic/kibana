@@ -8,7 +8,7 @@
  */
 
 import * as React from 'react';
-import { FlexibleInput, type FlexibleInputProps } from './flexible_input';
+import { FlexibleInput, FlexibleInputProps } from './flexible_input';
 
 export default {
   title: '<FlexibleInput>',

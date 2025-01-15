@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type AxisTypeId, computeInputCombinations, type PosType } from './_mocks';
+import { AxisTypeId, computeInputCombinations, PosType } from './_mocks';
 import { computeChartMargins, getLineAnnotationProps } from './utils';
-import { type AxesMap, type AxisConfiguration, Marker, MarkerBody } from '../../helpers';
-import { type ReferenceLineAnnotationConfig } from './reference_line_annotations';
+import { AxesMap, AxisConfiguration, Marker, MarkerBody } from '../../helpers';
+import { ReferenceLineAnnotationConfig } from './reference_line_annotations';
 import { Position } from '@elastic/charts';
 import React from 'react';
 

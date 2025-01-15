@@ -10,12 +10,12 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
-  type EuiSelectableOption,
+  EuiSelectableOption,
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from '../../../../components/mappings_editor/mappings_state_context';
-import { type State } from '../../../../components/mappings_editor/types';
+import { State } from '../../../../components/mappings_editor/types';
 import {
   getFieldsFromState,
   getFieldsMatchingFilterFromState,

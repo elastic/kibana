@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFilePicker, type EuiFilePickerProps } from '@elastic/eui';
+import { EuiFilePicker, EuiFilePickerProps } from '@elastic/eui';
 
 import { JSON } from '../../../../i18n/constants';
 export interface Props {

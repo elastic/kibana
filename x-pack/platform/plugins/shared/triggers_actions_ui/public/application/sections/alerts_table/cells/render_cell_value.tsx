@@ -18,13 +18,13 @@ import {
 } from '@kbn/rule-data-utils';
 import {
   FIELD_FORMAT_IDS,
-  type FieldFormatParams,
-  type FieldFormatsRegistry,
+  FieldFormatParams,
+  FieldFormatsRegistry,
 } from '@kbn/field-formats-plugin/common';
-import { EuiBadge, EuiLink, type RenderCellValue } from '@elastic/eui';
+import { EuiBadge, EuiLink, RenderCellValue } from '@elastic/eui';
 import { alertProducersData, observabilityFeatureIds } from '../constants';
 import { useKibana } from '../../../../common/lib/kibana';
-import { type AlertsTableSupportedConsumers } from '../types';
+import { AlertsTableSupportedConsumers } from '../types';
 
 export const getMappedNonEcsValue = ({
   data,

@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type moment from 'moment';
-import { type IAggConfig } from '../agg_config';
-import { type FilterFieldFn, type GenericBucket, type IAggConfigs } from '../../..';
-import { AggType, type AggTypeConfig } from '../agg_type';
-import { type AggParamType } from '../param_types/agg';
+import moment from 'moment';
+import { IAggConfig } from '../agg_config';
+import { FilterFieldFn, GenericBucket, IAggConfigs } from '../../..';
+import { AggType, AggTypeConfig } from '../agg_type';
+import { AggParamType } from '../param_types/agg';
 import type { FieldTypes } from '../param_types/field';
 
 export interface IBucketAggConfig extends IAggConfig {

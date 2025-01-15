@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type ElementPosition } from './elements';
-import { type FilterField } from './filters';
+import { ElementPosition } from './elements';
+import { FilterField } from './filters';
 
 export interface CanvasAsset {
   '@created': string;

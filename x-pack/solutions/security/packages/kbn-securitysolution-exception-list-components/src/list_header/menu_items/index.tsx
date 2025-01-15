@@ -6,11 +6,11 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
-import React, { type FC, useMemo } from 'react';
+import React, { FC, useMemo } from 'react';
 import { HeaderMenu } from '../../header_menu';
 import { headerMenuCss, noLinkedRulesCss } from '../list_header.styles';
 import * as i18n from '../../translations';
-import { type Rule } from '../../types';
+import { Rule } from '../../types';
 import { generateLinkedRulesMenuItems } from '../../generate_linked_rules_menu_item';
 interface MenuItemsProps {
   isReadonly: boolean;

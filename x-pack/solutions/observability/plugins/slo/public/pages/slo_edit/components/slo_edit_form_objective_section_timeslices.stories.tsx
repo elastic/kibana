@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { type ComponentStory } from '@storybook/react';
+import { ComponentStory } from '@storybook/react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';

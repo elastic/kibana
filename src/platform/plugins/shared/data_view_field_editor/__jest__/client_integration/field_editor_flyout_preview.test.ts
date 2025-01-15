@@ -13,7 +13,7 @@ import {
   setupEnvironment,
   fieldFormatsOptions,
   indexPatternNameForTest,
-  type EsDoc,
+  EsDoc,
   setSearchResponseLatency,
 } from './helpers';
 import {
@@ -21,7 +21,7 @@ import {
   setIndexPatternFields,
   getSearchCallMeta,
   setSearchResponse,
-  type FieldEditorFlyoutContentTestBed,
+  FieldEditorFlyoutContentTestBed,
 } from './field_editor_flyout_preview.helpers';
 import { spyGetFieldsForWildcard } from './helpers/setup_environment';
 import { mockDocuments, createPreviewError } from './helpers/mocks';

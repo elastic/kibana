@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
-import { type EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
+import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
+import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
 import { CONTROL_GROUP_TYPE } from '../../common';
 import {
   createControlGroupExtract,

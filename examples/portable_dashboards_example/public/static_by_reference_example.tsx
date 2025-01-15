@@ -10,9 +10,9 @@
 import React from 'react';
 import { css } from '@emotion/react';
 
-import { buildPhraseFilter, type Filter } from '@kbn/es-query';
+import { buildPhraseFilter, Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { DashboardRenderer, type DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
+import { DashboardRenderer, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { EuiCode, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 

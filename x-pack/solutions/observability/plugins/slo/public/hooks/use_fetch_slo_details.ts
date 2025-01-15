@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ALL_VALUE, type GetSLOResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, GetSLOResponse } from '@kbn/slo-schema';
 import {
-  type QueryObserverResult,
-  type RefetchOptions,
-  type RefetchQueryFilters,
+  QueryObserverResult,
+  RefetchOptions,
+  RefetchQueryFilters,
   useQuery,
 } from '@tanstack/react-query';
 import { SLO_LONG_REFETCH_INTERVAL } from '../constants';

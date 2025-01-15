@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { type ObservabilityOnboardingFlowStatus } from './get_onboarding_status';
+import { ObservabilityOnboardingFlowStatus } from './get_onboarding_status';
 import { OBSERVABILITY_ONBOARDING_AUTODETECT_TELEMETRY_EVENT } from '../../../../common/telemetry_events';
 
 interface IntegrationFields {

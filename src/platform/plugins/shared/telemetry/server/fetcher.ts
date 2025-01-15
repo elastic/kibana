@@ -14,7 +14,7 @@ import {
   firstValueFrom,
   merge,
   mergeMap,
-  type Observable,
+  Observable,
   skip,
   Subscription,
   takeUntil,

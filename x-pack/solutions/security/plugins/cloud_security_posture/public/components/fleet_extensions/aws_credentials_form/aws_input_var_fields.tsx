@@ -7,10 +7,10 @@
 
 import React, { Suspense } from 'react';
 import { EuiFieldText, EuiFormRow, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
-import { type PackageInfo } from '@kbn/fleet-plugin/common';
+import { PackageInfo } from '@kbn/fleet-plugin/common';
 import { css } from '@emotion/react';
 import { LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
-import { type AwsOptions } from './get_aws_credentials_form_options';
+import { AwsOptions } from './get_aws_credentials_form_options';
 import { findVariableDef } from '../utils';
 
 export const AwsInputVarFields = ({

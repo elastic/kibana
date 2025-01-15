@@ -8,9 +8,9 @@
  */
 
 import {
-  type ExpressionFunctionDefinition,
-  type ExpressionValueRender,
-  type Style,
+  ExpressionFunctionDefinition,
+  ExpressionValueRender,
+  Style,
 } from '@kbn/expressions-plugin/common';
 
 export enum Shape {

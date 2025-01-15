@@ -6,14 +6,14 @@
  */
 
 import {
-  type ExternalService,
-  type ExecutorSubActionPushParams,
-  type PushToServiceApiParamsSIR,
-  type ExternalServiceSIR,
-  type Observable,
+  ExternalService,
+  ExecutorSubActionPushParams,
+  PushToServiceApiParamsSIR,
+  ExternalServiceSIR,
+  Observable,
   ObservableTypes,
-  type ExternalServiceITOM,
-  type ExecutorSubActionAddEventParams,
+  ExternalServiceITOM,
+  ExecutorSubActionAddEventParams,
 } from './types';
 
 export const serviceNowCommonFields = [

@@ -20,7 +20,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTabbedContent,
-  type EuiTabbedContentTab,
+  EuiTabbedContentTab,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

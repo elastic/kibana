@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type RouteDependencies } from '../../plugin';
+import { RouteDependencies } from '../../plugin';
 import { registerCrawlerExtractionRulesRoutes } from '../enterprise_search/crawler/crawler_extraction_rules';
 
 import { registerSearchRelevanceSuggestionsRoutes } from './adaptive_relevance';

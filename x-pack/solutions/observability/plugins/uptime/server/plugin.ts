@@ -5,25 +5,25 @@
  * 2.0.
  */
 import {
-  type PluginInitializerContext,
-  type CoreStart,
-  type CoreSetup,
-  type Plugin as PluginType,
-  type Logger,
+  PluginInitializerContext,
+  CoreStart,
+  CoreSetup,
+  Plugin as PluginType,
+  Logger,
 } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { initUptimeServer } from './legacy_uptime/uptime_server';
 import {
-  type UptimeCorePluginsSetup,
-  type UptimeCorePluginsStart,
-  type UptimeServerSetup,
+  UptimeCorePluginsSetup,
+  UptimeCorePluginsStart,
+  UptimeServerSetup,
 } from './legacy_uptime/lib/adapters';
 import {
   registerUptimeSavedObjects,
   savedObjectsAdapter,
 } from './legacy_uptime/lib/saved_objects/saved_objects';
-import { type UptimeConfig } from '../common/config';
+import { UptimeConfig } from '../common/config';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
 import { uptimeRuleTypeFieldMap } from './legacy_uptime/lib/alerts/common';
 

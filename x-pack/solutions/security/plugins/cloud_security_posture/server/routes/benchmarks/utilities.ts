@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { type SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
-import { type CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
+import { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '../../../common/constants';
 
-import { type BenchmarkId } from '../../../common/types_old';
+import { BenchmarkId } from '../../../common/types_old';
 import { getBenchmarkFilter } from '../../../common/utils/helpers';
 
 export const getRulesCountForPolicy = async (

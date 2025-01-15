@@ -9,7 +9,7 @@
 
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
-import React, { type ComponentType, type ReactElement, type Ref, Suspense } from 'react';
+import React, { ComponentType, ReactElement, Ref, Suspense } from 'react';
 
 import { Fallback } from './fallback';
 

@@ -11,7 +11,7 @@ import { getEndpointEntryMatchMock } from '../entry_match/index.mock';
 import {
   endpointEntriesArray,
   nonEmptyEndpointEntriesArray,
-  type NonEmptyEndpointEntriesArray,
+  NonEmptyEndpointEntriesArray,
 } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { getEndpointEntryMatchAnyMock } from '../entry_match_any/index.mock';

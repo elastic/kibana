@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ConnectorUsageCollector, type Services } from '@kbn/actions-plugin/server/types';
+import { ConnectorUsageCollector, Services } from '@kbn/actions-plugin/server/types';
 import { validateConfig, validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { type ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { type Logger } from '@kbn/core/server';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { Logger } from '@kbn/core/server';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import axios from 'axios';
-import { type ConnectorTypeConfigType, type ConnectorTypeSecretsType, type WebhookConnectorType } from './types';
+import { ConnectorTypeConfigType, ConnectorTypeSecretsType, WebhookConnectorType } from './types';
 
 import { getConnectorType } from '.';
 

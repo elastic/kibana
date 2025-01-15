@@ -14,7 +14,7 @@ import { DURATION_ANOMALY } from '../../../../common/constants/uptime_alerts';
 import { getSeverityType } from '@kbn/ml-anomaly-utils';
 import type { MlAnomaliesTableRecord, MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
-import { type Ping } from '../../../../common/runtime_types/ping';
+import { Ping } from '../../../../common/runtime_types/ping';
 
 interface MockAnomaly {
   severity: MlAnomaliesTableRecord['severity'];

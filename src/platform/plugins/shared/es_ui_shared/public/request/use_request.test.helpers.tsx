@@ -9,12 +9,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { act } from 'react-dom/test-utils';
-import { mount, type ReactWrapper } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 import sinon from 'sinon';
 
-import { type HttpSetup, type HttpFetchOptions } from '@kbn/core/public';
-import { type SendRequestConfig, type SendRequestResponse } from './send_request';
-import { useRequest, type UseRequestResponse, type UseRequestConfig } from './use_request';
+import { HttpSetup, HttpFetchOptions } from '@kbn/core/public';
+import { SendRequestConfig, SendRequestResponse } from './send_request';
+import { useRequest, UseRequestResponse, UseRequestConfig } from './use_request';
 
 export interface UseRequestHelpers {
   advanceTime: (ms: number) => Promise<void>;

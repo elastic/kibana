@@ -7,9 +7,9 @@
 import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
-  type AgentPolicy,
+  AgentPolicy,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  type PackagePolicy,
+  PackagePolicy,
   SO_SEARCH_LIMIT,
 } from '@kbn/fleet-plugin/common';
 import { agentPolicyService } from '@kbn/fleet-plugin/server/services';

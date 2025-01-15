@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type DocLinks } from '@kbn/doc-links';
+import { DocLinks } from '@kbn/doc-links';
 
 /** @public */
 export interface DocLinksStart {

@@ -7,7 +7,7 @@
 
 import {
   generateMockFileIndicator,
-  type Indicator,
+  Indicator,
   RawIndicatorFieldId,
 } from '../../../../common/types/indicator';
 import { canAddToBlockList } from './can_add_to_block_list';

@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
+import { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
-import { UI_SETTINGS, type AggTypesDependencies } from '../..';
-import { type GetConfigFn } from '../../types';
+import { UI_SETTINGS, AggTypesDependencies } from '../..';
+import { GetConfigFn } from '../../types';
 import {
   AggConfigs,
   AggTypesRegistry,
@@ -19,7 +19,7 @@ import {
   getAggTypesFunctions,
   getCalculateAutoTimeExpression,
 } from '.';
-import { type AggsCommonSetup, type AggsCommonStart } from './types';
+import { AggsCommonSetup, AggsCommonStart } from './types';
 
 /** @internal */
 export const aggsRequiredUiSettings = [

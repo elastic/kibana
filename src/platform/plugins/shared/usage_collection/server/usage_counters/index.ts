@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type UsageCounters } from '../../common';
+import { UsageCounters } from '../../common';
 export type IncrementCounterParams = UsageCounters.v1.IncrementCounterParams;
 
 export type { UsageCountersServiceSetup, UsageCountersServiceStart } from './types';

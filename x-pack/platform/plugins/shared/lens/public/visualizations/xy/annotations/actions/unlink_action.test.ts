@@ -6,12 +6,12 @@
  */
 
 import {
-  type XYByValueAnnotationLayerConfig,
-  type XYByReferenceAnnotationLayerConfig,
-  type XYState,
+  XYByValueAnnotationLayerConfig,
+  XYByReferenceAnnotationLayerConfig,
+  XYState,
 } from '../../types';
 import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
-import { type PointInTimeEventAnnotationConfig } from '@kbn/event-annotation-common';
+import { PointInTimeEventAnnotationConfig } from '@kbn/event-annotation-common';
 import { cloneDeep } from 'lodash';
 import { getUnlinkLayerAction } from './unlink_action';
 

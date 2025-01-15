@@ -16,7 +16,7 @@ import {
   type SavedObjectsReference,
 } from '@kbn/content-management-content-editor';
 import {
-  type ContentInsightsClientPublic,
+  ContentInsightsClientPublic,
   ContentInsightsProvider,
 } from '@kbn/content-management-content-insights-public';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
@@ -30,7 +30,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
 import { UserProfilesKibanaProvider } from '@kbn/content-management-user-profiles';
 import {
-  type FavoritesClientPublic,
+  FavoritesClientPublic,
   FavoritesContextProvider,
 } from '@kbn/content-management-favorites-public';
 

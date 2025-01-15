@@ -10,10 +10,10 @@
 import { i18n } from '@kbn/i18n';
 
 import {
-  type PainlessCompletionResult,
-  type PainlessCompletionItem,
-  type PainlessContext,
-  type PainlessAutocompleteField,
+  PainlessCompletionResult,
+  PainlessCompletionItem,
+  PainlessContext,
+  PainlessAutocompleteField,
 } from '../../types';
 
 import {

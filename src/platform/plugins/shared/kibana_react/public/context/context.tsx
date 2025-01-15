@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC, type PropsWithChildren } from 'react';
-import { type KibanaReactContext, type KibanaReactContextValue, type KibanaServices } from './types';
+import React, { FC, PropsWithChildren } from 'react';
+import { KibanaReactContext, KibanaReactContextValue, KibanaServices } from './types';
 import { createReactOverlays } from '../overlays';
 import { createNotifications } from '../notifications';
 

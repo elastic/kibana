@@ -11,7 +11,7 @@ import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import React, { Suspense } from 'react';
 
 import { untilPluginStartServicesReady } from '../services/kibana_services';
-import { type DashboardListingProps } from './types';
+import { DashboardListingProps } from './types';
 
 const ListingTableLoadingIndicator = () => {
   return <EuiEmptyPrompt icon={<EuiLoadingSpinner size="l" />} />;

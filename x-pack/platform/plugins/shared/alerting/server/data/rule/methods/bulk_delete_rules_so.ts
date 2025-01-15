@@ -6,9 +6,9 @@
  */
 
 import {
-  type SavedObjectsClientContract,
-  type SavedObjectsBulkDeleteOptions,
-  type SavedObjectsBulkDeleteResponse,
+  SavedObjectsClientContract,
+  SavedObjectsBulkDeleteOptions,
+  SavedObjectsBulkDeleteResponse,
 } from '@kbn/core/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 
