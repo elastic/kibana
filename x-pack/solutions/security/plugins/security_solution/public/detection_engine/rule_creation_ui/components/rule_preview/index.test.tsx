@@ -40,9 +40,16 @@ jest.mock('../../../../common/hooks/use_experimental_features', () => ({
 }));
 
 // rule types that do not support logged requests
-const doNotSupportLoggedRequests: Type[] = ['threat_match', 'query', 'new_terms'];
+const doNotSupportLoggedRequests: Type[] = ['threat_match', 'new_terms'];
 
-const supportLoggedRequests: Type[] = ['esql', 'eql', 'threshold', 'machine_learning'];
+const supportLoggedRequests: Type[] = [
+  'esql',
+  'eql',
+  'threshold',
+  'machine_learning',
+  'query',
+  'saved_query',
+];
 
 const getMockIndexPattern = (): DataViewBase => ({
   fields,

@@ -390,6 +390,7 @@ export interface SearchAfterAndBulkCreateParams {
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   additionalFilters?: estypes.QueryDslQueryContainer[];
+  isLoggedRequestsEnabled?: boolean;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {
@@ -405,6 +406,7 @@ export interface SearchAfterAndBulkCreateReturnType {
   userError?: boolean;
   warningMessages: string[];
   suppressedAlertsCount?: number;
+  loggedRequests?: RulePreviewLoggedRequest[];
 }
 
 // the new fields can be added later if needed

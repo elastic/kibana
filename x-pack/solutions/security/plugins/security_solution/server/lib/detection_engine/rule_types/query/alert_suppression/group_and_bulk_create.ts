@@ -49,6 +49,7 @@ export interface GroupAndBulkCreateParams {
   groupByFields: string[];
   eventsTelemetry: ITelemetryEventsSender | undefined;
   experimentalFeatures: ExperimentalFeatures;
+  isLoggedRequestsEnabled: boolean;
 }
 
 export interface GroupAndBulkCreateReturnType extends SearchAfterAndBulkCreateReturnType {
@@ -128,6 +129,7 @@ export const groupAndBulkCreate = async ({
   groupByFields,
   eventsTelemetry,
   experimentalFeatures,
+  isLoggedRequestsEnabled,
 }: GroupAndBulkCreateParams): Promise<GroupAndBulkCreateReturnType> => {
   return withSecuritySpan('groupAndBulkCreate', async () => {
     const tuple = runOpts.tuple;
@@ -197,11 +199,14 @@ export const groupAndBulkCreate = async ({
         secondaryTimestamp: runOpts.secondaryTimestamp,
         runtimeMappings: runOpts.runtimeMappings,
         additionalFilters: bucketHistoryFilter,
+        loggedRequestDescription: isLoggedRequestsEnabled ? 'Find events' : undefined,
       };
-      const { searchResult, searchDuration, searchErrors } = await singleSearchAfter(
-        eventsSearchParams
-      );
+      const { searchResult, searchDuration, searchErrors, loggedRequests } =
+        await singleSearchAfter(eventsSearchParams);
 
+      if (isLoggedRequestsEnabled) {
+        toReturn.loggedRequests = loggedRequests;
+      }
       toReturn.searchAfterTimes.push(searchDuration);
       toReturn.errors.push(...searchErrors);
 

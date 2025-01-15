@@ -26,6 +26,7 @@ import type {
 } from '../types';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { GenericBulkCreateResponse } from '../factories';
+import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 
 import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 
@@ -56,10 +57,13 @@ export const searchAfterAndBulkCreateFactory = async ({
   additionalFilters,
   bulkCreateExecutor,
   getWarningMessage,
+  isLoggedRequestsEnabled,
 }: SearchAfterAndBulkCreateFactoryParams): Promise<SearchAfterAndBulkCreateReturnType> => {
+  // eslint-disable-next-line complexity
   return withSecuritySpan('searchAfterAndBulkCreate', async () => {
     let toReturn = createSearchAfterReturnType();
     let searchingIteration = 0;
+    const loggedRequests: RulePreviewLoggedRequest[] = [];
 
     // sortId tells us where to start our next consecutive search_after query
     let sortIds: estypes.SortResults | undefined;
@@ -88,7 +92,12 @@ export const searchAfterAndBulkCreateFactory = async ({
         );
 
         if (hasSortId) {
-          const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
+          const {
+            searchResult,
+            searchDuration,
+            searchErrors,
+            loggedRequests: singleSearchLoggedRequests = [],
+          } = await singleSearchAfter({
             searchAfterSortIds: sortIds,
             index: inputIndexPattern,
             runtimeMappings,
@@ -103,6 +112,11 @@ export const searchAfterAndBulkCreateFactory = async ({
             trackTotalHits,
             sortOrder,
             additionalFilters,
+            loggedRequestDescription: isLoggedRequestsEnabled
+              ? sortIds
+                ? `Find events after cursor ${sortIds}`
+                : 'Find events'
+              : undefined,
           });
           mergedSearchResults = mergeSearchResults([mergedSearchResults, searchResult]);
           toReturn = mergeReturns([
@@ -116,7 +130,7 @@ export const searchAfterAndBulkCreateFactory = async ({
               errors: searchErrors,
             }),
           ]);
-
+          loggedRequests.push(...singleSearchLoggedRequests);
           // determine if there are any candidate signals to be processed
           const totalHits = getTotalHitsValue(mergedSearchResults.hits.total);
           const lastSortIds = getSafeSortIds(
@@ -211,6 +225,6 @@ export const searchAfterAndBulkCreateFactory = async ({
       }
     }
     ruleExecutionLogger.debug(`Completed bulk indexing of ${toReturn.createdSignalsCount} alert`);
-    return toReturn;
+    return { ...toReturn, ...(isLoggedRequestsEnabled ? { loggedRequests } : {}) };
   });
 };

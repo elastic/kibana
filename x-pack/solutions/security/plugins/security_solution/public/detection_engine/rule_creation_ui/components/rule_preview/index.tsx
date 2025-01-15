@@ -48,6 +48,8 @@ const RULE_TYPES_SUPPORTING_LOGGED_REQUESTS: Type[] = [
   'eql',
   'threshold',
   'machine_learning',
+  'query',
+  'saved_query',
 ];
 
 const timeRanges = [
