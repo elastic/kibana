@@ -29,9 +29,10 @@ export interface Props extends DivProps {
   id: DashboardPanelState['explicitInput']['id'];
   index?: number;
   type: DashboardPanelState['type'];
+  expandedPanelId?: string;
+  focusedPanelId?: string;
   key: string;
   isRenderable?: boolean;
-  setDragHandles?: (refs: Array<HTMLElement | null>) => void;
 }
 
 export const Item = React.forwardRef<HTMLDivElement, Props>(
@@ -39,11 +40,14 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     {
       appFixedViewport,
       dashboardContainer,
+      expandedPanelId,
+      focusedPanelId,
       id,
       index,
       type,
       isRenderable = true,
-      setDragHandles,
+      // The props below are passed from ReactGridLayoutn and need to be merged with their counterparts.
+      // https://github.com/react-grid-layout/react-grid-layout/issues/1241#issuecomment-658306889
       children,
       className,
       ...rest
@@ -52,18 +56,9 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
   ) => {
     const dashboardApi = useDashboardApi();
     const dashboardInternalApi = useDashboardInternalApi();
-    const [
-      highlightPanelId,
-      scrollToPanelId,
-      expandedPanelId,
-      focusedPanelId,
-      useMargins,
-      viewMode,
-    ] = useBatchedPublishingSubjects(
+    const [highlightPanelId, scrollToPanelId, useMargins, viewMode] = useBatchedPublishingSubjects(
       dashboardApi.highlightPanelId$,
       dashboardApi.scrollToPanelId$,
-      dashboardApi.expandedPanelId,
-      dashboardApi.focusedPanelId$,
       dashboardApi.settings.useMargins$,
       dashboardApi.viewMode
     );
@@ -123,7 +118,6 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
         showBorder: useMargins,
         showNotifications: true,
         showShadow: false,
-        setDragHandles,
       };
 
       return (
@@ -139,7 +133,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
           onApiAvailable={(api) => dashboardInternalApi.registerChildApi(api)}
         />
       );
-    }, [id, dashboardApi, dashboardInternalApi, type, useMargins, setDragHandles]);
+    }, [id, dashboardApi, dashboardInternalApi, type, useMargins]);
 
     return (
       <div
@@ -196,6 +190,8 @@ export const ObservedItem = React.forwardRef<HTMLDivElement, Props>((props, pane
   return <Item ref={panelRef} isRenderable={isRenderable} {...props} />;
 });
 
+// ReactGridLayout passes ref to children. Functional component children require forwardRef to avoid react warning
+// https://github.com/react-grid-layout/react-grid-layout#custom-child-components-and-draggable-handles
 export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>((props, ref) => {
   const dashboardApi = useDashboardApi();
   const [focusedPanelId, viewMode] = useBatchedPublishingSubjects(

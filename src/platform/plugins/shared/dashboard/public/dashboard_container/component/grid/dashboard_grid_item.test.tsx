@@ -9,11 +9,12 @@
 
 import React from 'react';
 
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+
 import { buildMockDashboardApi } from '../../../mocks';
 import { Item, Props as DashboardGridItemProps } from './dashboard_grid_item';
 import { DashboardContext } from '../../../dashboard_api/use_dashboard_api';
 import { DashboardInternalContext } from '../../../dashboard_api/use_dashboard_internal_api';
-import { act, render } from '@testing-library/react';
 
 jest.mock('@kbn/embeddable-plugin/public', () => {
   const original = jest.requireActual('@kbn/embeddable-plugin/public');
@@ -49,7 +50,7 @@ const createAndMountDashboardGridItem = (props: DashboardGridItemProps) => {
   };
   const { api, internalApi } = buildMockDashboardApi({ overrides: { panels } });
 
-  const component = render(
+  const component = mountWithIntl(
     <DashboardContext.Provider value={api}>
       <DashboardInternalContext.Provider value={internalApi}>
         <Item {...props} />
@@ -65,89 +66,58 @@ test('renders Item', async () => {
     key: '1',
     type: TEST_EMBEDDABLE,
   });
-  const panelElements = component.getAllByTestId('dashboardPanel');
+  const panelElements = component.find('.embedPanel');
   expect(panelElements.length).toBe(1);
 
-  const panelElement = component.container.querySelector('#panel-1');
-  expect(panelElement).not.toBeNull();
-  expect(panelElement!.classList.contains('dshDashboardGrid__item--expanded')).toBe(false);
-  expect(panelElement!.classList.contains('dshDashboardGrid__item--hidden')).toBe(false);
-  expect(panelElement!.classList.contains('dshDashboardGrid__item--focused')).toBe(false);
-  expect(panelElement!.classList.contains('dshDashboardGrid__item--blurred')).toBe(false);
+  expect(component.find('#panel-1').hasClass('dshDashboardGrid__item--expanded')).toBe(false);
+  expect(component.find('#panel-1').hasClass('dshDashboardGrid__item--hidden')).toBe(false);
+
+  expect(component.find('#panel-1').hasClass('dshDashboardGrid__item--focused')).toBe(false);
+  expect(component.find('#panel-1').hasClass('dshDashboardGrid__item--blurred')).toBe(false);
 });
 
 test('renders expanded panel', async () => {
-  const { component, dashboardApi } = createAndMountDashboardGridItem({
+  const { component } = createAndMountDashboardGridItem({
     id: '1',
     key: '1',
     type: TEST_EMBEDDABLE,
+    expandedPanelId: '1',
   });
-
-  // maximize rendered panel
-  await act(async () => {
-    dashboardApi.expandPanel('1');
-    await new Promise((resolve) => setTimeout(resolve, 1));
-  });
-
-  const panelElement = component.container.querySelector('#panel-1');
-  expect(panelElement).not.toBeNull();
-  expect(panelElement!.classList.contains('dshDashboardGrid__item--expanded')).toBe(true);
-  expect(panelElement!.classList.contains('dshDashboardGrid__item--hidden')).toBe(false);
+  expect(component.find('#panel-1').hasClass('dshDashboardGrid__item--expanded')).toBe(true);
+  expect(component.find('#panel-1').hasClass('dshDashboardGrid__item--hidden')).toBe(false);
 });
 
 test('renders hidden panel', async () => {
-  const { component, dashboardApi } = createAndMountDashboardGridItem({
+  const { component } = createAndMountDashboardGridItem({
     id: '1',
     key: '1',
     type: TEST_EMBEDDABLE,
+    expandedPanelId: '2',
   });
-
-  // maximize non-rendered panel
-  await act(async () => {
-    dashboardApi.expandPanel('2');
-    await new Promise((resolve) => setTimeout(resolve, 1));
-  });
-
-  const panelElement = component.container.querySelector('#panel-1');
-  expect(panelElement).not.toBeNull();
-  expect(panelElement!.classList.contains('dshDashboardGrid__item--expanded')).toBe(false);
-  expect(panelElement!.classList.contains('dshDashboardGrid__item--hidden')).toBe(true);
+  expect(component.find('#panel-1').hasClass('dshDashboardGrid__item--expanded')).toBe(false);
+  expect(component.find('#panel-1').hasClass('dshDashboardGrid__item--hidden')).toBe(true);
 });
 
 test('renders focused panel', async () => {
-  const { component, dashboardApi } = createAndMountDashboardGridItem({
+  const { component } = createAndMountDashboardGridItem({
     id: '1',
     key: '1',
     type: TEST_EMBEDDABLE,
+    focusedPanelId: '1',
   });
 
-  // focus rendered panel
-  await act(async () => {
-    dashboardApi.setFocusedPanelId('1');
-    await new Promise((resolve) => setTimeout(resolve, 1));
-  });
-
-  const panelElement = component.container.querySelector('#panel-1');
-  expect(panelElement).not.toBeNull();
-  expect(panelElement!.classList.contains('dshDashboardGrid__item--focused')).toBe(true);
-  expect(panelElement!.classList.contains('dshDashboardGrid__item--blurred')).toBe(false);
+  expect(component.find('#panel-1').hasClass('dshDashboardGrid__item--focused')).toBe(true);
+  expect(component.find('#panel-1').hasClass('dshDashboardGrid__item--blurred')).toBe(false);
 });
 
 test('renders blurred panel', async () => {
-  const { component, dashboardApi } = createAndMountDashboardGridItem({
+  const { component } = createAndMountDashboardGridItem({
     id: '1',
     key: '1',
     type: TEST_EMBEDDABLE,
+    focusedPanelId: '2',
   });
 
-  // focus non-rendered panel
-  await act(async () => {
-    dashboardApi.setFocusedPanelId('2');
-    await new Promise((resolve) => setTimeout(resolve, 1));
-  });
-
-  const panelElement = component.container.querySelector('#panel-1');
-  expect(panelElement).not.toBeNull();
-  expect(panelElement!.classList.contains('dshDashboardGrid__item--focused')).toBe(false);
-  expect(panelElement!.classList.contains('dshDashboardGrid__item--blurred')).toBe(true);
+  expect(component.find('#panel-1').hasClass('dshDashboardGrid__item--focused')).toBe(false);
+  expect(component.find('#panel-1').hasClass('dshDashboardGrid__item--blurred')).toBe(true);
 });

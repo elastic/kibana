@@ -123,7 +123,7 @@ export const GridExample = ({
         <EuiPageTemplate.Section
           color="subdued"
           contentProps={{
-            css: { flexGrow: 1, display: 'flex', flexDirection: 'column' },
+            css: { flexGrow: 1 },
           }}
         >
           <EuiCallOut

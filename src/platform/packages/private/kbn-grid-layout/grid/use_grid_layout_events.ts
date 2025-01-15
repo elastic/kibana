@@ -119,10 +119,7 @@ export const useGridLayoutEvents = ({
           : pointerClientPixel.x - interactionEvent.pointerOffsets.left,
         top: isResize ? panelRect.top : pointerClientPixel.y - interactionEvent.pointerOffsets.top,
         bottom: pointerClientPixel.y - interactionEvent.pointerOffsets.bottom,
-        right:
-          isResize && isTouchEvent(e)
-            ? Math.min(pointerClientPixel.x - interactionEvent.pointerOffsets.right, gridWidth)
-            : pointerClientPixel.x - interactionEvent.pointerOffsets.right,
+        right: Math.min(pointerClientPixel.x - interactionEvent.pointerOffsets.right, gridWidth),
       };
 
       gridLayoutStateManager.activePanel$.next({ id: interactionEvent.id, position: previewRect });
@@ -198,7 +195,7 @@ export const useGridLayoutEvents = ({
       const atTheBottom = window.innerHeight + window.scrollY >= document.body.scrollHeight;
 
       if (!isTouchEvent(e)) {
-        const startScrollingUp = heightPercentage < 5 && !atTheTop; // don't scroll up when resizing
+        const startScrollingUp = !isResize && heightPercentage < 5 && !atTheTop; // don't scroll up when resizing
         const startScrollingDown = heightPercentage > 95 && !atTheBottom;
         if (startScrollingUp || startScrollingDown) {
           if (!scrollInterval.current) {
@@ -261,11 +258,11 @@ export const useGridLayoutEvents = ({
 };
 
 function getPointerClientPosition(e: Event) {
-  if (isMouseEvent(e)) {
-    return { x: e.clientX, y: e.clientY };
-  }
   if (isTouchEvent(e)) {
     return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }
+  if (isMouseEvent(e)) {
+    return { x: e.clientX, y: e.clientY };
   }
   throw new Error('Unknown event type');
 }

@@ -7,19 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { cloneDeep } from 'lodash';
-import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
+import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest, map, pairwise, skip } from 'rxjs';
 
 import { transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+import { cloneDeep } from 'lodash';
 import { DragPreview } from '../drag_preview';
 import { GridPanel } from '../grid_panel';
-import { GridLayoutStateManager, PanelInteractionEvent, UserInteractionEvent } from '../types';
+import {
+  GridLayoutStateManager,
+  GridRowData,
+  UserInteractionEvent,
+  PanelInteractionEvent,
+} from '../types';
 import { getKeysInOrder } from '../utils/resolve_grid_row';
-import { isMouseEvent, isTouchEvent } from '../utils/sensors';
 import { GridRowHeader } from './grid_row_header';
+import { isTouchEvent, isMouseEvent } from '../utils/sensors';
 
 export interface GridRowProps {
   rowIndex: number;
@@ -44,19 +49,33 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
 
     const { euiTheme } = useEuiTheme();
 
+    const getRowCount = useCallback(
+      (row: GridRowData) => {
+        const maxRow = Object.values(row.panels).reduce((acc, panel) => {
+          return Math.max(acc, panel.row + panel.height);
+        }, 0);
+        return maxRow || 1;
+      },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [rowIndex]
+    );
     const rowContainer = useRef<HTMLDivElement | null>(null);
 
     /** Set initial styles based on state at mount to prevent styles from "blipping" */
     const initialStyles = useMemo(() => {
+      const initialRow = gridLayoutStateManager.gridLayout$.getValue()[rowIndex];
       const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
-      const { columnCount, rowHeight } = runtimeSettings;
+      const { gutterSize, columnCount, rowHeight } = runtimeSettings;
 
       return css`
-        grid-auto-rows: ${rowHeight}px;
-        grid-template-columns: repeat(${columnCount}, minmax(0, 1fr));
-        gap: calc(var(--kbnGridGutterSize) * 1px);
+        gap: ${gutterSize}px;
+        grid-template-columns: repeat(
+          ${columnCount},
+          calc((100% - ${gutterSize * (columnCount - 1)}px) / ${columnCount})
+        );
+        grid-template-rows: repeat(${getRowCount(initialRow)}, ${rowHeight}px);
       `;
-    }, [gridLayoutStateManager]);
+    }, [gridLayoutStateManager, getRowCount, rowIndex]);
 
     useEffect(
       () => {
@@ -72,6 +91,10 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
             if (!rowRef) return;
 
             const { gutterSize, rowHeight, columnPixelWidth } = runtimeSettings;
+
+            rowRef.style.gridTemplateRows = `repeat(${getRowCount(
+              gridLayout[rowIndex]
+            )}, ${rowHeight}px)`;
 
             const targetRow = interactionEvent?.targetRowIndex;
             if (rowIndex === targetRow && interactionEvent) {
@@ -95,6 +118,36 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
               rowRef.style.backgroundSize = ``;
               rowRef.style.backgroundImage = ``;
               rowRef.style.backgroundColor = `transparent`;
+            }
+          });
+
+        const expandedPanelStyleSubscription = gridLayoutStateManager.expandedPanelId$
+          .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
+          .subscribe((expandedPanelId) => {
+            const rowContainerRef = rowContainer.current;
+            if (!rowContainerRef) return;
+
+            if (expandedPanelId) {
+              // If any panel is expanded, move all rows with their panels out of the viewport.
+              // The expanded panel is repositioned to its original location in the GridPanel component
+              // and stretched to fill the viewport.
+
+              rowContainerRef.style.transform = 'translate(-9999px, -9999px)';
+
+              const panelsIds = Object.keys(
+                gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels
+              );
+              const includesExpandedPanel = panelsIds.includes(expandedPanelId);
+              if (includesExpandedPanel) {
+                // Stretch the row with the expanded panel to occupy the entire remaining viewport
+                rowContainerRef.style.height = '100%';
+              } else {
+                // Hide the row if it does not contain the expanded panel
+                rowContainerRef.style.height = '0';
+              }
+            } else {
+              rowContainerRef.style.transform = ``;
+              rowContainerRef.style.height = ``;
             }
           });
 
@@ -136,6 +189,7 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
         return () => {
           interactionStyleSubscription.unsubscribe();
           rowStateSubscription.unsubscribe();
+          expandedPanelStyleSubscription.unsubscribe();
         };
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -203,13 +257,7 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
     }, [panelIds, gridLayoutStateManager, renderPanelContents, rowIndex, setInteractionEvent]);
 
     return (
-      <div
-        ref={rowContainer}
-        css={css`
-          height: 100%;
-        `}
-        className="kbnGridRowContainer"
-      >
+      <div ref={rowContainer}>
         {rowIndex !== 0 && (
           <GridRowHeader
             isCollapsed={isCollapsed}
@@ -223,10 +271,8 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
         )}
         {!isCollapsed && (
           <div
-            className={'kbnGridRow'}
             ref={gridRef}
             css={css`
-              height: 100%;
               display: grid;
               justify-items: stretch;
               transition: background-color 300ms linear;
