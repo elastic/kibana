@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState } from '@kbn/ml-url-state';
@@ -37,18 +37,27 @@ export const getDefaultAnomalyDetectionJobsListState = (): ListingPageUrlState =
   sortDirection: 'asc',
 });
 
+const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
+
 export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh }) => {
   const [pageState, setPageState] = usePageUrlState<PageUrlState>(
     ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
     getDefaultAnomalyDetectionJobsListState()
   );
   const {
-    services: { docLinks },
+    services: { docLinks, spaces },
   } = useMlKibana();
   const { euiTheme } = useEuiTheme();
 
   const { showNodeInfo } = useEnabledFeatures();
   const helpLink = docLinks.links.ml.anomalyDetection;
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const ContextWrapper = useCallback(
+    spaces ? spaces.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
+    [spaces]
+  );
+
   return (
     <>
       <MlPageHeader>
@@ -57,14 +66,16 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh })
       <HeaderMenuPortal>
         <JobsActionMenu />
       </HeaderMenuPortal>
-      <JobsListView
-        euiTheme={euiTheme}
-        isMlEnabledInSpace={isMlEnabledInSpace}
-        lastRefresh={lastRefresh}
-        jobsViewState={pageState}
-        onJobsViewStateUpdate={setPageState}
-        showNodeInfo={showNodeInfo}
-      />
+      <ContextWrapper>
+        <JobsListView
+          euiTheme={euiTheme}
+          isMlEnabledInSpace={isMlEnabledInSpace}
+          lastRefresh={lastRefresh}
+          jobsViewState={pageState}
+          onJobsViewStateUpdate={setPageState}
+          showNodeInfo={showNodeInfo}
+        />
+      </ContextWrapper>
       <HelpMenu docLink={helpLink} />
     </>
   );

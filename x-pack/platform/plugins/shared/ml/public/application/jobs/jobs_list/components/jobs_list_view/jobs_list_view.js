@@ -323,7 +323,10 @@ export class JobsListViewUI extends Component {
     const expandedJobsIds = Object.keys(this.state.itemIdToExpandedRowMap);
     try {
       let jobsAwaitingNodeCount = 0;
-      const jobs = await mlApi.jobs.jobsSummary(expandedJobsIds);
+      const [jobs, jobsSpaces] = await Promise.all([
+        mlApi.jobs.jobsSummary(expandedJobsIds),
+        mlApi.savedObjects.jobsSpaces(),
+      ]);
       const fullJobsList = {};
       const jobsSummaryList = jobs.map((job) => {
         if (job.fullJob !== undefined) {
@@ -332,6 +335,13 @@ export class JobsListViewUI extends Component {
           }
           fullJobsList[job.id] = job.fullJob;
           delete job.fullJob;
+        }
+        if (
+          jobsSpaces &&
+          jobsSpaces['anomaly-detector'] &&
+          jobsSpaces['anomaly-detector'][job.id]
+        ) {
+          job.spaces = jobsSpaces['anomaly-detector'][job.id];
         }
         job.latestTimestampSortValue = job.latestTimestampMs || 0;
 
