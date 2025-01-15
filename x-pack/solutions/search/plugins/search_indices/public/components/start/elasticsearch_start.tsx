@@ -100,7 +100,6 @@ export const ElasticsearchStart: React.FC<ElasticsearchStartProps> = () => {
       onChangeView={onChangeView}
       onClose={onClose}
       showSkip
-      showCallouts
     >
       {createIndexView === CreateIndexViewMode.UI && (
         <CreateIndexUIView

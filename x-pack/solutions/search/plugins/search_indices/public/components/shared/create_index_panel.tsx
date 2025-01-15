@@ -33,7 +33,6 @@ export interface CreateIndexPanelProps {
   createIndexView: CreateIndexViewMode;
   onChangeView: (id: string) => void;
   onClose: () => void;
-  showCallouts?: boolean;
   showSkip?: boolean;
   title?: React.ReactNode;
 }
@@ -43,12 +42,15 @@ export const CreateIndexPanel = ({
   createIndexView,
   onChangeView,
   onClose,
-  showCallouts,
   showSkip,
   title,
 }: CreateIndexPanelProps) => {
-  const { cloud, http } = useKibana().services;
+  const { buildFlavor, cloud, http } = useKibana().services;
   const { euiTheme } = useEuiTheme();
+
+  const isServerless: boolean = useMemo(() => {
+    return buildFlavor === 'serverless';
+  }, [buildFlavor]);
 
   const o11yTrialLink = useMemo(() => {
     if (cloud && cloud.isServerlessEnabled) {
@@ -57,6 +59,14 @@ export const CreateIndexPanel = ({
     }
     return http.basePath.prepend('/app/observability/onboarding');
   }, [cloud, http]);
+
+  const o11yCreateSpaceLink = useMemo(() => {
+    return http.basePath.prepend('/app/management/kibana/spaces/create');
+  }, [http]);
+
+  const analyzeLogsIntegration = useMemo(() => {
+    return http.basePath.prepend('/app/integrations/browse/observability');
+  }, [http]);
 
   return (
     <>
@@ -174,85 +184,100 @@ export const CreateIndexPanel = ({
             {children}
           </EuiFlexGroup>
         </EuiPanel>
-        {showCallouts && (
-          <>
-            <EuiSpacer />
-            <EuiPanel color="transparent">
-              <EuiTextAlign textAlign="center">
-                <EuiTitle size="xs">
-                  <h5>
-                    {i18n.translate(
-                      'xpack.searchIndices.shared.createIndex.observabilityCallout.title',
-                      {
-                        defaultMessage: 'Looking to store your logs or metrics data?',
-                      }
-                    )}
-                  </h5>
-                </EuiTitle>
-              </EuiTextAlign>
-              <EuiSpacer size="m" />
-              <EuiFlexGroup alignItems="center" justifyContent="center">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    color="text"
-                    iconSide="right"
-                    iconType="popout"
-                    data-test-subj="analyzeLogsBtn"
-                    href={docLinks.analyzeLogs}
-                    target="_blank"
-                  >
-                    {i18n.translate(
-                      'xpack.searchIndices.shared.createIndex.observabilityCallout.logs.button',
-                      {
-                        defaultMessage: 'Collect and analyze logs',
-                      }
-                    )}
-                  </EuiButtonEmpty>
-                  <EuiText color="subdued" size="s" textAlign="center">
-                    <small>
-                      {i18n.translate(
-                        'xpack.searchIndices.shared.createIndex.observabilityCallout.logs.subTitle',
-                        {
-                          defaultMessage: 'Explore Logstash and Beats',
-                        }
-                      )}
-                    </small>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText>or</EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    color="text"
-                    iconSide="right"
-                    iconType="popout"
-                    data-test-subj="startO11yTrialBtn"
-                    href={o11yTrialLink}
-                    target="_blank"
-                  >
-                    {i18n.translate(
-                      'xpack.searchIndices.shared.createIndex.observabilityCallout.o11yTrial.button',
-                      {
-                        defaultMessage: 'Start an Observability trial',
-                      }
-                    )}
-                  </EuiButtonEmpty>
-                  <EuiText color="subdued" size="s" textAlign="center">
-                    <small>
-                      {i18n.translate(
-                        'xpack.searchIndices.shared.createIndex.observabilityCallout.o11yTrial.subTitle',
-                        {
-                          defaultMessage: 'Powerful performance monitoring',
-                        }
-                      )}
-                    </small>
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          </>
-        )}
+
+        <EuiSpacer />
+        <EuiPanel color="transparent">
+          <EuiTextAlign textAlign="center">
+            <EuiTitle size="xs">
+              <h5>
+                {i18n.translate(
+                  'xpack.searchIndices.shared.createIndex.observabilityCallout.title',
+                  {
+                    defaultMessage: 'Looking to store your logs or metrics data?',
+                  }
+                )}
+              </h5>
+            </EuiTitle>
+          </EuiTextAlign>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup alignItems="center" justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                color="text"
+                iconSide="right"
+                iconType="popout"
+                data-test-subj="analyzeLogsBtn"
+                href={isServerless ? docLinks.analyzeLogs : analyzeLogsIntegration}
+                target="_blank"
+              >
+                {i18n.translate(
+                  'xpack.searchIndices.shared.createIndex.observabilityCallout.logs.button',
+                  {
+                    defaultMessage: 'Collect and analyze logs',
+                  }
+                )}
+              </EuiButtonEmpty>
+              <EuiText color="subdued" size="s" textAlign="center">
+                <small>
+                  {i18n.translate(
+                    'xpack.searchIndices.shared.createIndex.observabilityCallout.logs.subTitle',
+                    {
+                      defaultMessage: 'Explore Logstash and Beats',
+                    }
+                  )}
+                </small>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText>or</EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {isServerless ? (
+                <EuiButtonEmpty
+                  color="text"
+                  iconSide="right"
+                  iconType="popout"
+                  data-test-subj="startO11yTrialBtn"
+                  href={o11yTrialLink}
+                  target="_blank"
+                >
+                  {i18n.translate(
+                    'xpack.searchIndices.shared.createIndex.observabilityCallout.o11yTrial.button',
+                    {
+                      defaultMessage: 'Start an Observability trial',
+                    }
+                  )}
+                </EuiButtonEmpty>
+              ) : (
+                <EuiButtonEmpty
+                  color="text"
+                  iconSide="right"
+                  iconType="popout"
+                  data-test-subj="createO11ySpaceBtn"
+                  href={o11yCreateSpaceLink}
+                  target="_blank"
+                >
+                  {i18n.translate(
+                    'xpack.searchIndices.shared.createIndex.observabilityCallout.createO11ySpace.button',
+                    {
+                      defaultMessage: 'Create an Observability space',
+                    }
+                  )}
+                </EuiButtonEmpty>
+              )}
+              <EuiText color="subdued" size="s" textAlign="center">
+                <small>
+                  {i18n.translate(
+                    'xpack.searchIndices.shared.createIndex.observabilityCallout.o11yTrial.subTitle',
+                    {
+                      defaultMessage: 'Powerful performance monitoring',
+                    }
+                  )}
+                </small>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
       </EuiPanel>
       {showSkip === true && (
         <>

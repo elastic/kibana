@@ -21,6 +21,7 @@ import type {
 } from '@kbn/index-management-shared-types';
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
+import type { BuildFlavor } from '@kbn/config';
 import type { AvailableLanguages } from './code_examples';
 
 export interface SearchIndicesPluginSetup {
@@ -57,10 +58,12 @@ export interface SearchIndicesAppPluginStartDependencies {
 export interface SearchIndicesServicesContextDeps {
   history: AppMountParameters['history'];
   usageCollection?: UsageCollectionStart;
+  buildFlavor: BuildFlavor;
 }
 export type SearchIndicesServicesContext = CoreStart &
   SearchIndicesAppPluginStartDependencies & {
     history: AppMountParameters['history'];
+    buildFlavor: BuildFlavor;
   };
 
 export interface AppUsageTracker {
