@@ -58,7 +58,6 @@ export function getDashboardApi({
   savedObjectResult?: LoadDashboardReturn;
   savedObjectId?: string;
 }) {
-  const animatePanelTransforms$ = new BehaviorSubject(false); // set panel transforms to false initially to avoid panels animating on initial render.
   const controlGroupApi$ = new BehaviorSubject<ControlGroupApi | undefined>(undefined);
   const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
   const isManaged = savedObjectResult?.managed ?? false;
@@ -138,9 +137,6 @@ export function getDashboardApi({
   }
 
   const trackOverlayApi = initializeTrackOverlay(trackPanel.setFocusedPanelId);
-
-  // Start animating panel transforms 500 ms after dashboard is created.
-  setTimeout(() => animatePanelTransforms$.next(true), 500);
 
   const dashboardApi = {
     ...viewModeManager.api,
@@ -239,7 +235,6 @@ export function getDashboardApi({
     internalApi: {
       ...panelsManager.internalApi,
       ...unifiedSearchManager.internalApi,
-      animatePanelTransforms$,
       getSerializedStateForControlGroup: () => {
         return {
           rawState: savedObjectResult?.dashboardInput?.controlGroupInput
