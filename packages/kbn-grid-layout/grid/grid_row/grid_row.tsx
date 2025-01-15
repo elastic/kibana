@@ -7,18 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { cloneDeep } from 'lodash';
+import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest, map, pairwise, skip } from 'rxjs';
 
 import { transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { cloneDeep } from 'lodash';
 import { DragPreview } from '../drag_preview';
 import { GridPanel } from '../grid_panel';
-import { GridLayoutStateManager, GridRowData, PanelInteractionEvent } from '../types';
+import { GridLayoutStateManager, PanelInteractionEvent, UserInteractionEvent } from '../types';
 import { getKeysInOrder } from '../utils/resolve_grid_row';
+import { isMouseEvent, isTouchEvent } from '../utils/sensors';
 import { GridRowHeader } from './grid_row_header';
 
 export interface GridRowProps {
@@ -42,33 +43,19 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
     const [rowTitle, setRowTitle] = useState<string>(currentRow.title);
     const [isCollapsed, setIsCollapsed] = useState<boolean>(currentRow.isCollapsed);
 
-    const getRowCount = useCallback(
-      (row: GridRowData) => {
-        const maxRow = Object.values(row.panels).reduce((acc, panel) => {
-          return Math.max(acc, panel.row + panel.height);
-        }, 0);
-        return maxRow || 1;
-      },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [rowIndex]
-    );
     const rowContainer = useRef<HTMLDivElement | null>(null);
 
     /** Set initial styles based on state at mount to prevent styles from "blipping" */
     const initialStyles = useMemo(() => {
-      const initialRow = gridLayoutStateManager.gridLayout$.getValue()[rowIndex];
       const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
-      const { gutterSize, columnCount, rowHeight } = runtimeSettings;
+      const { columnCount, rowHeight } = runtimeSettings;
 
       return css`
-        gap: ${gutterSize}px;
-        grid-template-columns: repeat(
-          ${columnCount},
-          calc((100% - ${gutterSize * (columnCount - 1)}px) / ${columnCount})
-        );
-        grid-template-rows: repeat(${getRowCount(initialRow)}, ${rowHeight}px);
+        grid-auto-rows: ${rowHeight}px;
+        grid-template-columns: repeat(${columnCount}, minmax(0, 1fr));
+        gap: calc(var(--kbnGridGutterSize) * 1px);
       `;
-    }, [gridLayoutStateManager, getRowCount, rowIndex]);
+    }, [gridLayoutStateManager]);
 
     useEffect(
       () => {
@@ -84,10 +71,6 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
             if (!rowRef) return;
 
             const { gutterSize, rowHeight, columnPixelWidth } = runtimeSettings;
-
-            rowRef.style.gridTemplateRows = `repeat(${getRowCount(
-              gridLayout[rowIndex]
-            )}, ${rowHeight}px)`;
 
             const targetRow = interactionEvent?.targetRowIndex;
             if (rowIndex === targetRow && interactionEvent) {
@@ -111,36 +94,6 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
               rowRef.style.backgroundSize = ``;
               rowRef.style.backgroundImage = ``;
               rowRef.style.backgroundColor = `transparent`;
-            }
-          });
-
-        const expandedPanelStyleSubscription = gridLayoutStateManager.expandedPanelId$
-          .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
-          .subscribe((expandedPanelId) => {
-            const rowContainerRef = rowContainer.current;
-            if (!rowContainerRef) return;
-
-            if (expandedPanelId) {
-              // If any panel is expanded, move all rows with their panels out of the viewport.
-              // The expanded panel is repositioned to its original location in the GridPanel component
-              // and stretched to fill the viewport.
-
-              rowContainerRef.style.transform = 'translate(-9999px, -9999px)';
-
-              const panelsIds = Object.keys(
-                gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels
-              );
-              const includesExpandedPanel = panelsIds.includes(expandedPanelId);
-              if (includesExpandedPanel) {
-                // Stretch the row with the expanded panel to occupy the entire remaining viewport
-                rowContainerRef.style.height = '100%';
-              } else {
-                // Hide the row if it does not contain the expanded panel
-                rowContainerRef.style.height = '0';
-              }
-            } else {
-              rowContainerRef.style.transform = ``;
-              rowContainerRef.style.height = ``;
             }
           });
 
@@ -182,7 +135,6 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
         return () => {
           interactionStyleSubscription.unsubscribe();
           rowStateSubscription.unsubscribe();
-          expandedPanelStyleSubscription.unsubscribe();
         };
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -213,7 +165,6 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
                 const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
                 if (!panelRef) return;
 
-                const panelRect = panelRef.getBoundingClientRect();
                 if (type === 'drop') {
                   setInteractionEvent(undefined);
                   /**
@@ -225,17 +176,15 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
                     getKeysInOrder(gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels)
                   );
                 } else {
+                  const panelRect = panelRef.getBoundingClientRect();
+                  const pointerOffsets = getPointerOffsets(e, panelRect);
+
                   setInteractionEvent({
                     type,
                     id: panelId,
                     panelDiv: panelRef,
                     targetRowIndex: rowIndex,
-                    mouseOffsets: {
-                      top: e.clientY - panelRect.top,
-                      left: e.clientX - panelRect.left,
-                      right: e.clientX - panelRect.right,
-                      bottom: e.clientY - panelRect.bottom,
-                    },
+                    pointerOffsets,
                   });
                 }
               }}
@@ -253,7 +202,13 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
     }, [panelIds, gridLayoutStateManager, renderPanelContents, rowIndex, setInteractionEvent]);
 
     return (
-      <div ref={rowContainer}>
+      <div
+        ref={rowContainer}
+        css={css`
+          height: 100%;
+        `}
+        className="kbnGridRowContainer"
+      >
         {rowIndex !== 0 && (
           <GridRowHeader
             isCollapsed={isCollapsed}
@@ -267,8 +222,10 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
         )}
         {!isCollapsed && (
           <div
+            className={'kbnGridRow'}
             ref={gridRef}
             css={css`
+              height: 100%;
               display: grid;
               justify-items: stretch;
               transition: background-color 300ms linear;
@@ -284,3 +241,32 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
     );
   }
 );
+
+const defaultPointerOffsets = {
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+};
+
+function getPointerOffsets(e: UserInteractionEvent, panelRect: DOMRect) {
+  if (isTouchEvent(e)) {
+    if (e.touches.length > 1) return defaultPointerOffsets;
+    const touch = e.touches[0];
+    return {
+      top: touch.clientY - panelRect.top,
+      left: touch.clientX - panelRect.left,
+      right: touch.clientX - panelRect.right,
+      bottom: touch.clientY - panelRect.bottom,
+    };
+  }
+  if (isMouseEvent(e)) {
+    return {
+      top: e.clientY - panelRect.top,
+      left: e.clientX - panelRect.left,
+      right: e.clientX - panelRect.right,
+      bottom: e.clientY - panelRect.bottom,
+    };
+  }
+  throw new Error('Invalid event type');
+}

@@ -6,11 +6,8 @@
  */
 
 import { isObject, isArray } from 'lodash';
-import {
-  MetricsAPIRequest,
-  MetricsExplorerRequestBody,
-  afterKeyObjectRT,
-} from '../../../../common/http_api';
+import type { MetricsAPIRequest, MetricsExplorerRequestBody } from '../../../../common/http_api';
+import { afterKeyObjectRT } from '../../../../common/http_api';
 import { convertMetricToMetricsAPIMetric } from './convert_metric_to_metrics_api_metric';
 
 export const convertRequestToMetricsAPIOptions = (

@@ -5,33 +5,36 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   LOG_RATE_ANALYSIS_TYPE,
   type LogRateAnalysisType,
 } from '@kbn/aiops-log-rate-analysis/log_rate_analysis_type';
 import { getLogRateAnalysisParametersFromAlert } from '@kbn/aiops-log-rate-analysis/get_log_rate_analysis_parameters_from_alert';
 import { LogRateAnalysisContent, type LogRateAnalysisResultsData } from '@kbn/aiops-plugin/public';
-import { Rule } from '@kbn/alerting-plugin/common';
-import { TopAlert } from '@kbn/observability-plugin/public';
+import type { Rule } from '@kbn/alerting-plugin/common';
+import type { TopAlert } from '@kbn/observability-plugin/public';
 import { ALERT_END } from '@kbn/rule-data-utils';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { pick, orderBy } from 'lodash';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { Color, colorTransformer } from '../../../../../../common/color_palette';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
-import {
+import type {
   CountRuleParams,
-  isRatioRuleParams,
   PartialRuleParams,
+} from '../../../../../../common/alerting/logs/log_threshold';
+import {
+  isRatioRuleParams,
   ruleParamsRT,
 } from '../../../../../../common/alerting/logs/log_threshold';
 import { getESQueryForLogRateAnalysis } from '../log_rate_analysis_query';

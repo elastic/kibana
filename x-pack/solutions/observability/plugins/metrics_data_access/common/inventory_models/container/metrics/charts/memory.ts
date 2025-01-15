@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LensConfigWithId } from '../../../types';
+import type { LensConfigWithId } from '../../../types';
 import {
   DEFAULT_XY_FITTING_FUNCTION,
   DEFAULT_XY_HIDDEN_AXIS_TITLE,

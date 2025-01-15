@@ -12,15 +12,12 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React from 'react';
-import { PanelInteractionEvent } from '../types';
+import { UserInteractionEvent, PanelInteractionEvent } from '../types';
 
 export const ResizeHandle = ({
   interactionStart,
 }: {
-  interactionStart: (
-    type: PanelInteractionEvent['type'] | 'drop',
-    e: MouseEvent | React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => void;
+  interactionStart: (type: PanelInteractionEvent['type'] | 'drop', e: UserInteractionEvent) => void;
 }) => {
   return (
     <button
@@ -29,6 +26,12 @@ export const ResizeHandle = ({
         interactionStart('resize', e);
       }}
       onMouseUp={(e) => {
+        interactionStart('drop', e);
+      }}
+      onTouchStart={(e) => {
+        interactionStart('resize', e);
+      }}
+      onTouchEnd={(e) => {
         interactionStart('drop', e);
       }}
       aria-label={i18n.translate('kbnGridLayout.resizeHandle.ariaLabel', {
@@ -42,6 +45,7 @@ export const ResizeHandle = ({
         position: absolute;
         width: ${euiThemeVars.euiSizeL};
         max-width: 100%;
+        max-height: 100%;
         height: ${euiThemeVars.euiSizeL};
         z-index: ${euiThemeVars.euiZLevel9};
         transition: opacity 0.2s, border 0.2s;
@@ -55,7 +59,8 @@ export const ResizeHandle = ({
           background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.05)};
           cursor: se-resize;
         }
-        .kbnGrid--static & {
+        .kbnGrid--static &,
+        .kbnGridPanel--expanded & {
           opacity: 0 !important;
           display: none;
         }

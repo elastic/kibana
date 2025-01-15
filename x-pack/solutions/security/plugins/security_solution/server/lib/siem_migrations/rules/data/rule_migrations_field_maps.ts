@@ -10,6 +10,7 @@ import type {
   RuleMigration,
   RuleMigrationResource,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationIntegration, RuleMigrationPrebuiltRule } from '../types';
 
 export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<Omit<RuleMigration, 'id'>>> = {
   '@timestamp': { type: 'date', required: false },
@@ -52,22 +53,22 @@ export const ruleMigrationResourcesFieldMap: FieldMap<
   updated_by: { type: 'keyword', required: false },
 };
 
-export const integrationsFieldMap: FieldMap = {
-  '@timestamp': { type: 'date', required: true },
+export const integrationsFieldMap: FieldMap<SchemaFieldMapKeys<RuleMigrationIntegration>> = {
+  id: { type: 'keyword', required: true },
   title: { type: 'text', required: true },
   description: { type: 'text', required: true },
   data_streams: { type: 'nested', array: true, required: true },
   'data_streams.dataset': { type: 'keyword', required: true },
   'data_streams.title': { type: 'text', required: true },
   'data_streams.index_pattern': { type: 'keyword', required: true },
-  elser_embeddings: { type: 'semantic_text', required: true },
+  elser_embedding: { type: 'semantic_text', required: true },
 };
 
-export const prebuiltRulesFieldMap: FieldMap = {
-  '@timestamp': { type: 'date', required: true },
+export const prebuiltRulesFieldMap: FieldMap<SchemaFieldMapKeys<RuleMigrationPrebuiltRule>> = {
   name: { type: 'text', required: true },
   description: { type: 'text', required: true },
   elser_embedding: { type: 'semantic_text', required: true },
   rule_id: { type: 'keyword', required: true },
+  installed_rule_id: { type: 'keyword', required: true },
   mitre_attack_ids: { type: 'keyword', array: true, required: false },
 };

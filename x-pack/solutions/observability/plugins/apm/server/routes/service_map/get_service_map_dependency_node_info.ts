@@ -13,12 +13,12 @@ import {
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
 } from '../../../common/es_fields/apm';
-import { NodeStats } from '../../../common/service_map';
+import type { NodeStats } from '../../../common/service_map';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getBucketSize } from '../../../common/utils/get_bucket_size';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getDocumentTypeFilterForServiceDestinationStatistics } from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
 import {
   calculateFailedTransactionRate,

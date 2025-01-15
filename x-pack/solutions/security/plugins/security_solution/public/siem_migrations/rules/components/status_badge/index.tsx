@@ -6,29 +6,24 @@
  */
 
 import React from 'react';
-import { euiLightVars } from '@kbn/ui-theme';
 
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
+import {
+  convertTranslationResultIntoText,
+  useResultVisColors,
+} from '../../utils/translation_results';
 import {
   RuleMigrationStatusEnum,
   type RuleMigration,
-  type RuleMigrationTranslationResult,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import { convertTranslationResultIntoText } from '../../utils/helpers';
 import * as i18n from './translations';
 
 const statusTextWrapperClassName = css`
   width: 100%;
   display: inline-grid;
 `;
-
-const { euiColorVis0, euiColorVis7, euiColorVis9 } = euiLightVars;
-const statusToColorMap: Record<RuleMigrationTranslationResult, string> = {
-  full: euiColorVis0,
-  partial: euiColorVis7,
-  untranslatable: euiColorVis9,
-};
 
 interface StatusBadgeProps {
   migrationRule: RuleMigration;
@@ -37,13 +32,14 @@ interface StatusBadgeProps {
 
 export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(
   ({ migrationRule, 'data-test-subj': dataTestSubj = 'translation-result' }) => {
+    const colors = useResultVisColors();
     // Installed
     if (migrationRule.elastic_rule?.id) {
       return (
         <EuiToolTip content={i18n.RULE_STATUS_INSTALLED}>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="check" color={statusToColorMap.full} />
+              <EuiIcon type="check" color={colors[RuleTranslationResult.FULL]} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>{i18n.RULE_STATUS_INSTALLED}</EuiFlexItem>
           </EuiFlexGroup>
@@ -67,7 +63,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(
 
     const translationResult = migrationRule.translation_result ?? 'untranslatable';
     const displayValue = convertTranslationResultIntoText(translationResult);
-    const color = statusToColorMap[translationResult];
+    const color = colors[translationResult];
 
     return (
       <EuiToolTip content={displayValue}>

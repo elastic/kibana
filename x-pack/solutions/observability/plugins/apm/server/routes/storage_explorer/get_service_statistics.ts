@@ -6,7 +6,7 @@
  */
 import { termQuery, kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { ApmPluginRequestHandlerContext } from '../typings';
+import type { ApmPluginRequestHandlerContext } from '../typings';
 import {
   IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,
@@ -22,10 +22,10 @@ import {
   INDEX,
 } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
+import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { getTotalIndicesStats, getEstimatedSizeForDocumentsInIndex } from './indices_stats_helpers';
-import { RandomSampler } from '../../lib/helpers/get_random_sampler';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { RandomSampler } from '../../lib/helpers/get_random_sampler';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 async function getMainServiceStatistics({
   apmEventClient,

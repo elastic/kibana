@@ -10058,6 +10058,38 @@
         }
       }
     },
+    "favorites": {
+      "properties": {
+        "DYNAMIC_KEY": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Total favorite object count in this deployment"
+              }
+            },
+            "total_users_spaces": {
+              "type": "long",
+              "_meta": {
+                "description": "Total users per space that have favorited an object of this type in this deployment"
+              }
+            },
+            "avg_per_user_per_space": {
+              "type": "double",
+              "_meta": {
+                "description": "Average favorite objects count of this type per user per space for this deployment, only counts users who have favorited at least one object of this type"
+              }
+            },
+            "max_per_user_per_space": {
+              "type": "long",
+              "_meta": {
+                "description": "Max favorite objects count of this type per user per space for this deployment"
+              }
+            }
+          }
+        }
+      }
+    },
     "files": {
       "properties": {
         "countByExtension": {
@@ -10270,6 +10302,19 @@
         }
       }
     },
+    "kql": {
+      "properties": {
+        "optInCount": {
+          "type": "long"
+        },
+        "optOutCount": {
+          "type": "long"
+        },
+        "defaultQueryLanguage": {
+          "type": "keyword"
+        }
+      }
+    },
     "localization": {
       "properties": {
         "locale": {
@@ -10365,6 +10410,32 @@
               "description": "List of SO types that showed up in the break down but are not registered in Kibana. They could be a potential cause of future migration failures."
             }
           }
+        }
+      }
+    },
+    "search": {
+      "properties": {
+        "successCount": {
+          "type": "long"
+        },
+        "errorCount": {
+          "type": "long"
+        },
+        "averageDuration": {
+          "type": "float"
+        }
+      }
+    },
+    "search-session": {
+      "properties": {
+        "transientCount": {
+          "type": "long"
+        },
+        "persistedCount": {
+          "type": "long"
+        },
+        "totalCount": {
+          "type": "long"
         }
       }
     },

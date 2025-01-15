@@ -6,7 +6,7 @@
  */
 import { keyBy } from 'lodash';
 import type { StackFrameMetadata, TopNFunctions } from '@kbn/profiling-utils';
-import {
+import type {
   CalculateImpactEstimates,
   ImpactEstimates,
 } from '../../hooks/use_calculate_impact_estimates';

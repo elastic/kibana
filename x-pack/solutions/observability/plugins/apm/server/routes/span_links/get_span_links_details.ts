@@ -24,11 +24,11 @@ import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
 } from '../../../common/es_fields/apm';
-import { Environment } from '../../../common/environment_rt';
-import { SpanLinkDetails } from '../../../common/span_links';
-import { SpanLink } from '../../../typings/es_schemas/raw/fields/span_links';
+import type { Environment } from '../../../common/environment_rt';
+import type { SpanLinkDetails } from '../../../common/span_links';
+import type { SpanLink } from '../../../typings/es_schemas/raw/fields/span_links';
 import { getBufferedTimerange } from './utils';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 async function fetchSpanLinksDetails({
   apmEventClient,

@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiInMemoryTable, EuiToolTip, EuiBasicTableColumn } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiButtonEmpty, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { last, first } from 'lodash';
 import React, { useState, useMemo } from 'react';
 import { EuiPopover } from '@elastic/eui';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { createWaffleMapNode } from '../lib/nodes_to_wafflemap';
-import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../common/inventory/types';
+import type { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../common/inventory/types';
 import { fieldToName } from '../lib/field_to_display_name';
 import { NodeContextMenu } from './waffle/node_context_menu';
-import { SnapshotNode, SnapshotNodePath } from '../../../../../common/http_api/snapshot_api';
+import type { SnapshotNode, SnapshotNodePath } from '../../../../../common/http_api/snapshot_api';
 import { useAssetDetailsFlyoutState } from '../hooks/use_asset_details_flyout_url_state';
 
 interface Props {

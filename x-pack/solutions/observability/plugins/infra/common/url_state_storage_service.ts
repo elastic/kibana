@@ -9,12 +9,13 @@ import { url } from '@kbn/kibana-utils-plugin/common';
 import { encode } from '@kbn/rison';
 import type { Query } from '@kbn/es-query';
 import { parse, stringify } from 'query-string';
-import moment, { DurationInputObject } from 'moment';
+import type { DurationInputObject } from 'moment';
+import moment from 'moment';
+import type { LogViewReference } from '@kbn/logs-shared-plugin/common';
 import {
   defaultFilterStateKey,
   defaultPositionStateKey,
   DEFAULT_REFRESH_INTERVAL,
-  LogViewReference,
 } from '@kbn/logs-shared-plugin/common';
 import type { FilterStateInUrl } from '../public/observability_logs/log_stream_query_state';
 import type { PositionStateInUrl } from '../public/observability_logs/log_stream_position_state/src/url_state_storage_service';

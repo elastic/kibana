@@ -6,7 +6,7 @@
  */
 
 import 'css.escape'; // Polyfill required to render `EuiPageTemplate` server-side
-import { EuiPageTemplate, EuiProvider, euiStylisPrefixer } from '@elastic/eui';
+import { EuiPageTemplate, EuiProvider, euiStylisPrefixer, EuiThemeAmsterdam } from '@elastic/eui';
 // @ts-expect-error no definitions in component folder
 import { icon as EuiIconWarning } from '@elastic/eui/lib/components/icon/assets/warning';
 // @ts-expect-error no definitions in component folder
@@ -55,7 +55,7 @@ export function PromptPage({
 }: Props) {
   const content = (
     <I18nProvider>
-      <EuiProvider colorMode="light" cache={emotionCache}>
+      <EuiProvider colorMode="light" cache={emotionCache} theme={EuiThemeAmsterdam}>
         <EuiPageTemplate data-test-subj="promptPage">
           <EuiPageTemplate.EmptyPrompt
             iconType="warning"

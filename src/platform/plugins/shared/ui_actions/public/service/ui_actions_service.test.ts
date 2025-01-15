@@ -128,7 +128,7 @@ describe('UiActionsService', () => {
       isCompatible: async () => true,
     };
 
-    test('returns actions set on trigger', () => {
+    test('returns actions set on trigger', async () => {
       const service = new UiActionsService();
 
       service.registerAction(action1);
@@ -139,19 +139,19 @@ describe('UiActionsService', () => {
         title: 'baz',
       });
 
-      const list0 = service.getTriggerActions(FOO_TRIGGER);
+      const list0 = await service.getTriggerActions(FOO_TRIGGER);
 
       expect(list0).toHaveLength(0);
 
       service.addTriggerAction(FOO_TRIGGER, action1);
-      const list1 = service.getTriggerActions(FOO_TRIGGER);
+      const list1 = await service.getTriggerActions(FOO_TRIGGER);
 
       expect(list1).toHaveLength(1);
       expect(list1[0]).toBeInstanceOf(ActionInternal);
       expect(list1[0].id).toBe(action1.id);
 
       service.addTriggerAction(FOO_TRIGGER, action2);
-      const list2 = service.getTriggerActions(FOO_TRIGGER);
+      const list2 = await service.getTriggerActions(FOO_TRIGGER);
 
       expect(list2).toHaveLength(2);
       expect(!!list2.find(({ id }: { id: string }) => id === 'action1')).toBe(true);
@@ -171,7 +171,8 @@ describe('UiActionsService', () => {
       service.registerAction(helloWorldAction);
 
       expect(actions.size - length).toBe(1);
-      expect(actions.get(helloWorldAction.id)!.id).toBe(helloWorldAction.id);
+      const action = await actions.get(helloWorldAction.id)?.();
+      expect(action?.id).toBe(helloWorldAction.id);
     });
 
     test('getTriggerCompatibleActions returns attached actions', async () => {
@@ -288,7 +289,7 @@ describe('UiActionsService', () => {
       expect(trigger2.id).toBe(FOO_TRIGGER);
     });
 
-    test('forked service preserves trigger-to-actions mapping', () => {
+    test('forked service preserves trigger-to-actions mapping', async () => {
       const service1 = new UiActionsService();
 
       service1.registerTrigger({
@@ -299,8 +300,8 @@ describe('UiActionsService', () => {
 
       const service2 = service1.fork();
 
-      const actions1 = service1.getTriggerActions(FOO_TRIGGER);
-      const actions2 = service2.getTriggerActions(FOO_TRIGGER);
+      const actions1 = await service1.getTriggerActions(FOO_TRIGGER);
+      const actions2 = await service2.getTriggerActions(FOO_TRIGGER);
 
       expect(actions1).toHaveLength(1);
       expect(actions2).toHaveLength(1);
@@ -308,7 +309,7 @@ describe('UiActionsService', () => {
       expect(actions2[0].id).toBe(testAction1.id);
     });
 
-    test('new attachments in fork do not appear in original service', () => {
+    test('new attachments in fork do not appear in original service', async () => {
       const service1 = new UiActionsService();
 
       service1.registerTrigger({
@@ -320,16 +321,16 @@ describe('UiActionsService', () => {
 
       const service2 = service1.fork();
 
-      expect(service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
-      expect(service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
+      expect(await service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
+      expect(await service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
 
       service2.addTriggerAction(FOO_TRIGGER, testAction2);
 
-      expect(service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
-      expect(service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(2);
+      expect(await service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
+      expect(await service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(2);
     });
 
-    test('new attachments in original service do not appear in fork', () => {
+    test('new attachments in original service do not appear in fork', async () => {
       const service1 = new UiActionsService();
 
       service1.registerTrigger({
@@ -341,13 +342,13 @@ describe('UiActionsService', () => {
 
       const service2 = service1.fork();
 
-      expect(service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
-      expect(service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
+      expect(await service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
+      expect(await service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
 
       service1.addTriggerAction(FOO_TRIGGER, testAction2);
 
-      expect(service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(2);
-      expect(service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
+      expect(await service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(2);
+      expect(await service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
     });
   });
 
@@ -372,7 +373,7 @@ describe('UiActionsService', () => {
       });
     });
 
-    test('can register action', () => {
+    test('can register action', async () => {
       const actions: ActionRegistry = new Map();
       const service = new UiActionsService({ actions });
 
@@ -381,13 +382,13 @@ describe('UiActionsService', () => {
         order: 13,
       } as unknown as ActionDefinition);
 
-      expect(actions.get(ACTION_HELLO_WORLD)).toMatchObject({
+      expect(await actions.get(ACTION_HELLO_WORLD)?.()).toMatchObject({
         id: ACTION_HELLO_WORLD,
         order: 13,
       });
     });
 
-    test('can attach an action to a trigger', () => {
+    test('can attach an action to a trigger', async () => {
       const service = new UiActionsService();
 
       const trigger: Trigger = {
@@ -401,13 +402,13 @@ describe('UiActionsService', () => {
       service.registerTrigger(trigger);
       service.addTriggerAction(MY_TRIGGER, action);
 
-      const actions = service.getTriggerActions(trigger.id);
+      const actions = await service.getTriggerActions(trigger.id);
 
       expect(actions.length).toBe(1);
       expect(actions[0].id).toBe(ACTION_HELLO_WORLD);
     });
 
-    test('can detach an action from a trigger', () => {
+    test('can detach an action from a trigger', async () => {
       const service = new UiActionsService();
 
       const trigger: Trigger = {
@@ -423,7 +424,7 @@ describe('UiActionsService', () => {
       service.addTriggerAction(trigger.id, action);
       service.detachAction(trigger.id, action.id);
 
-      const actions2 = service.getTriggerActions(trigger.id);
+      const actions2 = await service.getTriggerActions(trigger.id);
       expect(actions2).toEqual([]);
     });
 

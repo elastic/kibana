@@ -15,7 +15,7 @@ Are you planning with scalability in mind?
 * Are you loading a minimal amount of JS code in the browser?
 ** See <<plugin-performance>> for more guidance.
 * Do you make lots of requests to the server?
-** If so, have you considered using the streaming {kib-repo}tree/{branch}/src/plugins/bfetch[bfetch service]?
+** If so, have you considered using the streaming {kib-repo}tree/{branch}/src/platform/plugins/shared/bfetch[bfetch service]?
 
 [discrete]
 === Accessibility
@@ -71,9 +71,9 @@ They take care of the nitty gritty so you can focus on creative
 solutions to your particular problem sphere. Some examples of common
 services you should consider:
 
-* {kib-repo}tree/{branch}/src/plugins/data/README.mdx[Data
+* {kib-repo}tree/{branch}/src/platform/plugins/shared/data/README.mdx[Data
 services]
-** {kib-repo}tree/{branch}/src/plugins/data/README.mdx#search[Search
+** {kib-repo}tree/{branch}/src/platform/plugins/shared/data/README.mdx#search[Search
 strategies]
 *** Use the `esSearchStrategy` to make raw queries to ES that will
 support async searching and partial results, as well as injecting the

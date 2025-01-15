@@ -176,6 +176,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           request,
           currentUser: coreContext.security.authc.getCurrentUser(),
           spaceId: getSpaceId(),
+          packageService: startPlugins.fleet?.packageService,
         })
       ),
 

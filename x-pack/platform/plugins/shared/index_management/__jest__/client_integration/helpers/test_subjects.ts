@@ -93,6 +93,8 @@ export type TestSubjects =
   | 'enrichPolicySummaryList'
   | 'requestBody'
   | 'editDataRetentionButton'
+  | 'bulkEditDataRetentionButton'
+  | 'dataStreamActionsPopoverButton'
   | 'errorWhenCreatingCallout'
   | 'manageDataStreamButton'
   | 'dataRetentionValue'

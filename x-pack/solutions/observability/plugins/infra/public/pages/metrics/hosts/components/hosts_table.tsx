@@ -10,16 +10,20 @@ import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { HostNodeRow, useHostsTableContext } from '../hooks/use_hosts_table';
+import type { HostNodeRow } from '../hooks/use_hosts_table';
+import { useHostsTableContext } from '../hooks/use_hosts_table';
 import { useHostsViewContext } from '../hooks/use_hosts_view';
 import { useHostCountContext } from '../hooks/use_host_count';
 import { FlyoutWrapper } from './host_details_flyout/flyout_wrapper';
 import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from '../constants';
 import { FilterAction } from './table/filter_action';
+import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 
 export const HostsTable = () => {
   const { loading } = useHostsViewContext();
-  const { loading: hostCountLoading } = useHostCountContext();
+  const { loading: hostCountLoading, count } = useHostCountContext();
+  const { searchCriteria } = useUnifiedSearchContext();
+
   const { onPageReady } = usePerformanceContext();
 
   const {
@@ -39,9 +43,16 @@ export const HostsTable = () => {
 
   useEffect(() => {
     if (!loading && !hostCountLoading) {
-      onPageReady();
+      onPageReady({
+        customMetrics: {
+          key1: 'num_of_hosts',
+          value1: count,
+          key2: `max_hosts_per_page`,
+          value2: searchCriteria.limit,
+        },
+      });
     }
-  }, [loading, hostCountLoading, onPageReady]);
+  }, [loading, hostCountLoading, onPageReady, count, searchCriteria]);
 
   return (
     <>

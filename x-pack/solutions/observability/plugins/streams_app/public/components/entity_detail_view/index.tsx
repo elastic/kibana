@@ -8,7 +8,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiPanel, EuiBadge } from 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { css } from '@emotion/css';
-import { isIngestStream, StreamDefinition } from '@kbn/streams-schema';
+import { ILM_LOCATOR_ID, IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
+import { ReadStreamDefinition, StreamLifecycle, isIngestStream } from '@kbn/streams-schema';
 import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { EntityOverviewTabList } from '../entity_overview_tab_list';
@@ -16,6 +17,7 @@ import { LoadingPanel } from '../loading_panel';
 import { StreamsAppPageBody } from '../streams_app_page_body';
 import { StreamsAppPageHeader } from '../streams_app_page_header';
 import { StreamsAppPageHeaderTitle } from '../streams_app_page_header/streams_app_page_header_title';
+import { useKibana } from '../../hooks/use_kibana';
 
 export interface EntityViewTab {
   name: string;
@@ -35,7 +37,7 @@ export function EntityDetailViewWithoutParams({
     displayName?: string;
     id: string;
   };
-  definition?: StreamDefinition;
+  definition?: ReadStreamDefinition;
 }) {
   const router = useStreamsAppRouter();
   useStreamsAppBreadcrumbs(() => {
@@ -99,7 +101,7 @@ export function EntityDetailViewWithoutParams({
           title={
             <StreamsAppPageHeaderTitle
               title={
-                <>
+                <EuiFlexGroup gutterSize="s" alignItems="center">
                   {entity.displayName}
                   {definition && isIngestStream(definition) ? (
                     <>
@@ -107,12 +109,13 @@ export function EntityDetailViewWithoutParams({
                       <EuiBadge>
                         {i18n.translate(
                           'xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel',
-                          { defaultMessage: 'Unmanaged' }
+                          { defaultMessage: 'Classic' }
                         )}
                       </EuiBadge>
                     </>
                   ) : null}
-                </>
+                  {definition && <LifecycleBadge lifecycle={definition.lifecycle} />}
+                </EuiFlexGroup>
               }
             />
           }
@@ -131,5 +134,38 @@ export function EntityDetailViewWithoutParams({
       </EuiFlexItem>
       <StreamsAppPageBody>{selectedTabObject.content}</StreamsAppPageBody>
     </EuiFlexGroup>
+  );
+}
+
+function LifecycleBadge({ lifecycle }: { lifecycle: StreamLifecycle }) {
+  const {
+    dependencies: {
+      start: { share },
+    },
+  } = useKibana();
+  const ilmLocator = share.url.locators.get<IlmLocatorParams>(ILM_LOCATOR_ID);
+  if (lifecycle.type === 'ilm') {
+    return (
+      <EuiBadge color="hollow">
+        <EuiLink
+          color="text"
+          href={ilmLocator?.getRedirectUrl({ page: 'policy_edit', policyName: lifecycle.policy })}
+        >
+          {i18n.translate('xpack.streams.entityDetailViewWithoutParams.ilmBadgeLabel', {
+            defaultMessage: 'ILM Policy: {name}',
+            values: { name: lifecycle.policy },
+          })}
+        </EuiLink>
+      </EuiBadge>
+    );
+  }
+
+  return (
+    <EuiBadge color="hollow">
+      {i18n.translate('xpack.streams.entityDetailViewWithoutParams.dlmBadgeLabel', {
+        defaultMessage: 'Retention: {retention}',
+        values: { retention: lifecycle.data_retention || '∞' },
+      })}
+    </EuiBadge>
   );
 }

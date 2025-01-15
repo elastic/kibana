@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import {
-  EuiDataGridCellValueElementProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -22,7 +22,7 @@ import { asWeight } from '../../utils/formatters/as_weight';
 import { StackFrameSummary } from '../stack_frame_summary';
 import { CPUStat } from './cpu_stat';
 import { SampleStat } from './sample_stat';
-import { IFunctionRow } from './utils';
+import type { IFunctionRow } from './utils';
 
 interface Props {
   functionRow: IFunctionRow;

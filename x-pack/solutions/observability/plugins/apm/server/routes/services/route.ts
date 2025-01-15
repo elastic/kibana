@@ -12,12 +12,12 @@ import {
   MLPrivilegesUninitialized,
   UnknownMLCapabilitiesError,
 } from '@kbn/ml-plugin/server';
-import { Annotation } from '@kbn/observability-plugin/common/annotations';
-import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
+import type { Annotation } from '@kbn/observability-plugin/common/annotations';
+import type { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import * as t from 'io-ts';
 import { isEmpty, mergeWith, uniq } from 'lodash';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
-import { ServiceAnomalyTimeseries } from '../../../common/anomaly_detection/service_anomaly_timeseries';
+import type { ServiceAnomalyTimeseries } from '../../../common/anomaly_detection/service_anomaly_timeseries';
 import { offsetRt } from '../../../common/comparison_rt';
 import { instancesSortFieldRt } from '../../../common/instances';
 import { latencyAggregationTypeRt } from '../../../common/latency_aggregation_types';
@@ -40,44 +40,39 @@ import {
   serviceTransactionDataSourceRt,
 } from '../default_api_types';
 import { getServiceGroup } from '../service_groups/get_service_group';
-import { getServiceAnnotations, ServiceAnnotationResponse } from './annotations';
-import { getServicesItems, ServicesItemsResponse } from './get_services/get_services_items';
-import { getServicesAlerts, ServiceAlertsResponse } from './get_services/get_service_alerts';
-import {
-  getServiceTransactionDetailedStatsPeriods,
-  ServiceTransactionDetailedStatPeriodsResponse,
-} from './get_services_detailed_statistics/get_service_transaction_detailed_statistics';
-import { getServiceAgent, ServiceAgentResponse } from './get_service_agent';
-import { getServiceDependencies, ServiceDependenciesResponse } from './get_service_dependencies';
-import {
-  getServiceDependenciesBreakdown,
-  ServiceDependenciesBreakdownResponse,
-} from './get_service_dependencies_breakdown';
-import {
-  getServiceInstancesDetailedStatisticsPeriods,
-  ServiceInstancesDetailedStatisticsResponse,
-} from './get_service_instances/detailed_statistics';
-import {
-  getServiceInstancesMainStatistics,
-  ServiceInstanceMainStatisticsResponse,
-} from './get_service_instances/main_statistics';
-import {
-  getServiceInstanceContainerMetadata,
-  ServiceInstanceContainerMetadataDetails,
-} from './get_service_instance_container_metadata';
-import {
-  getServiceInstanceMetadataDetails,
-  ServiceInstanceMetadataDetailsResponse,
-} from './get_service_instance_metadata_details';
-import { getServiceMetadataDetails, ServiceMetadataDetails } from './get_service_metadata_details';
-import { getServiceMetadataIcons, ServiceMetadataIcons } from './get_service_metadata_icons';
-import { getServiceNodeMetadata, ServiceNodeMetadataResponse } from './get_service_node_metadata';
+import type { ServiceAnnotationResponse } from './annotations';
+import { getServiceAnnotations } from './annotations';
+import type { ServicesItemsResponse } from './get_services/get_services_items';
+import { getServicesItems } from './get_services/get_services_items';
+import type { ServiceAlertsResponse } from './get_services/get_service_alerts';
+import { getServicesAlerts } from './get_services/get_service_alerts';
+import type { ServiceTransactionDetailedStatPeriodsResponse } from './get_services_detailed_statistics/get_service_transaction_detailed_statistics';
+import { getServiceTransactionDetailedStatsPeriods } from './get_services_detailed_statistics/get_service_transaction_detailed_statistics';
+import type { ServiceAgentResponse } from './get_service_agent';
+import { getServiceAgent } from './get_service_agent';
+import type { ServiceDependenciesResponse } from './get_service_dependencies';
+import { getServiceDependencies } from './get_service_dependencies';
+import type { ServiceDependenciesBreakdownResponse } from './get_service_dependencies_breakdown';
+import { getServiceDependenciesBreakdown } from './get_service_dependencies_breakdown';
+import type { ServiceInstancesDetailedStatisticsResponse } from './get_service_instances/detailed_statistics';
+import { getServiceInstancesDetailedStatisticsPeriods } from './get_service_instances/detailed_statistics';
+import type { ServiceInstanceMainStatisticsResponse } from './get_service_instances/main_statistics';
+import { getServiceInstancesMainStatistics } from './get_service_instances/main_statistics';
+import type { ServiceInstanceContainerMetadataDetails } from './get_service_instance_container_metadata';
+import { getServiceInstanceContainerMetadata } from './get_service_instance_container_metadata';
+import type { ServiceInstanceMetadataDetailsResponse } from './get_service_instance_metadata_details';
+import { getServiceInstanceMetadataDetails } from './get_service_instance_metadata_details';
+import type { ServiceMetadataDetails } from './get_service_metadata_details';
+import { getServiceMetadataDetails } from './get_service_metadata_details';
+import type { ServiceMetadataIcons } from './get_service_metadata_icons';
+import { getServiceMetadataIcons } from './get_service_metadata_icons';
+import type { ServiceNodeMetadataResponse } from './get_service_node_metadata';
+import { getServiceNodeMetadata } from './get_service_node_metadata';
 import { getServiceOverviewContainerMetadata } from './get_service_overview_container_metadata';
-import {
-  getServiceTransactionTypes,
-  ServiceTransactionTypesResponse,
-} from './get_service_transaction_types';
-import { getThroughput, ServiceThroughputResponse } from './get_throughput';
+import type { ServiceTransactionTypesResponse } from './get_service_transaction_types';
+import { getServiceTransactionTypes } from './get_service_transaction_types';
+import type { ServiceThroughputResponse } from './get_throughput';
+import { getThroughput } from './get_throughput';
 import { getServiceEntitySummary } from '../entities/services/get_service_entity_summary';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
