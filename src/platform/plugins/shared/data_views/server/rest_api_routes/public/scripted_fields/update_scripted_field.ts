@@ -12,7 +12,7 @@ import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { FieldSpec } from '../../../../common';
 import { ErrorIndexPatternFieldNotFound } from '../../../error';
 import { handleErrors } from '../util/handle_errors';
-import { fieldSpecSchemaFields } from '../../../../common/schema/schemas';
+import { fieldSpecSchemaFields } from '../../../schemas';
 import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,

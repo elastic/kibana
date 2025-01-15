@@ -85,4 +85,3 @@ export type {
 } from './expressions';
 export { getIndexPatternLoadMeta } from './expressions';
 export { DataViewMissingIndices } from './lib/errors';
-export { dataViewSpecSchema } from './schema/data_view_spec_schema';

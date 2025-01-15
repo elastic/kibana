@@ -13,7 +13,7 @@ import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { DataViewSpec } from '../../../common/types';
 import { DataViewsService } from '../../../common/data_views';
 import { handleErrors } from './util/handle_errors';
-import { dataViewSpecSchema } from '../../../common/schema/data_view_spec_schema';
+import { dataViewSpecSchema } from '../schema';
 import type {
   DataViewsServerPluginStartDependencies,
   DataViewsServerPluginStart,

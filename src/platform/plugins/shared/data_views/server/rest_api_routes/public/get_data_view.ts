@@ -12,7 +12,7 @@ import { schema } from '@kbn/config-schema';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { DataViewsService } from '../../../common';
 import { handleErrors } from './util/handle_errors';
-import { dataViewSpecSchema } from '../../../common/schema/data_view_spec_schema';
+import { dataViewSpecSchema } from '../schema';
 import { DataViewSpecRestResponse } from '../route_types';
 import type {
   DataViewsServerPluginStartDependencies,

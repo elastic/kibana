@@ -13,9 +13,9 @@ import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { DataViewsService } from '../../../../common';
 import { handleErrors } from '../util/handle_errors';
-import { serializedFieldFormatSchema } from '../../../../common/schema/schemas';
+import { serializedFieldFormatSchema } from '../../../schemas';
 import { MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH } from '../../../../common/constants';
-import { dataViewSpecSchema } from '../../../../common/schema/data_view_spec_schema';
+import { dataViewSpecSchema } from '../../schema';
 import { DataViewSpecRestResponse } from '../../route_types';
 import type {
   DataViewsServerPluginStartDependencies,

@@ -14,12 +14,8 @@ import { DataViewSpecRestResponse } from '../route_types';
 import { DataViewsService } from '../../../common/data_views';
 import { DataViewSpec } from '../../../common/types';
 import { handleErrors } from './util/handle_errors';
-import {
-  fieldSpecSchema,
-  runtimeFieldSchema,
-  serializedFieldFormatSchema,
-} from '../../../common/schema/schemas';
-import { dataViewSpecSchema } from '../../../common/schema/data_view_spec_schema';
+import { fieldSpecSchema, runtimeFieldSchema, serializedFieldFormatSchema } from '../../schemas';
+import { dataViewSpecSchema } from '../schema';
 import type {
   DataViewsServerPluginStartDependencies,
   DataViewsServerPluginStart,
