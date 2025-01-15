@@ -15,11 +15,12 @@ import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { css } from '@emotion/react';
 import { Panel } from '@xyflow/react';
 import { getEsQueryConfig } from '@kbn/data-service';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
+import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { Graph, isEntityNode } from '../../..';
 import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use_fetch_graph_data';
 import { GRAPH_INVESTIGATION_TEST_ID } from '../test_ids';
-import { EVENT_ID } from '../../common/constants';
+import { EVENT_ID, TOGGLE_SEARCH_BAR_STORAGE_KEY } from '../../common/constants';
 import { Actions } from '../controls/actions';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
 import { addFilter } from './search_filters';
@@ -113,7 +114,10 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
   }: GraphInvestigationProps) => {
     const [searchFilters, setSearchFilters] = useState<Filter[]>(() => []);
     const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
-    const [searchToggled, setSearchToggled] = useState(!showToggleSearch);
+    const [searchToggled, setSearchToggled] = useSessionStorage(
+      TOGGLE_SEARCH_BAR_STORAGE_KEY,
+      !showToggleSearch
+    );
     const lastValidEsQuery = useRef<EsQuery | undefined>();
     const [kquery, setKQuery] = useState<Query>(EMPTY_QUERY);
 
@@ -205,13 +209,15 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     }, [data?.nodes]);
 
     const searchFilterCounter = useMemo(() => {
-      const filtersCount = searchFilters.reduce((sum, filter) => {
-        if (isCombinedFilter(filter)) {
-          return sum + filter.meta.params.length;
-        }
+      const filtersCount = searchFilters
+        .filter((filter) => !filter.meta.disabled)
+        .reduce((sum, filter) => {
+          if (isCombinedFilter(filter)) {
+            return sum + filter.meta.params.length;
+          }
 
-        return sum + 1;
-      }, 0);
+          return sum + 1;
+        }, 0);
 
       const queryCounter = kquery.query.trim().length > 0 ? 1 : 0;
       return filtersCount + queryCounter;
@@ -233,7 +239,9 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         >
           {dataView && (
             <EuiFlexItem grow={false}>
-              <AnimatedSearchBarContainer className={!searchToggled ? 'toggled-off' : undefined}>
+              <AnimatedSearchBarContainer
+                className={!searchToggled && showToggleSearch ? 'toggled-off' : undefined}
+              >
                 <SearchBar<Query>
                   showFilterBar={true}
                   showDatePicker={true}
@@ -267,8 +275,10 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           <EuiFlexItem
             css={css`
               border-top: ${useBorder()};
+              position: relative;
             `}
           >
+            {isFetching && <EuiProgress size="xs" color="accent" position="absolute" />}
             <Graph
               css={css`
                 height: 100%;
@@ -286,6 +296,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
                   onInvestigateInTimeline={onInvestigateInTimelineCallback}
                   onSearchToggle={(isSearchToggle) => setSearchToggled(isSearchToggle)}
                   searchFilterCounter={searchFilterCounter}
+                  searchToggled={searchToggled}
                 />
               </Panel>
             </Graph>

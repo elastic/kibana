@@ -57,7 +57,9 @@ const filterHasKeyAndValue = (filter: Filter, key: string, value: string): boole
  * @returns true if the filters do contain the filter, false if they don't.
  */
 export const containsFilter = (filters: Filter[], key: string, value: string): boolean => {
-  return filters.some((filter) => filterHasKeyAndValue(filter, key, value));
+  return filters
+    .filter((filter) => !filter.meta.disabled)
+    .some((filter) => filterHasKeyAndValue(filter, key, value));
 };
 
 /**
@@ -73,7 +75,11 @@ export const containsFilter = (filters: Filter[], key: string, value: string): b
 export const addFilter = (dataViewId: string, prev: Filter[], key: string, value: string) => {
   const [firstFilter, ...otherFilters] = prev;
 
-  if (isCombinedFilter(firstFilter) && firstFilter?.meta?.relation === BooleanRelation.OR) {
+  if (
+    isCombinedFilter(firstFilter) &&
+    !firstFilter?.meta?.disabled &&
+    firstFilter?.meta?.relation === BooleanRelation.OR
+  ) {
     return [
       {
         ...firstFilter,
@@ -88,7 +94,11 @@ export const addFilter = (dataViewId: string, prev: Filter[], key: string, value
       },
       ...otherFilters,
     ];
-  } else if (isFilter(firstFilter) && firstFilter.meta?.type !== 'custom') {
+  } else if (
+    isFilter(firstFilter) &&
+    !firstFilter?.meta?.disabled &&
+    firstFilter.meta?.type !== 'custom'
+  ) {
     const combinedFilter = buildCombinedFilter(
       BooleanRelation.OR,
       [firstFilter, buildPhraseFilter(key, value, dataViewId)],
@@ -107,6 +117,7 @@ export const addFilter = (dataViewId: string, prev: Filter[], key: string, value
       ...otherFilters,
     ];
   } else {
+    // When the first filter is disabled or a custom filter, we just add the new filter to the list.
     return [
       {
         $state: {

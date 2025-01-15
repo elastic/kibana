@@ -131,13 +131,11 @@ describe('Actions component', () => {
     it('should not show the tour if user already toggled the search bar', () => {
       const setShouldShowSearchBarButtonTourMock = jest.fn();
       (useLocalStorage as jest.Mock).mockReturnValue([true, setShouldShowSearchBarButtonTourMock]);
-      const { getByTestId } = renderWithProviders({
+      renderWithProviders({
         ...defaultProps,
         searchFilterCounter: 0,
+        searchToggled: true,
       });
-      expect(setShouldShowSearchBarButtonTourMock).not.toBeCalled();
-
-      fireEvent.click(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID));
 
       expect(defaultProps.onSearchToggle).toHaveBeenCalledWith(true);
       expect(setShouldShowSearchBarButtonTourMock).toBeCalled();
@@ -162,7 +160,7 @@ describe('Actions component', () => {
 
       fireEvent.click(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID));
 
-      waitFor(() => {
+      await waitFor(() => {
         expect(queryByText('Adjust correlation with search')).not.toBeInTheDocument();
       });
 

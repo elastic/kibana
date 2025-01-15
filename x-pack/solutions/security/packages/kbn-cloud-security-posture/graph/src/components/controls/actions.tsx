@@ -80,6 +80,11 @@ export interface ActionsProps extends CommonProps {
    * Callback when investigate in timeline action button is clicked, ignored if investigateInTimelineComponent is provided.
    */
   onInvestigateInTimeline?: () => void;
+
+  /**
+   * Whether search is toggled or not. Defaults value is false.
+   */
+  searchToggled?: boolean;
 }
 
 export const Actions = ({
@@ -88,6 +93,7 @@ export const Actions = ({
   onInvestigateInTimeline,
   onSearchToggle,
   searchFilterCounter = 0,
+  searchToggled,
   ...props
 }: ActionsProps) => {
   const { euiTheme } = useEuiTheme();
@@ -96,7 +102,6 @@ export const Actions = ({
     SHOW_SEARCH_BAR_BUTTON_TOUR_STORAGE_KEY,
     true
   );
-  const [searchToggled, setSearchToggled] = useState<boolean>(false);
 
   useEffect(() => {
     if (searchFilterCounter > 0 && shouldShowSearchBarButtonTour) {
@@ -151,10 +156,7 @@ export const Actions = ({
                 aria-label={toggleSearchBarTooltip}
                 data-test-subj={GRAPH_ACTIONS_TOGGLE_SEARCH_ID}
                 onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-                  setSearchToggled((prev) => {
-                    onSearchToggle?.(!prev);
-                    return !prev;
-                  });
+                  onSearchToggle?.(!searchToggled);
 
                   setIsSearchBarTourOpen(false);
 

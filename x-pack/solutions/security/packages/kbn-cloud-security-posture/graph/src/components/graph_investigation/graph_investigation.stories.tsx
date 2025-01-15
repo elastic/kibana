@@ -15,6 +15,11 @@ import {
 } from '../../../.storybook/decorators';
 import { mockDataView } from '../mock/data_view.mock';
 import { SHOW_SEARCH_BAR_BUTTON_TOUR_STORAGE_KEY } from '../../common/constants';
+import { MockDataProvider } from '../mock/mock_context_provider';
+import {
+  USE_FETCH_GRAPH_DATA_ACTION,
+  USE_FETCH_GRAPH_DATA_REFRESH_ACTION,
+} from '../mock/constants';
 
 export default {
   title: 'Components/Graph Components/Investigation',
@@ -33,14 +38,30 @@ export default {
       control: { type: 'boolean' },
       defaultValue: true,
     },
+    isLoading: {
+      control: { type: 'boolean' },
+      defaultValue: false,
+    },
   },
   decorators: [
     ReactQueryStorybookDecorator,
     KibanaReactStorybookDecorator,
     (StoryComponent, context) => {
-      const { shouldShowSearchBarTour } = context.args;
+      const { shouldShowSearchBarTour, isLoading } = context.args;
       localStorage.setItem(SHOW_SEARCH_BAR_BUTTON_TOUR_STORAGE_KEY, shouldShowSearchBarTour);
-      return <StoryComponent />;
+      const mockData = {
+        useFetchGraphDataMock: {
+          isFetching: isLoading,
+          refresh: action(USE_FETCH_GRAPH_DATA_REFRESH_ACTION),
+          log: action(USE_FETCH_GRAPH_DATA_ACTION),
+        },
+      };
+
+      return (
+        <MockDataProvider data={mockData}>
+          <StoryComponent />
+        </MockDataProvider>
+      );
     },
   ],
 } as Meta;

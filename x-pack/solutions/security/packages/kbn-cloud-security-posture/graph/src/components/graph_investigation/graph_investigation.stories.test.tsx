@@ -12,6 +12,7 @@ import { setProjectAnnotations } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { composeStories } from '@storybook/testing-react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import useSessionStorage from 'react-use/lib/useSessionStorage';
 import * as stories from './graph_investigation.stories';
 import { type GraphInvestigationProps } from './graph_investigation';
 import {
@@ -59,6 +60,9 @@ jest.mock('../graph/constants', () => ({
   ONLY_RENDER_VISIBLE_ELEMENTS: false,
 }));
 
+// By default we toggle the search bar visibility
+jest.mock('react-use/lib/useSessionStorage', () => jest.fn().mockReturnValue([true, jest.fn()]));
+
 const QUERY_PARAM_IDX = 0;
 const FILTERS_PARAM_IDX = 1;
 
@@ -89,6 +93,23 @@ const hideActionsByNode = (container: HTMLElement, nodeId: string) => {
   const hideBtn = screen.getByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
   expect(hideBtn).toHaveTextContent('Hide actions by this entity');
   hideBtn.click();
+};
+
+const disableFilter = (container: HTMLElement, filterIndex: number) => {
+  const filterBtn = container.querySelector(
+    `[data-test-subj*="filter-id-${filterIndex}"]`
+  ) as HTMLButtonElement;
+  expect(filterBtn).not.toBeNull();
+  filterBtn.click();
+
+  const disableFilterBtn = screen.getByTestId('disableFilter');
+  expect(disableFilterBtn).not.toBeNull();
+  disableFilterBtn.click();
+};
+
+const isSearchBarVisible = (container: HTMLElement) => {
+  const searchBarContainer = container.querySelector('.toggled-off');
+  return searchBarContainer === null;
 };
 
 describe('GraphInvestigation Component', () => {
@@ -141,20 +162,55 @@ describe('GraphInvestigation Component', () => {
 
   describe('searchBar', () => {
     it('shows searchBar when search button toggle is hidden', () => {
-      const { getByTestId, queryByTestId } = renderStory();
+      const { getByTestId, queryByTestId, container } = renderStory();
 
       expect(queryByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).not.toBeInTheDocument();
       expect(getByTestId('globalQueryBar')).toBeInTheDocument();
+      expect(isSearchBarVisible(container)).toBeTruthy();
     });
 
-    it('toggles searchBar on click', () => {
-      const { getByTestId } = renderStory({
+    it('toggles searchBar on click', async () => {
+      let searchBarToggled = false;
+      const setSearchBarToggled = jest.fn((value: boolean) => {
+        searchBarToggled = value;
+      });
+      (useSessionStorage as jest.Mock).mockImplementation(() => [
+        searchBarToggled,
+        setSearchBarToggled,
+      ]);
+      const { getByTestId, container } = renderStory({
         showToggleSearch: true,
       });
 
+      expect(isSearchBarVisible(container)).toBeFalsy();
+
+      // Act
       getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID).click();
 
-      expect(getByTestId('globalQueryBar')).toBeInTheDocument();
+      // Assert
+      expect(setSearchBarToggled).lastCalledWith(true);
+    });
+
+    it('toggles searchBar off on click', async () => {
+      let searchBarToggled = true;
+      const setSearchBarToggled = jest.fn((value: boolean) => {
+        searchBarToggled = value;
+      });
+      (useSessionStorage as jest.Mock).mockImplementation(() => [
+        searchBarToggled,
+        setSearchBarToggled,
+      ]);
+      const { getByTestId, container } = renderStory({
+        showToggleSearch: true,
+      });
+
+      expect(isSearchBarVisible(container)).toBeTruthy();
+
+      // Act
+      getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID).click();
+
+      // Assert
+      expect(setSearchBarToggled).lastCalledWith(false);
     });
 
     it('shows filters counter when KQL filter is applied', async () => {
@@ -170,7 +226,7 @@ describe('GraphInvestigation Component', () => {
       expect(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).toHaveTextContent('1');
     });
 
-    it('shows filters counter when node filter is applied', async () => {
+    it('shows filters counter when node filter is applied', () => {
       const { getByTestId, container } = renderStory({
         showToggleSearch: true,
       });
@@ -180,7 +236,7 @@ describe('GraphInvestigation Component', () => {
       expect(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).toHaveTextContent('1');
     });
 
-    it('hide filters counter when node filter is toggled off', async () => {
+    it('hide filters counter when node filter is toggled off', () => {
       const { getByTestId, container } = renderStory({
         showToggleSearch: true,
       });
@@ -189,6 +245,24 @@ describe('GraphInvestigation Component', () => {
       expect(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).toHaveTextContent('1');
 
       hideActionsByNode(container, 'admin@example.com');
+
+      expect(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).toHaveTextContent('');
+
+      expandNode(container, 'admin@example.com');
+      expect(getByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID)).toHaveTextContent(
+        'Show actions by this entity'
+      );
+    });
+
+    it('hide filters counter when filter is disabled', () => {
+      const { getByTestId, container } = renderStory({
+        showToggleSearch: true,
+      });
+      showActionsByNode(container, 'admin@example.com');
+
+      expect(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).toHaveTextContent('1');
+
+      disableFilter(container, 0);
 
       expect(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).toHaveTextContent('');
 

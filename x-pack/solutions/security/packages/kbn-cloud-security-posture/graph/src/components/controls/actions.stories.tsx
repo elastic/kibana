@@ -38,4 +38,5 @@ Actions.args = {
   showToggleSearch: true,
   searchFilterCounter: 0,
   showInvestigateInTimeline: true,
+  searchToggled: false,
 };

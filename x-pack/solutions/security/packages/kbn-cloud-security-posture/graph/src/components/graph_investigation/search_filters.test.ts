@@ -208,6 +208,20 @@ describe('search_filters', () => {
       expect(newFilters).toHaveLength(1);
       expect(newFilters[0].meta.params).toHaveLength(2);
     });
+
+    it('should a new filter when the existing controlled (first) filter is disabled', () => {
+      const filters: Filter[] = [
+        { ...controlledPhraseFilter, meta: { ...controlledPhraseFilter.meta, disabled: true } },
+      ];
+
+      // Act
+      const newFilters = addFilter(dataViewId, filters, key, value);
+
+      // Assert
+      expect(newFilters).toHaveLength(2);
+      expect(newFilters[0].meta.disabled).toBe(false);
+      expect(newFilters[1].meta.disabled).toBe(true);
+    });
   });
 
   describe('removeFilter', () => {
