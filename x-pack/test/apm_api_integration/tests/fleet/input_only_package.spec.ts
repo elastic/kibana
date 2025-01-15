@@ -35,6 +35,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   const synthtraceKibanaClient = getService('synthtraceKibanaClient');
   const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
   const retry = getService('retry');
+  const retry = getService('retry');
 
   const API_KEY_NAME = 'apm_api_key_testing';
   const APM_AGENT_POLICY_NAME = 'apm_agent_policy_testing';

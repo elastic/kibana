@@ -20,6 +20,7 @@ export const ECS_GRAPH_PATH = `${INTEGRATION_ASSISTANT_BASE_PATH}/ecs`;
 export const CATEGORIZATION_GRAPH_PATH = `${INTEGRATION_ASSISTANT_BASE_PATH}/categorization`;
 export const ANALYZE_LOGS_PATH = `${INTEGRATION_ASSISTANT_BASE_PATH}/analyzelogs`;
 export const RELATED_GRAPH_PATH = `${INTEGRATION_ASSISTANT_BASE_PATH}/related`;
+export const ANALYZE_API_PATH = `${INTEGRATION_ASSISTANT_BASE_PATH}/analyzeapi`;
 export const CEL_INPUT_GRAPH_PATH = `${INTEGRATION_ASSISTANT_BASE_PATH}/cel`;
 export const CHECK_PIPELINE_PATH = `${INTEGRATION_ASSISTANT_BASE_PATH}/pipeline`;
 export const INTEGRATION_BUILDER_PATH = `${INTEGRATION_ASSISTANT_BASE_PATH}/build`;
@@ -48,3 +49,6 @@ export const CATEGORIZATION_RECURSION_LIMIT = 50;
 
 // Name regex pattern
 export const NAME_REGEX_PATTERN = /^[a-z0-9_]+$/;
+
+// Datastream name regex pattern. Same regex that for the name validation in elastic-package
+export const DATASTREAM_NAME_REGEX_PATTERN = /^([a-z0-9]{2}|[a-z0-9][a-z0-9_]+[a-z0-9])$/;
