@@ -41,6 +41,7 @@ import { useKibana } from '../../common/lib/kibana';
 
 import { EmptyState } from '../components/empty_state';
 import { AdditionalControls } from '../components/additional_controls';
+import { AssetInventorySearchBar } from '../components/search_bar';
 
 import { useDataViewContext } from '../hooks/data_view_context';
 import { useStyles } from '../hooks/use_styles';
@@ -365,6 +366,11 @@ const AllAssets = ({
 
   return (
     <I18nProvider>
+      <AssetInventorySearchBar
+        query={getDefaultQuery({ query: { query: '', language: '' }, filters: [] })}
+        setQuery={setUrlQuery}
+        loading={loadingState === DataLoadingState.loading}
+      />
       <EuiPageTemplate.Section>
         <EuiTitle size="l">
           <h1>
