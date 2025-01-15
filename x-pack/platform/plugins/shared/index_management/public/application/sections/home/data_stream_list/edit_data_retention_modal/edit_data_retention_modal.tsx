@@ -360,6 +360,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
               )}
               color="danger"
               iconType="warning"
+              data-test-subj="reducedDataRetentionCallout"
             >
               <p>
                 {isBulkEdit ? (
