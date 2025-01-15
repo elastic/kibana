@@ -215,16 +215,39 @@ export class StreamsClient {
       );
 
       if (!isRoutingToChild) {
-        /**
-         * The routing condition is defined in the parent. An empty condition
-         * means it is not actively routed. Consider this a placeholder until
-         * the routing condition is configured in its parent.
-         */
+        // If the parent is not routing to the child, we need to update the parent
+        // to include the child in the routing with an empty condition, which means that no data is routed.
+        // The user can set the condition later on the parent
         await this.updateStreamRouting({
           definition: parentDefinition,
           routing: parentDefinition.stream.ingest.routing.concat({
             name: definition.name,
           }),
+        });
+      }
+    } else if (isWiredStream(definition)) {
+      // if there is no parent, this is either the root stream, or
+      // there are intermediate streams missing in the tree.
+      // In the latter case, we need to create the intermediate streams first.
+      const parentId = getParentId(definition.name);
+      if (parentId) {
+        await this.upsertStream({
+          definition: {
+            name: parentId,
+            stream: {
+              ingest: {
+                processing: [],
+                routing: [
+                  {
+                    name: definition.name,
+                  },
+                ],
+                wired: {
+                  fields: {},
+                },
+              },
+            },
+          },
         });
       }
     }
