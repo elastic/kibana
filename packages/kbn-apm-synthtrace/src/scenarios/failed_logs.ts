@@ -8,7 +8,6 @@
  */
 
 import { LogDocument, log, generateShortId, generateLongId } from '@kbn/apm-synthtrace-client';
-import { merge } from 'lodash';
 import { Scenario } from '../cli/scenario';
 import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
 import { withClient } from '../lib/utils/with_client';
@@ -20,7 +19,7 @@ import {
   MORE_THAN_1024_CHARS,
 } from './helpers/logs_mock_data';
 import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
-import { LogsIndex } from '../lib/logs/logs_synthtrace_es_client';
+import { LogsCustom } from '../lib/logs/logs_synthtrace_es_client';
 
 const processors = [
   {
@@ -66,19 +65,14 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
       await logsEsClient.createCustomPipeline(processors);
       if (isLogsDb) await logsEsClient.createIndexTemplate(IndexTemplateName.LogsDb);
 
-      await logsEsClient.updateIndexTemplate(
-        isLogsDb ? IndexTemplateName.LogsDb : LogsIndex,
-        (template) => {
-          const next = {
-            name: LogsIndex,
-            data_stream: {
-              failure_store: true,
-            },
-          };
-
-          return merge({}, template, next);
-        }
-      );
+      await logsEsClient.createComponentTemplate({
+        name: LogsCustom,
+        dataStreamOptions: {
+          failure_store: {
+            enabled: true,
+          },
+        },
+      });
     },
     generate: ({ range, clients: { logsEsClient } }) => {
       const { logger } = runOptions;
@@ -155,7 +149,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
           commonLongEntryFields,
         } = constructLogsCommonData();
         const isMalformed = i % 10 === 0;
-        const isFailed = i % 80 === 0;
+        const isFailed = Math.floor(Math.random() * 100) % 80 === 0;
         return log
           .create({ isLogsDb })
           .dataset('synth.3')

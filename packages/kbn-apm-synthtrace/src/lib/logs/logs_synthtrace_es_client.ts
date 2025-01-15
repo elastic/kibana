@@ -56,11 +56,21 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
     }
   }
 
-  async createComponentTemplate(
-    name: string,
-    mappings?: MappingTypeMapping,
-    settings?: IndicesIndexSettings
-  ) {
+  async createComponentTemplate({
+    name,
+    mappings,
+    settings,
+    dataStreamOptions,
+  }: {
+    name: string;
+    mappings?: MappingTypeMapping;
+    settings?: IndicesIndexSettings;
+    dataStreamOptions?: {
+      failure_store: {
+        enabled: boolean;
+      };
+    };
+  }) {
     const isTemplateExisting = await this.client.cluster.existsComponentTemplate({ name });
 
     if (isTemplateExisting) return this.logger.info(`Component template already exists: ${name}`);
@@ -71,6 +81,7 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
         template: {
           ...((mappings && { mappings }) || {}),
           ...((settings && { settings }) || {}),
+          ...((dataStreamOptions && { data_stream_options: dataStreamOptions }) || {}),
         },
       });
       this.logger.info(`Component template successfully created: ${name}`);
