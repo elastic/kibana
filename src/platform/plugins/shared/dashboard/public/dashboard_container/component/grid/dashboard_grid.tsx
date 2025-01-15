@@ -115,7 +115,6 @@ export const DashboardGrid = ({ dashboardContainer }: { dashboardContainer?: HTM
 
   const memoizedgridLayout = useMemo(() => {
     // memoizing this component reduces the number of times it gets re-rendered to a minimum
-
     return (
       <GridLayout
         css={layoutStyles}
