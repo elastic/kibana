@@ -15,7 +15,7 @@ import type {
   QueryDslQueryContainer,
   Duration,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { StoredRuleMigration } from '../types';
+import type { InternalUpdateRuleMigrationData, StoredRuleMigration } from '../types';
 import {
   SiemMigrationStatus,
   RuleTranslationResult,
@@ -24,12 +24,10 @@ import {
   type RuleMigration,
   type RuleMigrationTaskStats,
   type RuleMigrationTranslationStats,
-  type UpdateRuleMigrationData,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 import { getSortingOptions, type RuleMigrationSort } from './sort';
 import { conditions as searchConditions } from './search';
-import { convertEsqlQueryToTranslationResult } from './utils';
 
 export type CreateRuleMigrationInput = Omit<
   RuleMigration,
@@ -96,31 +94,23 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
   }
 
   /** Updates an array of rule migrations to be processed */
-  async update(ruleMigrations: UpdateRuleMigrationData[]): Promise<void> {
+  async update(ruleMigrations: InternalUpdateRuleMigrationData[]): Promise<void> {
     const index = await this.getIndexName();
     const profileId = await this.getProfileUid();
 
-    let ruleMigrationsSlice: UpdateRuleMigrationData[];
+    let ruleMigrationsSlice: InternalUpdateRuleMigrationData[];
     const updatedAt = new Date().toISOString();
     while ((ruleMigrationsSlice = ruleMigrations.splice(0, BULK_MAX_SIZE)).length) {
       await this.esClient
         .bulk({
           refresh: 'wait_for',
           operations: ruleMigrationsSlice.flatMap((ruleMigration) => {
-            const {
-              id,
-              translation_result: translationResult,
-              elastic_rule: elasticRule,
-              ...rest
-            } = ruleMigration;
+            const { id, ...rest } = ruleMigration;
             return [
               { update: { _index: index, _id: id } },
               {
                 doc: {
                   ...rest,
-                  elastic_rule: elasticRule,
-                  translation_result:
-                    translationResult ?? convertEsqlQueryToTranslationResult(elasticRule?.query),
                   updated_by: profileId,
                   updated_at: updatedAt,
                 },
