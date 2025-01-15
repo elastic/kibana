@@ -209,8 +209,11 @@ function buildCustomPalette(): PaletteDefinition {
   } as PaletteDefinition<unknown>;
 }
 
-export const buildPalettes = (theme: CoreTheme): Record<string, PaletteDefinition> => {
-  const kbnPalettes = getKbnPalettes(theme);
+export const buildPalettes = (
+  theme: CoreTheme,
+  createNew = false
+): Record<string, PaletteDefinition> => {
+  const kbnPalettes = getKbnPalettes(theme, createNew);
   const defaultPalette = kbnPalettes.get(KbnPalette.Default);
   return {
     default: {

@@ -32,10 +32,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'test_logstash_reader',
       ]);
       await visualize.initTests();
-      await kibanaServer.uiSettings.update({
-        'theme:name': 'borealis',
-      });
-      await browser.refresh();
     });
     beforeEach(async () => {
       await visualize.navigateToNewVisualization();

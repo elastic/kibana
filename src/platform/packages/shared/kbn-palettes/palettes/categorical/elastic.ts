@@ -12,22 +12,25 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 import { KbnPalette } from '../../constants';
 import { KbnColorFnPalette } from '../../classes/color_fn_palette';
 
+export const getElasticPalette = () =>
+  new KbnColorFnPalette({
+    id: KbnPalette.Default,
+    type: 'categorical',
+    aliases: [
+      'elastic_borealis', // placeholder - not yet used
+      KbnPalette.Amsterdam, // to assign to existing default palettes
+    ],
+    colorCount: 10,
+    defaultNumberOfColors: 30,
+    name: i18n.translate('palettes.elastic.name', {
+      defaultMessage: 'Elastic (default)',
+    }),
+    // Return exact colors requested given enough rotations
+    colorFn: (n) => euiPaletteColorBlind({ rotations: Math.ceil(n / 10) }).slice(0, n),
+  });
+
 /**
  * This is not correctly returning the updated vis colors from eui.
  * All gradient function work correctly.
  */
-export const elasticPalette = new KbnColorFnPalette({
-  id: KbnPalette.Default,
-  type: 'categorical',
-  aliases: [
-    'elastic_borealis', // placeholder - not yet used
-    KbnPalette.Amsterdam, // to assign to existing default palettes
-  ],
-  colorCount: 10,
-  defaultNumberOfColors: 30,
-  name: i18n.translate('palettes.elastic.name', {
-    defaultMessage: 'Elastic (default)',
-  }),
-  // Return exact colors requested given enough rotations
-  colorFn: (n) => euiPaletteColorBlind({ rotations: Math.ceil(n / 10) }).slice(0, n),
-});
+export const elasticPalette = getElasticPalette();

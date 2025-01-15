@@ -11,10 +11,10 @@ import type { CoreTheme } from '@kbn/core-theme-browser';
 import { getPalettes } from '.';
 import { getLegacyKbnPalettes } from './legacy';
 
-export function getKbnPalettes({ name, darkMode }: CoreTheme) {
+export function getKbnPalettes({ name, darkMode }: CoreTheme, createNew = false) {
   if (name === 'amsterdam') {
     return getLegacyKbnPalettes(darkMode);
   }
 
-  return getPalettes(darkMode);
+  return getPalettes(darkMode, createNew);
 }

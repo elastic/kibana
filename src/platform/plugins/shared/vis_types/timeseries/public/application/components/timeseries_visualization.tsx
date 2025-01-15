@@ -60,7 +60,7 @@ function TimeseriesVisualization({
 
   useEffect(() => {
     getCharts()
-      .palettes.getPalettes()
+      .palettes.getPalettes(true)
       .then((paletteRegistry) => setPalettesService(paletteRegistry));
   }, [euiTheme.euiTheme.themeName]); // needs to update when theme name changes
 
