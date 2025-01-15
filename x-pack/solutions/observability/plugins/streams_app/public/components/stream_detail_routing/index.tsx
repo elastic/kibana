@@ -839,10 +839,7 @@ function RoutingStreamEntry({
                 color="transparent"
                 paddingSize="s"
                 {...draggableProvided.dragHandleProps}
-                aria-label={i18n.translate(
-                  'xpack.streams.routingStreamEntry.euiPanel.dragHandleLabel',
-                  { defaultMessage: 'Drag Handle' }
-                )}
+                aria-label="Drag Handle"
               >
                 <EuiIcon type="grab" />
               </EuiPanel>
@@ -878,16 +875,25 @@ function RoutingStreamEntry({
           })}
         />
       </EuiFlexGroup>
-      <ConditionEditor
-        readonly={!edit}
-        condition={child.condition}
-        onConditionChange={(condition) => {
-          onChildChange({
-            ...child,
-            condition,
-          });
-        }}
-      />
+      {child.condition && (
+        <ConditionEditor
+          readonly={!edit}
+          condition={child.condition}
+          onConditionChange={(condition) => {
+            onChildChange({
+              ...child,
+              condition,
+            });
+          }}
+        />
+      )}
+      {!child.condition && (
+        <EuiText>
+          {i18n.translate('xpack.streams.streamDetailRouting.noCondition', {
+            defaultMessage: 'No condition, no documents will be routed',
+          })}
+        </EuiText>
+      )}
     </EuiPanel>
   );
 }
@@ -921,16 +927,25 @@ function NewRoutingStreamEntry({
             }}
           />
         </EuiFormRow>
-        <ConditionEditor
-          readonly={false}
-          condition={child.condition}
-          onConditionChange={(condition) => {
-            onChildChange({
-              ...child,
-              condition,
-            });
-          }}
-        />
+        {child.condition && (
+          <ConditionEditor
+            readonly={false}
+            condition={child.condition}
+            onConditionChange={(condition) => {
+              onChildChange({
+                ...child,
+                condition,
+              });
+            }}
+          />
+        )}
+        {!child.condition && (
+          <EuiText>
+            {i18n.translate('xpack.streams.streamDetailRouting.noCondition', {
+              defaultMessage: 'No condition, no documents will be routed',
+            })}
+          </EuiText>
+        )}
       </EuiFlexGroup>
     </EuiPanel>
   );
