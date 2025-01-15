@@ -22,11 +22,8 @@ export const mount =
     const defaultDataView = await plugins.data.indexPatterns.getDefault();
     const { formula } = await plugins.lens.stateHelperApi();
 
-    const { analytics, i18n, theme } = core;
-    const startServices = { analytics, i18n, theme };
-
     const reactElement = (
-      <KibanaRenderContextProvider {...startServices}>
+      <KibanaRenderContextProvider {...core}>
         {defaultDataView && defaultDataView.isTimeBased() ? (
           <App core={core} plugins={plugins} defaultDataView={defaultDataView} formula={formula} />
         ) : (

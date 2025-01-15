@@ -1504,7 +1504,7 @@
           "PlaywrightTestConfig",
           "<{}, {}>"
         ],
-        "path": "packages/kbn-scout/src/playwright/config/index.ts",
+        "path": "packages/kbn-scout/src/playwright/config/create_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1524,7 +1524,7 @@
                 "text": "ScoutPlaywrightOptions"
               }
             ],
-            "path": "packages/kbn-scout/src/playwright/config/index.ts",
+            "path": "packages/kbn-scout/src/playwright/config/create_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1541,7 +1541,7 @@
         "label": "expect",
         "description": [],
         "signature": [
-          "{ <T = unknown>(actual: T, messageOrOptions?: string | { message?: string | undefined; } | undefined): MakeMatchers<void, T, {}>; soft: <T = unknown>(actual: T, messageOrOptions?: string | { message?: string | undefined; } | undefined) => MakeMatchers<void, T, {}>; poll: <T = unknown>(actual: () => T | Promise<T>, messageOrOptions?: string | { message?: string | undefined; timeout?: number | undefined; intervals?: number[] | undefined; } | undefined) => GenericAssertions<Promise<void>> & PlaywrightTest.Matchers<Promise<void>, T> & SnapshotAssertions & { not: BaseMatchers<Promise<void>, T>; }; extend<MoreMatchers extends Record<string, (this: ",
+          "{ <T = unknown>(actual: T, messageOrOptions?: string | { message?: string | undefined; } | undefined): MakeMatchers<void, T, {}>; soft: <T = unknown>(actual: T, messageOrOptions?: string | { message?: string | undefined; } | undefined) => MakeMatchers<void, T, {}>; poll: <T = unknown>(actual: () => T | Promise<T>, messageOrOptions?: string | { message?: string | undefined; timeout?: number | undefined; intervals?: number[] | undefined; } | undefined) => PollMatchers<Promise<void>, T, {}>; extend<MoreMatchers extends Record<string, (this: ",
           "ExpectMatcherState",
           ", receiver: any, ...args: any[]) => ",
           "MatcherReturnType",
@@ -1591,44 +1591,6 @@
       },
       {
         "parentPluginId": "@kbn/scout",
-        "id": "def-common.runTestsCli",
-        "type": "Function",
-        "tags": [],
-        "label": "runTestsCli",
-        "description": [
-          "\nStart servers and run the tests"
-        ],
-        "signature": [
-          "() => void"
-        ],
-        "path": "packages/kbn-scout/src/cli/run_tests_cli.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/scout",
-        "id": "def-common.startServersCli",
-        "type": "Function",
-        "tags": [],
-        "label": "startServersCli",
-        "description": [
-          "\nStart servers"
-        ],
-        "signature": [
-          "() => void"
-        ],
-        "path": "packages/kbn-scout/src/cli/start_servers_cli.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/scout",
         "id": "def-common.test",
         "type": "Function",
         "tags": [],
@@ -1642,22 +1604,6 @@
           "PlaywrightTestOptions",
           " & { browserAuth: ",
           "LoginFixture",
-          "; } & { page: ",
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.ScoutPage",
-            "text": "ScoutPage"
-          },
-          "; kbnUrl: ",
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.KibanaUrl",
-            "text": "KibanaUrl"
-          },
           "; } & ",
           {
             "pluginId": "@kbn/scout",
@@ -1666,7 +1612,7 @@
             "section": "def-common.ScoutTestFixtures",
             "text": "ScoutTestFixtures"
           },
-          ", ",
+          " & { validateTags: void; }, ",
           "PlaywrightWorkerArgs",
           " & ",
           "PlaywrightWorkerOptions",
@@ -1704,7 +1650,9 @@
             "type": "Function",
             "tags": [],
             "label": "loadIfNeeded",
-            "description": [],
+            "description": [
+              "\nLoads an Elasticsearch archive if the specified data index is not present."
+            ],
             "signature": [
               "(name: string, performance?: ",
               {
@@ -1728,7 +1676,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "name",
-                "description": [],
+                "description": [
+                  "The name of the archive to load."
+                ],
                 "signature": [
                   "string"
                 ],
@@ -1743,7 +1693,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "performance",
-                "description": [],
+                "description": [
+                  "An object of type LoadActionPerfOptions to measure and\nreport performance metrics during the load operation."
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/es-archiver",
@@ -1760,7 +1712,9 @@
                 "isRequired": false
               }
             ],
-            "returnComment": []
+            "returnComment": [
+              "A Promise that resolves to an object containing index statistics."
+            ]
           }
         ],
         "initialIsOpen": false
@@ -1852,7 +1806,7 @@
           },
           " extends Pick<",
           "PlaywrightTestConfig",
-          "<{}, {}>, \"testDir\" | \"workers\">"
+          "<{}, {}>, \"workers\" | \"testDir\">"
         ],
         "path": "packages/kbn-scout/src/playwright/types/index.ts",
         "deprecated": false,
@@ -2014,7 +1968,9 @@
         "type": "Interface",
         "tags": [],
         "label": "ScoutWorkerFixtures",
-        "description": [],
+        "description": [
+          "\nThe `ScoutWorkerFixtures` type defines the set of fixtures that are available"
+        ],
         "path": "packages/kbn-scout/src/playwright/fixtures/types/worker_scope.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2047,7 +2003,7 @@
             "label": "config",
             "description": [],
             "signature": [
-              "ScoutServerConfig"
+              "ScoutTestConfig"
             ],
             "path": "packages/kbn-scout/src/playwright/fixtures/types/worker_scope.ts",
             "deprecated": false,
@@ -2198,6 +2154,63 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/scout",
+        "id": "def-common.tags",
+        "type": "Object",
+        "tags": [],
+        "label": "tags",
+        "description": [],
+        "path": "packages/kbn-scout/src/playwright/tags.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.tags.ESS_ONLY",
+            "type": "Array",
+            "tags": [],
+            "label": "ESS_ONLY",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-scout/src/playwright/tags.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.tags.SERVERLESS_ONLY",
+            "type": "Array",
+            "tags": [],
+            "label": "SERVERLESS_ONLY",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-scout/src/playwright/tags.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.tags.DEPLOYMENT_AGNOSTIC",
+            "type": "Array",
+            "tags": [],
+            "label": "DEPLOYMENT_AGNOSTIC",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-scout/src/playwright/tags.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

@@ -466,9 +466,6 @@
           "id": "kibDataSearchPluginApi"
         },
         {
-          "id": "kibBfetchPluginApi"
-        },
-        {
           "id": "kibAlertingPluginApi"
         },
         {

@@ -26,5 +26,6 @@
     "@kbn/mock-idp-utils",
     "@kbn/cloud-plugin",
     "@kbn/es",
+    "@kbn/core-user-profile-browser",
   ]
 }

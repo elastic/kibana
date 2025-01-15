@@ -160,7 +160,8 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('POST /api/fleet/agent_policies', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/203346
+    describe.skip('POST /api/fleet/agent_policies', () => {
       let systemPkgVersion: string;
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
