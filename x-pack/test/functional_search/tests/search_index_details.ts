@@ -270,11 +270,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
-      describe.skip('index management index list page', () => {
+      describe('index management index list page', () => {
         before(async () => {
           await esDeleteAllIndices(indexName);
           await es.indices.create({ index: indexName });
-          await security.testUser.setRoles(['index_management_user']);
         });
         beforeEach(async () => {
           // Navigate to search solution space
