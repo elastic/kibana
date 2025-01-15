@@ -7,6 +7,7 @@
 
 import { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 
+import { getMicrosoftDefenderEndpointConnectorType } from './microsoft_defender_endpoint';
 import { getConnectorType as getCasesWebhookConnectorType } from './cases_webhook';
 import { getConnectorType as getJiraConnectorType } from './jira';
 import { getServiceNowITSMConnectorType } from './servicenow_itsm';
@@ -122,5 +123,8 @@ export function registerConnectorTypes({
   }
   if (experimentalFeatures.inferenceConnectorOn) {
     actions.registerSubActionConnectorType(getInferenceConnectorType());
+  }
+  if (experimentalFeatures.microsoftDefenderEndpointOn) {
+    actions.registerSubActionConnectorType(getMicrosoftDefenderEndpointConnectorType());
   }
 }
