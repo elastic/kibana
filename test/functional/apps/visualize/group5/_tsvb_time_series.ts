@@ -243,13 +243,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('Elastic charts', function () {
         this.tags('skipFirefox');
-        before(async () => {
-          await kibanaServer.uiSettings.update({
-            'theme:name': 'borealis',
-            'theme:darkMode': false,
-          });
-          await browser.refresh();
-        });
         beforeEach(async () => {
           await visualBuilder.toggleNewChartsLibraryWithDebug(true);
           await visualBuilder.clickPanelOptions('timeSeries');
