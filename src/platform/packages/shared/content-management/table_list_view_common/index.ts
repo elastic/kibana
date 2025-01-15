@@ -22,5 +22,4 @@ export interface UserContentCommonSchema {
     title: string;
     description?: string;
   };
-  savedObjectType?: string;
 }
