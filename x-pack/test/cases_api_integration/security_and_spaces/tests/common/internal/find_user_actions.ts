@@ -58,7 +58,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllCaseItems(es);
     });
 
-    it.skip('returns the id and version fields but not action_id', async () => {
+    it('returns the id and version fields but not action_id', async () => {
       const theCase = await createCase(supertest, getPostCaseRequest());
 
       const allUserActions = await getCaseUserActions({ supertest, caseID: theCase.id });
@@ -78,7 +78,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('default parameters', () => {
-      it.skip('performs a search using the default parameters when no query params are sent', async () => {
+      it('performs a search using the default parameters when no query params are sent', async () => {
         const theCase = await createCase(supertest, getPostCaseRequest());
 
         await createComment({
@@ -658,7 +658,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(createCaseUserAction.action).to.eql('create');
       });
 
-      it.skip('retrieves any non user comment user actions using the action filter', async () => {
+      it('retrieves any non user comment user actions using the action filter', async () => {
         const theCase = await createCase(supertest, getPostCaseRequest());
 
         const updatedCase = await bulkCreateAttachments({
@@ -752,7 +752,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(alertUserAction.payload.comment.type).to.eql('alert');
       });
 
-      it.skip('retrieves only user comment user actions', async () => {
+      it('retrieves only user comment user actions', async () => {
         const theCase = await createCase(supertest, getPostCaseRequest());
 
         await bulkCreateAttachments({
