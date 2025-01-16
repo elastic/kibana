@@ -15,7 +15,7 @@ import type {
   QueryDslQueryContainer,
   Duration,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { StoredRuleMigration } from '../types';
+import type { InternalUpdateRuleMigrationData, StoredRuleMigration } from '../types';
 import {
   SiemMigrationStatus,
   RuleTranslationResult,
@@ -24,12 +24,10 @@ import {
   type RuleMigration,
   type RuleMigrationTaskStats,
   type RuleMigrationTranslationStats,
-  type UpdateRuleMigrationData,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 import { getSortingOptions, type RuleMigrationSort } from './sort';
 import { conditions as searchConditions } from './search';
-import { convertEsqlQueryToTranslationResult } from './utils';
 
 export type CreateRuleMigrationInput = Omit<
   RuleMigration,
@@ -41,11 +39,13 @@ export type RuleMigrationAllDataStats = RuleMigrationDataStats[];
 export interface RuleMigrationFilters {
   status?: SiemMigrationStatus | SiemMigrationStatus[];
   ids?: string[];
+  installed?: boolean;
   installable?: boolean;
   prebuilt?: boolean;
-  custom?: boolean;
   failed?: boolean;
-  notFullyTranslated?: boolean;
+  fullyTranslated?: boolean;
+  partiallyTranslated?: boolean;
+  untranslatable?: boolean;
   searchTerm?: string;
 }
 export interface RuleMigrationGetOptions {
@@ -66,6 +66,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
   /** Indexes an array of rule migrations to be processed */
   async create(ruleMigrations: CreateRuleMigrationInput[]): Promise<void> {
     const index = await this.getIndexName();
+    const profileId = await this.getProfileUid();
 
     let ruleMigrationsSlice: CreateRuleMigrationInput[];
     const createdAt = new Date().toISOString();
@@ -79,8 +80,8 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
               ...ruleMigration,
               '@timestamp': createdAt,
               status: SiemMigrationStatus.PENDING,
-              created_by: this.username,
-              updated_by: this.username,
+              created_by: profileId,
+              updated_by: profileId,
               updated_at: createdAt,
             },
           ]),
@@ -93,31 +94,24 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
   }
 
   /** Updates an array of rule migrations to be processed */
-  async update(ruleMigrations: UpdateRuleMigrationData[]): Promise<void> {
+  async update(ruleMigrations: InternalUpdateRuleMigrationData[]): Promise<void> {
     const index = await this.getIndexName();
+    const profileId = await this.getProfileUid();
 
-    let ruleMigrationsSlice: UpdateRuleMigrationData[];
+    let ruleMigrationsSlice: InternalUpdateRuleMigrationData[];
     const updatedAt = new Date().toISOString();
     while ((ruleMigrationsSlice = ruleMigrations.splice(0, BULK_MAX_SIZE)).length) {
       await this.esClient
         .bulk({
           refresh: 'wait_for',
           operations: ruleMigrationsSlice.flatMap((ruleMigration) => {
-            const {
-              id,
-              translation_result: translationResult,
-              elastic_rule: elasticRule,
-              ...rest
-            } = ruleMigration;
+            const { id, ...rest } = ruleMigration;
             return [
               { update: { _index: index, _id: id } },
               {
                 doc: {
                   ...rest,
-                  elastic_rule: elasticRule,
-                  translation_result:
-                    translationResult ?? convertEsqlQueryToTranslationResult(elasticRule?.query),
-                  updated_by: this.username,
+                  updated_by: profileId,
                   updated_at: updatedAt,
                 },
               },
@@ -176,6 +170,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
    */
   async takePending(migrationId: string, size: number): Promise<StoredRuleMigration[]> {
     const index = await this.getIndexName();
+    const profileId = await this.getProfileUid();
     const query = this.getFilterQuery(migrationId, { status: SiemMigrationStatus.PENDING });
 
     const storedRuleMigrations = await this.esClient
@@ -194,7 +189,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
         operations: storedRuleMigrations.flatMap(({ id, status }) => [
           { update: { _id: id, _index: index } },
           {
-            doc: { status, updated_by: this.username, updated_at: new Date().toISOString() },
+            doc: { status, updated_by: profileId, updated_at: new Date().toISOString() },
           },
         ]),
       })
@@ -211,10 +206,11 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
   /** Updates one rule migration with the provided data and sets the status to `completed` */
   async saveCompleted({ id, ...ruleMigration }: StoredRuleMigration): Promise<void> {
     const index = await this.getIndexName();
+    const profileId = await this.getProfileUid();
     const doc = {
       ...ruleMigration,
       status: SiemMigrationStatus.COMPLETED,
-      updated_by: this.username,
+      updated_by: profileId,
       updated_at: new Date().toISOString(),
     };
     await this.esClient.update({ index, id, doc, refresh: 'wait_for' }).catch((error) => {
@@ -226,10 +222,11 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
   /** Updates one rule migration with the provided data and sets the status to `failed` */
   async saveError({ id, ...ruleMigration }: StoredRuleMigration): Promise<void> {
     const index = await this.getIndexName();
+    const profileId = await this.getProfileUid();
     const doc = {
       ...ruleMigration,
       status: SiemMigrationStatus.FAILED,
-      updated_by: this.username,
+      updated_by: profileId,
       updated_at: new Date().toISOString(),
     };
     await this.esClient.update({ index, id, doc, refresh: 'wait_for' }).catch((error) => {
@@ -403,12 +400,14 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     {
       status,
       ids,
+      installed,
       installable,
       prebuilt,
-      custom,
       searchTerm,
       failed,
-      notFullyTranslated,
+      fullyTranslated,
+      partiallyTranslated,
+      untranslatable,
     }: RuleMigrationFilters = {}
   ): QueryDslQueryContainer {
     const filter: QueryDslQueryContainer[] = [{ term: { migration_id: migrationId } }];
@@ -422,23 +421,43 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     if (ids) {
       filter.push({ terms: { _id: ids } });
     }
-    if (installable) {
-      filter.push(...searchConditions.isInstallable());
-    }
-    if (prebuilt) {
-      filter.push(searchConditions.isPrebuilt());
-    }
-    if (custom) {
-      filter.push(searchConditions.isCustom());
-    }
     if (searchTerm?.length) {
       filter.push(searchConditions.matchTitle(searchTerm));
     }
-    if (failed) {
-      filter.push(searchConditions.isFailed());
+    if (installed === true) {
+      filter.push(searchConditions.isInstalled());
+    } else if (installed === false) {
+      filter.push(searchConditions.isNotInstalled());
     }
-    if (notFullyTranslated) {
+    if (installable === true) {
+      filter.push(...searchConditions.isInstallable());
+    } else if (installable === false) {
+      filter.push(...searchConditions.isNotInstallable());
+    }
+    if (prebuilt === true) {
+      filter.push(searchConditions.isPrebuilt());
+    } else if (prebuilt === false) {
+      filter.push(searchConditions.isCustom());
+    }
+    if (failed === true) {
+      filter.push(searchConditions.isFailed());
+    } else if (failed === false) {
+      filter.push(searchConditions.isNotFailed());
+    }
+    if (fullyTranslated === true) {
+      filter.push(searchConditions.isFullyTranslated());
+    } else if (fullyTranslated === false) {
       filter.push(searchConditions.isNotFullyTranslated());
+    }
+    if (partiallyTranslated === true) {
+      filter.push(searchConditions.isPartiallyTranslated());
+    } else if (partiallyTranslated === false) {
+      filter.push(searchConditions.isNotPartiallyTranslated());
+    }
+    if (untranslatable === true) {
+      filter.push(searchConditions.isUntranslatable());
+    } else if (untranslatable === false) {
+      filter.push(searchConditions.isNotUntranslatable());
     }
     return { bool: { filter } };
   }
