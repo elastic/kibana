@@ -204,7 +204,7 @@ If your Kibana server is hosted behind a load balancer or reverse proxy we recom
 
 
 [discrete]
-[[known-issue-xxxxxx]]
+[[known-issue-206998]]
 .Search sessions has been disabled by default (9.0.0)
 [%collapsible]
 ====
