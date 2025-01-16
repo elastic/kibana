@@ -77,6 +77,7 @@ export class CsvESQLGenerator {
     const { maxSizeBytes, bom, escapeFormulaValues } = settings;
     const builder = new MaxSizeStringBuilder(this.stream, byteSizeValueToNumber(maxSizeBytes), bom);
 
+    // it will return undefined if there are no _tstart, _tend named params in the query
     const timeFieldName = getTimeFieldFromESQLQuery(this.job.query.esql);
     const params = [];
     if (timeFieldName && this.job.filters) {
