@@ -102,7 +102,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
           flex: 1 1 auto;
           cursor: pointer;
         }
-        .euiAccordion__triggerWrapper {
+        > .euiAccordion__triggerWrapper {
           z-index: 100;
           position: relative;
           border-radius: ${euiTheme.border.radius.medium};
