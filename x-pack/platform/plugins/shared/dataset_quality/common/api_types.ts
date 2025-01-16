@@ -56,6 +56,12 @@ export const getDataStreamDegradedDocsResponseRt = rt.type({
 
 export type DataStreamDegradedDocsResponse = rt.TypeOf<typeof getDataStreamDegradedDocsResponseRt>;
 
+export const getDataStreamFailedDocsResponseRt = rt.type({
+  failedDocs: rt.array(dataStreamDocsStatRt),
+});
+
+export type DataStreamFailedDocsResponse = rt.TypeOf<typeof getDataStreamFailedDocsResponseRt>;
+
 export const integrationDashboardRT = rt.type({
   id: rt.string,
   title: rt.string,
@@ -142,6 +148,19 @@ export const qualityIssueRT = rt.intersection([
 
 export type QualityIssue = rt.TypeOf<typeof qualityIssueRT>;
 
+export type FailedDocsDetails = rt.TypeOf<typeof qualityIssueBaseRT>;
+
+export const failedDocsErrorRt = rt.type({
+  message: rt.string,
+  type: rt.string,
+});
+
+export const failedDocsErrorsRt = rt.type({
+  errors: rt.array(failedDocsErrorRt),
+});
+
+export type FailedDocsErrors = rt.TypeOf<typeof failedDocsErrorsRt>;
+
 export const degradedFieldRt = rt.intersection([
   qualityIssueBaseRT,
   rt.type({
@@ -216,6 +235,7 @@ export type DataStreamSettings = rt.TypeOf<typeof dataStreamSettingsRt>;
 export const dataStreamDetailsRt = rt.partial({
   lastActivity: rt.number,
   degradedDocsCount: rt.number,
+  failedDocsCount: rt.number,
   docsCount: rt.number,
   sizeBytes: rt.number,
   services: rt.record(rt.string, rt.array(rt.string)),
