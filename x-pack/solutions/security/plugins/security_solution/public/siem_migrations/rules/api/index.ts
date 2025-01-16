@@ -16,7 +16,6 @@ import type { SiemMigrationRetryFilter } from '../../../../common/siem_migration
 import {
   SIEM_RULE_MIGRATIONS_PATH,
   SIEM_RULE_MIGRATIONS_ALL_STATS_PATH,
-  SIEM_RULE_MIGRATION_INSTALL_TRANSLATED_PATH,
   SIEM_RULE_MIGRATION_INSTALL_PATH,
   SIEM_RULE_MIGRATION_PATH,
   SIEM_RULE_MIGRATION_START_PATH,
@@ -33,7 +32,6 @@ import type {
   GetAllStatsRuleMigrationResponse,
   GetRuleMigrationResponse,
   GetRuleMigrationTranslationStatsResponse,
-  InstallTranslatedMigrationRulesResponse,
   InstallMigrationRulesResponse,
   StartRuleMigrationRequestBody,
   GetRuleMigrationStatsResponse,
@@ -238,7 +236,7 @@ export interface InstallRulesParams {
   /** `id` of the migration to install rules for */
   migrationId: string;
   /** The rule ids to install */
-  ids: string[];
+  ids?: string[];
   /** Optional indicator to enable the installed rule */
   enabled?: boolean;
   /** Optional AbortSignal for cancelling request */
@@ -254,23 +252,6 @@ export const installMigrationRules = async ({
   return KibanaServices.get().http.post<InstallMigrationRulesResponse>(
     replaceParams(SIEM_RULE_MIGRATION_INSTALL_PATH, { migration_id: migrationId }),
     { version: '1', body: JSON.stringify({ ids, enabled }), signal }
-  );
-};
-
-export interface InstallTranslatedRulesParams {
-  /** `id` of the migration to install rules for */
-  migrationId: string;
-  /** Optional AbortSignal for cancelling request */
-  signal?: AbortSignal;
-}
-/** Installs all the translated rules for a specific migration. */
-export const installTranslatedMigrationRules = async ({
-  migrationId,
-  signal,
-}: InstallTranslatedRulesParams): Promise<InstallTranslatedMigrationRulesResponse> => {
-  return KibanaServices.get().http.post<InstallTranslatedMigrationRulesResponse>(
-    replaceParams(SIEM_RULE_MIGRATION_INSTALL_TRANSLATED_PATH, { migration_id: migrationId }),
-    { version: '1', signal }
   );
 };
 
