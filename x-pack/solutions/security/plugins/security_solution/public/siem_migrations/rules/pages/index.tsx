@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 
-import { EuiSkeletonLoading, EuiSkeletonText, EuiSkeletonTitle } from '@elastic/eui';
+import { EuiSkeletonLoading, EuiSkeletonText, EuiSkeletonTitle, EuiSpacer } from '@elastic/eui';
 import type { RouteComponentProps } from 'react-router-dom';
 import type { RelatedIntegration } from '../../../../common/api/detection_engine';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
@@ -29,6 +29,7 @@ import { useInvalidateGetMigrationRules } from '../logic/use_get_migration_rules
 import { useInvalidateGetMigrationTranslationStats } from '../logic/use_get_migration_translation_stats';
 import { useGetIntegrations } from '../service/hooks/use_get_integrations';
 import { PageTitle } from './page_title';
+import { RuleMigrationsUploadMissingPanel } from '../components/migration_status_panels/upload_missing_panel';
 
 type MigrationRulesPageProps = RouteComponentProps<{ migrationId?: string }>;
 
@@ -102,7 +103,8 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
       return (
         <RuleMigrationDataInputWrapper onFlyoutClosed={refetchData}>
           <>
-            {/* TODO: uncomment when retry API is ready <RuleMigrationsUploadMissingPanel migrationStats={migrationStats} spacerSizeTop="s" /> */}
+            <RuleMigrationsUploadMissingPanel migrationStats={migrationStats} topSpacerSize="s" />
+            <EuiSpacer size="m" />
             {migrationStats.status === SiemMigrationTaskStatus.FINISHED && (
               <MigrationRulesTable
                 migrationId={migrationId}
