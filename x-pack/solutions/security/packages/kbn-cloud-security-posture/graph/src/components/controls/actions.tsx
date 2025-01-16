@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   type CommonProps,
   EuiButtonIcon,
@@ -103,20 +103,15 @@ export const Actions = ({
     true
   );
 
-  useEffect(() => {
-    if (searchFilterCounter > 0 && shouldShowSearchBarButtonTour) {
+  if (shouldShowSearchBarButtonTour) {
+    if (searchFilterCounter > 0) {
       setIsSearchBarTourOpen(true);
       setShouldShowSearchBarButtonTour(false);
     } else if (searchToggled) {
       // User already used the search bar, so we don't need to show the tour
       setShouldShowSearchBarButtonTour(false);
     }
-  }, [
-    searchFilterCounter,
-    shouldShowSearchBarButtonTour,
-    setShouldShowSearchBarButtonTour,
-    searchToggled,
-  ]);
+  }
 
   return (
     <EuiFlexGroup direction="column" gutterSize={'none'} {...props}>

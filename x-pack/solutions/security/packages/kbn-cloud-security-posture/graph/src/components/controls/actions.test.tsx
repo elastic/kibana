@@ -104,8 +104,14 @@ describe('Actions component', () => {
 
   describe('search bar tour', () => {
     it('opens the search bar tour when searchFilterCounter is greater than 0 and shouldShowSearchBarButtonTour is true', () => {
-      const setShouldShowSearchBarButtonTourMock = jest.fn();
-      (useLocalStorage as jest.Mock).mockReturnValue([true, setShouldShowSearchBarButtonTourMock]);
+      let shouldShowSearchBarButtonTour = true;
+      const setShouldShowSearchBarButtonTourMock = jest.fn(
+        (value: boolean) => (shouldShowSearchBarButtonTour = value)
+      );
+      (useLocalStorage as jest.Mock).mockImplementation(() => [
+        shouldShowSearchBarButtonTour,
+        setShouldShowSearchBarButtonTourMock,
+      ]);
       const { getByText } = renderWithProviders({
         ...defaultProps,
         searchFilterCounter: 3,
