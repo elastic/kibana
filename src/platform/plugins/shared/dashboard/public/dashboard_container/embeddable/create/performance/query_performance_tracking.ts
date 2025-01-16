@@ -13,9 +13,9 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { PublishesPhaseEvents, apiPublishesPhaseEvents } from '@kbn/presentation-publishing';
 
-import { DASHBOARD_LOADED_EVENT } from '../../../../dashboard_constants';
 import { coreServices } from '../../../../services/kibana_services';
 import { DashboardLoadType } from '../../../types';
+import { DASHBOARD_LOADED_EVENT } from '../../../../utils/telemetry_constants';
 
 export interface PerformanceState {
   firstLoad: boolean;
