@@ -54,7 +54,6 @@
     "@kbn/safer-lodash-set",
     "@kbn/esql-utils",
     "@kbn/shared-ux-table-persist",
-    "@kbn/doc-links",
     "@kbn/core-deprecations-common"
   ],
   "exclude": [

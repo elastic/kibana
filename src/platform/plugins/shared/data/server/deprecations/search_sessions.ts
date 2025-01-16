@@ -15,7 +15,6 @@ import type {
   SavedObjectsFindResult,
 } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import type { DocLinks } from '@kbn/doc-links';
 import type { DeprecationDetailsMessage } from '@kbn/core-deprecations-common';
 import { SEARCH_SESSION_TYPE, SearchSessionSavedObjectAttributes } from '../../common';
 
@@ -58,10 +57,7 @@ export const createSearchSessionsDeprecationsConfig: (
         title: i18n.translate('data.deprecations.searchSessionsTitle', {
           defaultMessage: 'Found active search sessions',
         }),
-        message: buildMessage({
-          searchSessions,
-          docLinks: core.docLinks.links,
-        }),
+        message: buildMessage({ searchSessions }),
         deprecationType: 'feature',
         level: 'warning',
         correctiveActions: {
@@ -120,10 +116,8 @@ const buildSearchSessionsListEntry = (
 
 const buildMessage = ({
   searchSessions,
-  docLinks,
 }: {
   searchSessions: Array<SavedObjectsFindResult<SearchSessionAttributes>>;
-  docLinks: DocLinks;
 }): DeprecationDetailsMessage => ({
   type: 'markdown',
   content: i18n.translate('data.deprecations.scriptedFieldsMessage', {
