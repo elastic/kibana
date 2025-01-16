@@ -34,10 +34,12 @@ export const SearchSynonymsOverview = () => {
       <KibanaPageTemplate.Section restrictWidth>
         {isInitialLoading && 'Loading...'}
 
-        {!isInitialLoading && synonymsData && synonymsData.count > 0 && (
+        {!isInitialLoading && synonymsData && synonymsData._meta.totalItemCount > 0 && (
           <SynonymSets synonyms={synonymsData} />
         )}
-        {!isInitialLoading && synonymsData && synonymsData.count === 0 && <EmptyPrompt />}
+        {!isInitialLoading && synonymsData && synonymsData._meta.totalItemCount === 0 && (
+          <EmptyPrompt />
+        )}
       </KibanaPageTemplate.Section>
       {embeddableConsole}
     </KibanaPageTemplate>

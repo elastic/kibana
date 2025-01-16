@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  SynonymsGetSynonymsSetsResponse,
-  SynonymsGetSynonymsSetsSynonymsSetItem,
-} from '@elastic/elasticsearch/lib/api/types';
+import { SynonymsGetSynonymsSetsSynonymsSetItem } from '@elastic/elasticsearch/lib/api/types';
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -19,9 +16,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { Paginate } from '../../../common/pagination';
 
 interface SynonymsSetsProps {
-  synonyms: SynonymsGetSynonymsSetsResponse;
+  synonyms: Paginate<SynonymsGetSynonymsSetsSynonymsSetItem>;
 }
 
 export const SynonymSets = ({ synonyms }: SynonymsSetsProps) => {
@@ -29,9 +27,7 @@ export const SynonymSets = ({ synonyms }: SynonymsSetsProps) => {
   const pagination = {
     initialPageSize: 25,
     pageSizeOptions: [10, 25, 50],
-    totalItemCount: 2,
-    pageIndex: 0,
-    pageSize: 1,
+    ...synonyms._meta,
   };
   const columns: Array<EuiBasicTableColumn<SynonymsGetSynonymsSetsSynonymsSetItem>> = [
     {
@@ -90,7 +86,7 @@ export const SynonymSets = ({ synonyms }: SynonymsSetsProps) => {
     <div>
       <EuiBasicTable
         data-test-subj="synonyms-set-table"
-        items={synonyms.results}
+        items={synonyms.data}
         columns={columns}
         pagination={pagination}
         onChange={() => {}}

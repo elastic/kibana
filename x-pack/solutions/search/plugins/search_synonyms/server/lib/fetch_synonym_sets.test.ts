@@ -38,10 +38,14 @@ describe('fetch synonym sets lib function', () => {
       ],
     });
 
-    const result = await fetchSynonymSets(client());
+    const result = await fetchSynonymSets(client(), { from: 0, size: 10 });
     expect(result).toEqual({
-      count: 2,
-      results: [
+      _meta: {
+        pageIndex: 0,
+        pageSize: 10,
+        totalItemCount: 2,
+      },
+      data: [
         {
           synonyms_set: 'my_synonyms_set',
           count: 2,

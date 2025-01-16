@@ -6,6 +6,7 @@
  */
 
 import { IRouter, Logger } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 import { APIRoutes } from '../common/api_routes';
 
 import { errorHandler } from './utils/error_handler';
@@ -24,7 +25,12 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
           requiredPrivileges: ['synonyms:read'],
         },
       },
-      validate: {},
+      validate: {
+        query: schema.object({
+          from: schema.number({ defaultValue: 0 }),
+          size: schema.number({ defaultValue: 10 }),
+        }),
+      },
     },
     errorHandler(logger)(async (context, request, response) => {
       const core = await context.core;
@@ -42,7 +48,10 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
         cluster: ['manage_search_synonyms'],
       });
       // TODO: no permissions check for synonyms:read and return 403
-      const result = await fetchSynonymSets(asCurrentUser);
+      const result = await fetchSynonymSets(asCurrentUser, {
+        from: request.query.from,
+        size: request.query.size,
+      });
       return response.ok({
         body: result,
       });

@@ -6,7 +6,8 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import type { SynonymsGetSynonymsSetsResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SynonymsGetSynonymsSetsSynonymsSetItem } from '@elastic/elasticsearch/lib/api/types';
+import { Paginate } from '../../common/pagination';
 import { APIRoutes } from '../../common/api_routes';
 import { useKibana } from './use_kibana';
 
@@ -17,7 +18,9 @@ export const useFetchSynonymsSets = () => {
   return useQuery({
     queryKey: ['synonyms-sets-fetch'],
     queryFn: async () => {
-      return await http.get<SynonymsGetSynonymsSetsResponse>(APIRoutes.SYNONYM_SETS);
+      return await http.get<Paginate<SynonymsGetSynonymsSetsSynonymsSetItem>>(
+        APIRoutes.SYNONYM_SETS
+      );
     },
   });
 };

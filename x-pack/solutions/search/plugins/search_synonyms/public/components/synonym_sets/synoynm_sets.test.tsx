@@ -12,8 +12,12 @@ import { SynonymSets } from './synonym_sets';
 
 describe('Search Synonym Sets list', () => {
   const synonymsMock = {
-    count: 2,
-    results: [
+    _meta: {
+      pageIndex: 0,
+      pageSize: 10,
+      totalItemCount: 2,
+    },
+    data: [
       {
         synonyms_set: 'Synonyms Set 1',
         count: 2,
