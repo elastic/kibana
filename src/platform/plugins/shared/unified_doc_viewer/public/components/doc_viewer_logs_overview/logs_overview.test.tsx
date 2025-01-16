@@ -158,11 +158,9 @@ const renderLogsOverview = (props: Partial<DocViewRenderProps> = {}) => {
   const rerender = (rerenderProps: Partial<DocViewRenderProps>) =>
     baseRerender(
       <EuiProvider>
-      <IntlProvider locale="en">
-
-        <LogsOverview dataView={dataView} hit={fullHit} {...props} {...rerenderProps} />
+        <IntlProvider locale="en">
+          <LogsOverview dataView={dataView} hit={fullHit} {...props} {...rerenderProps} />
         </IntlProvider>
-
       </EuiProvider>
     );
 
