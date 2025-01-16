@@ -180,6 +180,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await searchStart.expectToBeOnMLFileUploadPage();
       });
 
+      it('should have o11y links', async () => {
+        await searchStart.expectToBeOnStartPage();
+        await searchStart.expectAnalyzeLogsIntegrationLink();
+        await searchStart.expectCreateO11ySpaceBtn();
+      });
       it('should have close button', async () => {
         await searchStart.expectToBeOnStartPage();
         await searchStart.expectCloseCreateIndexButtonExists();

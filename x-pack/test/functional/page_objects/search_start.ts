@@ -110,5 +110,20 @@ export function SearchStartProvider({ getService }: FtrProviderContext) {
       await testSubjects.missingOrFail('apiKeyHasNotBeenGenerated');
       await testSubjects.missingOrFail('apiKeyHasBeenGenerated');
     },
+    async expectAnalyzeLogsIntegrationLink() {
+      await testSubjects.existOrFail('analyzeLogsBtn');
+      expect(await testSubjects.getAttribute('analyzeLogsBtn', 'href')).match(
+        /^https?\:\/\/.*\/app\/integrations\/browse\/observability/
+      );
+
+      expect(await testSubjects.getAttribute('analyzeLogsBtn', 'target')).equal('_blank');
+    },
+    async expectCreateO11ySpaceBtn() {
+      await testSubjects.existOrFail('createO11ySpaceBtn');
+      expect(await testSubjects.getAttribute('createO11ySpaceBtn', 'href')).match(
+        /^https?\:\/\/.*\/app\/management\/kibana\/spaces\/create/
+      );
+      expect(await testSubjects.getAttribute('createO11ySpaceBtn', 'target')).equal('_blank');
+    },
   };
 }
