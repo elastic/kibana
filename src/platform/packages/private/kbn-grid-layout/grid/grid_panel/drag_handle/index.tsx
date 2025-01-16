@@ -25,7 +25,7 @@ export const DragHandle = React.forwardRef<
     rowIndex: number;
   }
 >(({ gridLayoutStateManager, panelId, rowIndex }, ref) => {
-  const attachLayoutEvents = useGridLayoutEvents({
+  const startInteraction = useGridLayoutEvents({
     interactionType: 'drag',
     gridLayoutStateManager,
     panelId,
@@ -40,18 +40,18 @@ export const DragHandle = React.forwardRef<
       setDragHandleCount(dragHandles.length);
       for (const handle of dragHandles) {
         if (handle === null) return;
-        handle.addEventListener('mousedown', attachLayoutEvents, { passive: true });
-        handle.addEventListener('touchstart', attachLayoutEvents, { passive: false });
+        handle.addEventListener('mousedown', startInteraction, { passive: true });
+        handle.addEventListener('touchstart', startInteraction, { passive: false });
       }
       removeEventListenersRef.current = () => {
         for (const handle of dragHandles) {
           if (handle === null) return;
-          handle.removeEventListener('mousedown', attachLayoutEvents);
-          handle.removeEventListener('touchstart', attachLayoutEvents);
+          handle.removeEventListener('mousedown', startInteraction);
+          handle.removeEventListener('touchstart', startInteraction);
         }
       };
     },
-    [attachLayoutEvents]
+    [startInteraction]
   );
 
   useEffect(
@@ -64,5 +64,5 @@ export const DragHandle = React.forwardRef<
 
   useImperativeHandle(ref, () => ({ setDragHandles }), [setDragHandles]);
 
-  return Boolean(dragHandleCount) ? null : <DefaultDragHandle onDragStart={attachLayoutEvents} />;
+  return Boolean(dragHandleCount) ? null : <DefaultDragHandle onDragStart={startInteraction} />;
 });

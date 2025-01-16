@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isMouseEvent } from './sensors';
+import { isMouseEvent } from '.';
 
 const MIN_SPEED = 50;
 const MAX_SPEED = 150;
+
+let scrollInterval: NodeJS.Timeout | null = null;
 
 const scrollOnInterval = (direction: 'up' | 'down') => {
   let count = 0;
@@ -18,7 +20,7 @@ const scrollOnInterval = (direction: 'up' | 'down') => {
   let maxSpeed = MIN_SPEED;
   let turnAroundPoint: number | undefined;
 
-  const interval = setInterval(() => {
+  scrollInterval = setInterval(() => {
     /**
      * Since "smooth" scrolling on an interval is jittery on Chrome, we are manually creating
      * an "ease" effect via the parabola formula `y = a(x - h)^2 + k`
@@ -45,17 +47,17 @@ const scrollOnInterval = (direction: 'up' | 'down') => {
 
     count++; // increase the counter to increase the time interval used in the parabola formula
   }, 60);
-  return interval;
+  return scrollInterval;
 };
 
-export const stopAutoScroll = (scrollInterval?: { current: NodeJS.Timeout | null }) => {
-  if (scrollInterval?.current) {
-    clearInterval(scrollInterval.current);
-    scrollInterval.current = null;
+export const stopAutoScroll = () => {
+  if (scrollInterval) {
+    clearInterval(scrollInterval);
+    scrollInterval = null;
   }
 };
 
-export const handleAutoscroll = (e: Event, scrollInterval: { current: NodeJS.Timeout | null }) => {
+export const handleAutoscroll = (e: Event) => {
   if (!isMouseEvent(e)) return;
   // auto scroll when an event is happening close to the top or bottom of the screen
   const heightPercentage = 100 - ((window.innerHeight - e.clientY) / window.innerHeight) * 100;
@@ -65,11 +67,11 @@ export const handleAutoscroll = (e: Event, scrollInterval: { current: NodeJS.Tim
   const startScrollingUp = heightPercentage < 5 && !atTheTop; // don't scroll up when resizing
   const startScrollingDown = heightPercentage > 95 && !atTheBottom;
   if (startScrollingUp || startScrollingDown) {
-    if (!scrollInterval.current) {
+    if (!scrollInterval) {
       // only start scrolling if it's not already happening
-      scrollInterval.current = scrollOnInterval(startScrollingUp ? 'up' : 'down');
+      scrollInterval = scrollOnInterval(startScrollingUp ? 'up' : 'down');
     }
   } else {
-    stopAutoScroll(scrollInterval);
+    stopAutoScroll();
   }
 };
