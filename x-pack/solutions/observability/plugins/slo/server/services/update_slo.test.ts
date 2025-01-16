@@ -215,12 +215,12 @@ describe('UpdateSLO', () => {
 
       expectDeletionOfOriginalSLOResources(slo);
       expect(mockRepository.update).toHaveBeenCalledWith(
-        expect.objectContaining({ settings: newSettings })
+        expect.objectContaining({ settings: newSettings, revision: 2 })
       );
       expectInstallationOfUpdatedSLOResources();
     });
 
-    it('consideres a budgeting method change as a breaking change', async () => {
+    it('considers a budgeting method change as a breaking change', async () => {
       const slo = createSLO({ budgetingMethod: 'occurrences' });
       mockRepository.findById.mockResolvedValueOnce(slo);
 
@@ -237,7 +237,7 @@ describe('UpdateSLO', () => {
       expectDeletionOfOriginalSLOResources(slo);
     });
 
-    it('consideres a timeWindow change as a breaking change', async () => {
+    it('considers a timeWindow change as a breaking change', async () => {
       const slo = createSLOWithTimeslicesBudgetingMethod();
       mockRepository.findById.mockResolvedValueOnce(slo);
 
@@ -249,7 +249,7 @@ describe('UpdateSLO', () => {
       expectDeletionOfOriginalSLOResources(slo);
     });
 
-    it('consideres a timeslice target change as a breaking change', async () => {
+    it('considers a timeslice target change as a breaking change', async () => {
       const slo = createSLOWithTimeslicesBudgetingMethod();
       mockRepository.findById.mockResolvedValueOnce(slo);
 
@@ -265,7 +265,7 @@ describe('UpdateSLO', () => {
       expectDeletionOfOriginalSLOResources(slo);
     });
 
-    it('consideres a timeslice window change as a breaking change', async () => {
+    it('considers a timeslice window change as a breaking change', async () => {
       const slo = createSLOWithTimeslicesBudgetingMethod();
       mockRepository.findById.mockResolvedValueOnce(slo);
 
@@ -281,7 +281,7 @@ describe('UpdateSLO', () => {
       expectDeletionOfOriginalSLOResources(slo);
     });
 
-    it('consideres an indicator change as a breaking change', async () => {
+    it('considers an indicator change as a breaking change', async () => {
       const slo = createSLOWithTimeslicesBudgetingMethod();
       mockRepository.findById.mockResolvedValueOnce(slo);
 
@@ -293,7 +293,7 @@ describe('UpdateSLO', () => {
       expectDeletionOfOriginalSLOResources(slo);
     });
 
-    it('consideres a groupBy change as a breaking change', async () => {
+    it('considers a groupBy change as a breaking change', async () => {
       const slo = createSLOWithTimeslicesBudgetingMethod();
       mockRepository.findById.mockResolvedValueOnce(slo);
 
