@@ -17,7 +17,6 @@ import {
 import { css } from '@emotion/css';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components';
 
 import type { FieldHook } from '../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
@@ -40,13 +39,6 @@ const timeTypeOptions = [
   { value: 'h', text: I18n.HOURS },
   { value: 'd', text: I18n.DAYS },
 ];
-
-// move optional label to the end of input
-const StyledLabelAppend = styled(EuiFlexItem)`
-  &.euiFlexItem {
-    margin-left: 31px;
-  }
-`;
 
 const getNumberFromUserInput = (input: string, minimumValue = 0): number => {
   const number = parseInt(input, 10);
@@ -134,13 +126,13 @@ export const ScheduleItemField = ({
   const rest = { disabled: isDisabled };
   const label = useMemo(
     () => (
-      <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
+      <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false} component="span">
           {field.label}
         </EuiFlexItem>
-        <StyledLabelAppend grow={false} component="span">
+        <EuiFlexItem grow={false} component="span">
           {field.labelAppend}
-        </StyledLabelAppend>
+        </EuiFlexItem>
       </EuiFlexGroup>
     ),
     [field.label, field.labelAppend]
