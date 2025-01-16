@@ -215,7 +215,7 @@ Object {
 exports[`useComparisonCss should render with lines diff mode and diff decorations 1`] = `
 Object {
   "map": undefined,
-  "name": "nlhk3s",
+  "name": "1nu19hw",
   "next": undefined,
   "styles": "
     .unifiedDataTable__cellValue {
@@ -280,7 +280,7 @@ Object {
     line-height: 1;
     font-weight: 500;
   ;
-          background-color: #ce5d56;
+          background-color: #BD271E;
           color: #F1F4FA;
         }
       ;

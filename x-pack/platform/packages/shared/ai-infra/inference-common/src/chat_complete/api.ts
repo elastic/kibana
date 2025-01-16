@@ -90,6 +90,18 @@ export type ChatCompleteOptions<
    */
   messages: Message[];
   /**
+   * LLM temperature. All models support the 0-1 range (some supports more).
+   * Defaults to 0;
+   */
+  temperature?: number;
+  /**
+   * The model name identifier to use. Can be defined to use another model than the
+   * default one, when using connectors / providers exposing multiple models.
+   *
+   * Defaults to the default model as defined by the used connector.
+   */
+  modelName?: string;
+  /**
    * Function calling mode, defaults to "native".
    */
   functionCalling?: FunctionCallingMode;
