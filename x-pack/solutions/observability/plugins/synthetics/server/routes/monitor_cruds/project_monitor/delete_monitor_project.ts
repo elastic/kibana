@@ -30,10 +30,10 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
     const { projectName } = request.params;
     const { monitors: monitorsToDelete } = request.body;
     const decodedProjectName = decodeURI(projectName);
-    if (monitorsToDelete.length > 250) {
+    if (monitorsToDelete.length > 500) {
       return response.badRequest({
         body: {
-          message: REQUEST_TOO_LARGE,
+          message: REQUEST_TOO_LARGE_DELETE,
         },
       });
     }
@@ -70,7 +70,10 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
   },
 });
 
-export const REQUEST_TOO_LARGE = i18n.translate('xpack.synthetics.server.project.delete.toolarge', {
-  defaultMessage:
-    'Delete request payload is too large. Please send a max of 250 monitors to delete per request',
-});
+export const REQUEST_TOO_LARGE_DELETE = i18n.translate(
+  'xpack.synthetics.server.project.delete.tooLarge',
+  {
+    defaultMessage:
+      'Delete request payload is too large. Please send a max of 500 monitors to delete per request',
+  }
+);

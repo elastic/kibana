@@ -56,9 +56,10 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
     }
 
     try {
-      const spaceId = await validateSpaceId(routeContext);
-
-      const permissionError = await validatePermissions(routeContext, monitors);
+      const [spaceId, permissionError] = await Promise.all([
+        validateSpaceId(routeContext),
+        validatePermissions(routeContext, monitors),
+      ]);
 
       if (permissionError) {
         return response.forbidden({ body: { message: permissionError } });
