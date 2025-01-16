@@ -123,7 +123,6 @@ export const riskScoreFieldMap: FieldMap = {
     array: false,
     required: false,
   },
-  ...buildIdentityRiskFields(RiskScoreEntity.user),
   'event.ingested': {
     type: 'date',
     array: false,
