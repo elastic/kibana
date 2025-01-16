@@ -123,6 +123,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     return {
       data: props.data,
       theme: props.core.theme,
+      i18n: props.core.i18n,
       uiSettings: props.core.uiSettings,
       toastNotifications: props.core.notifications.toasts,
       fieldFormats: props.fieldFormats,
@@ -131,6 +132,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   }, [
     props.core.notifications.toasts,
     props.core.theme,
+    props.core.i18n,
     props.core.uiSettings,
     props.data,
     props.fieldFormats,
@@ -155,6 +157,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
           hasRoomForGridControls: true,
         },
         gridProps: {
+          inTableSearchControl: customToolbarProps.gridProps.inTableSearchControl,
           additionalControls: (
             <EuiLink
               href={discoverLink}
@@ -204,6 +207,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       rows={rows}
       columnsMeta={columnsMeta}
       services={services}
+      enableInTableSearch
       isPlainRecord
       isSortEnabled={false}
       loadingState={DataLoadingState.loaded}
