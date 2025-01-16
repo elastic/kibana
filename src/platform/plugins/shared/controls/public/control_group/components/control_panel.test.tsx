@@ -18,7 +18,6 @@ import type { ControlLabelPosition, ControlWidth } from '../../../common';
 import { uiActionsService } from '../../services/kibana_services';
 import { ControlPanel } from './control_panel';
 
-
 describe('render', () => {
   let mockApi = {};
   const Component = React.forwardRef((_, ref) => {
