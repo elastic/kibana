@@ -56,6 +56,21 @@ export const SHOW_REAL_VALUES = i18n.translate(
   }
 );
 
+export const HIDE_CONTENT_REFERENCES = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.hideContentReferencesLabel',
+  {
+    defaultMessage: 'Hide citations',
+  }
+);
+
+export const SHOW_CONTENT_REFERENCES = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.showContentReferencesLabel',
+  {
+    defaultMessage: 'Show citations',
+  }
+);
+
+
 export const CANCEL_BUTTON_TEXT = i18n.translate(
   'xpack.elasticAssistant.assistant.resetConversationModal.cancelButtonText',
   {

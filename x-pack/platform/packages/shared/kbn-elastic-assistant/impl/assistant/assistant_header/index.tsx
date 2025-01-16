@@ -47,6 +47,8 @@ interface OwnProps {
   refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
   onConversationCreate: () => Promise<void>;
   isAssistantEnabled: boolean;
+  contentReferencesVisible: boolean,
+  setContentReferencesVisible: React.Dispatch<React.SetStateAction<boolean>>,
   refetchPrompts?: (
     options?: RefetchOptions & RefetchQueryFilters<unknown>
   ) => Promise<QueryObserverResult<unknown, unknown>>;
@@ -66,6 +68,8 @@ export const AssistantHeader: React.FC<Props> = ({
   isSettingsModalVisible,
   onToggleShowAnonymizedValues,
   setIsSettingsModalVisible,
+  contentReferencesVisible,
+  setContentReferencesVisible,
   showAnonymizedValues,
   onChatCleared,
   chatHistoryVisible,
@@ -86,6 +90,10 @@ export const AssistantHeader: React.FC<Props> = ({
       showAnonymizedValues,
     [selectedConversation?.replacements, showAnonymizedValues]
   );
+
+  const toggleContentReferencesVisible = () => {
+    setContentReferencesVisible(prevState => !prevState)
+  }
 
   const selectedConnectorId = useMemo(
     () => selectedConversation?.apiConfig?.connectorId,
@@ -199,6 +207,27 @@ export const AssistantHeader: React.FC<Props> = ({
                     iconType={showAnonymizedValuesChecked ? 'eye' : 'eyeClosed'}
                     onClick={onToggleShowAnonymizedValues}
                     isDisabled={isEmpty(selectedConversation?.replacements)}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={
+                    contentReferencesVisible ? i18n.HIDE_CONTENT_REFERENCES : i18n.SHOW_CONTENT_REFERENCES
+                  }
+                >
+                  <EuiButtonIcon
+                    css={css`
+                      border-radius: 50%;
+                    `}
+                    display={contentReferencesVisible?"base":"empty"}
+                    data-test-subj="showContentReferences"
+                    isSelected={showAnonymizedValuesChecked}
+                    aria-label={
+                      contentReferencesVisible ? i18n.HIDE_CONTENT_REFERENCES : i18n.SHOW_CONTENT_REFERENCES
+                    }
+                    iconType={'documentation'}
+                    onClick={toggleContentReferencesVisible}
                   />
                 </EuiToolTip>
               </EuiFlexItem>

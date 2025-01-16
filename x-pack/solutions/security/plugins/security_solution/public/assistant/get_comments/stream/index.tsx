@@ -19,6 +19,7 @@ interface Props {
   abortStream: () => void;
   content?: string;
   contentReferences?: ContentReferences
+  contentReferencesVisible?: boolean,
   isError?: boolean;
   isFetching?: boolean;
   isControlsEnabled?: boolean;
@@ -34,6 +35,7 @@ export const StreamComment = ({
   abortStream,
   content,
   contentReferences,
+  contentReferencesVisible,
   index,
   isControlsEnabled = false,
   isError = false,
@@ -112,6 +114,7 @@ export const StreamComment = ({
           contentReferences={contentReferences}
           index={index}
           loading={isAnythingLoading}
+          contentReferencesVisible={contentReferencesVisible ?? true}
         />
       }
       error={error ? new Error(error) : undefined}

@@ -32,6 +32,7 @@ import { ContentReferences } from '@kbn/elastic-assistant-common';
 interface Props {
   content: string;
   contentReferences?: ContentReferences
+  contentReferencesVisible: boolean
   index: number;
   loading: boolean;
   ['data-test-subj']?: string;
@@ -105,9 +106,10 @@ const loadingCursorPlugin = () => {
 
 type GetPluginDependencies = {
   contentReferences?: ContentReferences
+  contentReferencesVisible: boolean
 }
 
-const getPluginDependencies = ({ contentReferences }: GetPluginDependencies) => {
+const getPluginDependencies = ({ contentReferences, contentReferencesVisible }: GetPluginDependencies) => {
   const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
 
   const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
@@ -116,7 +118,7 @@ const getPluginDependencies = ({ contentReferences }: GetPluginDependencies) => 
 
   processingPlugins[1][1].components = {
     ...components,
-    contentReference: contentReferenceComponentFactory({ contentReferences }),
+    contentReference: contentReferenceComponentFactory({ contentReferences, contentReferencesVisible }),
     cursor: Cursor,
     customCodeBlock: (props) => {
       return (
@@ -153,12 +155,12 @@ const getPluginDependencies = ({ contentReferences }: GetPluginDependencies) => 
   };
 };
 
-export function MessageText({ loading, content, contentReferences, index, 'data-test-subj': dataTestSubj }: Props) {
+export function MessageText({ loading, content, contentReferences, contentReferencesVisible, index, 'data-test-subj': dataTestSubj }: Props) {
   const containerClassName = css`
     overflow-wrap: anywhere;
   `;
 
-  const { parsingPluginList, processingPluginList } = getPluginDependencies({contentReferences});
+  const { parsingPluginList, processingPluginList } = getPluginDependencies({contentReferences,contentReferencesVisible});
 
   return (
     <EuiText className={containerClassName} data-test-subj={dataTestSubj}>

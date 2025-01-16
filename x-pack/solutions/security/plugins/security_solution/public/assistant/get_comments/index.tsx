@@ -61,6 +61,7 @@ export const getComments: GetAssistantMessages = ({
   currentUserAvatar,
   setIsStreaming,
   systemPromptContent,
+  contentReferencesVisible
 }) => {
   if (!currentConversation) return [];
 
@@ -175,6 +176,7 @@ export const getComments: GetAssistantMessages = ({
             <StreamComment
               abortStream={abortStream}
               contentReferences={message.metadata?.contentReferences}
+              contentReferencesVisible={contentReferencesVisible}
               index={index}
               isControlsEnabled={isControlsEnabled}
               isError={message.isError}
@@ -199,6 +201,7 @@ export const getComments: GetAssistantMessages = ({
             abortStream={abortStream}
             content={transformedMessage.content}
             contentReferences={message.metadata?.contentReferences}
+            contentReferencesVisible={contentReferencesVisible}
             index={index}
             isControlsEnabled={isControlsEnabled}
             isError={message.isError}

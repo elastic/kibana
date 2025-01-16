@@ -9,12 +9,12 @@ import { ProductDocumentationReference } from './product_documentation_reference
 
 type ContentReferenceComponentFactory = {
   contentReferences?: ContentReferences
-  hidden?: boolean
+  contentReferencesVisible: boolean
 }
 
-export const contentReferenceComponentFactory = ({ contentReferences, hidden }: ContentReferenceComponentFactory) => {
+export const contentReferenceComponentFactory = ({ contentReferences, contentReferencesVisible }: ContentReferenceComponentFactory) => {
   return (contentReferenceNode: ContentReferenceNode): React.ReactNode => {
-    if(hidden) return null
+    if(!contentReferencesVisible) return null
 
     const defaultNode = <ContentReferenceButton
       disabled

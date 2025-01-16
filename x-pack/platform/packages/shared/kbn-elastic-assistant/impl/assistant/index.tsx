@@ -90,6 +90,8 @@ const AssistantComponent: React.FC<Props> = ({
     promptContexts,
     currentUserAvatar,
     setLastConversationId,
+    contentReferencesVisible,
+    setContentReferencesVisible
   } = useAssistantContext();
 
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
@@ -375,6 +377,7 @@ const AssistantComponent: React.FC<Props> = ({
             setIsStreaming,
             currentUserAvatar,
             systemPromptContent: currentSystemPrompt?.content,
+            contentReferencesVisible
           })}
           // Avoid comments going off the flyout
           css={css`
@@ -402,6 +405,7 @@ const AssistantComponent: React.FC<Props> = ({
       setIsStreaming,
       currentUserAvatar,
       currentSystemPrompt?.content,
+      contentReferencesVisible,
       selectedPromptContextsCount,
     ]
   );
@@ -475,6 +479,8 @@ const AssistantComponent: React.FC<Props> = ({
                   onConversationCreate={handleCreateConversation}
                   isAssistantEnabled={isAssistantEnabled}
                   refetchPrompts={refetchPrompts}
+                  setContentReferencesVisible={setContentReferencesVisible}
+                  contentReferencesVisible={contentReferencesVisible}
                 />
 
                 {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
