@@ -83,7 +83,7 @@ export const DashboardGrid = ({ dashboardContainer }: { dashboardContainer?: HTM
   );
 
   const renderPanelContents = useCallback(
-    (id: string, setDragHandles?: (refs: Array<HTMLElement | null>) => void) => {
+    (id: string) => {
       const currentPanels = dashboardApi.panels$.getValue();
       if (!currentPanels[id]) return;
 
@@ -99,7 +99,6 @@ export const DashboardGrid = ({ dashboardContainer }: { dashboardContainer?: HTM
           key={id}
           id={id}
           type={type}
-          setDragHandles={setDragHandles}
           appFixedViewport={appFixedViewport}
           dashboardContainer={dashboardContainer}
         />

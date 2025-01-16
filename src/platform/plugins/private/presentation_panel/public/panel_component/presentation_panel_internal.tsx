@@ -40,8 +40,6 @@ export const PresentationPanelInternal = <
 
   Component,
   componentProps,
-
-  setDragHandles,
 }: PresentationPanelInternalProps<ApiType, ComponentPropsType>) => {
   const panelErrorCss = usePanelErrorCss();
   const [api, setApi] = useState<ApiType | null>(null);
@@ -98,14 +96,6 @@ export const PresentationPanelInternal = <
     return attrs;
   }, [dataLoading, blockingError]);
 
-  const setDragHandle = useCallback(
-    (id: string, ref: HTMLElement | null) => {
-      dragHandles.current[id] = ref;
-      setDragHandles?.(Object.values(dragHandles.current));
-    },
-    [setDragHandles]
-  );
-
   return (
     <PresentationPanelHoverActions
       {...{
@@ -117,7 +107,6 @@ export const PresentationPanelInternal = <
         showNotifications,
         showBorder,
       }}
-      setDragHandle={setDragHandle}
     >
       <EuiPanel
         role="figure"
@@ -133,7 +122,6 @@ export const PresentationPanelInternal = <
         {!hideHeader && api && (
           <PresentationPanelHeader
             api={api}
-            setDragHandle={setDragHandle}
             headerId={headerId}
             viewMode={viewMode}
             hideTitle={hideTitle}

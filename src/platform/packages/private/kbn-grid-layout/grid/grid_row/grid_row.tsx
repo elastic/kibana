@@ -23,10 +23,7 @@ import { GridRowHeader } from './grid_row_header';
 
 export interface GridRowProps {
   rowIndex: number;
-  renderPanelContents: (
-    panelId: string,
-    setDragHandles?: (refs: Array<HTMLElement | null>) => void
-  ) => React.ReactNode;
+  renderPanelContents: (panelId: string) => React.ReactNode;
   setInteractionEvent: (interactionData?: PanelInteractionEvent) => void;
   gridLayoutStateManager: GridLayoutStateManager;
 }

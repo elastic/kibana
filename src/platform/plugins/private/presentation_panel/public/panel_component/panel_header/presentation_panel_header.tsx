@@ -35,7 +35,6 @@ export type PresentationPanelHeaderProps<ApiType extends DefaultPresentationPane
   hideTitle?: boolean;
   panelTitle?: string;
   panelDescription?: string;
-  setDragHandle: (id: string, ref: HTMLDivElement | null) => void;
 } & Pick<PresentationPanelInternalProps, 'showBadges' | 'getActions' | 'showNotifications'>;
 
 export const PresentationPanelHeader = <
@@ -48,7 +47,6 @@ export const PresentationPanelHeader = <
   hideTitle,
   panelTitle,
   panelDescription,
-  setDragHandle,
   showBadges = true,
   showNotifications = true,
 }: PresentationPanelHeaderProps<ApiType>) => {
@@ -57,14 +55,6 @@ export const PresentationPanelHeader = <
     showBadges,
     api,
     getActions
-  );
-
-  const memoizedSetDragHandle = useCallback(
-    // memoize the ref callback so that we don't call `setDragHandle` on every render
-    (ref: HTMLHeadingElement | null) => {
-      setDragHandle('panelHeader', ref);
-    },
-    [setDragHandle]
   );
 
   const showPanelBar =
@@ -93,7 +83,7 @@ export const PresentationPanelHeader = <
       className={headerClasses}
       data-test-subj={`embeddablePanelHeading-${(panelTitle || '').replace(/\s/g, '')}`}
     >
-      <h2 ref={memoizedSetDragHandle} data-test-subj="dashboardPanelTitle" className={titleClasses}>
+      <h2 data-test-subj="dashboardPanelTitle" className={titleClasses}>
         {ariaLabelElement}
         <PresentationPanelTitle
           api={api}

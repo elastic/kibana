@@ -31,7 +31,6 @@ export interface Props extends DivProps {
   type: DashboardPanelState['type'];
   key: string;
   isRenderable?: boolean;
-  setDragHandles?: (refs: Array<HTMLElement | null>) => void;
 }
 
 export const Item = React.forwardRef<HTMLDivElement, Props>(
@@ -43,7 +42,6 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       index,
       type,
       isRenderable = true,
-      setDragHandles,
       children,
       className,
       ...rest
@@ -123,7 +121,6 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
         showBorder: useMargins,
         showNotifications: true,
         showShadow: false,
-        setDragHandles,
       };
 
       return (
@@ -139,7 +136,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
           onApiAvailable={(api) => dashboardInternalApi.registerChildApi(api)}
         />
       );
-    }, [id, dashboardApi, dashboardInternalApi, type, useMargins, setDragHandles]);
+    }, [id, dashboardApi, dashboardInternalApi, type, useMargins]);
 
     return (
       <div

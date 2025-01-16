@@ -20,10 +20,7 @@ import { ResizeHandle } from './resize_handle';
 export interface GridPanelProps {
   panelId: string;
   rowIndex: number;
-  renderPanelContents: (
-    panelId: string,
-    setDragHandles?: (refs: Array<HTMLElement | null>) => void
-  ) => React.ReactNode;
+  renderPanelContents: (panelId: string) => React.ReactNode;
   interactionStart: (type: PanelInteractionEvent['type'] | 'drop', e: UserInteractionEvent) => void;
   gridLayoutStateManager: GridLayoutStateManager;
 }
@@ -33,7 +30,6 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
     { panelId, rowIndex, renderPanelContents, interactionStart, gridLayoutStateManager },
     panelRef
   ) => {
-    const [dragHandleApi, setDragHandleApi] = useState<DragHandleApi | null>(null);
     const { euiTheme } = useEuiTheme();
 
     useEffect(() => {
@@ -186,14 +182,12 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
      * Memoize panel contents to prevent unnecessary re-renders
      */
     const panelContents = useMemo(() => {
-      if (!dragHandleApi) return <></>; // delays the rendering of the panel until after dragHandleApi is defined
-      return renderPanelContents(panelId, dragHandleApi.setDragHandles);
-    }, [panelId, renderPanelContents, dragHandleApi]);
+      return renderPanelContents(panelId);
+    }, [panelId, renderPanelContents]);
 
     return (
       <div ref={panelRef} css={initialStyles} className="kbnGridPanel">
         <DragHandle
-          ref={setDragHandleApi}
           gridLayoutStateManager={gridLayoutStateManager}
           interactionStart={interactionStart}
         />

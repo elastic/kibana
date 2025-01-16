@@ -58,13 +58,6 @@ export interface PresentationPanelInternalProps<
    * "title" when the panel has no title, i.e. "Panel {index}".
    */
   index?: number;
-
-  /**
-   * Set the drag handlers to be used by kbn-grid-layout
-   * Note: If we make kbn-grid-layout responsible for **all** panel placement
-   *       logic, then this could be removed.
-   */
-  setDragHandles?: (refs: Array<HTMLElement | null>) => void;
 }
 
 /**

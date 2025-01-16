@@ -106,7 +106,6 @@ export const PresentationPanelHoverActions = ({
   api,
   index,
   getActions,
-  setDragHandle,
   actionPredicate,
   children,
   className,
@@ -117,7 +116,6 @@ export const PresentationPanelHoverActions = ({
   index?: number;
   api: DefaultPresentationPanelApi | null;
   getActions: PresentationPanelInternalProps['getActions'];
-  setDragHandle: (id: string, ref: HTMLElement | null) => void;
   actionPredicate?: (actionId: string) => boolean;
   children: ReactElement;
   className?: string;
@@ -474,7 +472,6 @@ export const PresentationPanelHoverActions = ({
       <button
         ref={(ref) => {
           dragHandleRef.current = ref;
-          setDragHandle('hoverActions', ref);
         }}
       >
         <EuiIcon
@@ -491,7 +488,7 @@ export const PresentationPanelHoverActions = ({
         />
       </button>
     ),
-    [setDragHandle, euiTheme.size.xs]
+    [euiTheme.size.xs]
   );
 
   const hasHoverActions = quickActionElements.length || contextMenuPanels.lastIndexOf.length;

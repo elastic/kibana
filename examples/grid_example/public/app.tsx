@@ -89,7 +89,7 @@ export const GridExample = ({
   }, []);
 
   const renderPanelContents = useCallback(
-    (id: string, setDragHandles?: (refs: Array<HTMLElement | null>) => void) => {
+    (id: string) => {
       const currentPanels = mockDashboardApi.panels$.getValue();
 
       return (
@@ -103,7 +103,6 @@ export const GridExample = ({
             showBorder: true,
             showNotifications: true,
             showShadow: false,
-            setDragHandles,
           }}
         />
       );

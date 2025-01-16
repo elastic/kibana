@@ -21,12 +21,8 @@ import {
 } from '../types';
 import { isMouseEvent, isTouchEvent } from '../utils/sensors';
 
-export interface DragHandleApi {
-  setDragHandles: (refs: Array<HTMLElement | null>) => void;
-}
-
 export const DragHandle = React.forwardRef<
-  DragHandleApi,
+  void,
   {
     gridLayoutStateManager: GridLayoutStateManager;
     interactionStart: (
@@ -36,10 +32,6 @@ export const DragHandle = React.forwardRef<
   }
 >(({ gridLayoutStateManager, interactionStart }, ref) => {
   const { euiTheme } = useEuiTheme();
-
-  const removeEventListenersRef = useRef<(() => void) | null>(null);
-  const [dragHandleCount, setDragHandleCount] = useState<number>(0);
-  const dragHandleRefs = useRef<Array<HTMLElement | null>>([]);
 
   /**
    * We need to memoize the `onDragStart` and `onDragEnd` callbacks so that we don't assign a new event handler
@@ -72,48 +64,7 @@ export const DragHandle = React.forwardRef<
     [interactionStart]
   );
 
-  const setDragHandles = useCallback(
-    (dragHandles: Array<HTMLElement | null>) => {
-      setDragHandleCount(dragHandles.length);
-      dragHandleRefs.current = dragHandles;
-
-      for (const handle of dragHandles) {
-        if (handle === null) return;
-        handle.addEventListener('mousedown', onDragStart, { passive: true });
-        handle.addEventListener('touchstart', onDragStart, { passive: false });
-        handle.addEventListener('touchend', onDragEnd, { passive: true });
-      }
-
-      removeEventListenersRef.current = () => {
-        for (const handle of dragHandles) {
-          if (handle === null) return;
-          handle.removeEventListener('mousedown', onDragStart);
-          handle.removeEventListener('touchstart', onDragStart);
-          handle.removeEventListener('touchend', onDragEnd);
-        }
-      };
-    },
-    [onDragStart, onDragEnd]
-  );
-
-  useEffect(() => {
-    return () => {
-      // on unmount, remove all drag handle event listeners
-      if (removeEventListenersRef.current) {
-        removeEventListenersRef.current();
-      }
-    };
-  }, []);
-
-  useImperativeHandle(
-    ref,
-    () => {
-      return { setDragHandles };
-    },
-    [setDragHandles]
-  );
-
-  return Boolean(dragHandleCount) ? null : (
+  return (
     <button
       aria-label={i18n.translate('kbnGridLayout.dragHandle.ariaLabel', {
         defaultMessage: 'Drag to move',
