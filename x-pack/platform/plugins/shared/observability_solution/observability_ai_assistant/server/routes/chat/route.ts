@@ -294,6 +294,11 @@ const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
     },
   },
   params: chatCompletePublicParamsSchema,
+  options: {
+    summary: 'Generate a chat completion via the Observability AI Assistant',
+    tags: ['oas-tag:Observability AI assistant'],
+    description: `Creates a new chat completion via the Observability AI Assistant, returning the model's response based on the current conversation context. This endpoint also handles any tool requests within the conversation, which may trigger multiple calls to the underlying large language model (LLM)`,
+  },
   handler: async (resources): Promise<Readable> => {
     const { params, logger } = resources;
 

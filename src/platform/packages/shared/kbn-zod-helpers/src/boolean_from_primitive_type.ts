@@ -21,14 +21,17 @@ function isPrimitive(value: unknown): value is string | number | boolean | null 
 }
 
 // This is a helper schema to convert a primitive type value to a boolean.
-export const BooleanFromPrimitiveType = z.preprocess((input) => {
-  if (!isPrimitive(input)) {
-    return undefined;
-  }
+export const BooleanFromPrimitiveType: z.ZodEffects<z.ZodType<unknown>, boolean> = z.preprocess(
+  (input) => {
+    if (!isPrimitive(input)) {
+      return undefined;
+    }
 
-  if (typeof input === 'string') {
-    return input === 'true';
-  }
+    if (typeof input === 'string') {
+      return input === 'true';
+    }
 
-  return Boolean(input);
-}, z.boolean());
+    return Boolean(input);
+  },
+  z.boolean()
+);

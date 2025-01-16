@@ -57,9 +57,7 @@ export const chatCompleteBodyBaseSchema = z.intersection(
       .array(messageSchema)
       .describe('Array of message objects containing the conversation history'),
     connectorId: z.string().describe('Unique identifier for the connector'),
-    persist: BooleanFromPrimitiveType.describe(
-      'Flag indicating whether to persist the conversation'
-    ),
+    persist: z.boolean().describe('Flag indicating whether to persist the conversation'),
   }),
   z.object({
     conversationId: z
