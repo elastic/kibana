@@ -62,7 +62,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await esDeleteAllIndices(indexName);
         });
         it('can load index detail page', async () => {
-          await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
           await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
           await pageObjects.searchIndexDetailsPage.expectSearchIndexDetailsTabsExists();
           await pageObjects.searchIndexDetailsPage.expectAPIReferenceDocLinkExists();
@@ -275,7 +274,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         before(async () => {
           await esDeleteAllIndices(indexName);
           await es.indices.create({ index: indexName });
-          await security.testUser.setRoles(['index_management_user']);
         });
         beforeEach(async () => {
           // Navigate to search solution space

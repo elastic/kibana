@@ -1,7 +1,7 @@
 // LAYOUT MODES
 // Adjust borders/etc... for non-spaced out and expanded panels
 .dshLayout-withoutMargins {
-  margin-top: $euiSizeS;
+  padding-top: $euiSizeS;
 
   .embPanel__content,
   .embPanel,
@@ -58,4 +58,8 @@
     animation-timing-function: ease-out;
     z-index: $euiZLevel2;
   }
+}
+
+.dshDashboardGrid__item {
+  height: 100%;
 }

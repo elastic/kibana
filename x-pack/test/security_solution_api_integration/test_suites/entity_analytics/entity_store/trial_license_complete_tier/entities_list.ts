@@ -15,7 +15,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('when the entity store is disable', () => {
       it("should return response with success status when the index doesn't exist", async () => {
         const { body } = await securitySolutionApi.listEntities({
-          query: { entities_types: ['host'] },
+          query: { entity_types: ['host'] },
         });
 
         expect(body).toEqual(
@@ -40,27 +40,36 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      it('should return hosts in the entity store index', async () => {
+      it('should return hosts from the entity store index', async () => {
         const { body } = await securitySolutionApi.listEntities({
-          query: { entities_types: ['host'] },
+          query: { entity_types: ['host'] },
         });
 
         expect(body.total).toEqual(1);
         expect(body.records.length).toEqual(1);
       });
 
-      it('should return users in the entity store index', async () => {
+      it('should return users from the entity store index', async () => {
         const { body } = await securitySolutionApi.listEntities({
-          query: { entities_types: ['user'] },
+          query: { entity_types: ['user'] },
         });
 
         expect(body.total).toEqual(1);
         expect(body.records.length).toEqual(1);
       });
 
-      it('should return all entities in the entity store index', async () => {
+      it('should return services from the entity store index', async () => {
         const { body } = await securitySolutionApi.listEntities({
-          query: { entities_types: ['user', 'host'] },
+          query: { entity_types: ['service'] },
+        });
+
+        expect(body.total).toEqual(1);
+        expect(body.records.length).toEqual(1);
+      });
+
+      it('should return two entity types from the entity store index', async () => {
+        const { body } = await securitySolutionApi.listEntities({
+          query: { entity_types: ['user', 'host'] },
         });
 
         expect(body.total).toEqual(2);
