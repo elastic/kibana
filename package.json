@@ -1155,7 +1155,6 @@
     "json-stable-stringify": "^1.0.1",
     "json-stringify-pretty-compact": "1.2.0",
     "json-stringify-safe": "5.0.1",
-    "jsonpath-plus": "^10.2.0",
     "jsonwebtoken": "^9.0.2",
     "jsts": "^1.6.2",
     "kea": "^2.6.0",
