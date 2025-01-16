@@ -110,7 +110,11 @@ import { incrementPackagePolicyCopyName } from './package_policies';
 import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { escapeSearchQueryPhrase, normalizeKuery as _normalizeKuery } from './saved_object';
-import { getFullAgentPolicy, validateOutputForPolicy } from './agent_policies';
+import {
+  getFullAgentPolicy,
+  validateOutputForPolicy,
+  validateRequiredVersions,
+} from './agent_policies';
 import { auditLoggingService } from './audit_logging';
 import { licenseService } from './license';
 import { createSoFindIterable } from './utils/create_so_find_iterable';
@@ -408,6 +412,7 @@ class AgentPolicyService {
       {},
       getAllowedOutputTypesForAgentPolicy(agentPolicy)
     );
+    validateRequiredVersions(agentPolicy.name, agentPolicy.required_versions);
 
     const newSo = await soClient.create<AgentPolicySOAttributes>(
       savedObjectType,
@@ -708,6 +713,7 @@ class AgentPolicyService {
         namespace: agentPolicy.namespace,
       });
     }
+    validateRequiredVersions(agentPolicy.name ?? id, agentPolicy.required_versions);
 
     const existingAgentPolicy = await this.get(soClient, id, true);
 
