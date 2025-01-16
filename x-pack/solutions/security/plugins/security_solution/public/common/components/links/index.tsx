@@ -125,23 +125,26 @@ export const UserDetailsLink = React.memo(UserDetailsLinkComponent);
 const ServiceDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
   serviceName?: string;
-  onClick: (e: SyntheticEvent) => void;
+  onClick?: (e: SyntheticEvent) => void;
 }> = ({ children, onClick: onClickParam, serviceName }) => {
   const { telemetry } = useKibana().services;
 
   const onClick = useCallback(
     (e: SyntheticEvent) => {
       telemetry.reportEvent(EntityEventTypes.EntityDetailsClicked, { entity: EntityType.service });
-      const callback = onClickParam;
-      callback(e);
+      if (onClickParam) {
+        onClickParam(e);
+      }
     },
     [onClickParam, telemetry]
   );
 
-  return (
+  return onClickParam ? (
     <LinkAnchor data-test-subj="service-link-anchor" onClick={onClick}>
       {children ? children : serviceName}
     </LinkAnchor>
+  ) : (
+    serviceName
   );
 };
 
@@ -248,11 +251,7 @@ export const EntityDetailsLink = ({
   } else if (entityType === EntityType.user) {
     return <UserDetailsLink {...props} userTab={tab as UsersTableType} userName={entityName} />;
   } else if (entityType === EntityType.service) {
-    return props.onClick ? (
-      <ServiceDetailsLink serviceName={entityName} onClick={props.onClick} />
-    ) : (
-      entityName
-    );
+    return <ServiceDetailsLink serviceName={entityName} onClick={props.onClick} />;
   }
 
   return entityName;

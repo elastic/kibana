@@ -8,7 +8,6 @@
 import { EuiSpacer, EuiBadge, EuiText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
-import { max } from 'lodash/fp';
 
 import { EntityType } from '../../../../common/search_strategy';
 import { EntityIconByType } from '../../../entity_analytics/components/entity_store/helpers';
@@ -25,7 +24,7 @@ interface ServicePanelHeaderProps {
 
 export const ServicePanelHeader = ({ serviceName, observedService }: ServicePanelHeaderProps) => {
   const lastSeenDate = useMemo(
-    () => max([observedService.lastSeen.date].map((el) => el && new Date(el))),
+    () => observedService.lastSeen.date && new Date(observedService.lastSeen.date),
     [observedService.lastSeen]
   );
 
