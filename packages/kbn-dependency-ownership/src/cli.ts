@@ -7,109 +7,109 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { run } from '@kbn/dev-cli-runner';
+import { createFailError } from '@kbn/dev-cli-errors';
 import nodePath from 'path';
 
-import yargs from 'yargs';
-import chalk from 'chalk';
 import fs from 'fs';
 
-import { identifyDependencyOwnership } from './dependency_ownership';
+import { DependenciesByOwner, identifyDependencyOwnership } from './dependency_ownership';
 
 interface CLIArgs {
   dependency?: string;
   owner?: string;
   missingOwner?: boolean;
   outputPath?: string;
+  failIfUnowned?: boolean;
 }
 
-export const configureYargs = () => {
-  return yargs(process.argv.slice(2))
-    .command(
-      '*',
-      chalk.green('Identify the dependency ownership'),
-      (y) => {
-        y.version(false)
-          .option('dependency', {
-            alias: 'd',
-            describe: chalk.yellow('Show who owns the given dependency'),
-            type: 'string',
-          })
-          .option('owner', {
-            alias: 'o',
-            type: 'string',
-            describe: chalk.magenta('Show dependencies owned by the given owner'),
-          })
-          .option('missing-owner', {
-            describe: chalk.cyan('Show dependencies that are not owned by any team'),
-            type: 'boolean',
-          })
-          .option('output-path', {
-            alias: 'f',
-            describe: chalk.blue('Specify the output file to save results as JSON'),
-            type: 'string',
-          })
-          .check(({ dependency, owner, missingOwner }: Partial<CLIArgs>) => {
-            const notProvided = [dependency, owner, missingOwner].filter(
-              (arg) => arg === undefined
-            );
+export async function identifyDependencyOwnershipCLI() {
+  await run(
+    async ({ log, flags }) => {
+      // Check if flags are valid
+      const { dependency, owner, missingOwner, outputPath, failIfUnowned } = flags as CLIArgs;
+      if (!dependency && !owner && !missingOwner) {
+        throw createFailError(
+          'You must provide either a dependency, owner, or missingOwner flag. Use --help for more information.'
+        );
+      }
 
-            if (notProvided.length === 1) {
-              throw new Error(
-                'You must provide either a dependency, owner, or missingOwner flag to search for'
-              );
-            }
+      if (failIfUnowned && !missingOwner) {
+        throw createFailError(
+          'You must provide the missingOwner flag to use the failIfUnowned flag'
+        );
+      }
 
-            return true;
-          })
-          .example(
-            '--owner @elastic/kibana-core',
-            chalk.blue('Searches for all dependencies owned by the Kibana Core team')
+      if (owner) {
+        log.write(`Searching for dependencies owned by ${owner}...\n`);
+      }
+
+      const result = identifyDependencyOwnership({ dependency, owner, missingOwner });
+      if (failIfUnowned) {
+        const { prodDependencies = [] as string[], devDependencies = [] as string[] } =
+          result as DependenciesByOwner;
+
+        const uncoveredDependencies = [...prodDependencies, ...devDependencies];
+        if (uncoveredDependencies.length > 0) {
+          log.write('Dependencies without an owner:');
+          log.write(uncoveredDependencies.map((dep) => ` - ${dep}`).join('\n'));
+          throw createFailError(
+            `Found ${uncoveredDependencies.length} dependencies without an owner. Please update \`renovate.json\` to include these dependencies.\nVisit https://docs.elastic.dev/kibana-dev-docs/third-party-dependencies#dependency-ownership for more information.`
           );
-      },
-      async (argv: CLIArgs) => {
-        const { dependency, owner, missingOwner, outputPath } = argv;
-
-        if (owner) {
-          console.log(chalk.yellow(`Searching for dependencies owned by ${owner}...\n`));
-        }
-
-        try {
-          const result = identifyDependencyOwnership({ dependency, owner, missingOwner });
-
-          if (outputPath) {
-            const isJsonFile = nodePath.extname(outputPath) === '.json';
-            const outputFile = isJsonFile
-              ? outputPath
-              : nodePath.join(outputPath, 'dependency-ownership.json');
-
-            const outputDir = nodePath.dirname(outputFile);
-
-            if (!fs.existsSync(outputDir)) {
-              fs.mkdirSync(outputDir, { recursive: true });
-            }
-
-            fs.writeFile(outputFile, JSON.stringify(result, null, 2), (err) => {
-              if (err) {
-                console.error(chalk.red(`Failed to save results to ${outputFile}: ${err.message}`));
-              } else {
-                console.log(chalk.green(`Results successfully saved to ${outputFile}`));
-              }
-            });
-          } else {
-            console.log(chalk.yellow('No output file specified, displaying results below:\n'));
-            console.log(JSON.stringify(result, null, 2));
-          }
-        } catch (error) {
-          console.error('Error fetching dependency ownership:', error.message);
+        } else {
+          log.success('All dependencies have an owner');
         }
       }
-    )
-    .help();
-};
+
+      if (outputPath) {
+        const isJsonFile = nodePath.extname(outputPath) === '.json';
+        const outputFile = isJsonFile
+          ? outputPath
+          : nodePath.join(outputPath, 'dependency-ownership.json');
+
+        const outputDir = nodePath.dirname(outputFile);
+
+        if (!fs.existsSync(outputDir)) {
+          fs.mkdirSync(outputDir, { recursive: true });
+        }
+
+        fs.writeFile(outputFile, JSON.stringify(result, null, 2), (err) => {
+          if (err) {
+            throw createFailError(`Failed to save results to ${outputFile}: ${err.message}`);
+          } else {
+            log.success(`Results successfully saved to ${outputFile}`);
+          }
+        });
+      } else {
+        log.debug('No output file specified, displaying results below:');
+        log.success(JSON.stringify(result, null, 2));
+      }
+    },
+    {
+      description: `A CLI tool for analyzing package ownership.`,
+      usage: 'node scripts/dependency_ownership --dependency <dependency>',
+      flags: {
+        string: ['dependency', 'owner', 'outputPath'],
+        boolean: ['missingOwner', 'failIfUnowned'],
+        alias: {
+          d: 'dependency',
+          o: 'owner',
+          f: 'outputPath',
+        },
+        help: `
+        --dependency, -d   Show who owns the given dependency
+        --owner, -o        Show dependencies owned by the given owner
+        --missingOwner     Show dependencies that are not owned by any team
+        --outputPath, -f   Specify the output file to save results as JSON
+        --failIfUnowned    Fail if any dependencies are not owned by any team
+      `,
+      },
+    }
+  );
+}
 
 export const runCLI = () => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-  configureYargs().argv;
+  identifyDependencyOwnershipCLI();
 };
 
 if (!process.env.JEST_WORKER_ID) {
