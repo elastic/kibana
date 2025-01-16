@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import { kibanaRequestFactory } from '@kbn/core/packages/http/server-utils';
-import {
-  SECURITY_EXTENSION_ID,
-  type CoreStart,
-  type KibanaRequest,
-  SavedObjectsClient,
-} from '@kbn/core/server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { SECURITY_EXTENSION_ID, type CoreStart, SavedObjectsClient } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 export async function getInternalSavedObjectsClient(coreStart: CoreStart) {
