@@ -50,9 +50,26 @@ import {
   panelNotificationTrigger,
   PANEL_NOTIFICATION_TRIGGER,
 } from '../../panel_actions';
-import { getContextMenuAriaLabel } from '../presentation_panel_strings';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 import { AnyApiAction } from '../../panel_actions/types';
+
+const getContextMenuAriaLabel = (title?: string, index?: number) => {
+  if (title) {
+    return i18n.translate('presentationPanel.contextMenu.ariaLabelWithTitle', {
+      defaultMessage: 'Panel options for {title}',
+      values: { title },
+    });
+  }
+  if (index) {
+    return i18n.translate('presentationPanel.contextMenu.ariaLabelWithIndex', {
+      defaultMessage: 'Options for panel {index}',
+      values: { index },
+    });
+  }
+  return i18n.translate('presentationPanel.contextMenu.ariaLabel', {
+    defaultMessage: 'Panel options',
+  });
+};
 
 const QUICK_ACTION_IDS = {
   edit: [
@@ -243,10 +260,11 @@ export const PresentationPanelHoverActions = ({
 
     (async () => {
       // subscribe to any frequently changing context menu actions
-      const frequentlyChangingActions = uiActions.getFrequentlyChangingActionsForTrigger(
+      const frequentlyChangingActions = await uiActions.getFrequentlyChangingActionsForTrigger(
         CONTEXT_MENU_TRIGGER,
         apiContext
       );
+      if (canceled) return;
 
       for (const frequentlyChangingAction of frequentlyChangingActions) {
         if ((quickActionIds as readonly string[]).includes(frequentlyChangingAction.id)) {
@@ -265,10 +283,12 @@ export const PresentationPanelHoverActions = ({
       }
 
       // subscribe to any frequently changing notification actions
-      const frequentlyChangingNotifications = uiActions.getFrequentlyChangingActionsForTrigger(
-        PANEL_NOTIFICATION_TRIGGER,
-        apiContext
-      );
+      const frequentlyChangingNotifications =
+        await uiActions.getFrequentlyChangingActionsForTrigger(
+          PANEL_NOTIFICATION_TRIGGER,
+          apiContext
+        );
+      if (canceled) return;
 
       for (const frequentlyChangingNotification of frequentlyChangingNotifications) {
         if (
