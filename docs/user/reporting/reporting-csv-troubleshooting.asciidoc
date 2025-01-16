@@ -78,7 +78,7 @@ from Elasticsearch, or determine if there are performance improvements to be gai
 
 1. Go to **Stack Management > Reporting** and click the info icon next to a report.
 2. In the footer of the report flyout, click **Actions**.
-3. Click the "Inspect query in Console" action that appears in the actions menu.
+3. Click **Inspect query in Console** in the **Actions** menu.
 4. This will open the *Console* application, pre-filled with the queries used to generate the CSV export.
 
 [role="screenshot"]
