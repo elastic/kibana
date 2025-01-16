@@ -9,9 +9,8 @@ import expect from '@kbn/expect';
 import { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { cleanUpRootStream } from './helpers/cleanup';
 import { createStreamsRepositorySupertestClient } from './helpers/repository_client';
-import { enableStreams, indexDocument } from './helpers/requests';
+import { disableStreams, enableStreams, indexDocument } from './helpers/requests';
 
 type StreamPutItem = ClientRequestParamsOf<
   StreamsRouteRepository,
@@ -70,6 +69,7 @@ const streams: StreamPutItem[] = [
   {
     name: 'logs.test',
     ingest: {
+      routing: [],
       processing: [],
       wired: {
         fields: {
@@ -113,17 +113,14 @@ export default function ({ getService }: FtrProviderContext) {
 
   // An anticipated use case is that a user will want to flush a tree of streams from a config file
   describe('Flush from config file', () => {
-    after(async () => {
-      await cleanUpRootStream(esClient);
-      await esClient.indices.deleteDataStream({
-        name: ['logs*'],
-      });
-    });
-
     before(async () => {
-      await enableStreams(supertest);
+      await enableStreams(apiClient);
       await createStreams();
       await indexDocuments();
+    });
+
+    after(async () => {
+      await disableStreams(apiClient);
     });
 
     it('puts the data in the right data streams', async () => {

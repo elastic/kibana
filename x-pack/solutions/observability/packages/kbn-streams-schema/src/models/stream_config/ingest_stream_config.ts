@@ -11,8 +11,8 @@ import { processingDefinitionSchema, streamChildSchema } from '../common';
 export const ingestStreamConfigDefinitonSchema = z
   .object({
     ingest: z.object({
-      processing: z.array(processingDefinitionSchema).default([]),
-      routing: z.array(streamChildSchema).default([]),
+      processing: z.array(processingDefinitionSchema),
+      routing: z.array(streamChildSchema),
     }),
   })
   .strict();
