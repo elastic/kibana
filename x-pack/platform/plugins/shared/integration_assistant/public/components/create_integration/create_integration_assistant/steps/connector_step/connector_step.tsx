@@ -42,15 +42,23 @@ interface ConnectorStepProps {
 }
 export const ConnectorStep = React.memo<ConnectorStepProps>(({ connector }) => {
   const { euiTheme } = useEuiTheme();
-  const { http, notifications } = useKibana().services;
+  const { http, notifications, triggersActionsUi } = useKibana().services;
   const { setConnector, completeStep } = useActions();
 
   const [connectors, setConnectors] = useState<AIConnector[]>();
+  let inferenceEnabled: boolean = false;
+
+  if (triggersActionsUi.actionTypeRegistry.has('.inference')) {
+    inferenceEnabled = triggersActionsUi.actionTypeRegistry.get('.inference') as unknown as boolean;
+  }
+  if (inferenceEnabled) {
+    AllowedActionTypeIds.push('.inference');
+  }
   const {
     isLoading,
     data: aiConnectors,
     refetch: refetchConnectors,
-  } = useLoadConnectors({ http, toasts: notifications.toasts });
+  } = useLoadConnectors({ http, toasts: notifications.toasts, inferenceEnabled });
 
   useEffect(() => {
     if (aiConnectors != null) {

@@ -214,3 +214,8 @@ export interface KibanaRequest<
    */
   readonly body: Body;
 }
+
+/**
+ * @remark Convenience type, use when the concrete values of P, Q, B and route method do not matter.
+ */
+export type AnyKibanaRequest = KibanaRequest<unknown, unknown, unknown, RouteMethod>;

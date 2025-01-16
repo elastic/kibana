@@ -15,6 +15,7 @@ import {
 } from '../../__mocks__/conversations_schema.mock';
 import { authenticatedUser } from '../../__mocks__/user';
 import { updateConversationRoute } from './update_route';
+import expect from 'expect';
 
 describe('Update conversation route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -22,6 +23,7 @@ describe('Update conversation route', () => {
   const mockUser1 = authenticatedUser;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
@@ -143,6 +145,28 @@ describe('Update conversation route', () => {
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
         `messages.0.role: Invalid enum value. Expected 'system' | 'user' | 'assistant', received 'invalid'`
+      );
+    });
+
+    // validate id is correct, check happens on L71 in update_route.ts
+    test('validates id is correct', async () => {
+      const request = requestMock.create({
+        method: 'put',
+        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
+        body: {
+          ...getUpdateConversationSchemaMock(),
+          id: 'invalid-id',
+        },
+        params: { id: 'real-id' },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(
+        clients.elasticAssistant.getAIAssistantConversationsDataClient.updateConversation
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          conversationUpdateProps: expect.objectContaining({ id: 'real-id' }),
+        })
       );
     });
   });
