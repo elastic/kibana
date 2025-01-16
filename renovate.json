@@ -2361,25 +2361,6 @@
       "enabled": true
     },
     {
-      "groupName": "react-resizable",
-      "matchDepNames": [
-        "react-resizable"
-      ],
-      "reviewers": [
-        "team:kibana-presentation"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Presentation",
-        "backport:all-open",
-        "release_note:skip"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
       "groupName": "misc kibana-presentation dependencies",
       "matchDepNames": [
         "jsts",
@@ -2405,11 +2386,9 @@
       "groupName": "kibana-presentation react dependencies",
       "matchDepNames": [
         "react-dropzone",
-        "react-grid-layout",
         "react-recompose",
         "react-shortcuts",
         "redux-thunks",
-        "@types/react-grid-layout",
         "@types/react-recompose"
       ],
       "reviewers": [
