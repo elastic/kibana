@@ -9,6 +9,7 @@ import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import { SavedObjectTaggingOssPluginSetup } from '@kbn/saved-objects-tagging-oss-plugin/server';
 import { savedObjectsTaggingFeature } from './features';
 import { tagType } from './saved_objects';
 import type {
@@ -21,11 +22,13 @@ import { TagsRequestHandlerContext } from './request_handler_context';
 import { registerRoutes } from './routes';
 import { createTagUsageCollector } from './usage';
 import { TagsClient, AssignmentService } from './services';
+import { convertTagNameToId, getTagsFromReferences, replaceTagReferences } from '../common';
 
 interface SetupDeps {
   features: FeaturesPluginSetup;
   usageCollection?: UsageCollectionSetup;
   security?: SecurityPluginSetup;
+  savedObjectsTaggingOss: SavedObjectTaggingOssPluginSetup;
 }
 
 interface StartDeps {
@@ -36,8 +39,8 @@ export class SavedObjectTaggingPlugin
   implements Plugin<{}, SavedObjectTaggingStart, SetupDeps, StartDeps>
 {
   public setup(
-    { savedObjects, http, getStartServices }: CoreSetup,
-    { features, usageCollection, security }: SetupDeps
+    { savedObjects, http, getStartServices }: CoreSetup<StartDeps, SavedObjectTaggingStart>,
+    { features, usageCollection, security, savedObjectsTaggingOss }: SetupDeps
   ) {
     savedObjects.registerType(tagType);
 
@@ -49,6 +52,10 @@ export class SavedObjectTaggingPlugin
       async (context, req, res) => {
         return new TagsRequestHandlerContext(req, await context.core, security);
       }
+    );
+
+    savedObjectsTaggingOss.registerTaggingApi(
+      getStartServices().then(([_core, _deps, startContract]) => startContract)
     );
 
     features.registerKibanaFeature(savedObjectsTaggingFeature);
@@ -69,7 +76,7 @@ export class SavedObjectTaggingPlugin
     return {};
   }
 
-  public start(core: CoreStart, { security }: StartDeps) {
+  public start(core: CoreStart, { security }: StartDeps): SavedObjectTaggingStart {
     return {
       createTagClient: ({ client }: CreateTagClientOptions) => {
         return new TagsClient({ client });
@@ -82,6 +89,9 @@ export class SavedObjectTaggingPlugin
           internal: true,
         });
       },
+      convertTagNameToId,
+      getTagsFromReferences,
+      replaceTagReferences,
     };
   }
 }

@@ -6,7 +6,6 @@
  */
 
 import { uniq, difference } from 'lodash';
-import { PublicMethodsOf } from '@kbn/utility-types';
 import {
   SavedObjectsClientContract,
   ISavedObjectTypeRegistry,
@@ -20,24 +19,18 @@ import {
   FindAssignableObjectsOptions,
   getKey,
   ObjectReference,
-} from '../../../common/assignments';
+} from '@kbn/saved-objects-tagging-oss-plugin/common';
+import {
+  AssignmentServiceOptions,
+  IAssignmentService,
+} from '@kbn/saved-objects-tagging-oss-plugin/server';
 import { updateTagReferences } from '../../../common/references';
 import { taggableTypes } from '../../../common/constants';
 import { getUpdatableSavedObjectTypes } from './get_updatable_types';
 import { AssignmentError } from './errors';
 import { toAssignableObject } from './utils';
 
-interface AssignmentServiceOptions {
-  request?: KibanaRequest;
-  client: SavedObjectsClientContract;
-  typeRegistry: ISavedObjectTypeRegistry;
-  authorization?: SecurityPluginSetup['authz'];
-  internal?: boolean;
-}
-
-export type IAssignmentService = PublicMethodsOf<AssignmentService>;
-
-export class AssignmentService {
+export class AssignmentService implements IAssignmentService {
   private readonly soClient: SavedObjectsClientContract;
   private readonly typeRegistry: ISavedObjectTypeRegistry;
   private readonly authorization?: SecurityPluginSetup['authz'];

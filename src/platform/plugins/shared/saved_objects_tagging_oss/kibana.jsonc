@@ -9,7 +9,7 @@
   "plugin": {
     "id": "savedObjectsTaggingOss",
     "browser": true,
-    "server": false,
+    "server": true,
     "optionalPlugins": [
       "savedObjects"
     ]

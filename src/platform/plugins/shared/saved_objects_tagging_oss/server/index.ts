@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  AssignableObject,
-  UpdateTagAssignmentsOptions,
-  FindAssignableObjectsOptions,
-  ObjectReference,
-  Tag,
-  TagAttributes,
-  CreateTagOptions,
-  GetAllTagsOptions,
-  ITagsClient,
-  TagWithOptionalId,
-} from './types';
+import { PluginInitializerContext } from '@kbn/core/server';
 
-export { getKey } from './types';
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { SavedObjectTaggingOssPlugin } = await import('./plugin');
+  return new SavedObjectTaggingOssPlugin(initializerContext);
+}
+
+export type {
+  SavedObjectTaggingOssPluginSetup,
+  SavedObjectTaggingOssPluginStart,
+  SavedObjectsTaggingApiServer,
+  IAssignmentService,
+  AssignmentServiceOptions,
+} from './types';

@@ -13,7 +13,6 @@ export type {
   CreateTagAssignmentServiceOptions,
   CreateTagClientOptions,
 } from './types';
-export type { IAssignmentService } from './services';
 
 export const plugin = async (initializerContext: PluginInitializerContext) => {
   const { SavedObjectTaggingPlugin } = await import('./plugin');
