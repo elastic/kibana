@@ -25,7 +25,13 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { merge } from 'rxjs';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
-import { AggregateQuery, isOfAggregateQueryType, Query, TimeRange } from '@kbn/es-query';
+import {
+  AggregateQuery,
+  isOfAggregateQueryType,
+  isOfQueryType,
+  Query,
+  TimeRange,
+} from '@kbn/es-query';
 import { isFunction } from 'lodash';
 import { loadSavedSearch as loadSavedSearchFn } from './utils/load_saved_search';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
@@ -335,7 +341,7 @@ export function getDiscoverStateContainer({
 
     services.dataViews.clearInstanceCache(prevDataView.id);
 
-    updateFiltersReferences({
+    await updateFiltersReferences({
       prevDataView,
       nextDataView,
       services,
@@ -386,7 +392,10 @@ export function getDiscoverStateContainer({
   };
 
   const transitionFromDataViewToESQL = (dataView: DataView) => {
-    const queryString = getInitialESQLQuery(dataView);
+    const appState = appStateContainer.get();
+    const { query } = appState;
+    const filterQuery = query && isOfQueryType(query) ? query : undefined;
+    const queryString = getInitialESQLQuery(dataView, filterQuery);
 
     appStateContainer.update({
       query: { esql: queryString },

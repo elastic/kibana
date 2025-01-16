@@ -45,6 +45,8 @@ export default function ({ getService }: FtrProviderContext) {
   let supertestAdminWithApiKey: SupertestWithRoleScopeType;
 
   describe('security/authorization', function () {
+    this.tags(['failsOnMKI']);
+
     before(async function () {
       supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
         'admin',
