@@ -53,9 +53,6 @@ export function QueryHistoryAction({
   isSpaceReduced?: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
-  // get history items from local storage
-  const items: QueryHistoryItem[] = getHistoryItems('desc');
-  if (!items.length) return null;
   return (
     <>
       {isSpaceReduced && (
