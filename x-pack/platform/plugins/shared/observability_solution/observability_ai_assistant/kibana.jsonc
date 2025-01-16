@@ -21,6 +21,6 @@
     "optionalPlugins": ["cloud", "serverless"],
     "requiredBundles": ["kibanaReact", "kibanaUtils"],
     "runtimePluginDependencies": ["ml"],
-    "extraPublicDirs": ["common"]
+    "extraPublicDirs": []
   }
 }

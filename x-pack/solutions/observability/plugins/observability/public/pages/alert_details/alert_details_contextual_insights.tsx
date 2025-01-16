@@ -9,7 +9,6 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import dedent from 'dedent';
-import { ALERT_CONTEXT_INSTRUCTION } from '@kbn/observability-ai-assistant-plugin/common';
 import { type AlertDetailsContextualInsight } from '../../../server/services';
 import { useKibana } from '../../utils/kibana_react';
 import { AlertData } from '../../hooks/use_fetch_alert_detail';
@@ -63,7 +62,7 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
         instructions: dedent(
           `I'm an SRE. I am looking at an alert that was triggered. I want to understand why it was triggered, what it means, and what I should do next.
 
-        ${ALERT_CONTEXT_INSTRUCTION}:
+        The following contextual information is available to help you understand the alert:
         ${obsAlertContext}
 
         The user already know the alert reason so do not repeat this: ${alert.formatted.reason}
