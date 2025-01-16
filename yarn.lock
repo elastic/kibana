@@ -2313,10 +2313,10 @@
     apache-arrow "^18.0.0"
     tslib "^2.4.0"
 
-"@elastic/ems-client@8.6.2":
-  version "8.6.2"
-  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-8.6.2.tgz#cdca0a063756391705492f1d301a33a314464d8e"
-  integrity sha512-bhbR6BmrA5pNEDI/ais9V3612KPimx6NLacViOc1QpRw9oNGfQPRQVSOwd7IXzCn2eJKgBJoTWBgJGu6sjvZ4g==
+"@elastic/ems-client@8.6.3":
+  version "8.6.3"
+  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-8.6.3.tgz#9c5e29645516380c3550a33f2567456d38115b9f"
+  integrity sha512-ha8vsuT+AVsIThErXRNe3s8wwZCGI4EzJIbeXeFZoMcnD/x3t3DTOWwfSH1ov9RpDXKj5e8i4GkbvGDgPaLooQ==
   dependencies:
     "@types/geojson" "7946.0.15"
     "@types/topojson-client" "3.1.5"
@@ -22994,7 +22994,7 @@ jsonify@~0.0.0:
   resolved "https://registry.yarnpkg.com/jsonify/-/jsonify-0.0.0.tgz#2c74b6ee41d93ca51b7b5aaee8f503631d252a73"
   integrity sha1-LHS27kHZPKUbe1qu6PUDYx0lKnM=
 
-jsonpath-plus@^10.0.0, jsonpath-plus@^10.2.0:
+jsonpath-plus@^10.0.0:
   version "10.2.0"
   resolved "https://registry.yarnpkg.com/jsonpath-plus/-/jsonpath-plus-10.2.0.tgz#84d680544d9868579cc7c8f59bbe153a5aad54c4"
   integrity sha512-T9V+8iNYKFL2n2rF+w02LBOT2JjDnTjioaNFrxRy0Bv1y/hNsqR/EBK7Ojy2ythRHwmz2cRIls+9JitQGZC/sw==
