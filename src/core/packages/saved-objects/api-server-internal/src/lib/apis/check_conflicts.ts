@@ -19,7 +19,6 @@ import {
   SavedObjectsBaseOptions,
   SavedObjectsCheckConflictsResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import {
   Either,
   errorContent,
@@ -74,61 +73,22 @@ export const performCheckConflicts = async <T>(
   });
 
   const validObjects = expectedBulkGetResults.filter(isRight);
-  const includeSavedObjectNames = securityExtension?.includeSavedObjectNames() ?? false;
-
-  const bulkGetDocs = validObjects.map(({ value: { type, id } }) => {
-    return {
-      _id: serializer.generateRawId(namespace, type, id),
-      _index: commonHelper.getIndexForType(type),
-      _source: {
-        includes: [
-          'type',
-          'namespaces',
-          ...(includeSavedObjectNames
-            ? SavedObjectsUtils.getIncludedNameFields(type, registry.getNameAttribute(type))
-            : []),
-        ],
-      },
-    };
+  await securityExtension?.authorizeCheckConflicts({
+    namespace,
+    objects: validObjects.map((element) => ({ type: element.value.type, id: element.value.id })),
   });
 
+  const bulkGetDocs = validObjects.map(({ value: { type, id } }) => ({
+    _id: serializer.generateRawId(namespace, type, id),
+    _index: commonHelper.getIndexForType(type),
+    _source: { includes: ['type', 'namespaces'] },
+  }));
   const bulkGetResponse = bulkGetDocs.length
     ? await client.mget<SavedObjectsRawDocSource>(
         { docs: bulkGetDocs },
         { ignore: [404], meta: true }
       )
     : undefined;
-
-  const authObjects = expectedBulkGetResults.map((expectedResult) => {
-    const { type, id } = expectedResult.value;
-
-    if (isLeft(expectedResult)) {
-      return { type, id };
-    }
-
-    const { esRequestIndex } = expectedResult.value;
-    const doc = bulkGetResponse?.body.docs[esRequestIndex];
-
-    const name =
-      isMgetDoc(doc) && doc.found
-        ? SavedObjectsUtils.getName(
-            { attributes: doc?._source?.[type] ?? {} },
-            registry.getNameAttribute(type)
-          )
-        : undefined;
-
-    return {
-      type,
-      id,
-      name,
-    };
-  });
-
-  await securityExtension?.authorizeCheckConflicts({
-    namespace,
-    objects: authObjects,
-  });
-
   // throw if we can't verify a 404 response is from Elasticsearch
   if (
     bulkGetResponse &&
@@ -149,7 +109,6 @@ export const performCheckConflicts = async <T>(
 
     const { type, id, esRequestIndex } = expectedResult.value;
     const doc = bulkGetResponse?.body.docs[esRequestIndex];
-
     if (isMgetDoc(doc) && doc.found) {
       errors.push({
         id,
