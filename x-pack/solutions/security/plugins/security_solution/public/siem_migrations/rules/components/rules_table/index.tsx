@@ -41,7 +41,7 @@ import * as i18n from './translations';
 import { useStartMigration } from '../../service/hooks/use_start_migration';
 import type { FilterOptions } from '../../types';
 import { MigrationRulesFilter } from './filters';
-import { convertFilterOptions } from './helpers';
+import { convertFilterOptions } from './utils/filters';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
