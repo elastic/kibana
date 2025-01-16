@@ -67,7 +67,6 @@ export class UpdateSLO {
     updatedSlo = Object.assign(updatedSlo, {
       updatedAt: new Date(),
       updatedBy: this.userId,
-      createdBy: originalSlo.createdBy,
       revision: requireRevisionBump ? originalSlo.revision + 1 : originalSlo.revision,
     });
 
