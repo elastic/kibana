@@ -92,7 +92,7 @@ const AssistantComponent: React.FC<Props> = ({
     currentUserAvatar,
     setLastConversationId,
     contentReferencesVisible,
-    setContentReferencesVisible
+    setContentReferencesVisible,
   } = useAssistantContext();
 
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
@@ -378,7 +378,7 @@ const AssistantComponent: React.FC<Props> = ({
             setIsStreaming,
             currentUserAvatar,
             systemPromptContent: currentSystemPrompt?.content,
-            contentReferencesVisible
+            contentReferencesVisible,
           })}
           // Avoid comments going off the flyout
           css={css`

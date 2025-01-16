@@ -13,7 +13,7 @@ import type { Logger } from '@kbn/logging';
 
 import { BaseMessage } from '@langchain/core/messages';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import { ContentReferencesStore, ConversationResponse, Replacements } from '@kbn/elastic-assistant-common';
+import { ConversationResponse, Replacements } from '@kbn/elastic-assistant-common';
 import { AgentState, NodeParamsBase } from './types';
 import { AssistantDataClients } from '../../executors/types';
 

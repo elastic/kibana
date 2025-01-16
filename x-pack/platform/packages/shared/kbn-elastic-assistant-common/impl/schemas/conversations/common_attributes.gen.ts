@@ -74,7 +74,7 @@ export const ConversationConfidence = z.enum(['low', 'medium', 'high']);
 export type ConversationConfidenceEnum = typeof ConversationConfidence.enum;
 export const ConversationConfidenceEnum = ConversationConfidence.enum;
 
-/********* Begin Content References *********/
+/** ******* Begin Content References *********/
 /**
  * Data referenced by the message content
  */
@@ -87,7 +87,7 @@ export const BaseContentReference = z.object({
   /**
    * Specifies the type of ContentReference
    */
-  type: z.string()
+  type: z.string(),
 });
 
 /**
@@ -98,7 +98,7 @@ export const KnowledgeBaseEntryContentReference = BaseContentReference.extend({
   /**
    * Specifies this is a KnowledgeBaseEntryContentReference
    */
-  type: z.literal("KnowledgeBaseEntry"),
+  type: z.literal('KnowledgeBaseEntry'),
   /**
    * Id of the knowledge base entry
    */
@@ -106,18 +106,20 @@ export const KnowledgeBaseEntryContentReference = BaseContentReference.extend({
   /**
    * Name of the knowledge base entry
    */
-  knowledgeBaseEntryName: z.string()
+  knowledgeBaseEntryName: z.string(),
 });
 
 /**
  * Alerts count referenced by the message content
  */
-export type ProductDocumentationContentReference = z.infer<typeof ProductDocumentationContentReference>;
+export type ProductDocumentationContentReference = z.infer<
+  typeof ProductDocumentationContentReference
+>;
 export const ProductDocumentationContentReference = BaseContentReference.extend({
   /**
    * Specifies this is a ProductDocumentationContentReference
    */
-  type: z.literal("ProductDocumentation"),
+  type: z.literal('ProductDocumentation'),
   /**
    * Title of the documentation
    */
@@ -125,7 +127,7 @@ export const ProductDocumentationContentReference = BaseContentReference.extend(
   /**
    * Url to the documentation
    */
-  url: z.string()
+  url: z.string(),
 });
 
 /**
@@ -136,7 +138,7 @@ export const SecurityAlertsPageContentReference = BaseContentReference.extend({
   /**
    * Specifies this is a SecurityAlertsPageContentReference
    */
-  type: z.literal("SecurityAlertsPage"),
+  type: z.literal('SecurityAlertsPage'),
 });
 
 /**
@@ -147,26 +149,30 @@ export const SecurityAlertContentReference = BaseContentReference.extend({
   /**
    * Specifies this is a SecurityAlertContentReference
    */
-  type: z.literal("SecurityAlert"),
+  type: z.literal('SecurityAlert'),
   /**
    * Id of the alert
    */
-  alertId: z.string()
+  alertId: z.string(),
 });
 
-export const ContentReference = z.union([KnowledgeBaseEntryContentReference, SecurityAlertContentReference, SecurityAlertsPageContentReference, ProductDocumentationContentReference])
-export type ContentReference = z.infer<typeof ContentReference>
-export const ContentReferences = z.record(z.string(), ContentReference)
-export type ContentReferences = z.infer<typeof ContentReferences>
-/********* End Content References *********/
+export const ContentReference = z.union([
+  KnowledgeBaseEntryContentReference,
+  SecurityAlertContentReference,
+  SecurityAlertsPageContentReference,
+  ProductDocumentationContentReference,
+]);
+export type ContentReference = z.infer<typeof ContentReference>;
+export const ContentReferences = z.record(z.string(), ContentReference);
+export type ContentReferences = z.infer<typeof ContentReferences>;
+/** ******* End Content References *********/
 
 /**
  * Message specific metadata
  */
 export type MessageMetadata = z.infer<typeof MessageMetadata>;
 export const MessageMetadata = z.object({
-
-  contentReferences: ContentReferences.optional()
+  contentReferences: ContentReferences.optional(),
 });
 
 /**
@@ -201,7 +207,7 @@ export const Message = z.object({
   /**
    * Message metadata
    */
-  metadata: MessageMetadata.optional()
+  metadata: MessageMetadata.optional(),
 });
 
 export type ApiConfig = z.infer<typeof ApiConfig>;

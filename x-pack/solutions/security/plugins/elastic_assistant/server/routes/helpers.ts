@@ -106,7 +106,7 @@ export const getMessageFromRawResponse = ({
   traceData,
 }: {
   rawContent?: string;
-    metadata?: MessageMetadata,
+  metadata?: MessageMetadata;
   traceData?: TraceData;
   isError?: boolean;
 }): Message => {
@@ -174,7 +174,7 @@ export interface AppendAssistantMessageToConversationParams {
   messageContent: string;
   replacements: Replacements;
   conversationId: string;
-  contentReferences?: ContentReferences
+  contentReferences?: ContentReferences;
   isError?: boolean;
   traceData?: Message['traceData'];
 }
@@ -194,9 +194,9 @@ export const appendAssistantMessageToConversation = async ({
 
   const metadata: MessageMetadata = {
     ...(contentReferences ? { contentReferences } : {}),
-  }
+  };
 
-  const isMetadataPopulated = contentReferences != undefined
+  const isMetadataPopulated = contentReferences != undefined;
 
   await conversationsDataClient.appendConversationMessages({
     existingConversation: conversation,
@@ -231,7 +231,7 @@ export interface LangChainExecuteParams {
   telemetry: AnalyticsServiceSetup;
   actionTypeId: string;
   connectorId: string;
-  contentReferencesStore: ContentReferencesStore,
+  contentReferencesStore: ContentReferencesStore;
   llmTasks?: LlmTasksPluginStart;
   inference: InferenceServerStart;
   isOssModel?: boolean;

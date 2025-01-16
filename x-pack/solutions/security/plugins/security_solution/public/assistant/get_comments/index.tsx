@@ -61,7 +61,7 @@ export const getComments: GetAssistantMessages = ({
   currentUserAvatar,
   setIsStreaming,
   systemPromptContent,
-  contentReferencesVisible
+  contentReferencesVisible,
 }) => {
   if (!currentConversation) return [];
 

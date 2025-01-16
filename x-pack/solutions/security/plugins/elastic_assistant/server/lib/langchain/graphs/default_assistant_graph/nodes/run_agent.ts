@@ -7,12 +7,12 @@
 
 import { RunnableConfig } from '@langchain/core/runnables';
 import { AgentRunnableSequence } from 'langchain/dist/agents/agent';
+import { removeContentReferences } from '@kbn/elastic-assistant-common/impl/content_references/references';
+import { BaseMessage } from '@langchain/core/messages';
 import { formatLatestUserMessage } from '../prompts';
 import { AgentState, NodeParamsBase } from '../types';
 import { NodeType } from '../constants';
 import { AIAssistantKnowledgeBaseDataClient } from '../../../../../ai_assistant_data_clients/knowledge_base';
-import { removeContentReferences } from '@kbn/elastic-assistant-common/impl/content_references/references';
-import { BaseMessage } from '@langchain/core/messages';
 
 export interface RunAgentParams extends NodeParamsBase {
   state: AgentState;
@@ -72,10 +72,10 @@ export async function runAgent({
  * Removes content references from chat history
  */
 const sanitizeChatHistory = (messages: BaseMessage[]): BaseMessage[] => {
-  return messages.map(message => {
-    if(!Array.isArray(message.content)){
-      message.content = removeContentReferences(message.content)
+  return messages.map((message) => {
+    if (!Array.isArray(message.content)) {
+      message.content = removeContentReferences(message.content);
     }
-    return message
-  })
-}
+    return message;
+  });
+};

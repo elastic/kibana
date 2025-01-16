@@ -26,9 +26,9 @@ export {
   contentReferencesStoreFactory,
   alertReferenceFactory,
   knowledgeBaseReferenceFactory,
-} from './impl/content_references'
+} from './impl/content_references';
 
-export type { ContentReferencesStore } from './impl/content_references/types'
+export type { ContentReferencesStore } from './impl/content_references/types';
 
 export { transformRawData } from './impl/data_anonymization/transform_raw_data';
 export { parseBedrockBuffer, handleBedrockChunk } from './impl/utils/bedrock';

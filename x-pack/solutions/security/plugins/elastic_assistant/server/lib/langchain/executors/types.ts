@@ -11,7 +11,12 @@ import { BaseMessage } from '@langchain/core/messages';
 import { Logger } from '@kbn/logging';
 import { KibanaRequest, KibanaResponseFactory, ResponseHeaders } from '@kbn/core-http-server';
 import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
-import { ContentReferencesStore, ExecuteConnectorRequestBody, Message, Replacements } from '@kbn/elastic-assistant-common';
+import {
+  ContentReferencesStore,
+  ExecuteConnectorRequestBody,
+  Message,
+  Replacements,
+} from '@kbn/elastic-assistant-common';
 import { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';

@@ -66,11 +66,14 @@ export const transformESSearchToConversations = (
             ...(message.is_error ? { isError: message.is_error } : {}),
             ...(message.reader ? { reader: message.reader } : {}),
             role: message.role,
-            ...(message.metadata ? {
-              metadata: {
-                ...(message.metadata.content_references ? { contentReferences: message.metadata.content_references } : {})
-              }
-            }
+            ...(message.metadata
+              ? {
+                  metadata: {
+                    ...(message.metadata.content_references
+                      ? { contentReferences: message.metadata.content_references }
+                      : {}),
+                  },
+                }
               : {}),
             ...(message.trace_data
               ? {

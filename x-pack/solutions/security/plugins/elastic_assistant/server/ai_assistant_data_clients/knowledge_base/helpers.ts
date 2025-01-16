@@ -10,7 +10,11 @@ import { DynamicStructuredTool } from '@langchain/core/tools';
 import { errors } from '@elastic/elasticsearch';
 import { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { AuthenticatedUser } from '@kbn/core-security-common';
-import { ContentReferencesStore, IndexEntry, knowledgeBaseReferenceFactory } from '@kbn/elastic-assistant-common';
+import {
+  ContentReferencesStore,
+  IndexEntry,
+  knowledgeBaseReferenceFactory,
+} from '@kbn/elastic-assistant-common';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { contentReferenceString } from '@kbn/elastic-assistant-common/impl/content_references';
 
@@ -144,7 +148,7 @@ export const getStructuredToolForIndexEntry = ({
 }: {
   indexEntry: IndexEntry;
   esClient: ElasticsearchClient;
-    contentReferencesStore: ContentReferencesStore
+  contentReferencesStore: ContentReferencesStore;
   logger: Logger;
 }): DynamicStructuredTool => {
   const inputSchema = indexEntry.inputSchema?.reduce((prev, input) => {
@@ -225,7 +229,9 @@ export const getStructuredToolForIndexEntry = ({
           };
         });
 
-        const knowledgeBaseReference = contentReferencesStore.add(p => knowledgeBaseReferenceFactory(p.id, indexEntry.name, indexEntry.id))
+        const knowledgeBaseReference = contentReferencesStore.add((p) =>
+          knowledgeBaseReferenceFactory(p.id, indexEntry.name, indexEntry.id)
+        );
 
         logger.debug(() => `Similarity Search Params:\n ${JSON.stringify(params)}`);
         logger.debug(() => `Similarity Search Results:\n ${JSON.stringify(result)}`);

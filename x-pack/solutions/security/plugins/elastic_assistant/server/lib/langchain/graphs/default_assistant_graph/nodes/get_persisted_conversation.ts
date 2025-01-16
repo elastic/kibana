@@ -18,7 +18,7 @@ export interface GetPersistedConversationParams extends NodeParamsBase {
 export async function getPersistedConversation({
   logger,
   state,
-  conversationsDataClient
+  conversationsDataClient,
 }: GetPersistedConversationParams): Promise<Partial<AgentState>> {
   logger.debug(
     () => `${NodeType.GET_PERSISTED_CONVERSATION}: Node state:\n${JSON.stringify(state, null, 2)}`
@@ -38,7 +38,6 @@ export async function getPersistedConversation({
   logger.debug(`conversationId: ${state.conversationId}`);
 
   const messages = getLangChainMessages(conversation.messages ?? []);
-
 
   if (!state.input) {
     const lastMessage = messages?.splice(-1)[0];

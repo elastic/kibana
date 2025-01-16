@@ -31,6 +31,7 @@ import {
 import { css } from '@emotion/react';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import useAsync from 'react-use/lib/useAsync';
+import { useSearchParams } from 'react-router-dom-v5-compat';
 import { ProductDocumentationManagement } from '../../assistant/settings/product_documentation';
 import { KnowledgeBaseTour } from '../../tour/knowledge_base';
 import { AlertsSettingsManagement } from '../../assistant/settings/alerts_settings/alerts_settings_management';
@@ -66,7 +67,6 @@ import {
   useKnowledgeBaseStatus,
 } from '../../assistant/api/knowledge_base/use_knowledge_base_status';
 import { CANCEL_BUTTON_TEXT } from '../../assistant/assistant_header/translations';
-import { useSearchParams } from 'react-router-dom-v5-compat';
 
 interface Params {
   dataViews: DataViewsContract;

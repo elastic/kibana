@@ -1,20 +1,27 @@
-import { SecurityAlertsPageContentReference } from '@kbn/elastic-assistant-common';
-import React from 'react';
-import { ContentReferenceNode } from '../content_reference_parser';
-import { PopoverReference } from './popover_reference';
-import { EuiLink } from '@elastic/eui';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
 
-type Props = {
-    contentReferenceNode: ContentReferenceNode
-    securityAlertsPageContentReference: SecurityAlertsPageContentReference
+import type { SecurityAlertsPageContentReference } from '@kbn/elastic-assistant-common';
+import React from 'react';
+import { EuiLink } from '@elastic/eui';
+import type { ContentReferenceNode } from '../content_reference_parser';
+import { PopoverReference } from './popover_reference';
+
+interface Props {
+  contentReferenceNode: ContentReferenceNode;
+  securityAlertsPageContentReference: SecurityAlertsPageContentReference;
 }
 
 export const SecurityAlertsPageReference: React.FC<Props> = ({ contentReferenceNode }) => {
-    return (
-        <PopoverReference contentReferenceCount={contentReferenceNode.contentReferenceCount}>
-            <EuiLink href={`/app/security/alerts`} target="_blank">
-                View alerts
-            </EuiLink>
-        </PopoverReference>
-    );
-}
+  return (
+    <PopoverReference contentReferenceCount={contentReferenceNode.contentReferenceCount}>
+      <EuiLink href={`/app/security/alerts`} target="_blank">
+        View alerts
+      </EuiLink>
+    </PopoverReference>
+  );
+};
