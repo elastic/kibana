@@ -38,12 +38,22 @@ export function createMergedMappings(files: FileWrapper[]) {
       if (!acc.has(field.name)) {
         acc.set(field.name, field.value);
       } else {
-        if (acc.get(field.name).type !== field.value.type) {
-          //  should we allow text and keyword clashes. default to text?
-          fieldClashes.push({
-            fieldName: field.name,
-            fieldTypes: [acc.get(field.name).type, field.value.type],
-          });
+        const existingField = acc.get(field.name);
+
+        if (existingField.type !== field.value.type) {
+          // if either new or existing field is text or keyword, we should allow the clash
+          // and replace the existing field with the new field if the existing is keyword =
+          if (existingField.type === 'keyword' && field.value.type === 'text') {
+            // the existing field is keyword and the new field is text, replace the existing field with the text version
+            acc.set(field.name, field.value);
+          } else if (existingField.type === 'text' && field.value.type === 'keyword') {
+            // do nothing
+          } else {
+            fieldClashes.push({
+              fieldName: field.name,
+              fieldTypes: [existingField.type, field.value.type],
+            });
+          }
         }
       }
     });

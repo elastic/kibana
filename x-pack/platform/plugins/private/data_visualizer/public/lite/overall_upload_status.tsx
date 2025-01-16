@@ -45,11 +45,6 @@ export const OverallUploadStatus: FC<Props> = ({ filesStatus, uploadStatus }) =>
     filesStatus.length;
 
   const steps: EuiContainedStepProps[] = [
-    {
-      title: 'Creating index and ingest pipeline',
-      children: <></>,
-      status: generateStatus([uploadStatus.indexCreated, uploadStatus.pipelineCreated]),
-    },
     ...(uploadStatus.modelDeployed === STATUS.NA
       ? []
       : [
@@ -59,6 +54,11 @@ export const OverallUploadStatus: FC<Props> = ({ filesStatus, uploadStatus }) =>
             status: generateStatus([uploadStatus.modelDeployed]),
           },
         ]),
+    {
+      title: 'Creating index and ingest pipeline',
+      children: <></>,
+      status: generateStatus([uploadStatus.indexCreated, uploadStatus.pipelineCreated]),
+    },
     {
       title: 'Uploading files',
       children: (
