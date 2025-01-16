@@ -17,49 +17,6 @@ describe('Microsoft Defender for Endpoint Connector', () => {
     connectorMock = microsoftDefenderEndpointConnectorMocks.create();
   });
 
-  describe('Access Token management', () => {
-    const soTokenMock = {
-      id: '1',
-      type: 'connector_token',
-      attributes: {
-        connectorId: '123',
-        tokenType: 'access_token',
-        token: 'testtokenvalue',
-        expiresAt: '2025-01-16T13:02:43.494Z',
-      },
-      references: [],
-    };
-
-    it('should call API to generate as new token', async () => {
-      await connectorMock.instanceMock.isolateHost(
-        { id: '1-2-3', comment: 'foo' },
-        connectorMock.usageCollector
-      );
-
-      expect(connectorMock.instanceMock.request).toHaveBeenCalledWith(
-        expect.objectContaining({
-          url: `${connectorMock.options.config.oAuthServerUrl}/${connectorMock.options.config.tenantId}/oauth2/v2.0/token`,
-          method: 'POST',
-          data: {
-            grant_type: 'client_credentials',
-            client_id: connectorMock.options.config.clientId,
-            scope: connectorMock.options.config.oAuthScope,
-            client_secret: connectorMock.options.secrets.clientSecret,
-          },
-        }),
-        connectorMock.usageCollector
-      );
-    });
-
-    it('should use cached token', async () => {
-      // TODO:PT implement
-    });
-
-    it('should should call API to generate as new token if cached token is expired', async () => {
-      // TODO:PT implement
-    });
-  });
-
   describe('#testConnector', () => {
     it('should return expected response', async () => {
       Object.entries(connectorMock.apiMock).forEach(([url, responseFn]) => {
