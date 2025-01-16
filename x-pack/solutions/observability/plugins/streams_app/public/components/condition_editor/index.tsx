@@ -7,7 +7,7 @@
 
 import {
   EuiBadge,
-  EuiButtonEmpty,
+  EuiButton,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -82,15 +82,15 @@ export function ConditionForm(props: {
             defaultMessage: 'Route no documents to this stream without deleting existing data',
           })}
         >
-          <EuiButtonEmpty
-            size="xs"
+          <EuiButton
+            size={'xs' as 's'} // TODO: remove this cast when EUI is updated - EuiButton takes xs, but the type is wrong
             onClick={() => props.onConditionChange(undefined)}
             disabled={props.condition === undefined}
           >
             {i18n.translate('xpack.streams.conditionEditor.disable', {
               defaultMessage: 'Disable routing',
             })}
-          </EuiButtonEmpty>
+          </EuiButton>
         </EuiToolTip>
 
         <EuiSwitch
