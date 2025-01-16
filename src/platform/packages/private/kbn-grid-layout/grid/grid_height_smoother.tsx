@@ -32,15 +32,14 @@ export const GridHeightSmoother = ({
       if (!smoothHeightRef.current || gridLayoutStateManager.expandedPanelId$.getValue()) return;
 
       if (!interactionEvent) {
-        smoothHeightRef.current.style.height = `${dimensions.height}px`;
+        smoothHeightRef.current.style.minHeight = `${dimensions.height}px`;
         smoothHeightRef.current.style.userSelect = 'auto';
         return;
       }
 
-      smoothHeightRef.current.style.height = `${Math.max(
-        dimensions.height ?? 0,
+      smoothHeightRef.current.style.minHeight = `${
         smoothHeightRef.current.getBoundingClientRect().height
-      )}px`;
+      }px`;
       smoothHeightRef.current.style.userSelect = 'none';
     });
 
@@ -55,11 +54,11 @@ export const GridHeightSmoother = ({
       ref={smoothHeightRef}
       className={'kbnGridWrapper'}
       css={css`
+        height: 100%;
         overflow-anchor: none;
-        transition: height 500ms linear;
+        transition: min-height 500ms linear;
 
         &:has(.kbnGridPanel--expanded) {
-          height: 100% !important;
           position: relative;
           transition: none;
         }
