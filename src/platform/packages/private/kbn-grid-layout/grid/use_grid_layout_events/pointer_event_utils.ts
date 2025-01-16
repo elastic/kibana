@@ -8,11 +8,11 @@
  */
 
 import { PanelInteractionEvent, RuntimeGridSettings, UserInteractionEvent } from '../types';
-import { isMouseEvent, isTouchEvent } from '../utils/sensors';
+import { getPointerPosition } from './sensors';
 
 export const getResizePreviewRect = (
   interactionEvent: PanelInteractionEvent,
-  pointerClientPixel: { x: number; y: number },
+  pointerPixel: { clientX: number; clientY: number },
   runtimeSettings: RuntimeGridSettings
 ) => {
   const { columnCount, gutterSize, columnPixelWidth } = runtimeSettings;
@@ -22,42 +22,29 @@ export const getResizePreviewRect = (
   return {
     left: panelRect.left,
     top: panelRect.top,
-    bottom: pointerClientPixel.y - interactionEvent.pointerOffsets.bottom,
-    right: Math.min(pointerClientPixel.x - interactionEvent.pointerOffsets.right, gridWidth),
+    bottom: pointerPixel.clientY - interactionEvent.pointerOffsets.bottom,
+    right: Math.min(pointerPixel.clientX - interactionEvent.pointerOffsets.right, gridWidth),
   };
 };
 
 export const getDragPreviewRect = (
   interactionEvent: PanelInteractionEvent,
-  pointerClientPixel: { x: number; y: number }
+  pointerPixel: { clientX: number; clientY: number }
 ) => {
   return {
-    left: pointerClientPixel.x - interactionEvent.pointerOffsets.left,
-    top: pointerClientPixel.y - interactionEvent.pointerOffsets.top,
-    bottom: pointerClientPixel.y - interactionEvent.pointerOffsets.bottom,
-    right: pointerClientPixel.x - interactionEvent.pointerOffsets.right,
+    left: pointerPixel.clientX - interactionEvent.pointerOffsets.left,
+    top: pointerPixel.clientY - interactionEvent.pointerOffsets.top,
+    bottom: pointerPixel.clientY - interactionEvent.pointerOffsets.bottom,
+    right: pointerPixel.clientX - interactionEvent.pointerOffsets.right,
   };
 };
 
 export function getPointerOffsets(e: UserInteractionEvent, panelRect: DOMRect) {
-  if (!isMouseEvent(e) && !isTouchEvent(e)) {
-    throw new Error('Invalid event type');
-  }
-  const { clientX, clientY } = isTouchEvent(e) ? e.touches[0] : e;
+  const { clientX, clientY } = getPointerPosition(e);
   return {
     top: clientY - panelRect.top,
     left: clientX - panelRect.left,
     right: clientX - panelRect.right,
     bottom: clientY - panelRect.bottom,
   };
-}
-
-export function getPointerPosition(e: Event) {
-  if (isMouseEvent(e)) {
-    return { x: e.clientX, y: e.clientY };
-  }
-  if (isTouchEvent(e)) {
-    return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-  }
-  throw new Error('Invalid event type');
 }

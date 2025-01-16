@@ -9,7 +9,6 @@
 
 import deepEqual from 'fast-deep-equal';
 import { useCallback, useRef } from 'react';
-import { cloneDeep } from 'lodash';
 import { resolveGridRow } from '../utils/resolve_grid_row';
 import {
   GridPanelData,
@@ -18,14 +17,15 @@ import {
   UserInteractionEvent,
 } from '../types';
 import { isGridDataEqual } from '../utils/equality_checks';
-import { isMouseEvent, isTouchEvent, attachMouseEvents, attachTouchEvents } from './sensors';
-import { handleAutoscroll, stopAutoScroll } from './autoscroll';
 import {
-  getDragPreviewRect,
-  getResizePreviewRect,
   getPointerPosition,
-  getPointerOffsets,
-} from './pointer_event_utils';
+  isMouseEvent,
+  isTouchEvent,
+  startMouseInteraction,
+  startTouchInteraction,
+} from './sensors';
+import { getDragPreviewRect, getResizePreviewRect } from './pointer_event_utils';
+import { commitAction, startAction } from './state_manager_actions';
 
 export const useGridLayoutEvents = ({
   interactionType,
@@ -34,14 +34,12 @@ export const useGridLayoutEvents = ({
   panelId,
 }: {
   interactionType: PanelInteractionEvent['type'];
-
   gridLayoutStateManager: GridLayoutStateManager;
   rowIndex: number;
   panelId: string;
 }) => {
-  const scrollInterval = useRef<NodeJS.Timeout | null>(null);
   const lastRequestedPanelPosition = useRef<GridPanelData | undefined>(undefined);
-  const pointerClientPixel = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const pointerPixel = useRef<{ clientX: number; clientY: number }>({ clientX: 0, clientY: 0 });
 
   const onPointerMove = useCallback(
     (e: Event) => {
@@ -76,7 +74,7 @@ export const useGridLayoutEvents = ({
       }
 
       if (isMouseEvent(e) || isTouchEvent(e)) {
-        pointerClientPixel.current = getPointerPosition(e);
+        pointerPixel.current = getPointerPosition(e);
       }
 
       const currentRuntimeSettings = runtimeSettings$.value;
@@ -86,8 +84,8 @@ export const useGridLayoutEvents = ({
       const isResize = interactionEvent?.type === 'resize';
 
       const previewRect = isResize
-        ? getResizePreviewRect(interactionEvent, pointerClientPixel.current, currentRuntimeSettings)
-        : getDragPreviewRect(interactionEvent, pointerClientPixel.current);
+        ? getResizePreviewRect(interactionEvent, pointerPixel.current, currentRuntimeSettings)
+        : getDragPreviewRect(interactionEvent, pointerPixel.current);
 
       activePanel$.next({ id: interactionEvent.id, position: previewRect });
 
@@ -182,35 +180,35 @@ export const useGridLayoutEvents = ({
     [gridLayoutStateManager]
   );
 
-  const attachLayoutEvents = useCallback(
+  const startInteraction = useCallback(
     (e: UserInteractionEvent) => {
       if (!isLayoutInteractive(gridLayoutStateManager)) return;
       e.stopPropagation();
 
       if (isMouseEvent(e)) {
-        attachMouseEvents(
+        startMouseInteraction({
           e,
-          (ev) => {
-            onPointerMove(ev);
-            handleAutoscroll(ev, scrollInterval);
+          onMove: onPointerMove,
+          onEnd: () => {
+            commitAction(gridLayoutStateManager);
           },
-          () => {
-            stopAutoScroll(scrollInterval);
-            finishInteraction(gridLayoutStateManager);
-          }
-        );
+        });
       } else if (isTouchEvent(e)) {
-        attachTouchEvents(e, onPointerMove, () => {
-          finishInteraction(gridLayoutStateManager);
+        startTouchInteraction({
+          e,
+          onMove: onPointerMove,
+          onEnd: () => {
+            commitAction(gridLayoutStateManager);
+          },
         });
       }
 
-      startInteraction(gridLayoutStateManager, e, interactionType, rowIndex, panelId);
+      startAction(gridLayoutStateManager, e, interactionType, rowIndex, panelId);
     },
     [gridLayoutStateManager, onPointerMove, rowIndex, panelId, interactionType]
   );
 
-  return attachLayoutEvents;
+  return startInteraction;
 };
 
 const isLayoutInteractive = (gridLayoutStateManager: GridLayoutStateManager) => {
@@ -218,39 +216,4 @@ const isLayoutInteractive = (gridLayoutStateManager: GridLayoutStateManager) => 
     gridLayoutStateManager.expandedPanelId$.value === undefined &&
     gridLayoutStateManager.accessMode$.getValue() === 'EDIT'
   );
-};
-
-const finishInteraction = ({
-  activePanel$,
-  interactionEvent$,
-  stableGridLayout$,
-  gridLayout$,
-}: GridLayoutStateManager) => {
-  activePanel$.next(undefined);
-  interactionEvent$.next(undefined);
-  if (!deepEqual(gridLayout$.getValue(), stableGridLayout$.getValue())) {
-    stableGridLayout$.next(cloneDeep(gridLayout$.getValue()));
-  }
-};
-
-const startInteraction = (
-  gridLayoutStateManager: GridLayoutStateManager,
-  e: UserInteractionEvent,
-  type: 'drag' | 'resize',
-  rowIndex: number,
-  panelId: string
-) => {
-  const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
-  if (!panelRef) return;
-
-  const panelRect = panelRef.getBoundingClientRect();
-  const pointerOffsets = getPointerOffsets(e, panelRect);
-
-  gridLayoutStateManager.interactionEvent$.next({
-    type,
-    id: panelId,
-    panelDiv: panelRef,
-    targetRowIndex: rowIndex,
-    pointerOffsets,
-  });
 };

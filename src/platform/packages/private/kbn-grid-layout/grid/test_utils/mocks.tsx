@@ -10,7 +10,7 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { ObservedSize } from 'use-resize-observer/polyfilled';
-import { clone, cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash';
 import {
   ActivePanel,
   GridAccessMode,

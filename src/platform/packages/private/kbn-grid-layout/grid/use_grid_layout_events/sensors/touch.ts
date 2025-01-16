@@ -13,18 +13,22 @@ export const isTouchEvent = (e: Event | React.UIEvent<HTMLElement>): e is UserTo
   return 'touches' in e;
 };
 
-export const attachTouchEvents = (
-  e: UserTouchEvent,
-  onMove: (e: Event) => void,
-  onDragEnd: () => void
-) => {
+export const startTouchInteraction = ({
+  e,
+  onMove,
+  onEnd,
+}: {
+  e: UserTouchEvent;
+  onMove: (e: Event) => void;
+  onEnd: () => void;
+}) => {
   if (e.touches.length > 1) return;
 
-  const onEnd = () => {
+  const handleEnd = () => {
     e.target!.removeEventListener('touchmove', onMove);
-    onDragEnd();
+    onEnd();
   };
 
   e.target!.addEventListener('touchmove', onMove, { passive: false });
-  e.target!.addEventListener('touchend', onEnd, { once: true });
+  e.target!.addEventListener('touchend', handleEnd, { once: true });
 };

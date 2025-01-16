@@ -7,5 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { isMouseEvent, attachMouseEvents } from './mouse';
-export { isTouchEvent, attachTouchEvents } from './touch';
+import { UserInteractionEvent } from '../../types';
+import { isMouseEvent } from './mouse';
+import { isTouchEvent } from './touch';
+
+export { isMouseEvent, startMouseInteraction } from './mouse';
+export { isTouchEvent, startTouchInteraction } from './touch';
+
+export function getPointerPosition(e: UserInteractionEvent) {
+  if (!isMouseEvent(e) && !isTouchEvent(e)) {
+    throw new Error('Invalid event type');
+  }
+  return isTouchEvent(e) ? e.touches[0] : e;
+}
