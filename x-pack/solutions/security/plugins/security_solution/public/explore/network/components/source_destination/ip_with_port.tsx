@@ -7,16 +7,10 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import { Ip } from '../ip';
 import { Port } from '../port';
-
-const IpPortSeparator = styled.span`
-  margin: 0 3px;
-`;
-
-IpPortSeparator.displayName = 'IpPortSeparator';
 
 /**
  * Renders a separator (i.e. `:`) and a draggable, hyperlinked port when
@@ -32,7 +26,14 @@ const PortWithSeparator = React.memo<{
   return port != null ? (
     <EuiFlexGroup gutterSize="none">
       <EuiFlexItem grow={false}>
-        <IpPortSeparator data-test-subj="ip-port-separator">{':'}</IpPortSeparator>
+        <span
+          css={css`
+            margin: 0 3px;
+          `}
+          data-test-subj="ip-port-separator"
+        >
+          {':'}
+        </span>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <Port

@@ -7,17 +7,11 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
 
 import { Network } from './network';
 import { SourceDestinationWithArrows } from './source_destination_with_arrows';
 import type { SourceDestinationProps } from './types';
-
-const EuiFlexItemMarginTop = styled(EuiFlexItem)`
-  margin-top: 3px;
-`;
-
-EuiFlexItemMarginTop.displayName = 'EuiFlexItemMarginTop';
+import { css } from '@emotion/react';
 
 /**
  * Renders a visualization of network traffic between a source and a destination
@@ -68,7 +62,12 @@ export const SourceDestination = React.memo<SourceDestinationProps>(
         />
       </EuiFlexItem>
 
-      <EuiFlexItemMarginTop grow={false}>
+      <EuiFlexItem
+        css={css`
+          margin-top: 3px;
+        `}
+        grow={false}
+      >
         <SourceDestinationWithArrows
           contextId={contextId}
           destinationBytes={destinationBytes}
@@ -92,7 +91,7 @@ export const SourceDestination = React.memo<SourceDestinationProps>(
           sourcePackets={sourcePackets}
           sourcePort={sourcePort}
         />
-      </EuiFlexItemMarginTop>
+      </EuiFlexItem>
     </EuiFlexGroup>
   )
 );

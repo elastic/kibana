@@ -9,7 +9,6 @@ import type { Location } from 'history';
 import { EuiFlexItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
 
 import * as i18nIp from '../details/translations';
 
@@ -17,12 +16,7 @@ import { FlowTargetSelect } from '../flow_controls/flow_target_select';
 import { IpOverviewId } from '../../../../timelines/components/field_renderers/field_renderers';
 import type { FlowTarget, FlowTargetSourceDest } from '../../../../../common/search_strategy';
 import { FlowDirection } from '../../../../../common/search_strategy';
-
-const SelectTypeItem = styled(EuiFlexItem)`
-  min-width: 180px;
-`;
-
-SelectTypeItem.displayName = 'SelectTypeItem';
+import { css } from '@emotion/react';
 
 interface Props {
   flowTarget: FlowTarget | FlowTargetSourceDest;
@@ -51,7 +45,13 @@ export const FlowTargetSelectConnectedComponent: React.FC<Props> = ({ flowTarget
   );
 
   return (
-    <SelectTypeItem grow={false} data-test-subj={`${IpOverviewId}-select-flow-target`}>
+    <EuiFlexItem
+      css={css`
+        min-width: 180px;
+      `}
+      grow={false}
+      data-test-subj={`${IpOverviewId}-select-flow-target`}
+    >
       <FlowTargetSelect
         id={IpOverviewId}
         isLoading={!flowTarget}
@@ -60,7 +60,7 @@ export const FlowTargetSelectConnectedComponent: React.FC<Props> = ({ flowTarget
         displayTextOverride={[i18nIp.AS_SOURCE, i18nIp.AS_DESTINATION]}
         updateFlowTargetAction={updateNetworkDetailsFlowTarget}
       />
-    </SelectTypeItem>
+    </EuiFlexItem>
   );
 };
 

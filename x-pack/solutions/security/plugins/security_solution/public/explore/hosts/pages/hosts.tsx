@@ -6,14 +6,15 @@
  */
 
 import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
-import styled from 'styled-components';
 import { noop } from 'lodash/fp';
+import type { PropsWithChildren } from 'react';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import type { Filter } from '@kbn/es-query';
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
+import { css } from '@emotion/react';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
 import { FiltersGlobal } from '../../../common/components/filters_global';
@@ -34,7 +35,6 @@ import { inputsSelectors } from '../../../common/store';
 
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
-import { Display } from './display';
 import { HostsTabs } from './hosts_tabs';
 import { navTabsHosts } from './nav_tabs';
 import * as i18n from './translations';
@@ -57,7 +57,7 @@ import { useLicense } from '../../../common/hooks/use_license';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
-const StyledFullHeightContainer = styled.div`
+const fullHeightContainerStyles = css`
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
@@ -164,7 +164,7 @@ const HostsComponent = () => {
   return (
     <>
       {indicesExist ? (
-        <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
+        <div css={fullHeightContainerStyles} onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
             <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
@@ -205,7 +205,7 @@ const HostsComponent = () => {
               type={hostsModel.HostsType.page}
             />
           </SecuritySolutionPageWrapper>
-        </StyledFullHeightContainer>
+        </div>
       ) : (
         <EmptyPrompt />
       )}
@@ -217,3 +217,12 @@ const HostsComponent = () => {
 HostsComponent.displayName = 'HostsComponent';
 
 export const Hosts = React.memo(HostsComponent);
+
+const Display = React.memo<PropsWithChildren<{ show: boolean }>>(({ show, children }) => {
+  const styles = css`
+    ${show ? '' : 'display: none;'}
+  `;
+  return <div css={styles}>{children}</div>;
+});
+
+Display.displayName = 'Display';

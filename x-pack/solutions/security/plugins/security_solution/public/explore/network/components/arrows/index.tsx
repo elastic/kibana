@@ -5,16 +5,23 @@
  * 2.0.
  */
 
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React from 'react';
-import styled from 'styled-components';
 
 /** Renders the body (non-pointy part) of an arrow */
-export const ArrowBody = styled.span<{ height: number }>`
-  background-color: ${(props) => props.theme.eui.euiColorLightShade};
-  height: ${({ height }) => `${height}px`};
-  width: 25px;
-`;
+export const ArrowBody = React.memo<{
+  height: number;
+}>(({ height }) => {
+  const { euiTheme } = useEuiTheme();
+  const styles = css`
+    background-color: ${euiTheme.colors.lightShade};
+    height: ${height}px;
+    width: 25px;
+  `;
+
+  return <span css={styles} />;
+});
 
 ArrowBody.displayName = 'ArrowBody';
 

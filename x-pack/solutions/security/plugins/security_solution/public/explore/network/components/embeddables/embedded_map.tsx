@@ -7,11 +7,10 @@
 
 // embedded map v2
 
-import { EuiAccordion, EuiLink, EuiText } from '@elastic/eui';
+import { EuiAccordion, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
-import styled, { css } from 'styled-components';
 import type { Filter, Query } from '@kbn/es-query';
 import { isEqual } from 'lodash/fp';
 import type { MapApi, RenderTooltipContentParams } from '@kbn/maps-plugin/public';
@@ -30,66 +29,58 @@ import { sourcererSelectors } from '../../../../sourcerer/store';
 import type { State } from '../../../../common/store';
 import type { SourcererDataView } from '../../../../sourcerer/store/model';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { css } from '@emotion/react';
 
 export const NETWORK_MAP_VISIBLE = 'network_map_visbile';
 
 interface EmbeddableMapProps {
   maintainRatio?: boolean;
+  children?: React.ReactNode;
 }
 
-const EmbeddableMapRatioHolder = styled.div.attrs(() => ({
-  className: 'siemEmbeddable__map',
-}))<EmbeddableMapProps>`
-  .mapToolbarOverlay__button {
-    display: none;
+export const EmbeddableMapRatioHolder = React.memo<EmbeddableMapProps>(
+  ({ maintainRatio, children }) => {
+    const { euiTheme } = useEuiTheme();
+
+    const styles = css`
+      &.siemEmbeddable__map {
+        .mapToolbarOverlay__button {
+          display: none;
+        }
+
+        ${maintainRatio &&
+        `
+          padding-top: calc(3 / 4 * 100%); /* 4:3 (standard) ratio */
+          position: relative;
+
+          @media only screen and (min-width: ${euiTheme.breakpoint.m}) {
+            padding-top: calc(9 / 32 * 100%); /* 32:9 (ultra widescreen) ratio */
+          }
+
+          @media only screen and (min-width: 1441px) and (min-height: 901px) {
+            padding-top: calc(9 / 21 * 100%); /* 21:9 (ultrawide) ratio */
+          }
+
+          .embPanel {
+            bottom: 0;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+          }
+        `}
+      }
+    `;
+
+    return (
+      <div css={styles} className="siemEmbeddable__map">
+        {children}
+      </div>
+    );
   }
-
-  ${({ maintainRatio }) =>
-    maintainRatio &&
-    css`
-      padding-top: calc(3 / 4 * 100%); /* 4:3 (standard) ratio */
-      position: relative;
-
-      @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.m}) {
-        padding-top: calc(9 / 32 * 100%); /* 32:9 (ultra widescreen) ratio */
-      }
-
-      @media only screen and (min-width: 1441px) and (min-height: 901px) {
-        padding-top: calc(9 / 21 * 100%); /* 21:9 (ultrawide) ratio */
-      }
-
-      .embPanel {
-        bottom: 0;
-        left: 0;
-        position: absolute;
-        right: 0;
-        top: 0;
-      }
-    `}
-`;
-
-const StyledEuiText = styled(EuiText)`
-  margin-right: 16px;
-`;
-
-const StyledEuiAccordion = styled(EuiAccordion)`
-  & .euiAccordion__triggerWrapper {
-    padding: 16px;
-  }
-`;
+);
 
 EmbeddableMapRatioHolder.displayName = 'EmbeddableMapRatioHolder';
-
-const EmbeddableMapWrapper = styled.div`
-  position: relative;
-`;
-
-const EmbeddableMap = styled.div`
-  height: 100%;
-  width: 100%;
-  position: absolute;
-  top: 0;
-`;
 
 export interface EmbeddedMapProps {
   query: Query;
@@ -187,12 +178,23 @@ export const EmbeddedMapComponent = ({
       <InPortal node={portalNode}>
         <MapToolTip />
       </InPortal>
-      <EmbeddableMapWrapper>
+      <div
+        css={css`
+          position: relative;
+        `}
+      >
         <EmbeddableMapRatioHolder maintainRatio={!isIndexError} />
         {isIndexError ? (
           <IndexPatternsMissingPrompt data-test-subj="missing-prompt" />
         ) : (
-          <EmbeddableMap>
+          <div
+            css={css`
+              height: 100%;
+              width: 100%;
+              position: absolute;
+              top: 0;
+            `}
+          >
             <services.maps.Map
               // eslint-disable-next-line react/display-name
               getTooltipRenderer={() => (tooltipProps: RenderTooltipContentParams) =>
@@ -211,14 +213,19 @@ export const EmbeddedMapComponent = ({
                 });
               }}
             />
-          </EmbeddableMap>
+          </div>
         )}
-      </EmbeddableMapWrapper>
+      </div>
     </Embeddable>
   );
 
   return isError ? null : (
-    <StyledEuiAccordion
+    <EuiAccordion
+      css={css`
+        & .euiAccordion__triggerWrapper {
+          padding: 16px;
+        }
+      `}
       data-test-subj="EmbeddedMapComponent"
       onToggle={setDefaultMapVisibility}
       id={'network-map'}
@@ -229,17 +236,22 @@ export const EmbeddedMapComponent = ({
       }}
       buttonContent={<strong>{i18n.EMBEDDABLE_HEADER_TITLE}</strong>}
       extraAction={
-        <StyledEuiText size="xs">
+        <EuiText
+          css={css`
+            margin-right: 16px;
+          `}
+          size="xs"
+        >
           <EuiLink href={`${services.docLinks.links.siem.networkMap}`} target="_blank">
             {i18n.EMBEDDABLE_HEADER_HELP}
           </EuiLink>
-        </StyledEuiText>
+        </EuiText>
       }
       paddingSize="none"
       initialIsOpen={storageValue}
     >
       {content}
-    </StyledEuiAccordion>
+    </EuiAccordion>
   );
 };
 

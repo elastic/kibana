@@ -8,12 +8,12 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { get, uniq } from 'lodash/fp';
 import React from 'react';
-import styled from 'styled-components';
 
 import { DefaultDraggable } from '../../../../common/components/draggables';
 
 import { CountryFlag } from './country_flag';
 import type { GeoFieldsProps, SourceDestinationType } from './types';
+import { css } from '@emotion/react';
 
 export const SOURCE_GEO_CONTINENT_NAME_FIELD_NAME = 'source.geo.continent_name';
 export const SOURCE_GEO_COUNTRY_NAME_FIELD_NAME = 'source.geo.country_name';
@@ -63,12 +63,6 @@ export const getGeoFieldPropNameToFieldNameMap = (
     fieldName: `${type}.${fieldName}`,
   }));
 
-const GeoFlexItem = styled(EuiFlexItem)`
-  margin-right: 5px;
-`;
-
-GeoFlexItem.displayName = 'GeoFlexItem';
-
 const GeoFieldValues = React.memo<{
   contextId: string;
   eventId: string;
@@ -79,7 +73,13 @@ const GeoFieldValues = React.memo<{
   values != null ? (
     <>
       {uniq(values).map((value) => (
-        <GeoFlexItem grow={false} key={`${contextId}-${eventId}-${fieldName}-${value}`}>
+        <EuiFlexItem
+          css={css`
+            margin-right: 5px;
+          `}
+          grow={false}
+          key={`${contextId}-${eventId}-${fieldName}-${value}`}
+        >
           <EuiFlexGroup alignItems="center" gutterSize="none">
             {fieldName === SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME ||
             fieldName === DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME ? (
@@ -99,7 +99,7 @@ const GeoFieldValues = React.memo<{
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </GeoFlexItem>
+        </EuiFlexItem>
       ))}
     </>
   ) : null

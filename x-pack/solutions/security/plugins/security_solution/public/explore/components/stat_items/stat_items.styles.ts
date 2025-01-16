@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
-export const Display = styled.div<{ show: boolean }>`
-  ${({ show }) => (show ? '' : 'display: none;')};
-`;
-
-Display.displayName = 'Display';
+export const useStyles = () => {
+  return {
+    item: css`
+      min-width: 0;
+      position: relative;
+    `,
+  };
+};

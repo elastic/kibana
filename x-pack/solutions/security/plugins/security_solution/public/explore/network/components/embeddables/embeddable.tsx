@@ -6,14 +6,9 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { PropsWithChildren } from 'react';
 import React from 'react';
-import styled from 'styled-components';
-
-const Panel = styled(EuiPanel)`
-  overflow: hidden;
-`;
-Panel.displayName = 'Panel';
 
 export interface EmbeddableProps {
   children: React.ReactNode;
@@ -21,9 +16,15 @@ export interface EmbeddableProps {
 
 export const Embeddable = React.memo<PropsWithChildren<EmbeddableProps>>(({ children }) => (
   <section className="siemEmbeddable" data-test-subj="siemEmbeddable">
-    <Panel paddingSize="none" hasBorder>
+    <EuiPanel
+      css={css`
+        overflow: hidden;
+      `}
+      paddingSize="none"
+      hasBorder
+    >
       {children}
-    </Panel>
+    </EuiPanel>
   </section>
 ));
 Embeddable.displayName = 'Embeddable';

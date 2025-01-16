@@ -6,10 +6,12 @@
  */
 
 import type {
-  EuiBasicTableProps,
   EuiGlobalToastListToast as Toast,
   EuiTableRowCellProps,
   EuiTitleSize,
+  EuiFlexItemProps,
+  EuiFlexGroupProps,
+  EuiBasicTableProps,
 } from '@elastic/eui';
 import {
   EuiBasicTable,
@@ -23,9 +25,8 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import type { FC, ComponentType } from 'react';
+import type { FC } from 'react';
 import React, { memo, useState, useMemo, useEffect, useCallback } from 'react';
-import styled from 'styled-components';
 
 import type { EntitiesListColumns } from '../../../entity_analytics/components/entity_store/hooks/use_entities_list_columns';
 import type { Direction } from '../../../../common/search_strategy';
@@ -56,6 +57,7 @@ import { InspectButtonContainer } from '../../../common/components/inspect';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import type { UsersTableColumns } from '../../users/components/all_users';
 import type { AuthTableColumns } from '../authentication/types';
+import { useStyles } from './index.styles';
 
 const DEFAULT_DATA_TEST_SUBJ = 'paginated-table';
 
@@ -177,6 +179,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
   const [myActivePage, setActivePage] = useState(activePage);
   const [loadingInitial, setLoadingInitial] = useState(headerCount === -1);
   const [isPopoverOpen, setPopoverOpen] = useState(false);
+  const styles = useStyles();
 
   const pageCount = Math.ceil(totalCount / limit);
   const dispatchToaster = useStateToaster()[1];
@@ -358,51 +361,39 @@ const PaginatedTableComponent: FC<SiemTables> = ({
 
 export const PaginatedTable = memo(PaginatedTableComponent);
 
-type BasicTableType = ComponentType<EuiBasicTableProps<any>>; // eslint-disable-line @typescript-eslint/no-explicit-any
-const BasicTable = styled(EuiBasicTable as BasicTableType)`
-  tbody {
-    th,
-    td {
-      vertical-align: top;
-    }
+// type BasicTableType = ComponentType<
+//   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//   EuiBasicTableProps<any> & {
+//     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//     columns: EuiBasicTableProps<any>['columns'];
+//     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//     onChange: EuiBasicTableProps<any>['onChange'];
+//   }
+// >;
 
-    .euiTableCellContent {
-      display: block;
-    }
-  }
-` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+const BasicTable = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  props: EuiBasicTableProps<any> & { onChange: any; columns: EuiBasicTableProps<any>['columns'] }
+) => {
+  const styles = useStyles();
 
-BasicTable.displayName = 'BasicTable';
+  return <EuiBasicTable css={styles.table} {...props} />;
+};
 
-const FooterAction = styled(EuiFlexGroup).attrs(() => ({
-  alignItems: 'center',
-  responsive: false,
-}))`
-  margin-top: ${({ theme }) => theme.eui.euiSizeXS};
-`;
+export const FooterAction = (props: EuiFlexGroupProps) => {
+  const styles = useStyles();
+
+  return (
+    <EuiFlexGroup alignItems="center" responsive={false} css={styles.footerAction} {...props} />
+  );
+};
 
 FooterAction.displayName = 'FooterAction';
 
-export const PaginationEuiFlexItem = styled(EuiFlexItem)`
-  @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.m}) {
-    .euiButtonIcon:last-child {
-      margin-left: 28px;
-    }
+export const PaginationEuiFlexItem = (props: EuiFlexItemProps) => {
+  const styles = useStyles();
 
-    .euiPagination {
-      position: relative;
-    }
-
-    .euiPagination::before {
-      bottom: 0;
-      color: ${({ theme }) => theme.eui.euiButtonColorDisabled};
-      content: '\\2026';
-      font-size: ${({ theme }) => theme.eui.euiFontSizeS};
-      padding: 5px ${({ theme }) => theme.eui.euiSizeS};
-      position: absolute;
-      right: ${({ theme }) => theme.eui.euiSizeL};
-    }
-  }
-` as typeof EuiFlexItem;
+  return <EuiFlexItem css={styles.pagination} {...props} />;
+};
 
 PaginationEuiFlexItem.displayName = 'PaginationEuiFlexItem';
