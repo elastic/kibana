@@ -12,12 +12,4 @@ export interface ConfigType {
   experimental: {
     forceSolutionVisibility: boolean;
   };
-  name?: string;
-  original?: string;
-  os?: {
-    name: string;
-    version?: string;
-    full?: string;
-  };
-  version?: string;
 }
