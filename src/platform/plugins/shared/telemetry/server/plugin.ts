@@ -101,7 +101,9 @@ export interface TelemetryPluginStart {
    * Pushes `true` when sending usage to Elastic is enabled.
    * Pushes `false` when the user explicitly opts out of sending usage data to Elastic.
    *
-   * Additionally, pushes the actual value on Kibana startup.
+   * Additionally, pushes the actual value on Kibana startup, except if the (previously opted-out) user
+   * haven't chosen yet to opt-in or out after a minor or major upgrade. In that case, pushing the new
+   * value waits until the user decides.
    *
    * @track-adoption
    */
