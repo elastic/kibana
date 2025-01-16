@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isMouseEvent } from './sensors';
+
 const MIN_SPEED = 50;
 const MAX_SPEED = 150;
 
@@ -53,13 +55,10 @@ export const stopAutoScroll = (scrollInterval?: { current: NodeJS.Timeout | null
   }
 };
 
-export const handleAutoscroll = (
-  scrollInterval: { current: NodeJS.Timeout | null },
-  pointerClientPixelY: number
-) => {
+export const handleAutoscroll = (e: Event, scrollInterval: { current: NodeJS.Timeout | null }) => {
+  if (!isMouseEvent(e)) return;
   // auto scroll when an event is happening close to the top or bottom of the screen
-  const heightPercentage =
-    100 - ((window.innerHeight - pointerClientPixelY) / window.innerHeight) * 100;
+  const heightPercentage = 100 - ((window.innerHeight - e.clientY) / window.innerHeight) * 100;
   const atTheTop = window.scrollY <= 0;
   const atTheBottom = window.innerHeight + window.scrollY >= document.body.scrollHeight;
 
