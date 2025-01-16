@@ -24,7 +24,7 @@ import { CodeSample } from '../shared/code_sample';
 import { generateSampleDocument } from '../../utils/document_generation';
 import { getDefaultCodingLanguage } from '../../utils/language';
 import { GuideSelector } from '../shared/guide_selector';
-import { useWorkflow } from '../shared/hooks/use_create_index_coding_examples';
+import { useWorkflow } from '../shared/hooks/use_workflow';
 import { WorkflowId } from '../../code_examples/workflows';
 
 export const basicExampleTexts = [
@@ -113,30 +113,18 @@ export const AddDocumentsCodeExample = ({
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem css={{ maxWidth: '300px' }} grow={false}>
-                <LanguageSelector
-                  options={LanguageOptions}
-                  selectedLanguage={selectedLanguage}
-                  onSelectLanguage={onSelectLanguage}
-                  showLabel
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <TryInConsoleButton
-                  request={
-                    !indexHasMappings
-                      ? `${ingestExamples.sense.updateMappingsCommand(
-                          codeParams
-                        )}\n\n${ingestExamples.sense.ingestCommand(codeParams)}`
-                      : ingestExamples.sense.ingestCommand(codeParams)
-                  }
-                  application={application}
-                  sharePlugin={share}
-                  consolePlugin={consolePlugin}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <TryInConsoleButton
+              request={
+                !indexHasMappings
+                  ? `${ingestExamples.sense.updateMappingsCommand(
+                      codeParams
+                    )}\n\n${ingestExamples.sense.ingestCommand(codeParams)}`
+                  : ingestExamples.sense.ingestCommand(codeParams)
+              }
+              application={application}
+              sharePlugin={share}
+              consolePlugin={consolePlugin}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
         {!!workflow && (
@@ -150,6 +138,14 @@ export const AddDocumentsCodeExample = ({
             </EuiText>
           </EuiFlexItem>
         )}
+        <EuiFlexItem css={{ maxWidth: '300px' }} grow={false}>
+          <LanguageSelector
+            options={LanguageOptions}
+            selectedLanguage={selectedLanguage}
+            onSelectLanguage={onSelectLanguage}
+            showLabel
+          />
+        </EuiFlexItem>
         {selectedCodeExamples.installCommand && (
           <EuiFlexItem>
             <CodeSample

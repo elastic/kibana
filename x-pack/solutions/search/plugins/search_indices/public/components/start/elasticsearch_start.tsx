@@ -24,7 +24,7 @@ import { CreateIndexPanel } from '../shared/create_index_panel';
 import { useKibana } from '../../hooks/use_kibana';
 import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
 import { WorkflowId } from '../../code_examples/workflows';
-import { useWorkflow } from '../shared/hooks/use_create_index_coding_examples';
+import { useWorkflow } from '../shared/hooks/use_workflow';
 
 function initCreateIndexState(): CreateIndexFormState {
   const defaultIndexName = generateRandomIndexName();
@@ -50,7 +50,7 @@ export const ElasticsearchStart: React.FC<ElasticsearchStartProps> = () => {
       : CreateIndexViewMode.UI
   );
   const usageTracker = useUsageTracker();
-  const { selectedWorkflowId, setSelectedWorkflowId } = useWorkflow();
+  const { workflow, setSelectedWorkflowId } = useWorkflow();
 
   useEffect(() => {
     usageTracker.load(AnalyticsEvents.startPageOpened);
@@ -124,7 +124,7 @@ export const ElasticsearchStart: React.FC<ElasticsearchStartProps> = () => {
               `${AnalyticsEvents.startCreateIndexWorkflowSelect}_${workflowId}`,
             ]);
           }}
-          selectedWorkflowId={selectedWorkflowId}
+          selectedWorkflow={workflow}
           canCreateApiKey={userPrivileges?.privileges.canCreateApiKeys}
           analyticsEvents={{
             runInConsole: AnalyticsEvents.startCreateIndexRunInConsole,

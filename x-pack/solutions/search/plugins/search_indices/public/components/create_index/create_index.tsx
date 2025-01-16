@@ -23,7 +23,7 @@ import { CreateIndexPanel } from '../shared/create_index_panel';
 import { CreateIndexCodeView } from './create_index_code_view';
 import { CreateIndexUIView } from './create_index_ui_view';
 import { WorkflowId } from '../../code_examples/workflows';
-import { useWorkflow } from '../shared/hooks/use_create_index_coding_examples';
+import { useWorkflow } from '../shared/hooks/use_workflow';
 
 function initCreateIndexState() {
   const defaultIndexName = generateRandomIndexName();
@@ -52,7 +52,7 @@ export const CreateIndex = ({ indicesData }: CreateIndexProps) => {
       ? CreateIndexViewMode.Code
       : CreateIndexViewMode.UI
   );
-  const { selectedWorkflowId, setSelectedWorkflowId } = useWorkflow();
+  const { workflow, setSelectedWorkflowId } = useWorkflow();
   const usageTracker = useUsageTracker();
   const onChangeView = useCallback(
     (id: string) => {
@@ -112,7 +112,7 @@ export const CreateIndex = ({ indicesData }: CreateIndexProps) => {
               `${AnalyticsEvents.startCreateIndexWorkflowSelect}_${workflowId}`,
             ]);
           }}
-          selectedWorkflowId={selectedWorkflowId}
+          selectedWorkflow={workflow}
           canCreateApiKey={userPrivileges?.privileges.canCreateApiKeys}
           analyticsEvents={{
             runInConsole: AnalyticsEvents.createIndexRunInConsole,
