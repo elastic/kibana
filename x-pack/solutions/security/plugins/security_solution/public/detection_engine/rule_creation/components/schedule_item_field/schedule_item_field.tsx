@@ -12,8 +12,9 @@ import {
   EuiFieldNumber,
   EuiFormRow,
   EuiSelect,
-  transparentize,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -47,26 +48,6 @@ const StyledLabelAppend = styled(EuiFlexItem)`
   }
 `;
 
-const StyledEuiFormRow = styled(EuiFormRow)`
-  max-width: none;
-
-  .euiFormControlLayout__append {
-    padding-inline: 0 !important;
-  }
-
-  .euiFormControlLayoutIcons {
-    color: ${({ theme }) => theme.eui.euiColorPrimary};
-  }
-`;
-
-const MyEuiSelect = styled(EuiSelect)`
-  min-width: 106px; // Preserve layout when disabled & dropdown arrow is not rendered
-  background: ${({ theme }) =>
-    transparentize(theme.eui.euiColorPrimary, 0.1)} !important; // Override focus states etc.
-  color: ${({ theme }) => theme.eui.euiColorPrimary};
-  box-shadow: none;
-`;
-
 const getNumberFromUserInput = (input: string, minimumValue = 0): number => {
   const number = parseInt(input, 10);
   if (Number.isNaN(number)) {
@@ -89,6 +70,25 @@ export const ScheduleItemField = ({
   const [timeVal, setTimeVal] = useState<number>(0);
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const { value, setValue } = field;
+
+  const { euiTheme } = useEuiTheme();
+  const durationFormRowStyles = css`
+    max-width: none;
+
+    .euiFormControlLayout__append {
+      padding-inline: 0 !important;
+    }
+
+    .euiFormControlLayoutIcons {
+      color: ${euiTheme.colors.primary};
+    }
+  `;
+  const durationUnitSelectStyles = css`
+    min-width: 106px; // Preserve layout when disabled & dropdown arrow is not rendered
+    box-shadow: none;
+    background: ${euiTheme.colors.backgroundBasePrimary} !important;
+    color: ${euiTheme.colors.primary};
+  `;
 
   const onChangeTimeType = useCallback<NonNullable<EuiSelectProps['onChange']>>(
     (e) => {
@@ -147,7 +147,8 @@ export const ScheduleItemField = ({
   );
 
   return (
-    <StyledEuiFormRow
+    <EuiFormRow
+      className={durationFormRowStyles}
       label={label}
       helpText={field.helpText}
       error={errorMessage}
@@ -158,7 +159,8 @@ export const ScheduleItemField = ({
     >
       <EuiFieldNumber
         append={
-          <MyEuiSelect
+          <EuiSelect
+            className={durationUnitSelectStyles}
             fullWidth
             options={timeTypeOptions.filter((type) => timeTypes.includes(type.value))}
             onChange={onChangeTimeType}
@@ -176,6 +178,6 @@ export const ScheduleItemField = ({
         data-test-subj="interval"
         {...rest}
       />
-    </StyledEuiFormRow>
+    </EuiFormRow>
   );
 };

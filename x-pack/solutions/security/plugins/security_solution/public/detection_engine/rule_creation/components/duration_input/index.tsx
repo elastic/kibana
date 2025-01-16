@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback } from 'react';
 import { css } from '@emotion/css';
-import { EuiFieldNumber, EuiFormRow, EuiSelect, transparentize, useEuiTheme } from '@elastic/eui';
+import { EuiFieldNumber, EuiFormRow, EuiSelect, useEuiTheme } from '@elastic/eui';
 import type { FieldHook } from '../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import * as I18n from './translations';
@@ -71,10 +71,7 @@ export const DurationInput = memo(function DurationInputComponent({
   const durationUnitSelectStyle = css`
     min-width: 106px; // Preserve layout when disabled & dropdown arrow is not rendered
     box-shadow: none;
-    background: ${transparentize(
-      euiTheme.colors.primary,
-      0.1
-    )} !important; // Override focus states etc.
+    background: ${euiTheme.colors.backgroundBasePrimary} !important;
     color: ${euiTheme.colors.primary};
   `;
   const durationInputStyle = css`
