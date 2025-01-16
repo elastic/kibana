@@ -87,6 +87,7 @@ export const SettingsApplicationProvider: FC<PropsWithChildren<SettingsApplicati
     isCustomSetting,
     isOverriddenSetting,
     addUrlToHistory,
+    getDataViewLink,
   } = services;
 
   return (
@@ -104,7 +105,15 @@ export const SettingsApplicationProvider: FC<PropsWithChildren<SettingsApplicati
       }}
     >
       <FormProvider
-        {...{ saveChanges, showError, validateChange, showReloadPagePrompt, links, showDanger }}
+        {...{
+          saveChanges,
+          showError,
+          validateChange,
+          showReloadPagePrompt,
+          links,
+          showDanger,
+          getDataViewLink,
+        }}
       >
         {children}
       </FormProvider>
@@ -129,6 +138,7 @@ export const SettingsApplicationKibanaProvider: FC<
     sectionRegistry,
     application,
     chrome,
+    http,
   } = dependencies;
   const { client, globalClient } = settings;
 
@@ -195,7 +205,9 @@ export const SettingsApplicationKibanaProvider: FC<
 
   return (
     <SettingsApplicationContext.Provider value={services}>
-      <FormKibanaProvider {...{ docLinks, notifications, userProfile, theme, i18n, settings }}>
+      <FormKibanaProvider
+        {...{ docLinks, notifications, userProfile, theme, i18n, settings, http }}
+      >
         {children}
       </FormKibanaProvider>
     </SettingsApplicationContext.Provider>

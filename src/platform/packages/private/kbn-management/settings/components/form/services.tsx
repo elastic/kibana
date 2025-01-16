@@ -46,7 +46,7 @@ export const FormKibanaProvider: FC<PropsWithChildren<FormKibanaDependencies>> =
   children,
   ...deps
 }) => {
-  const { settings, notifications, docLinks, ...startDeps } = deps;
+  const { settings, notifications, docLinks, http, ...startDeps } = deps;
 
   const services: Services = {
     saveChanges: (changes, scope: UiSettingsScope) => {
@@ -62,7 +62,7 @@ export const FormKibanaProvider: FC<PropsWithChildren<FormKibanaDependencies>> =
 
   return (
     <FormContext.Provider value={services}>
-      <FieldCategoryKibanaProvider {...{ docLinks, notifications, settings }}>
+      <FieldCategoryKibanaProvider {...{ docLinks, notifications, settings, http }}>
         {children}
       </FieldCategoryKibanaProvider>
     </FormContext.Provider>

@@ -30,10 +30,10 @@ export interface FieldRowProviderProps extends FieldRowServices {
 export const FieldRowProvider = ({ children, ...services }: FieldRowProviderProps) => {
   // Typescript types are widened to accept more than what is needed.  Take only what is necessary
   // so the context remains clean.
-  const { links, showDanger, validateChange } = services;
+  const { links, showDanger, validateChange, getDataViewLink } = services;
 
   return (
-    <FieldRowContext.Provider value={{ links }}>
+    <FieldRowContext.Provider value={{ links, getDataViewLink }}>
       <FieldInputProvider {...{ showDanger, validateChange }}>{children}</FieldInputProvider>
     </FieldRowContext.Provider>
   );
@@ -47,11 +47,13 @@ export const FieldRowKibanaProvider: FC<PropsWithChildren<FieldRowKibanaDependen
   docLinks,
   notifications,
   settings,
+  http,
 }) => {
   return (
     <FieldRowContext.Provider
       value={{
         links: docLinks.links.management,
+        getDataViewLink: http.basePath.prepend,
       }}
     >
       <FieldInputKibanaProvider {...{ notifications, settings }}>

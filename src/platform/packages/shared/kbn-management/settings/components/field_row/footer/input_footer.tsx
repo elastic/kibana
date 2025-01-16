@@ -15,10 +15,12 @@ import type {
   UnsavedFieldChange,
 } from '@kbn/management-settings-types';
 
+import { OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID } from '@kbn/management-settings-ids';
 import { InputResetLink } from './reset_link';
 import { ChangeImageLink } from './change_image_link';
 import { FieldOverriddenMessage } from './overridden_message';
 import { useInputFooterStyles } from './input_footer.styles';
+import { LogSourcesSettingCallout } from './log_sources_setting_callout';
 
 export const DATA_TEST_SUBJ_FOOTER_PREFIX = 'field-row-input-footer';
 
@@ -60,6 +62,9 @@ export const FieldInputFooter = <T extends SettingType>({
     return (
       <span css={footerCSS} data-test-subj={`${DATA_TEST_SUBJ_FOOTER_PREFIX}-${field.id}`}>
         <InputResetLink {...{ field, onReset, unsavedChange }} />
+        {field.id === OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID && unsavedChange && (
+          <LogSourcesSettingCallout />
+        )}
         <ChangeImageLink {...{ field, unsavedChange, onClear }} />
       </span>
     );

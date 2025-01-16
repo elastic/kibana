@@ -8,6 +8,7 @@
  */
 
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { HttpStart } from '@kbn/core/public';
 
 import type {
   FieldInputServices,
@@ -19,6 +20,7 @@ import type {
  */
 export interface Services {
   links: { [key: string]: string };
+  getDataViewLink: (url: string) => string;
 }
 
 /**
@@ -36,6 +38,7 @@ export interface KibanaDependencies {
       management: DocLinksStart['links']['management'];
     };
   };
+  http: HttpStart;
 }
 
 /**

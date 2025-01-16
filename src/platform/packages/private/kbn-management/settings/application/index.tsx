@@ -33,6 +33,7 @@ export const KibanaSettingsApplication = ({
   sectionRegistry,
   application,
   chrome,
+  http,
 }: SettingsApplicationKibanaDependencies) => (
   <SettingsApplicationKibanaProvider
     {...{
@@ -46,6 +47,7 @@ export const KibanaSettingsApplication = ({
       sectionRegistry,
       application,
       chrome,
+      http,
     }}
   >
     <SettingsApplication />
