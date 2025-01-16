@@ -48,6 +48,7 @@
     "@kbn/zod",
     "@kbn/tooling-log",
     "@kbn/ai-assistant-icon",
-    "@kbn/task-manager-plugin"
+    "@kbn/task-manager-plugin",
+    "@kbn/logging"
   ]
 }
