@@ -184,6 +184,7 @@
     "@kbn/elastic-assistant-common",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/lens-embeddable-utils",
+    "@kbn/esql",
     "@kbn/esql-utils",
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/core-ui-settings-server",
@@ -233,6 +234,7 @@
     "@kbn/ai-assistant-icon",
     "@kbn/llm-tasks-plugin",
     "@kbn/charts-theme",
-    "@kbn/product-doc-base-plugin"
+    "@kbn/product-doc-base-plugin",
+    "@kbn/shared-ux-error-boundary"
   ]
 }
