@@ -18,7 +18,6 @@ import { i18n } from '@kbn/i18n';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
 
 import { SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';
-import { SEARCH_INDICES_PATH } from './applications/enterprise_search_content/routes';
 
 export interface DynamicSideNavItems {
   collections?: Array<EuiSideNavItemType<unknown>>;
@@ -77,7 +76,7 @@ export const getNavigationTreeDefinition = ({
     id: 'es',
     navigationTree$: dynamicItems$.pipe(
       debounceTime(10),
-      map(({ indices, searchApps, collections }) => {
+      map(({ searchApps, collections }) => {
         const navTree: NavigationTreeDefinition = {
           body: [
             {
@@ -116,27 +115,16 @@ export const getNavigationTreeDefinition = ({
                 {
                   children: [
                     {
+                      breadcrumbStatus:
+                        'hidden' /* management sub-pages set their breadcrumbs themselves */,
                       getIsActive: ({ pathNameSerialized, prepend }) => {
-                        const someSubItemSelected = indices?.some((index) =>
-                          index.items?.some((item) => item.isSelected)
-                        );
-
-                        if (someSubItemSelected) return false;
-
                         return (
-                          pathNameSerialized ===
-                          prepend(`/app/elasticsearch/content${SEARCH_INDICES_PATH}`)
+                          pathNameSerialized.startsWith(
+                            prepend('/app/management/data/index_management/')
+                          ) || pathNameSerialized.startsWith(prepend('/app/elasticsearch/indices'))
                         );
                       },
-                      link: 'enterpriseSearchContent:searchIndices',
-                      renderAs: 'item',
-                      ...(indices
-                        ? {
-                            children: indices.map(euiItemTypeToNodeDefinition),
-                            isCollapsible: false,
-                            renderAs: 'accordion',
-                          }
-                        : {}),
+                      link: 'management:index_management',
                     },
                     { link: 'enterpriseSearchContent:connectors' },
                     { link: 'enterpriseSearchContent:webCrawlers' },

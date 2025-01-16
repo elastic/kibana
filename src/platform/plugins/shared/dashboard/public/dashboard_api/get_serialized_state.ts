@@ -21,8 +21,11 @@ import {
   embeddableService,
   savedObjectsTaggingService,
 } from '../services/kibana_services';
-import { LATEST_DASHBOARD_CONTAINER_VERSION } from '../dashboard_container';
 import { DashboardState } from './types';
+import { LATEST_VERSION } from '../../common/content_management';
+import { convertNumberToDashboardVersion } from '../services/dashboard_content_management_service/lib/dashboard_versioning';
+
+const LATEST_DASHBOARD_CONTAINER_VERSION = convertNumberToDashboardVersion(LATEST_VERSION);
 
 export const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
   if (moment(time).isValid()) {
