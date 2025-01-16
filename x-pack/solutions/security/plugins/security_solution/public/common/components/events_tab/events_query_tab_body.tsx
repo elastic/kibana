@@ -10,8 +10,8 @@ import { useDispatch } from 'react-redux';
 
 import { EuiCheckbox } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import { dataTableActions } from '@kbn/securitysolution-data-table';
 import type { TableId } from '@kbn/securitysolution-data-table';
+import { dataTableActions } from '@kbn/securitysolution-data-table';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import type { CustomBulkAction } from '../../../../common/types';
 import { RowRendererValues } from '../../../../common/api/timeline';
@@ -177,7 +177,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
         />
       )}
       <StatefulEventsViewer
-        additionalFilters={toggleExternalAlertsCheckbox}
+        topRightMenuOptions={toggleExternalAlertsCheckbox}
         cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
         start={startDate}
         end={endDate}
