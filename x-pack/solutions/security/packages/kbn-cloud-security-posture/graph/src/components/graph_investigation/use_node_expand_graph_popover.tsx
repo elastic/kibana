@@ -8,20 +8,66 @@
 import React, { memo, useCallback, useRef, useState } from 'react';
 import { useGraphPopover } from '../../..';
 import type { ExpandButtonClickCallback, NodeProps } from '../types';
-import { GraphNodeExpandPopover } from './graph_node_expand_popover';
+import {
+  ListGroupGraphPopover,
+  type ItemExpandPopoverListItemProps,
+  type SeparatorExpandPopoverListItemProps,
+} from './list_group_graph_popover';
+import type { PopoverActions, PopoverState } from '../graph/use_graph_popover';
 
-interface UseGraphNodeExpandPopoverArgs {
-  onExploreRelatedEntitiesClick: (node: NodeProps) => void;
-  onShowActionsByEntityClick: (node: NodeProps) => void;
-  onShowActionsOnEntityClick: (node: NodeProps) => void;
+interface UseNodeExpandGraphPopoverArgs {
+  /**
+   * The ID of the popover.
+   */
+  id: string;
+
+  /**
+   * The data-test-subj value for the popover.
+   */
+  testSubject: string;
+
+  /**
+   * Function to get the list of items to display in the popover.
+   * This function is called each time the popover is opened.
+   */
+  itemsFn?: (
+    node: NodeProps
+  ) => Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps>;
 }
 
-export const useGraphNodeExpandPopover = ({
-  onExploreRelatedEntitiesClick,
-  onShowActionsByEntityClick,
-  onShowActionsOnEntityClick,
-}: UseGraphNodeExpandPopoverArgs) => {
-  const { id, state, actions } = useGraphPopover('node-expand-popover');
+export interface UseNodeExpandGraphPopoverReturn {
+  /**
+   * The ID of the popover.
+   */
+  id: string;
+
+  /**
+   * Handler to open the popover when the node expand button is clicked.
+   */
+  onNodeExpandButtonClick: ExpandButtonClickCallback;
+
+  /**
+   * The component that renders the popover.
+   */
+  PopoverComponent: React.FC;
+
+  /**
+   * The popover actions and state.
+   */
+  actions: PopoverActions;
+
+  /**
+   * The popover state.
+   */
+  state: PopoverState;
+}
+
+export const useNodeExpandGraphPopover = ({
+  id,
+  testSubject,
+  itemsFn,
+}: UseNodeExpandGraphPopoverArgs): UseNodeExpandGraphPopoverReturn => {
+  const { state, actions } = useGraphPopover(id);
   const { openPopover, closePopover } = actions;
 
   const selectedNode = useRef<NodeProps | null>(null);
@@ -60,27 +106,40 @@ export const useGraphNodeExpandPopover = ({
     [closePopoverHandler]
   );
 
+  // Wrap the items function to add the onClick handler to the items and close the popover
+  const itemsFnWrapper = useCallback(() => {
+    const node = selectedNode.current;
+
+    if (!node) {
+      return [];
+    }
+
+    const items = itemsFn?.(node) || [];
+    return items.map((item) => {
+      if (item.type === 'item') {
+        return {
+          ...item,
+          onClick: () => {
+            item.onClick();
+            closePopoverHandler();
+          },
+        };
+      }
+
+      return item;
+    });
+  }, [closePopoverHandler, itemsFn]);
+
   // PopoverComponent is a memoized component that renders the GraphNodeExpandPopover
   // It handles the display of the popover and the actions that can be performed on the node
-
   // eslint-disable-next-line react/display-name
   const PopoverComponent = memo(() => (
-    <GraphNodeExpandPopover
+    <ListGroupGraphPopover
       isOpen={state.isOpen}
       anchorElement={state.anchorElement}
       closePopover={closePopoverHandler}
-      onShowRelatedEntitiesClick={() => {
-        onExploreRelatedEntitiesClick(selectedNode.current as NodeProps);
-        closePopoverHandler();
-      }}
-      onShowActionsByEntityClick={() => {
-        onShowActionsByEntityClick(selectedNode.current as NodeProps);
-        closePopoverHandler();
-      }}
-      onShowActionsOnEntityClick={() => {
-        onShowActionsOnEntityClick(selectedNode.current as NodeProps);
-        closePopoverHandler();
-      }}
+      itemsFn={itemsFnWrapper}
+      testSubject={testSubject}
     />
   ));
 
@@ -99,9 +158,9 @@ export const useGraphNodeExpandPopover = ({
   }
 
   return {
+    id,
     onNodeExpandButtonClick,
     PopoverComponent,
-    id,
     actions: {
       ...actions,
       closePopover: closePopoverHandler,
