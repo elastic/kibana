@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { SynonymsGetSynonymsSetsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 
 // TODO: pagination
-export const fetchSynonymSets = async (client: ElasticsearchClient) => {
+export const fetchSynonymSets = async (
+  client: ElasticsearchClient
+): Promise<SynonymsGetSynonymsSetsResponse> => {
   const result = await client.synonyms.getSynonymsSets();
   return result;
 };

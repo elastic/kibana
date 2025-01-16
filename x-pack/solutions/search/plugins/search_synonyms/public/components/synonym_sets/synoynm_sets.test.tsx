@@ -11,8 +11,21 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { SynonymSets } from './synonym_sets';
 
 describe('Search Synonym Sets list', () => {
+  const synonymsMock = {
+    count: 2,
+    results: [
+      {
+        synonyms_set: 'Synonyms Set 1',
+        count: 2,
+      },
+      {
+        synonyms_set: 'Synonyms Set 2',
+        count: 3,
+      },
+    ],
+  };
   it('should render the list with synonym sets', () => {
-    render(<SynonymSets />);
+    render(<SynonymSets synonyms={synonymsMock} />);
     const synonymSetTable = screen.getByTestId('synonyms-set-table');
     expect(synonymSetTable).toBeInTheDocument();
 
@@ -37,7 +50,7 @@ describe('Search Synonym Sets list', () => {
 
   describe('Synonym set item', () => {
     it('should have an action popover', async () => {
-      render(<SynonymSets />);
+      render(<SynonymSets synonyms={synonymsMock} />);
       const synonymSetItemActions = screen.getAllByTestId('synonyms-set-item-actions');
       act(() => {
         fireEvent.click(synonymSetItemActions[0]);

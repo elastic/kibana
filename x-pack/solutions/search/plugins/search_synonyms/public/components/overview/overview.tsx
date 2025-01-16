@@ -11,13 +11,13 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useKibana } from '../../hooks/use_kibana';
 import { SynonymSets } from '../synonym_sets/synonym_sets';
 import { useFetchSynonymsSets } from '../../hooks/use_fetch_synonyms_sets';
+import { EmptyPrompt } from '../empty_prompt/empty_prompt';
 
 export const SearchSynonymsOverview = () => {
   const {
     services: { console: consolePlugin, history, searchNavigation },
   } = useKibana();
-  const data = useFetchSynonymsSets();
-  console.log(data);
+  const { data: synonymsData, isInitialLoading } = useFetchSynonymsSets();
 
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
@@ -32,9 +32,13 @@ export const SearchSynonymsOverview = () => {
       solutionNav={searchNavigation?.useClassicNavigation(history)}
     >
       <KibanaPageTemplate.Section restrictWidth>
-        <SynonymSets />
+        {isInitialLoading && 'Loading...'}
+
+        {!isInitialLoading && synonymsData && synonymsData.count > 0 && (
+          <SynonymSets synonyms={synonymsData} />
+        )}
+        {!isInitialLoading && synonymsData && synonymsData.count === 0 && <EmptyPrompt />}
       </KibanaPageTemplate.Section>
-      {/* <EmptyPrompt /> */}
       {embeddableConsole}
     </KibanaPageTemplate>
   );
