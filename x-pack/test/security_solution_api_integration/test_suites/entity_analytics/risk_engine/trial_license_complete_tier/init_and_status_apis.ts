@@ -645,7 +645,7 @@ export default ({ getService }: FtrProviderContext) => {
             start: 'now-30d',
           },
           _meta: {
-            mappingsVersion: 2,
+            mappingsVersion: 3,
           },
         });
       });
