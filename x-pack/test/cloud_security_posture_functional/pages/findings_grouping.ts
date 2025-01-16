@@ -182,7 +182,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('groups findings by resource and sort by compliance score desc', async () => {
         const groupSelector = await findings.groupSelector();
         await groupSelector.openDropDown();
-        await groupSelector.setValue('Resource');
+        await groupSelector.setValue('Resource ID');
 
         const grouping = await findings.findingsGrouping();
 
@@ -414,7 +414,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await groupSelector.openDropDown();
         await groupSelector.setValue('None');
         await groupSelector.openDropDown();
-        await groupSelector.setValue('Resource');
+        await groupSelector.setValue('Resource ID');
 
         // Filter bar uses the field's customLabel in the DataView
         await filterBar.addFilter({ field: 'rule.name', operation: 'is', value: ruleName1 });
@@ -515,12 +515,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const groupSelector = await findings.groupSelector();
         await groupSelector.openDropDown();
-        await groupSelector.setValue('Resource');
+        await groupSelector.setValue('Resource ID');
 
         const grouping = await findings.findingsGrouping();
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be(`${resourceGroupCount + 1} resources`);
+        expect(groupCount).to.be(`${resourceGroupCount} resources`);
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be(`${findingsCount + 1} findings`);

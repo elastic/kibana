@@ -171,6 +171,7 @@ export const DEFAULT_GROUPING_TABLE_HEIGHT = 512;
 
 export const FINDINGS_GROUPING_OPTIONS = {
   NONE: 'none',
+  RESOURCE_ID: 'resource.id',
   RESOURCE_NAME: 'resource.name',
   RULE_NAME: 'rule.name',
   RULE_SECTION: 'rule.section',
