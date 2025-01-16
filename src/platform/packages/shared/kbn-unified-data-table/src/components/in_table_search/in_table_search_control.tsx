@@ -100,50 +100,60 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
   );
 
   return (
-    <EuiFieldSearch
-      compressed
-      isClearable
-      isLoading={isProcessing}
-      append={
-        Boolean(inputValue?.length) && !isProcessing ? (
-          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
-            {matchesCount > 0 ? (
-              <>
-                <EuiFlexItem grow={false}>{`${activeMatchPosition} / ${matchesCount}`}</EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    iconType="arrowUp"
-                    aria-label={i18n.translate(
-                      'unifiedDataTable.inTableSearch.buttonPreviousMatch',
-                      {
-                        defaultMessage: 'Previous match',
-                      }
-                    )}
-                    onClick={goToPrevMatch}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    iconType="arrowDown"
-                    aria-label={i18n.translate('unifiedDataTable.inTableSearch.buttonNextMatch', {
-                      defaultMessage: 'Next match',
-                    })}
-                    onClick={goToNextMatch}
-                  />
-                </EuiFlexItem>
-              </>
-            ) : (
-              <EuiFlexItem grow={false}>0</EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        ) : undefined
-      }
-      placeholder={i18n.translate('unifiedDataTable.inTableSearch.inputPlaceholder', {
-        defaultMessage: 'Find in the table',
-      })}
-      value={inputValue}
-      onChange={onInputChange}
-      onKeyUp={onKeyUp}
-    />
+    <div
+      css={css`
+        .euiFormControlLayout__append {
+          padding-inline-end: 0 !important;
+        }
+      `}
+    >
+      <EuiFieldSearch
+        compressed
+        isClearable
+        isLoading={isProcessing}
+        append={
+          Boolean(inputValue?.length) && !isProcessing ? (
+            <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
+              {matchesCount > 0 ? (
+                <>
+                  <EuiFlexItem
+                    grow={false}
+                  >{`${activeMatchPosition} / ${matchesCount}`}</EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      iconType="arrowUp"
+                      aria-label={i18n.translate(
+                        'unifiedDataTable.inTableSearch.buttonPreviousMatch',
+                        {
+                          defaultMessage: 'Previous match',
+                        }
+                      )}
+                      onClick={goToPrevMatch}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      iconType="arrowDown"
+                      aria-label={i18n.translate('unifiedDataTable.inTableSearch.buttonNextMatch', {
+                        defaultMessage: 'Next match',
+                      })}
+                      onClick={goToNextMatch}
+                    />
+                  </EuiFlexItem>
+                </>
+              ) : (
+                <EuiFlexItem grow={false}>0</EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          ) : undefined
+        }
+        placeholder={i18n.translate('unifiedDataTable.inTableSearch.inputPlaceholder', {
+          defaultMessage: 'Find in the table',
+        })}
+        value={inputValue}
+        onChange={onInputChange}
+        onKeyUp={onKeyUp}
+      />
+    </div>
   );
 };
