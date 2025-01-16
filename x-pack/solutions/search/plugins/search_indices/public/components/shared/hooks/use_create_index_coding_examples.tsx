@@ -40,7 +40,7 @@ const workflowIdToIngestDataExamples = (type: WorkflowId) => {
   }
 };
 
-export const useIndexExampleWorkflow = () => {
+export const useWorkflow = () => {
   // TODO: in the future this will be dynamic based on the onboarding token
   // or project sub-type
   const [selectedWorkflowId, setSelectedWorkflowId] = useState<WorkflowId>('semantic');

@@ -24,7 +24,8 @@ import { CodeSample } from '../shared/code_sample';
 import { generateSampleDocument } from '../../utils/document_generation';
 import { getDefaultCodingLanguage } from '../../utils/language';
 import { GuideSelector } from '../shared/guide_selector';
-import { useIndexExampleWorkflow } from '../shared/hooks/use_create_index_coding_examples';
+import { useWorkflow } from '../shared/hooks/use_create_index_coding_examples';
+import { WorkflowId } from '../../code_examples/workflows';
 
 export const basicExampleTexts = [
   'Yellowstone National Park',
@@ -49,16 +50,15 @@ export const AddDocumentsCodeExample = ({
 
   const [selectedLanguage, setSelectedLanguage] =
     useState<AvailableLanguages>(getDefaultCodingLanguage);
-  const { selectedWorkflowId, setSelectedWorkflowId, ingestExamples, workflow } =
-    useIndexExampleWorkflow();
+  const { selectedWorkflowId, setSelectedWorkflowId, ingestExamples, workflow } = useWorkflow();
   const selectedCodeExamples = ingestExamples[selectedLanguage];
   const codeSampleMappings = indexHasMappings ? mappingProperties : ingestExamples.defaultMapping;
   const onSelectLanguage = useCallback(
     (value: AvailableLanguages) => {
       setSelectedLanguage(value);
       usageTracker.count([
-        AnalyticsEvents.startCreateIndexLanguageSelect,
-        `${AnalyticsEvents.startCreateIndexLanguageSelect}_${value}`,
+        AnalyticsEvents.indexDetailsCodeLanguageSelect,
+        `${AnalyticsEvents.indexDetailsCodeLanguageSelect}_${value}`,
       ]);
     },
     [usageTracker]
@@ -102,7 +102,13 @@ export const AddDocumentsCodeExample = ({
             <EuiFlexItem css={{ maxWidth: '300px' }} grow={false}>
               <GuideSelector
                 selectedWorkflowId={selectedWorkflowId}
-                onChange={setSelectedWorkflowId}
+                onChange={(workflowId: WorkflowId) => {
+                  setSelectedWorkflowId(workflowId);
+                  usageTracker.click([
+                    AnalyticsEvents.indexDetailsCodeLanguageSelect,
+                    `${AnalyticsEvents.indexDetailsCodeLanguageSelect}_${workflowId}`,
+                  ]);
+                }}
               />
             </EuiFlexItem>
           )}

@@ -17,13 +17,17 @@ import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
 
 import { APIKeyCallout } from './api_key_callout';
 import { CodeSample } from './code_sample';
-import { useIndexExampleWorkflow } from './hooks/use_create_index_coding_examples';
+import { useWorkflow } from './hooks/use_create_index_coding_examples';
 import { LanguageSelector } from './language_selector';
+import { GuideSelector } from './guide_selector';
+import { WorkflowId } from '../../code_examples/workflows';
 
 export interface CreateIndexCodeViewProps {
   selectedLanguage: AvailableLanguages;
   indexName: string;
   changeCodingLanguage: (language: AvailableLanguages) => void;
+  changeWorkflowId: (workflowId: WorkflowId) => void;
+  selectedWorkflowId: WorkflowId;
   canCreateApiKey?: boolean;
   analyticsEvents: {
     runInConsole: string;
@@ -36,12 +40,14 @@ export const CreateIndexCodeView = ({
   analyticsEvents,
   canCreateApiKey,
   changeCodingLanguage,
+  changeWorkflowId,
+  selectedWorkflowId,
   indexName,
   selectedLanguage,
 }: CreateIndexCodeViewProps) => {
   const { application, share, console: consolePlugin } = useKibana().services;
   const usageTracker = useUsageTracker();
-  const { createIndexExamples: selectedCodeExamples } = useIndexExampleWorkflow();
+  const { createIndexExamples: selectedCodeExamples } = useWorkflow();
 
   const elasticsearchUrl = useElasticsearchUrl();
   const { apiKey } = useSearchApiKey();
@@ -65,6 +71,9 @@ export const CreateIndexCodeView = ({
         </EuiFlexItem>
       )}
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem>
+          <GuideSelector selectedWorkflowId={selectedWorkflowId} onChange={changeWorkflowId} />
+        </EuiFlexItem>
         <EuiFlexItem css={{ maxWidth: '300px' }}>
           <LanguageSelector
             options={LanguageOptions}
