@@ -114,7 +114,7 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
       <RowHeightSettings
         rowHeight={rowHeight}
         label={i18n.translate('unifiedDataTable.rowHeightLabel', {
-          defaultMessage: 'Max body cell lines',
+          defaultMessage: 'Body cell lines',
         })}
         onChangeRowHeight={onChangeRowHeight}
         onChangeRowHeightLines={onChangeRowHeightLines}

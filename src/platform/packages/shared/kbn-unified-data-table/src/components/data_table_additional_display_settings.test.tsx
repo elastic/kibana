@@ -264,12 +264,12 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
         onChangeRowHeight: jest.fn(),
         onChangeRowHeightLines: jest.fn(),
       });
-      expect(screen.getByLabelText('Max body cell lines')).toBeInTheDocument();
+      expect(screen.getByLabelText('Body cell lines')).toBeInTheDocument();
     });
 
     it('should not render rowHeight if onChangeRowHeight and onChangeRowHeightLines are undefined', () => {
       renderDisplaySettings();
-      expect(screen.queryByLabelText('Max body cell lines')).not.toBeInTheDocument();
+      expect(screen.queryByLabelText('Body cell lines')).not.toBeInTheDocument();
     });
 
     it('should call onChangeRowHeight and onChangeRowHeightLines when the rowHeight changes', async () => {

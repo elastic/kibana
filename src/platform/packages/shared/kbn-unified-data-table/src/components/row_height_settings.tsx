@@ -79,6 +79,11 @@ export function RowHeightSettings({
             onChange={(optionId) => {
               const newMode = optionId.replace(idPrefix, '') as RowHeightSettingsProps['rowHeight'];
               onChangeRowHeight(newMode);
+
+              // When switching back to custom mode, trigger the callback with current line count
+              if (newMode === RowHeightMode.custom) {
+                onChangeRowHeightLines(lineCountInput);
+              }
             }}
             data-test-subj={`${dataTestSubj}_rowHeightButtonGroup`}
           />

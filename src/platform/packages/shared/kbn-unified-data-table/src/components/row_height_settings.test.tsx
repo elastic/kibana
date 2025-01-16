@@ -21,13 +21,11 @@ const renderRowHeightSettings = ({
 } = {}) => {
   const Wrapper = () => {
     const [rowHeight, setRowHeight] = useState<RowHeightSettingsProps['rowHeight']>();
-    const [_, setRowHeightLines] = useState<number>();
     const [lineCount, setLineCount] = useState<number>(3);
 
     const onChange = (value: number) => {
       setLineCount(value);
       onChangeRowHeightLines?.(value);
-      setRowHeightLines(value);
     };
 
     return (
@@ -112,6 +110,9 @@ describe('RowHeightSettings', () => {
     expect(fieldNumber).toHaveValue(10);
 
     await userEvent.click(screen.getByRole('button', { name: 'Auto' }));
+
+    onChangeRowHeightLines.mockClear();
+
     await userEvent.click(screen.getByRole('button', { name: 'Custom' }));
 
     expect(onChangeRowHeightLines).toHaveBeenCalledWith(Number(fieldNumber.value));

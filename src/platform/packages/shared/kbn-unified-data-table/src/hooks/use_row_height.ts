@@ -138,9 +138,9 @@ export const useRowHeight = ({
 
   useEffect(() => {
     if (rowHeight === RowHeightMode.custom) {
-      setLineCountInput(rowHeightState && rowHeightState > 0 ? rowHeightState : configRowHeight);
+      setLineCountInput(rowHeightLines > 0 ? rowHeightLines : configRowHeight);
     }
-  }, [rowHeightState, configRowHeight, rowHeight]);
+  }, [rowHeightLines, configRowHeight, rowHeight]);
 
   return {
     rowHeight,

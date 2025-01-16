@@ -119,7 +119,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
         <RowHeightSettings
           rowHeight={state.rowHeight ?? DEFAULT_ROW_HEIGHT}
           label={i18n.translate('xpack.lens.table.visualOptionsFitRowToContentLabel', {
-            defaultMessage: 'Max body cell lines',
+            defaultMessage: 'Body cell lines',
           })}
           onChangeRowHeight={(mode) =>
             onChangeHeight(mode, 'rowHeight', ROW_HEIGHT_LINES_KEYS.rowHeightLines)
