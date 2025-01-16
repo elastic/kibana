@@ -46,7 +46,17 @@ export const useFindGapsForRule = (
   options?: UseQueryOptions<FindGapsResponseBody>
 ) => {
   return useQuery<FindGapsResponseBody>(
-    [FIND_GAPS_FOR_RULE, ruleId, page, perPage, statuses?.join(','), sortField, sortOrder],
+    [
+      FIND_GAPS_FOR_RULE,
+      ruleId,
+      page,
+      perPage,
+      statuses?.join(','),
+      sortField,
+      sortOrder,
+      start,
+      end,
+    ],
     async ({ signal }) => {
       const response = await findGapsForRule({
         signal,

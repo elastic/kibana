@@ -26,7 +26,7 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
-import { IEventLogService } from '@kbn/event-log-plugin/server';
+import { IEventLogClientService, IEventLogService } from '@kbn/event-log-plugin/server';
 import { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
@@ -52,7 +52,7 @@ export interface FixtureStartDeps {
   spaces?: SpacesPluginStart;
   actions: ActionsPluginStart;
   taskManager: TaskManagerStartContract;
-  eventLog: IEventLogService;
+  eventLog: IEventLogClientService;
   notifications: NotificationsPluginStart;
   elasticsearch: ElasticsearchClient;
 }

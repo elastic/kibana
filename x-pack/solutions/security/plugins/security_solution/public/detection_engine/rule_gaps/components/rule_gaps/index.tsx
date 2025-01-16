@@ -7,7 +7,7 @@
 
 import styled from '@emotion/styled';
 import React, { useCallback, useState } from 'react';
-
+import moment from 'moment';
 import type {
   CriteriaWithPagination,
   EuiBasicTableColumn,
@@ -32,7 +32,7 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { TableHeaderTooltipCell } from '../../../rule_management_ui/components/rules_table/table_header_tooltip_cell';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useKibana } from '../../../../common/lib/kibana';
-import { getFormattedDuration } from '../../../rule_details_ui/pages/rule_details/execution_log_table/rule_duration_format';
+import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import * as i18n from './translations';
 import type { Gap, GapStatus } from '../../types';
 import { getStatusLabel } from './utils';
@@ -130,7 +130,9 @@ const getGapsTableColumns = (hasCRUDPermissions: boolean, ruleId: string, enable
       name: (
         <TableHeaderTooltipCell title={i18n.GAPS_TABLE_GAP_DURATION_TOOLTIP} tooltipContent={''} />
       ),
-      render: (value: Gap['total_gap_duration_ms']) => <>{getFormattedDuration(value)}</>,
+      render: (value: Gap['total_gap_duration_ms']) => (
+        <> {value != null ? moment.duration(value, 'ms').humanize() : getEmptyTagValue()}</>
+      ),
       width: '10%',
     },
   ];

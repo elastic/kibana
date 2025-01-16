@@ -25,7 +25,7 @@ import type {
   PatchRuleRequestBody,
 } from '../../../../common/api/detection_engine/rule_management';
 import { FindRulesSortField } from '../../../../common/api/detection_engine/rule_management';
-
+import type { GapRangeValue } from '../../rule_gaps/constants';
 export interface CreateRulesProps {
   rule: RuleCreateProps;
   signal?: AbortSignal;
@@ -101,8 +101,7 @@ export interface FilterOptions {
   ruleExecutionStatus?: RuleExecutionStatus; // undefined means "all"
   ruleSource?: RuleCustomizationEnum[]; // undefined is to display all the rules
   ruleIds?: string[];
-  searchGapsStart?: string;
-  searchGapsEnd?: string;
+  gapSearchRange: GapRangeValue;
 }
 
 export interface FetchRulesResponse {

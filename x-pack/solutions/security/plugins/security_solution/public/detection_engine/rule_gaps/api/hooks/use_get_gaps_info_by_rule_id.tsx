@@ -4,27 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { GetGapsInfoByRuleIdsResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/get_rules_with_gaps';
+import type { GetGapsInfoByRuleIdsResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/get_gaps_info_by_rule_ids';
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import { getGapsInfoByRuleIds } from '../api';
-
+import type { GapRangeValue } from '../../constants';
+import { getGapRange } from './utils';
 const GET_GAPS_INFO_BY_RULE_IDS = ['GET_GAPS_INFO_BY_RULE_IDS'];
 export const useGetGapsInfoByRuleIds = (
   {
-    start,
-    end,
+    gapRange,
     ruleIds,
   }: {
-    start: string;
-    end: string;
+    gapRange: GapRangeValue;
     ruleIds: string[];
   },
   options?: UseQueryOptions<GetGapsInfoByRuleIdsResponseBody>
 ) => {
   return useQuery<GetGapsInfoByRuleIdsResponseBody>(
-    [...GET_GAPS_INFO_BY_RULE_IDS, ...ruleIds, start, end],
+    [...GET_GAPS_INFO_BY_RULE_IDS, ...ruleIds, gapRange],
     async ({ signal }) => {
+      const { start, end } = getGapRange(gapRange);
       const response = await getGapsInfoByRuleIds({ signal, start, end, ruleIds });
 
       return response;

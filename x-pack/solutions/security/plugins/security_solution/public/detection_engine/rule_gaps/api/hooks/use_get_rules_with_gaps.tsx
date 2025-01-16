@@ -8,22 +8,25 @@ import type { GetRulesWithGapResponseBody } from '@kbn/alerting-plugin/common/ro
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import { getRulesWithGaps } from '../api';
+import type { GapRangeValue } from '../../constants';
+import { getGapRange } from './utils';
 
 const GET_RULES_WITH_GAPS = ['GET_RULES_WITH_GAPS'];
 export const useGetRulesWithGaps = (
   {
-    start,
-    end,
+    gapRange,
+    statuses,
   }: {
-    start: string;
-    end: string;
+    gapRange: GapRangeValue;
+    statuses: string[];
   },
   options?: UseQueryOptions<GetRulesWithGapResponseBody>
 ) => {
   return useQuery<GetRulesWithGapResponseBody>(
-    [GET_RULES_WITH_GAPS, start, end],
+    [GET_RULES_WITH_GAPS, gapRange, ...statuses],
     async ({ signal }) => {
-      const response = await getRulesWithGaps({ signal, start, end });
+      const { start, end } = getGapRange(gapRange);
+      const response = await getRulesWithGaps({ signal, start, end, statuses });
 
       return response;
     },

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import {
   EuiButton,
@@ -20,34 +20,26 @@ import {
   EuiFilterGroup,
 } from '@elastic/eui';
 
+import { gapStatus } from '@kbn/alerting-plugin/common';
 import { useRulesTableContext } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import * as i18n from './translations';
 import { useGetRulesWithGaps } from '../../api/hooks/use_get_rules_with_gaps';
-
-enum RangeValue {
-  LAST_24_H = 'last_24_h',
-  LAST_3_D = 'last_3_d',
-  LAST_7_D = 'last_7_d',
-}
-
-const defaultRangeValue = RangeValue.LAST_24_H;
+import { defaultRangeValue, GapRangeValue } from '../../constants';
 
 export const RulesWithGapsOverviewPanel = () => {
-  const [rangeValue, setRangeValue] = useState(defaultRangeValue);
   const [showRulesWithGaps, setShowRulesWithGaps] = useState(false);
   const {
     state: {
-      filterOptions: { searchGapsStart, searchGapsEnd },
+      filterOptions: { gapSearchRange },
     },
     actions: { setFilterOptions },
   } = useRulesTableContext();
   const { data } = useGetRulesWithGaps(
     {
-      start: searchGapsStart ?? '',
-      end: searchGapsEnd ?? '',
+      gapRange: gapSearchRange,
+      statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
     },
     {
-      enabled: Boolean(searchGapsStart) && Boolean(searchGapsEnd),
       onSuccess: (result) => {
         if (showRulesWithGaps) {
           setFilterOptions({
@@ -60,36 +52,10 @@ export const RulesWithGapsOverviewPanel = () => {
   const [isPopoverOpen, setPopover] = useState(false);
 
   const rangeValueToLabel = {
-    [RangeValue.LAST_24_H]: i18n.RULE_GAPS_OVERVIEW_PANEL_LAST_24_HOURS_LABEL,
-    [RangeValue.LAST_3_D]: i18n.RULE_GAPS_OVERVIEW_PANEL_LAST_3_DAYS_LABEL,
-    [RangeValue.LAST_7_D]: i18n.RULE_GAPS_OVERVIEW_PANEL_LAST_7_DAYS_LABEL,
+    [GapRangeValue.LAST_24_H]: i18n.RULE_GAPS_OVERVIEW_PANEL_LAST_24_HOURS_LABEL,
+    [GapRangeValue.LAST_3_D]: i18n.RULE_GAPS_OVERVIEW_PANEL_LAST_3_DAYS_LABEL,
+    [GapRangeValue.LAST_7_D]: i18n.RULE_GAPS_OVERVIEW_PANEL_LAST_7_DAYS_LABEL,
   };
-
-  useEffect(() => {
-    if (rangeValue) {
-      const now = new Date();
-      const dayMs = 24 * 60 * 60 * 1000;
-      let amountOfDays = 1;
-      switch (rangeValue) {
-        case RangeValue.LAST_24_H:
-          amountOfDays = 1;
-          break;
-        case RangeValue.LAST_3_D:
-          amountOfDays = 3;
-          break;
-        case RangeValue.LAST_7_D:
-          amountOfDays = 7;
-          break;
-      }
-
-      const start = new Date(now.getTime() - amountOfDays * dayMs).toISOString();
-      const end = now.toISOString();
-      setFilterOptions({
-        searchGapsStart: start,
-        searchGapsEnd: end,
-      });
-    }
-  }, [rangeValue, setFilterOptions]);
 
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
@@ -99,14 +65,14 @@ export const RulesWithGapsOverviewPanel = () => {
     setPopover(false);
   };
 
-  const items = Object.values(RangeValue).map((value) => ({
+  const items = Object.values(GapRangeValue).map((value) => ({
     value,
     label: rangeValueToLabel[value],
   }));
 
   const button = (
     <EuiButton iconType="arrowDown" iconSide="right" onClick={onButtonClick}>
-      {rangeValueToLabel[rangeValue]}
+      {rangeValueToLabel[gapSearchRange ?? defaultRangeValue]}
     </EuiButton>
   );
 
@@ -147,7 +113,9 @@ export const RulesWithGapsOverviewPanel = () => {
                 <EuiContextMenuItem
                   key={item.value}
                   onClick={() => {
-                    setRangeValue(item.value);
+                    setFilterOptions({
+                      gapSearchRange: item.value,
+                    });
                     closePopover();
                   }}
                 >

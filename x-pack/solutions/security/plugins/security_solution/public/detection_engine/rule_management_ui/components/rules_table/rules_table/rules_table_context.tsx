@@ -39,6 +39,7 @@ import {
 } from './rules_table_defaults';
 import { RuleSource } from './rules_table_saved_state';
 import { useRulesTableSavedState } from './use_rules_table_saved_state';
+import { defaultRangeValue } from '../../../../rule_gaps/constants';
 
 interface RulesSnoozeSettings {
   /**
@@ -187,9 +188,6 @@ interface RulesTableContextProviderProps {
   children: React.ReactNode;
 }
 
-const start = new Date(new Date().setDate(new Date().getDate() - 1)).toISOString();
-const end = new Date().toISOString();
-
 export const RulesTableContextProvider = ({ children }: RulesTableContextProviderProps) => {
   const [autoRefreshSettings] = useUiSetting$<{
     on: boolean;
@@ -214,8 +212,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     ruleExecutionStatus:
       savedFilter?.ruleExecutionStatus ?? DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
     ruleIds: [],
-    searchGapsStart: '',
-    searchGapsEnd: '',
+    gapSearchRange: defaultRangeValue,
   });
 
   const [sortingOptions, setSortingOptions] = useState<SortingOptions>({
@@ -260,6 +257,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       tags: DEFAULT_FILTER_OPTIONS.tags,
       enabled: undefined,
       ruleExecutionStatus: DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
+      gapSearchRange: defaultRangeValue,
     });
     setSortingOptions({
       field: DEFAULT_SORTING_OPTIONS.field,
@@ -323,23 +321,13 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     { enabled: rules.length > 0 }
   );
 
-  const {
-    data: rulesGapInfoByRuleIds,
-    isLoading: isGapInfoLoading,
-    isFetching: isGapInfoFetching,
-    isError: isGapInfoFetchError,
-    refetch: refetchGapInfo,
-  } = useGetGapsInfoByRuleIds(
+  const { data: rulesGapInfoByRuleIds, refetch: refetchGapInfo } = useGetGapsInfoByRuleIds(
     {
       ruleIds: rules.map((x) => x.id),
-      start: filterOptions.searchGapsStart,
-      end: filterOptions.searchGapsEnd,
+      gapRange: filterOptions.gapSearchRange,
     },
     {
-      enabled:
-        rules.length > 0 &&
-        Boolean(filterOptions.searchGapsStart) &&
-        Boolean(filterOptions.searchGapsEnd),
+      enabled: rules.length > 0,
     }
   );
 
