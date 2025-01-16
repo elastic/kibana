@@ -85,6 +85,7 @@ describe('createChatCompleteApi', () => {
       connectorId: 'connectorId',
       messages: [{ role: MessageRole.User, content: 'question' }],
       temperature: 0.7,
+      modelName: 'gpt-4o',
     });
 
     expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(1);
@@ -93,6 +94,7 @@ describe('createChatCompleteApi', () => {
       executor: inferenceExecutor,
       logger,
       temperature: 0.7,
+      modelName: 'gpt-4o',
     });
   });
 
