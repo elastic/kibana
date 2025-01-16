@@ -18,7 +18,7 @@ import {
   Replacements,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { prunedContentReferences } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store';
+import { prunedContentReferences } from '@kbn/elastic-assistant-common';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import { buildResponse } from '../lib/build_response';

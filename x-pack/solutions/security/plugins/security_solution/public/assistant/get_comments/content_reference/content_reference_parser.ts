@@ -6,7 +6,7 @@
  */
 
 import type { RemarkTokenizer } from '@elastic/eui';
-import type { ContentReferenceBlock } from '@kbn/elastic-assistant-common/impl/content_references/types';
+import type { ContentReferenceBlock } from '@kbn/elastic-assistant-common';
 import type { Plugin } from 'unified';
 import type { Node } from 'unist';
 

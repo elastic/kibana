@@ -6,7 +6,7 @@ import { ContentReferenceId } from "../types";
  * @param id id of the contentReference
  * @returns AlertsCountReference
  */
-export const alertsCountReferenceFactory = (id: string): SecurityAlertsPageContentReference => {
+export const alertsPageReferenceFactory = (id: string): SecurityAlertsPageContentReference => {
   return {
     type: 'SecurityAlertsPage',
     id,

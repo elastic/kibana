@@ -10,8 +10,7 @@ import { DynamicStructuredTool } from '@langchain/core/tools';
 import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { SECURITY_LABS_RESOURCE } from '@kbn/elastic-assistant-plugin/server/routes/knowledge_base/constants';
-import { knowledgeBaseReferenceFactory } from '@kbn/elastic-assistant-common';
-import { contentReferenceString } from '@kbn/elastic-assistant-common/impl/content_references';
+import { knowledgeBaseReferenceFactory, contentReferenceString } from '@kbn/elastic-assistant-common';
 import { APP_UI_ID } from '../../../../common';
 
 const toolDetails = {

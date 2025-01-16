@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-export { contentReferencesStoreFactory } from './content_references_store';
+export { contentReferencesStoreFactory, prunedContentReferences } from './content_references_store';
 export {
   alertReferenceFactory,
   knowledgeBaseReferenceFactory,
+  alertsPageReferenceFactory,
+  productDocumentationReferenceFactory
 } from './references';
-export { contentReferenceString, contentReferenceBlock } from './references/utils'
+export { contentReferenceString, contentReferenceBlock, removeContentReferences } from './references/utils'

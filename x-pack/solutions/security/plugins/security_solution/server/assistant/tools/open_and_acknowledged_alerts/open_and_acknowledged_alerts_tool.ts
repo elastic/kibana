@@ -19,7 +19,7 @@ import { DynamicStructuredTool } from '@langchain/core/tools';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import { contentReferenceBlock } from '@kbn/elastic-assistant-common/impl/content_references';
+import { contentReferenceBlock } from '@kbn/elastic-assistant-common';
 import { APP_UI_ID } from '../../../../common';
 
 export interface OpenAndAcknowledgedAlertsToolParams extends AssistantToolParams {

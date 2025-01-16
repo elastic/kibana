@@ -7,12 +7,12 @@
 
 import { RunnableConfig } from '@langchain/core/runnables';
 import { AgentRunnableSequence } from 'langchain/dist/agents/agent';
-import { removeContentReferences } from '@kbn/elastic-assistant-common/impl/content_references/references';
 import { BaseMessage } from '@langchain/core/messages';
 import { formatLatestUserMessage } from '../prompts';
 import { AgentState, NodeParamsBase } from '../types';
 import { NodeType } from '../constants';
 import { AIAssistantKnowledgeBaseDataClient } from '../../../../../ai_assistant_data_clients/knowledge_base';
+import { removeContentReferences } from '@kbn/elastic-assistant-common';
 
 export interface RunAgentParams extends NodeParamsBase {
   state: AgentState;

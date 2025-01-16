@@ -10,9 +10,7 @@ import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import type { AIAssistantKnowledgeBaseDataClient } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/knowledge_base';
 import { Document } from 'langchain/document';
-import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
-import { knowledgeBaseReferenceFactory } from '@kbn/elastic-assistant-common';
-import { contentReferenceBlock } from '@kbn/elastic-assistant-common/impl/content_references';
+import { knowledgeBaseReferenceFactory, contentReferenceBlock, ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import { APP_UI_ID } from '../../../../common';
 
 export interface KnowledgeBaseRetrievalToolParams extends AssistantToolParams {

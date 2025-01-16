@@ -24,11 +24,19 @@ export {
 
 export {
   contentReferencesStoreFactory,
+
   alertReferenceFactory,
   knowledgeBaseReferenceFactory,
+  alertsPageReferenceFactory,
+  productDocumentationReferenceFactory,
+  
+  contentReferenceString,
+  contentReferenceBlock,
+  removeContentReferences,
+  prunedContentReferences,
 } from './impl/content_references';
 
-export type { ContentReferencesStore } from './impl/content_references/types';
+export type { ContentReferencesStore, ContentReferenceBlock } from './impl/content_references/types';
 
 export { transformRawData } from './impl/data_anonymization/transform_raw_data';
 export { parseBedrockBuffer, handleBedrockChunk } from './impl/utils/bedrock';

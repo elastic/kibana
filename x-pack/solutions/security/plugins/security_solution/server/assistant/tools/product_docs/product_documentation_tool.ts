@@ -12,7 +12,7 @@ import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-
 import {
   contentReferenceBlock,
   productDocumentationReferenceFactory,
-} from '@kbn/elastic-assistant-common/impl/content_references/references';
+} from '@kbn/elastic-assistant-common';
 import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import type { RetrievedDocument } from '@kbn/llm-tasks-plugin/server/tasks/retrieve_documentation/types';
 import { APP_UI_ID } from '../../../../common';
