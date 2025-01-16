@@ -5,13 +5,8 @@
  * 2.0.
  */
 import { filter, lastValueFrom, of, throwError, toArray } from 'rxjs';
-import {
-  ChatCompletionChunkEvent,
-  Message,
-  MessageRole,
-  StreamingChatResponseEventType,
-} from '../../../../common';
-import { ChatEvent } from '../../../../common/conversation_complete';
+import { ChatCompleteResponse } from '@kbn/inference-common';
+import { Message, MessageRole, StreamingChatResponseEventType } from '../../../../common';
 import { LangTracer } from '../instrumentation/lang_tracer';
 import { TITLE_CONVERSATION_FUNCTION_NAME, getGeneratedTitle } from './get_generated_title';
 
@@ -26,19 +21,7 @@ describe('getGeneratedTitle', () => {
     },
   ];
 
-  function createChatCompletionChunk(
-    content: string | { content?: string; function_call?: { name: string; arguments: string } }
-  ): ChatCompletionChunkEvent {
-    const msg = typeof content === 'string' ? { content } : content;
-
-    return {
-      type: StreamingChatResponseEventType.ChatCompletionChunk,
-      id: 'id',
-      message: msg,
-    };
-  }
-
-  function callGenerateTitle(...rest: [ChatEvent[]] | [{}, ChatEvent[]]) {
+  function callGenerateTitle(...rest: [ChatCompleteResponse[]] | [{}, ChatCompleteResponse[]]) {
     const options = rest.length === 1 ? {} : rest[0];
     const chunks = rest.length === 1 ? rest[0] : rest[1];
 
@@ -60,14 +43,22 @@ describe('getGeneratedTitle', () => {
     return { chatSpy, title$ };
   }
 
-  it('returns the given title as a string', async () => {
+  it('', async () => {
     const { title$ } = callGenerateTitle([
-      createChatCompletionChunk({
-        function_call: {
-          name: 'title_conversation',
-          arguments: JSON.stringify({ title: 'My title' }),
-        },
-      }),
+      {
+        content: '',
+        toolCalls: [
+          {
+            toolCallId: 'test_id',
+            function: {
+              name: 'title_conversation',
+              arguments: {
+                title: 'My title',
+              },
+            },
+          },
+        ],
+      },
     ]);
 
     const title = await lastValueFrom(
@@ -76,15 +67,22 @@ describe('getGeneratedTitle', () => {
 
     expect(title).toEqual('My title');
   });
-
   it('calls chat with the user message', async () => {
     const { chatSpy, title$ } = callGenerateTitle([
-      createChatCompletionChunk({
-        function_call: {
-          name: TITLE_CONVERSATION_FUNCTION_NAME,
-          arguments: JSON.stringify({ title: 'My title' }),
-        },
-      }),
+      {
+        content: '',
+        toolCalls: [
+          {
+            toolCallId: 'test_id',
+            function: {
+              name: TITLE_CONVERSATION_FUNCTION_NAME,
+              arguments: {
+                title: 'My title',
+              },
+            },
+          },
+        ],
+      },
     ]);
 
     await lastValueFrom(title$);
@@ -99,12 +97,20 @@ describe('getGeneratedTitle', () => {
   it('strips quotes from the title', async () => {
     async function testTitle(title: string) {
       const { title$ } = callGenerateTitle([
-        createChatCompletionChunk({
-          function_call: {
-            name: 'title_conversation',
-            arguments: JSON.stringify({ title }),
-          },
-        }),
+        {
+          content: '',
+          toolCalls: [
+            {
+              toolCallId: 'test_id',
+              function: {
+                name: 'title_conversation',
+                arguments: {
+                  title,
+                },
+              },
+            },
+          ],
+        },
       ]);
 
       return await lastValueFrom(
@@ -117,37 +123,21 @@ describe('getGeneratedTitle', () => {
     expect(await testTitle(`"User's request for a title"`)).toEqual(`User's request for a title`);
   });
 
-  it('handles partial updates', async () => {
-    const { title$ } = callGenerateTitle([
-      createChatCompletionChunk({
-        function_call: {
-          name: 'title_conversation',
-          arguments: '',
-        },
-      }),
-      createChatCompletionChunk({
-        function_call: {
-          name: '',
-          arguments: JSON.stringify({ title: 'My title' }),
-        },
-      }),
-    ]);
-
-    const title = await lastValueFrom(title$);
-
-    expect(title).toEqual('My title');
-  });
-
   it('ignores token count events and still passes them through', async () => {
     const { title$ } = callGenerateTitle([
-      createChatCompletionChunk({
-        function_call: {
-          name: 'title_conversation',
-          arguments: JSON.stringify({ title: 'My title' }),
-        },
-      }),
       {
-        type: StreamingChatResponseEventType.TokenCount,
+        content: '',
+        toolCalls: [
+          {
+            toolCallId: 'test_id',
+            function: {
+              name: 'title_conversation',
+              arguments: {
+                title: 'My title',
+              },
+            },
+          },
+        ],
         tokens: {
           completion: 10,
           prompt: 10,
