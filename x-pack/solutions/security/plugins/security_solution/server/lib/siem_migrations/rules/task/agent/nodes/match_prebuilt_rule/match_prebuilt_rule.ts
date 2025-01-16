@@ -7,7 +7,11 @@
 
 import type { Logger } from '@kbn/core/server';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import { RuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
+import {
+  DEFAULT_TRANSLATION_RISK_SCORE,
+  DEFAULT_TRANSLATION_SEVERITY,
+  RuleTranslationResult,
+} from '../../../../../../../../common/siem_migrations/constants';
 import type { RuleMigrationsRetriever } from '../../../retrievers';
 import type { ChatModel } from '../../../util/actions_client_chat';
 import type { GraphNode } from '../../types';
@@ -77,8 +81,8 @@ export const getMatchPrebuiltRuleNode = ({
             prebuilt_rule_id: matchedRule.rule_id,
             id: matchedRule.current?.id,
             integration_ids: matchedRule.target?.related_integrations?.map((i) => i.package),
-            severity: matchedRule.target?.severity,
-            risk_score: matchedRule.target?.risk_score,
+            severity: matchedRule.target?.severity ?? DEFAULT_TRANSLATION_SEVERITY,
+            risk_score: matchedRule.target?.risk_score ?? DEFAULT_TRANSLATION_RISK_SCORE,
           },
           translation_result: RuleTranslationResult.FULL,
         };
