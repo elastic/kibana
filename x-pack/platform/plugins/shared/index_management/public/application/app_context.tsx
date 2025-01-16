@@ -19,6 +19,7 @@ import {
   HttpSetup,
   IUiSettingsClient,
   OverlayStart,
+  ChromeStart,
 } from '@kbn/core/public';
 import type { MlPluginStart } from '@kbn/ml-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -43,6 +44,7 @@ export interface AppDependencies {
     http: HttpSetup;
     i18n: I18nStart;
     theme: ThemeServiceStart;
+    chrome: ChromeStart;
   };
   plugins: {
     usageCollection: UsageCollectionSetup;

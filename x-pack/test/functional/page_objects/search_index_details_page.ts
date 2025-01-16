@@ -13,12 +13,24 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
   const browser = getService('browser');
   const retry = getService('retry');
 
+  const expectIndexDetailPageHeader = async function () {
+    await testSubjects.existOrFail('searchIndexDetailsHeader', { timeout: 2000 });
+  };
+  const expectSearchIndexDetailsTabsExists = async function () {
+    await testSubjects.existOrFail('dataTab');
+    await testSubjects.existOrFail('mappingsTab');
+    await testSubjects.existOrFail('settingsTab');
+  };
+
   return {
-    async expectIndexDetailPageHeader() {
-      await testSubjects.existOrFail('searchIndexDetailsHeader', { timeout: 2000 });
-    },
+    expectIndexDetailPageHeader,
+    expectSearchIndexDetailsTabsExists,
     async expectAPIReferenceDocLinkExists() {
       await testSubjects.existOrFail('ApiReferenceDoc', { timeout: 2000 });
+    },
+    async expectIndexDetailsPageIsLoaded() {
+      await expectIndexDetailPageHeader();
+      await expectSearchIndexDetailsTabsExists();
     },
     async expectActionItemReplacedWhenHasDocs() {
       await testSubjects.missingOrFail('ApiReferenceDoc', { timeout: 2000 });
@@ -269,11 +281,6 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
       await retry.waitFor('index details page title to show up', async () => {
         return (await testSubjects.isDisplayed('searchIndexDetailsHeader')) === true;
       });
-    },
-    async expectSearchIndexDetailsTabsExists() {
-      await testSubjects.existOrFail('dataTab');
-      await testSubjects.existOrFail('mappingsTab');
-      await testSubjects.existOrFail('settingsTab');
     },
 
     async expectBreadcrumbNavigationWithIndexName(indexName: string) {
