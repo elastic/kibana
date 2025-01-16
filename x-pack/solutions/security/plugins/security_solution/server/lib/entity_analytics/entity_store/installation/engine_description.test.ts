@@ -534,8 +534,20 @@ describe('getUnitedEntityDefinition', () => {
             "service.node.name": Object {
               "type": "keyword",
             },
+            "service.node.role": Object {
+              "type": "keyword",
+            },
             "service.node.roles": Object {
               "type": "keyword",
+            },
+            "service.risk.calculated_level": Object {
+              "type": "keyword",
+            },
+            "service.risk.calculated_score": Object {
+              "type": "float",
+            },
+            "service.risk.calculated_score_norm": Object {
+              "type": "float",
             },
             "service.state": Object {
               "type": "keyword",
@@ -662,6 +674,56 @@ describe('getUnitedEntityDefinition', () => {
               },
               "destination": "service.version",
               "source": "service.version",
+            },
+            Object {
+              "aggregation": Object {
+                "sort": Object {
+                  "@timestamp": "asc",
+                },
+                "type": "top_value",
+              },
+              "destination": "entity.source",
+              "source": "_index",
+            },
+            Object {
+              "aggregation": Object {
+                "sort": Object {
+                  "@timestamp": "desc",
+                },
+                "type": "top_value",
+              },
+              "destination": "asset.criticality",
+              "source": "asset.criticality",
+            },
+            Object {
+              "aggregation": Object {
+                "sort": Object {
+                  "@timestamp": "desc",
+                },
+                "type": "top_value",
+              },
+              "destination": "service.risk.calculated_level",
+              "source": "service.risk.calculated_level",
+            },
+            Object {
+              "aggregation": Object {
+                "sort": Object {
+                  "@timestamp": "desc",
+                },
+                "type": "top_value",
+              },
+              "destination": "service.risk.calculated_score",
+              "source": "service.risk.calculated_score",
+            },
+            Object {
+              "aggregation": Object {
+                "sort": Object {
+                  "@timestamp": "desc",
+                },
+                "type": "top_value",
+              },
+              "destination": "service.risk.calculated_score_norm",
+              "source": "service.risk.calculated_score_norm",
             },
           ],
           "name": "Security 'service' Entity Store Definition",
