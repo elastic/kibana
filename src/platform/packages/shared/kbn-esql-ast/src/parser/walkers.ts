@@ -94,10 +94,8 @@ import {
   ESQLAstField,
   ESQLInlineCast,
   ESQLOrderExpression,
-  ESQLBinaryExpression,
 } from '../types';
 import { firstItem, lastItem } from '../visitor/utils';
-import { Builder } from '../builder';
 
 export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstItem[] {
   const fromContexts = ctx.getTypedRuleContexts(IndexPatternContext);
