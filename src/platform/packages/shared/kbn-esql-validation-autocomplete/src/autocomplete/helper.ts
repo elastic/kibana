@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ESQLAstItem,
-  ESQLCommand,
-  ESQLFunction,
-  ESQLLiteral,
-  ESQLSource,
+import {
+  isIdentifier,
+  type ESQLAstItem,
+  type ESQLCommand,
+  type ESQLFunction,
+  type ESQLLiteral,
+  type ESQLSource,
 } from '@kbn/esql-ast';
 import { uniqBy } from 'lodash';
 import {
@@ -30,7 +31,6 @@ import {
   isAssignment,
   isColumnItem,
   isFunctionItem,
-  isIdentifier,
   isLiteralItem,
   isTimeIntervalItem,
 } from '../shared/helpers';

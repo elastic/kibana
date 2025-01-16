@@ -21,6 +21,72 @@
     "functions": [
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.getAncestors",
+        "type": "Function",
+        "tags": [],
+        "label": "getAncestors",
+        "description": [],
+        "signature": [
+          "(id: string) => string[]"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/hierarchy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.getAncestors.$1",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/hierarchy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.getParentId",
+        "type": "Function",
+        "tags": [],
+        "label": "getParentId",
+        "description": [],
+        "signature": [
+          "(id: string) => string | undefined"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/hierarchy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.getParentId.$1",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/hierarchy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.getProcessorType",
         "type": "Function",
         "tags": [],
@@ -103,6 +169,54 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.isChildOf",
+        "type": "Function",
+        "tags": [],
+        "label": "isChildOf",
+        "description": [],
+        "signature": [
+          "(parent: string, child: string) => boolean"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/hierarchy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.isChildOf.$1",
+            "type": "string",
+            "tags": [],
+            "label": "parent",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/hierarchy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.isChildOf.$2",
+            "type": "string",
+            "tags": [],
+            "label": "child",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/hierarchy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.isCompleteCondition",
         "type": "Function",
         "tags": [],
@@ -143,6 +257,54 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.isDescendantOf",
+        "type": "Function",
+        "tags": [],
+        "label": "isDescendantOf",
+        "description": [],
+        "signature": [
+          "(parent: string, child: string) => boolean"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/hierarchy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.isDescendantOf.$1",
+            "type": "string",
+            "tags": [],
+            "label": "parent",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/hierarchy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.isDescendantOf.$2",
+            "type": "string",
+            "tags": [],
+            "label": "child",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/hierarchy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -468,6 +630,39 @@
               "any"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.isRoot",
+        "type": "Function",
+        "tags": [],
+        "label": "isRoot",
+        "description": [],
+        "signature": [
+          "(id: string) => boolean"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/hierarchy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.isRoot.$1",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/hierarchy.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

@@ -229,17 +229,14 @@ export function FieldControlForm({
           label={i18n.translate('esql.flyout.values.label', {
             defaultMessage: 'Values',
           })}
-          helpText={i18n.translate('esql.flyout.values.multipleValuesDropdownLabel', {
-            defaultMessage: 'Select multiple values',
-          })}
           fullWidth
         >
           <EuiComboBox
             aria-label={i18n.translate('esql.flyout.fieldsOptions.placeholder', {
-              defaultMessage: 'Select the fields options',
+              defaultMessage: 'Select or add values',
             })}
             placeholder={i18n.translate('esql.flyout.fieldsOptions.placeholder', {
-              defaultMessage: 'Select the fields options',
+              defaultMessage: 'Select or add values',
             })}
             options={availableFieldsOptions}
             selectedOptions={selectedFields}

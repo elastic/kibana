@@ -17,6 +17,7 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { esqlVariablesService, type EsqlVariablesService } from '@kbn/esql-variables/common';
+import type { EsqlPluginStart } from './plugin';
 
 export let core: CoreStart;
 
@@ -30,6 +31,7 @@ interface ServiceDeps {
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
   esqlService?: EsqlVariablesService;
+  esql: EsqlPluginStart;
 }
 
 const servicesReady$ = new BehaviorSubject<ServiceDeps | undefined>(undefined);
@@ -46,6 +48,7 @@ export const untilPluginStartServicesReady = () => {
 };
 
 export const setKibanaServices = (
+  esql: EsqlPluginStart,
   kibanaCore: CoreStart,
   dataViews: DataViewsPublicPluginStart,
   expressions: ExpressionsStart,
@@ -66,5 +69,6 @@ export const setKibanaServices = (
     fieldsMetadata,
     usageCollection,
     esqlService: esqlVariablesService,
+    esql,
   });
 };

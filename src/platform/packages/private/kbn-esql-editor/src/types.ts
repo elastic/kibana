@@ -88,6 +88,20 @@ interface EsqlVariablesService {
   areSuggestionsEnabled: boolean;
 }
 
+export interface JoinIndicesAutocompleteResult {
+  indices: JoinIndexAutocompleteItem[];
+}
+
+export interface JoinIndexAutocompleteItem {
+  name: string;
+  mode: 'lookup' | string;
+  aliases: string[];
+}
+
+export interface EsqlPluginStartBase {
+  getJoinIndicesAutocomplete: () => Promise<JoinIndicesAutocompleteResult>;
+}
+
 export interface ESQLEditorDeps {
   core: CoreStart;
   dataViews: DataViewsPublicPluginStart;
@@ -98,4 +112,5 @@ export interface ESQLEditorDeps {
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
   esqlService: EsqlVariablesService;
+  esql?: EsqlPluginStartBase;
 }

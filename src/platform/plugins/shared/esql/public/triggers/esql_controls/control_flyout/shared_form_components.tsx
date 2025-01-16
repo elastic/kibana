@@ -36,7 +36,7 @@ import { TooltipWrapper } from './tooltip_wrapper';
 const controlTypeOptions = [
   {
     label: i18n.translate('esql.flyout.controlTypeOptions.staticValuesLabel', {
-      defaultMessage: 'Static Values',
+      defaultMessage: 'Static values',
     }),
     'data-test-subj': 'staticValues',
     key: EsqlControlType.STATIC_VALUES,
@@ -148,7 +148,7 @@ export function VariableName({
   onVariableNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
   const genericContent = i18n.translate('esql.flyout.variableName.helpText', {
-    defaultMessage: 'This name will be prefaced with an "?" in the editor',
+    defaultMessage: 'This name will be prefaced with a "?" in the editor',
   });
   const isDisabledTooltipText = i18n.translate('esql.flyout.variableName.disabledTooltip', {
     defaultMessage: 'You can’t edit a control name after it’s been created.',
@@ -159,7 +159,7 @@ export function VariableName({
         defaultMessage: 'Name',
       })}
       helpText={i18n.translate('esql.flyout.variableName.helpText', {
-        defaultMessage: 'This name will be prefaced with an "?" in the editor',
+        defaultMessage: 'This name will be prefaced with n "?" in the editor',
       })}
       fullWidth
       autoFocus
@@ -254,13 +254,13 @@ export function ControlWidth({
     <>
       <EuiFormRow
         label={i18n.translate('esql.flyout.minimumWidth.label', {
-          defaultMessage: 'Minimum Width',
+          defaultMessage: 'Minimum width',
         })}
         fullWidth
       >
         <EuiButtonGroup
           legend={i18n.translate('esql.flyout.minimumWidth.label', {
-            defaultMessage: 'Minimum Width',
+            defaultMessage: 'Minimum width',
           })}
           options={minimumWidthButtonGroup}
           idSelected={minimumWidth}

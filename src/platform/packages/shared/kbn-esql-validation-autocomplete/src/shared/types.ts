@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLRealField } from '../validation/types';
+import type { ESQLRealField, JoinIndexAutocompleteItem } from '../validation/types';
 
 /** @internal **/
 type CallbackFn<Options = {}, Result = string> = (ctx?: Options) => Result[] | Promise<Result[]>;
@@ -60,6 +60,7 @@ export interface ESQLCallbacks {
   getFieldsMetadata?: Promise<PartialFieldsMetadataClient>;
   getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[];
   canSuggestVariables?: () => boolean;
+  getJoinIndices?: () => Promise<{ indices: JoinIndexAutocompleteItem[] }>;
 }
 
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';

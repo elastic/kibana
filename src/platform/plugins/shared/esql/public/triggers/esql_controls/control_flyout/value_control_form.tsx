@@ -434,10 +434,10 @@ export function ValueControlForm({
           >
             <EuiComboBox
               aria-label={i18n.translate('esql.flyout.values.placeholder', {
-                defaultMessage: 'Select the options or add a new one',
+                defaultMessage: 'Select or add values',
               })}
               placeholder={i18n.translate('esql.flyout.values.placeholder', {
-                defaultMessage: 'Select the options or add a new one',
+                defaultMessage: 'Select or add values',
               })}
               data-test-subj="esqlValuesOptions"
               options={availableValuesOptions}
