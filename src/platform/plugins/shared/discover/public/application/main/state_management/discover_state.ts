@@ -374,13 +374,22 @@ export function getDiscoverStateContainer({
     const currentSpace = await services.spaces?.getActiveSpace();
     const sessionKey = `discover:session:dataRequirements:${currentUser.profile_uid}:${currentSpace?.id}`;
     const sessionValue = sessionStorage.getItem(sessionKey);
+    const sessionValueParsed = JSON.parse(sessionValue || '{}') as DiscoverStateDataRequirements;
+    const useSessionValue =
+      sessionValue &&
+      sessionValueParsed &&
+      sessionValueParsed.hasUserDataViewValue &&
+      sessionValueParsed.hasESDataValue &&
+      sessionValueParsed.defaultDataViewExists;
 
-    if (sessionValue) {
-      const sessionValueParsed = JSON.parse(sessionValue || '{}');
+    if (useSessionValue) {
+      // just use the value stored in the session if data/dataviews are available
       if (sessionValueParsed.dataViewList) {
         internalStateContainer.transitions.setSavedDataViews(sessionValueParsed.dataViewList);
       }
+      // refresh the values in the background
       loadDataRequirementsHelper(sessionKey);
+      // return the value in browser session
       return sessionValueParsed;
     }
     return loadDataRequirementsHelper(sessionKey);

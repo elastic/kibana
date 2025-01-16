@@ -22,8 +22,21 @@ import {
 } from '../../customizations/customization_service';
 import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
 import { mockCustomizationContext } from '../../customizations/__mocks__/customization_context';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
 
 let mockCustomizationService: DiscoverCustomizationService | undefined;
+
+// mock browser session storage
+const sessionStorage = {
+  value: {
+    getItem: jest.fn(),
+    setItem: jest.fn(),
+    removeItem: jest.fn(),
+  },
+  writable: true,
+  configurable: true,
+};
+Object.defineProperty(window, 'sessionStorage', sessionStorage);
 
 jest.mock('../../customizations', () => {
   const originalModule = jest.requireActual('../../customizations');
@@ -159,5 +172,9 @@ function getServicesMock(hasESData = true, hasUserDataView = true) {
     hasDataView: jest.fn(() => Promise.resolve(true)),
   };
   discoverServiceMock.core.http.get = jest.fn().mockResolvedValue({});
+  discoverServiceMock.core.security.authc.getCurrentUser = jest.fn().mockResolvedValue('test');
+  discoverServiceMock.spaces = {
+    getActiveSpace: jest.fn().mockResolvedValue('test'),
+  } as unknown as SpacesApi;
   return discoverServiceMock;
 }

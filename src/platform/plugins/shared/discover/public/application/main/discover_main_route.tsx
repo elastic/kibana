@@ -22,6 +22,7 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
+import { NoDataViewError } from './state_management/utils/load_saved_search';
 import { useUrl } from './hooks/use_url';
 import { useDiscoverStateContainer } from './hooks/use_discover_state_container';
 import { MainHistoryLocationState } from '../../../common';
@@ -187,7 +188,16 @@ export function DiscoverMainRoute({
           });
         }
       } catch (e) {
-        if (e instanceof SavedObjectNotFound) {
+        if (e instanceof NoDataViewError) {
+          const { hasUserDataViewValue, hasESDataValue } =
+            await stateContainer.actions.loadDataRequirements();
+
+          setNoDataState({
+            showNoDataPage: true,
+            hasESData: Boolean(hasESDataValue),
+            hasUserDataView: Boolean(hasUserDataViewValue),
+          });
+        } else if (e instanceof SavedObjectNotFound) {
           redirectWhenMissing({
             history,
             navigateToApp: core.application.navigateToApp,

@@ -38,6 +38,12 @@ interface LoadSavedSearchDeps {
   setDataView: DiscoverStateContainer['actions']['setDataView'];
 }
 
+export class NoDataViewError extends Error {
+  constructor() {
+    super('No data view found');
+  }
+}
+
 /**
  * Loading persisted saved searches or existing ones and updating services accordingly
  * @param params
@@ -69,15 +75,16 @@ export const loadSavedSearch = async (
     const dataViewId = isDataSourceType(appState?.dataSource, DataSourceType.DataView)
       ? appState?.dataSource.dataViewId
       : undefined;
-
-    nextSavedSearch = await savedSearchContainer.new(
-      await getStateDataView(params, {
-        dataViewId,
-        query: appState?.query,
-        services,
-        internalStateContainer,
-      })
-    );
+    const nextDataView = await getStateDataView(params, {
+      dataViewId,
+      query: appState?.query,
+      services,
+      internalStateContainer,
+    });
+    if (!nextDataView) {
+      throw new NoDataViewError();
+    }
+    nextSavedSearch = await savedSearchContainer.new(nextDataView);
   }
 
   // Cleaning up the previous state
@@ -112,6 +119,9 @@ export const loadSavedSearch = async (
         services,
         internalStateContainer,
       });
+      if (!stateDataView) {
+        throw new NoDataViewError();
+      }
       const dataViewDifferentToAppState = stateDataView.id !== savedSearchDataViewId;
       if (
         !nextSavedSearch.isTextBasedQuery &&
