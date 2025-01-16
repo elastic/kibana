@@ -404,15 +404,11 @@ export function Insight({
       </>
     );
   } else if (isEditingPrompt) {
-    const instructionToEdit = getPromptToEdit();
+    const promptToEdit = getPromptToEdit();
 
-    if (messages.status === FETCH_STATUS.SUCCESS && instructionToEdit) {
+    if (messages.status === FETCH_STATUS.SUCCESS && promptToEdit) {
       children = (
-        <PromptEdit
-          initialPrompt={instructionToEdit}
-          onSend={onEditPrompt}
-          onCancel={handleCancel}
-        />
+        <PromptEdit initialPrompt={promptToEdit} onSend={onEditPrompt} onCancel={handleCancel} />
       );
     } else {
       children = <EuiLoadingSpinner size="m" />;
