@@ -2313,10 +2313,10 @@
     apache-arrow "^18.0.0"
     tslib "^2.4.0"
 
-"@elastic/ems-client@8.6.2":
-  version "8.6.2"
-  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-8.6.2.tgz#cdca0a063756391705492f1d301a33a314464d8e"
-  integrity sha512-bhbR6BmrA5pNEDI/ais9V3612KPimx6NLacViOc1QpRw9oNGfQPRQVSOwd7IXzCn2eJKgBJoTWBgJGu6sjvZ4g==
+"@elastic/ems-client@8.6.3":
+  version "8.6.3"
+  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-8.6.3.tgz#9c5e29645516380c3550a33f2567456d38115b9f"
+  integrity sha512-ha8vsuT+AVsIThErXRNe3s8wwZCGI4EzJIbeXeFZoMcnD/x3t3DTOWwfSH1ov9RpDXKj5e8i4GkbvGDgPaLooQ==
   dependencies:
     "@types/geojson" "7946.0.15"
     "@types/topojson-client" "3.1.5"
