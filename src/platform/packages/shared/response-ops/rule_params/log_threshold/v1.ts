@@ -8,7 +8,11 @@
  */
 
 import * as rt from 'io-ts';
-import { persistedLogViewReferenceRT } from '@kbn/logs-shared-plugin/common';
+
+const persistedLogViewReferenceRT = rt.type({
+  logViewId: rt.string,
+  type: rt.literal('log-view-reference'),
+});
 
 // Comparators //
 export enum Comparator {
