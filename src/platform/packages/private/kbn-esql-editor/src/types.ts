@@ -71,6 +71,20 @@ export interface ESQLEditorProps {
   disableAutoFocus?: boolean;
 }
 
+export interface JoinIndicesAutocompleteResult {
+  indices: JoinIndexAutocompleteItem[];
+}
+
+export interface JoinIndexAutocompleteItem {
+  name: string;
+  mode: 'lookup' | string;
+  aliases: string[];
+}
+
+export interface EsqlPluginStartBase {
+  getJoinIndicesAutocomplete: () => Promise<JoinIndicesAutocompleteResult>;
+}
+
 export interface ESQLEditorDeps {
   core: CoreStart;
   dataViews: DataViewsPublicPluginStart;
@@ -79,4 +93,5 @@ export interface ESQLEditorDeps {
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
+  esql?: EsqlPluginStartBase;
 }
