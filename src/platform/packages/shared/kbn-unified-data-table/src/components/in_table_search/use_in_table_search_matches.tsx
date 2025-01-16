@@ -117,10 +117,12 @@ export const useInTableSearchMatches = (
 
   const goToPrevMatch = useCallback(() => {
     setActiveMatchPosition((prev) => {
+      let nextMatchPosition = prev - 1;
+
       if (prev - 1 < 1) {
-        return prev;
+        nextMatchPosition = matchesCount; // allow to circle though matches endlessly
       }
-      const nextMatchPosition = prev - 1;
+
       scrollToMatch({
         matchPosition: nextMatchPosition,
         activeMatchesList: matchesList,
@@ -129,14 +131,16 @@ export const useInTableSearchMatches = (
       });
       return nextMatchPosition;
     });
-  }, [setActiveMatchPosition, scrollToMatch, matchesList, visibleColumns]);
+  }, [setActiveMatchPosition, scrollToMatch, matchesList, visibleColumns, matchesCount]);
 
   const goToNextMatch = useCallback(() => {
     setActiveMatchPosition((prev) => {
+      let nextMatchPosition = prev + 1;
+
       if (prev + 1 > matchesCount) {
-        return prev;
+        nextMatchPosition = 1; // allow to circle though matches endlessly
       }
-      const nextMatchPosition = prev + 1;
+
       scrollToMatch({
         matchPosition: nextMatchPosition,
         activeMatchesList: matchesList,

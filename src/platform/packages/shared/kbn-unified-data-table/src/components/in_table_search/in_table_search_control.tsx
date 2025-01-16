@@ -119,7 +119,6 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
                         defaultMessage: 'Previous match',
                       }
                     )}
-                    disabled={activeMatchPosition <= 1}
                     onClick={goToPrevMatch}
                   />
                 </EuiFlexItem>
@@ -129,7 +128,6 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
                     aria-label={i18n.translate('unifiedDataTable.inTableSearch.buttonNextMatch', {
                       defaultMessage: 'Next match',
                     })}
-                    disabled={activeMatchPosition >= matchesCount}
                     onClick={goToNextMatch}
                   />
                 </EuiFlexItem>
