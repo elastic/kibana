@@ -188,7 +188,7 @@ const TriggersActionsUiExampleApp = ({
             render={() => (
               <Page title="Rule Create">
                 <RuleForm
-                  plugins={{
+                  services={{
                     http,
                     application,
                     notifications,
@@ -212,7 +212,7 @@ const TriggersActionsUiExampleApp = ({
             render={() => (
               <Page title="Rule Edit">
                 <RuleForm
-                  plugins={{
+                  services={{
                     http,
                     application,
                     notifications,
