@@ -30,14 +30,15 @@ import { SHOW_SEARCH_BAR_BUTTON_TOUR_STORAGE_KEY } from '../../common/constants'
 const toggleSearchBarTourTitle = i18n.translate(
   'securitySolutionPackages.csp.graph.controls.toggleSearchBar.tour.title',
   {
-    defaultMessage: 'Adjust correlation with search',
+    defaultMessage: 'Refine your view with search',
   }
 );
 
 const toggleSearchBarTourContent = i18n.translate(
   'securitySolutionPackages.csp.graph.controls.toggleSearchBar.tour.content',
   {
-    defaultMessage: 'You can view all your correlations in a familiar KQL form',
+    defaultMessage:
+      'Click here to reveal the search bar and advanced filtering options to focus on specific connections within the graph.',
   }
 );
 
@@ -125,6 +126,7 @@ export const Actions = ({
             onFinish={() => setIsSearchBarTourOpen(false)}
             step={1}
             stepsTotal={1}
+            maxWidth={350}
           >
             <EuiToolTip
               content={isSearchBarTourOpen ? undefined : toggleSearchBarTooltip}
