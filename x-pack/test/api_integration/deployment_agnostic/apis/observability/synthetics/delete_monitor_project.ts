@@ -61,10 +61,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       ]);
     });
 
-    it('only allows 250 requests at a time', async () => {
+    it('only allows 500 requests at a time', async () => {
       const project = 'test-brower-suite';
       const monitors = [];
-      for (let i = 0; i < 251; i++) {
+      for (let i = 0; i < 550; i++) {
         monitors.push({
           ...projectMonitors.monitors[0],
           id: `test-id-${i}`,
