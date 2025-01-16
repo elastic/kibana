@@ -196,7 +196,9 @@ export function initializePanelsManager(
           }
         );
 
-        pushReferences(prefixReferencesFromPanel(newId, serializedState?.references ?? []));
+        if (serializedState?.references && serializedState.references.length > 0) {
+          pushReferences(prefixReferencesFromPanel(newId, serializedState.references));
+        }
         const newPanel: DashboardPanelState = {
           type,
           gridData: {
@@ -318,7 +320,9 @@ export function initializePanelsManager(
         delete panels[idToRemove];
 
         const { panelType: type, serializedState, initialState } = panelPackage;
-        pushReferences(prefixReferencesFromPanel(id, serializedState?.references ?? []));
+        if (serializedState?.references && serializedState.references.length > 0) {
+          pushReferences(prefixReferencesFromPanel(id, serializedState?.references));
+        }
 
         if (initialState) setRuntimeStateForChild(id, initialState);
 
