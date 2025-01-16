@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { SEARCH_INDICES_CREATE_INDEX } from '@kbn/deeplinks-search/constants';
 import { i18n } from '@kbn/i18n';
 
 import { Subscription } from 'rxjs';
-import type { BuildFlavor } from '@kbn/config';
 import { docLinks } from '../common/doc_links';
 import type {
   AppPluginSetupDependencies,
@@ -34,18 +33,12 @@ export class SearchIndicesPlugin
 {
   private pluginEnabled: boolean = false;
   private activeSolutionIdSubscription: Subscription | undefined;
-  private readonly buildFlavor: BuildFlavor;
-
-  constructor(initializerContext: PluginInitializerContext) {
-    this.buildFlavor = initializerContext.env.packageInfo.buildFlavor;
-  }
 
   public setup(
     core: CoreSetup<SearchIndicesAppPluginStartDependencies, SearchIndicesPluginStart>,
     plugins: AppPluginSetupDependencies
   ): SearchIndicesPluginSetup {
     this.pluginEnabled = true;
-    const buildFlavor: BuildFlavor = this.buildFlavor;
 
     const queryClient = initQueryClient(core.notifications.toasts);
 
@@ -62,7 +55,6 @@ export class SearchIndicesPlugin
         const startDeps: SearchIndicesServicesContextDeps = {
           ...depsStart,
           history,
-          buildFlavor,
         };
         return renderApp(ElasticsearchStartPage, coreStart, startDeps, element, queryClient);
       },
@@ -89,7 +81,6 @@ export class SearchIndicesPlugin
         const startDeps: SearchIndicesServicesContextDeps = {
           ...depsStart,
           history,
-          buildFlavor,
         };
         return renderApp(SearchIndicesRouter, coreStart, startDeps, element, queryClient);
       },

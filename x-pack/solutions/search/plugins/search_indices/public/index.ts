@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/public';
 import { SearchIndicesPlugin } from './plugin';
 
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new SearchIndicesPlugin(initializerContext);
+export function plugin() {
+  return new SearchIndicesPlugin();
 }
 export type { SearchIndicesPluginSetup, SearchIndicesPluginStart } from './types';

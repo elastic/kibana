@@ -45,12 +45,12 @@ export const CreateIndexPanel = ({
   showSkip,
   title,
 }: CreateIndexPanelProps) => {
-  const { buildFlavor, cloud, http } = useKibana().services;
+  const { cloud, http } = useKibana().services;
   const { euiTheme } = useEuiTheme();
 
   const isServerless: boolean = useMemo(() => {
-    return buildFlavor === 'serverless';
-  }, [buildFlavor]);
+    return cloud ? cloud.isServerlessEnabled : false;
+  }, [cloud]);
 
   const o11yTrialLink = useMemo(() => {
     if (cloud && cloud.isServerlessEnabled) {
