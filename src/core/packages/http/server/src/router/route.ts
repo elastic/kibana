@@ -128,6 +128,7 @@ export interface RouteDeprecationInfo {
   documentationUrl: string;
   /**
    * The description message to be displayed for the deprecation.
+   * This will also appear in the '299 Kibana-{version} {message}' header warning when someone calls the route.
    * Check the README for writing deprecations in `src/core/server/deprecations/README.mdx`
    */
   message?: string;
