@@ -14257,6 +14257,24 @@ paths:
                                   - created_at
                                   - created_by
                               type: array
+                        required_versions:
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              percentage:
+                                description: Target percentage of agents to auto upgrade
+                                maximum: 100
+                                minimum: 0
+                                type: number
+                              version:
+                                description: Target version for automatic agent upgrade
+                                type: string
+                            required:
+                              - version
+                              - percentage
+                          nullable: true
+                          type: array
                         revision:
                           type: number
                         schema_version:
@@ -14500,6 +14518,24 @@ paths:
                   description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
                   nullable: true
                   type: object
+                required_versions:
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      percentage:
+                        description: Target percentage of agents to auto upgrade
+                        maximum: 100
+                        minimum: 0
+                        type: number
+                      version:
+                        description: Target version for automatic agent upgrade
+                        type: string
+                    required:
+                      - version
+                      - percentage
+                  nullable: true
+                  type: array
                 space_ids:
                   items:
                     type: string
@@ -14959,6 +14995,24 @@ paths:
                                 - created_at
                                 - created_by
                             type: array
+                      required_versions:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            percentage:
+                              description: Target percentage of agents to auto upgrade
+                              maximum: 100
+                              minimum: 0
+                              type: number
+                            version:
+                              description: Target version for automatic agent upgrade
+                              type: string
+                          required:
+                            - version
+                            - percentage
+                        nullable: true
+                        type: array
                       revision:
                         type: number
                       schema_version:
@@ -15503,6 +15557,24 @@ paths:
                                   - created_at
                                   - created_by
                               type: array
+                        required_versions:
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              percentage:
+                                description: Target percentage of agents to auto upgrade
+                                maximum: 100
+                                minimum: 0
+                                type: number
+                              version:
+                                description: Target version for automatic agent upgrade
+                                type: string
+                            required:
+                              - version
+                              - percentage
+                          nullable: true
+                          type: array
                         revision:
                           type: number
                         schema_version:
@@ -16026,6 +16098,24 @@ paths:
                                 - created_at
                                 - created_by
                             type: array
+                      required_versions:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            percentage:
+                              description: Target percentage of agents to auto upgrade
+                              maximum: 100
+                              minimum: 0
+                              type: number
+                            version:
+                              description: Target version for automatic agent upgrade
+                              type: string
+                          required:
+                            - version
+                            - percentage
+                        nullable: true
+                        type: array
                       revision:
                         type: number
                       schema_version:
@@ -16267,6 +16357,24 @@ paths:
                   description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
                   nullable: true
                   type: object
+                required_versions:
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      percentage:
+                        description: Target percentage of agents to auto upgrade
+                        maximum: 100
+                        minimum: 0
+                        type: number
+                      version:
+                        description: Target version for automatic agent upgrade
+                        type: string
+                    required:
+                      - version
+                      - percentage
+                  nullable: true
+                  type: array
                 space_ids:
                   items:
                     type: string
@@ -16726,6 +16834,24 @@ paths:
                                 - created_at
                                 - created_by
                             type: array
+                      required_versions:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            percentage:
+                              description: Target percentage of agents to auto upgrade
+                              maximum: 100
+                              minimum: 0
+                              type: number
+                            version:
+                              description: Target version for automatic agent upgrade
+                              type: string
+                          required:
+                            - version
+                            - percentage
+                        nullable: true
+                        type: array
                       revision:
                         type: number
                       schema_version:
@@ -17269,6 +17395,24 @@ paths:
                                 - created_at
                                 - created_by
                             type: array
+                      required_versions:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            percentage:
+                              description: Target percentage of agents to auto upgrade
+                              maximum: 100
+                              minimum: 0
+                              type: number
+                            version:
+                              description: Target version for automatic agent upgrade
+                              type: string
+                          required:
+                            - version
+                            - percentage
+                        nullable: true
+                        type: array
                       revision:
                         type: number
                       schema_version:
