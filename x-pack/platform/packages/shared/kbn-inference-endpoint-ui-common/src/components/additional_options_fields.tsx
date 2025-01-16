@@ -153,7 +153,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
       selectedTaskType,
       config.taskType,
       xsFontSize,
-      euiTheme.colors.textSubdued,
+      euiTheme.colors.subduedText,
       euiTheme.colors.disabled,
       euiTheme.colors.lightestShade,
       euiTheme.colors.darkShade,
