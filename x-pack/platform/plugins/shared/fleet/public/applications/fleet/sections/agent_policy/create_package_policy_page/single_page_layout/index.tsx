@@ -351,7 +351,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     );
   }
   const { isAgentlessIntegration } = useAgentless();
-  const { handleSetupTechnologyChange: handleSetupTechnologyChangeFn, selectedSetupTechnology } =
+  const { handleSetupTechnologyChange, selectedSetupTechnology, defaultSetupTechnology } =
     useSetupTechnology({
       newAgentPolicy,
       setNewAgentPolicy,
@@ -361,24 +361,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       packageInfo,
       packagePolicy,
     });
-
-  const handleSetupTechnologyChange = useCallback(
-    (setupTechnology: SetupTechnology, policyTemplateName?: string) => {
-      handleSetupTechnologyChangeFn(setupTechnology, policyTemplateName);
-      // agentless doesn't need system integration
-      setWithSysMonitoring(setupTechnology === SetupTechnology.AGENT_BASED);
-
-      // reset selected output if swtiching to agentless
-      // this is a quick fix to avoid retrieving outputs and comparing against
-      // allowed outputs
-      if (setupTechnology === SetupTechnology.AGENTLESS) {
-        updatePackagePolicy({
-          output_id: null,
-        });
-      }
-    },
-    [handleSetupTechnologyChangeFn, updatePackagePolicy]
-  );
 
   const replaceStepConfigurePackagePolicy =
     replaceDefineStepView && packageInfo?.name ? (
@@ -395,6 +377,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             isEditPage={false}
             handleSetupTechnologyChange={handleSetupTechnologyChange}
             isAgentlessEnabled={isAgentlessIntegration(packageInfo)}
+            defaultSetupTechnology={defaultSetupTechnology}
           />
         </ExtensionWrapper>
       )
@@ -427,6 +410,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                 handleSetupTechnologyChange(value);
                 // agentless doesn't need system integration
                 setWithSysMonitoring(value === SetupTechnology.AGENT_BASED);
+
+                // reset selected output if swtiching to agentless
+                // this is a quick fix to avoid retrieving outputs and comparing against
+                // allowed outputs
+                if (setupTechnology === SetupTechnology.AGENTLESS) {
+                  updatePackagePolicy({
+                    output_id: null,
+                  });
+                }
               }}
             />
           )}
