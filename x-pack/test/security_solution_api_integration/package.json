@@ -399,6 +399,13 @@
     "prebuilt_rules_update_prebuilt_rules_package:server:ess": "npm run initialize-server:rm prebuilt_rules/update_prebuilt_rules_package ess",
     "prebuilt_rules_update_prebuilt_rules_package:runner:ess": "npm run run-tests:rm prebuilt_rules/update_prebuilt_rules_package ess essEnv",
 
+    "prebuilt_rule_customization_enabled:server:serverless": "npm run initialize-server:rm prebuilt_rules/prebuilt_rule_customization/customization_enabled serverless",
+    "prebuilt_rule_customization_enabled:runner:serverless": "npm run run-tests:rm prebuilt_rules/prebuilt_rule_customization/customization_enabled serverless serverlessEnv",
+    "prebuilt_rule_customization_enabled:qa:serverless": "npm run run-tests:rm prebuilt_rules/prebuilt_rule_customization/customization_enabled serverless qaPeriodicEnv",
+    "prebuilt_rule_customization_enabled:qa:serverless:release": "npm run run-tests:rm prebuilt_rules/prebuilt_rule_customization/customization_enabled serverless qaEnv",
+    "prebuilt_rule_customization_enabled:server:ess": "npm run initialize-server:rm prebuilt_rules/prebuilt_rule_customization/customization_enabled ess",
+    "prebuilt_rule_customization_enabled:runner:ess": "npm run run-tests:rm prebuilt_rules/prebuilt_rule_customization/customization_enabled ess essEnv",
+
     "rule_delete:server:serverless": "npm run initialize-server:rm rule_delete serverless",
     "rule_delete:runner:serverless": "npm run run-tests:rm rule_delete serverless serverlessEnv",
     "rule_delete:qa:serverless": "npm run run-tests:rm rule_delete serverless qaPeriodicEnv",

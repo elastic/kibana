@@ -10,14 +10,14 @@ import {
   BulkActionEditTypeEnum,
   BulkActionTypeEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { deleteAllRules } from '../../../../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 import {
   deleteAllPrebuiltRuleAssets,
   createRuleAssetSavedObject,
   createPrebuiltRuleAssetSavedObjects,
   installPrebuiltRules,
-} from '../../../../utils';
+} from '../../../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

@@ -42,6 +42,8 @@ import {
   EXECUTION_RUN_TYPE_FILTER,
   EXECUTION_RUN_TYPE_FILTER_ITEM,
   RULE_BACKFILLS_TABLE,
+  POPOVER_ACTIONS_TRIGGER_BUTTON,
+  EXPORT_RULE_ACTION_BUTTON,
 } from '../screens/rule_details';
 import { RuleDetailsTabs, ruleDetailsUrl } from '../urls/rule_details';
 import {
@@ -213,3 +215,8 @@ export const filterByRunType = (ruleType: string) => {
 };
 
 export const getBackfillsTableRows = () => cy.get(RULE_BACKFILLS_TABLE).find('tbody tr');
+
+export const exportRuleFromDetailsPage = () => {
+  cy.get(POPOVER_ACTIONS_TRIGGER_BUTTON).click();
+  cy.get(EXPORT_RULE_ACTION_BUTTON).click();
+};

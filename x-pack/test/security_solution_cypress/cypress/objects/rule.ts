@@ -555,6 +555,8 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RuleResponse
     related_integrations: relatedIntegrations,
     setup,
     investigation_fields: investigationFields,
+    license,
+    revision,
   } = ruleResponse.body;
 
   let query: string | undefined;
@@ -575,11 +577,12 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RuleResponse
     tags,
     interval,
     enabled,
-    revision: 0,
+    revision,
     description,
     risk_score: riskScore,
     severity,
     note,
+    license,
     output_index: '',
     investigation_fields: investigationFields,
     author,

@@ -407,6 +407,21 @@ export const expectManagementTableRules = (ruleNames: string[]): void => {
   }
 };
 
+export const expectToContainModifiedBadge = (ruleName: string) => {
+  cy.get(RULES_MANAGEMENT_TABLE)
+    .find(RULES_ROW)
+    .should('include.text', ruleName)
+    .contains('Modified');
+};
+
+export const expectToNotContainModifiedBadge = (ruleName: string) => {
+  cy.get(RULES_MANAGEMENT_TABLE)
+    .find(RULES_ROW)
+    .should('include.text', ruleName)
+    .contains('Modified')
+    .should('not.exist');
+};
+
 const selectOverwriteExceptionsRulesImport = () => {
   cy.get(RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX).check({ force: true });
   cy.get(RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX).should('be.checked');

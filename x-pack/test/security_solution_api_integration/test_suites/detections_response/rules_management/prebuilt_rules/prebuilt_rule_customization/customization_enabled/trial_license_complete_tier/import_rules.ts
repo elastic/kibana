@@ -15,9 +15,9 @@ import {
   fetchRule,
   getCustomQueryRuleParams,
   getInstalledRules,
-} from '../../../../utils';
-import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+} from '../../../../../utils';
+import { deleteAllRules } from '../../../../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -176,6 +176,33 @@ export default ({ getService }: FtrProviderContext): void => {
               version: prebuiltRules[3].version,
               rule_source: { type: 'external', is_customized: false },
               immutable: true,
+            }),
+          ])
+        );
+      });
+
+      it("imports rules as custom when rules package isn't installed", async () => {
+        await deleteAllPrebuiltRuleAssets(es, log);
+
+        const { body } = await importRules([prebuiltRules[0]]);
+
+        expect(body).toMatchObject({
+          rules_count: 1,
+          success: true,
+          success_count: 1,
+          errors: [],
+        });
+
+        const { data: importedRules } = await getInstalledRules(supertest);
+
+        expect(importedRules).toHaveLength(1);
+        expect(importedRules).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              rule_id: prebuiltRules[0].rule_id,
+              version: prebuiltRules[0].version,
+              rule_source: { type: 'internal' },
+              immutable: false,
             }),
           ])
         );
