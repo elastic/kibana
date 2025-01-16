@@ -4538,7 +4538,7 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              ", \"allowNoIndex\"> | undefined) => Promise<",
+              ", \"allowNoIndex\" | \"pattern\"> | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
