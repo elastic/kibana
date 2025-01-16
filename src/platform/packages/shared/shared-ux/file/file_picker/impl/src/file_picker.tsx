@@ -100,6 +100,10 @@ const Component: FunctionComponent<InnerProps> = ({ onClose, onDone, onUpload, m
           width: 75vw;
           height: 75vh;
         }
+        .euiCard__content,
+        .euiCard__description {
+          margin: 0; // make the cards a little bit more compact
+        }
       `}
     >
       <EuiModalHeader>
