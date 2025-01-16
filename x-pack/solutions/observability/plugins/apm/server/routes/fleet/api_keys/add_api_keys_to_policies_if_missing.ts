@@ -52,8 +52,6 @@ export async function addApiKeysToEveryPackagePolicyIfMissing({
     fleetPluginStart: fleet,
   });
 
-  // const savedObjectsClient = await getInternalSavedObjectsClient(coreStart);
-
   return Promise.all(
     apmFleetPolicies.items.map((policy) => {
       const savedObjectsClient = getInternalSavedObjectsClientForSpaceId(
