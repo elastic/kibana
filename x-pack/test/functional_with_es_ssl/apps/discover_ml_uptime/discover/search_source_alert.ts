@@ -170,9 +170,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.setValue('timeWindowSizeNumber', '30');
 
     await testSubjects.click('ruleFormStep-actions');
-    await retry.waitFor('actions accordion to exist', async () => {
-      await testSubjects.click('.index-alerting-ActionTypeSelectOption');
-      return await testSubjects.exists('alertActionAccordion-0');
+    await retry.waitFor('actions button to exist', async () => {
+      await testSubjects.click('ruleActionsAddActionButton');
+      await find.clickByCssSelector('[data-action-type-id=".index"]');
+      return (await testSubjects.findAll('ruleActionsItem')).length === 1;
     });
 
     await monacoEditor.waitCodeEditorReady('kibanaCodeEditor');
@@ -190,6 +191,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const ruleName = await testSubjects.getAttribute('ruleDetailsNameInput', 'value');
       return ruleName === alertName;
     });
+
+    await testSubjects.click('ruleFormStep-definition');
   };
 
   const openDiscoverAlertFlyout = async () => {
@@ -427,6 +430,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('ruleFormStep-details');
       await testSubjects.click('ruleFlyoutFooterSaveButton');
 
+      await testSubjects.click('ruleFormStep-definition');
       const errorElem = await testSubjects.find('esQueryAlertExpressionError');
       const errorText = await errorElem.getVisibleText();
       expect(errorText).to.eql('Data view should have a time field.');
