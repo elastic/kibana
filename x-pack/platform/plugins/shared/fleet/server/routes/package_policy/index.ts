@@ -7,9 +7,8 @@
 import { schema } from '@kbn/config-schema';
 
 import { getRouteRequiredAuthz } from '../../services/security';
-
+import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import type { FleetAuthzRouter } from '../../services/security';
-
 import type { FleetAuthz } from '../../../common';
 import { API_VERSIONS } from '../../../common/constants';
 import { PACKAGE_POLICY_API_ROUTES } from '../../constants';
@@ -56,6 +55,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .get({
       path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
+      // TODO move to kibana authz https://github.com/elastic/kibana/issues/203170
       fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
         calculateRouteAuthz(
           fleetAuthz,
@@ -88,6 +88,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .post({
       path: PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN,
+      // TODO move to kibana authz https://github.com/elastic/kibana/issues/203170
       fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
         calculateRouteAuthz(
           fleetAuthz,
@@ -123,6 +124,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .get({
       path: PACKAGE_POLICY_API_ROUTES.INFO_PATTERN,
+      // TODO move to kibana authz https://github.com/elastic/kibana/issues/203170
       fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
         calculateRouteAuthz(
           fleetAuthz,
@@ -218,6 +220,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .put({
       path: PACKAGE_POLICY_API_ROUTES.UPDATE_PATTERN,
+      // TODO move to kibana authz https://github.com/elastic/kibana/issues/203170
       fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
         calculateRouteAuthz(
           fleetAuthz,
@@ -258,8 +261,13 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .post({
       path: PACKAGE_POLICY_API_ROUTES.DELETE_PATTERN,
-      fleetAuthz: {
-        integrations: { writeIntegrationPolicies: true },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+            FLEET_API_PRIVILEGES.INTEGRATIONS.ALL,
+          ],
+        },
       },
       summary: 'Bulk delete package policies',
       options: {
@@ -287,8 +295,13 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .delete({
       path: PACKAGE_POLICY_API_ROUTES.INFO_PATTERN,
-      fleetAuthz: {
-        integrations: { writeIntegrationPolicies: true },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+            FLEET_API_PRIVILEGES.INTEGRATIONS.ALL,
+          ],
+        },
       },
       summary: 'Delete a package policy',
       description: 'Delete a package policy by ID.',
@@ -318,8 +331,13 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .post({
       path: PACKAGE_POLICY_API_ROUTES.UPGRADE_PATTERN,
-      fleetAuthz: {
-        integrations: { writeIntegrationPolicies: true },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+            FLEET_API_PRIVILEGES.INTEGRATIONS.ALL,
+          ],
+        },
       },
       summary: 'Upgrade a package policy',
       description: 'Upgrade a package policy to a newer package version.',
@@ -349,8 +367,13 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .post({
       path: PACKAGE_POLICY_API_ROUTES.DRYRUN_PATTERN,
-      fleetAuthz: {
-        integrations: { readIntegrationPolicies: true },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+            FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
+          ],
+        },
       },
       summary: 'Dry run a package policy upgrade',
       options: {

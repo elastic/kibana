@@ -67,13 +67,12 @@ export class IndexActionsContextMenu extends Component {
       performExtensionAction,
       indices,
       reloadIndices,
-      unfreezeIndices,
       indicesListURLParams,
     } = this.props;
     const allOpen = every(indexNames, (indexName) => {
       return indexStatusByName[indexName] === INDEX_OPEN;
     });
-    const allFrozen = every(indices, (index) => index.isFrozen);
+
     const selectedIndexCount = indexNames.length;
     const items = [];
     if (isOnListView && selectedIndexCount === 1) {
@@ -191,18 +190,6 @@ export class IndexActionsContextMenu extends Component {
           this.closePopoverAndExecute(flushIndices);
         },
       });
-      if (allFrozen) {
-        items.push({
-          'data-test-subj': 'unfreezeIndexMenuButton',
-          name: i18n.translate('xpack.idxMgmt.indexActionsMenu.unfreezeIndexLabel', {
-            defaultMessage: 'Unfreeze {selectedIndexCount, plural, one {index} other {indices} }',
-            values: { selectedIndexCount },
-          }),
-          onClick: () => {
-            this.closePopoverAndExecute(unfreezeIndices);
-          },
-        });
-      }
     } else if (!allOpen && enableIndexActions) {
       items.push({
         'data-test-subj': 'openIndexMenuButton',

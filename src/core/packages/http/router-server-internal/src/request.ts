@@ -191,7 +191,7 @@ export class CoreKibanaRequest<
       enumerable: false,
     });
 
-    this.httpVersion = isRealReq ? request.raw.req.httpVersion : '1.0';
+    this.httpVersion = isRealReq ? getHttpVersionFromRequest(request) : '1.0';
     this.apiVersion = undefined;
     this.protocol = getProtocolFromHttpVersion(this.httpVersion);
 
@@ -328,12 +328,6 @@ export class CoreKibanaRequest<
       return true;
     }
 
-    const security = this.getSecurity(request);
-
-    if (security?.authc !== undefined) {
-      return security.authc?.enabled ?? true;
-    }
-
     const authOptions = request.route.settings.auth;
     if (typeof authOptions === 'object') {
       // 'try' is used in the legacy platform
@@ -423,4 +417,12 @@ function sanitizeRequest(req: Request): { query: unknown; params: unknown; body:
 
 function getProtocolFromHttpVersion(httpVersion: string): HttpProtocol {
   return httpVersion.split('.')[0] === '2' ? 'http2' : 'http1';
+}
+
+function getHttpVersionFromRequest(request: Request) {
+  return request.raw.req.httpVersion;
+}
+
+export function getProtocolFromRequest(request: Request) {
+  return getProtocolFromHttpVersion(getHttpVersionFromRequest(request));
 }

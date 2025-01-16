@@ -12,7 +12,12 @@ export type ResponseActionStatus = (typeof RESPONSE_ACTION_STATUS)[number];
 export const RESPONSE_ACTION_TYPE = ['automated', 'manual'] as const;
 export type ResponseActionType = (typeof RESPONSE_ACTION_TYPE)[number];
 
-export const RESPONSE_ACTION_AGENT_TYPE = ['endpoint', 'sentinel_one', 'crowdstrike'] as const;
+export const RESPONSE_ACTION_AGENT_TYPE = [
+  'endpoint',
+  'sentinel_one',
+  'crowdstrike',
+  'microsoft_defender_endpoint',
+] as const;
 export type ResponseActionAgentType = (typeof RESPONSE_ACTION_AGENT_TYPE)[number];
 
 /**
@@ -181,6 +186,7 @@ export const RESPONSE_ACTIONS_ZIP_PASSCODE: Readonly<Record<ResponseActionAgentT
     endpoint: 'elastic',
     sentinel_one: 'Elastic@123',
     crowdstrike: 'tbd..',
+    microsoft_defender_endpoint: 'tbd..',
   });
 
 /**
@@ -206,6 +212,12 @@ export const RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS: Readonly<
     'sentinel_one.agent.agent.id',
   ],
   crowdstrike: ['device.id'],
+  microsoft_defender_endpoint: [
+    'm365_defender.alerts.entities.deviceId',
+    'm365_defender.alerts.devices.mdatpDeviceId',
+    'm365_defender.incident.alert.evidence.mde_device_id',
+    'cloud.instance.id',
+  ],
 });
 
 export const SUPPORTED_AGENT_ID_ALERT_FIELDS: Readonly<string[]> = Object.values(

@@ -89,7 +89,7 @@ export function registerTopNFunctionsSearchRoute({
               core,
               esClient,
               query,
-              aggregationField: 'service.name',
+              aggregationFields: ['service.name'],
               totalSeconds,
             });
 
