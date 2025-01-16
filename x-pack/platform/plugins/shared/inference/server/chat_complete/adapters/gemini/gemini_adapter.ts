@@ -29,6 +29,7 @@ export const geminiAdapter: InferenceConnectorAdapter = {
     toolChoice,
     tools,
     temperature = 0,
+    modelName,
     abortSignal,
   }) => {
     return from(
@@ -40,6 +41,7 @@ export const geminiAdapter: InferenceConnectorAdapter = {
           tools: toolsToGemini(tools),
           toolConfig: toolChoiceToConfig(toolChoice),
           temperature,
+          model: modelName,
           signal: abortSignal,
           stopSequences: ['\n\nHuman:'],
         },
