@@ -14,22 +14,14 @@ interface FooterProps {
   isFlyoutGenerating: State['isFlyoutGenerating'];
   isValid: boolean;
   isGenerationComplete: boolean;
-  showNeedsGeneration: boolean;
-  needsGenerationHint: string;
+  showHint: boolean;
+  hint: string;
   onCancel: () => void;
   onSave: () => void;
 }
 
 export const Footer = React.memo<FooterProps>(
-  ({
-    isFlyoutGenerating,
-    isValid,
-    isGenerationComplete,
-    showNeedsGeneration,
-    needsGenerationHint,
-    onSave,
-    onCancel,
-  }) => {
+  ({ isFlyoutGenerating, isValid, isGenerationComplete, showHint, hint, onSave, onCancel }) => {
     return (
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
@@ -42,7 +34,7 @@ export const Footer = React.memo<FooterProps>(
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-          {showNeedsGeneration && <EuiText size="s">{needsGenerationHint}</EuiText>}
+          {showHint && <EuiText size="s">{hint}</EuiText>}
           <EuiButton
             fill={isGenerationComplete ? true : false}
             color="primary"

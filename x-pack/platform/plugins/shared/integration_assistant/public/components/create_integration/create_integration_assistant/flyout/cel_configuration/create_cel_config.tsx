@@ -218,8 +218,8 @@ export const CreateCelConfigFlyout = React.memo<CreateCelConfigFlyoutProps>(
             isFlyoutGenerating={isFlyoutGenerating}
             isValid={!showValidation || (isValid && completedCelGeneration)}
             isGenerationComplete={completedCelGeneration}
-            showNeedsGeneration={showValidation && needsGeneration}
-            needsGenerationHint={
+            showHint={showValidation && needsGeneration}
+            hint={
               isAnalyzeApiGenerationComplete ? i18n.GENERATE_BUTTON_HINT : i18n.ANALYZE_BUTTON_HINT
             }
             onCancel={onCancel}
