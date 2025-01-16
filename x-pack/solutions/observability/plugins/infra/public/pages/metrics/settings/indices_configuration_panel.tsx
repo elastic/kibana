@@ -19,12 +19,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import type { RulesParams } from '@kbn/observability-plugin/public';
-import { rulesLocatorID } from '@kbn/observability-plugin/public';
-import {
-  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-  METRIC_THRESHOLD_ALERT_TYPE_ID,
-} from '@kbn/rule-data-utils';
 import { METRICS_INDEX_PATTERN } from '../../../../common/constants';
 import type { InputFieldProps } from './input_fields';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
@@ -46,10 +40,10 @@ const METRIC_INDICES_WARNING_TITLE = i18n.translate(
   }
 );
 
-const METRIC_INDICES_USED_BY_RULES = i18n.translate(
-  'xpack.infra.sourceConfiguration.metricIndicesUsedByRulesTitle',
+const METRIC_INDICES_NOT_USED_BY_RULES = i18n.translate(
+  'xpack.infra.sourceConfiguration.metricIndicesNotUsedByRulesTitle',
   {
-    defaultMessage: 'Alerting rules use this data source setting',
+    defaultMessage: 'Alerting rules now use data view',
   }
 );
 
@@ -70,17 +64,12 @@ export const IndicesConfigurationPanel = ({
   numberOfInfraRules,
 }: IndicesConfigurationPanelProps) => {
   const {
-    services: {
-      share: {
-        url: { locators },
-      },
-    },
+    services: { http },
   } = useKibanaContextForPlugin();
 
-  const rulesLocator = locators.get<RulesParams>(rulesLocatorID);
-  const viewAffectedRulesLink = rulesLocator?.useUrl({
-    type: [METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID, METRIC_THRESHOLD_ALERT_TYPE_ID],
-  });
+  const viewDataViewLink = http.basePath.prepend(
+    '/app/management/kibana/dataViews/dataView/infra_rules_data_view'
+  );
 
   return (
     <EuiForm>
@@ -142,25 +131,25 @@ export const IndicesConfigurationPanel = ({
           <>
             <EuiSpacer size="s" />
             <EuiCallOut
-              data-test-subj="infraIndicesPanelSettingsWarningCalloutUsedByRules"
+              data-test-subj="infraIndicesPanelSettingsWarningCalloutNotUsedByRules"
               size="s"
-              title={METRIC_INDICES_USED_BY_RULES}
+              title={METRIC_INDICES_NOT_USED_BY_RULES}
               color="warning"
               iconType="warning"
             >
               <FormattedMessage
-                id="xpack.infra.sourceConfiguration.metricIndicesUsedByRulesMessage"
-                defaultMessage="One or more alerting rules rely on this data source setting. Changing this setting will change which data is used to generate alerts."
+                id="xpack.infra.sourceConfiguration.metricIndicesNotUsedByRulesMessage"
+                defaultMessage="If you intend to change data source of the Inventory threshold or Metric threshold rules, please update the data view."
               />
               <EuiSpacer size="s" />
               <EuiLink
-                data-test-subj="metricIndicesViewAffectedRulesLink"
-                href={viewAffectedRulesLink}
+                data-test-subj="metricIndicesViewDataViewLink"
+                href={viewDataViewLink}
                 target="_blank"
               >
                 <FormattedMessage
-                  id="xpack.infra.sourceConfiguration.metricIndices.viewAffectedRulesLink"
-                  defaultMessage="View affected rules"
+                  id="xpack.infra.sourceConfiguration.metricIndices.viewDataViewLink"
+                  defaultMessage="View data view"
                 />
               </EuiLink>
             </EuiCallOut>
