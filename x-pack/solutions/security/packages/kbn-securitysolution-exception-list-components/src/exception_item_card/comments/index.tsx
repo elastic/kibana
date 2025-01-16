@@ -7,15 +7,7 @@
 
 import React, { memo } from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
-import {
-  EuiAccordion,
-  EuiCommentList,
-  EuiFlexItem,
-  EuiPanel,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/css';
+import { EuiAccordion, EuiCommentList, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import * as i18n from '../translations';
 
 export interface ExceptionItemCardCommentsProps {
@@ -25,25 +17,20 @@ export interface ExceptionItemCardCommentsProps {
 
 export const ExceptionItemCardComments = memo<ExceptionItemCardCommentsProps>(
   ({ comments, dataTestSubj }) => {
-    const { euiTheme } = useEuiTheme();
-    const accordionCss = css`
-      color: ${euiTheme.colors.textPrimary};
-    `;
-
     if (!comments.length) return null;
     return (
       <EuiFlexItem data-test-subj={dataTestSubj}>
         <EuiAccordion
           id="exceptionItemCardComments"
           buttonContent={
-            <EuiText size="s" css={accordionCss} data-test-subj={`${dataTestSubj || ''}TextButton`}>
+            <EuiText size="s" data-test-subj={`${dataTestSubj || ''}TextButton`}>
               {i18n.exceptionItemCardCommentsAccordion(comments.length)}
             </EuiText>
           }
           arrowDisplay="none"
           data-test-subj="exceptionItemCardComments"
         >
-          <EuiPanel data-test-subj="accordionContentPanel" hasBorder hasShadow paddingSize="m">
+          <EuiPanel data-test-subj="accordionContentPanel" paddingSize="m">
             <EuiCommentList data-test-subj="accordionCommentList" comments={comments} />
           </EuiPanel>
         </EuiAccordion>
