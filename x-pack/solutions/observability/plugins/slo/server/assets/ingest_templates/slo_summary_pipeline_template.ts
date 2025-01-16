@@ -234,17 +234,19 @@ export const getSLOSummaryPipelineTemplate = (
           source: getBurnRateSource('oneDayBurnRate'),
         },
       },
-      // >= 8.18: add updatedBy, createdBy and spaceId field
+      // >= 8.18: add updatedBy, createdBy
       {
         set: {
-          field: 'updatedBy',
+          field: 'slo.updatedBy',
           value: slo.updatedBy,
+          ignore_failure: true,
         },
       },
       {
         set: {
-          field: 'createdBy',
+          field: 'slo.createdBy',
           value: slo.createdBy,
+          ignore_failure: true,
         },
       },
     ],

@@ -135,6 +135,20 @@ export const getSLOSummaryMappingsTemplate = (
                 },
               },
             },
+            createdAt: {
+              type: 'date',
+              format: 'date_optional_time||epoch_millis',
+            },
+            updatedAt: {
+              type: 'date',
+              format: 'date_optional_time||epoch_millis',
+            },
+            createdBy: {
+              type: 'keyword',
+            },
+            updatedBy: {
+              type: 'keyword',
+            },
           },
         },
         sliValue: {
@@ -216,20 +230,6 @@ export const getSLOSummaryMappingsTemplate = (
               type: 'double',
             },
           },
-        },
-        createdBy: {
-          type: 'keyword',
-        },
-        updatedBy: {
-          type: 'keyword',
-        },
-        createdAt: {
-          type: 'date',
-          format: 'date_optional_time||epoch_millis',
-        },
-        updatedAt: {
-          type: 'date',
-          format: 'date_optional_time||epoch_millis',
         },
       },
     },
