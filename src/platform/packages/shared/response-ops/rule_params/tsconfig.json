@@ -11,7 +11,6 @@
     "@kbn/ml-anomaly-utils",
     "@kbn/i18n",
     "@kbn/alerting-comparators",
-    "@kbn/logs-shared-plugin",
     "@kbn/es-query",
     "@kbn/i18n"
   ]
