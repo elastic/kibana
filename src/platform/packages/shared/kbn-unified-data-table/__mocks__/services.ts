@@ -81,6 +81,7 @@ export function createServicesMock() {
       },
     } as unknown as DataViewFieldEditorStart,
     theme,
+    i18n: corePluginMock.i18n,
     storage: {
       clear: jest.fn(),
       get: jest.fn(),
