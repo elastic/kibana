@@ -68,7 +68,7 @@ const getRule = async ({ kbnClient, log }: { kbnClient: KbnClient; log: ToolingL
   return response.data.data?.[0];
 };
 
-async function readAndDecompress(filePath: string) {
+async function readAndDecompress({ filePath, log }: { filePath: string; log: ToolingLog }) {
   try {
     const decompressedChunks: Uint8Array[] = [];
 
@@ -93,7 +93,8 @@ async function readAndDecompress(filePath: string) {
 
     return decompressedText;
   } catch (error) {
-    console.error('Error during file reading or decompression:', error);
+    log.error('Error during file reading or decompression:');
+    log.error(error);
   }
 }
 
@@ -235,7 +236,7 @@ const processFile = async ({
 
   log.info(`Processing and indexing file: ${file} ...`);
 
-  const fileData = (await readAndDecompress(file))?.split('\n') ?? [];
+  const fileData = (await readAndDecompress({ filePath: file, log }))?.split('\n') ?? [];
 
   try {
     const response = await esClient.bulk<string>({
