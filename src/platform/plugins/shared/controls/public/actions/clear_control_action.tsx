@@ -11,17 +11,27 @@ import React, { SyntheticEvent } from 'react';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { apiCanAccessViewMode, apiHasParentApi, apiHasType, apiHasUniqueId, apiIsOfType, HasParentApi, type EmbeddableApiContext, type HasUniqueId, HasType } from '@kbn/presentation-publishing';
+import {
+  apiCanAccessViewMode,
+  apiHasParentApi,
+  apiHasType,
+  apiHasUniqueId,
+  apiIsOfType,
+  HasParentApi,
+  type EmbeddableApiContext,
+  type HasUniqueId,
+  HasType,
+} from '@kbn/presentation-publishing';
 import {
   IncompatibleActionError,
   FrequentCompatibilityChangeAction,
   type Action,
 } from '@kbn/ui-actions-plugin/public';
+import { PresentationContainer, apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { CONTROL_GROUP_TYPE } from '../../common';
 import { CanClearSelections, isClearableControl } from '../types';
 
 import { ACTION_CLEAR_CONTROL } from './constants';
-import { PresentationContainer, apiIsPresentationContainer } from '@kbn/presentation-containers';
 
 type ClearControlActionApi = HasType &
   HasUniqueId &
