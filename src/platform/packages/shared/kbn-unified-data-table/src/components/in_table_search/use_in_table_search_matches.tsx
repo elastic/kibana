@@ -31,7 +31,7 @@ export interface UseInTableSearchMatchesProps {
     props: EuiDataGridCellValueElementProps &
       Pick<InTableSearchHighlightsWrapperProps, 'onHighlightsCountFound'>
   ) => ReactNode;
-  scrollToFoundMatch: (params: {
+  scrollToActiveMatch: (params: {
     rowIndex: number;
     fieldName: string;
     matchIndex: number;
@@ -56,7 +56,7 @@ export const useInTableSearchMatches = (
     inTableSearchTerm,
     tableContext,
     renderCellValue,
-    scrollToFoundMatch,
+    scrollToActiveMatch,
   } = props;
   const [matchesList, setMatchesList] = useState<RowMatches[]>(DEFAULT_MATCHES);
   const [matchesCount, setMatchesCount] = useState<number>(0);
@@ -99,7 +99,7 @@ export const useInTableSearchMatches = (
             traversedMatchesCount + matchesCountForFieldName >= matchPosition
           ) {
             // can even go slower to next match within the field within the row
-            scrollToFoundMatch({
+            scrollToActiveMatch({
               rowIndex: Number(rowIndex),
               fieldName,
               matchIndex: matchPosition - traversedMatchesCount - 1,
@@ -112,7 +112,7 @@ export const useInTableSearchMatches = (
         }
       }
     },
-    [scrollToFoundMatch]
+    [scrollToActiveMatch]
   );
 
   const goToPrevMatch = useCallback(() => {

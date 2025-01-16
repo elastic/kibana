@@ -11,21 +11,67 @@ import React, { ChangeEvent, KeyboardEvent, useCallback } from 'react';
 import { EuiFieldSearch, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, keys } from '@elastic/eui';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { i18n } from '@kbn/i18n';
+import { css, type SerializedStyles } from '@emotion/react';
 import {
   useInTableSearchMatches,
   UseInTableSearchMatchesProps,
 } from './use_in_table_search_matches';
 
-export interface InTableSearchControlProps extends UseInTableSearchMatchesProps {
+export interface InTableSearchControlProps
+  extends Omit<UseInTableSearchMatchesProps, 'scrollToActiveMatch'> {
+  pageSize: number | null; // null when the pagination is disabled
+  changeToExpectedPage: (pageIndex: number) => void;
+  scrollToCell: (params: { rowIndex: number; columnIndex: number; align: 'start' }) => void;
   onChange: (searchTerm: string | undefined) => void;
+  onChangeCss: (styles: SerializedStyles) => void;
 }
 
 export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
+  pageSize,
+  changeToExpectedPage,
+  scrollToCell,
   onChange,
+  onChangeCss,
   ...props
 }) => {
+  const scrollToActiveMatch: UseInTableSearchMatchesProps['scrollToActiveMatch'] = useCallback(
+    ({ rowIndex, fieldName, matchIndex, shouldJump }) => {
+      if (typeof pageSize === 'number') {
+        const expectedPageIndex = Math.floor(rowIndex / pageSize);
+        changeToExpectedPage(expectedPageIndex);
+      }
+
+      // TODO: use a named color token
+      onChangeCss(css`
+        .euiDataGridRowCell[data-gridcell-row-index='${rowIndex}'][data-gridcell-column-id='${fieldName}']
+          .unifiedDataTable__inTableSearchMatch[data-match-index='${matchIndex}'] {
+          background-color: #ffc30e;
+        }
+      `);
+
+      if (shouldJump) {
+        const anyCellForFieldName = document.querySelector(
+          `.euiDataGridRowCell[data-gridcell-column-id='${fieldName}']`
+        );
+
+        // getting column index by column id
+        const columnIndex = anyCellForFieldName?.getAttribute('data-gridcell-column-index') ?? 0;
+
+        // getting rowIndex for the visible page
+        const visibleRowIndex = typeof pageSize === 'number' ? rowIndex % pageSize : rowIndex;
+
+        scrollToCell({
+          rowIndex: visibleRowIndex,
+          columnIndex: Number(columnIndex),
+          align: 'start',
+        });
+      }
+    },
+    [pageSize, changeToExpectedPage, scrollToCell, onChangeCss]
+  );
+
   const { matchesCount, activeMatchPosition, goToPrevMatch, goToNextMatch, isProcessing } =
-    useInTableSearchMatches(props);
+    useInTableSearchMatches({ ...props, scrollToActiveMatch });
 
   const { inputValue, handleInputChange } = useDebouncedValue({
     onChange,

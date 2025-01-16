@@ -36,7 +36,7 @@ import {
   useDataGridColumnsCellActions,
   type UseDataGridColumnsCellActionsProps,
 } from '@kbn/cell-actions';
-import { SerializedStyles, css } from '@emotion/react';
+import type { SerializedStyles } from '@emotion/react';
 import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import type { Serializable } from '@kbn/utility-types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
@@ -763,43 +763,20 @@ export const UnifiedDataTable = ({
         visibleColumns={visibleColumns}
         rows={displayedRows}
         renderCellValue={renderCellValue}
-        scrollToFoundMatch={({ rowIndex, fieldName, matchIndex, shouldJump }) => {
-          const expectedPageIndex = Math.floor(rowIndex / currentPageSize);
-
+        pageSize={isPaginationEnabled ? currentPageSize : null}
+        changeToExpectedPage={(expectedPageIndex) => {
           if (isPaginationEnabled && currentPageIndexRef.current !== expectedPageIndex) {
             changeCurrentPageIndex(expectedPageIndex);
           }
-
-          // TODO: use a named color token
-          setInTableSearchTermCss(css`
-            .euiDataGridRowCell[data-gridcell-row-index='${rowIndex}'][data-gridcell-column-id='${fieldName}']
-              .unifiedDataTable__inTableSearchMatch[data-match-index='${matchIndex}'] {
-              background-color: #ffc30e;
-            }
-          `);
-
-          if (shouldJump) {
-            const anyCellForFieldName = document.querySelector(
-              `.euiDataGridRowCell[data-gridcell-column-id='${fieldName}']`
-            );
-
-            // getting column index by column id
-            const columnIndex =
-              anyCellForFieldName?.getAttribute('data-gridcell-column-index') ?? 0;
-
-            const visibleRowIndex = isPaginationEnabled ? rowIndex % currentPageSize : rowIndex;
-
-            dataGridRef.current?.scrollToItem?.({
-              rowIndex: visibleRowIndex,
-              columnIndex: Number(columnIndex),
-              align: 'start',
-            });
-          }
+        }}
+        scrollToCell={(params) => {
+          dataGridRef.current?.scrollToItem?.(params);
         }}
         onChange={(searchTerm) => {
           setInTableSearchTerm(searchTerm || '');
           setInTableSearchTermCss(undefined);
         }}
+        onChangeCss={(styles) => setInTableSearchTermCss(styles)}
       />
     );
   }, [
