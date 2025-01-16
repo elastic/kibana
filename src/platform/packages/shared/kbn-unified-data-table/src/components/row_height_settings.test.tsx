@@ -34,7 +34,7 @@ const renderRowHeightSettings = ({
         rowHeight={rowHeight}
         maxRowHeight={maxRowHeight}
         onChangeRowHeight={setRowHeight}
-        onChangeRowHeightLines={onChange}
+        onChangeLineCountInput={onChange}
         data-test-subj="rowHeightSettings"
         lineCountInput={lineCount}
       />

@@ -8,7 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
-import { RowHeightSettings } from '@kbn/unified-data-table';
+import { RowHeightSettings, ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import { ToolbarPopover } from '../../../shared_components';
 import type { VisualizationToolbarProps } from '../../../types';
 import type { DatatableVisualizationState } from '../visualization';
@@ -19,7 +19,6 @@ import {
   DEFAULT_HEADER_ROW_HEIGHT_LINES,
   DEFAULT_ROW_HEIGHT,
   DEFAULT_ROW_HEIGHT_LINES,
-  ROWS_HEIGHT_OPTIONS,
   ROW_HEIGHT_LINES_KEYS,
 } from './constants';
 
@@ -109,7 +108,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
           onChangeRowHeight={(mode) =>
             onChangeHeight(mode, 'headerRowHeight', ROW_HEIGHT_LINES_KEYS.headerRowHeightLines)
           }
-          onChangeRowHeightLines={(lines) => {
+          onChangeLineCountInput={(lines) => {
             onChangeHeightLines(lines, ROW_HEIGHT_LINES_KEYS.headerRowHeightLines);
           }}
           data-test-subj="lnsHeaderHeightSettings"
@@ -124,7 +123,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
           onChangeRowHeight={(mode) =>
             onChangeHeight(mode, 'rowHeight', ROW_HEIGHT_LINES_KEYS.rowHeightLines)
           }
-          onChangeRowHeightLines={(lines) => {
+          onChangeLineCountInput={(lines) => {
             onChangeHeightLines(lines, ROW_HEIGHT_LINES_KEYS.rowHeightLines);
           }}
           data-test-subj="lnsRowHeightSettings"

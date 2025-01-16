@@ -23,25 +23,25 @@ export enum RowHeightMode {
   custom = 'custom',
 }
 export interface RowHeightSettingsProps {
+  lineCountInput: number;
   rowHeight?: RowHeightMode;
   maxRowHeight?: number;
   label: string;
   onChangeRowHeight: (newHeightMode: RowHeightMode | undefined) => void;
-  onChangeRowHeightLines: (newRowHeightLines: number) => void;
+  onChangeLineCountInput: (newRowHeightLines: number) => void;
   'data-test-subj'?: string;
-  lineCountInput: number;
 }
 
 const idPrefix = htmlIdGenerator()();
 
 export function RowHeightSettings({
+  lineCountInput,
   label,
   rowHeight,
   onChangeRowHeight,
-  onChangeRowHeightLines,
+  onChangeLineCountInput,
   maxRowHeight,
   ['data-test-subj']: dataTestSubj,
-  lineCountInput,
 }: RowHeightSettingsProps) {
   const rowHeightModeOptions = [
     {
@@ -82,7 +82,7 @@ export function RowHeightSettings({
 
               // When switching back to custom mode, trigger the callback with current line count
               if (newMode === RowHeightMode.custom) {
-                onChangeRowHeightLines(lineCountInput);
+                onChangeLineCountInput(lineCountInput);
               }
             }}
             data-test-subj={`${dataTestSubj}_rowHeightButtonGroup`}
@@ -92,7 +92,7 @@ export function RowHeightSettings({
             value={lineCountInput}
             onChange={(e) => {
               const lineCount = Number(e.currentTarget.value);
-              onChangeRowHeightLines(lineCount);
+              onChangeLineCountInput(lineCount);
             }}
             min={1}
             max={maxRowHeight ?? 20}

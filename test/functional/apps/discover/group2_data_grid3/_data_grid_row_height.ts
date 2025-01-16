@@ -53,13 +53,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.clickGridSettings();
       expect(await dataGrid.getCurrentRowHeightValue()).to.be('Custom');
 
-      // toggle the popover
-      await dataGrid.clickGridSettings();
-      await dataGrid.clickGridSettings();
-
       await testSubjects.missingOrFail('resetDisplaySelector');
 
       await dataGrid.changeRowHeightValue('Auto');
+
+      // toggle the popover
+      await dataGrid.clickGridSettings();
+      await dataGrid.clickGridSettings();
 
       expect(await dataGrid.getCurrentRowHeightValue()).to.be('Auto');
 

@@ -101,7 +101,7 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
           defaultMessage: 'Max header cell lines',
         })}
         onChangeRowHeight={onChangeHeaderRowHeight}
-        onChangeRowHeightLines={onChangeHeaderRowHeightLines}
+        onChangeLineCountInput={onChangeHeaderRowHeightLines}
         data-test-subj="unifiedDataTableHeaderRowHeightSettings"
         maxRowHeight={5}
         lineCountInput={headerLineCountInput}
@@ -117,7 +117,7 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
           defaultMessage: 'Body cell lines',
         })}
         onChangeRowHeight={onChangeRowHeight}
-        onChangeRowHeightLines={onChangeRowHeightLines}
+        onChangeLineCountInput={onChangeRowHeightLines}
         data-test-subj="unifiedDataTableRowHeightSettings"
         lineCountInput={lineCountInput}
       />
