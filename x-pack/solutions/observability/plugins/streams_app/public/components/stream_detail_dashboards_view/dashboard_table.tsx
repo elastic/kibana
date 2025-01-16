@@ -52,7 +52,10 @@ export function DashboardsTable({
           defaultMessage: 'Dashboard name',
         }),
         render: (_, { label, id }) => (
-          <EuiLink href={dashboardLocator?.getRedirectUrl({ dashboardId: id, timeRange } || '')}>
+          <EuiLink
+            data-test-subj="streamsAppColumnsLink"
+            href={dashboardLocator?.getRedirectUrl({ dashboardId: id, timeRange } || '')}
+          >
             {label}
           </EuiLink>
         ),

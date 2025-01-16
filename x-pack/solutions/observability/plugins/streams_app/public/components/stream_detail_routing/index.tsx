@@ -395,6 +395,7 @@ function ControlBar({
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="streamsAppSaveOrUpdateChildrenOpenStreamInNewTabButton"
                 size="s"
                 target="_blank"
                 href={router.link('/{key}/{tab}/{subtab}', {
