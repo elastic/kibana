@@ -12,15 +12,17 @@ import {
   DataStreamDetails,
   DataStreamRolloverResponse,
   DataStreamSettings,
-  DegradedField,
   DegradedFieldAnalysis,
   DegradedFieldResponse,
   DegradedFieldValues,
   NonAggregatableDatasets,
+  QualityIssue,
   UpdateFieldLimitResponse,
 } from '../../../common/api_types';
 import { TableCriteria, TimeRangeConfig } from '../../../common/types';
 import { IntegrationType } from '../../../common/data_stream_details';
+
+export type QualityIssueType = QualityIssue['type'];
 
 export interface DataStream {
   name: string;
@@ -31,12 +33,22 @@ export interface DataStream {
 
 export interface DegradedFieldsTableConfig {
   table: TableCriteria<DegradedFieldSortField>;
-  data?: DegradedField[];
+  data?: QualityIssue[];
 }
 
 export interface DegradedFieldsWithData {
   table: TableCriteria<DegradedFieldSortField>;
-  data: DegradedField[];
+  data: QualityIssue[];
+}
+
+export interface FailedDocsErrorsTableConfig {
+  table: TableCriteria<DegradedFieldSortField>;
+  data?: QualityIssue[];
+}
+
+export interface FailedDocsErrorsWithData {
+  table: TableCriteria<DegradedFieldSortField>;
+  data: QualityIssue[];
 }
 
 export interface FieldLimit {
@@ -48,13 +60,18 @@ export interface FieldLimit {
 export interface WithDefaultControllerState {
   dataStream: string;
   degradedFields: DegradedFieldsTableConfig;
+  failedDocsErrors: FailedDocsErrorsTableConfig;
   timeRange: TimeRangeConfig;
   showCurrentQualityIssues: boolean;
+  qualityIssuesChart: QualityIssueType;
   breakdownField?: string;
   isBreakdownFieldEcs?: boolean;
   isIndexNotFoundError?: boolean;
   integration?: IntegrationType;
-  expandedDegradedField?: string;
+  expandedQualityIssue?: {
+    name: string;
+    type: QualityIssueType;
+  };
   isNonAggregatable?: boolean;
   fieldLimit?: FieldLimit;
 }
@@ -73,6 +90,10 @@ export interface WithBreakdownInEcsCheck {
 
 export interface WithDegradedFieldsData {
   degradedFields: DegradedFieldsWithData;
+}
+
+export interface WithFailedDocsErrorsData {
+  failedDocsErrors: FailedDocsErrorsWithData;
 }
 
 export interface WithNonAggregatableDatasetStatus {
@@ -111,7 +132,12 @@ export interface WithNewFieldLimitResponse {
 
 export type DefaultDatasetQualityDetailsContext = Pick<
   WithDefaultControllerState,
-  'degradedFields' | 'timeRange' | 'isIndexNotFoundError' | 'showCurrentQualityIssues'
+  | 'degradedFields'
+  | 'failedDocsErrors'
+  | 'timeRange'
+  | 'isIndexNotFoundError'
+  | 'showCurrentQualityIssues'
+  | 'qualityIssuesChart'
 >;
 
 export type DatasetQualityDetailsControllerTypeState =

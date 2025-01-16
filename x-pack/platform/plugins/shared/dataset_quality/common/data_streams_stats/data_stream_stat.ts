@@ -6,7 +6,7 @@
  */
 
 import { DataStreamDocsStat } from '../api_types';
-import { DEFAULT_DATASET_QUALITY, DEFAULT_DEGRADED_DOCS } from '../constants';
+import { DEFAULT_DATASET_QUALITY, DEFAULT_QUALITY_DOC_STATS } from '../constants';
 import { DataStreamType, QualityIndicators } from '../types';
 import { indexNameToDataStreamParts, mapPercentageToQuality } from '../utils';
 import { Integration } from './integration';
@@ -30,6 +30,10 @@ export class DataStreamStat {
     percentage: number;
     count: number;
   };
+  failedDocs: {
+    percentage: number;
+    count: number;
+  };
 
   private constructor(dataStreamStat: DataStreamStat) {
     this.rawName = dataStreamStat.rawName;
@@ -46,6 +50,7 @@ export class DataStreamStat {
     this.quality = dataStreamStat.quality;
     this.docsInTimeRange = dataStreamStat.docsInTimeRange;
     this.degradedDocs = dataStreamStat.degradedDocs;
+    this.failedDocs = dataStreamStat.failedDocs;
   }
 
   public static create(dataStreamStat: DataStreamStatType) {
@@ -63,7 +68,8 @@ export class DataStreamStat {
       userPrivileges: dataStreamStat.userPrivileges,
       totalDocs: dataStreamStat.totalDocs,
       quality: DEFAULT_DATASET_QUALITY,
-      degradedDocs: DEFAULT_DEGRADED_DOCS,
+      degradedDocs: DEFAULT_QUALITY_DOC_STATS,
+      failedDocs: DEFAULT_QUALITY_DOC_STATS,
     };
 
     return new DataStreamStat(dataStreamStatProps);

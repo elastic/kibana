@@ -10,8 +10,8 @@ import { orderBy } from 'lodash';
 import { DegradedField } from '../../common/data_streams_stats';
 import { SortDirection } from '../../common/types';
 import {
-  DEFAULT_DEGRADED_FIELD_SORT_DIRECTION,
-  DEFAULT_DEGRADED_FIELD_SORT_FIELD,
+  DEFAULT_QUALITY_ISSUE_SORT_DIRECTION,
+  DEFAULT_QUALITY_ISSUE_SORT_FIELD,
 } from '../../common/constants';
 import { useKibanaContextForPlugin } from '../utils';
 import { useDatasetQualityDetailsState } from './use_dataset_quality_details_state';
@@ -59,8 +59,8 @@ export function useDegradedFields() {
           page: options.page.index,
           rowsPerPage: options.page.size,
           sort: {
-            field: options.sort?.field || DEFAULT_DEGRADED_FIELD_SORT_FIELD,
-            direction: options.sort?.direction || DEFAULT_DEGRADED_FIELD_SORT_DIRECTION,
+            field: options.sort?.field || DEFAULT_QUALITY_ISSUE_SORT_FIELD,
+            direction: options.sort?.direction || DEFAULT_QUALITY_ISSUE_SORT_DIRECTION,
           },
         },
       });

@@ -30,7 +30,11 @@ export type DatasetQualityDetailsPublicState = WithDefaultControllerState;
 export type DatasetQualityDetailsPublicStateUpdate = Partial<
   Pick<
     WithDefaultControllerState,
-    'timeRange' | 'breakdownField' | 'expandedDegradedField' | 'showCurrentQualityIssues'
+    | 'timeRange'
+    | 'breakdownField'
+    | 'showCurrentQualityIssues'
+    | 'expandedQualityIssue'
+    | 'qualityIssuesChart'
   >
 > & {
   dataStream: string;

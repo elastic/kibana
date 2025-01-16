@@ -18,10 +18,12 @@ export const getPublicStateFromContext = (
   return {
     dataStream: context.dataStream,
     degradedFields: context.degradedFields,
+    failedDocsErrors: context.failedDocsErrors,
     timeRange: context.timeRange,
     breakdownField: context.breakdownField,
+    qualityIssuesChart: context.qualityIssuesChart,
     integration: context.integration,
-    expandedDegradedField: context.expandedDegradedField,
+    expandedQualityIssue: context.expandedQualityIssue,
     showCurrentQualityIssues: context.showCurrentQualityIssues,
   };
 };
@@ -52,7 +54,8 @@ export const getContextFromPublicState = (
   },
   dataStream: publicState.dataStream,
   breakdownField: publicState.breakdownField,
-  expandedDegradedField: publicState.expandedDegradedField,
+  qualityIssuesChart: publicState.qualityIssuesChart ?? DEFAULT_CONTEXT.qualityIssuesChart,
+  expandedQualityIssue: publicState.expandedQualityIssue,
   showCurrentQualityIssues:
     publicState.showCurrentQualityIssues ?? DEFAULT_CONTEXT.showCurrentQualityIssues,
 });
