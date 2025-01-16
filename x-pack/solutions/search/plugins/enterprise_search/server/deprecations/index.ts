@@ -9,8 +9,8 @@ import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { DeprecationsDetails } from '@kbn/core-deprecations-common';
 import { GetDeprecationsContext, RegisterDeprecationsConfig } from '@kbn/core-deprecations-server';
 
-import { hasFleetServers } from '@kbn/fleet-plugin/server/services/fleet_server';
-import { isAgentlessEnabled } from '@kbn/fleet-plugin/server/services/utils/agentless';
+import { hasFleetServers } from '@kbn/fleet-plugin/server';
+import { isAgentlessEnabled } from '@kbn/fleet-plugin/server';
 import { i18n } from '@kbn/i18n';
 import { Connector, fetchConnectors } from '@kbn/search-connectors';
 
