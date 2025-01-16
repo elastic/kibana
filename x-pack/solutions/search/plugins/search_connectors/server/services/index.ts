@@ -16,7 +16,7 @@ export interface ConnectorMetadata {
   id: string;
   name: string;
   service_type: string;
-  is_deleted?: boolean;
+  is_deleted: boolean;
 }
 
 export interface PackageConnectorSettings {
@@ -80,7 +80,7 @@ export class AgentlessConnectorsInfraService {
           id: connector.id,
           name: connector.name,
           service_type: connector.service_type,
-          is_deleted: connector.deleted,
+          is_deleted: !!connector.deleted,
         });
       }
     }
@@ -257,19 +257,40 @@ export const getConnectorsToDeploy = (
   packagePolicies: PackagePolicyMetadata[],
   connectors: ConnectorMetadata[]
 ): ConnectorMetadata[] => {
-  return connectors.filter(
-    (x) =>
-      packagePolicies.filter((y) => y.connector_settings.id === x.id).length === 0 &&
-      x.is_deleted === false
-  );
+  const results: ConnectorMetadata[] = [];
+
+  for (const connector of connectors) {
+    // Skip deleted connectors
+    if (connector.is_deleted) continue;
+
+    // If no package policies reference this connector by id then it should be deployed
+    if (
+      packagePolicies.every((packagePolicy) => packagePolicy.connector_settings.id !== connector.id)
+    ) {
+      results.push(connector);
+    }
+  }
+
+  return results;
 };
 
 export const getPoliciesToDelete = (
   packagePolicies: PackagePolicyMetadata[],
   connectors: ConnectorMetadata[]
 ): PackagePolicyMetadata[] => {
-  return packagePolicies.filter(
-    (x) =>
-      connectors.filter((y) => y.id === x.connector_settings.id && y.is_deleted === true).length > 0
-  );
+  const results: PackagePolicyMetadata[] = [];
+
+  for (const packagePolicy of packagePolicies) {
+    // If there is a connector that has been soft-deleted for this package policy then this policy should be deleted
+    if (
+      connectors.some(
+        (connector) =>
+          connector.id === packagePolicy.connector_settings.id && connector.is_deleted === true
+      )
+    ) {
+      results.push(packagePolicy);
+    }
+  }
+
+  return results;
 };
