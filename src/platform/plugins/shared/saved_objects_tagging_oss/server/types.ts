@@ -34,6 +34,16 @@ export interface SavedObjectsTaggingApiServer {
    * Creates a TagClient bound to the provided SavedObject client.
    */
   createTagClient: ({ client }: { client: SavedObjectsClientContract }) => ITagsClient;
+
+  /**
+   * Creates an internal AssignmentService bound to the provided SavedObject client.
+   *
+   * @remark: As assignment services created via this API will not be performing authz check to ensure
+   *          that the current user is allowed to update the assigned/unassigned objects.
+   *          This API is only meant to be used to perform operations on behalf of the 'internal' Kibana user.
+   *          When trying to assign or unassign tags on behalf of a user, use the `tags` request handler context
+   *          instead.
+   */
   createInternalAssignmentService: (options: AssignmentServiceOptions) => IAssignmentService;
   getTagsFromReferences: (
     references: SavedObjectReference[],
