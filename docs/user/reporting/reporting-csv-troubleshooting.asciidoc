@@ -82,7 +82,7 @@ from Elasticsearch, or determine if there are performance improvements to be gai
 4. This will open the *Console* application, pre-filled with the queries used to generate the CSV export.
 
 [role="screenshot"]
-image::user/reporting/images/inspect-query-from-csv-export.gif["Inspecting the query used for CSV export"]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt4758e67aaec715d9/67897d0be92e090a6dc626a8/inspect-query-from-csv-export.gif[Inspect the query used for CSV export]
 
 [float]
 [[reporting-troubleshooting-csv-token-expired]]
