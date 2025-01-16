@@ -6,13 +6,15 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createStreamsRepositorySupertestClient } from './helpers/repository_client';
 import { disableStreams, enableStreams, fetchDocument, indexDocument } from './helpers/requests';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const supertest = getService('supertest');
   const esClient = getService('es');
+  const config = getService('config');
+  const isServerless = !!config.get('serverless');
 
   const TEST_STREAM_NAME = 'logs-test-default';
 
@@ -94,10 +96,12 @@ export default function ({ getService }: FtrProviderContext) {
         name: TEST_STREAM_NAME,
         dashboards: [],
         inherited_fields: {},
-        lifecycle: {
-          policy: 'logs',
-          type: 'ilm',
-        },
+        lifecycle: isServerless
+          ? { type: 'dlm' }
+          : {
+              policy: 'logs',
+              type: 'ilm',
+            },
         stream: {
           ingest: {
             processing: [

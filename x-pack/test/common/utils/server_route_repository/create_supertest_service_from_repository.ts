@@ -98,7 +98,10 @@ export function getApiClientFromSupertest<TServerRouteRepository extends ServerR
       const { method, pathname, version } = formatRequest(endpoint, params.path);
       const url = format({ pathname, query: params?.query });
 
-      const headers: Record<string, string> = { 'kbn-xsrf': 'foo' };
+      const headers: Record<string, string> = {
+        'kbn-xsrf': 'foo',
+        'x-elastic-internal-origin': 'kibana',
+      };
 
       if (version) {
         headers['Elastic-Api-Version'] = version;

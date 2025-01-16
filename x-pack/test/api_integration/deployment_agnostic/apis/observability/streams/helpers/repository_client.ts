@@ -9,7 +9,7 @@ import supertest from 'supertest';
 import {
   RepositorySupertestClient,
   getApiClientFromSupertest,
-} from '../../../../common/utils/server_route_repository/create_supertest_service_from_repository';
+} from '../../../../../../common/utils/server_route_repository/create_supertest_service_from_repository';
 
 export type StreamsSupertestRepositoryClient = RepositorySupertestClient<StreamsRouteRepository>;
 

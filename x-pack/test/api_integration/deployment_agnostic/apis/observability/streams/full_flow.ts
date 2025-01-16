@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createStreamsRepositorySupertestClient } from './helpers/repository_client';
 import {
   disableStreams,
@@ -16,7 +16,7 @@ import {
   indexDocument,
 } from './helpers/requests';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const supertest = getService('supertest');
   const esClient = getService('es');
 

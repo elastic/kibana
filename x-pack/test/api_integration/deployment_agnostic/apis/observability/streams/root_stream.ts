@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { WiredStreamConfigDefinition, WiredStreamDefinition } from '@kbn/streams-schema';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { disableStreams, enableStreams, putStream } from './helpers/requests';
 import { createStreamsRepositorySupertestClient } from './helpers/repository_client';
 
@@ -37,7 +37,7 @@ const rootStreamDefinition: WiredStreamDefinition = {
   },
 };
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const supertest = getService('supertest');
   const apiClient = createStreamsRepositorySupertestClient(supertest);
 

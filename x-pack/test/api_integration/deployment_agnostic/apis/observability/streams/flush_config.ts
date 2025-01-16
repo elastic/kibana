@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
 import { ReadStreamDefinition, WiredReadStreamDefinition } from '@kbn/streams-schema';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createStreamsRepositorySupertestClient } from './helpers/repository_client';
 import { disableStreams, enableStreams, indexDocument } from './helpers/requests';
 
@@ -120,7 +120,7 @@ const streams: StreamPutItem[] = [
   },
 ];
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const supertest = getService('supertest');
   const esClient = getService('es');
 

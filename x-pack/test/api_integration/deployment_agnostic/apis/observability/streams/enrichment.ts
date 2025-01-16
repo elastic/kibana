@@ -16,10 +16,10 @@ import {
   indexDocument,
   putStream,
 } from './helpers/requests';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createStreamsRepositorySupertestClient } from './helpers/repository_client';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const supertest = getService('supertest');
   const esClient = getService('es');
 
