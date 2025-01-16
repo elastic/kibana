@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React from 'react';
 import type { EuiDataGridControlColumn, EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { render, renderHook, screen } from '@testing-library/react';
 import { TestProviders, mockTimelineData } from '../../../../../common/mock';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { useTimelineControlColumn } from './use_timeline_control_columns';
-import type { ColumnHeaderOptions } from '../../../../../../common/types/timeline/columns';
 import { TimelineId } from '@kbn/timelines-plugin/public/store/timeline';
-import { TimelineTabs } from '../../../../../../common/types';
 import type { UnifiedTimelineDataGridCellContext } from '../../types';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { initialUserPrivilegesState } from '../../../../../common/components/user_privileges/user_privileges_context';
@@ -30,19 +29,6 @@ jest.mock('../../../../../common/components/user_privileges');
 const useLicenseMock = useLicense as jest.Mock;
 
 describe('useTimelineControlColumns', () => {
-  const mockColumns: ColumnHeaderOptions[] = [
-    {
-      columnHeaderType: 'not-filtered',
-      id: 'source.ip',
-      initialWidth: 150,
-    },
-    {
-      columnHeaderType: 'not-filtered',
-      id: 'agent.type',
-      initialWidth: 150,
-    },
-  ];
-
   const refetchMock = jest.fn();
 
   describe('leadingControlColumns', () => {
@@ -50,10 +36,7 @@ describe('useTimelineControlColumns', () => {
       const { result } = renderHook(
         () =>
           useTimelineControlColumn({
-            columns: mockColumns,
-            sort: [],
             timelineId: TimelineId.test,
-            activeTab: TimelineTabs.query,
             refetch: refetchMock,
             events: [],
             pinnedEventIds: {},
@@ -73,10 +56,7 @@ describe('useTimelineControlColumns', () => {
       const { result } = renderHook(
         () =>
           useTimelineControlColumn({
-            columns: mockColumns,
-            sort: [],
             timelineId: TimelineId.test,
-            activeTab: TimelineTabs.query,
             refetch: refetchMock,
             events: [],
             pinnedEventIds: {},
@@ -97,10 +77,7 @@ describe('useTimelineControlColumns', () => {
       const { result } = renderHook(
         () =>
           useTimelineControlColumn({
-            columns: mockColumns,
-            sort: [],
             timelineId: TimelineId.test,
-            activeTab: TimelineTabs.query,
             refetch: refetchMock,
             events: [],
             pinnedEventIds: {},
@@ -170,10 +147,7 @@ describe('useTimelineControlColumns', () => {
       const { result } = renderHook(
         () =>
           useTimelineControlColumn({
-            columns: mockColumns,
-            sort: [],
             timelineId: TimelineId.test,
-            activeTab: TimelineTabs.query,
             refetch: refetchMock,
             events: mockTimelineData,
             pinnedEventIds: {},
@@ -206,10 +180,7 @@ describe('useTimelineControlColumns', () => {
       const { result } = renderHook(
         () =>
           useTimelineControlColumn({
-            columns: mockColumns,
-            sort: [],
             timelineId: TimelineId.test,
-            activeTab: TimelineTabs.query,
             refetch: refetchMock,
             events: mockTimelineData,
             pinnedEventIds: {},

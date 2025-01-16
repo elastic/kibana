@@ -19,7 +19,7 @@ export const siemMigrationsLinks: LinkItem = {
   id: SecurityPageName.siemMigrationsRules,
   title: SIEM_MIGRATIONS_RULES,
   description: i18n.translate('xpack.securitySolution.appLinks.siemMigrationsRulesDescription', {
-    defaultMessage: 'SIEM Rules Migrations.',
+    defaultMessage: 'SIEM Rule Migrations.',
   }),
   landingIcon: SiemMigrationsIcon,
   path: SIEM_MIGRATIONS_RULES_PATH,
@@ -28,8 +28,9 @@ export const siemMigrationsLinks: LinkItem = {
   hideTimeline: true,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.siemMigrationsRules', {
-      defaultMessage: 'SIEM Rules Migrations',
+      defaultMessage: 'SIEM Rule Migrations',
     }),
   ],
   experimentalKey: 'siemMigrationsEnabled',
+  isBeta: true,
 };
