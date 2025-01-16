@@ -17,7 +17,12 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getProcessorType, isDissectProcessor, isGrokProcessor } from '@kbn/streams-schema';
+import {
+  ReadStreamDefinition,
+  getProcessorType,
+  isDissectProcessor,
+  isGrokProcessor,
+} from '@kbn/streams-schema';
 import { useBoolean } from '@kbn/react-hooks';
 import { css } from '@emotion/react';
 import { EditProcessorFlyout, EditProcessorFlyoutProps } from './flyout';
@@ -45,6 +50,7 @@ export const DraggableProcessorListItem = ({
 );
 
 interface ProcessorListItemProps {
+  definition: ReadStreamDefinition;
   processor: ProcessorDefinition;
   hasShadow: EuiPanelProps['hasShadow'];
   onUpdateProcessor: EditProcessorFlyoutProps['onUpdateProcessor'];
@@ -52,6 +58,7 @@ interface ProcessorListItemProps {
 }
 
 const ProcessorListItem = ({
+  definition,
   processor,
   hasShadow = false,
   onUpdateProcessor,
@@ -93,6 +100,7 @@ const ProcessorListItem = ({
       {isEditProcessorOpen && (
         <EditProcessorFlyout
           key={`edit-processor`}
+          definition={definition}
           processor={processor}
           onClose={closeEditProcessor}
           onUpdateProcessor={onUpdateProcessor}
