@@ -11,6 +11,7 @@ import { APIRoutes } from '../common/api_routes';
 
 import { errorHandler } from './utils/error_handler';
 import { fetchSynonymSets } from './lib/fetch_synonym_sets';
+import { DEFAULT_PAGE_VALUE } from '../common/pagination';
 
 export function defineRoutes({ logger, router }: { logger: Logger; router: IRouter }) {
   router.get(
@@ -27,8 +28,8 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         query: schema.object({
-          from: schema.number({ defaultValue: 0 }),
-          size: schema.number({ defaultValue: 10 }),
+          from: schema.number({ defaultValue: DEFAULT_PAGE_VALUE.from }),
+          size: schema.number({ defaultValue: DEFAULT_PAGE_VALUE.size }),
         }),
       },
     },

@@ -35,7 +35,7 @@ export const SearchSynonymsOverview = () => {
         {isInitialLoading && 'Loading...'}
 
         {!isInitialLoading && synonymsData && synonymsData._meta.totalItemCount > 0 && (
-          <SynonymSets synonyms={synonymsData} />
+          <SynonymSets />
         )}
         {!isInitialLoading && synonymsData && synonymsData._meta.totalItemCount === 0 && (
           <EmptyPrompt />

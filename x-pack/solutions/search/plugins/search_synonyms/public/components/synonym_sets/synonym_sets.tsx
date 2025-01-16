@@ -15,19 +15,27 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { Paginate } from '../../../common/pagination';
+import React, { useState } from 'react';
+import { DEFAULT_PAGE_VALUE, paginationToPage } from '../../../common/pagination';
+import { useFetchSynonymsSets } from '../../hooks/use_fetch_synonyms_sets';
 
-interface SynonymsSetsProps {
-  synonyms: Paginate<SynonymsGetSynonymsSetsSynonymsSetItem>;
-}
-
-export const SynonymSets = ({ synonyms }: SynonymsSetsProps) => {
+export const SynonymSets = () => {
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_VALUE.size);
+  const { from } = paginationToPage({ pageIndex, pageSize, totalItemCount: 0 });
+  const { data: synonyms } = useFetchSynonymsSets({ from, size: pageSize });
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
+
+  if (!synonyms) {
+    return null;
+  }
+
   const pagination = {
-    initialPageSize: 25,
+    initialPageSize: 10,
     pageSizeOptions: [10, 25, 50],
     ...synonyms._meta,
+    pageSize,
+    pageIndex,
   };
   const columns: Array<EuiBasicTableColumn<SynonymsGetSynonymsSetsSynonymsSetItem>> = [
     {
@@ -89,7 +97,10 @@ export const SynonymSets = ({ synonyms }: SynonymsSetsProps) => {
         items={synonyms.data}
         columns={columns}
         pagination={pagination}
-        onChange={() => {}}
+        onChange={({ page: changedPage }) => {
+          setPageIndex(changedPage.index);
+          setPageSize(changedPage.size);
+        }}
       />
     </div>
   );

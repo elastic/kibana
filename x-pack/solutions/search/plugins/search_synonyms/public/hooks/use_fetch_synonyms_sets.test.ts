@@ -6,7 +6,6 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { useKibana } from './use_kibana';
 
 const mockHttpGet = jest.fn();
 
@@ -16,7 +15,7 @@ jest.mock('@tanstack/react-query', () => ({
       const res = await queryFn();
       return Promise.resolve(res);
     } catch (e) {
-      //opts.onError(e);
+      // opts.onError(e);
     }
   }),
 }));

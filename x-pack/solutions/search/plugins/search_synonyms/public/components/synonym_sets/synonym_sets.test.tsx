@@ -10,26 +10,29 @@ import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { SynonymSets } from './synonym_sets';
 
-describe('Search Synonym Sets list', () => {
-  const synonymsMock = {
-    _meta: {
-      pageIndex: 0,
-      pageSize: 10,
-      totalItemCount: 2,
+jest.mock('../../hooks/use_fetch_synonyms_sets', () => ({
+  useFetchSynonymsSets: () => ({
+    data: {
+      data: [
+        {
+          synonyms_set: 'Synonyms Set 1',
+          count: 2,
+        },
+        {
+          synonyms_set: 'Synonyms Set 2',
+          count: 3,
+        },
+      ],
+      _meta: { pageIndex: 0, pageSize: 10, totalItemCount: 2 },
     },
-    data: [
-      {
-        synonyms_set: 'Synonyms Set 1',
-        count: 2,
-      },
-      {
-        synonyms_set: 'Synonyms Set 2',
-        count: 3,
-      },
-    ],
-  };
+    isLoading: false,
+    isError: false,
+  }),
+}));
+
+describe('Search Synonym Sets list', () => {
   it('should render the list with synonym sets', () => {
-    render(<SynonymSets synonyms={synonymsMock} />);
+    render(<SynonymSets />);
     const synonymSetTable = screen.getByTestId('synonyms-set-table');
     expect(synonymSetTable).toBeInTheDocument();
 
@@ -54,7 +57,7 @@ describe('Search Synonym Sets list', () => {
 
   describe('Synonym set item', () => {
     it('should have an action popover', async () => {
-      render(<SynonymSets synonyms={synonymsMock} />);
+      render(<SynonymSets />);
       const synonymSetItemActions = screen.getAllByTestId('synonyms-set-item-actions');
       act(() => {
         fireEvent.click(synonymSetItemActions[0]);

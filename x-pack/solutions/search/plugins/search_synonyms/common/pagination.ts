@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+export const DEFAULT_PAGE_VALUE: Page = {
+  from: 0,
+  size: 10,
+};
+
 export interface Pagination {
   pageIndex: number;
   pageSize: number;
