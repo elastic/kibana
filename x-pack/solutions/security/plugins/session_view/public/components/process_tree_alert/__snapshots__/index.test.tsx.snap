@@ -51,7 +51,6 @@ exports[`ProcessTreeAlerts component When ProcessTreeAlert is mounted should ren
           >
             cmd test alert
           </div>
-          
         </div>
       </div>
       <div
