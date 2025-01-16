@@ -81,7 +81,7 @@ export const initializeAnomalyChartsControls = (
       updateSelectedEntities,
     } as AnomalyChartsComponentApi,
     dataLoadingApi: {
-      dataLoading: dataLoading$,
+      dataLoading$,
       setInterval,
       onRenderComplete,
       onLoading,
