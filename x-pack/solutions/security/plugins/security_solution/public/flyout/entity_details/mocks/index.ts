@@ -160,9 +160,8 @@ export const mockServiceRiskScoreState: RiskScoreState<EntityType.service> = {
   isInspected: false,
   refetch: () => {},
   totalCount: 0,
-  isModuleEnabled: true,
   isAuthorized: true,
-  isDeprecated: false,
+  hasEngineBeenInstalled: true,
   loading: false,
   error: undefined,
 };
