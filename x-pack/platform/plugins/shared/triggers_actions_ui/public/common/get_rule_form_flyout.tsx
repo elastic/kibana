@@ -5,32 +5,29 @@
  * 2.0.
  */
 
+import { EuiPortal, EuiOverlayMask, EuiLoadingSpinner } from '@elastic/eui';
 import type { RuleFormProps } from '@kbn/response-ops-rule-form';
-import React, { useState } from 'react';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
+import React, { Suspense, lazy } from 'react';
 import type { RuleTypeMetaData } from '../types';
-
-const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
-  props: RuleFormProps<MetaData>
-) => {
-  const [Component, setComponent] = useState<React.ComponentType<RuleFormProps<MetaData>> | null>(
-    null
-  );
-  useEffectOnce(() => {
-    (async () => {
-      const { RuleForm: RuleFormComponent } = await import('@kbn/response-ops-rule-form');
-      setComponent(RuleFormComponent);
-    })();
-  });
-
-  if (!Component) {
-    return null;
-  }
-  return <Component {...props} />;
-};
 
 export const getRuleFormFlyoutLazy = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
   props: RuleFormProps<MetaData>
 ) => {
-  return <RuleForm {...props} isFlyout />;
+  const RuleForm: React.LazyExoticComponent<React.FC<RuleFormProps<MetaData>>> = lazy(() =>
+    import('@kbn/response-ops-rule-form').then((module) => ({ default: module.RuleForm }))
+  );
+
+  return (
+    <Suspense
+      fallback={
+        <EuiPortal>
+          <EuiOverlayMask>
+            <EuiLoadingSpinner size="xl" />
+          </EuiOverlayMask>
+        </EuiPortal>
+      }
+    >
+      <RuleForm {...props} isFlyout />
+    </Suspense>
+  );
 };
