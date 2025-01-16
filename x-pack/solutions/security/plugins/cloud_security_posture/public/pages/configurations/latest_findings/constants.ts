@@ -78,7 +78,7 @@ export const NULL_GROUPING_MESSAGES = {
 
 export const defaultGroupingOptions: GroupOption[] = [
   {
-    label: i18n.translate('xpack.csp.findings.latestFindings.groupByResourceId', {
+    label: i18n.translate('xpack.csp.findings.latestFindings.groupByResource', {
       defaultMessage: 'Resource ID',
     }),
     key: FINDINGS_GROUPING_OPTIONS.RESOURCE_ID,
