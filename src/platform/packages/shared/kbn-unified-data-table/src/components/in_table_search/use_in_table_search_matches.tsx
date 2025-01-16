@@ -269,8 +269,18 @@ function getCellMatchesCount({
   const UnifiedDataTableRenderCellValue = renderCellValue;
 
   const container = document.createElement('div');
-  // TODO: add a timeout to prevent infinite waiting
-  return new Promise((resolve) => {
+
+  return new Promise<number>((resolve) => {
+    const finish = (count: number) => {
+      resolve(count);
+      ReactDOM.unmountComponentAtNode(container);
+    };
+
+    const timer = setTimeout(() => {
+      // time out if rendering takes longer
+      finish(0);
+    }, 1000);
+
     ReactDOM.render(
       <KibanaRenderContextProvider {...services}>
         <UnifiedDataTableContext.Provider
@@ -290,13 +300,13 @@ function getCellMatchesCount({
             colIndex={0}
             setCellProps={() => {}}
             onHighlightsCountFound={(count) => {
-              resolve(count);
-              ReactDOM.unmountComponentAtNode(container);
+              clearTimeout(timer);
+              finish(count);
             }}
           />
         </UnifiedDataTableContext.Provider>
       </KibanaRenderContextProvider>,
       container
     );
-  });
+  }).catch(() => 0); // catching unexpected errors
 }
