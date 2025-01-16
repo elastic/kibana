@@ -18,6 +18,18 @@ describe('Microsoft Defender for Endpoint Connector', () => {
   });
 
   describe('Access Token management', () => {
+    const soTokenMock = {
+      id: '1',
+      type: 'connector_token',
+      attributes: {
+        connectorId: '123',
+        tokenType: 'access_token',
+        token: 'testtokenvalue',
+        expiresAt: '2025-01-16T13:02:43.494Z',
+      },
+      references: [],
+    };
+
     it('should call API to generate as new token', async () => {
       await connectorMock.instanceMock.isolateHost(
         { id: '1-2-3', comment: 'foo' },
@@ -37,6 +49,14 @@ describe('Microsoft Defender for Endpoint Connector', () => {
         }),
         connectorMock.usageCollector
       );
+    });
+
+    it('should use cached token', async () => {
+      // TODO:PT implement
+    });
+
+    it('should should call API to generate as new token if cached token is expired', async () => {
+      // TODO:PT implement
     });
   });
 

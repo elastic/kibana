@@ -41,7 +41,7 @@ export class OAuthTokenManager {
 
   private isTokenExpired(token: ConnectorToken): boolean {
     const now = new Date();
-    now.setSeconds(now.getSeconds() - 30); // Allows for a threshold of 30s before considering the token expired
+    now.setSeconds(now.getSeconds() - 5); // Allows for a threshold of -5s before considering the token expired
 
     const isExpired = token.expiresAt < now.toISOString();
 
