@@ -17,6 +17,7 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import {
   DataPublicPluginStart,
+  type DataViewListItem,
   noSearchSessionStorageCapabilityMessage,
   SearchSessionInfoProvider,
 } from '@kbn/data-plugin/public';
@@ -68,6 +69,13 @@ import {
   DataSourceType,
   isDataSourceType,
 } from '../../../../common/data_sources';
+
+interface DiscoverStateDataRequirements {
+  hasUserDataViewValue?: boolean;
+  hasESDataValue?: boolean;
+  defaultDataViewExists?: boolean;
+  dataViewList?: DataViewListItem[];
+}
 
 export interface DiscoverStateContainerParams {
   /**
@@ -161,7 +169,11 @@ export interface DiscoverStateContainer {
     /**
      * Load current list of data views, add them to internal state
      */
-    loadDataViewList: () => Promise<void>;
+    loadDataViewList: () => Promise<DataViewListItem[]>;
+    /**
+     * Loading information about data and data views that are required for the current session
+     */
+    loadDataRequirements: () => Promise<DiscoverStateDataRequirements>;
     /**
      * Load a saved search by id or create a new one that's not persisted yet
      * @param LoadParams - optional parameters to load a saved search
@@ -324,6 +336,54 @@ export function getDiscoverStateContainer({
   const loadDataViewList = async () => {
     const dataViewList = await services.dataViews.getIdsWithTitle(true);
     internalStateContainer.transitions.setSavedDataViews(dataViewList);
+    return dataViewList;
+  };
+
+  const loadDataRequirementsHelper = async (sessKey: string) => {
+    try {
+      const [hasUserDataViewValue, hasESDataValue, defaultDataViewExists, dataViewList] =
+        await Promise.all([
+          services.data.dataViews.hasData.hasUserDataView().catch(() => false),
+          services.data.dataViews.hasData.hasESData().catch(() => false),
+          services.data.dataViews.defaultDataViewExists().catch(() => false),
+          loadDataViewList(),
+        ]);
+      const result = {
+        hasUserDataViewValue,
+        hasESDataValue,
+        defaultDataViewExists,
+        dataViewList,
+      };
+      sessionStorage.setItem(sessKey, JSON.stringify(result));
+      return {
+        hasUserDataViewValue,
+        hasESDataValue,
+        defaultDataViewExists,
+      };
+    } catch (error) {
+      return {
+        hasUserDataViewValue: false,
+        hasESDataValue: false,
+        defaultDataViewExists: false,
+      };
+    }
+  };
+
+  const loadDataRequirements = async () => {
+    const currentUser = await services.core.security.authc.getCurrentUser();
+    const currentSpace = await services.spaces?.getActiveSpace();
+    const sessionKey = `discover:session:dataRequirements:${currentUser.profile_uid}:${currentSpace?.id}`;
+    const sessionValue = sessionStorage.getItem(sessionKey);
+
+    if (sessionValue) {
+      const sessionValueParsed = JSON.parse(sessionValue || '{}');
+      if (sessionValueParsed.dataViewList) {
+        internalStateContainer.transitions.setSavedDataViews(sessionValueParsed.dataViewList);
+      }
+      loadDataRequirementsHelper(sessionKey);
+      return sessionValueParsed;
+    }
+    return loadDataRequirementsHelper(sessionKey);
   };
 
   /**
@@ -615,6 +675,7 @@ export function getDiscoverStateContainer({
       initializeAndSync,
       fetchData,
       loadDataViewList,
+      loadDataRequirements,
       loadSavedSearch,
       onChangeDataView,
       createAndAppendAdHocDataView,

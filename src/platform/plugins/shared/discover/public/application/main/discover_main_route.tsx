@@ -123,22 +123,19 @@ export function DiscoverMainRoute({
         if (savedSearchId || isEsqlQuery || nextDataView) {
           // Although ES|QL doesn't need a data view, we still need to load the data view list to
           // ensure the data view is available for the user to switch to classic mode
-          await stateContainer.actions.loadDataViewList();
+          // however, we don't need to wait for those requirements to load, which makes loading a bit more snappy
+          stateContainer.actions.loadDataRequirements();
           return true;
         }
 
-        const [hasUserDataViewValue, hasESDataValue, defaultDataViewExists] = await Promise.all([
-          data.dataViews.hasData.hasUserDataView().catch(() => false),
-          data.dataViews.hasData.hasESData().catch(() => false),
-          data.dataViews.defaultDataViewExists().catch(() => false),
-          stateContainer.actions.loadDataViewList(),
-        ]);
+        const { hasUserDataViewValue, hasESDataValue, defaultDataViewExists } =
+          await stateContainer.actions.loadDataRequirements();
 
         if (!hasUserDataViewValue || !defaultDataViewExists) {
           setNoDataState({
             showNoDataPage: true,
-            hasESData: hasESDataValue,
-            hasUserDataView: hasUserDataViewValue,
+            hasESData: Boolean(hasESDataValue),
+            hasUserDataView: Boolean(hasUserDataViewValue),
           });
           return false;
         }
@@ -148,7 +145,7 @@ export function DiscoverMainRoute({
         return false;
       }
     },
-    [data.dataViews, savedSearchId, stateContainer]
+    [savedSearchId, stateContainer]
   );
 
   const loadSavedSearch = useCallback(
