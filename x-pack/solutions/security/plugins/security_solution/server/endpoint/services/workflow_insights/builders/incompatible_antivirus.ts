@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { get as _get } from 'lodash';
+import { get as _get, uniqBy } from 'lodash';
 
 import type { DefendInsight } from '@kbn/elastic-assistant-common';
 
@@ -51,10 +51,8 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
 
   const insightsPromises = defendInsights.map(
     async (defendInsight: DefendInsight): Promise<SecurityWorkflowInsight[]> => {
-      const filePaths = Array.from(
-        new Set((defendInsight.events ?? []).map((event) => event.value))
-      );
-      const eventIds = Array.from(new Set((defendInsight.events ?? []).map((event) => event.id)));
+      const uniqueFilePathsInsights = uniqBy(defendInsight.events, 'value');
+      const eventIds = Array.from(new Set(uniqueFilePathsInsights.map((event) => event.id)));
 
       const codeSignaturesHits = (
         await esClient.search<FileEventDoc>({
@@ -90,9 +88,10 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
       ).hits.hits;
 
       const createRemediation = (
-        field: string,
-        value: string,
-        os: string
+        filePath: string,
+        os: string,
+        signatureField?: string,
+        signatureValue?: string
       ): SecurityWorkflowInsight => {
         return {
           '@timestamp': currentTime,
@@ -129,11 +128,21 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
                 description: 'Suggested by Security Workflow Insights',
                 entries: [
                   {
-                    field,
+                    field: 'process.executable.caseless',
                     operator: 'included' as const,
                     type: 'match' as const,
-                    value,
+                    value: filePath,
                   },
+                  ...(signatureField && signatureValue
+                    ? [
+                        {
+                          field: signatureField,
+                          operator: 'included' as const,
+                          type: 'match' as const,
+                          value: signatureValue,
+                        },
+                      ]
+                    : []),
                 ],
                 // TODO add per policy support
                 tags: ['policy:all'],
@@ -145,18 +154,26 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
       };
 
       return Object.keys(osEndpointIdsMap).flatMap((os): SecurityWorkflowInsight[] => {
-        if (codeSignaturesHits.length) {
-          return codeSignaturesHits.map((hit) => {
-            const extPath = os === 'windows' ? '.Ext' : '';
-            const field = `process${extPath}.code_signature`;
-            const value = _get(hit, `_source.${field}.subject_name`, 'invalid subject name');
-            return createRemediation(field, value, os);
-          });
-        } else {
-          return filePaths.map((filePath) =>
-            createRemediation('process.executable.caseless', filePath, os)
-          );
-        }
+        return uniqueFilePathsInsights.map((insight) => {
+          const { value: filePath, id } = insight;
+
+          if (codeSignaturesHits.length) {
+            const codeSignatureSearchHit = codeSignaturesHits.find((hit) => hit._id === id);
+
+            if (codeSignatureSearchHit) {
+              const extPath = os === 'windows' ? '.Ext' : '';
+              const field = `process${extPath}.code_signature`;
+              const value = _get(
+                codeSignatureSearchHit,
+                `_source.${field}.subject_name`,
+                'invalid subject name'
+              );
+              return createRemediation(filePath, os, field, value);
+            }
+          }
+
+          return createRemediation(filePath, os);
+        });
       });
     }
   );

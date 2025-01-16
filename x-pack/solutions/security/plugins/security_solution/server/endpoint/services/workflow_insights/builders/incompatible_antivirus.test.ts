@@ -74,7 +74,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
     } as unknown as ElasticsearchClient,
   });
 
-  const buildExpectedInsight = (os: string, field: string, value: string) =>
+  const buildExpectedInsight = (os: string, signerField?: string, signerValue?: string) =>
     expect.objectContaining({
       '@timestamp': expect.any(moment),
       message: 'Incompatible antiviruses detected',
@@ -103,11 +103,21 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
             description: 'Suggested by Security Workflow Insights',
             entries: [
               {
-                field,
+                field: 'process.executable.caseless',
                 operator: 'included',
                 type: 'match',
-                value,
+                value: '/Applications/AVGAntivirus.app/Contents/Backend/services/com.avg.activity',
               },
+              ...(signerField && signerValue
+                ? [
+                    {
+                      field: signerField,
+                      operator: 'included',
+                      type: 'match',
+                      value: signerValue,
+                    },
+                  ]
+                : []),
             ],
             tags: ['policy:all'],
             os_types: [os],
@@ -128,13 +138,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
     const params = generateParams();
     const result = await buildIncompatibleAntivirusWorkflowInsights(params);
 
-    expect(result).toEqual([
-      buildExpectedInsight(
-        'windows',
-        'process.executable.caseless',
-        '/Applications/AVGAntivirus.app/Contents/Backend/services/com.avg.activity'
-      ),
-    ]);
+    expect(result).toEqual([buildExpectedInsight('windows')]);
     expect(groupEndpointIdsByOS).toHaveBeenCalledWith(
       ['endpoint-1'],
       params.endpointMetadataService
@@ -151,6 +155,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
       hits: {
         hits: [
           {
+            _id: 'lqw5opMB9Ke6SNgnxRSZ',
             _source: {
               process: {
                 Ext: {
@@ -188,6 +193,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
       hits: {
         hits: [
           {
+            _id: 'lqw5opMB9Ke6SNgnxRSZ',
             _source: {
               process: {
                 code_signature: {

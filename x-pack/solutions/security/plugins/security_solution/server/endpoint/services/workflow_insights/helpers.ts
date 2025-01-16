@@ -136,9 +136,15 @@ export async function groupEndpointIdsByOS(
 }
 
 export function generateInsightId(insight: SecurityWorkflowInsight): string {
-  const { type, category, value, target } = insight;
+  const { type, category, value, target, remediation } = insight;
   const targetType = target.type;
   const targetIds = target.ids.join(',');
+  const targetRemediationEntries =
+    remediation?.exception_list_items
+      ?.flatMap((item) =>
+        (item.entries as Array<{ value: string }>).map((entry) => entry.value).join(',')
+      )
+      .join(',') ?? '';
 
   const hash = createHash('sha256');
   hash.update(type);
@@ -146,6 +152,7 @@ export function generateInsightId(insight: SecurityWorkflowInsight): string {
   hash.update(value);
   hash.update(targetType);
   hash.update(targetIds);
+  hash.update(targetRemediationEntries);
 
   return hash.digest('hex');
 }
