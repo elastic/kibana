@@ -21,6 +21,7 @@ import {
   tap,
   shareReplay,
   map,
+  first,
 } from 'rxjs';
 
 import { ElasticV3ServerShipper } from '@elastic/ebt/shippers/elastic_v3/server';
@@ -171,9 +172,11 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   }
 
   public setup(
-    { analytics, docLinks, http, savedObjects }: CoreSetup,
+    coreSetup: CoreSetup,
     { usageCollection, telemetryCollectionManager }: TelemetryPluginsDepsSetup
   ): TelemetryPluginSetup {
+    const { analytics, docLinks, http, savedObjects } = coreSetup;
+
     this.isOptedIn$.subscribe((optedIn) => {
       const optInStatusMsg = optedIn ? 'enabled' : 'disabled';
       this.logger.info(
@@ -232,6 +235,17 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     registerTelemetrySavedObject((opts) => savedObjects.registerType(opts));
     this.registerUsageCollectors(usageCollection);
+
+    config$
+      .pipe(
+        filter((cfg) => cfg.localShipper === true),
+        first(),
+        map(async () => {
+          const { initializeLocalShipper } = await import('./local_shipper');
+          initializeLocalShipper(this.logger.get('local-shipper'), coreSetup);
+        })
+      )
+      .subscribe();
 
     return {
       getTelemetryUrl: async () => {
