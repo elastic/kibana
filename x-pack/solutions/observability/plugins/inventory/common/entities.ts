@@ -35,11 +35,8 @@ export type EntityGroup = {
 export type InventoryEntity = {
   entityId: string;
   entityType: string;
-  entityIdentityFields: string | string[];
   entityDisplayName: string;
-  entityDefinitionId: string;
   entityLastSeenTimestamp: string;
-  entityDefinitionVersion: string;
-  entitySchemaVersion: string;
+  entityIdentityFields: Record<string, string[]>;
   alertsCount?: number;
 } & EntityMetadata;

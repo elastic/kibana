@@ -4997,13 +4997,7 @@
         "label": "SolutionView",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.SolutionId",
-            "text": "SolutionId"
-          },
+          "SolutionId",
           " | \"classic\""
         ],
         "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",

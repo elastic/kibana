@@ -8,7 +8,8 @@
 import type { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
-import type { InputType, SamplesFormat } from '../../../../common';
+import type Oas from 'oas';
+import type { CelAuthType, InputType, SamplesFormat } from '../../../../common';
 
 interface GenAiConfig {
   apiUrl?: string;
@@ -35,5 +36,18 @@ export interface IntegrationSettings {
   inputTypes?: InputType[];
   logSamples?: string[];
   samplesFormat?: SamplesFormat;
-  apiDefinition?: string;
+  apiSpec?: Oas;
+  celUrl?: string;
+  celPath?: string;
+  celAuth?: CelAuthType;
+}
+
+export interface CelSettings {
+  suggestedPaths?: string[];
+  endpoint?: string;
+  auth?: CelAuthType;
+}
+
+export interface ApiPathOptions {
+  [key: string]: string;
 }
