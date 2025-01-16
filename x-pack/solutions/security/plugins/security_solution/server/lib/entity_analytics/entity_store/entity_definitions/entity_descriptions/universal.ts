@@ -7,7 +7,7 @@
 
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityDescription } from '../types';
-import { newestValue } from './field_utils';
+import { collectValues } from './field_utils';
 
 export const UNIVERSAL_DEFINITION_VERSION = '1.0.0';
 export const UNIVERSAL_IDENTITY_FIELD = 'related.entity';
@@ -54,10 +54,15 @@ const entityMetadataExtractorProcessor = {
 
       def id = ctx.entity.id;
       Map merged = ctx;
-      Object json = Processors.json(ctx.collected.metadata);
+      for (meta in ctx.collected.metadata) {
+        Object json = Processors.json(meta);
+        if (((Map)json)[id] == null) {
+          continue;
+        }
 
-      if (((Map)json)[id] != null) {
-        overwriteLeafFields(merged, ((Map)json)[id]);
+        if (((Map)json)[id] != null) {
+          overwriteLeafFields(merged, ((Map)json)[id]);
+        }
       }
 
       merged.entity.id = id;
@@ -70,7 +75,7 @@ export const universalEntityEngineDescription: EntityDescription = {
   version: UNIVERSAL_DEFINITION_VERSION,
   entityType: 'universal',
   identityField: UNIVERSAL_IDENTITY_FIELD,
-  fields: [newestValue({ source: 'entities.keyword', destination: 'collected.metadata' })],
+  fields: [collectValues({ source: 'entities.keyword', destination: 'collected.metadata' })],
   settings: {
     timestampField: 'event.ingested',
   },
