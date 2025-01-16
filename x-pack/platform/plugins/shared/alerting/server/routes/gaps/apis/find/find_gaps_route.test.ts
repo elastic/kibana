@@ -9,7 +9,6 @@ import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
-import { transformRequestV1, transformResponseV1 } from './transforms';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { findGapsRoute } from './find_gaps_route';
 import { Gap } from '../../../../lib/rule_gaps/gap';

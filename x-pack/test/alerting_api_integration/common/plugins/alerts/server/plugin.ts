@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, CoreStart, Logger, PluginInitializerContext, ElasticsearchClient } from '@kbn/core/server';
+import {
+  Plugin,
+  CoreSetup,
+  CoreStart,
+  Logger,
+  PluginInitializerContext,
+  ElasticsearchClient,
+} from '@kbn/core/server';
 import { firstValueFrom, Subject } from 'rxjs';
 import { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server/plugin';
 import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server/plugin';
