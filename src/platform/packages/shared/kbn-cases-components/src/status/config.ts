@@ -12,12 +12,12 @@ import { CaseStatuses } from './types';
 
 export const getStatusConfiguration = () => ({
   [CaseStatuses.open]: {
-    color: 'primary',
+    color: 'success',
     label: i18n.OPEN,
     icon: 'folderOpen' as const,
   },
   [CaseStatuses['in-progress']]: {
-    color: 'hollow',
+    color: 'primary',
     label: i18n.IN_PROGRESS,
     icon: 'folderExclamation' as const,
   },
