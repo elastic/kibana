@@ -39,7 +39,7 @@ describe('FieldControlForm', () => {
     // no need to test further as the control type is disabled
     expect(await findByTestId('esqlControlTypeDropdown')).toBeInTheDocument();
     const controlTypeInputPopover = await findByTestId('esqlControlTypeInputPopover');
-    expect(within(controlTypeInputPopover).getByRole('combobox')).toHaveValue(`Static Values`);
+    expect(within(controlTypeInputPopover).getByRole('combobox')).toHaveValue(`Static values`);
 
     // variable name input should be rendered and with the default value
     expect(await findByTestId('esqlVariableName')).toHaveValue('field');
