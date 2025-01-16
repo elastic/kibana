@@ -11,14 +11,7 @@ import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButton,
-  EuiFilePicker,
-  EuiSpacer,
-  EuiFieldText,
-  EuiFormRow,
-  EuiProgress,
-} from '@elastic/eui';
+import { EuiButton, EuiFilePicker, EuiSpacer, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import type {
   EuiFilePickerClass,
   EuiFilePickerProps,
@@ -29,6 +22,8 @@ import type { GetAdditionalLinks } from '../application/common/components/result
 import type { FileUploadResults } from './flyout/create_flyout';
 import { FileManager } from './file_manager';
 import { STATUS } from './file_manager/file_manager';
+import { FileStatus } from './file_status';
+import { OverallUploadStatus } from './overall_upload_status';
 
 interface Props {
   dataStart: DataPublicPluginStart;
@@ -41,10 +36,10 @@ interface Props {
   autoAddSemanticTextField?: boolean;
 }
 
-enum MODE {
-  ANALYZE,
-  IMPORT,
-}
+// enum MODE {
+//   ANALYZE,
+//   IMPORT,
+// }
 
 export const FileUploadLiteView: FC<Props> = ({
   fileUpload,
@@ -53,16 +48,17 @@ export const FileUploadLiteView: FC<Props> = ({
   setUploadResults,
   autoAddSemanticTextField,
 }) => {
-  const [mode, setMode] = useState<MODE>(MODE.ANALYZE);
+  // const [mode, setMode] = useState<MODE>(MODE.ANALYZE);
   const [indexName, setIndexName] = useState<string>('');
   const [showErrors] = useState<boolean>(false);
   const filePickerRef = useRef<EuiFilePickerClass>(null);
   const fm = useMemo(
     () => new FileManager(fileUpload, http, dataStart.dataViews, autoAddSemanticTextField),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dataStart.dataViews, fileUpload, http]
+    [autoAddSemanticTextField, dataStart.dataViews, fileUpload, http]
   );
-  const fileStatus = useObservable(fm.analysisStatus$, []);
+  const deleteFile = useCallback((i: number) => fm.removeFile(i), [fm]);
+
+  const filesStatus = useObservable(fm.analysisStatus$, []);
   const filesOk = useObservable(fm.analysisOk$, false);
   const uploadStatus = useObservable(fm.uploadStatus$, fm.uploadStatus$.getValue());
 
@@ -83,18 +79,18 @@ export const FileUploadLiteView: FC<Props> = ({
     };
   }, [fm]);
 
-  const onNextClick = useCallback(() => {
-    // eslint-disable-next-line no-console
-    console.log('next');
-    setMode(MODE.IMPORT);
-  }, []);
+  // const onNextClick = useCallback(() => {
+  //   // eslint-disable-next-line no-console
+  //   console.log('next');
+  //   setMode(MODE.IMPORT);
+  // }, []);
 
-  const onBackClick = useCallback(() => {
-    // eslint-disable-next-line no-console
-    console.log('back');
-    setIndexName('');
-    setMode(MODE.ANALYZE);
-  }, []);
+  // const onBackClick = useCallback(() => {
+  //   // eslint-disable-next-line no-console
+  //   console.log('back');
+  //   setIndexName('');
+  //   setMode(MODE.ANALYZE);
+  // }, []);
 
   const onImportClick = useCallback(() => {
     // eslint-disable-next-line no-console
@@ -108,89 +104,78 @@ export const FileUploadLiteView: FC<Props> = ({
 
   return (
     <>
-      {mode === MODE.ANALYZE ? (
+      <>
+        <EuiFilePicker
+          ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
+          id="filePicker"
+          fullWidth
+          display="large"
+          compressed
+          multiple
+          disabled={uploadStatus.overallImportStatus !== STATUS.NOT_STARTED}
+          initialPromptText={i18n.translate(
+            'xpack.dataVisualizer.file.aboutPanel.selectOrDragAndDropFileDescription',
+            {
+              defaultMessage: 'Select or drag and drop a file',
+            }
+          )}
+          onChange={(files) => onFilePickerChange(files)}
+        />
+
+        <EuiSpacer />
+
         <>
-          <EuiFilePicker
-            ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
-            id="filePicker"
-            fullWidth
-            display="large"
-            compressed
-            multiple
-            initialPromptText={i18n.translate(
-              'xpack.dataVisualizer.file.aboutPanel.selectOrDragAndDropFileDescription',
-              {
-                defaultMessage: 'Select or drag and drop a file',
-              }
-            )}
-            onChange={(files) => onFilePickerChange(files)}
-          />
-
-          <EuiSpacer />
-
-          <>
-            {fileStatus.map((status, i) => (
-              <div key={i}>
-                {status.fileName} - loaded: {status.loaded ? 'true' : 'false'}
-              </div>
-            ))}
-          </>
-
-          <EuiSpacer />
-
-          <EuiButton disabled={!filesOk} onClick={onNextClick}>
-            Import
-          </EuiButton>
-        </>
-      ) : (
-        <>
-          {fileStatus.map((status, i) => (
-            <div key={i}>
-              {status.fileName}
-              <EuiProgress value={status.importProgress} max={100} size="s" />
-              <EuiSpacer size="s" />
-            </div>
-          ))}
-
-          <EuiSpacer />
-
-          <EuiFormRow label="Index name" isInvalid={showErrors}>
-            <EuiFieldText
-              value={indexName}
-              disabled={
-                uploadStatus.overallImportStatus === STATUS.STARTED ||
-                uploadStatus.overallImportStatus === STATUS.COMPLETED
-              }
-              onChange={(e) => setIndexName(e.target.value)}
-              placeholder="Index name"
+          {filesStatus.map((status, i) => (
+            <FileStatus
+              uploadStatus={uploadStatus}
+              fileStatus={status}
+              key={i}
+              deleteFile={() => deleteFile(i)}
             />
-          </EuiFormRow>
-
-          <EuiSpacer />
-
-          <EuiButton
-            onClick={onBackClick}
-            disabled={
-              uploadStatus.overallImportStatus === STATUS.STARTED ||
-              uploadStatus.overallImportStatus === STATUS.COMPLETED
-            }
-          >
-            Back
-          </EuiButton>
-
-          <EuiSpacer />
-          <EuiButton
-            disabled={
-              indexName === '' ||
-              uploadStatus.overallImportStatus === STATUS.STARTED ||
-              uploadStatus.overallImportStatus === STATUS.COMPLETED
-            }
-            onClick={onImportClick}
-          >
-            Import
-          </EuiButton>
+          ))}
         </>
-      )}
+
+        <EuiSpacer />
+
+        {uploadStatus.overallImportStatus === STATUS.NOT_STARTED &&
+        filesStatus.length > 0 &&
+        filesOk ? (
+          <>
+            <EuiFormRow label="Index name" isInvalid={showErrors}>
+              <EuiFieldText
+                value={indexName}
+                // disabled={
+                //   uploadStatus.overallImportStatus === STATUS.STARTED ||
+                //   uploadStatus.overallImportStatus === STATUS.COMPLETED
+                // }
+                onChange={(e) => setIndexName(e.target.value)}
+                placeholder="Index name"
+              />
+            </EuiFormRow>
+
+            <EuiSpacer />
+
+            <EuiSpacer />
+            <EuiButton
+              disabled={
+                indexName === ''
+                // uploadStatus.overallImportStatus === STATUS.STARTED ||
+                // uploadStatus.overallImportStatus === STATUS.COMPLETED
+              }
+              onClick={onImportClick}
+            >
+              Import
+            </EuiButton>
+          </>
+        ) : null}
+
+        {uploadStatus.overallImportStatus === STATUS.STARTED ||
+        uploadStatus.overallImportStatus === STATUS.COMPLETED ? (
+          <>
+            <OverallUploadStatus uploadStatus={uploadStatus} filesStatus={filesStatus} />
+          </>
+        ) : null}
+      </>
     </>
   );
 };

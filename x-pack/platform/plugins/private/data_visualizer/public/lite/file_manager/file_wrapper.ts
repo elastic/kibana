@@ -11,19 +11,24 @@ import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common/t
 import { isTikaType } from '../../../common/utils/tika_utils';
 import { processResults, readFile } from '../../application/common/components/utils';
 import { analyzeTikaFile } from '../../application/file_data_visualizer/components/file_data_visualizer_view/tika_analyzer';
+import { STATUS } from './file_manager';
+import { FileSizeChecker } from '../../application/file_data_visualizer/components/file_data_visualizer_view/file_size_check';
 
 interface AnalysisResults {
+  analysisStatus: STATUS;
   fileContents: string;
   results: FindFileStructureResponse | null;
   explanation: string[] | undefined;
   serverSettings: ReturnType<typeof processResults> | null;
+  analysisError?: any;
 }
 
 export type AnalyzedFile = AnalysisResults & {
   loaded: boolean;
-  imported: boolean;
+  importStatus: STATUS;
   fileName: string;
   fileContents: string;
+  fileSize: string;
   data: ArrayBuffer | null;
   fileTooLarge: boolean;
   fileCouldNotBeRead: boolean;
@@ -38,12 +43,14 @@ export type AnalyzedFile = AnalysisResults & {
 
 export class FileWrapper {
   private analyzedFile$ = new BehaviorSubject<AnalyzedFile>({
+    analysisStatus: STATUS.NOT_STARTED,
     fileContents: '',
+    fileSize: '',
     results: null,
     explanation: undefined,
     serverSettings: null,
     loaded: false,
-    imported: false,
+    importStatus: STATUS.NOT_STARTED,
     fileName: '',
     data: null,
     fileTooLarge: false,
@@ -56,12 +63,16 @@ export class FileWrapper {
   });
 
   public readonly fileStatus$ = this.analyzedFile$.asObservable();
+  private fileSizeChecker: FileSizeChecker;
 
   constructor(private file: File, private fileUpload: FileUploadStartApi) {
+    this.fileSizeChecker = new FileSizeChecker(fileUpload, file);
     this.analyzedFile$.next({
       ...this.analyzedFile$.getValue(),
       fileName: this.file.name,
       loaded: false,
+      fileTooLarge: !this.fileSizeChecker.check(),
+      fileSize: this.fileSizeChecker.fileSizeFormatted(),
     });
   }
 
@@ -70,6 +81,7 @@ export class FileWrapper {
   }
 
   public async analyzeFile() {
+    this.setStatus({ analysisStatus: STATUS.STARTED });
     readFile(this.file).then(async ({ data, fileContents }) => {
       // return after file has been read
       // analysis will be done in the background
@@ -100,6 +112,7 @@ export class FileWrapper {
       results: standardResults.results,
       explanation: standardResults.results.explanation,
       serverSettings,
+      analysisStatus: STATUS.COMPLETED,
     };
   }
 
@@ -108,15 +121,27 @@ export class FileWrapper {
     overrides: any,
     isRetry = false
   ): Promise<AnalysisResults> {
-    const resp = await this.fileUpload.analyzeFile(fileContents, overrides);
-    const serverSettings = processResults(resp);
+    try {
+      const resp = await this.fileUpload.analyzeFile(fileContents, overrides);
+      const serverSettings = processResults(resp);
 
-    return {
-      fileContents,
-      results: resp.results,
-      explanation: resp.results.explanation,
-      serverSettings,
-    };
+      return {
+        fileContents,
+        results: resp.results,
+        explanation: resp.results.explanation,
+        serverSettings,
+        analysisStatus: STATUS.COMPLETED,
+      };
+    } catch (e) {
+      return {
+        fileContents,
+        results: null,
+        explanation: undefined,
+        serverSettings: null,
+        analysisError: e,
+        analysisStatus: STATUS.FAILED,
+      };
+    }
   }
 
   private setStatus(status: Partial<AnalyzedFile>) {
@@ -141,6 +166,7 @@ export class FileWrapper {
   }
 
   public async import(id: string, index: string, pipelineId: string, mappings: any, pipeline: any) {
+    this.setStatus({ importStatus: STATUS.STARTED });
     const format = this.analyzedFile$.getValue().results!.format;
     const importer = await this.fileUpload.importerFactory(format, {
       excludeLinesPattern: this.analyzedFile$.getValue().results!.exclude_lines_pattern,
@@ -151,7 +177,7 @@ export class FileWrapper {
     const resp = await importer.import(id, index, pipelineId, (p) => {
       this.setStatus({ importProgress: p });
     });
-    this.setStatus({ docCount: resp.docCount, imported: true });
+    this.setStatus({ docCount: resp.docCount, importStatus: STATUS.COMPLETED });
     return resp;
   }
 }

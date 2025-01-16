@@ -33,7 +33,7 @@ export enum STATUS {
   FAILED,
 }
 
-interface UploadStatus {
+export interface UploadStatus {
   overallImportStatus: STATUS;
   indexCreated: STATUS;
   pipelineCreated: STATUS;
@@ -58,7 +58,6 @@ export class FileManager {
   private importer: IImporter | null = null;
   private timeFieldName: string | undefined | null = null;
   private commonFileFormat: string | null = null;
-  private fileListString: string = '';
 
   public readonly uploadStatus$ = new BehaviorSubject<UploadStatus>({
     overallImportStatus: STATUS.NOT_STARTED,
@@ -81,16 +80,13 @@ export class FileManager {
 
     // this.files = new Map<string, FileWrapper>();
     this.mappingsCheckSubscription = this.analysisStatus$.subscribe((statuses) => {
-      // don't do this when upload process changes. only when files are added or removed.!!!!!!!!!!!!!!!!!!
       const allFilesAnalyzed = statuses.every((status) => status.loaded);
       if (allFilesAnalyzed) {
         this.analysisValid$.next(true);
-        const tempFileNameList = statuses.map((status) => status.fileName).join(', ');
-        if (tempFileNameList === this.fileListString) {
+        if (this.uploadStatus$.getValue().fileImport === STATUS.STARTED) {
           return;
         }
 
-        this.fileListString = tempFileNameList;
         const formatOk = this.checkFormat();
         const { fieldClashes, mergedMappings } = this.createMergedMappings();
         const mappingsOk = fieldClashes.length === 0;
@@ -136,7 +132,9 @@ export class FileManager {
     const f = files[index];
     files.splice(index, 1);
     this.files$.next(files);
-    f.destroy();
+    if (f) {
+      f.destroy();
+    }
   }
 
   public getFiles() {
@@ -198,11 +196,10 @@ export class FileManager {
     this.importer = await this.fileUpload.importerFactory(this.commonFileFormat, {});
     this.inferenceId = getInferenceId(this.mappings);
 
-    this.setStatus({
-      modelDeployed: STATUS.NOT_STARTED,
-    });
-
     if (this.inferenceId !== null) {
+      this.setStatus({
+        modelDeployed: STATUS.NOT_STARTED,
+      });
       this.setStatus({
         modelDeployed: STATUS.STARTED,
       });
