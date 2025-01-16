@@ -19,7 +19,6 @@ import {
   UserMouseEvent,
   UserTouchEvent,
 } from '../types';
-import { isMouseEvent, isTouchEvent } from '../utils/sensors';
 
 export interface DragHandleApi {
   setDragHandles: (refs: Array<HTMLElement | null>) => void;
