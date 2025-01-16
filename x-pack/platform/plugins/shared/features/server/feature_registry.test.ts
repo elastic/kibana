@@ -57,7 +57,7 @@ describe('FeatureRegistry', () => {
             app: ['app1'],
             savedObject: {
               all: ['space', 'etc', 'telemetry'],
-              read: ['canvas', 'config', 'config-global', 'url', 'tag'],
+              read: ['canvas', 'config', 'config-global', 'url', 'tag', 'cloud'],
             },
             api: ['someApiEndpointTag', 'anotherEndpointTag'],
             ui: ['allowsFoo', 'showBar', 'showBaz'],
@@ -65,7 +65,7 @@ describe('FeatureRegistry', () => {
           read: {
             savedObject: {
               all: [],
-              read: ['config', 'config-global', 'url', 'telemetry', 'tag'],
+              read: ['config', 'config-global', 'url', 'telemetry', 'tag', 'cloud'],
             },
             ui: [],
           },
@@ -130,7 +130,7 @@ describe('FeatureRegistry', () => {
                 app: ['app1'],
                 savedObject: {
                   all: ['space', 'etc', 'telemetry'],
-                  read: ['canvas', 'config', 'config-global', 'url', 'tag'],
+                  read: ['canvas', 'config', 'config-global', 'url', 'tag', 'cloud'],
                 },
                 api: ['someApiEndpointTag', 'anotherEndpointTag'],
                 ui: ['allowsFoo', 'showBar', 'showBaz'],
@@ -348,13 +348,20 @@ describe('FeatureRegistry', () => {
 
       const allPrivilege = result[0].privileges?.all;
       const readPrivilege = result[0].privileges?.read;
-      expect(allPrivilege?.savedObject.read).toEqual(['config', 'config-global', 'url', 'tag']);
+      expect(allPrivilege?.savedObject.read).toEqual([
+        'config',
+        'config-global',
+        'url',
+        'tag',
+        'cloud',
+      ]);
       expect(readPrivilege?.savedObject.read).toEqual([
         'config',
         'config-global',
         'telemetry',
         'url',
         'tag',
+        'cloud',
       ]);
     });
 
@@ -389,7 +396,13 @@ describe('FeatureRegistry', () => {
 
       const reservedPrivilege = result[0]!.reserved!.privileges[0].privilege;
       expect(reservedPrivilege.savedObject.all).toEqual(['telemetry']);
-      expect(reservedPrivilege.savedObject.read).toEqual(['config', 'config-global', 'url', 'tag']);
+      expect(reservedPrivilege.savedObject.read).toEqual([
+        'config',
+        'config-global',
+        'url',
+        'tag',
+        'cloud',
+      ]);
     });
 
     it(`does not duplicate the automatic grants if specified on the incoming feature`, () => {
@@ -403,14 +416,14 @@ describe('FeatureRegistry', () => {
             ui: [],
             savedObject: {
               all: ['telemetry'],
-              read: ['config', 'config-global', 'url', 'tag'],
+              read: ['config', 'config-global', 'url', 'tag', 'cloud'],
             },
           },
           read: {
             ui: [],
             savedObject: {
               all: [],
-              read: ['config', 'config-global', 'url', 'tag'],
+              read: ['config', 'config-global', 'url', 'tag', 'cloud'],
             },
           },
         },
@@ -427,12 +440,19 @@ describe('FeatureRegistry', () => {
       const allPrivilege = result[0].privileges!.all;
       const readPrivilege = result[0].privileges!.read;
       expect(allPrivilege?.savedObject.all).toEqual(['telemetry']);
-      expect(allPrivilege?.savedObject.read).toEqual(['config', 'config-global', 'url', 'tag']);
+      expect(allPrivilege?.savedObject.read).toEqual([
+        'config',
+        'config-global',
+        'url',
+        'tag',
+        'cloud',
+      ]);
       expect(readPrivilege?.savedObject.read).toEqual([
         'config',
         'config-global',
         'url',
         'tag',
+        'cloud',
         'telemetry',
       ]);
     });
@@ -2457,7 +2477,10 @@ describe('FeatureRegistry', () => {
         expect(featureA.privileges).toEqual({
           all: {
             ui: [],
-            savedObject: { all: ['telemetry'], read: ['config', 'config-global', 'url', 'tag'] },
+            savedObject: {
+              all: ['telemetry'],
+              read: ['config', 'config-global', 'url', 'tag', 'cloud'],
+            },
             composedOf: [
               { feature: 'featureC', privileges: ['subFeatureCOne'] },
               { feature: 'featureD', privileges: ['all'] },
@@ -2465,7 +2488,10 @@ describe('FeatureRegistry', () => {
           },
           read: {
             ui: [],
-            savedObject: { all: [], read: ['config', 'config-global', 'telemetry', 'url', 'tag'] },
+            savedObject: {
+              all: [],
+              read: ['config', 'config-global', 'telemetry', 'url', 'tag', 'cloud'],
+            },
             composedOf: [{ feature: 'featureD', privileges: ['read'] }],
           },
         });
@@ -2485,12 +2511,18 @@ describe('FeatureRegistry', () => {
         expect(featureA.privileges).toEqual({
           all: {
             ui: [],
-            savedObject: { all: ['telemetry'], read: ['config', 'config-global', 'url', 'tag'] },
+            savedObject: {
+              all: ['telemetry'],
+              read: ['config', 'config-global', 'url', 'tag', 'cloud'],
+            },
             composedOf: [{ feature: 'featureE', privileges: ['all'] }],
           },
           read: {
             ui: [],
-            savedObject: { all: [], read: ['config', 'config-global', 'telemetry', 'url', 'tag'] },
+            savedObject: {
+              all: [],
+              read: ['config', 'config-global', 'telemetry', 'url', 'tag', 'cloud'],
+            },
           },
         });
       });
@@ -2670,10 +2702,12 @@ describe('FeatureRegistry', () => {
       }
 
       function createDeprecatedFeature({
+        deprecated,
         all,
         read,
         subAlpha,
       }: {
+        deprecated?: { notice: string; replacedBy?: string[] };
         all?: FeatureKibanaPrivilegesReference[];
         read?: {
           minimal: FeatureKibanaPrivilegesReference[];
@@ -2682,7 +2716,7 @@ describe('FeatureRegistry', () => {
         subAlpha?: FeatureKibanaPrivilegesReference[];
       } = {}): KibanaFeatureConfig {
         return {
-          deprecated: { notice: 'It was a mistake.' },
+          deprecated: deprecated ?? { notice: 'It was a mistake.' },
           id: 'feature-alpha',
           name: 'Feature Alpha',
           app: [],
@@ -3207,6 +3241,50 @@ describe('FeatureRegistry', () => {
         ).toThrowErrorMatchingInlineSnapshot(
           `"Cannot replace privilege \\"sub-alpha-1-1\\" of deprecated feature \\"feature-alpha\\" with disabled privilege \\"read\\" of feature \\"feature-delta\\"."`
         );
+      });
+
+      it('requires correct list of feature IDs to be replaced by', () => {
+        // Case 1: empty list of feature IDs.
+        expect(() =>
+          createRegistry(
+            createDeprecatedFeature({ deprecated: { notice: 'some notice', replacedBy: [] } })
+          ).validateFeatures()
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Feature “feature-alpha” is deprecated and must have at least one feature ID added to the “replacedBy” property, or the property must be left out completely."`
+        );
+
+        // Case 2: invalid feature IDs.
+        expect(() =>
+          createRegistry(
+            createDeprecatedFeature({
+              deprecated: {
+                notice: 'some notice',
+                replacedBy: ['feature-beta', 'feature-gamma', 'feature-delta'],
+              },
+            })
+          ).validateFeatures()
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Cannot replace deprecated feature “feature-alpha” with the following features, as they aren’t used to replace feature privileges: feature-gamma, feature-delta."`
+        );
+
+        // Case 3: valid feature ID.
+        expect(() =>
+          createRegistry(
+            createDeprecatedFeature({
+              deprecated: { notice: 'some notice', replacedBy: ['feature-beta'] },
+            })
+          ).validateFeatures()
+        ).not.toThrow();
+
+        // Case 4: valid multiple feature IDs.
+        expect(() =>
+          createRegistry(
+            createDeprecatedFeature({
+              deprecated: { notice: 'some notice', replacedBy: ['feature-beta', 'feature-delta'] },
+              all: [{ feature: 'feature-delta', privileges: ['all'] }],
+            })
+          ).validateFeatures()
+        ).not.toThrow();
       });
     });
   });

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { EuiStat, EuiToolTip } from '@elastic/eui';
+import { EuiStat, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import { TITLE_SIZE } from '../constants';
 import * as i18n from './translations';
@@ -26,8 +25,9 @@ const AllowedStatComponent: React.FC<Props> = ({
   total,
   inline,
   titleSize = TITLE_SIZE,
-  gap = euiThemeVars.euiSizeXS,
+  gap,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const tooltipContent = useMemo(() => i18n.ALLOWED_TOOLTIP({ allowed, total }), [allowed, total]);
 
   return (
@@ -38,7 +38,7 @@ const AllowedStatComponent: React.FC<Props> = ({
             ? css`
                 display: flex;
                 align-items: center;
-                gap: ${gap};
+                gap: ${gap || euiTheme.size.xs};
               `
             : null
         }

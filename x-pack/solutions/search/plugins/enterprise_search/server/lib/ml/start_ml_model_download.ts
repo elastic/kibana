@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MlPutTrainedModelRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { MlPutTrainedModelRequest } from '@elastic/elasticsearch/lib/api/types';
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
 import { MlModelDeploymentState, MlModelDeploymentStatus } from '../../../common/types/ml';
@@ -43,10 +43,8 @@ export const startMlModelDownload = async (
 
   // we're not downloaded yet - let's initiate that...
   const putRequest: MlPutTrainedModelRequest = {
-    body: {
-      input: {
-        field_names: ['text_field'],
-      },
+    input: {
+      field_names: ['text_field'],
     },
     model_id: modelName,
   };

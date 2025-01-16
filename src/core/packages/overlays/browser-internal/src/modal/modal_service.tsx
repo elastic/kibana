@@ -10,7 +10,7 @@
 /* eslint-disable max-classes-per-file */
 
 import { i18n as t } from '@kbn/i18n';
-import { EuiModal, EuiConfirmModal } from '@elastic/eui';
+import { EuiModal, EuiConfirmModal, htmlIdGenerator } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
@@ -108,9 +108,11 @@ export class ModalService {
           this.activeModal.close();
           this.cleanupDom();
         }
+        const modalTitleId = htmlIdGenerator()();
 
         return new Promise((resolve, reject) => {
           let resolved = false;
+
           const closeModal = (confirmed: boolean) => {
             resolved = true;
             modal.close();
@@ -153,7 +155,11 @@ export class ModalService {
 
           render(
             <KibanaRenderContextProvider {...startDeps}>
-              <EuiConfirmModal {...props} />
+              <EuiConfirmModal
+                aria-labelledby={modalTitleId}
+                titleProps={{ id: modalTitleId }}
+                {...props}
+              />
             </KibanaRenderContextProvider>,
             targetDomElement
           );

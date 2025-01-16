@@ -1218,24 +1218,7 @@
           "path": "x-pack/platform/plugins/shared/security/public/plugin.tsx",
           "deprecated": true,
           "trackAdoption": false,
-          "references": [
-            {
-              "plugin": "enterpriseSearch",
-              "path": "x-pack/solutions/search/plugins/enterprise_search/public/applications/workplace_search/views/account_settings/account_settings.tsx"
-            },
-            {
-              "plugin": "enterpriseSearch",
-              "path": "x-pack/solutions/search/plugins/enterprise_search/public/applications/workplace_search/views/account_settings/account_settings.tsx"
-            },
-            {
-              "plugin": "enterpriseSearch",
-              "path": "x-pack/solutions/search/plugins/enterprise_search/public/applications/workplace_search/views/account_settings/account_settings.tsx"
-            },
-            {
-              "plugin": "enterpriseSearch",
-              "path": "x-pack/solutions/search/plugins/enterprise_search/public/applications/workplace_search/views/account_settings/account_settings.tsx"
-            }
-          ]
+          "references": []
         }
       ],
       "lifecycle": "start",
@@ -5931,18 +5914,6 @@
             {
               "plugin": "ml",
               "path": "x-pack/platform/plugins/shared/ml/server/plugin.ts"
-            },
-            {
-              "plugin": "enterpriseSearch",
-              "path": "x-pack/solutions/search/plugins/enterprise_search/server/lib/check_access.ts"
-            },
-            {
-              "plugin": "enterpriseSearch",
-              "path": "x-pack/solutions/search/plugins/enterprise_search/server/lib/check_access.ts"
-            },
-            {
-              "plugin": "enterpriseSearch",
-              "path": "x-pack/solutions/search/plugins/enterprise_search/server/lib/check_access.ts"
             }
           ]
         }
@@ -6025,11 +5996,11 @@
             },
             {
               "plugin": "fleet",
-              "path": "x-pack/platform/plugins/shared/fleet/server/services/api_keys/security.ts"
+              "path": "x-pack/platform/plugins/shared/fleet/server/services/api_keys/transform_api_keys.ts"
             },
             {
               "plugin": "fleet",
-              "path": "x-pack/platform/plugins/shared/fleet/server/services/api_keys/transform_api_keys.ts"
+              "path": "x-pack/platform/plugins/shared/fleet/server/services/api_keys/security.ts"
             },
             {
               "plugin": "fleet",
