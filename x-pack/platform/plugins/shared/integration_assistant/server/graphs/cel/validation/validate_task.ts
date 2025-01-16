@@ -46,7 +46,7 @@ export class ValidateCelTask {
     this.logger.info(JSON.stringify(params));
     if (params.celProgram) {
       const program = params.celProgram;
-      const validator = new CelValidatorWorker(this.logger, false);
+      const validator = new CelValidatorWorker(this.logger, true);
       const formattedProgram = await validator.validate(program.trim());
       const stateUpdated = {
         ...state,
