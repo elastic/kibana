@@ -218,6 +218,37 @@ describe('structurally can walk all nodes', () => {
             'index4',
           ]);
         });
+
+        test('can walk through "WHERE" binary expression', () => {
+          const query = 'FROM index | STATS a = 123 WHERE c == d';
+          const { root } = parse(query);
+          const expressions: ESQLFunction[] = [];
+
+          walk(root, {
+            visitFunction: (node) => {
+              if (node.name === 'where') {
+                expressions.push(node);
+              }
+            },
+          });
+
+          expect(expressions.length).toBe(1);
+          expect(expressions[0]).toMatchObject({
+            type: 'function',
+            subtype: 'binary-expression',
+            name: 'where',
+            args: [
+              {
+                type: 'function',
+                name: '=',
+              },
+              {
+                type: 'function',
+                name: '==',
+              },
+            ],
+          });
+        });
       });
 
       describe('columns', () => {
@@ -274,31 +305,6 @@ describe('structurally can walk all nodes', () => {
             {
               type: 'column',
               name: 'b',
-            },
-          ]);
-        });
-      });
-
-      describe('fields', () => {
-        test('can walk through "WHERE" binary expression', () => {
-          const query = 'FROM index | STATS a = 123 WHERE ...';
-          const { ast } = parse(query);
-          const fields: ESQLField[] = [];
-
-          throw new Error('Not implemented');
-
-          expect(fields).toMatchObject([
-            {
-              type: 'field',
-              column: {
-                type: 'column',
-                name: 'a',
-              },
-              value: {
-                type: 'literal',
-                literalType: 'integer',
-                value: 123,
-              },
             },
           ]);
         });

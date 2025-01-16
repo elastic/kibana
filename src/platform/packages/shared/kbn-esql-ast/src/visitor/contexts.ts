@@ -77,6 +77,7 @@ export class VisitorContext<
     this.ctx.assertMethodExists('visitExpression');
 
     for (const arg of this.arguments()) {
+      if (!arg) continue;
       if (arg.type === 'option' && arg.name !== 'as') {
         continue;
       }
@@ -178,7 +179,7 @@ export class CommandVisitorContext<
 
   public *options(): Iterable<ESQLCommandOption> {
     for (const arg of this.node.args) {
-      if (Array.isArray(arg)) {
+      if (!arg || Array.isArray(arg)) {
         continue;
       }
       if (arg.type === 'option') {
@@ -207,6 +208,9 @@ export class CommandVisitorContext<
 
     if (!option) {
       for (const arg of this.node.args) {
+        if (!arg) {
+          continue;
+        }
         if (Array.isArray(arg)) {
           yield arg;
           continue;
@@ -221,7 +225,7 @@ export class CommandVisitorContext<
     }
 
     const optionNode = this.node.args.find(
-      (arg) => !Array.isArray(arg) && arg.type === 'option' && arg.name === option
+      (arg) => !Array.isArray(arg) && arg && arg.type === 'option' && arg.name === option
     );
 
     if (optionNode) {
