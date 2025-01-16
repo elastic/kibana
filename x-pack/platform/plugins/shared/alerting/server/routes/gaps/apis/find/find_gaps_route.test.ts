@@ -26,7 +26,7 @@ describe('findGapsRoute', () => {
   });
 
   const mockFindOptions = {
-    rule_ids: ['abc'],
+    rule_id: 'abc',
     start: '2023-11-16T08:00:00.000Z',
     end: '2023-11-17T08:00:00.000Z',
     page: 1,
@@ -71,9 +71,42 @@ describe('findGapsRoute', () => {
 
     await handler(context, req, res);
 
-    expect(rulesClient.findGaps).toHaveBeenLastCalledWith(transformRequestV1(mockFindOptions));
+    expect(rulesClient.findGaps).toHaveBeenLastCalledWith({
+      ruleId: 'abc',
+      start: '2023-11-16T08:00:00.000Z',
+      end: '2023-11-17T08:00:00.000Z',
+      page: 1,
+      perPage: 10,
+    });
     expect(res.ok).toHaveBeenLastCalledWith({
-      body: transformResponseV1(mockFindResult),
+      body: {
+        page: 1,
+        per_page: 10,
+        total: 1,
+        data: [
+          {
+            _id: 'gap-1',
+            '@timestamp': '2024-01-30T00:00:00.000Z',
+            status: 'unfilled',
+            range: {
+              gte: '2023-11-16T08:00:00.000Z',
+              lte: '2023-11-16T20:00:00.000Z',
+            },
+            total_gap_duration_ms: 43200000,
+            unfilled_duration_ms: 43200000,
+            filled_duration_ms: 0,
+            in_progress_duration_ms: 0,
+            unfilled_intervals: [
+              {
+                gte: '2023-11-16T08:00:00.000Z',
+                lte: '2023-11-16T20:00:00.000Z',
+              },
+            ],
+            filled_intervals: [],
+            in_progress_intervals: [],
+          },
+        ],
+      },
     });
   });
 

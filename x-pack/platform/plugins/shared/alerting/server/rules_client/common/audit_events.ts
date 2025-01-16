@@ -151,6 +151,7 @@ const ruleEventTypes: Record<RuleAuditAction, ArrayElement<EcsEvent['type']>> = 
   rule_find_gaps: 'access',
   rule_fill_gaps: 'change',
   rule_get_rules_with_gaps: 'access',
+  rule_get_gaps_info_by_rule_ids: 'access',
 };
 
 const adHocRunEventTypes: Record<AdHocRunAuditAction, ArrayElement<EcsEvent['type']>> = {

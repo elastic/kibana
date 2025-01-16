@@ -23,9 +23,16 @@ export const transformResponse = ({
   page,
   per_page: perPage,
   total,
-  data: gapsData.map((gap) => ({
-    _id: gap?.internalFields?._id,
-    ...gap.getEsObject(),
-    '@timestamp': gap.timestamp,
-  })),
+  data: gapsData
+    .map((gap) => {
+      if (!gap?.internalFields?._id || !gap.timestamp) {
+        return undefined;
+      }
+      return {
+        _id: gap.internalFields._id,
+        ...gap.getEsObject(),
+        '@timestamp': gap.timestamp,
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== undefined),
 });
