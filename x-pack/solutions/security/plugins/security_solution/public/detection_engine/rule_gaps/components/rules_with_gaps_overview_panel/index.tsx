@@ -36,7 +36,7 @@ export const RulesWithGapsOverviewPanel = () => {
   } = useRulesTableContext();
   const { data } = useGetRulesWithGaps(
     {
-      gapRange: gapSearchRange,
+      gapRange: gapSearchRange ?? defaultRangeValue,
       statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
     },
     {

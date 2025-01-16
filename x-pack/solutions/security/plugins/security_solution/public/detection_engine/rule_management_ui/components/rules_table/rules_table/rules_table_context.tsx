@@ -324,7 +324,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
   const { data: rulesGapInfoByRuleIds, refetch: refetchGapInfo } = useGetGapsInfoByRuleIds(
     {
       ruleIds: rules.map((x) => x.id),
-      gapRange: filterOptions.gapSearchRange,
+      gapRange: filterOptions.gapSearchRange ?? defaultRangeValue,
     },
     {
       enabled: rules.length > 0,

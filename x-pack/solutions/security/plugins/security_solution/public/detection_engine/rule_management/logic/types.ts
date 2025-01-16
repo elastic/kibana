@@ -101,7 +101,7 @@ export interface FilterOptions {
   ruleExecutionStatus?: RuleExecutionStatus; // undefined means "all"
   ruleSource?: RuleCustomizationEnum[]; // undefined is to display all the rules
   ruleIds?: string[];
-  gapSearchRange: GapRangeValue;
+  gapSearchRange?: GapRangeValue;
 }
 
 export interface FetchRulesResponse {
