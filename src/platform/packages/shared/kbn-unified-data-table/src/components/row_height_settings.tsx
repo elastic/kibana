@@ -19,7 +19,6 @@ import {
 
 export enum RowHeightMode {
   auto = 'auto',
-  single = 'single',
   custom = 'custom',
 }
 export interface RowHeightSettingsProps {

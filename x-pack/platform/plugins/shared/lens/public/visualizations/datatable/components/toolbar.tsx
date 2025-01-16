@@ -46,15 +46,10 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
       heightProperty: string,
       heightLinesProperty: keyof typeof ROW_HEIGHT_LINES_KEYS
     ) => {
-      let newRowHeightLines = lineCounts[heightLinesProperty];
-
-      if (newHeightMode === RowHeightMode.auto) {
-        newRowHeightLines = ROWS_HEIGHT_OPTIONS.auto;
-      }
-
-      if (newHeightMode === RowHeightMode.single) {
-        newRowHeightLines = ROWS_HEIGHT_OPTIONS.single;
-      }
+      const newRowHeightLines =
+        newHeightMode === RowHeightMode.auto
+          ? ROWS_HEIGHT_OPTIONS.auto
+          : lineCounts[heightLinesProperty];
 
       setState({
         ...state,
