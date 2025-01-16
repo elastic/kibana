@@ -9,7 +9,6 @@
 
 import expect from '@kbn/expect';
 
-import { KbnPalette, getKbnPalettes } from '@kbn/palettes';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -24,8 +23,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const log = getService('log');
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
-  const palettes = getKbnPalettes({ name: 'borealis', darkMode: false });
-  const elasticPalette = palettes.get(KbnPalette.Default);
 
   describe('visual builder', function describeIndexTests() {
     before(async () => {
@@ -279,7 +276,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(chartData).to.eql(expectedChartData);
         });
 
-        it('should display correct chart data, label names and area colors for sum aggregation when split by terms', async () => {
+        it('nick - should display correct chart data, label names and area colors for sum aggregation when split by terms', async () => {
           const firstAreaExpectedChartData = [
             [1442620800000, 0],
             [1442664000000, 0],
@@ -311,9 +308,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           expect(areasCount).to.be(2);
           expect(legendNames).to.eql(['apache', 'nginx']);
-          // We need to point to the palette source here because of how visColors are set
+          // We need to use OR condition here because of how visColors are set inconsistently
           // See https://github.com/elastic/kibana/issues/206380
-          expect(areaColors).to.eql(elasticPalette.colors().slice(0, 2));
+          const [firstColor, secondColor] = areaColors!;
+          expect(['#16c5c0', '#54b399']).contain(firstColor); // first color in elastic palette
+          expect(['#a6edea', '#6092c0']).contain(secondColor); // second color in elastic palette
+          expect(areaColors).to.length(2);
           expect(firstAreaChartData).to.eql(firstAreaExpectedChartData);
           expect(secondAreaChartData).to.eql(secondAreaExpectedChartData);
         });
