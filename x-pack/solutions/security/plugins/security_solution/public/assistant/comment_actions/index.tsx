@@ -12,6 +12,7 @@ import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { useAssistantContext } from '@kbn/elastic-assistant/impl/assistant_context';
+import { removeContentReferences } from '@kbn/elastic-assistant-common';
 import { useKibana, useToasts } from '../../common/lib/kibana';
 import type { Note } from '../../common/lib/note';
 import { appActions } from '../../common/store/actions';
@@ -20,7 +21,6 @@ import { updateAndAssociateNode } from '../../timelines/components/notes/helpers
 import { timelineActions } from '../../timelines/store';
 import * as i18n from './translations';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { removeContentReferences } from '@kbn/elastic-assistant-common';
 
 interface Props {
   message: ClientMessage;

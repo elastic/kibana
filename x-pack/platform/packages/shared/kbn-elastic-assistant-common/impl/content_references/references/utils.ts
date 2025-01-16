@@ -1,13 +1,22 @@
-import { ContentReference } from "../../schemas";
-import { ContentReferenceBlock, ContentReferenceId } from "../types";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { ContentReference } from '../../schemas';
+import { ContentReferenceBlock, ContentReferenceId } from '../types';
 
 /**
  * Returns "Arid2" from "{reference(Arid2)}"
  * @param contentReference A ContentReferenceBlock
  * @returns ContentReferenceId
  */
-export const getContentReferenceId = (contentReferenceBlock: ContentReferenceBlock): ContentReferenceId => {
-    return contentReferenceBlock.replace("{reference(", "").replace(")}", "");
+export const getContentReferenceId = (
+  contentReferenceBlock: ContentReferenceBlock
+): ContentReferenceId => {
+  return contentReferenceBlock.replace('{reference(', '').replace(')}', '');
 };
 
 /**
@@ -16,8 +25,10 @@ export const getContentReferenceId = (contentReferenceBlock: ContentReferenceBlo
  * @param contentReference A ContentReference
  * @returns ContentReferenceBlock
  */
-export const contentReferenceBlock = (contentReference: ContentReference): ContentReferenceBlock => {
-    return `{reference(${contentReference.id})}`;
+export const contentReferenceBlock = (
+  contentReference: ContentReference
+): ContentReferenceBlock => {
+  return `{reference(${contentReference.id})}`;
 };
 
 /**
@@ -26,7 +37,7 @@ export const contentReferenceBlock = (contentReference: ContentReference): Conte
  * @returns the string: `Reference: <contentReferenceBlock>`
  */
 export const contentReferenceString = (contentReference: ContentReference) => {
-    return `Reference: ${contentReferenceBlock(contentReference)}` as const;
+  return `Reference: ${contentReferenceBlock(contentReference)}` as const;
 };
 
 /**
@@ -34,6 +45,6 @@ export const contentReferenceString = (contentReference: ContentReference) => {
  * @param content content to remove content references from
  * @returns content with content references replaced with ''
  */
-export const removeContentReferences = (content: String) => {
-    return content.replaceAll(/\{reference\(.*?\)\}/g, '');
+export const removeContentReferences = (content: string) => {
+  return content.replaceAll(/\{reference\(.*?\)\}/g, '');
 };

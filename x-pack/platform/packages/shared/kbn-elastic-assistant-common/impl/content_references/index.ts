@@ -10,6 +10,10 @@ export {
   alertReferenceFactory,
   knowledgeBaseReferenceFactory,
   alertsPageReferenceFactory,
-  productDocumentationReferenceFactory
+  productDocumentationReferenceFactory,
 } from './references';
-export { contentReferenceString, contentReferenceBlock, removeContentReferences } from './references/utils'
+export {
+  contentReferenceString,
+  contentReferenceBlock,
+  removeContentReferences,
+} from './references/utils';
