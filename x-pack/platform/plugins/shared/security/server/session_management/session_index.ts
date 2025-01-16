@@ -568,6 +568,9 @@ export class SessionIndex {
     }
 
     logger.debug('Cleanup routine successfully completed.');
+    return {
+      state: {},
+    };
   }
 
   /**
