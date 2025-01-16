@@ -178,6 +178,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     isInitialized,
     handleSetupTechnologyChange,
     selectedSetupTechnology,
+    defaultSetupTechnology,
     isAgentlessSelected,
   } = useOnSubmit({
     agentCount,
@@ -372,6 +373,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             isEditPage={false}
             handleSetupTechnologyChange={handleSetupTechnologyChange}
             isAgentlessEnabled={isAgentlessIntegration(packageInfo)}
+            defaultSetupTechnology={defaultSetupTechnology}
           />
         </ExtensionWrapper>
       )
