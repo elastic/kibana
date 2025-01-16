@@ -9,22 +9,19 @@ import { createElement } from 'react';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { WrappedHelper } from '../../../../utils/testing';
 import { getServiceLocations } from '../../../../state/service_locations';
-import { setIsCreatePrivateLocationFlyoutVisible } from '../../../../state/private_locations/actions';
+import { setAddingNewPrivateLocation } from '../../../../state/private_locations';
 import { usePrivateLocationsAPI } from './use_locations_api';
 import * as locationAPI from '../../../../state/private_locations/api';
 import * as reduxHooks from 'react-redux';
 
 describe('usePrivateLocationsAPI', () => {
   const dispatch = jest.fn();
-  const addAPI = jest
-    .spyOn(locationAPI, 'createSyntheticsPrivateLocation')
-    .mockResolvedValue({} as any);
+  const addAPI = jest.spyOn(locationAPI, 'addSyntheticsPrivateLocations').mockResolvedValue([]);
   const deletedAPI = jest
-    .spyOn(locationAPI, 'deleteSyntheticsPrivateLocation')
+    .spyOn(locationAPI, 'deleteSyntheticsPrivateLocations')
     .mockResolvedValue([]);
   jest.spyOn(locationAPI, 'getSyntheticsPrivateLocations');
   jest.spyOn(reduxHooks, 'useDispatch').mockReturnValue(dispatch);
-  jest.spyOn(reduxHooks, 'useSelector').mockReturnValue(jest.fn());
 
   it('returns expected results', () => {
     const { result } = renderHook(() => usePrivateLocationsAPI(), {
@@ -33,6 +30,7 @@ describe('usePrivateLocationsAPI', () => {
 
     expect(result.current).toEqual(
       expect.objectContaining({
+        loading: true,
         privateLocations: [],
       })
     );
@@ -51,6 +49,7 @@ describe('usePrivateLocationsAPI', () => {
 
     expect(result.current).toEqual(
       expect.objectContaining({
+        loading: true,
         privateLocations: [],
       })
     );
@@ -58,6 +57,7 @@ describe('usePrivateLocationsAPI', () => {
     await waitFor(() =>
       expect(result.current).toEqual(
         expect.objectContaining({
+          loading: false,
           privateLocations: [],
         })
       )
@@ -91,7 +91,7 @@ describe('usePrivateLocationsAPI', () => {
         label: 'new',
         agentPolicyId: 'newPolicy',
       });
-      expect(dispatch).toBeCalledWith(setIsCreatePrivateLocationFlyoutVisible(false));
+      expect(dispatch).toBeCalledWith(setAddingNewPrivateLocation(false));
       expect(dispatch).toBeCalledWith(getServiceLocations());
     });
   });
@@ -109,7 +109,7 @@ describe('usePrivateLocationsAPI', () => {
 
     await waitFor(() => {
       expect(deletedAPI).toHaveBeenLastCalledWith('Test');
-      expect(dispatch).toBeCalledWith(setIsCreatePrivateLocationFlyoutVisible(false));
+      expect(dispatch).toBeCalledWith(setAddingNewPrivateLocation(false));
       expect(dispatch).toBeCalledWith(getServiceLocations());
     });
   });
