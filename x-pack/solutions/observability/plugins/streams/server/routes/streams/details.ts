@@ -10,7 +10,6 @@ import { notFound, internal } from '@hapi/boom';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { createServerRoute } from '../create_server_route';
 import { DefinitionNotFound } from '../../lib/streams/errors';
-import { readStream } from '../../lib/streams/stream_crud';
 
 export interface StreamDetailsResponse {
   details: {
@@ -45,11 +44,8 @@ export const streamDetailRoute = createServerRoute({
     getScopedClients,
   }): Promise<StreamDetailsResponse> => {
     try {
-      const { scopedClusterClient } = await getScopedClients({ request });
-      const streamEntity = await readStream({
-        scopedClusterClient,
-        id: params.path.id,
-      });
+      const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+      const streamEntity = await streamsClient.getStream(params.path.id);
 
       // check doc count
       const docCountResponse = await scopedClusterClient.asCurrentUser.search({
