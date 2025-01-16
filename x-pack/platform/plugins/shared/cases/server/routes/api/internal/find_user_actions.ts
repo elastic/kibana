@@ -41,10 +41,13 @@ export const findUserActionsRoute = createCasesRoute({
           params: options,
         });
 
-      const commentIds = userActionsResponse.userActions
-        .filter(isCommentUserAction)
-        .map((userAction) => userAction.comment_id)
-        .filter(Boolean) as string[];
+      const uniqueCommentIds: Set<string> = new Set();
+      for (const action of userActionsResponse.userActions) {
+        if (isCommentUserAction(action) && action.comment_id) {
+          uniqueCommentIds.add(action.comment_id);
+        }
+      }
+      const commentIds = Array.from(uniqueCommentIds);
 
       let attachmentRes: attachmentApiV1.BulkGetAttachmentsResponse = {
         attachments: [],

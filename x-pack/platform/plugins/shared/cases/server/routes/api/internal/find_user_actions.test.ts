@@ -80,7 +80,7 @@ const userActionsMockData = {
       },
       owner: 'cases',
       action: 'update',
-      comment_id: '601a03cf-71a0-4949-9407-97cf372b313b',
+      comment_id: '123e4567-e89b-12d3-a456-426614174000',
       id: '675cc9a3-5445-4aaa-ad65-21241f095546',
       version: 'WzExLDFd',
     },
@@ -153,7 +153,7 @@ const attachmentsMockData = {
         email: null,
         profile_uid: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
       },
-      id: '601a03cf-71a0-4949-9407-97cf372b313b',
+      id: '123e4567-e89b-12d3-a456-426614174000',
       version: 'WzksMV0=',
     },
   ],
@@ -253,6 +253,67 @@ describe('findUserActionsRoute', () => {
       expect.objectContaining({
         body: expect.objectContaining({
           latestAttachments: [],
+        }),
+      })
+    );
+  });
+
+  it('should filter repeated comment_ids', async () => {
+    userActionsMockData.userActions[1].comment_id = userActionsMockData.userActions[2].comment_id;
+    const casesClientMock = {
+      userActions: {
+        find: jest.fn().mockResolvedValue(userActionsMockData),
+      },
+      attachments: {
+        bulkGet: jest.fn().mockResolvedValue(attachmentsMockData),
+      },
+    };
+    const context = { cases: { getCasesClient: jest.fn().mockResolvedValue(casesClientMock) } };
+    const request = {
+      params: {
+        case_id: 'my_fake_case_id',
+      },
+      query: '',
+    };
+
+    // @ts-expect-error: mocking necessary properties for handler logic only, no Kibana platform
+    await findUserActionsRoute.handler({ context, request, response });
+
+    expect(casesClientMock.attachments.bulkGet).toHaveBeenCalledWith({
+      attachmentIDs: [
+        userActionsMockData.userActions[1].comment_id,
+        userActionsMockData.userActions[3].comment_id,
+      ],
+      caseID: 'my_fake_case_id',
+    });
+    expect(response.ok).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({
+          latestAttachments: expect.arrayContaining([
+            expect.objectContaining({
+              comment: 'Edited first comment',
+              created_at: '2025-01-07T13:32:01.283Z',
+              created_by: {
+                email: null,
+                full_name: null,
+                profile_uid: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+                username: 'elastic',
+              },
+              id: '601a03cf-71a0-4949-9407-97cf372b313b',
+              owner: 'cases',
+              pushed_at: null,
+              pushed_by: null,
+              type: 'user',
+              updated_at: '2025-01-07T13:32:18.127Z',
+              updated_by: {
+                email: null,
+                full_name: null,
+                profile_uid: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+                username: 'elastic',
+              },
+              version: 'WzksMV0=',
+            }),
+          ]),
         }),
       })
     );

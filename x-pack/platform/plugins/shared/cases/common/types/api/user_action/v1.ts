@@ -85,13 +85,6 @@ export const UserActionFindResponseRt = rt.strict({
   total: rt.number,
 });
 
-export const UserActionInternalFindResponseRt = rt.strict({
-  userActions: UserActionsRt,
-  page: rt.number,
-  perPage: rt.number,
-  total: rt.number,
-});
-
 export type UserActionFindResponse = rt.TypeOf<typeof UserActionFindResponseRt>;
 
 export interface UserActionInternalFindResponse extends UserActionFindResponse {
