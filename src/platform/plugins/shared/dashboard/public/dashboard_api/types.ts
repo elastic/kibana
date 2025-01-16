@@ -140,6 +140,7 @@ export type DashboardApi = CanExpandPanels &
     controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
     fullScreenMode$: PublishingSubject<boolean>;
     focusedPanelId$: PublishingSubject<string | undefined>;
+    setFocusedPanelId: (id: string | undefined) => void;
     forceRefresh: () => void;
     getSettings: () => DashboardSettings;
     getSerializedState: () => {
@@ -174,7 +175,6 @@ export type DashboardApi = CanExpandPanels &
   };
 
 export interface DashboardInternalApi {
-  animatePanelTransforms$: PublishingSubject<boolean>;
   controlGroupReload$: Subject<void>;
   panelsReload$: Subject<void>;
   getRuntimeStateForControlGroup: () => object | undefined;

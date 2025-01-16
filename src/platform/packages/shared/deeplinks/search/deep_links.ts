@@ -46,7 +46,7 @@ export type SearchVectorSearch = typeof SEARCH_VECTOR_SEARCH;
 export type SearchSemanticSearch = typeof SEARCH_SEMANTIC_SEARCH;
 export type SearchAISearch = typeof SEARCH_AI_SEARCH;
 
-export type ContentLinkId = 'searchIndices' | 'connectors' | 'webCrawlers';
+export type ContentLinkId = 'connectors' | 'webCrawlers';
 
 export type ApplicationsLinkId = 'searchApplications';
 
