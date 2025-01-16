@@ -7,13 +7,14 @@
 
 import { z } from '@kbn/zod';
 import { notFound, internal, badRequest } from '@hapi/boom';
-import { FieldDefinitionConfig, processingDefinitionSchema } from '@kbn/streams-schema';
-import { calculateObjectDiff, flattenObject } from '@kbn/object-utils';
 import {
-  IngestSimulateResponse,
-  IngestSimulateSimulateDocumentResult,
-} from '@elastic/elasticsearch/lib/api/types';
+  FieldDefinitionConfig,
+  fieldDefinitionConfigSchema,
+  processingDefinitionSchema,
+} from '@kbn/streams-schema';
+import { calculateObjectDiff, flattenObject } from '@kbn/object-utils';
 import { isEmpty } from 'lodash';
+import { DetectedMappingFailure } from '../../../lib/streams/errors/detected_mapping_failure';
 import { NonAdditiveProcessor } from '../../../lib/streams/errors/non_additive_processor';
 import { SimulationFailed } from '../../../lib/streams/errors/simulation_failed';
 import { formatToIngestProcessors } from '../../../lib/streams/helpers/processing';
@@ -38,9 +39,12 @@ export const simulateProcessorRoute = createServerRoute({
     body: z.object({
       processing: z.array(processingDefinitionSchema),
       documents: z.array(z.record(z.unknown())),
+      detected_fields: z
+        .array(z.object({ name: z.string(), type: fieldDefinitionConfigSchema.shape.type }))
+        .optional(),
     }),
   }),
-  handler: async ({ params, request, response, getScopedClients }) => {
+  handler: async ({ params, request, getScopedClients }) => {
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
 
@@ -51,17 +55,55 @@ export const simulateProcessorRoute = createServerRoute({
       // Normalize processing definition to pipeline processors
       const processors = formatToIngestProcessors(params.body.processing);
       // Convert input documents to ingest simulation format
-      const docs = params.body.documents.map((doc) => ({ _source: doc }));
+      const docs = params.body.documents.map((doc, id) => ({
+        _index: params.path.id,
+        _id: id.toString(),
+        _source: doc,
+      }));
 
-      let simulationResult: IngestSimulateResponse;
+      const simulationBody: any = {
+        docs,
+        pipeline_substitutions: {
+          [`${params.path.id}@stream.processing`]: {
+            processors,
+          },
+        },
+      };
+
+      // Add component template substitutions if detected fields are provided
+      if (params.body.detected_fields) {
+        const properties = computeMappingProperties(params.body.detected_fields);
+
+        simulationBody.component_template_substitutions = {
+          [`${params.path.id}@stream.layer`]: {
+            template: {
+              mappings: {
+                properties,
+              },
+            },
+          },
+        };
+      }
+
+      // TODO: update type once Kibana updates to elasticsearch-js 8.17
+      let simulationResult: any;
       try {
-        simulationResult = await scopedClusterClient.asCurrentUser.ingest.simulate({
-          verbose: true,
-          pipeline: { processors },
-          docs,
+        // TODO: We should be using scopedClusterClient.asCurrentUser.simulate.ingest() but the ES JS lib currently has a bug. The types also aren't available yet, so we use any.
+        simulationResult = await scopedClusterClient.asCurrentUser.transport.request({
+          method: 'POST',
+          path: `_ingest/_simulate`,
+          body: simulationBody,
         });
       } catch (error) {
         throw new SimulationFailed(error);
+      }
+
+      const entryWithError = simulationResult.docs.find(isMappingFailure);
+      // If there is at least one document with a mapping failure, throw an error
+      if (entryWithError) {
+        throw new DetectedMappingFailure(
+          `The detected field types might not be compatible with these documents. ${entryWithError.doc.error.reason}`
+        );
       }
 
       const simulationDiffs = computeSimulationDiffs(simulationResult, docs);
@@ -73,8 +115,13 @@ export const simulateProcessorRoute = createServerRoute({
         );
       }
 
+      // At this point, we know that the shared detected fields are valid, so we can keep the user type choices
+      const confirmedValidDetectedFields = computeMappingProperties(
+        params.body.detected_fields ?? []
+      );
+
       const documents = computeSimulationDocuments(simulationResult, docs);
-      const detectedFields = computeDetectedFields(simulationDiffs);
+      const detectedFields = computeDetectedFields(simulationDiffs, confirmedValidDetectedFields);
       const successRate = computeSuccessRate(simulationResult);
       const failureRate = 1 - successRate;
 
@@ -98,17 +145,20 @@ export const simulateProcessorRoute = createServerRoute({
   },
 });
 
+// TODO: update type once Kibana updates to elasticsearch-js 8.17
 const computeSimulationDiffs = (
-  simulation: IngestSimulateResponse,
+  simulation: any,
   sampleDocs: Array<{ _source: Record<string, unknown> }>
 ) => {
   // Since we filter out failed documents, we need to map the simulation docs to the sample docs for later retrieval
-  const samplesToSimulationMap = new Map(simulation.docs.map((doc, id) => [doc, sampleDocs[id]]));
+  const samplesToSimulationMap = new Map<any, { _source: Record<string, unknown> }>(
+    simulation.docs.map((entry: any, id: number) => [entry.doc, sampleDocs[id]])
+  );
 
-  const diffs = simulation.docs.filter(isSuccessfulDocument).map((doc) => {
-    const sample = samplesToSimulationMap.get(doc);
+  const diffs = simulation.docs.filter(isSuccessfulDocument).map((entry: any) => {
+    const sample = samplesToSimulationMap.get(entry.doc);
     if (sample) {
-      return calculateObjectDiff(sample._source, doc.processor_results.at(-1)?.doc?._source);
+      return calculateObjectDiff(sample._source, entry.doc._source);
     }
 
     return calculateObjectDiff({});
@@ -117,9 +167,10 @@ const computeSimulationDiffs = (
   return diffs;
 };
 
+// TODO: update type once Kibana updates to elasticsearch-js 8.17
 const computeUpdatedFields = (simulationDiff: ReturnType<typeof computeSimulationDiffs>) => {
   const diffs = simulationDiff
-    .map((simulatedDoc) => flattenObject(simulatedDoc.updated))
+    .map((simulatedDoc: any) => flattenObject(simulatedDoc.updated))
     .flatMap(Object.keys);
 
   const uniqueFields = [...new Set(diffs)];
@@ -127,15 +178,16 @@ const computeUpdatedFields = (simulationDiff: ReturnType<typeof computeSimulatio
   return uniqueFields;
 };
 
+// TODO: update type once Kibana updates to elasticsearch-js 8.17
 const computeSimulationDocuments = (
-  simulation: IngestSimulateResponse,
+  simulation: any,
   sampleDocs: Array<{ _source: Record<string, unknown> }>
-) => {
-  return simulation.docs.map((doc, id) => {
+): Array<{ isMatch: boolean; value: Record<string, unknown> }> => {
+  return simulation.docs.map((entry: any, id: number) => {
     // If every processor was successful, return and flatten the simulation doc from the last processor
-    if (isSuccessfulDocument(doc)) {
+    if (isSuccessfulDocument(entry)) {
       return {
-        value: flattenObject(doc.processor_results.at(-1)?.doc?._source ?? sampleDocs[id]._source),
+        value: flattenObject(entry.doc._source ?? sampleDocs[id]._source),
         isMatch: true,
       };
     }
@@ -148,29 +200,41 @@ const computeSimulationDocuments = (
 };
 
 const computeDetectedFields = (
-  simulationDiff: ReturnType<typeof computeSimulationDiffs>
+  simulationDiff: ReturnType<typeof computeSimulationDiffs>,
+  confirmedValidDetectedFields: Record<string, { type: FieldDefinitionConfig['type'] | 'unmapped' }>
 ): Array<{
   name: string;
   type: FieldDefinitionConfig['type'] | 'unmapped';
 }> => {
-  const diffs = simulationDiff
-    .map((simulatedDoc) => flattenObject(simulatedDoc.added))
+  const diffs: string[] = simulationDiff
+    .map((simulatedDoc: any) => flattenObject(simulatedDoc.added))
     .flatMap(Object.keys);
 
   const uniqueFields = [...new Set(diffs)];
 
-  return uniqueFields.map((name) => ({ name, type: 'unmapped' }));
+  return uniqueFields.map((name: string) => ({
+    name,
+    type: confirmedValidDetectedFields[name]?.type || 'unmapped',
+  }));
 };
 
-const computeSuccessRate = (simulation: IngestSimulateResponse) => {
-  const successfulCount = simulation.docs.reduce((rate, doc) => {
-    return (rate += isSuccessfulDocument(doc) ? 1 : 0);
+// TODO: update type once Kibana updates to elasticsearch-js 8.17
+const computeSuccessRate = (simulation: any) => {
+  const successfulCount = simulation.docs.reduce((rate: number, entry: any) => {
+    return (rate += isSuccessfulDocument(entry) ? 1 : 0);
   }, 0);
+
   return successfulCount / simulation.docs.length;
 };
 
-const isSuccessfulDocument = (
-  doc: IngestSimulateSimulateDocumentResult
-): doc is Required<IngestSimulateSimulateDocumentResult> =>
-  doc.processor_results?.every((processorSimulation) => processorSimulation.status === 'success') ||
-  false;
+const computeMappingProperties = (
+  detectedFields: Array<{ name: string; type: FieldDefinitionConfig['type'] }>
+) => {
+  return Object.fromEntries(detectedFields.map(({ name, type }) => [name, { type }]));
+};
+
+// TODO: update type once Kibana updates to elasticsearch-js 8.17
+const isSuccessfulDocument = (entry: any) => entry.doc.error === undefined;
+// TODO: update type once Kibana updates to elasticsearch-js 8.17
+const isMappingFailure = (entry: any) =>
+  !isSuccessfulDocument(entry) && entry.doc.error.type === 'document_parsing_exception';
