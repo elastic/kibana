@@ -39,6 +39,7 @@ const createRootMock = () => {
 export const createFieldRowServicesMock = (): FieldRowServices => ({
   ...createFieldInputServicesMock(),
   links: { deprecationKey: 'link/to/deprecation/docs' },
+  getDataViewLink: (url: string) => url,
 });
 
 export const TestWrapper = ({
