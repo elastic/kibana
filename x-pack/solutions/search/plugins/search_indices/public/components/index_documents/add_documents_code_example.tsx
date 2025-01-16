@@ -98,12 +98,14 @@ export const AddDocumentsCodeExample = ({
     >
       <EuiFlexGroup direction="column">
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem css={{ maxWidth: '300px' }} grow={false}>
-            <GuideSelector
-              selectedWorkflowId={selectedWorkflowId}
-              onChange={setSelectedWorkflowId}
-            />
-          </EuiFlexItem>
+          {!indexHasMappings && (
+            <EuiFlexItem css={{ maxWidth: '300px' }} grow={false}>
+              <GuideSelector
+                selectedWorkflowId={selectedWorkflowId}
+                onChange={setSelectedWorkflowId}
+              />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem css={{ maxWidth: '300px' }} grow={false}>
