@@ -48,7 +48,7 @@ export const celTestState: CelInputState = {
   hasProgramHeaders: false,
   validateCelTask: validateCelTaskMock,
   path: '',
-  authType: undefined,
+  authType: 'basic',
   openApiPathDetails: {},
   openApiSchemas: {},
   configFields: {},
