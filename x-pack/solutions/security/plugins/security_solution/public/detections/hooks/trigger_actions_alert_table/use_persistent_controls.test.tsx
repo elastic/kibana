@@ -8,7 +8,7 @@
 import React from 'react';
 import { getPersistentControlsHook } from './use_persistent_controls';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { render, fireEvent, renderHook } from '@testing-library/react';
+import { fireEvent, render, renderHook } from '@testing-library/react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
@@ -93,7 +93,7 @@ describe('usePersistentControls', () => {
       ),
     });
 
-    const groupSelector = result.current.right.props.additionalMenuOptions[0];
+    const groupSelector = result.current.right.props.children[2];
     const { getByTestId } = render(<TestProviders store={store}>{groupSelector}</TestProviders>);
 
     fireEvent.click(getByTestId('group-selector-dropdown'));
