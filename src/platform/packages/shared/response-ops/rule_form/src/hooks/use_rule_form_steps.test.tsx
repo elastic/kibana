@@ -14,6 +14,8 @@ import {
   RULE_FORM_PAGE_RULE_DEFINITION_TITLE,
   RULE_FORM_PAGE_RULE_ACTIONS_TITLE,
   RULE_FORM_PAGE_RULE_DETAILS_TITLE,
+  RULE_FORM_PAGE_RULE_DEFINITION_TITLE_SHORT,
+  RULE_FORM_PAGE_RULE_DETAILS_TITLE_SHORT,
 } from '../translations';
 import { RuleFormData } from '../types';
 import { EuiSteps, EuiStepsHorizontal } from '@elastic/eui';
@@ -145,9 +147,9 @@ describe('useRuleFormHorizontalSteps', () => {
 
     render(<TestComponent />);
 
-    expect(screen.getByText(RULE_FORM_PAGE_RULE_DEFINITION_TITLE)).toBeInTheDocument();
+    expect(screen.getByText(RULE_FORM_PAGE_RULE_DEFINITION_TITLE_SHORT)).toBeInTheDocument();
     expect(screen.getByText(RULE_FORM_PAGE_RULE_ACTIONS_TITLE)).toBeInTheDocument();
-    expect(screen.getByText(RULE_FORM_PAGE_RULE_DETAILS_TITLE)).toBeInTheDocument();
+    expect(screen.getByText(RULE_FORM_PAGE_RULE_DETAILS_TITLE_SHORT)).toBeInTheDocument();
   });
 
   test('tracks current step successfully', async () => {
