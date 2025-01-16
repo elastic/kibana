@@ -6,8 +6,10 @@
  */
 
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import { apiPublishesESQLVariables } from '@kbn/esql-variables/common';
 import { apiPublishesUnifiedSearch, fetch$ } from '@kbn/presentation-publishing';
 import { type KibanaExecutionContext } from '@kbn/core/public';
+import { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import {
   BehaviorSubject,
   type Subscription,
@@ -18,6 +20,7 @@ import {
   merge,
   tap,
   map,
+  of,
 } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
@@ -249,9 +252,27 @@ export function loadEmbeddableData(
     return pipe(distinctUntilChanged(fastIsEqual), skip(1));
   }
 
+  // Read ESQL variables from the parent if it provides them
+  const esqlVariables$ = apiPublishesESQLVariables(parentApi)
+    ? parentApi.esqlVariables$
+    : of([] as ESQLControlVariable[]);
+
   const mergedSubscriptions = merge(
     // on search context change, reload
     fetch$(api).pipe(map(() => 'searchContext' as ReloadReason)),
+    esqlVariables$.pipe(
+      map((variables) => {
+        /**
+         * TODO: instead of just reloading lens on any ESQL variables change, we should select
+         * only the variables that are used in the current query and reload only when they change.
+         *
+         * We also do nothing with the variables here. They should be passed in as part of the query context
+         * like filters / query / time range ETC.
+         */
+        console.log('variables are', variables);
+        return 'searchContext' as ReloadReason;
+      })
+    ),
     // On state change, reload
     // this is used to refresh the chart on inline editing
     // just make sure to avoid to rerender if there's no substantial change

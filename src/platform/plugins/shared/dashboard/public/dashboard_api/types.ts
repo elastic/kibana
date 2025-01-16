@@ -8,6 +8,17 @@
  */
 
 import {
+  ControlGroupApi,
+  ControlGroupRuntimeState,
+  ControlGroupSerializedState,
+} from '@kbn/controls-plugin/public';
+import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import { RefreshInterval, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
+import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
+import { PublishesESQLVariables } from '@kbn/esql-variables/common';
+import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import {
   CanExpandPanels,
   HasRuntimeChildState,
   HasSaveNotification,
@@ -35,27 +46,17 @@ import {
   PublishingSubject,
   ViewMode,
 } from '@kbn/presentation-publishing';
-import {
-  ControlGroupApi,
-  ControlGroupRuntimeState,
-  ControlGroupSerializedState,
-} from '@kbn/controls-plugin/public';
-import { Filter, Query, TimeRange } from '@kbn/es-query';
-import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { Observable, Subject } from 'rxjs';
-import { RefreshInterval, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
-import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { LocatorPublic } from '@kbn/share-plugin/common';
-import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import { Observable, Subject } from 'rxjs';
 import { DashboardPanelMap, DashboardPanelState } from '../../common';
 import type { DashboardAttributes, DashboardOptions } from '../../server/content_management';
+import { DashboardLocatorParams } from '../dashboard_container/types';
 import {
   LoadDashboardReturn,
   SaveDashboardReturn,
 } from '../services/dashboard_content_management_service/types';
-import { DashboardLocatorParams } from '../dashboard_container/types';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 
@@ -129,6 +130,7 @@ export type DashboardApi = CanExpandPanels &
   Pick<PublishesPanelTitle, 'panelTitle'> &
   PublishesReload &
   PublishesSavedObjectId &
+  PublishesESQLVariables &
   PublishesSearchSession &
   PublishesSettings &
   PublishesUnifiedSearch &

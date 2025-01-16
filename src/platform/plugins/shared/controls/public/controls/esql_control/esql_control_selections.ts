@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import deepEqual from 'react-fast-compare';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, combineLatest } from 'rxjs';
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
-import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
+import { ESQLControlVariable, ESQLVariableType } from '@kbn/esql-validation-autocomplete';
 import type { ESQLControlState } from './types';
 
 export function initializeESQLControlSelections(initialState: ESQLControlState) {
   const availableOptions$ = new BehaviorSubject<string[]>(initialState.availableOptions ?? []);
   const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
+  const hasSelections$ = new BehaviorSubject<boolean>(false); // hardcoded to false to prevent clear action from appearing.
   const variableName$ = new BehaviorSubject<string>(initialState.variableName ?? '');
   const variableType$ = new BehaviorSubject<ESQLVariableType>(
     initialState.variableType ?? ESQLVariableType.VALUES
@@ -32,7 +33,28 @@ export function initializeESQLControlSelections(initialState: ESQLControlState) 
     }
   }
 
+  // derive ESQL control variable from state.
+  const getEsqlVariable = () => ({
+    key: variableName$.value,
+    value: selectedOptions$.value[0],
+    type: variableType$.value,
+  });
+  const esqlVariable$ = new BehaviorSubject<ESQLControlVariable>(getEsqlVariable());
+  const subscriptions = combineLatest([variableName$, variableType$, selectedOptions$]).subscribe(
+    () => esqlVariable$.next(getEsqlVariable())
+  );
+
+  // update hasSelections$ when selectedOptions$ changes
+  // subscriptions.add(
+  //   selectedOptions$.subscribe((selectedOptions) => hasSelections$.next(selectedOptions.length > 0))
+  // );
+
   return {
+    cleanup: () => subscriptions.unsubscribe(),
+    api: {
+      hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
+      esqlVariable$: esqlVariable$ as PublishingSubject<ESQLControlVariable>,
+    },
     comparators: {
       selectedOptions: [selectedOptions$, setSelectedOptions, selectedOptionsComparatorFunction],
       availableOptions: [availableOptions$, (next) => availableOptions$.next(next)],
