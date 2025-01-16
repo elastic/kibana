@@ -384,6 +384,30 @@ describe('UpdateSLO', () => {
     });
   });
 
+  describe('Update also updates updatedBy field', () => {
+    beforeEach(() => {
+      mockEsClient.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: true,
+      } as SecurityHasPrivilegesResponse);
+    });
+
+    it('updates the updatedBy field with the user id', async () => {
+      const originalSlo = createSLO({
+        id: 'original-id',
+        indicator: createAPMTransactionErrorRateIndicator({ environment: 'development' }),
+      });
+      mockRepository.findById.mockResolvedValueOnce(originalSlo);
+
+      const newIndicator = createAPMTransactionErrorRateIndicator({ environment: 'production' });
+
+      await updateSLO.execute(originalSlo.id, { indicator: newIndicator });
+
+      expect(mockRepository.update).toHaveBeenCalledWith(
+        expect.objectContaining({ updatedBy: 'some-user-id' })
+      );
+    });
+  });
+
   function expectInstallationOfUpdatedSLOResources() {
     expect(mockTransformManager.install).toHaveBeenCalled();
     expect(mockTransformManager.start).toHaveBeenCalled();
