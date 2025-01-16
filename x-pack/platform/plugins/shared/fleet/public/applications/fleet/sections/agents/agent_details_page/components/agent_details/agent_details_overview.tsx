@@ -23,7 +23,7 @@ import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy } from '../../../../../types';
 import { useAgentVersion, useGetInfoOutputsForPolicy } from '../../../../../hooks';
-import { ExperimentalFeaturesService, isAgentUpgradeable } from '../../../../../services';
+import { isAgentUpgradeable } from '../../../../../services';
 import { AgentPolicySummaryLine } from '../../../../../components';
 import { AgentHealth } from '../../../components';
 import { Tags } from '../../../components/tags';
@@ -42,7 +42,6 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
   agentPolicy?: AgentPolicy;
 }> = memo(({ agent, agentPolicy }) => {
   const latestAgentVersion = useAgentVersion();
-  const { displayAgentMetrics } = ExperimentalFeaturesService.get();
 
   const outputRes = useGetInfoOutputsForPolicy(agentPolicy?.id);
   const outputs = outputRes?.data?.item;
@@ -55,84 +54,82 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
           gutterSize="m"
           data-test-subj="agentDetailsOverviewSection"
         >
-          {displayAgentMetrics && (
-            <EuiFlexGroup>
-              <FlexItemWithMinWidth grow={5}>
-                <EuiFlexGroup direction="column" gutterSize="m">
-                  {[
-                    {
-                      title: (
-                        <EuiToolTip
-                          content={
-                            <FormattedMessage
-                              id="xpack.fleet.agentDetails.cpuTooltip"
-                              defaultMessage="Average CPU usage in the last 5 minutes"
-                            />
-                          }
-                        >
-                          <span>
-                            <FormattedMessage
-                              id="xpack.fleet.agentDetails.cpuTitle"
-                              defaultMessage="CPU"
-                            />
-                            &nbsp;
-                            <EuiIcon type="iInCircle" />
-                          </span>
+          <EuiFlexGroup>
+            <FlexItemWithMinWidth grow={5}>
+              <EuiFlexGroup direction="column" gutterSize="m">
+                {[
+                  {
+                    title: (
+                      <EuiToolTip
+                        content={
+                          <FormattedMessage
+                            id="xpack.fleet.agentDetails.cpuTooltip"
+                            defaultMessage="Average CPU usage in the last 5 minutes"
+                          />
+                        }
+                      >
+                        <span>
+                          <FormattedMessage
+                            id="xpack.fleet.agentDetails.cpuTitle"
+                            defaultMessage="CPU"
+                          />
+                          &nbsp;
+                          <EuiIcon type="iInCircle" />
+                        </span>
+                      </EuiToolTip>
+                    ),
+                    description: formatAgentCPU(agent.metrics, agentPolicy),
+                  },
+                  {
+                    title: (
+                      <EuiToolTip
+                        content={
+                          <FormattedMessage
+                            id="xpack.fleet.agentDetails.memoryTooltip"
+                            defaultMessage="Average memory usage in the last 5 minutes"
+                          />
+                        }
+                      >
+                        <span>
+                          <FormattedMessage
+                            id="xpack.fleet.agentDetails.memoryTitle"
+                            defaultMessage="Memory"
+                          />
+                          &nbsp;
+                          <EuiIcon type="iInCircle" />
+                        </span>
+                      </EuiToolTip>
+                    ),
+                    description: formatAgentMemory(agent.metrics, agentPolicy),
+                  },
+                ].map(({ title, description }) => {
+                  const tooltip =
+                    typeof description === 'string' && description.length > 20 ? description : '';
+                  return (
+                    <EuiFlexGroup>
+                      <FlexItemWithMinWidth grow={8}>
+                        <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
+                      </FlexItemWithMinWidth>
+                      <FlexItemWithMinWidth grow={4}>
+                        <EuiToolTip position="top" content={tooltip}>
+                          <EuiDescriptionListDescription className="eui-textTruncate">
+                            {description}
+                          </EuiDescriptionListDescription>
                         </EuiToolTip>
-                      ),
-                      description: formatAgentCPU(agent.metrics, agentPolicy),
-                    },
-                    {
-                      title: (
-                        <EuiToolTip
-                          content={
-                            <FormattedMessage
-                              id="xpack.fleet.agentDetails.memoryTooltip"
-                              defaultMessage="Average memory usage in the last 5 minutes"
-                            />
-                          }
-                        >
-                          <span>
-                            <FormattedMessage
-                              id="xpack.fleet.agentDetails.memoryTitle"
-                              defaultMessage="Memory"
-                            />
-                            &nbsp;
-                            <EuiIcon type="iInCircle" />
-                          </span>
-                        </EuiToolTip>
-                      ),
-                      description: formatAgentMemory(agent.metrics, agentPolicy),
-                    },
-                  ].map(({ title, description }) => {
-                    const tooltip =
-                      typeof description === 'string' && description.length > 20 ? description : '';
-                    return (
-                      <EuiFlexGroup>
-                        <FlexItemWithMinWidth grow={8}>
-                          <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
-                        </FlexItemWithMinWidth>
-                        <FlexItemWithMinWidth grow={4}>
-                          <EuiToolTip position="top" content={tooltip}>
-                            <EuiDescriptionListDescription className="eui-textTruncate">
-                              {description}
-                            </EuiDescriptionListDescription>
-                          </EuiToolTip>
-                        </FlexItemWithMinWidth>
-                      </EuiFlexGroup>
-                    );
-                  })}
-                </EuiFlexGroup>
-              </FlexItemWithMinWidth>
-              <FlexItemWithMinWidth grow={5}>
-                <EuiFlexGroup justifyContent="flexEnd">
-                  <EuiFlexItem grow={false}>
-                    <AgentDashboardLink agent={agent} agentPolicy={agentPolicy} />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </FlexItemWithMinWidth>
-            </EuiFlexGroup>
-          )}
+                      </FlexItemWithMinWidth>
+                    </EuiFlexGroup>
+                  );
+                })}
+              </EuiFlexGroup>
+            </FlexItemWithMinWidth>
+            <FlexItemWithMinWidth grow={5}>
+              <EuiFlexGroup justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  <AgentDashboardLink agent={agent} agentPolicy={agentPolicy} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </FlexItemWithMinWidth>
+          </EuiFlexGroup>
           {[
             {
               title: i18n.translate('xpack.fleet.agentDetails.statusLabel', {

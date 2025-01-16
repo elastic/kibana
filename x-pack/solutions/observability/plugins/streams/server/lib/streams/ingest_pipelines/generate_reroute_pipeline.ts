@@ -14,7 +14,7 @@ interface GenerateReroutePipelineParams {
   definition: StreamDefinition;
 }
 
-export async function generateReroutePipeline({ definition }: GenerateReroutePipelineParams) {
+export function generateReroutePipeline({ definition }: GenerateReroutePipelineParams) {
   return {
     id: getReroutePipelineName(definition.name),
     processors: definition.stream.ingest.routing.map((child) => {
