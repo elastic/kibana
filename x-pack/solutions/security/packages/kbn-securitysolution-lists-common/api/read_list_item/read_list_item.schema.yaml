@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Read list item API endpoint
+  title: Read value list item API endpoint
   version: '2023-10-31'
 paths:
   /api/lists/items:
@@ -8,30 +8,28 @@ paths:
       x-labels: [serverless, ess]
       operationId: ReadListItem
       x-codegen-enabled: true
-      summary: Get a list item
-      description: Get the details of a list item.
+      summary: Get a value list item
+      description: Get the details of a value list item.
       parameters:
         - name: id
           in: query
           required: false
-          description: Required if `list_id` and `value` are not specified
+          description: Value list item identifier. Required if `list_id` and `value` are not specified.
           schema:
             $ref: '../model/list_common.schema.yaml#/components/schemas/ListId'
-          example: qN1XRJQBs4HAK3VQs3Gc
         - name: list_id
           in: query
           required: false
-          description: Required if `id` is not specified
+          description: Value list item list's `id` identfier. Required if `id` is not specified.
           schema:
             $ref: '../model/list_common.schema.yaml#/components/schemas/ListId'
-          example: ip_list
         - name: value
           in: query
           required: false
-          description: Required if `id` is not specified
+          description: The value used to evaluate exceptions. Required if `id` is not specified.
           schema:
             type: string
-          example: 127.0.0.2
+            example: 127.0.0.2
       responses:
         200:
           description: Successful response
@@ -65,7 +63,7 @@ paths:
                 oneOf:
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
-              example:
+              examples:
                 badRequest:
                   value:
                     message: 'Either \"list_id\" or \"id\" needs to be defined in the request'
@@ -81,14 +79,19 @@ paths:
                   value:
                     statusCode: 401
                     error: Unauthorized
-                    message: |
-                      [security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
         403:
           description: Not enough privileges response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'API [GET /api/lists/items?id=qN1XRJQBs4HAK3VQs3Gc] is unauthorized for user, this action is granted by the Kibana privileges [lists-read]'
         404:
           description: List item not found response
           content:

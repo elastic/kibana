@@ -14,58 +14,58 @@ paths:
   /api/lists:
     delete:
       description: |
-        Delete a list using the list ID.
+        Delete a value list using the list ID.
         > info
         > When you delete a list, all of its list items are also deleted.
       operationId: DeleteList
       parameters:
-        - description: List's `id` value
-          examples:
-            customId:
-              value: ip_list
-            uuid:
-              value: 330bdd28-eedf-40e1-bed0-f10176c7f9e0
-          in: query
+        - in: query
           name: id
           required: true
           schema:
             $ref: '#/components/schemas/ListId'
-        - example: false
+        - description: >-
+            Determines whether exception items referencing this value list
+            should be deleted.
           in: query
           name: deleteReferences
           required: false
           schema:
             default: false
+            example: false
             type: boolean
-        - example: false
+        - description: >-
+            Determines whether to delete value list without performing any
+            additional checks of where this list may be utilized.
           in: query
           name: ignoreReferences
           required: false
           schema:
             default: false
+            example: false
             type: boolean
       responses:
         '200':
           content:
             application/json:
+              examples:
+                ipList:
+                  value:
+                    _version: WzIsMV0=
+                    '@timestamp': 2025-01-08T04:47:34.273Z
+                    created_at: 2025-01-08T04:47:34.273Z
+                    created_by: elastic
+                    description: List of bad internet ips.
+                    id: 21b01cfb-058d-44b9-838c-282be16c91cd
+                    immutable: false
+                    name: Bad ips
+                    tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
+                    type: ip
+                    updated_at: 2025-01-08T05:39:39.292Z
+                    updated_by: elastic
+                    version: 3
               schema:
                 $ref: '#/components/schemas/List'
-                examples:
-                  ipList:
-                    value:
-                      _version: WzIsMV0=
-                      '@timestamp': 2025-01-08T04:47:34.273Z
-                      created_at: 2025-01-08T04:47:34.273Z
-                      created_by: elastic
-                      description: Some other description here for you
-                      id: ip_list
-                      immutable: false
-                      name: Changed the name here to something else
-                      tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
-                      type: ip
-                      updated_at: 2025-01-08T05:39:39.292Z
-                      updated_by: elastic
-                      version: 3
           description: Successful response
         '400':
           content:
@@ -88,7 +88,7 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >
+                    message: >-
                       [security_exception\n\tRoot
                       causes:\n\t\tsecurity_exception: unable to authenticate
                       user [elastic] for REST request
@@ -101,6 +101,15 @@ paths:
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: >-
+                      API [DELETE /api/lists?id=ip_list] is unauthorized for
+                      user, this action is granted by the Kibana privileges
+                      [lists-all]
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
@@ -126,16 +135,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
-      summary: Delete a list
+      summary: Delete a value list
       tags:
         - Security Lists API
     get:
-      description: Get the details of a list using the list ID.
+      description: Get the details of a value list using the list ID.
       operationId: ReadList
       parameters:
-        - description: List's `id` value
-          example: ip_list
-          in: query
+        - in: query
           name: id
           required: true
           schema:
@@ -144,24 +151,24 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                ip:
+                  value:
+                    _version: WzEsMV0=
+                    '@timestamp': 2025-01-08T04:47:34.273Z
+                    created_at: 2025-01-08T04:47:34.273Z
+                    created_by: elastic
+                    description: This list describes bad internet ip
+                    id: ip_list
+                    immutable: false
+                    name: My bad ips
+                    tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
+                    type: ip
+                    updated_at: 2025-01-08T05:21:53.843Z
+                    updated_by: elastic
+                    version: 1
               schema:
                 $ref: '#/components/schemas/List'
-                examples:
-                  ip:
-                    value:
-                      _version: WzEsMV0=
-                      '@timestamp': 2025-01-08T04:47:34.273Z
-                      created_at: 2025-01-08T04:47:34.273Z
-                      created_by: elastic
-                      description: This list describes bad internet ip
-                      id: ip_list
-                      immutable: false
-                      name: My bad ips
-                      tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
-                      type: ip
-                      updated_at: 2025-01-08T05:21:53.843Z
-                      updated_by: elastic
-                      version: 1
           description: Successful response
         '400':
           content:
@@ -192,6 +199,15 @@ paths:
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: >-
+                      API [GET /api/lists?id=ip_list] is unauthorized for user,
+                      this action is granted by the Kibana privileges
+                      [lists-read]
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
@@ -217,23 +233,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
-      summary: Get list details
+      summary: Get value list details
       tags:
         - Security Lists API
     patch:
-      description: Update specific fields of an existing list using the list ID.
+      description: Update specific fields of an existing list using the list `id`.
       operationId: PatchList
       requestBody:
         content:
           application/json:
-            example:
-              id: ip_list
-              name: Changed the name here to something else
             schema:
+              example:
+                id: ip_list
+                name: Bad ips list - UPDATED
               type: object
               properties:
                 _version:
-                  type: string
+                  $ref: '#/components/schemas/ListVersionId'
                 description:
                   $ref: '#/components/schemas/ListDescription'
                 id:
@@ -243,34 +259,33 @@ paths:
                 name:
                   $ref: '#/components/schemas/ListName'
                 version:
-                  minimum: 1
-                  type: integer
+                  $ref: '#/components/schemas/ListVersion'
               required:
                 - id
-        description: List's properties
+        description: Value list's properties
         required: true
       responses:
         '200':
           content:
             application/json:
+              examples:
+                ip:
+                  value:
+                    _version: WzEsMV0=
+                    '@timestamp': 2025-01-08T04:47:34.273Z
+                    created_at: 2025-01-08T04:47:34.273Z
+                    created_by: elastic
+                    description: This list describes bad internet ips
+                    id: ip_list
+                    immutable: false
+                    name: Bad ips list - UPDATED
+                    tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
+                    type: ip
+                    updated_at: 2025-01-08T05:21:53.843Z
+                    updated_by: elastic
+                    version: 2
               schema:
                 $ref: '#/components/schemas/List'
-                examples:
-                  ip:
-                    value:
-                      _version: WzEsMV0=
-                      '@timestamp': 2025-01-08T04:47:34.273Z
-                      created_at: 2025-01-08T04:47:34.273Z
-                      created_by: elastic
-                      description: This list describes bad internet ip
-                      id: ip_list
-                      immutable: false
-                      name: Changed the name here to something else
-                      tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
-                      type: ip
-                      updated_at: 2025-01-08T05:21:53.843Z
-                      updated_by: elastic
-                      version: 2
           description: Successful response
         '400':
           content:
@@ -293,7 +308,7 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >
+                    message: >-
                       [security_exception\n\tRoot
                       causes:\n\t\tsecurity_exception: unable to authenticate
                       user [elastic] for REST request
@@ -306,6 +321,14 @@ paths:
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: >-
+                      API [PATCH /api/lists] is unauthorized for user, this
+                      action is granted by the Kibana privileges [lists-all]
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
@@ -331,11 +354,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
-      summary: Patch a list
+      summary: Patch a value list
       tags:
         - Security Lists API
     post:
-      description: Create a new list.
+      description: Create a new value list.
       operationId: CreateList
       requestBody:
         content:
@@ -374,7 +397,7 @@ paths:
                 description:
                   $ref: '#/components/schemas/ListDescription'
                 deserializer:
-                  type: string
+                  $ref: '#/components/schemas/ListDeserializer'
                 id:
                   $ref: '#/components/schemas/ListId'
                 meta:
@@ -382,18 +405,16 @@ paths:
                 name:
                   $ref: '#/components/schemas/ListName'
                 serializer:
-                  type: string
+                  $ref: '#/components/schemas/ListSerializer'
                 type:
                   $ref: '#/components/schemas/ListType'
                 version:
-                  default: 1
-                  minimum: 1
-                  type: integer
+                  $ref: '#/components/schemas/ListVersion'
               required:
                 - name
                 - description
                 - type
-        description: List's properties
+        description: Value list's properties
         required: true
       responses:
         '200':
@@ -501,6 +522,14 @@ paths:
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: >-
+                      API [POST /api/lists] is unauthorized for user, this
+                      action is granted by the Kibana privileges [lists-all]
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
@@ -526,13 +555,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
-      summary: Create a list
+      summary: Create a value list
       tags:
         - Security Lists API
     put:
       description: >
-        Update a list using the list ID. The original list is replaced, and all
-        unspecified fields are deleted.
+        Update a value list using the list `id`. The original list is replaced,
+        and all unspecified fields are deleted.
 
         > info
 
@@ -549,7 +578,7 @@ paths:
               type: object
               properties:
                 _version:
-                  type: string
+                  $ref: '#/components/schemas/ListVersionId'
                 description:
                   $ref: '#/components/schemas/ListDescription'
                 id:
@@ -559,36 +588,35 @@ paths:
                 name:
                   $ref: '#/components/schemas/ListName'
                 version:
-                  minimum: 1
-                  type: integer
+                  $ref: '#/components/schemas/ListVersion'
               required:
                 - id
                 - name
                 - description
-        description: List's properties
+        description: Value list's properties
         required: true
       responses:
         '200':
           content:
             application/json:
+              examples:
+                ip:
+                  value:
+                    _version: WzIsMV0=
+                    '@timestamp': 2025-01-08T04:47:34.273Z
+                    created_at: 2025-01-08T04:47:34.273Z
+                    created_by: elastic
+                    description: Latest list of bad ips
+                    id: ip_list
+                    immutable: false
+                    name: Bad ips - updated
+                    tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
+                    type: ip
+                    updated_at: 2025-01-08T05:39:39.292Z
+                    updated_by: elastic
+                    version: 3
               schema:
                 $ref: '#/components/schemas/List'
-                examples:
-                  ip:
-                    value:
-                      _version: WzIsMV0=
-                      '@timestamp': 2025-01-08T04:47:34.273Z
-                      created_at: 2025-01-08T04:47:34.273Z
-                      created_by: elastic
-                      description: Latest list of bad ips
-                      id: ip_list
-                      immutable: false
-                      name: Bad ips - updated
-                      tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
-                      type: ip
-                      updated_at: 2025-01-08T05:39:39.292Z
-                      updated_by: elastic
-                      version: 3
           description: Successful response
         '400':
           content:
@@ -624,6 +652,14 @@ paths:
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: >-
+                      API [PUT /api/lists] is unauthorized for user, this action
+                      is granted by the Kibana privileges [lists-all]
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
@@ -649,39 +685,40 @@ paths:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
-      summary: Update a list
+      summary: Update a value list
       tags:
         - Security Lists API
   /api/lists/_find:
     get:
       description: >-
-        Get a paginated subset of lists. By default, the first page is returned,
-        with 20 results per page.
+        Get a paginated subset of value lists. By default, the first page is
+        returned, with 20 results per page.
       operationId: FindLists
       parameters:
-        - description: The page number to return
-          example: 1
+        - description: The page number to return.
           in: query
           name: page
           required: false
           schema:
+            example: 1
             type: integer
-        - description: The number of lists to return per page
-          example: 20
+        - description: The number of value lists to return per page.
           in: query
           name: per_page
           required: false
           schema:
+            example: 20
             type: integer
-        - description: Determines which field is used to sort the results
-          example: name
+        - description: Determines which field is used to sort the results.
           in: query
           name: sort_field
           required: false
           schema:
-            $ref: '#/components/schemas/NonEmptyString'
+            example: name
+            format: nonempty
+            minLength: 1
+            type: string
         - description: Determines the sort order, which can be `desc` or `asc`
-          example: asc
           in: query
           name: sort_order
           required: false
@@ -689,17 +726,13 @@ paths:
             enum:
               - desc
               - asc
+            example: asc
             type: string
-        - description: >
-            Returns the list that come after the last list returned in the
-            previous call
-
-            (use the cursor value returned in the previous call). This parameter
-            uses
-
-            the `tie_breaker_id` field to ensure all lists are sorted and
-            returned correctly.
-          example: WzIwLFsiZjU1MDgxODgtYjFlOS00ZTZlLTk2NjItZDAzOWE3ZDg5ODk5Il1d
+        - description: >-
+            Returns the lists that come after the last lists returned in the
+            previous call (use the `cursor` value returned in the previous
+            call). This parameter uses the `tie_breaker_id` field to ensure all
+            lists are sorted and returned correctly.
           in: query
           name: cursor
           required: false
@@ -710,8 +743,6 @@ paths:
             field,
 
             using the <field name>:<field value> syntax.
-          example: |
-            type:ip
           in: query
           name: filter
           required: false
@@ -792,7 +823,7 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >
+                    message: >-
                       [security_exception\n\tRoot
                       causes:\n\t\tsecurity_exception: unable to authenticate
                       user [elastic] for REST request
@@ -805,6 +836,15 @@ paths:
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: >-
+                      API [GET /api/lists/_find?page=1&per_page=20] is
+                      unauthorized for user, this action is granted by the
+                      Kibana privileges [lists-read]
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
@@ -819,7 +859,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
-      summary: Get lists
+      summary: Get value lists
       tags:
         - Security Lists API
   /api/lists/index:
@@ -853,7 +893,7 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >
+                    message: >-
                       [security_exception\n\tRoot
                       causes:\n\t\tsecurity_exception: unable to authenticate
                       user [elastic] for REST request
@@ -886,7 +926,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
-      summary: Delete list data streams
+      summary: Delete value list data streams
       tags:
         - Security Lists API
     get:
@@ -922,7 +962,7 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >
+                    message: >-
                       [security_exception\n\tRoot
                       causes:\n\t\tsecurity_exception: unable to authenticate
                       user [elastic] for REST request
@@ -955,7 +995,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
-      summary: Get status of list data streams
+      summary: Get status of value list data streams
       tags:
         - Security Lists API
     post:
@@ -1033,34 +1073,37 @@ paths:
         - Security Lists API
   /api/lists/items:
     delete:
-      description: Delete a list item using its `id`, or its `list_id` and `value` fields.
+      description: >-
+        Delete a value list item using its `id`, or its `list_id` and `value`
+        fields.
       operationId: DeleteListItem
       parameters:
-        - description: Required if `list_id` and `value` are not specified
-          example: pd1WRJQBs4HAK3VQeHFI
+        - description: >-
+            Value list item's identifier. Required if `list_id` and `value` are
+            not specified.
           in: query
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/ListId'
-        - description: Required if `id` is not specified
-          example: ip_list
+            $ref: '#/components/schemas/ListItemId'
+        - description: Value list's identifier. Required if `id` is not specified.
           in: query
           name: list_id
           required: false
           schema:
             $ref: '#/components/schemas/ListId'
-        - description: Required if `id` is not specified
-          example: 255.255.255.255
+        - description: >-
+            The value used to evaluate exceptions. Required if `id` is not
+            specified.
           in: query
           name: value
           required: false
           schema:
+            example: 255.255.255.255
             type: string
         - description: >-
             Determines when changes made by the request are made visible to
-            search
-          example: false
+            search.
           in: query
           name: refresh
           required: false
@@ -1070,6 +1113,7 @@ paths:
               - 'true'
               - 'false'
               - wait_for
+            example: false
             type: string
       responses:
         '200':
@@ -1079,17 +1123,14 @@ paths:
                 ip:
                   value:
                     _version: WzIwLDFd
-                    '@timestamp': |
-                      2025-01-08T05:15:05.159Z
-                    created_at: |
-                      2025-01-08T05:15:05.159Z
+                    '@timestamp': 2025-01-08T05:15:05.159Z
+                    created_at: 2025-01-08T05:15:05.159Z
                     created_by: elastic
                     id: pd1WRJQBs4HAK3VQeHFI
                     list_id: ip_list
                     tie_breaker_id: eee41dc7-1666-4876-982f-8b0f7b59eca3
                     type: ip
-                    updated_at: |
-                      2025-01-08T05:44:14.009Z
+                    updated_at: 2025-01-08T05:44:14.009Z
                     updated_by: elastic
                     value: 255.255.255.255
               schema:
@@ -1121,7 +1162,7 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >
+                    message: >-
                       [security_exception\n\tRoot
                       causes:\n\t\tsecurity_exception: unable to authenticate
                       user [elastic] for REST request
@@ -1134,6 +1175,15 @@ paths:
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: >-
+                      API [DELETE /api/lists/items?id=pd1WRJQBs4HAK3VQeHFI] is
+                      unauthorized for user, this action is granted by the
+                      Kibana privileges [lists-all]
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
@@ -1159,33 +1209,37 @@ paths:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
-      summary: Delete a list item
+      summary: Delete a value list item
       tags:
         - Security Lists API
     get:
-      description: Get the details of a list item.
+      description: Get the details of a value list item.
       operationId: ReadListItem
       parameters:
-        - description: Required if `list_id` and `value` are not specified
-          example: qN1XRJQBs4HAK3VQs3Gc
+        - description: >-
+            Value list item identifier. Required if `list_id` and `value` are
+            not specified.
           in: query
           name: id
           required: false
           schema:
             $ref: '#/components/schemas/ListId'
-        - description: Required if `id` is not specified
-          example: ip_list
+        - description: >-
+            Value list item list's `id` identfier. Required if `id` is not
+            specified.
           in: query
           name: list_id
           required: false
           schema:
             $ref: '#/components/schemas/ListId'
-        - description: Required if `id` is not specified
-          example: 127.0.0.2
+        - description: >-
+            The value used to evaluate exceptions. Required if `id` is not
+            specified.
           in: query
           name: value
           required: false
           schema:
+            example: 127.0.0.2
             type: string
       responses:
         '200':
@@ -1215,7 +1269,7 @@ paths:
         '400':
           content:
             application/json:
-              example:
+              examples:
                 badRequest:
                   value:
                     message: >-
@@ -1234,7 +1288,7 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >
+                    message: >-
                       [security_exception\n\tRoot
                       causes:\n\t\tsecurity_exception: unable to authenticate
                       user [elastic] for REST request
@@ -1247,6 +1301,15 @@ paths:
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: >-
+                      API [GET /api/lists/items?id=qN1XRJQBs4HAK3VQs3Gc] is
+                      unauthorized for user, this action is granted by the
+                      Kibana privileges [lists-read]
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
@@ -1272,23 +1335,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
-      summary: Get a list item
+      summary: Get a value list item
       tags:
         - Security Lists API
     patch:
-      description: Update specific fields of an existing list item using the list item ID.
+      description: >-
+        Update specific fields of an existing value list item using the item
+        `id`.
       operationId: PatchListItem
       requestBody:
         content:
           application/json:
-            example:
-              id: pd1WRJQBs4HAK3VQeHFI
-              value: 255.255.255.255
             schema:
+              example:
+                id: pd1WRJQBs4HAK3VQeHFI
+                value: 255.255.255.255
               type: object
               properties:
                 _version:
-                  type: string
+                  $ref: '#/components/schemas/ListVersionId'
                 id:
                   $ref: '#/components/schemas/ListItemId'
                 meta:
@@ -1296,7 +1361,7 @@ paths:
                 refresh:
                   description: >-
                     Determines when changes made by the request are made visible
-                    to search
+                    to search.
                   enum:
                     - 'true'
                     - 'false'
@@ -1306,28 +1371,28 @@ paths:
                   $ref: '#/components/schemas/ListItemValue'
               required:
                 - id
-        description: List item's properties
+        description: Value list item's properties
         required: true
       responses:
         '200':
           content:
             application/json:
+              examples:
+                ipItem:
+                  value:
+                    _version: WzE5LDFd
+                    '@timestamp': 2025-01-08T05:15:05.159Z
+                    created_at: 2025-01-08T05:15:05.159Z
+                    created_by: elastic
+                    id: pd1WRJQBs4HAK3VQeHFI
+                    list_id: ip_list
+                    tie_breaker_id: eee41dc7-1666-4876-982f-8b0f7b59eca3
+                    type: ip
+                    updated_at: 2025-01-08T05:23:37.602Z
+                    updated_by: elastic
+                    value: 255.255.255.255
               schema:
                 $ref: '#/components/schemas/ListItem'
-                examples:
-                  ipItem:
-                    value:
-                      _version: WzE5LDFd
-                      '@timestamp': 2025-01-08T05:15:05.159Z
-                      created_at: 2025-01-08T05:15:05.159Z
-                      created_by: elastic
-                      id: pd1WRJQBs4HAK3VQeHFI
-                      list_id: ip_list
-                      tie_breaker_id: eee41dc7-1666-4876-982f-8b0f7b59eca3
-                      type: ip
-                      updated_at: 2025-01-08T05:23:37.602Z
-                      updated_by: elastic
-                      value: 255.255.255.255
           description: Successful response
         '400':
           content:
@@ -1354,7 +1419,7 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >
+                    message: >-
                       [security_exception\n\tRoot
                       causes:\n\t\tsecurity_exception: unable to authenticate
                       user [elastic] for REST request
@@ -1367,6 +1432,15 @@ paths:
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: >-
+                      API [PATCH /api/lists/items] is unauthorized for user,
+                      this action is granted by the Kibana privileges
+                      [lists-all]
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
@@ -1392,16 +1466,17 @@ paths:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
-      summary: Patch a list item
+      summary: Patch a value list item
       tags:
         - Security Lists API
     post:
       description: >
-        Create a list item and associate it with the specified list.
+        Create a value list item and associate it with the specified value list.
 
 
-        All list items in the same list must be the same type. For example, each
-        list item in an `ip` list must define a specific IP address.
+        All value list items in the same list must be the same type. For
+        example, each list item in an `ip` list must define a specific IP
+        address.
 
         > info
 
@@ -1410,9 +1485,19 @@ paths:
       requestBody:
         content:
           application/json:
-            example:
-              list_id: ip_list
-              value: 127.0.0.1
+            examples:
+              ip:
+                value:
+                  list_id: ip_list
+                  value: 127.0.0.1
+              ip_range:
+                value:
+                  list_id: ip_range_list
+                  value: 192.168.0.0/16
+              keyword:
+                value:
+                  list_id: keyword_list
+                  value: zeek
             schema:
               type: object
               properties:
@@ -1425,18 +1510,19 @@ paths:
                 refresh:
                   description: >-
                     Determines when changes made by the request are made visible
-                    to search
+                    to search.
                   enum:
                     - 'true'
                     - 'false'
                     - wait_for
+                  example: wait_for
                   type: string
                 value:
                   $ref: '#/components/schemas/ListItemValue'
               required:
                 - list_id
                 - value
-        description: List item's properties
+        description: Value list item's properties
         required: true
       responses:
         '200':
@@ -1508,7 +1594,7 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >
+                    message: >-
                       [security_exception\n\tRoot
                       causes:\n\t\tsecurity_exception: unable to authenticate
                       user [elastic] for REST request
@@ -1521,6 +1607,14 @@ paths:
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: >-
+                      API [POST /api/lists/items] is unauthorized for user, this
+                      action is granted by the Kibana privileges [lists-all]
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
@@ -1557,13 +1651,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
-      summary: Create a list item
+      summary: Create a value list item
       tags:
         - Security Lists API
     put:
       description: >
-        Update a list item using the list item ID. The original list item is
-        replaced, and all unspecified fields are deleted.
+        Update a value list item using the list item ID. The original list item
+        is replaced, and all unspecified fields are deleted.
 
         > info
 
@@ -1579,7 +1673,7 @@ paths:
               type: object
               properties:
                 _version:
-                  type: string
+                  $ref: '#/components/schemas/ListVersionId'
                 id:
                   $ref: '#/components/schemas/ListItemId'
                 meta:
@@ -1589,28 +1683,28 @@ paths:
               required:
                 - id
                 - value
-        description: List item's properties
+        description: Value list item's properties
         required: true
       responses:
         '200':
           content:
             application/json:
+              examples:
+                ip:
+                  value:
+                    _version: WzIwLDFd
+                    '@timestamp': 2025-01-08T05:15:05.159Z
+                    created_at: 2025-01-08T05:15:05.159Z
+                    created_by: elastic
+                    id: pd1WRJQBs4HAK3VQeHFI
+                    list_id: ip_list
+                    tie_breaker_id: eee41dc7-1666-4876-982f-8b0f7b59eca3
+                    type: ip
+                    updated_at: 2025-01-08T05:44:14.009Z
+                    updated_by: elastic
+                    value: 255.255.255.255
               schema:
                 $ref: '#/components/schemas/ListItem'
-                examples:
-                  ip:
-                    value:
-                      _version: WzIwLDFd
-                      '@timestamp': 2025-01-08T05:15:05.159Z
-                      created_at: 2025-01-08T05:15:05.159Z
-                      created_by: elastic
-                      id: pd1WRJQBs4HAK3VQeHFI
-                      list_id: ip_list
-                      tie_breaker_id: eee41dc7-1666-4876-982f-8b0f7b59eca3
-                      type: ip
-                      updated_at: 2025-01-08T05:44:14.009Z
-                      updated_by: elastic
-                      value: 255.255.255.255
           description: Successful response
         '400':
           content:
@@ -1646,6 +1740,15 @@ paths:
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: >-
+                      API [PATCH /api/lists/items] is unauthorized for user,
+                      this action is granted by the Kibana privileges
+                      [lists-all]
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
@@ -1671,16 +1774,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
-      summary: Update a list item
+      summary: Update a value list item
       tags:
         - Security Lists API
   /api/lists/items/_export:
     post:
-      description: Export list item values from the specified list.
+      description: Export list item values from the specified value list.
       operationId: ExportListItems
       parameters:
-        - description: List's id to export
-          example: ip_list
+        - description: Value list's `id` to export.
           in: query
           name: list_id
           required: true
@@ -1692,6 +1794,16 @@ paths:
             application/ndjson:
               schema:
                 description: A `.txt` file containing list items from the specified list
+                example: |
+                  127.0.0.1
+                  127.0.0.2
+                  127.0.0.3
+                  127.0.0.4
+                  127.0.0.5
+                  127.0.0.6
+                  127.0.0.7
+                  127.0.0.8
+                  127.0.0.9
                 format: binary
                 type: string
           description: Successful response
@@ -1715,7 +1827,7 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >
+                    message: >-
                       [security_exception\n\tRoot
                       causes:\n\t\tsecurity_exception: unable to authenticate
                       user [elastic] for REST request
@@ -1728,6 +1840,15 @@ paths:
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: >-
+                      API [POST /api/lists/items/_export?list_id=ips.txt] is
+                      unauthorized for user, this action is granted by the
+                      Kibana privileges [lists-read]
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
@@ -1748,44 +1869,43 @@ paths:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
-      summary: Export list items
+      summary: Export value list items
       tags:
         - Security Lists API
   /api/lists/items/_find:
     get:
-      description: Get all list items in the specified list.
+      description: Get all value list items in the specified list.
       operationId: FindListItems
       parameters:
-        - description: List's id
-          example: ip_list
-          in: query
+        - in: query
           name: list_id
           required: true
           schema:
             $ref: '#/components/schemas/ListId'
-        - description: The page number to return
-          example: 1
+        - description: The page number to return.
           in: query
           name: page
           required: false
           schema:
+            example: 1
             type: integer
-        - description: The number of list items to return per page
-          example: 20
+        - description: The number of list items to return per page.
           in: query
           name: per_page
           required: false
           schema:
+            example: 20
             type: integer
-        - description: Determines which field is used to sort the results
-          example: value
+        - description: Determines which field is used to sort the results.
           in: query
           name: sort_field
           required: false
           schema:
-            $ref: '#/components/schemas/NonEmptyString'
+            example: value
+            format: nonempty
+            minLength: 1
+            type: string
         - description: Determines the sort order, which can be `desc` or `asc`
-          example: asc
           in: query
           name: sort_order
           required: false
@@ -1793,18 +1913,9 @@ paths:
             enum:
               - desc
               - asc
+            example: asc
             type: string
-        - description: >
-            Returns the list that come after the last list returned in the
-            previous call
-
-            (use the cursor value returned in the previous call). This parameter
-            uses
-
-            the `tie_breaker_id` field to ensure all lists are sorted and
-            returned correctly.
-          example: WzIwLFsiYjU3Yzc2MmMtMzAzNi00NjVjLTliZmItN2JmYjVlNmU1MTVhIl1d
-          in: query
+        - in: query
           name: cursor
           required: false
           schema:
@@ -1814,8 +1925,6 @@ paths:
             field,
 
             using the <field name>:<field value> syntax.
-          example: |
-            value:127.0.0.1
           in: query
           name: filter
           required: false
@@ -1891,7 +2000,7 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >
+                    message: >-
                       [security_exception\n\tRoot
                       causes:\n\t\tsecurity_exception: unable to authenticate
                       user [elastic] for REST request
@@ -1904,6 +2013,16 @@ paths:
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: >-
+                      API [GET
+                      /api/lists/items/_find?list_id=ip_list&page=1&per_page=20]
+                      is unauthorized for user, this action is granted by the
+                      Kibana privileges [lists-read]
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
@@ -1918,14 +2037,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
-      summary: Get list items
+      summary: Get value list items
       tags:
         - Security Lists API
   /api/lists/items/_import:
     post:
       description: >
-        Import list items from a TXT or CSV file. The maximum file size is 9
-        million bytes.
+        Import value list items from a TXT or CSV file. The maximum file size is
+        9 million bytes.
 
 
         You can import items to a new or existing list.
@@ -1935,42 +2054,63 @@ paths:
             List's id.
 
             Required when importing to an existing list.
-          example: ip_list
           in: query
           name: list_id
           required: false
           schema:
             $ref: '#/components/schemas/ListId'
-        - description: >
+        - description: |
             Type of the importing list.
 
-
-            Required when importing a new list that is `list_id` is not
-            specified.
-          example: ip
+            Required when importing a new list whose list `id` is not specified.
+          examples:
+            ip:
+              value: ip
           in: query
           name: type
           required: false
           schema:
             $ref: '#/components/schemas/ListType'
-        - example: >-
-            (?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))
+        - description: >
+            Determines how uploaded list item values are parsed. By default,
+            list items are parsed using these named regex groups:
+
+
+            - `(?<value>.+)` - Single value item types, such as ip, long, date,
+            keyword, and text.
+
+            - `(?<gte>.+)-(?<lte>.+)|(?<value>.+)` - Range value item types,
+            such as `date_range`, `ip_range`, `double_range`, `float_range`,
+            `integer_range`, and `long_range`.
           in: query
           name: serializer
           required: false
           schema:
+            example: >-
+              (?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))
             type: string
-        - example: |
-            {{value}}
+        - description: >
+            Determines how retrieved list item values are presented. By default
+            list items are presented using these Handelbar expressions:
+
+
+            - `{{{value}}}` - Single value item types, such as `ip`, `long`,
+            `date`, `keyword`, and `text`.
+
+            - `{{{gte}}}-{{{lte}}}` - Range value item types, such as
+            `ip_range`, `double_range`, `float_range`, `integer_range`, and
+            `long_range`.
+
+            - `{{{gte}}},{{{lte}}}` - Date range values.
           in: query
           name: deserializer
           required: false
           schema:
+            example: '{{value}}'
             type: string
         - description: >-
             Determines when changes made by the request are made visible to
-            search
-          example: true
+            search.
           in: query
           name: refresh
           required: false
@@ -1979,6 +2119,7 @@ paths:
               - 'true'
               - 'false'
               - wait_for
+            example: true
             type: string
       requestBody:
         content:
@@ -1989,7 +2130,17 @@ paths:
                 file:
                   description: >-
                     A `.txt` or `.csv` file containing newline separated list
-                    items
+                    items.
+                  example: |
+                    127.0.0.1
+                    127.0.0.2
+                    127.0.0.3
+                    127.0.0.4
+                    127.0.0.5
+                    127.0.0.6
+                    127.0.0.7
+                    127.0.0.8
+                    127.0.0.9
                   format: binary
                   type: string
         required: true
@@ -1997,24 +2148,24 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                ip:
+                  value:
+                    _version: WzAsMV0=
+                    '@timestamp': 2025-01-08T04:47:34.273Z
+                    created_at: 2025-01-08T04:47:34.273Z
+                    created_by: elastic
+                    description: This list describes bad internet ip
+                    id: ip_list
+                    immutable: false
+                    name: Simple list with an ip
+                    tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
+                    type: ip
+                    updated_at: 2025-01-08T04:47:34.273Z
+                    updated_by: elastic
+                    version: 1
               schema:
                 $ref: '#/components/schemas/List'
-                examples:
-                  ip:
-                    value:
-                      _version: WzAsMV0=
-                      '@timestamp': 2025-01-08T04:47:34.273Z
-                      created_at: 2025-01-08T04:47:34.273Z
-                      created_by: elastic
-                      description: This list describes bad internet ip
-                      id: ip_list
-                      immutable: false
-                      name: Simple list with an ip
-                      tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
-                      type: ip
-                      updated_at: 2025-01-08T04:47:34.273Z
-                      updated_by: elastic
-                      version: 1
           description: Successful response
         '400':
           content:
@@ -2036,7 +2187,7 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >
+                    message: >-
                       [security_exception\n\tRoot
                       causes:\n\t\tsecurity_exception: unable to authenticate
                       user [elastic] for REST request
@@ -2049,6 +2200,15 @@ paths:
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: >-
+                      API [POST /api/lists/items/_import?list_id=ip_list] is
+                      unauthorized for user, this action is granted by the
+                      Kibana privileges [lists-all]
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
@@ -2069,7 +2229,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
-      summary: Import list items
+      summary: Import value list items
       tags:
         - Security Lists API
   /api/lists/privileges:
@@ -2176,7 +2336,7 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >
+                    message: >-
                       [security_exception\n\tRoot
                       causes:\n\t\tsecurity_exception: unable to authenticate
                       user [elastic] for REST request
@@ -2189,6 +2349,15 @@ paths:
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: >-
+                      API [GET /api/lists/privileges] is unauthorized for user,
+                      this action is granted by the Kibana privileges
+                      [lists-read]
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
@@ -2203,36 +2372,54 @@ paths:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
-      summary: Get list privileges
+      summary: Get value list privileges
       tags:
         - Security Lists API
 components:
   schemas:
     FindListItemsCursor:
-      $ref: '#/components/schemas/NonEmptyString'
+      description: >-
+        Returns the items that come after the last item returned in the previous
+        call (use the `cursor` value returned in the previous call). This
+        parameter uses the `tie_breaker_id` field to ensure all items are sorted
+        and returned correctly.
+      example: WzIwLFsiYjU3Yzc2MmMtMzAzNi00NjVjLTliZmItN2JmYjVlNmU1MTVhIl1d
+      format: nonempty
+      minLength: 1
+      type: string
     FindListItemsFilter:
+      example: value:127.0.0.1
       type: string
     FindListsCursor:
-      $ref: '#/components/schemas/NonEmptyString'
+      example: WzIwLFsiYjU3Yzc2MmMtMzAzNi00NjVjLTliZmItN2JmYjVlNmU1MTVhIl1d
+      format: nonempty
+      minLength: 1
+      type: string
     FindListsFilter:
+      example: value:127.0.0.1
       type: string
     List:
       type: object
       properties:
         _version:
-          type: string
+          $ref: '#/components/schemas/ListVersionId'
         '@timestamp':
+          example: 2025-01-08T04:47:34.273Z
           format: date-time
           type: string
         created_at:
+          description: Autogenerated date of object creation.
+          example: 2025-01-08T04:47:34.273Z
           format: date-time
           type: string
         created_by:
+          description: Autogenerated value - user that created object.
+          example: elastic
           type: string
         description:
           $ref: '#/components/schemas/ListDescription'
         deserializer:
-          type: string
+          $ref: '#/components/schemas/ListDeserializer'
         id:
           $ref: '#/components/schemas/ListId'
         immutable:
@@ -2242,19 +2429,26 @@ components:
         name:
           $ref: '#/components/schemas/ListName'
         serializer:
-          type: string
+          $ref: '#/components/schemas/ListSerializer'
         tie_breaker_id:
+          description: >-
+            Field used in search to ensure all containers are sorted and
+            returned correctly.
+          example: f5508188-b1e9-4e6e-9662-d039a7d89899
           type: string
         type:
           $ref: '#/components/schemas/ListType'
         updated_at:
+          description: Autogenerated date of last object update.
+          example: 2025-01-08T04:47:34.273Z
           format: date-time
           type: string
         updated_by:
+          description: Autogenerated value - user that last updated object.
+          example: elastic
           type: string
         version:
-          minimum: 1
-          type: integer
+          $ref: '#/components/schemas/ListVersion'
       required:
         - id
         - type
@@ -2268,24 +2462,51 @@ components:
         - updated_at
         - updated_by
     ListDescription:
-      $ref: '#/components/schemas/NonEmptyString'
+      description: Describes the value list.
+      format: nonempty
+      minLength: 1
+      type: string
+    ListDeserializer:
+      description: >
+        Determines how retrieved list item values are presented. By default list
+        items are presented using these Handelbar expressions:
+
+
+        - `{{{value}}}` - Single value item types, such as `ip`, `long`, `date`,
+        `keyword`, and `text`.
+
+        - `{{{gte}}}-{{{lte}}}` - Range value item types, such as `ip_range`,
+        `double_range`, `float_range`, `integer_range`, and `long_range`.
+
+        - `{{{gte}}},{{{lte}}}` - Date range values.
+      example: '{{value}}'
+      type: string
     ListId:
-      $ref: '#/components/schemas/NonEmptyString'
+      description: Value list's identifier.
+      example: 21b01cfb-058d-44b9-838c-282be16c91cd
+      format: nonempty
+      minLength: 1
+      type: string
     ListItem:
       type: object
       properties:
         _version:
-          type: string
+          $ref: '#/components/schemas/ListVersionId'
         '@timestamp':
+          example: 2025-01-08T04:47:34.273Z
           format: date-time
           type: string
         created_at:
+          description: Autogenerated date of object creation.
+          example: 2025-01-08T04:47:34.273Z
           format: date-time
           type: string
         created_by:
+          description: Autogenerated value - user that created object.
+          example: elastic
           type: string
         deserializer:
-          type: string
+          $ref: '#/components/schemas/ListDeserializer'
         id:
           $ref: '#/components/schemas/ListItemId'
         list_id:
@@ -2293,15 +2514,23 @@ components:
         meta:
           $ref: '#/components/schemas/ListItemMetadata'
         serializer:
-          type: string
+          $ref: '#/components/schemas/ListSerializer'
         tie_breaker_id:
+          description: >-
+            Field used in search to ensure all containers are sorted and
+            returned correctly.
+          example: f5508188-b1e9-4e6e-9662-d039a7d89899
           type: string
         type:
           $ref: '#/components/schemas/ListType'
         updated_at:
+          description: Autogenerated date of last object update.
+          example: 2025-01-08T04:47:34.273Z
           format: date-time
           type: string
         updated_by:
+          description: Autogenerated value - user that last updated object.
+          example: elastic
           type: string
         value:
           $ref: '#/components/schemas/ListItemValue'
@@ -2316,9 +2545,14 @@ components:
         - updated_at
         - updated_by
     ListItemId:
-      $ref: '#/components/schemas/NonEmptyString'
+      description: Value list item's identifier.
+      example: 54b01cfb-058d-44b9-838c-282be16c91cd
+      format: nonempty
+      minLength: 1
+      type: string
     ListItemMetadata:
       additionalProperties: true
+      description: Placeholder for metadata about the value list item.
       type: object
     ListItemPrivileges:
       type: object
@@ -2348,12 +2582,20 @@ components:
         - index
         - application
     ListItemValue:
-      $ref: '#/components/schemas/NonEmptyString'
+      description: The value used to evaluate exceptions.
+      format: nonempty
+      minLength: 1
+      type: string
     ListMetadata:
       additionalProperties: true
+      description: Placeholder for metadata about the value list.
       type: object
     ListName:
-      $ref: '#/components/schemas/NonEmptyString'
+      description: Value list's name.
+      example: List of bad IPs
+      format: nonempty
+      minLength: 1
+      type: string
     ListPrivileges:
       type: object
       properties:
@@ -2381,7 +2623,33 @@ components:
         - cluster
         - index
         - application
+    ListSerializer:
+      description: >
+        Determines how uploaded list item values are parsed. By default, list
+        items are parsed using these named regex groups:
+
+
+        - `(?<value>.+)` - Single value item types, such as ip, long, date,
+        keyword, and text.
+
+        - `(?<gte>.+)-(?<lte>.+)|(?<value>.+)` - Range value item types, such as
+        `date_range`, `ip_range`, `double_range`, `float_range`,
+        `integer_range`, and `long_range`.
+      example: >-
+        (?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))
+      type: string
     ListType:
+      description: >
+        Specifies the Elasticsearch data type of excludes the list container
+        holds. Some common examples:
+
+
+        - `keyword`: Many ECS fields are Elasticsearch keywords
+
+        - `ip`: IP addresses
+
+        - `ip_range`: Range of IP addresses (supports IPv4, IPv6, and CIDR
+        notation)
       enum:
         - binary
         - boolean
@@ -2407,10 +2675,17 @@ components:
         - short
         - text
       type: string
-    NonEmptyString:
-      description: A string that does not contain only whitespace characters
-      format: nonempty
-      minLength: 1
+    ListVersion:
+      default: 1
+      description: The document version number.
+      example: 1
+      minimum: 1
+      type: integer
+    ListVersionId:
+      description: >
+        The version id, normally returned by the API when the document is
+        retrieved. Use it ensure updates are done against the latest version.
+      example: WzIsMV0=
       type: string
     PlatformErrorResponse:
       type: object

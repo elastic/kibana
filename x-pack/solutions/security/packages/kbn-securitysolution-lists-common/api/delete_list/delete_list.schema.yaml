@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Delete list API endpoint
+  title: Delete value list API endpoint
   version: '2023-10-31'
 paths:
   /api/lists:
@@ -8,37 +8,33 @@ paths:
       x-labels: [serverless, ess]
       operationId: DeleteList
       x-codegen-enabled: true
-      summary: Delete a list
+      summary: Delete a value list
       description: |
-        Delete a list using the list ID.
+        Delete a value list using the list ID.
         > info
         > When you delete a list, all of its list items are also deleted.
       parameters:
         - name: id
           in: query
           required: true
-          description: List's `id` value
           schema:
             $ref: '../model/list_common.schema.yaml#/components/schemas/ListId'
-          examples:
-            customId:
-              value: ip_list
-            uuid:
-              value: 330bdd28-eedf-40e1-bed0-f10176c7f9e0
         - name: deleteReferences
           in: query
           required: false
           schema:
             type: boolean
             default: false
-          example: false
+            example: false
+          description: Determines whether exception items referencing this value list should be deleted.
         - name: ignoreReferences
           in: query
           required: false
           schema:
             type: boolean
             default: false
-          example: false
+            example: false
+          description: Determines whether to delete value list without performing any additional checks of where this list may be utilized.
       responses:
         200:
           description: Successful response
@@ -46,22 +42,22 @@ paths:
             application/json:
               schema:
                 $ref: '../model/list_schemas.schema.yaml#/components/schemas/List'
-                examples:
-                  ipList:
-                    value:
-                      id: ip_list
-                      type: ip
-                      name: Changed the name here to something else
-                      description: Some other description here for you
-                      immutable: false
-                      '@timestamp': 2025-01-08T04:47:34.273Z
-                      version: 3
-                      _version: WzIsMV0=
-                      tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
-                      created_at: 2025-01-08T04:47:34.273Z
-                      created_by: elastic
-                      updated_at: 2025-01-08T05:39:39.292Z
-                      updated_by: elastic
+              examples:
+                ipList:
+                  value:
+                    id: 21b01cfb-058d-44b9-838c-282be16c91cd
+                    type: ip
+                    name: Bad ips
+                    description: List of bad internet ips.
+                    immutable: false
+                    '@timestamp': 2025-01-08T04:47:34.273Z
+                    version: 3
+                    _version: WzIsMV0=
+                    tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
+                    created_at: 2025-01-08T04:47:34.273Z
+                    created_by: elastic
+                    updated_at: 2025-01-08T05:39:39.292Z
+                    updated_by: elastic
         400:
           description: Invalid input data response
           content:
@@ -87,14 +83,19 @@ paths:
                   value:
                     statusCode: 401
                     error: Unauthorized
-                    message: |
-                      [security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
         403:
           description: Not enough privileges response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'API [DELETE /api/lists?id=ip_list] is unauthorized for user, this action is granted by the Kibana privileges [lists-all]'
         404:
           description: List not found response
           content:

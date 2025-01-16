@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Create list item API endpoint
+  title: Create value list item API endpoint
   version: '2023-10-31'
 paths:
   /api/lists/items:
@@ -8,15 +8,15 @@ paths:
       x-labels: [serverless, ess]
       operationId: CreateListItem
       x-codegen-enabled: true
-      summary: Create a list item
+      summary: Create a value list item
       description: |
-        Create a list item and associate it with the specified list.
+        Create a value list item and associate it with the specified value list.
 
-        All list items in the same list must be the same type. For example, each list item in an `ip` list must define a specific IP address.
+        All value list items in the same list must be the same type. For example, each list item in an `ip` list must define a specific IP address.
         > info
         > Before creating a list item, you must create a list.
       requestBody:
-        description: List item's properties
+        description: Value list item's properties
         required: true
         content:
           application/json:
@@ -37,13 +37,24 @@ paths:
                     - 'true'
                     - 'false'
                     - wait_for
-                  description: Determines when changes made by the request are made visible to search
+                  description: Determines when changes made by the request are made visible to search.
+                  example: wait_for
               required:
                 - list_id
                 - value
-            example:
-              list_id: ip_list
-              value: 127.0.0.1
+            examples:
+              ip:
+                value:
+                  list_id: ip_list
+                  value: 127.0.0.1
+              ip_range:
+                value:
+                  list_id: ip_range_list
+                  value: 192.168.0.0/16
+              keyword:
+                value:
+                  list_id: keyword_list
+                  value: zeek
       responses:
         200:
           description: Successful response
@@ -116,14 +127,19 @@ paths:
                   value:
                     statusCode: 401
                     error: Unauthorized
-                    message: |
-                      [security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
         403:
           description: Not enough privileges response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'API [POST /api/lists/items] is unauthorized for user, this action is granted by the Kibana privileges [lists-all]'
         404:
           description: Not enough privileges response
           content:

@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Create list API endpoint
+  title: Create value list API endpoint
   version: '2023-10-31'
 paths:
   /api/lists:
@@ -8,10 +8,10 @@ paths:
       x-labels: [serverless, ess]
       operationId: CreateList
       x-codegen-enabled: true
-      summary: Create a list
-      description: Create a new list.
+      summary: Create a value list
+      description: Create a new value list.
       requestBody:
-        description: List's properties
+        description: Value list's properties
         required: true
         content:
           application/json:
@@ -27,15 +27,13 @@ paths:
                 type:
                   $ref: '../model/list_common.schema.yaml#/components/schemas/ListType'
                 serializer:
-                  type: string
+                  $ref: '../model/list_common.schema.yaml#/components/schemas/ListSerializer'
                 deserializer:
-                  type: string
+                  $ref: '../model/list_common.schema.yaml#/components/schemas/ListDeserializer'
                 meta:
                   $ref: '../model/list_common.schema.yaml#/components/schemas/ListMetadata'
                 version:
-                  type: integer
-                  minimum: 1
-                  default: 1
+                  $ref: '../model/list_common.schema.yaml#/components/schemas/ListVersion'
               required:
                 - name
                 - description
@@ -169,6 +167,12 @@ paths:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'API [POST /api/lists] is unauthorized for user, this action is granted by the Kibana privileges [lists-all]'
         409:
           description: List already exists response
           content:
