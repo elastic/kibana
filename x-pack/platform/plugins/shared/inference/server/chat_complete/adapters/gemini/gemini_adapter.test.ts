@@ -519,5 +519,22 @@ describe('geminiAdapter', () => {
         }),
       });
     });
+
+    it('propagates the modelName parameter', () => {
+      geminiAdapter.chatComplete({
+        logger,
+        executor: executorMock,
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        modelName: 'gemini-1.5',
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(executorMock.invoke).toHaveBeenCalledWith({
+        subAction: 'invokeStream',
+        subActionParams: expect.objectContaining({
+          model: 'gemini-1.5',
+        }),
+      });
+    });
   });
 });
