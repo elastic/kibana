@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { useController } from 'react-hook-form';
-import { EuiFormRow, EuiSwitch, htmlIdGenerator } from '@elastic/eui';
+import { EuiFormRow, EuiFormRowProps, EuiSwitch, htmlIdGenerator } from '@elastic/eui';
 
 interface ToggleFieldProps {
-  helpText?: string;
+  helpText?: EuiFormRowProps['helpText'];
   id?: string;
   label: string;
   name: string;
