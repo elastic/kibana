@@ -4,16 +4,92 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { z } from '@kbn/zod';
-import { notFound, internal } from '@hapi/boom';
+import { internal, notFound } from '@hapi/boom';
 import { getFlattenedObject } from '@kbn/std';
-import { fieldDefinitionConfigSchema } from '@kbn/streams-schema';
-import { createServerRoute } from '../../create_server_route';
+import { fieldDefinitionConfigSchema, isWiredStream } from '@kbn/streams-schema';
 import { DefinitionNotFound } from '../../../lib/streams/errors';
 import { checkAccess } from '../../../lib/streams/stream_crud';
+import { createServerRoute } from '../../create_server_route';
 
-const SAMPLE_SIZE = 200;
+const UNMAPPED_SAMPLE_SIZE = 500;
+
+export const unmappedFieldsRoute = createServerRoute({
+  endpoint: 'GET /api/streams/{id}/schema/unmapped_fields',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
+  params: z.object({
+    path: z.object({ id: z.string() }),
+  }),
+  handler: async ({ params, request, getScopedClients }): Promise<{ unmappedFields: string[] }> => {
+    try {
+      const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+
+      const searchBody = {
+        sort: [
+          {
+            '@timestamp': {
+              order: 'desc',
+            },
+          },
+        ],
+        size: UNMAPPED_SAMPLE_SIZE,
+      };
+
+      const [streamDefinition, ancestors, results] = await Promise.all([
+        streamsClient.getStream(params.path.id),
+        streamsClient.getAncestors(params.path.id),
+        scopedClusterClient.asCurrentUser.search({
+          index: params.path.id,
+          ...searchBody,
+        }),
+      ]);
+
+      const sourceFields = new Set<string>();
+
+      results.hits.hits.forEach((hit) => {
+        Object.keys(getFlattenedObject(hit._source as Record<string, unknown>)).forEach((field) => {
+          sourceFields.add(field);
+        });
+      });
+
+      // Mapped fields from the stream's definition and inherited from ancestors
+      const mappedFields = new Set<string>();
+
+      if (isWiredStream(streamDefinition)) {
+        Object.keys(streamDefinition.stream.ingest.wired.fields).forEach((name) =>
+          mappedFields.add(name)
+        );
+      }
+
+      for (const ancestor of ancestors) {
+        Object.keys(ancestor.stream.ingest.wired.fields).forEach((name) => mappedFields.add(name));
+      }
+
+      const unmappedFields = Array.from(sourceFields)
+        .filter((field) => !mappedFields.has(field))
+        .sort();
+
+      return { unmappedFields };
+    } catch (e) {
+      if (e instanceof DefinitionNotFound) {
+        throw notFound(e);
+      }
+
+      throw internal(e);
+    }
+  },
+});
+
+const FIELD_SIMILATION_SAMPLE_SIZE = 200;
 
 export const schemaFieldsSimulationRoute = createServerRoute({
   endpoint: 'POST /api/streams/{id}/schema/fields_simulation',
@@ -71,7 +147,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
             },
           },
         ],
-        size: SAMPLE_SIZE,
+        size: FIELD_SIMILATION_SAMPLE_SIZE,
       };
 
       const sampleResults = await scopedClusterClient.asCurrentUser.search({
@@ -168,7 +244,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
             },
           },
         ],
-        size: SAMPLE_SIZE,
+        size: FIELD_SIMILATION_SAMPLE_SIZE,
         fields: params.body.field_definitions.map((field) => field.name),
         _source: false,
       };
@@ -203,3 +279,8 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     }
   },
 });
+
+export const schemaRoutes = {
+  ...unmappedFieldsRoute,
+  ...schemaFieldsSimulationRoute,
+};
