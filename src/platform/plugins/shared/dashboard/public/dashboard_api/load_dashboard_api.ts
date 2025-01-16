@@ -65,10 +65,9 @@ export async function loadDashboardApi({
     ...(savedObjectResult?.dashboardInput ?? {}),
     ...sessionStorageInput,
   };
-  combinedSessionState.references =
-    (sessionStorageInput?.references?.length ?? 0) > 0
-      ? sessionStorageInput?.references
-      : savedObjectResult?.references;
+  combinedSessionState.references = sessionStorageInput?.references?.length
+    ? sessionStorageInput?.references
+    : savedObjectResult?.references;
 
   // --------------------------------------------------------------------------------------
   // Combine state with overrides.
