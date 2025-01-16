@@ -14,8 +14,8 @@ import {
   AgentlessConnectorsInfraService,
   ConnectorMetadata,
   PackagePolicyMetadata,
-  getConnectorsWithoutPolicies,
-  getPoliciesWithoutConnectors,
+  getConnectorsToDeploy,
+  getPoliciesToDelete,
 } from '.';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
@@ -104,12 +104,14 @@ describe('AgentlessConnectorsInfraService', () => {
             name: 'Sharepoint Online Production Connector',
             service_type: 'sharepoint_online',
             is_native: false,
+            deleted: false,
           },
           {
             id: '00000002',
             name: 'Github Connector for ACME Organisation',
             service_type: 'github',
             is_native: true,
+            deleted: true,
           },
         ],
         count: 2,
@@ -121,6 +123,7 @@ describe('AgentlessConnectorsInfraService', () => {
       expect(nativeConnectors[0].id).toBe(mockResult.results[1].id);
       expect(nativeConnectors[0].name).toBe(mockResult.results[1].name);
       expect(nativeConnectors[0].service_type).toBe(mockResult.results[1].service_type);
+      expect(nativeConnectors[0].is_deleted).toBe(mockResult.results[1].deleted);
     });
 
     test('Lists only supported service types', async () => {
@@ -131,24 +134,28 @@ describe('AgentlessConnectorsInfraService', () => {
             name: 'Sharepoint Online Production Connector',
             service_type: 'sharepoint_online',
             is_native: true,
+            deleted: false,
           },
           {
             id: '00000002',
             name: 'Github Connector for ACME Organisation',
             service_type: 'github',
             is_native: true,
+            deleted: true,
           },
           {
             id: '00000003',
             name: 'Connector with unexpected service_type',
             service_type: 'crawler',
             is_native: true,
+            deleted: false,
           },
           {
             id: '00000004',
             name: 'Connector with no service_type',
             service_type: null,
             is_native: true,
+            deleted: true,
           },
         ],
         count: 4,
@@ -160,9 +167,11 @@ describe('AgentlessConnectorsInfraService', () => {
       expect(nativeConnectors[0].id).toBe(mockResult.results[0].id);
       expect(nativeConnectors[0].name).toBe(mockResult.results[0].name);
       expect(nativeConnectors[0].service_type).toBe(mockResult.results[0].service_type);
+      expect(nativeConnectors[0].is_deleted).toBe(mockResult.results[0].deleted);
       expect(nativeConnectors[1].id).toBe(mockResult.results[1].id);
       expect(nativeConnectors[1].name).toBe(mockResult.results[1].name);
       expect(nativeConnectors[1].service_type).toBe(mockResult.results[1].service_type);
+      expect(nativeConnectors[1].is_deleted).toBe(mockResult.results[1].deleted);
     });
   });
   describe('getConnectorPackagePolicies', () => {
@@ -214,13 +223,13 @@ describe('AgentlessConnectorsInfraService', () => {
 
       expect(policies.length).toBe(1);
       expect(policies[0].package_policy_id).toBe(firstPackagePolicy.id);
-      expect(policies[0].connector_metadata.id).toBe(
+      expect(policies[0].connector_settings.id).toBe(
         firstPackagePolicy.inputs[0].compiled_input.connector_id
       );
-      expect(policies[0].connector_metadata.name).toBe(
+      expect(policies[0].connector_settings.name).toBe(
         firstPackagePolicy.inputs[0].compiled_input.connector_name
       );
-      expect(policies[0].connector_metadata.service_type).toBe(
+      expect(policies[0].connector_settings.service_type).toBe(
         firstPackagePolicy.inputs[0].compiled_input.service_type
       );
       expect(policies[0].agent_policy_ids).toBe(firstPackagePolicy.policy_ids);
@@ -268,25 +277,25 @@ describe('AgentlessConnectorsInfraService', () => {
 
       expect(policies.length).toBe(2);
       expect(policies[0].package_policy_id).toBe(firstPackagePolicy.id);
-      expect(policies[0].connector_metadata.id).toBe(
+      expect(policies[0].connector_settings.id).toBe(
         firstPackagePolicy.inputs[0].compiled_input.connector_id
       );
-      expect(policies[0].connector_metadata.name).toBe(
+      expect(policies[0].connector_settings.name).toBe(
         firstPackagePolicy.inputs[0].compiled_input.connector_name
       );
-      expect(policies[0].connector_metadata.service_type).toBe(
+      expect(policies[0].connector_settings.service_type).toBe(
         firstPackagePolicy.inputs[0].compiled_input.service_type
       );
       expect(policies[0].agent_policy_ids).toBe(firstPackagePolicy.policy_ids);
 
       expect(policies[1].package_policy_id).toBe(thirdPackagePolicy.id);
-      expect(policies[1].connector_metadata.id).toBe(
+      expect(policies[1].connector_settings.id).toBe(
         thirdPackagePolicy.inputs[0].compiled_input.connector_id
       );
-      expect(policies[1].connector_metadata.name).toBe(
+      expect(policies[1].connector_settings.name).toBe(
         thirdPackagePolicy.inputs[0].compiled_input.connector_name
       );
-      expect(policies[1].connector_metadata.service_type).toBe(
+      expect(policies[1].connector_settings.service_type).toBe(
         thirdPackagePolicy.inputs[0].compiled_input.service_type
       );
       expect(policies[1].agent_policy_ids).toBe(thirdPackagePolicy.policy_ids);
@@ -352,6 +361,7 @@ describe('AgentlessConnectorsInfraService', () => {
         id: '',
         name: 'something',
         service_type: 'github',
+        is_deleted: false,
       };
 
       try {
@@ -367,6 +377,7 @@ describe('AgentlessConnectorsInfraService', () => {
         id: '000000001',
         name: 'something',
         service_type: '',
+        is_deleted: false,
       };
 
       try {
@@ -382,6 +393,7 @@ describe('AgentlessConnectorsInfraService', () => {
         id: '000000001',
         name: 'something',
         service_type: 'crawler',
+        is_deleted: false,
       };
 
       try {
@@ -393,11 +405,28 @@ describe('AgentlessConnectorsInfraService', () => {
       }
     });
 
+    test('Raises an error if connector.is_deleted is true', async () => {
+      const connector = {
+        id: '000000001',
+        name: 'something',
+        service_type: 'github',
+        is_deleted: true,
+      };
+
+      try {
+        await service.deployConnector(connector);
+        expect(true).toBe(false);
+      } catch (e) {
+        expect(e.message).toContain('deleted');
+      }
+    });
+
     test('Does not swallow an error if agent policy creation failed', async () => {
       const connector = {
         id: '000000001',
         name: 'something',
         service_type: 'github',
+        is_deleted: false,
       };
       const errorMessage = 'Failed to create an agent policy hehe';
 
@@ -418,6 +447,7 @@ describe('AgentlessConnectorsInfraService', () => {
         id: '000000001',
         name: 'something',
         service_type: 'github',
+        is_deleted: false,
       };
       const errorMessage = 'Failed to create a package policy hehe';
 
@@ -439,6 +469,7 @@ describe('AgentlessConnectorsInfraService', () => {
         id: '000000001',
         name: 'something',
         service_type: 'github',
+        is_deleted: false,
       };
 
       agentPolicyInterface.create.mockResolvedValue(agentPolicy);
@@ -531,74 +562,95 @@ describe('module', () => {
     id: '000001',
     name: 'Github Connector',
     service_type: 'github',
+    is_deleted: false,
   };
 
   const sharepointConnector: ConnectorMetadata = {
     id: '000002',
     name: 'Sharepoint Connector',
     service_type: 'sharepoint_online',
+    is_deleted: false,
   };
 
   const mysqlConnector: ConnectorMetadata = {
     id: '000003',
     name: 'MySQL Connector',
     service_type: 'mysql',
+    is_deleted: false,
+  };
+
+  const deleted = (connector: ConnectorMetadata): ConnectorMetadata => {
+    return {
+      id: connector.id,
+      name: connector.name,
+      service_type: connector.service_type,
+      is_deleted: true,
+    };
   };
 
   const githubPackagePolicy: PackagePolicyMetadata = {
     package_policy_id: 'agent-001',
     agent_policy_ids: ['agent-package-001'],
-    connector_metadata: githubConnector,
+    connector_settings: githubConnector,
   };
 
   const sharepointPackagePolicy: PackagePolicyMetadata = {
     package_policy_id: 'agent-002',
     agent_policy_ids: ['agent-package-002'],
-    connector_metadata: sharepointConnector,
+    connector_settings: sharepointConnector,
   };
 
   const mysqlPackagePolicy: PackagePolicyMetadata = {
     package_policy_id: 'agent-003',
     agent_policy_ids: ['agent-package-003'],
-    connector_metadata: mysqlConnector,
+    connector_settings: mysqlConnector,
   };
 
-  describe('getPoliciesWithoutConnectors', () => {
-    test('Returns a missing policy if one is missing', async () => {
-      const missingPolicies = getPoliciesWithoutConnectors(
+  describe('getPoliciesToDelete', () => {
+    test('Returns one policy if connector has been soft-deleted', async () => {
+      const policiesToDelete = getPoliciesToDelete(
         [githubPackagePolicy, sharepointPackagePolicy, mysqlPackagePolicy],
-        [githubConnector, sharepointConnector]
+        [deleted(githubConnector), sharepointConnector, mysqlConnector]
       );
 
-      expect(missingPolicies.length).toBe(1);
-      expect(missingPolicies).toContain(mysqlPackagePolicy);
+      expect(policiesToDelete.length).toBe(1);
+      expect(policiesToDelete).toContain(githubPackagePolicy);
     });
 
-    test('Returns empty array if no policies are missing', async () => {
-      const missingPolicies = getPoliciesWithoutConnectors(
+    test('Returns empty array if no connectors were soft-deleted', async () => {
+      const policiesToDelete = getPoliciesToDelete(
         [githubPackagePolicy, sharepointPackagePolicy, mysqlPackagePolicy],
         [githubConnector, sharepointConnector, mysqlConnector]
       );
 
-      expect(missingPolicies.length).toBe(0);
+      expect(policiesToDelete.length).toBe(0);
     });
 
-    test('Returns all policies if all are missing', async () => {
-      const missingPolicies = getPoliciesWithoutConnectors(
+    test('Returns no policies if no connectors are passed', async () => {
+      const policiesToDelete = getPoliciesToDelete(
         [githubPackagePolicy, sharepointPackagePolicy, mysqlPackagePolicy],
         []
       );
 
-      expect(missingPolicies.length).toBe(3);
-      expect(missingPolicies).toContain(githubPackagePolicy);
-      expect(missingPolicies).toContain(sharepointPackagePolicy);
-      expect(missingPolicies).toContain(mysqlPackagePolicy);
+      expect(policiesToDelete.length).toBe(0);
+    });
+
+    test('Returns all policies if all connectors were soft-deleted', async () => {
+      const policiesToDelete = getPoliciesToDelete(
+        [githubPackagePolicy, sharepointPackagePolicy, mysqlPackagePolicy],
+        [deleted(githubConnector), deleted(sharepointConnector), deleted(mysqlConnector)]
+      );
+
+      expect(policiesToDelete.length).toBe(3);
+      expect(policiesToDelete).toContain(githubPackagePolicy);
+      expect(policiesToDelete).toContain(sharepointPackagePolicy);
+      expect(policiesToDelete).toContain(mysqlPackagePolicy);
     });
   });
 
-  describe('getConnectorsWithoutPolicies', () => {
-    test('Returns a missing policy if one is missing', async () => {
-      const missingConnectors = getConnectorsWithoutPolicies(
+  describe('getConnectorsToDeploy', () => {
+    test('Returns a single connector if only one is missing', async () => {
+      const missingConnectors = getConnectorsToDeploy(
         [githubPackagePolicy, sharepointPackagePolicy],
         [githubConnector, sharepointConnector, mysqlConnector]
       );
@@ -607,8 +659,8 @@ describe('module', () => {
       expect(missingConnectors).toContain(mysqlConnector);
     });
 
-    test('Returns empty array if no policies are missing', async () => {
-      const missingConnectors = getConnectorsWithoutPolicies(
+    test('Returns empty array if all policies have a matching connector', async () => {
+      const missingConnectors = getConnectorsToDeploy(
         [githubPackagePolicy, sharepointPackagePolicy, mysqlPackagePolicy],
         [githubConnector, sharepointConnector, mysqlConnector]
       );
@@ -616,8 +668,17 @@ describe('module', () => {
       expect(missingConnectors.length).toBe(0);
     });
 
-    test('Returns all policies if all are missing', async () => {
-      const missingConnectors = getConnectorsWithoutPolicies(
+    test('Does not include soft-deleted connectors', async () => {
+      const missingConnectors = getConnectorsToDeploy(
+        [],
+        [deleted(githubConnector), deleted(sharepointConnector), deleted(mysqlConnector)]
+      );
+
+      expect(missingConnectors.length).toBe(0);
+    });
+
+    test('Returns all policies if no connectors are present', async () => {
+      const missingConnectors = getConnectorsToDeploy(
         [],
         [githubConnector, sharepointConnector, mysqlConnector]
       );
