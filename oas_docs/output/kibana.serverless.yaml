@@ -15494,6 +15494,7 @@ paths:
                                 additionalProperties: false
                                 type: object
                                 properties:
+                                  apm: {}
                                   enabled:
                                     type: boolean
                                   logs:
@@ -15511,6 +15512,7 @@ paths:
                                   - metrics
                                   - logs
                                   - traces
+                                  - apm
                               protection:
                                 additionalProperties: false
                                 type: object
