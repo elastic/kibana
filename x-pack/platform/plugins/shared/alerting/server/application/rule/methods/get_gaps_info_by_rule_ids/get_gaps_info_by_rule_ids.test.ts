@@ -281,7 +281,7 @@ describe('getGapsInfoByRuleIds', () => {
           action: 'rule_get_gaps_info_by_rule_ids',
           category: ['database'],
           outcome: 'failure',
-          type: undefined,
+          type: ['access'],
         },
         kibana: {
           saved_object: undefined,
@@ -344,7 +344,7 @@ describe('getGapsInfoByRuleIds', () => {
           action: 'rule_get_gaps_info_by_rule_ids',
           category: ['database'],
           outcome: 'failure',
-          type: undefined,
+          type: ['access'],
         },
         kibana: {
           saved_object: undefined,

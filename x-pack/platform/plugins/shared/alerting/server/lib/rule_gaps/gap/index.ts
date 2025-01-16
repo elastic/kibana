@@ -118,7 +118,7 @@ export class Gap {
   }
 
   public get status(): GapStatus {
-    if (this.unfilledGapDurationMs === this.totalGapDurationMs) {
+    if (this.filledGapDurationMs === 0) {
       return gapStatus.UNFILLED;
     } else if (this.unfilledGapDurationMs === 0 && this.inProgressGapDurationMs === 0) {
       return gapStatus.FILLED;

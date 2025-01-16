@@ -20,6 +20,7 @@ export type {
   QueryEventsBySavedObjectResult,
   AggregateEventsBySavedObjectResult,
   InternalFields,
+  IValidatedEventInternalDocInfo,
 } from './types';
 export { SAVED_OBJECT_REL_PRIMARY } from './types';
 

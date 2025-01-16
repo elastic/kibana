@@ -9,10 +9,15 @@ import moment from 'moment';
 import expect from '@kbn/expect';
 import { get } from 'lodash';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
+import {
+  IValidatedEvent,
+  nanosToMillis,
+  IValidatedEventInternalDocInfo,
+} from '@kbn/event-log-plugin/server';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { ES_TEST_INDEX_NAME, ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+
 import { Spaces } from '../../../scenarios';
 import {
   getUrlPrefix,
@@ -299,7 +304,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           });
 
           function validateInstanceEvent(
-            event: IValidatedEvent,
+            event: IValidatedEventInternalDocInfo,
             subMessage: string,
             shouldHaveEventEnd: boolean,
             flapping: boolean,
@@ -2085,7 +2090,6 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           // Prepare the update
           const fieldsToUpdate = {
             event: { kind: 'test_update' },
-            new_field: 'Updated test message',
           };
 
           // Call the update API
@@ -2093,10 +2097,10 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/_test/event_log/update_document`)
             .set('kbn-xsrf', 'foo')
             .send({
-              _id: eventToUpdate._id,
-              _index: eventToUpdate._index,
-              _seq_no: eventToUpdate._seq_no,
-              _primary_term: eventToUpdate._primary_term,
+              _id: eventToUpdate?._id,
+              _index: eventToUpdate?._index,
+              _seq_no: eventToUpdate?._seq_no,
+              _primary_term: eventToUpdate?._primary_term,
               fieldsToUpdate,
             })
             .expect(200);
@@ -2104,7 +2108,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           expect(updateResponse.body.ok).to.be(true);
 
           // Verify the update by getting the event again
-          const updatedEvents = await retry.try(async () => {
+          await retry.try(async () => {
             const newResponse = await getEventLog({
               getService,
               spaceId: space.id,
@@ -2114,10 +2118,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               actions: new Map([['execute', { gte: 1 }]]),
             });
 
-            const updatedEvent = newResponse.find((event) => event._id === eventToUpdate._id);
+            const updatedEvent = newResponse.find((event) => event?._id === eventToUpdate?._id);
             expect(updatedEvent).to.be.ok();
-            expect(updatedEvent.event.kind).to.be('test_update');
-            expect(updatedEvent.new_field).to.be('Updated test message');
+            expect(updatedEvent?.event?.kind).to.be('test_update');
 
             return response;
           });

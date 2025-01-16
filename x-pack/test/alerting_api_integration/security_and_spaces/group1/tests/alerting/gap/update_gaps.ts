@@ -182,7 +182,7 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
         expect(inProgressResponse.statusCode).to.eql(200);
         expect(inProgressResponse.body.total).to.eql(1);
         const gap = inProgressResponse.body.data[0];
-        expect(gap.status).to.eql('partially_filled');
+        expect(gap.status).to.eql('unfilled');
         expect(gap.in_progress_intervals).to.have.length(1);
         expect(gap.in_progress_intervals[0].gte).to.eql(gapStart);
         expect(gap.in_progress_intervals[0].lte).to.eql(gapEnd);
@@ -409,7 +409,7 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
           });
 
         expect(inProgressResponse.statusCode).to.eql(200);
-        expect(inProgressResponse.body.data[0].status).to.eql('partially_filled');
+        expect(inProgressResponse.body.data[0].status).to.eql('unfilled');
         expect(inProgressResponse.body.data[0].in_progress_intervals).to.have.length(1);
       });
 
@@ -490,7 +490,7 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
           });
 
         const firstGap = firstGapResponse.body.data[0];
-        expect(firstGap.status).to.eql('partially_filled');
+        expect(firstGap.status).to.eql('unfilled');
         expect(firstGap.unfilled_intervals).to.have.length(0);
         expect(firstGap.in_progress_intervals).to.have.length(1);
         expect(firstGap.in_progress_intervals[0].gte).to.eql(gapStart);

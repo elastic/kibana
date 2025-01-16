@@ -23,6 +23,7 @@ export type {
   QueryEventsBySavedObjectResult,
   AggregateEventsBySavedObjectResult,
   InternalFields,
+  IValidatedEventInternalDocInfo,
 } from './es/cluster_client_adapter';
 import { SavedObjectProvider } from './saved_object_provider_registry';
 

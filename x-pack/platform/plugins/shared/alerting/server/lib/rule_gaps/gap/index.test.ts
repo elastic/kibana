@@ -70,7 +70,7 @@ describe('Gap Class Tests', () => {
     expect(gap.inProgressGapDurationMs).toBe(inProgressDuration);
     expect(gap.filledGapDurationMs).toBe(0);
     expect(gap.unfilledGapDurationMs).toBe(HOUR_MS - inProgressDuration);
-    expect(gap.status).toBe(gapStatus.PARTIALLY_FILLED);
+    expect(gap.status).toBe(gapStatus.UNFILLED);
   });
 
   it('handles intervals that extend beyond the range', () => {

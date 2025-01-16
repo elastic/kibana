@@ -46,7 +46,7 @@ export interface ConstructorOpts {
   wait: Wait;
 }
 
-type IValidatedEventInternalDocInfo = IValidatedEvent & {
+export type IValidatedEventInternalDocInfo = IValidatedEvent & {
   _id: estypes.Id;
   _index: estypes.IndexName;
   _seq_no: estypes.SequenceNumber;
@@ -452,7 +452,7 @@ export class ClusterClientAdapter<
     try {
       const {
         hits: { hits, total },
-      } = await esClient.search<IValidatedEvent>({
+      } = await esClient.search<IValidatedEventInternalDocInfo>({
         index,
         track_total_hits: true,
         seq_no_primary_term: true,
@@ -504,7 +504,7 @@ export class ClusterClientAdapter<
     try {
       const {
         hits: { hits, total },
-      } = await esClient.search<IValidatedEvent>({
+      } = await esClient.search<IValidatedEventInternalDocInfo>({
         index,
         track_total_hits: true,
         body,
