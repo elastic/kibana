@@ -65,15 +65,19 @@ function modifyDOMAndAddSearchHighlights(
       const nodeWithText = node as Text;
       const parts = (nodeWithText.textContent || '').split(searchTermRegExp);
 
+      if (dryRun) {
+        parts.forEach((part) => {
+          if (searchTermRegExp.test(part)) {
+            matchIndex++;
+          }
+        });
+        return;
+      }
+
       if (parts.length > 1) {
         const nodeWithHighlights = document.createDocumentFragment();
 
         parts.forEach((part) => {
-          if (dryRun && searchTermRegExp.test(part)) {
-            matchIndex++;
-            return;
-          }
-
           if (searchTermRegExp.test(part)) {
             const mark = document.createElement('mark');
             mark.textContent = part;
@@ -85,9 +89,7 @@ function modifyDOMAndAddSearchHighlights(
           }
         });
 
-        if (!dryRun) {
-          nodeWithText.replaceWith(nodeWithHighlights);
-        }
+        nodeWithText.replaceWith(nodeWithHighlights);
       }
     }
   }

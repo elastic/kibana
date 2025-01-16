@@ -11,7 +11,7 @@ import React, { useCallback, useEffect, useState, ReactNode } from 'react';
 import ReactDOM from 'react-dom';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import { UnifiedDataTableContext } from '../../table_context';
+import { UnifiedDataTableContext, DataTableContext } from '../../table_context';
 import { InTableSearchHighlightsWrapperProps } from './in_table_search_highlights_wrapper';
 
 interface RowMatches {
@@ -26,6 +26,7 @@ export interface UseInTableSearchMatchesProps {
   visibleColumns: string[];
   rows: DataTableRecord[] | undefined;
   inTableSearchTerm: string | undefined;
+  tableContext: Omit<DataTableContext, 'inTableSearchTerm' | 'pageIndex' | 'pageSize'>;
   renderCellValue: (
     props: EuiDataGridCellValueElementProps &
       Pick<InTableSearchHighlightsWrapperProps, 'onHighlightsCountFound'>
@@ -46,13 +47,17 @@ export interface UseInTableSearchMatchesReturn {
   goToNextMatch: () => void;
 }
 
-export const useInTableSearchMatches = ({
-  visibleColumns,
-  rows,
-  inTableSearchTerm,
-  renderCellValue,
-  scrollToFoundMatch,
-}: UseInTableSearchMatchesProps): UseInTableSearchMatchesReturn => {
+export const useInTableSearchMatches = (
+  props: UseInTableSearchMatchesProps
+): UseInTableSearchMatchesReturn => {
+  const {
+    visibleColumns,
+    rows,
+    inTableSearchTerm,
+    tableContext,
+    renderCellValue,
+    scrollToFoundMatch,
+  } = props;
   const [matchesList, setMatchesList] = useState<RowMatches[]>(DEFAULT_MATCHES);
   const [matchesCount, setMatchesCount] = useState<number>(0);
   const [activeMatchPosition, setActiveMatchPosition] = useState<number>(
@@ -161,12 +166,13 @@ export const useInTableSearchMatches = ({
         let rowMatchesCount = 0;
 
         for (const fieldName of visibleColumns) {
-          const matchesCountForFieldName = await getCellMatchesCount(
-            inTableSearchTerm,
+          const matchesCountForFieldName = await getCellMatchesCount({
             rowIndex,
             fieldName,
-            renderCellValue
-          );
+            inTableSearchTerm,
+            tableContext,
+            renderCellValue,
+          });
 
           if (matchesCountForFieldName) {
             matchesCountPerField[fieldName] = matchesCountForFieldName;
@@ -212,6 +218,7 @@ export const useInTableSearchMatches = ({
     visibleColumns,
     rows,
     inTableSearchTerm,
+    tableContext,
   ]);
 
   return {
@@ -223,12 +230,16 @@ export const useInTableSearchMatches = ({
   };
 };
 
-function getCellMatchesCount(
-  inTableSearchTerm: string,
-  rowIndex: number,
-  fieldName: string,
-  renderCellValue: UseInTableSearchMatchesProps['renderCellValue']
-): Promise<number> {
+function getCellMatchesCount({
+  rowIndex,
+  fieldName,
+  inTableSearchTerm,
+  renderCellValue,
+  tableContext,
+}: Pick<UseInTableSearchMatchesProps, 'inTableSearchTerm' | 'tableContext' | 'renderCellValue'> & {
+  rowIndex: number;
+  fieldName: string;
+}): Promise<number> {
   const UnifiedDataTableRenderCellValue = renderCellValue;
 
   const container = document.createElement('div');
@@ -237,8 +248,10 @@ function getCellMatchesCount(
     ReactDOM.render(
       <UnifiedDataTableContext.Provider
         value={{
+          ...tableContext,
           inTableSearchTerm,
-          // TODO: add other context values?
+          pageIndex: 0,
+          pageSize: rowIndex + 1,
         }}
       >
         <UnifiedDataTableRenderCellValue

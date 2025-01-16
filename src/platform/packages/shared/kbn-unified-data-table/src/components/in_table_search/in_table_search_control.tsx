@@ -21,25 +21,15 @@ export interface InTableSearchControlProps extends UseInTableSearchMatchesProps 
 }
 
 export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
-  inTableSearchTerm,
-  visibleColumns,
-  rows,
-  renderCellValue,
-  scrollToFoundMatch,
   onChange,
+  ...props
 }) => {
   const { matchesCount, activeMatchPosition, goToPrevMatch, goToNextMatch, isProcessing } =
-    useInTableSearchMatches({
-      visibleColumns,
-      rows,
-      inTableSearchTerm,
-      renderCellValue,
-      scrollToFoundMatch,
-    });
+    useInTableSearchMatches(props);
 
   const { inputValue, handleInputChange } = useDebouncedValue({
     onChange,
-    value: inTableSearchTerm,
+    value: props.inTableSearchTerm,
   });
 
   const onInputChange = useCallback(
@@ -69,7 +59,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
       isClearable
       isLoading={isProcessing}
       append={
-        Boolean(inTableSearchTerm?.length) && !isProcessing ? (
+        Boolean(inputValue?.length) && !isProcessing ? (
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
             {matchesCount > 0 ? (
               <>
