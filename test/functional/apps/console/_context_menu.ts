@@ -85,8 +85,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.clickContextMenu();
         await PageObjects.console.clickCopyAsButton();
 
-        let resultToast = await toasts.getElementByIndex(1);
-        let toastText = await resultToast.getVisibleText();
+        const resultToast = await toasts.getElementByIndex(1);
+        const toastText = await resultToast.getVisibleText();
 
         expect(toastText).to.be('Requests copied to clipboard as curl');
 
@@ -104,7 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Verify that the Change language button is not displayed for kbn request
         await PageObjects.console.clickContextMenu();
-        expect(await testSubjects.exist('changeLanguageButton')).to.be(false);
+        expect(await testSubjects.exists('changeLanguageButton')).to.be(false);
       });
 
       it.skip('allows to change default language', async () => {
