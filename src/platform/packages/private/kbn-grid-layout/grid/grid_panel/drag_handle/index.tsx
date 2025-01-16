@@ -42,12 +42,14 @@ export const DragHandle = React.forwardRef<
         if (handle === null) return;
         handle.addEventListener('mousedown', attachLayoutEvents, { passive: true });
         handle.addEventListener('touchstart', attachLayoutEvents, { passive: false });
+        handle.addEventListener('keydown', attachLayoutEvents);
       }
       removeEventListenersRef.current = () => {
         for (const handle of dragHandles) {
           if (handle === null) return;
           handle.removeEventListener('mousedown', attachLayoutEvents);
           handle.removeEventListener('touchstart', attachLayoutEvents);
+          handle.removeEventListener('keydown', attachLayoutEvents);
         }
       };
     },
@@ -64,5 +66,7 @@ export const DragHandle = React.forwardRef<
 
   useImperativeHandle(ref, () => ({ setDragHandles }), [setDragHandles]);
 
-  return Boolean(dragHandleCount) ? null : <DefaultDragHandle onDragStart={attachLayoutEvents} />;
+  return Boolean(dragHandleCount) ? null : (
+    <DefaultDragHandle attachLayoutEvents={attachLayoutEvents} />
+  );
 });

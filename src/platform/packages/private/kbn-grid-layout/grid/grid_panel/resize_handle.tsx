@@ -37,6 +37,7 @@ export const ResizeHandle = ({
       className="kbnGridPanel__resizeHandle"
       onMouseDown={attachLayoutEvents}
       onTouchStart={attachLayoutEvents}
+      onKeyDown={attachLayoutEvents}
       aria-label={i18n.translate('kbnGridLayout.resizeHandle.ariaLabel', {
         defaultMessage: 'Resize panel',
       })}

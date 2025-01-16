@@ -127,4 +127,6 @@ export type UserMouseEvent = MouseEvent | React.MouseEvent<HTMLButtonElement, Mo
 
 export type UserTouchEvent = TouchEvent | React.TouchEvent<HTMLButtonElement>;
 
+export type UserKeyboardEvent = KeyboardEvent | React.KeyboardEvent<HTMLButtonElement>;
+
 export type UserInteractionEvent = React.UIEvent<HTMLElement> | Event;

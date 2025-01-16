@@ -17,9 +17,10 @@ import {
   PanelInteractionEvent,
   UserMouseEvent,
   UserTouchEvent,
+  UserInteractionEvent,
 } from '../types';
 import { isGridDataEqual } from '../utils/equality_checks';
-import { isMouseEvent, isTouchEvent } from '../utils/sensors';
+import { isKeyboardEvent, isMouseEvent, isTouchEvent } from '../utils/sensors';
 import { handleAutoscroll, stopAutoScroll } from './autoscroll';
 import {
   getDragPreviewRect,
@@ -37,7 +38,6 @@ export const useGridLayoutEvents = ({
   panelId,
 }: {
   interactionType: PanelInteractionEvent['type'];
-
   gridLayoutStateManager: GridLayoutStateManager;
   rowIndex: number;
   panelId: string;
@@ -199,7 +199,7 @@ export const useGridLayoutEvents = ({
         document.removeEventListener('mousemove', onPointerMove);
 
         stopAutoScroll(scrollInterval);
-        drop(gridLayoutStateManager);
+        finishInteraction(gridLayoutStateManager);
       };
 
       document.addEventListener('scroll', onPointerMove);
@@ -215,8 +215,7 @@ export const useGridLayoutEvents = ({
 
       const onDragEnd = () => {
         e.target!.removeEventListener('touchmove', onPointerMove);
-
-        drop(gridLayoutStateManager);
+        finishInteraction(gridLayoutStateManager);
       };
 
       e.target!.addEventListener('touchmove', onPointerMove, { passive: false });
@@ -226,20 +225,27 @@ export const useGridLayoutEvents = ({
   );
 
   const attachLayoutEvents = useCallback(
-    (e: UserMouseEvent | UserTouchEvent) => {
-      const isInteractive =
-        gridLayoutStateManager.expandedPanelId$.value === undefined &&
-        gridLayoutStateManager.accessMode$.getValue() === 'EDIT';
-      if (!isInteractive) return;
+    (e: UserInteractionEvent) => {
+      if (!isLayoutInteractive(gridLayoutStateManager)) return;
       e.stopPropagation();
 
       if (isMouseEvent(e)) {
         attachMouseEvents(e);
+        startInteraction(e, gridLayoutStateManager, interactionType, rowIndex, panelId);
       } else if (isTouchEvent(e)) {
         attachTouchEvents(e);
-      }
+        startInteraction(e, gridLayoutStateManager, interactionType, rowIndex, panelId);
+      } else if (isKeyboardEvent(e)) {
+        // handle keyboard events
+        const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
+        if (!panelRef) return;
 
-      startInteraction(gridLayoutStateManager, e, interactionType, rowIndex, panelId);
+        onKeyDown(e, gridLayoutStateManager, {
+          rowIndex,
+          panelId,
+          panelRef,
+        });
+      }
     },
     [
       attachMouseEvents,
@@ -254,17 +260,45 @@ export const useGridLayoutEvents = ({
   return attachLayoutEvents;
 };
 
-const drop = (gridLayoutStateManager: GridLayoutStateManager) => {
-  gridLayoutStateManager.activePanel$.next(undefined);
-  gridLayoutStateManager.interactionEvent$.next(undefined);
-  gridLayoutStateManager.stableGridLayout$.next(
-    cloneDeep(gridLayoutStateManager.gridLayout$.getValue())
+const isLayoutInteractive = (gridLayoutStateManager: GridLayoutStateManager) => {
+  return (
+    gridLayoutStateManager.expandedPanelId$.value === undefined &&
+    gridLayoutStateManager.accessMode$.getValue() === 'EDIT'
   );
 };
 
+const finishInteraction = ({
+  activePanel$,
+  interactionEvent$,
+  stableGridLayout$,
+  gridLayout$,
+}: GridLayoutStateManager) => {
+  activePanel$.next(undefined);
+  interactionEvent$.next(undefined);
+  if (!deepEqual(gridLayout$.getValue(), stableGridLayout$.getValue())) {
+    stableGridLayout$.next(cloneDeep(gridLayout$.getValue()));
+  }
+};
+
+const cancelInteraction = ({
+  activePanel$,
+  interactionEvent$,
+  stableGridLayout$,
+  gridLayout$,
+}: GridLayoutStateManager) => {
+  console.log(
+    'CANCEL: if there is an interaction event and the user pressed the cancel key, cancel the interaction'
+  );
+  activePanel$.next(undefined);
+  interactionEvent$.next(undefined);
+  if (!deepEqual(gridLayout$.getValue(), stableGridLayout$.getValue())) {
+    gridLayout$.next(cloneDeep(stableGridLayout$.getValue()));
+  }
+};
+
 const startInteraction = (
+  e: UserInteractionEvent,
   gridLayoutStateManager: GridLayoutStateManager,
-  e: UserMouseEvent | UserTouchEvent,
   type: 'drag' | 'resize',
   rowIndex: number,
   panelId: string

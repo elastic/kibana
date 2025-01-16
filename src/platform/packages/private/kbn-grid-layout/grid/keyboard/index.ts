@@ -7,16 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UserMouseEvent, UserTouchEvent, UserKeyboardEvent } from '../types';
-
-export const isTouchEvent = (e: Event | React.UIEvent<HTMLElement>): e is UserTouchEvent => {
-  return 'touches' in e;
-};
-
-export const isMouseEvent = (e: Event | React.UIEvent<HTMLElement>): e is UserMouseEvent => {
-  return 'clientX' in e;
-};
-
-export const isKeyboardEvent = (e: Event | React.UIEvent<HTMLElement>): e is UserKeyboardEvent => {
-  return 'key' in e;
-};
+export { onKeyDown } from './keyboard';

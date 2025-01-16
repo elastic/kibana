@@ -10,19 +10,20 @@ import React from 'react';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { UserMouseEvent, UserTouchEvent } from '../../types';
+import { UserInteractionEvent } from '../../types';
 
 export const DefaultDragHandle = ({
-  onDragStart,
+  attachLayoutEvents,
 }: {
-  onDragStart: (e: UserMouseEvent | UserTouchEvent) => void;
+  attachLayoutEvents: (e: UserInteractionEvent) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
     <button
-      onMouseDown={onDragStart}
-      onTouchStart={onDragStart}
+      onMouseDown={attachLayoutEvents}
+      onTouchStart={attachLayoutEvents}
+      onKeyDown={attachLayoutEvents}
       aria-label={i18n.translate('kbnGridLayout.dragHandle.ariaLabel', {
         defaultMessage: 'Drag to move',
       })}
