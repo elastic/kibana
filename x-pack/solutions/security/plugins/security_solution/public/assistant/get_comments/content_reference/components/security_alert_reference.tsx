@@ -3,6 +3,7 @@ import React from 'react';
 import { ContentReferenceNode } from '../content_reference_parser';
 import { PopoverReference } from './popover_reference';
 import { EuiLink } from '@elastic/eui';
+import { SECURITY_ALERT_REFERENCE_LABEL } from './translations';
 
 type Props = {
     contentReferenceNode: ContentReferenceNode
@@ -13,7 +14,7 @@ export const SecurityAlertReference: React.FC<Props> = ({ contentReferenceNode, 
     return (
         <PopoverReference contentReferenceCount={contentReferenceNode.contentReferenceCount}>
             <EuiLink href={`/app/security/alerts/redirect/${securityAlertContentReference.alertId}`} target="_blank">
-                View alert
+                {SECURITY_ALERT_REFERENCE_LABEL}
             </EuiLink>
         </PopoverReference>
     );

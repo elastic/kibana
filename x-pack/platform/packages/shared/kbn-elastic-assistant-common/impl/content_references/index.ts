@@ -1,2 +1,3 @@
 export { contentReferencesStoreFactory } from './content_references_store'
-export { alertReferenceFactory, knowledgeBaseReferenceFactory, contentReferenceString, contentReferenceBlock } from './references'
+export { alertReferenceFactory, knowledgeBaseReferenceFactory } from './references'
+export { contentReferenceString, contentReferenceBlock } from './references/utils'

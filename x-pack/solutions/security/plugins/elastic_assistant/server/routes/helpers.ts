@@ -196,7 +196,7 @@ export const appendAssistantMessageToConversation = async ({
     ...(contentReferences ? { contentReferences } : {}),
   }
 
-  const isMetadataPopulated = contentReferences != undefined
+  const isMetadataPopulated = contentReferences !== undefined
 
   await conversationsDataClient.appendConversationMessages({
     existingConversation: conversation,

@@ -3,7 +3,7 @@ import React from 'react';
 import { ContentReferenceNode } from '../content_reference_parser';
 import { KnowledgeBaseEntryReference } from './knowledge_base_entry_reference';
 import { SecurityAlertReference } from './security_alert_reference';
-import { SecurityAlertsPageReference } from './security_alert_page_reference';
+import { SecurityAlertsPageReference } from './security_alerts_page_reference';
 import { ContentReferenceButton } from './content_reference_button';
 import { ProductDocumentationReference } from './product_documentation_reference';
 
@@ -21,11 +21,11 @@ export const contentReferenceComponentFactory = ({ contentReferences, contentRef
       contentReferenceCount={contentReferenceNode.contentReferenceCount}
     />
 
-    if (contentReferences == undefined) return defaultNode
+    if (contentReferences === undefined) return defaultNode
 
     const contentReference = contentReferences[contentReferenceNode.contentReferenceId]
 
-    if (!contentReference == undefined) return defaultNode
+    if (!contentReference === undefined) return defaultNode
 
     switch (contentReference.type) {
       case "KnowledgeBaseEntry": return <KnowledgeBaseEntryReference contentReferenceNode={contentReferenceNode} knowledgeBaseEntryContentReference={contentReference} />

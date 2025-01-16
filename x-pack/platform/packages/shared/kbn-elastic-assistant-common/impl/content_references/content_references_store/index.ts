@@ -1,6 +1,6 @@
-import { ContentReference, ContentReferences, Message } from "../../schemas"
-import { customAlphabet } from 'nanoid'
-import { ContentReferencesStore } from "../types"
+import { ContentReference, ContentReferences } from "../../schemas"
+import { getContentReferenceId } from "../references/utils"
+import { ContentReferenceBlock, ContentReferencesStore } from "../types"
 
 const CONTENT_REFERENCE_ID_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
 
@@ -9,7 +9,6 @@ const CONTENT_REFERENCE_ID_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmno
  */
 export const contentReferencesStoreFactory: () => ContentReferencesStore = () => {
     const store = new Map<string, ContentReference>()
-    const nanoid = customAlphabet(CONTENT_REFERENCE_ID_ALPHABET, 5)
 
     const add: ContentReferencesStore['add'] = (creator) => {
         const entry = creator({ id: generateId() })
@@ -21,8 +20,16 @@ export const contentReferencesStoreFactory: () => ContentReferencesStore = () =>
         return Object.fromEntries(store)
     }
 
+    /**
+     * Generates an ID that does not exist in the store yet. This is not cryptographically secure.
+     * @param size Size of ID to generate
+     * @returns 
+     */
     const generateId = (size = 5) => {
-        const id = nanoid(size)
+        let id = "";
+        for (let i = 0; i < length; i++) {
+            id += CONTENT_REFERENCE_ID_ALPHABET.charAt(Math.floor(Math.random() * CONTENT_REFERENCE_ID_ALPHABET.length));
+        }
         if (store.has(id)) {
             return generateId(size + 1)
         }
@@ -49,7 +56,7 @@ export const prunedContentReferences = (content: string, contentReferencesStore:
 
     for (const match of matches) {
         const referenceElement = match[0]
-        const referenceId = referenceElement.replace("{reference(", "").replace(")}", "")
+        const referenceId = getContentReferenceId(referenceElement as ContentReferenceBlock)
         if (referenceId in prunedStore) {
             continue
         }
