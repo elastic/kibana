@@ -174,3 +174,7 @@ const isSuccessfulDocument = (
 ): doc is Required<IngestSimulateSimulateDocumentResult> =>
   doc.processor_results?.every((processorSimulation) => processorSimulation.status === 'success') ||
   false;
+
+export const processingRoutes = {
+  ...simulateProcessorRoute,
+};

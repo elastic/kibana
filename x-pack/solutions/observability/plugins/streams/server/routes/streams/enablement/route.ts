@@ -7,9 +7,9 @@
 
 import { badRequest, internal } from '@hapi/boom';
 import { z } from '@kbn/zod';
-import { EnableStreamsResponse } from '../../lib/streams/client';
-import { SecurityException } from '../../lib/streams/errors';
-import { createServerRoute } from '../create_server_route';
+import { SecurityException } from '../../../lib/streams/errors';
+import { createServerRoute } from '../../create_server_route';
+import { DisableStreamsResponse, EnableStreamsResponse } from '../../../lib/streams/client';
 
 export const enableStreamsRoute = createServerRoute({
   endpoint: 'POST /api/streams/_enable',
@@ -39,3 +39,33 @@ export const enableStreamsRoute = createServerRoute({
     }
   },
 });
+
+export const disableStreamsRoute = createServerRoute({
+  endpoint: 'POST /api/streams/_disable',
+  params: z.object({}),
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: ['streams_write'],
+    },
+  },
+  handler: async ({ request, getScopedClients }): Promise<DisableStreamsResponse> => {
+    try {
+      const { streamsClient } = await getScopedClients({ request });
+
+      return await streamsClient.disableStreams();
+    } catch (e) {
+      if (e instanceof SecurityException) {
+        throw badRequest(e);
+      }
+      throw internal(e);
+    }
+  },
+});
+
+export const enablementRoutes = {
+  ...enableStreamsRoute,
+  ...disableStreamsRoute,
+};
