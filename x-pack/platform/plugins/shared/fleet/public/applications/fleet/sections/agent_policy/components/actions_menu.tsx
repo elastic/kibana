@@ -18,7 +18,7 @@ import {
 } from '../../../components';
 import { FLEET_SERVER_PACKAGE } from '../../../constants';
 
-import { policyHasFleetServer, ExperimentalFeaturesService } from '../../../services';
+import { policyHasFleetServer } from '../../../services';
 
 import { AgentUpgradeAgentModal } from '../../agents/components';
 
@@ -49,8 +49,6 @@ export const AgentPolicyActionMenu = memo<{
     const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] =
       useState<boolean>(false);
     const [isUpgradeAgentsModalOpen, setIsUpgradeAgentsModalOpen] = useState<boolean>(false);
-
-    const { agentTamperProtectionEnabled } = ExperimentalFeaturesService.get();
 
     const isFleetServerPolicy = useMemo(
       () =>
@@ -228,7 +226,6 @@ export const AgentPolicyActionMenu = memo<{
 
           if (
             authz.fleet.allAgents &&
-            agentTamperProtectionEnabled &&
             !agentPolicy?.is_managed &&
             !agentPolicy?.supports_agentless
           ) {
