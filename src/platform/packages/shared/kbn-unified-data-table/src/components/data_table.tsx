@@ -664,6 +664,7 @@ export const UnifiedDataTable = ({
     changeCurrentPageIndex,
   ]);
 
+  const { dataGridId, dataGridWrapper, setDataGridWrapper } = useFullScreenWatcher();
   const [inTableSearchTerm, setInTableSearchTerm] = useState<string>('');
   const [inTableSearchTermCss, setInTableSearchTermCss] = useState<SerializedStyles>();
 
@@ -782,6 +783,9 @@ export const UnifiedDataTable = ({
         scrollToCell={(params) => {
           dataGridRef.current?.scrollToItem?.(params);
         }}
+        shouldOverrideCmdF={(element) => {
+          return dataGridWrapper?.contains?.(element) ?? false;
+        }}
         onChange={(searchTerm) => {
           setInTableSearchTerm(searchTerm || '');
           setInTableSearchTermCss(undefined);
@@ -798,6 +802,7 @@ export const UnifiedDataTable = ({
     renderCellValue,
     visibleColumns,
     dataGridRef,
+    dataGridWrapper,
     currentPageSize,
     changeCurrentPageIndex,
     isPaginationEnabled,
@@ -1147,8 +1152,6 @@ export const UnifiedDataTable = ({
     rowHeightLines,
     rowLineHeight: rowLineHeightOverride,
   });
-
-  const { dataGridId, dataGridWrapper, setDataGridWrapper } = useFullScreenWatcher();
 
   const isRenderComplete = loadingState !== DataLoadingState.loading;
 

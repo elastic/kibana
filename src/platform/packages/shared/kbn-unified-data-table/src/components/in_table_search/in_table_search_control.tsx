@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ChangeEvent, KeyboardEvent, FocusEvent, useCallback, useState } from 'react';
+import React, { ChangeEvent, FocusEvent, useCallback, useState, useEffect } from 'react';
 import {
   EuiFieldSearch,
   EuiButtonIcon,
@@ -46,6 +46,7 @@ export interface InTableSearchControlProps
   pageSize: number | null; // null when the pagination is disabled
   changeToExpectedPage: (pageIndex: number) => void;
   scrollToCell: (params: { rowIndex: number; columnIndex: number; align: 'start' }) => void;
+  shouldOverrideCmdF: (element: HTMLElement) => boolean;
   onChange: (searchTerm: string | undefined) => void;
   onChangeCss: (styles: SerializedStyles) => void;
 }
@@ -54,6 +55,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
   pageSize,
   changeToExpectedPage,
   scrollToCell,
+  shouldOverrideCmdF,
   onChange,
   onChangeCss,
   ...props
@@ -112,10 +114,16 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
   );
 
   const onKeyUp = useCallback(
-    (event: KeyboardEvent<HTMLInputElement>) => {
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === keys.ESCAPE) {
+        setIsFocused(false);
+        return;
+      }
+
       if (areArrowsDisabled) {
         return;
       }
+
       if (event.key === keys.ENTER && event.shiftKey) {
         goToPrevMatch();
       } else if (event.key === keys.ENTER) {
@@ -137,6 +145,26 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
     },
     [setIsFocused, inputValue]
   );
+
+  useEffect(() => {
+    const handleGlobalKeyDown = (event: KeyboardEvent) => {
+      if (
+        (event.metaKey || event.ctrlKey) &&
+        event.key === 'f' &&
+        shouldOverrideCmdF(event.target as HTMLElement)
+      ) {
+        event.preventDefault(); // prevent default browser find-in-page behavior
+        setIsFocused(true);
+      }
+    };
+
+    document.addEventListener('keydown', handleGlobalKeyDown);
+
+    // Cleanup the event listener
+    return () => {
+      document.removeEventListener('keydown', handleGlobalKeyDown);
+    };
+  }, [setIsFocused, shouldOverrideCmdF]);
 
   if (!isFocused && !inputValue) {
     return (
