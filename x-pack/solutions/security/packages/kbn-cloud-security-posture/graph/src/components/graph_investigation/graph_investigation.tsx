@@ -23,7 +23,7 @@ import { GRAPH_INVESTIGATION_TEST_ID } from '../test_ids';
 import { EVENT_ID, TOGGLE_SEARCH_BAR_STORAGE_KEY } from '../../common/constants';
 import { Actions } from '../controls/actions';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
-import { addFilter } from './search_filters';
+import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from './search_filters';
 import { useEntityNodeExpandPopover } from './use_entity_node_expand_popover';
 import { useLabelNodeExpandPopover } from './use_label_node_expand_popover';
 
@@ -46,6 +46,21 @@ const useGraphPopovers = (
   );
 
   return { nodeExpandPopover, labelExpandPopover, openPopoverCallback };
+};
+
+const NEGATED_FILTER_SEARCH_WARNING_MESSAGE = {
+  title: i18n.translate(
+    'securitySolutionPackages.csp.graph.investigation.warningNegatedFilterTitle',
+    {
+      defaultMessage: 'Filters Negated',
+    }
+  ),
+  content: i18n.translate(
+    'securitySolutionPackages.csp.graph.investigation.warningNegatedFilterContent',
+    {
+      defaultMessage: 'One or more filters are negated and may not return expected results.',
+    }
+  ),
 };
 
 export interface GraphInvestigationProps {
@@ -223,6 +238,16 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       return filtersCount + queryCounter;
     }, [kquery.query, searchFilters]);
 
+    const searchWarningMessage =
+      searchFilters.filter(
+        (filter) =>
+          !filter.meta.disabled &&
+          filter.meta.negate &&
+          filter.meta.controlledBy === CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER
+      ).length > 0
+        ? NEGATED_FILTER_SEARCH_WARNING_MESSAGE
+        : undefined;
+
     return (
       <>
         <EuiFlexGroup
@@ -297,6 +322,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
                   onSearchToggle={(isSearchToggle) => setSearchToggled(isSearchToggle)}
                   searchFilterCounter={searchFilterCounter}
                   searchToggled={searchToggled}
+                  searchWarningMessage={searchWarningMessage}
                 />
               </Panel>
             </Graph>

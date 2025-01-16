@@ -16,6 +16,7 @@ import {
 } from '../test_ids';
 
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn().mockReturnValue([false, jest.fn()]));
+const SEARCH_BAR_TOUR_TITLE = 'Refine your view with search';
 
 const defaultProps: ActionsProps = {
   showToggleSearch: true,
@@ -102,6 +103,44 @@ describe('Actions component', () => {
     expect(getByText('99+')).toBeInTheDocument();
   });
 
+  describe('search warning message', () => {
+    it('should show search warning message when searchWarningMessage is provided', async () => {
+      const { getByTestId, getByText, container } = renderWithProviders({
+        ...defaultProps,
+        searchWarningMessage: {
+          title: 'Warning title',
+          content: 'Warning content',
+        },
+      });
+      expect(container.querySelector('.euiBeacon')).toBeInTheDocument();
+
+      getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID).focus();
+      await waitFor(() => {
+        expect(getByText('Warning title')).toBeInTheDocument();
+        expect(getByText('Warning content')).toBeInTheDocument();
+      });
+    });
+
+    it('should show search warning message when search button is toggled', async () => {
+      const { getByTestId, getByText, container } = renderWithProviders({
+        ...defaultProps,
+        searchToggled: true,
+        searchWarningMessage: {
+          title: 'Warning title',
+          content: 'Warning content',
+        },
+      });
+
+      expect(container.querySelector('.euiBeacon')).toBeInTheDocument();
+
+      getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID).focus();
+      await waitFor(() => {
+        expect(getByText('Warning title')).toBeInTheDocument();
+        expect(getByText('Warning content')).toBeInTheDocument();
+      });
+    });
+  });
+
   describe('search bar tour', () => {
     it('opens the search bar tour when searchFilterCounter is greater than 0 and shouldShowSearchBarButtonTour is true', () => {
       let shouldShowSearchBarButtonTour = true;
@@ -117,7 +156,7 @@ describe('Actions component', () => {
         searchFilterCounter: 3,
       });
 
-      expect(getByText('Adjust correlation with search')).toBeInTheDocument();
+      expect(getByText(SEARCH_BAR_TOUR_TITLE)).toBeInTheDocument();
       expect(setShouldShowSearchBarButtonTourMock).toBeCalled();
       expect(setShouldShowSearchBarButtonTourMock).toBeCalledWith(false);
     });
@@ -130,7 +169,7 @@ describe('Actions component', () => {
         searchFilterCounter: 2,
       });
 
-      expect(queryByText('Adjust correlation with search')).not.toBeInTheDocument();
+      expect(queryByText(SEARCH_BAR_TOUR_TITLE)).not.toBeInTheDocument();
       expect(setShouldShowSearchBarButtonTourMock).not.toBeCalled();
     });
 
@@ -162,12 +201,12 @@ describe('Actions component', () => {
         searchFilterCounter: 1,
       });
 
-      expect(getByText('Adjust correlation with search')).toBeInTheDocument();
+      expect(getByText(SEARCH_BAR_TOUR_TITLE)).toBeInTheDocument();
 
       fireEvent.click(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID));
 
       await waitFor(() => {
-        expect(queryByText('Adjust correlation with search')).not.toBeInTheDocument();
+        expect(queryByText(SEARCH_BAR_TOUR_TITLE)).not.toBeInTheDocument();
       });
 
       expect(setShouldShowSearchBarButtonTourMock).toBeCalled();

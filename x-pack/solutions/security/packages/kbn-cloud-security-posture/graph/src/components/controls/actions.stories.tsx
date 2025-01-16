@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
+import type { Meta, Story } from '@storybook/react';
 import { ThemeProvider, css } from '@emotion/react';
 import { action } from '@storybook/addon-actions';
 import { Actions as ActionsComponent, type ActionsProps } from './actions';
@@ -14,8 +14,12 @@ import { Actions as ActionsComponent, type ActionsProps } from './actions';
 export default {
   title: 'Components/Graph Components/Additional Components',
   description: 'CDR - Graph visualization',
-  argTypes: {},
-};
+  argTypes: {
+    searchWarningMessage: {
+      control: 'object',
+    },
+  },
+} as Meta;
 
 const Template: Story<ActionsProps> = (props) => {
   return (

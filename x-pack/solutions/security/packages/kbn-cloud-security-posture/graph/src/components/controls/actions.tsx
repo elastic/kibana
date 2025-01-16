@@ -17,6 +17,7 @@ import {
   EuiNotificationBadge,
   EuiButton,
   EuiTourStep,
+  EuiBeacon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -86,8 +87,14 @@ export interface ActionsProps extends CommonProps {
    * Whether search is toggled or not. Defaults value is false.
    */
   searchToggled?: boolean;
+
+  /**
+   * Warning message to show. Defaults value is undefined.
+   */
+  searchWarningMessage?: { title: string; content: string };
 }
 
+// eslint-disable-next-line complexity
 export const Actions = ({
   showToggleSearch = true,
   showInvestigateInTimeline = true,
@@ -95,10 +102,12 @@ export const Actions = ({
   onSearchToggle,
   searchFilterCounter = 0,
   searchToggled,
+  searchWarningMessage,
   ...props
 }: ActionsProps) => {
   const { euiTheme } = useEuiTheme();
   const [isSearchBarTourOpen, setIsSearchBarTourOpen] = useState(false);
+  const hasSearchWarning = searchWarningMessage !== undefined && searchWarningMessage !== null;
   const [shouldShowSearchBarButtonTour, setShouldShowSearchBarButtonTour] = useLocalStorage(
     SHOW_SEARCH_BAR_BUTTON_TOUR_STORAGE_KEY,
     true
@@ -114,6 +123,15 @@ export const Actions = ({
     }
   }
 
+  const tooltipTitle =
+    !isSearchBarTourOpen && hasSearchWarning ? searchWarningMessage.title : undefined;
+  const tooltipContent =
+    !isSearchBarTourOpen && hasSearchWarning
+      ? searchWarningMessage.content
+      : !isSearchBarTourOpen
+      ? toggleSearchBarTooltip
+      : undefined;
+
   return (
     <EuiFlexGroup direction="column" gutterSize={'none'} {...props}>
       {showToggleSearch && (
@@ -128,10 +146,7 @@ export const Actions = ({
             stepsTotal={1}
             maxWidth={350}
           >
-            <EuiToolTip
-              content={isSearchBarTourOpen ? undefined : toggleSearchBarTooltip}
-              position="left"
-            >
+            <EuiToolTip title={tooltipTitle} content={tooltipContent} position="left">
               <EuiButton
                 iconType="search"
                 color={searchToggled ? 'primary' : 'text'}
@@ -164,6 +179,18 @@ export const Actions = ({
                   event.currentTarget?.blur();
                 }}
               >
+                {hasSearchWarning && (
+                  <EuiBeacon
+                    css={css`
+                      position: absolute;
+                      left: ${-4.5 + (searchToggled ? 1 : 0)}px;
+                      bottom: ${14 + (searchToggled ? 1 : 0)}px;
+                      transition: all ${euiTheme.animation.fast} ease-in, right 0s linear,
+                        bottom 0s linear !important;
+                    `}
+                    color="warning"
+                  />
+                )}
                 {searchFilterCounter > 0 && (
                   <EuiNotificationBadge
                     css={css`
