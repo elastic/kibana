@@ -206,9 +206,9 @@ export type InstallMigrationRulesRequestBodyInput = z.input<
 export type InstallMigrationRulesResponse = z.infer<typeof InstallMigrationRulesResponse>;
 export const InstallMigrationRulesResponse = z.object({
   /**
-   * Indicates rules migrations have been installed.
+   * Indicates the number of successfully installed migration rules.
    */
-  installed: z.boolean(),
+  installed: z.number(),
 });
 
 export type StartRuleMigrationRequestParams = z.infer<typeof StartRuleMigrationRequestParams>;

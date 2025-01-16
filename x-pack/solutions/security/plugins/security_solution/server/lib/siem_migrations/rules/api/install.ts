@@ -49,7 +49,7 @@ export const registerSiemRuleMigrationsInstallRoute = (
             const savedObjectsClient = ctx.core.savedObjects.client;
             const rulesClient = await ctx.alerting.getRulesClient();
 
-            await installTranslated({
+            const installed = await installTranslated({
               migrationId,
               ids,
               enabled,
@@ -58,7 +58,7 @@ export const registerSiemRuleMigrationsInstallRoute = (
               rulesClient,
             });
 
-            return res.ok({ body: { installed: true } });
+            return res.ok({ body: { installed } });
           } catch (err) {
             logger.error(err);
             return res.badRequest({ body: err.message });

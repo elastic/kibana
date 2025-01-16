@@ -17,7 +17,7 @@ import { installMigrationRules } from '../api';
 export const INSTALL_MIGRATION_RULES_MUTATION_KEY = ['POST', SIEM_RULE_MIGRATION_INSTALL_PATH];
 
 export const useInstallMigrationRules = (migrationId: string) => {
-  const { addError } = useAppToasts();
+  const { addError, addSuccess } = useAppToasts();
 
   const invalidateGetRuleMigrations = useInvalidateGetMigrationRules();
   const invalidateGetMigrationTranslationStats = useInvalidateGetMigrationTranslationStats();
@@ -26,6 +26,9 @@ export const useInstallMigrationRules = (migrationId: string) => {
     ({ ids, enabled }) => installMigrationRules({ migrationId, ids, enabled }),
     {
       mutationKey: INSTALL_MIGRATION_RULES_MUTATION_KEY,
+      onSuccess: ({ installed }) => {
+        addSuccess(i18n.INSTALL_MIGRATION_RULES_SUCCESS(installed));
+      },
       onError: (error) => {
         addError(error, { title: i18n.INSTALL_MIGRATION_RULES_FAILURE });
       },

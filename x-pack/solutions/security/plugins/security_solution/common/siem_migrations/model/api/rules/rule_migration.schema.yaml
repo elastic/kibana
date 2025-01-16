@@ -257,8 +257,8 @@ paths:
                   - installed
                 properties:
                   installed:
-                    type: boolean
-                    description: Indicates rules migrations have been installed.
+                    type: number
+                    description: Indicates the number of successfully installed migration rules.
 
   /internal/siem_migrations/rules/{migration_id}/start:
     put:
