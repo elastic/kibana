@@ -159,7 +159,7 @@
   const encoder = new TextEncoder('utf-8');
   const decoder = new TextDecoder('utf-8');
 
-  class Go {
+  globalThis.Go = class {
     constructor() {
       this.argv = ['js'];
       this.env = {};
@@ -627,4 +627,9 @@
       };
     }
   };
+  if (typeof module !== 'undefined') {
+    module.exports = Go;
+  } else {
+    globalThis.Go = Go;
+  }
 })();

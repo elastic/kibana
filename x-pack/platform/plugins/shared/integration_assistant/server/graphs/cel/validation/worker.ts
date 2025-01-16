@@ -67,14 +67,13 @@ async function execute({ data: { inputProgram } }: ValidateCelRequest) {
   const { port } = workerData as WorkerData;
   const wasmPath = path.join(__dirname, 'wasm');
   const file = fs.readFileSync(path.join(wasmPath, 'celformat.wasm'));
-  // @ts-expect-error
   const goWasm = new Go();
   let value;
   try {
     const result = await WebAssembly.instantiate(file, goWasm.importObject);
     const wasm = result.instance;
     goWasm.run(wasm);
-    value = global.formatCelProgram(inputProgram);
+    value = globalThis.formatCelProgram(inputProgram);
 
     if (value === undefined) {
       const errorResponse: ValidateCelResponse = {
@@ -100,6 +99,6 @@ async function execute({ data: { inputProgram } }: ValidateCelRequest) {
       port.postMessage(successResponse);
     }
   } finally {
-    global.stopFormatCelProgram();
+    globalThis.stopFormatCelProgram();
   }
 }
