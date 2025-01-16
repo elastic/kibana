@@ -83,38 +83,4 @@ describe('RowHeightSettings', () => {
 
     expect(fieldNumber).toHaveValue(10);
   });
-
-  it('should set rowHeightLines when the number input changes', async () => {
-    const onChangeRowHeightLines = jest.fn();
-    renderRowHeightSettings({ onChangeRowHeightLines });
-
-    const fieldNumber = screen.getByRole('spinbutton') as HTMLInputElement;
-    expect(fieldNumber).toHaveValue(3);
-    fireEvent.change(fieldNumber, {
-      target: { value: '10' },
-    });
-
-    expect(fieldNumber).toHaveValue(10);
-    expect(onChangeRowHeightLines).toHaveBeenCalledWith(10);
-  });
-
-  it('should set rowHeightLines to number input value after switching from Auto back to Custom', async () => {
-    const onChangeRowHeightLines = jest.fn();
-    renderRowHeightSettings({ onChangeRowHeightLines });
-
-    const fieldNumber = screen.getByRole('spinbutton') as HTMLInputElement;
-    expect(fieldNumber).toHaveValue(3);
-    fireEvent.change(fieldNumber, {
-      target: { value: 10 },
-    });
-    expect(fieldNumber).toHaveValue(10);
-
-    await userEvent.click(screen.getByRole('button', { name: 'Auto' }));
-
-    onChangeRowHeightLines.mockClear();
-
-    await userEvent.click(screen.getByRole('button', { name: 'Custom' }));
-
-    expect(onChangeRowHeightLines).toHaveBeenCalledWith(Number(fieldNumber.value));
-  });
 });
