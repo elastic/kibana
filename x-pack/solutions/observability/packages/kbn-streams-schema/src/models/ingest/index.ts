@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export * from './wired_stream_config';
-export * from './ingest_stream_config';
-export * from './stream_config';
+export * from './base';
+export * from './api';
+export * from './fields';
+export * from './processors';
+export * from './conditions';
+export * from './routing';

@@ -4,11 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { z } from '@kbn/zod';
-import { streamDefinitionSchema } from '../models';
+import { Condition, conditionSchema } from '../conditions';
 
-export const listStreamsResponseSchema = z.object({
-  streams: z.array(streamDefinitionSchema),
+export interface RoutingDefiniition {
+  to: string;
+  if: Condition;
+}
+
+export const routingDefinitionSchema: z.Schema<RoutingDefiniition> = z.object({
+  to: z.string(),
+  if: conditionSchema,
 });
-
-export type ListStreamsResponse = z.infer<typeof listStreamsResponseSchema>;

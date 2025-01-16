@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export * from './ingest_read_stream';
-export * from './wired_read_stream';
-export * from './read_stream';
+export interface StreamDefinitionBase {
+  name: string;
+}

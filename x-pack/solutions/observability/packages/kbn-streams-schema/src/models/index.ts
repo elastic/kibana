@@ -5,7 +5,25 @@
  * 2.0.
  */
 
-export * from './common';
-export * from './read_streams';
-export * from './streams';
-export * from './stream_config';
+import { z } from '@kbn/zod';
+import {
+  IngestStreamDefinition,
+  IngestStreamGetResponse,
+  IngestStreamUpsertRequest,
+  ingestStreamDefinitionSchema,
+  ingestStreamUpsertRequestSchema,
+} from './ingest';
+import { createIsSchema } from '../helpers';
+
+export * from './ingest';
+
+export type StreamDefinition = IngestStreamDefinition;
+export type StreamGetResponse = IngestStreamGetResponse;
+export type StreamUpsertRequest = IngestStreamUpsertRequest;
+
+export const streamDefinitionSchema: z.Schema<StreamDefinition> = ingestStreamDefinitionSchema;
+
+export const isStreamDefinition = createIsSchema(streamDefinitionSchema);
+
+export const streamUpsertRequestSchema: z.Schema<StreamUpsertRequest> =
+  ingestStreamUpsertRequestSchema;
