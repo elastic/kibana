@@ -1,17 +1,5 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
-import {
-  SecurityAlertContentReference,
-  SecurityAlertsPageContentReference,
-  KnowledgeBaseEntryContentReference,
-  ProductDocumentationContentReference,
-} from '../../schemas';
-import { ContentReferenceId } from '../types';
+import { SecurityAlertContentReference, SecurityAlertsPageContentReference, KnowledgeBaseEntryContentReference, ProductDocumentationContentReference, EsqlContentReference } from "../../schemas";
+import { ContentReferenceId } from "../types";
 
 /**
  * Generates a contentReference for the alerts count tool.
@@ -61,6 +49,21 @@ export const knowledgeBaseReferenceFactory = (
     knowledgeBaseEntryId,
   };
 };
+
+/**
+ * Generates a contentReference for when a ESQL query is referenced.
+ * @param id id of the contentReference
+ * @param query the ESQL query
+ * @param label content reference label
+ * @returns KnowledgeBaseReference
+ */
+export const esqlQueryReferenceFactory = (id: ContentReferenceId, query: string): EsqlContentReference => {
+    return {
+        type: "EsqlQuery",
+        id,
+        query
+    }
+}
 
 /**
  * Generates a contentReference for the alerts count tool.

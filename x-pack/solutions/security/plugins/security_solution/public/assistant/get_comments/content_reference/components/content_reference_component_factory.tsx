@@ -13,6 +13,7 @@ import { SecurityAlertReference } from './security_alert_reference';
 import { SecurityAlertsPageReference } from './security_alerts_page_reference';
 import { ContentReferenceButton } from './content_reference_button';
 import { ProductDocumentationReference } from './product_documentation_reference';
+import { EsqlQueryReference } from './esql_query_reference';
 
 interface ContentReferenceComponentFactory {
   contentReferences?: ContentReferences;
@@ -37,7 +38,7 @@ export const contentReferenceComponentFactory = ({
 
     const contentReference = contentReferences[contentReferenceNode.contentReferenceId];
 
-    if (!contentReference === undefined) return defaultNode;
+    if (contentReference === undefined) return defaultNode
 
     switch (contentReference.type) {
       case 'KnowledgeBaseEntry':
@@ -68,6 +69,8 @@ export const contentReferenceComponentFactory = ({
             productDocumentationContentReference={contentReference}
           />
         );
+        case 'EsqlQuery':
+        return <EsqlQueryReference contentReferenceNode={contentReferenceNode} esqlContentReference={contentReference}/>
       default:
         return defaultNode;
     }

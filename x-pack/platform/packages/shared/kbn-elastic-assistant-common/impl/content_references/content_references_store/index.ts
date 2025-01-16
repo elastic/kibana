@@ -28,22 +28,20 @@ export const contentReferencesStoreFactory: () => ContentReferencesStore = () =>
     return Object.fromEntries(store);
   };
 
-  /**
-   * Generates an ID that does not exist in the store yet. This is not cryptographically secure.
-   * @param size Size of ID to generate
-   * @returns
-   */
-  const generateId = (size = 5) => {
-    let id = '';
-    for (let i = 0; i < length; i++) {
-      id += CONTENT_REFERENCE_ID_ALPHABET.charAt(
-        Math.floor(Math.random() * CONTENT_REFERENCE_ID_ALPHABET.length)
-      );
-    }
-    if (store.has(id)) {
-      return generateId(size + 1);
-    }
-    return id;
+    /**
+     * Generates an ID that does not exist in the store yet. This is not cryptographically secure.
+     * @param size Size of ID to generate
+     * @returns 
+     */
+    const generateId = (size = 5) => {
+        let id = "";
+        for (let i = 0; i < size; i++) {
+            id += CONTENT_REFERENCE_ID_ALPHABET.charAt(Math.floor(Math.random() * CONTENT_REFERENCE_ID_ALPHABET.length));
+        }
+        if (store.has(id)) {
+            return generateId(size + 1)
+        }
+        return id
   };
 
   return {

@@ -11,6 +11,7 @@ export {
   knowledgeBaseReferenceFactory,
   alertsPageReferenceFactory,
   productDocumentationReferenceFactory,
+  esqlQueryReferenceFactory,
 } from './references';
 export {
   contentReferenceString,

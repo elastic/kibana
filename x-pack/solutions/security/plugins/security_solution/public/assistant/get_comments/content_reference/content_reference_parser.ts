@@ -72,11 +72,6 @@ export const ContentReferenceParser: Plugin = function ContentReferenceParser() 
 
     const contentReferenceId = readArg('(', ')');
 
-    if (contentReferenceId.length > 10) {
-      // The contentReferenceId is very long. This is probably an invalid content reference.
-      return false;
-    }
-
     const lastChar = value[index];
     if (lastChar !== '}') return false;
 

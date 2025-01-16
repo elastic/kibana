@@ -517,6 +517,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       const results = result.hits.hits.map((hit) => {
         const metadata = {
           name: hit?._source?.name,
+          index: hit?._index,
           source: hit?._source?.source,
           required: hit?._source?.required,
           kbResource: hit?._source?.kb_resource,

@@ -28,6 +28,8 @@ export {
   knowledgeBaseReferenceFactory,
   alertsPageReferenceFactory,
   productDocumentationReferenceFactory,
+  esqlQueryReferenceFactory,
+  
   contentReferenceString,
   contentReferenceBlock,
   removeContentReferences,
