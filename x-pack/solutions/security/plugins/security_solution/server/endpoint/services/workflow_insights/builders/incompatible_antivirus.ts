@@ -114,11 +114,12 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
             type: ActionType.Refreshed,
             timestamp: currentTime,
           },
-          value: defendInsight.group,
+          value: `${defendInsight.group} ${filePath}${signatureValue ? ` ${signatureValue}` : ''}`,
           metadata: {
             notes: {
               llm_model: apiConfig.model ?? '',
             },
+            display_name: defendInsight.group,
           },
           remediation: {
             exception_list_items: [

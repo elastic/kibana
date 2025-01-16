@@ -122,7 +122,7 @@ export const WorkflowInsightsResults = ({
                 <EuiFlexItem>
                   <EuiText size="s">
                     <EuiText size={'s'}>
-                      <strong>{insight.value}</strong>
+                      <strong>{insight.metadata.display_name || insight.value}</strong>
                     </EuiText>
                     <EuiText size={'s'} color={'subdued'}>
                       {insight.message}
