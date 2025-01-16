@@ -130,8 +130,13 @@ export function useSetupTechnology({
       }),
       name: agentlessPolicyName,
       global_data_tags: getGlobaDataTags(packageInfo),
-      agentless: getAgentlessPolicy(packageInfo),
     };
+
+    const agentlessPolicy = getAgentlessPolicy(packageInfo);
+    if (agentlessPolicy) {
+      nextNewAgentlessPolicy.agentless = agentlessPolicy;
+    }
+
     setCurrentAgentPolicy(nextNewAgentlessPolicy);
     setNewAgentPolicy(nextNewAgentlessPolicy as NewAgentPolicy);
     updateAgentPolicies([nextNewAgentlessPolicy] as AgentPolicy[]);
@@ -213,7 +218,7 @@ const getAgentlessPolicy = (packageInfo?: PackageInfo) => {
     !packageInfo?.policy_templates &&
     !packageInfo?.policy_templates?.some((policy) => policy.deployment_modes)
   ) {
-    return undefined;
+    return;
   }
   const agentlessPolicyTemplate = packageInfo.policy_templates.find(
     (policy) => policy.deployment_modes
@@ -222,9 +227,11 @@ const getAgentlessPolicy = (packageInfo?: PackageInfo) => {
   // assumes that all the policy templates agentless deployments modes indentify have the same organization, division and team
   const agentlessInfo = agentlessPolicyTemplate?.deployment_modes?.agentless;
 
-  return agentlessInfo?.resources
-    ? {
-        resources: agentlessInfo.resources,
-      }
-    : {};
+  if (!agentlessInfo?.resources) {
+    return;
+  }
+
+  return {
+    resources: agentlessInfo.resources,
+  };
 };

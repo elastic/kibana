@@ -525,6 +525,14 @@ describe('useSetupTechnology', () => {
           { name: 'division', value: 'div' },
           { name: 'team', value: 'team' },
         ],
+        agentless: {
+          resources: {
+            requests: {
+              memory: '256Mi',
+              cpu: '100m',
+            },
+          },
+        },
       });
       expect(updatePackagePolicyMock).toHaveBeenCalledWith({ supports_agentless: true });
     });
@@ -587,7 +595,7 @@ describe('useSetupTechnology', () => {
     });
   });
 
-  it('should have empty agentless section on the request when creating agentless policy without resources', async () => {
+  it('should not have agentless section on the request when creating agentless policy without resources', async () => {
     (useConfig as MockFn).mockReturnValue({
       agentless: {
         enabled: true,
@@ -620,14 +628,14 @@ describe('useSetupTechnology', () => {
 
     await waitFor(() => {
       expect(setNewAgentPolicy).toHaveBeenCalledWith(
-        expect.objectContaining({
+        expect.not.objectContaining({
           agentless: {},
         })
       );
     });
   });
 
-  it('should have empty agentless section on the request when creating policy with agentless disabled', async () => {
+  it('should not have agentless section on the request when creating policy with agentless disabled', async () => {
     (useConfig as MockFn).mockReturnValue({
       agentless: {
         enabled: true,
@@ -660,7 +668,7 @@ describe('useSetupTechnology', () => {
 
     await waitFor(() => {
       expect(setNewAgentPolicy).toHaveBeenCalledWith(
-        expect.objectContaining({
+        expect.not.objectContaining({
           agentless: {},
         })
       );
