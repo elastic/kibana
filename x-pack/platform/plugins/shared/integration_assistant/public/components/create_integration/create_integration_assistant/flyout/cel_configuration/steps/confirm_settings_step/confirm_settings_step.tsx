@@ -324,7 +324,12 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
           />
           <EuiSpacer size="m" />
           {successfulGeneration && isSelectedPathGenerated ? (
-            <EuiCallOut title="Success" color="success" iconType="check" />
+            <EuiCallOut
+              title="Success"
+              color="success"
+              iconType="check"
+              data-test-subj="successCallout"
+            />
           ) : error ? (
             <GenerationError title={i18n.GENERATION_ERROR} error={error} retryAction={onGenerate} />
           ) : (
@@ -345,7 +350,7 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
                 <EuiButtonEmpty
                   onClick={onCancel}
                   flush="left"
-                  data-test-subj="buttonsFooter-cancelButton"
+                  data-test-subj="cancelCelGenerationButton"
                 >
                   {i18n.CANCEL}
                 </EuiButtonEmpty>

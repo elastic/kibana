@@ -95,6 +95,7 @@ export const EndpointSelection = React.memo<EndpointSelectionProps>(
                 idSelected={selectedPath}
                 disabled={isGenerating}
                 onChange={onChangeSuggestedPath}
+                data-test-subj="suggestedPathsRadioGroup"
               />
             </EuiFlexItem>
           </EuiFlexItem>
@@ -117,6 +118,7 @@ export const EndpointSelection = React.memo<EndpointSelectionProps>(
                   selectedOtherPath === undefined ? undefined : [{ label: selectedOtherPath }]
                 }
                 onChange={onChangeOtherPath}
+                data-test-subj="allPathOptionsComboBox"
               />
             </EuiFormRow>
           </EuiFlexGroup>

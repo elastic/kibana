@@ -25,11 +25,7 @@ export const Footer = React.memo<FooterProps>(
     return (
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            onClick={onCancel}
-            flush="left"
-            data-test-subj="buttonsFooter-cancelButton"
-          >
+          <EuiButtonEmpty onClick={onCancel} flush="left" data-test-subj="footer-cancelButton">
             {i18n.CANCEL}
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -40,7 +36,7 @@ export const Footer = React.memo<FooterProps>(
             color="primary"
             onClick={onSave}
             isDisabled={isFlyoutGenerating || !isValid}
-            data-test-subj="buttonsFooter-saveButton"
+            data-test-subj="footer-saveButton"
           >
             {i18n.SAVE_CONFIG}
           </EuiButton>

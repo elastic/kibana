@@ -189,7 +189,12 @@ export const UploadSpecStep = React.memo<UploadSpecStepProps>(
                     onModifySpecFile={onModifySpecFile}
                   />
                   {successfulGeneration ? (
-                    <EuiCallOut title={i18n.SUCCESS} color="success" iconType="check" />
+                    <EuiCallOut
+                      title={i18n.SUCCESS}
+                      color="success"
+                      iconType="check"
+                      data-test-subj="successCallout"
+                    />
                   ) : error ? (
                     <GenerationError
                       title={i18n.GENERATION_ERROR}
@@ -217,7 +222,7 @@ export const UploadSpecStep = React.memo<UploadSpecStepProps>(
                         <EuiButtonEmpty
                           onClick={onCancel}
                           flush="left"
-                          data-test-subj="buttonsFooter-cancelButton"
+                          data-test-subj="cancelAnalyzeApiButton"
                         >
                           {i18n.CANCEL}
                         </EuiButtonEmpty>

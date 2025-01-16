@@ -55,7 +55,7 @@ export const AuthSelection = React.memo<AuthSelectionProps>(
     );
 
     return (
-      <EuiFormRow fullWidth>
+      <EuiFormRow fullWidth data-test-subj="confirmAuth">
         <EuiFlexItem>
           <EuiTitle size="xs">
             <h4>{i18n.CONFIRM_AUTH}</h4>
@@ -77,6 +77,7 @@ export const AuthSelection = React.memo<AuthSelectionProps>(
               options={options}
               selectedOptions={selectedAuth === undefined ? undefined : [{ label: selectedAuth }]}
               onChange={onChangeAuth}
+              data-test-subj="authInputComboBox"
             />
           </EuiFormRow>
           {invalidAuth && (
@@ -87,6 +88,7 @@ export const AuthSelection = React.memo<AuthSelectionProps>(
                 size="s"
                 color="warning"
                 iconType="warning"
+                data-test-subj="authDoesNotAlignWarning"
               />
             </EuiFlexItem>
           )}
