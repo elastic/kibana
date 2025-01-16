@@ -10,7 +10,7 @@
 import './timeseries_visualization.scss';
 
 import React, { Suspense, useCallback, useEffect, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
 import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
@@ -56,13 +56,12 @@ function TimeseriesVisualization({
 }: TimeseriesVisualizationProps) {
   const [indexPattern, setIndexPattern] = useState<FetchedIndexPattern['indexPattern']>(null);
   const [palettesService, setPalettesService] = useState<PaletteRegistry | null>(null);
-  const euiTheme = useEuiTheme();
 
   useEffect(() => {
     getCharts()
-      .palettes.getPalettes(true)
+      .palettes.getPalettes()
       .then((paletteRegistry) => setPalettesService(paletteRegistry));
-  }, [euiTheme.euiTheme.themeName]); // needs to update when theme name changes
+  }, []);
 
   useEffect(() => {
     fetchIndexPattern(model.index_pattern, getDataViewsStart()).then((fetchedIndexPattern) =>

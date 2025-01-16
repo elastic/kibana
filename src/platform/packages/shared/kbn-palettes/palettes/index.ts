@@ -8,7 +8,7 @@
  */
 
 import { KbnPalettes } from '../classes/palettes';
-import { elasticPalette, getElasticPalette, getNeutralPalette } from './categorical';
+import { elasticPalette, getNeutralPalette } from './categorical';
 import { elasticClassicPalette, kibana4Palette, kibana7Palette } from './legacy/categorical';
 import {
   complementaryPalette,
@@ -22,53 +22,45 @@ import {
 } from './gradient';
 export { logLevelPalette } from './semantic';
 
-const getDarkKbnPalettes = () =>
-  new KbnPalettes(
-    [
-      getElasticPalette(),
-      kibana7Palette,
-      kibana4Palette,
-      getNeutralPalette(true),
-      complementaryPalette,
-      coolPalette,
-      grayPalette,
-      greenPalette,
-      redPalette,
-      statusPalette,
-      temperaturePalette,
-      warmPalette,
-      elasticClassicPalette,
-    ],
-    elasticPalette
-  );
+const darkKbnPalettes = new KbnPalettes(
+  [
+    elasticPalette,
+    kibana7Palette,
+    kibana4Palette,
+    getNeutralPalette(true),
+    complementaryPalette,
+    coolPalette,
+    grayPalette,
+    greenPalette,
+    redPalette,
+    statusPalette,
+    temperaturePalette,
+    warmPalette,
+    elasticClassicPalette,
+  ],
+  elasticPalette
+);
 
-const getLightKbnPalettes = () =>
-  new KbnPalettes(
-    [
-      getElasticPalette(),
-      kibana7Palette,
-      kibana4Palette,
-      getNeutralPalette(true),
-      complementaryPalette,
-      coolPalette,
-      grayPalette,
-      greenPalette,
-      redPalette,
-      statusPalette,
-      temperaturePalette,
-      warmPalette,
-      elasticClassicPalette,
-    ],
-    elasticPalette
-  );
+const lightKbnPalettes = new KbnPalettes(
+  [
+    elasticPalette,
+    kibana7Palette,
+    kibana4Palette,
+    getNeutralPalette(true),
+    complementaryPalette,
+    coolPalette,
+    grayPalette,
+    greenPalette,
+    redPalette,
+    statusPalette,
+    temperaturePalette,
+    warmPalette,
+    elasticClassicPalette,
+  ],
+  elasticPalette
+);
 
-const lightKbnPalettes = getLightKbnPalettes();
-const darkKbnPalettes = getDarkKbnPalettes();
-
-export const getPalettes = (darkMode: boolean, createNew: boolean = false) => {
-  if (createNew) return darkMode ? getDarkKbnPalettes() : getLightKbnPalettes();
-  return darkMode ? darkKbnPalettes : lightKbnPalettes;
-};
+export const getPalettes = (darkMode: boolean) => (darkMode ? darkKbnPalettes : lightKbnPalettes);
 
 export { elasticPalette } from './categorical';
 export * from './get_kbn_palettes';

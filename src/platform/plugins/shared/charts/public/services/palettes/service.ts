@@ -24,10 +24,10 @@ export class PaletteService {
 
   public setup(theme: CoreTheme) {
     return {
-      getPalettes: async (createNew = false): Promise<PaletteRegistry> => {
+      getPalettes: async (): Promise<PaletteRegistry> => {
         if (!this.palettes) {
           const { buildPalettes } = await import('./palettes');
-          this.palettes = buildPalettes(theme, createNew);
+          this.palettes = buildPalettes(theme);
         }
         return {
           get: (name: string) => {
