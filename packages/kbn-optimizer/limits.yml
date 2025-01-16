@@ -22,7 +22,7 @@ pageLoadAssetSize:
   core: 564663
   crossClusterReplication: 65408
   customIntegrations: 22034
-  dashboard: 68015
+  dashboard: 19000
   dashboardEnhanced: 65646
   data: 454087
   dataQuality: 19384
@@ -122,8 +122,8 @@ pageLoadAssetSize:
   observabilityShared: 111036
   osquery: 107090
   painlessLab: 179748
-  presentationPanel: 55463
-  presentationUtil: 58834
+  presentationPanel: 11468
+  presentationUtil: 33186
   productDocBase: 22500
   profiling: 36694
   remoteClusters: 51327
