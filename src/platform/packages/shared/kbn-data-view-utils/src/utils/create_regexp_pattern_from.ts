@@ -7,29 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const createRegExpPatternFrom = (basePatterns: string | string[], selectors: string[]) => {
-  const indexNamePatterns = Array.isArray(basePatterns) ? basePatterns : [basePatterns];
+import { escapeRegExp } from 'lodash';
 
-  const { allowNoSelector, normalizedSelectors } = normalizeSelectors(selectors);
+type Selector = 'data' | 'failures' | '*';
+
+export const createRegExpPatternFrom = (basePatterns: string | string[], selector: Selector) => {
+  const normalizedBasePatterns = normalizeBasePatterns(basePatterns);
+
+  const indexNames = `(?:${normalizedBasePatterns.join('|')})`;
+  const selectorsSuffix = `(?:::(?:${escapeRegExp(selector)}))${
+    isDefaultSelector(selector) ? '?' : ''
+  }`;
 
   return new RegExp(
-    `^(?:(?:[^:,\\s]*:)?[^:,\\s]*(?:\\b|_)(?:${indexNamePatterns.join(
-      '|'
-    )})(?:\\b|_)(?:[^:,\\s]*)?(?:::(?:${normalizedSelectors.join('|')}))${
-      allowNoSelector ? '?' : ''
-    },?)+$`,
+    `^(?:${optionalRemoteCluster}${optionalIndexNamePrefix}${indexNames}${optionalIndexNameSuffix}${selectorsSuffix},?)+$`,
     'i'
   );
 };
 
-const normalizeSelectors = (
-  selectors: string[]
-): { allowNoSelector: boolean; normalizedSelectors: string[] } => {
-  if (selectors.length === 0) {
-    return { allowNoSelector: true, normalizedSelectors: ['data'] };
-  } else if (selectors.includes('data')) {
-    return { allowNoSelector: true, normalizedSelectors: selectors };
-  } else {
-    return { allowNoSelector: false, normalizedSelectors: selectors };
-  }
-};
+const normalizeBasePatterns = (basePatterns: string | string[]): string[] =>
+  (Array.isArray(basePatterns) ? basePatterns : [basePatterns]).map(escapeRegExp);
+
+const isDefaultSelector = (selector: Selector): boolean => selector === 'data';
+
+const nameCharacters = '[^:,\\s]+';
+const segmentBoundary = '(?:\\b|_)';
+const optionalRemoteCluster = `(?:${nameCharacters}:)?`;
+const optionalIndexNamePrefix = `(?:${nameCharacters}${segmentBoundary})?`;
+const optionalIndexNameSuffix = `(?:${segmentBoundary}${nameCharacters})?`;

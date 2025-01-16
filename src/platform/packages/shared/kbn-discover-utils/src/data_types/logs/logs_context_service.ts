@@ -27,11 +27,9 @@ export const DEFAULT_ALLOWED_LOGS_BASE_PATTERNS = [
   'winlogbeat',
 ];
 
-export const ALLOWED_INDEX_SELECTORS = ['data'];
-
 export const DEFAULT_ALLOWED_LOGS_BASE_PATTERNS_REGEXP = createRegExpPatternFrom(
   DEFAULT_ALLOWED_LOGS_BASE_PATTERNS,
-  ALLOWED_INDEX_SELECTORS
+  'data'
 );
 
 export const createLogsContextService = async ({ logsDataAccess }: LogsContextServiceDeps) => {
