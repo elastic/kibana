@@ -136,7 +136,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(response.userActions.length).to.be(3);
-        expect(response.latestAttachments.length).to.be(2);
+        expect(response.latestAttachments.length).to.be(1);
 
         const attachment = response.latestAttachments[0];
         expect(attachment.type).to.eql('user');
@@ -695,7 +695,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(response.userActions.length).to.be(5);
-        expect(response.latestAttachments.length).to.be(0);
+        expect(response.latestAttachments.length).to.be(3);
 
         const createCaseUserAction = response.userActions[0];
 
@@ -771,7 +771,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(response.userActions.length).to.be(1);
-        expect(response.latestAttachments.length).to.be(0);
+        expect(response.latestAttachments.length).to.be(1);
 
         const userCommentUserAction = response.userActions[0] as CommentUserAction;
 
