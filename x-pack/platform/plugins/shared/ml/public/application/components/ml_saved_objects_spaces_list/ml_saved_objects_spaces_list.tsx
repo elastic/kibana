@@ -12,12 +12,13 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SpacesPluginStart, ShareToSpaceFlyoutProps } from '@kbn/spaces-plugin/public';
 import type { SavedObjectResult, MlSavedObjectType } from '../../../../common/types/saved_objects';
+import { ML_JOB_SAVED_OBJECT_TYPE } from '../../../../common/types/saved_objects';
 import { useMlApi } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 
 interface Props {
   spacesApi: SpacesPluginStart; // this component is only ever used when spaces is enabled
-  spaceIds?: string[];
+  spaceIds: string[];
   id: string;
   mlSavedObjectType: MlSavedObjectType;
   refresh(): void;
@@ -32,11 +33,9 @@ const modelObjectNoun = i18n.translate('xpack.ml.management.jobsSpacesList.model
   defaultMessage: 'trained model',
 });
 
-const FALLBACK_SPACES_ID: string[] = [];
-
 export const MLSavedObjectsSpacesList: FC<Props> = ({
   spacesApi,
-  spaceIds = FALLBACK_SPACES_ID,
+  spaceIds,
   id,
   mlSavedObjectType,
   refresh,
@@ -45,13 +44,8 @@ export const MLSavedObjectsSpacesList: FC<Props> = ({
     savedObjects: { updateJobsSpaces, updateModelsSpaces },
   } = useMlApi();
   const { displayErrorToast } = useToastNotificationService();
+
   const [showFlyout, setShowFlyout] = useState(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const LazySpaceList = useCallback(spacesApi?.ui.components.getSpaceList, [spacesApi]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const LazyShareToSpaceFlyout = useCallback(spacesApi?.ui.components.getShareToSpaceFlyout, [
-    spacesApi,
-  ]);
 
   async function changeSpacesHandler(
     _objects: Array<{ type: string; id: string }>, // this is ignored because ML jobs do not have references
@@ -75,9 +69,7 @@ export const MLSavedObjectsSpacesList: FC<Props> = ({
 
   function onClose() {
     setShowFlyout(false);
-    if (refresh) {
-      refresh();
-    }
+    refresh();
   }
 
   function handleApplySpaces(resp: SavedObjectResult) {
@@ -92,9 +84,16 @@ export const MLSavedObjectsSpacesList: FC<Props> = ({
     });
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const LazySpaceList = useCallback(spacesApi.ui.components.getSpaceList, [spacesApi]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const LazyShareToSpaceFlyout = useCallback(spacesApi.ui.components.getShareToSpaceFlyout, [
+    spacesApi,
+  ]);
+
   const shareToSpaceFlyoutProps: ShareToSpaceFlyoutProps = {
     savedObjectTarget: {
-      type: mlSavedObjectType,
+      type: mlSavedObjectType === 'anomaly-detector' ? ML_JOB_SAVED_OBJECT_TYPE : mlSavedObjectType,
       id,
       namespaces: spaceIds,
       title: id,
