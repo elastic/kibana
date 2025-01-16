@@ -6,11 +6,9 @@
  */
 
 import { ApmSynthtraceKibanaClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
-import cypress from 'cypress';
-import path from 'path';
 import Url from 'url';
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
-import type { FtrProviderContext } from './ftr_provider_context';
+import type { FtrProviderContext } from '../common/ftr_provider_context';
 
 export async function cypressTestRunner({ getService }: FtrProviderContext) {
   const config = getService('config');
@@ -54,44 +52,22 @@ export async function cypressTestRunner({ getService }: FtrProviderContext) {
     port: config.get('servers.kibana.port'),
   });
 
-  const cypressProjectPath = path.join(__dirname);
-  const { open, ...cypressCliArgs } = getCypressCliArgs();
-  const cypressExecution = open ? cypress.open : cypress.run;
-  const res = await cypressExecution({
-    ...cypressCliArgs,
-    project: cypressProjectPath,
-    browser: 'electron',
-    config: {
-      e2e: {
-        baseUrl: kibanaUrlWithoutAuth,
-      },
-    },
-    env: {
-      KIBANA_URL: kibanaUrlWithoutAuth,
-      APM_PACKAGE_VERSION: packageVersion,
-      ES_NODE: esNode,
-      ES_REQUEST_TIMEOUT: esRequestTimeout,
-      TEST_CLOUD: process.env.TEST_CLOUD,
-    },
-  });
-
-  return res;
-}
-
-function getCypressCliArgs(): Record<string, unknown> {
-  if (!process.env.CYPRESS_CLI_ARGS) {
-    return {};
-  }
-
-  const { $0, _, ...cypressCliArgs } = JSON.parse(process.env.CYPRESS_CLI_ARGS) as Record<
-    string,
-    unknown
-  >;
-
-  const spec =
-    typeof cypressCliArgs.spec === 'string' && !cypressCliArgs.spec.includes('**')
-      ? `**/${cypressCliArgs.spec}*`
-      : cypressCliArgs.spec;
-
-  return { ...cypressCliArgs, spec };
+  return {
+    KIBANA_URL: kibanaUrlWithoutAuth,
+    APM_PACKAGE_VERSION: packageVersion,
+    ES_NODE: esNode,
+    ES_REQUEST_TIMEOUT: esRequestTimeout,
+    TEST_CLOUD: process.env.TEST_CLOUD,
+    baseUrl: Url.format({
+      protocol: config.get('servers.kibana.protocol'),
+      hostname: config.get('servers.kibana.hostname'),
+      port: config.get('servers.kibana.port'),
+    }),
+    protocol: config.get('servers.kibana.protocol'),
+    hostname: config.get('servers.kibana.hostname'),
+    configport: config.get('servers.kibana.port'),
+    ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
+    ELASTICSEARCH_USERNAME: config.get('servers.kibana.username'),
+    ELASTICSEARCH_PASSWORD: config.get('servers.kibana.password'),
+  };
 }

@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-Cypress.on('uncaught:exception', (err, runnable) => {
-  return false;
-});
-
-import './commands';
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('@ess SecuritySolution SIEM Migrations', () => {
+    loadTestFile(require.resolve('./get'));
+  });
+}

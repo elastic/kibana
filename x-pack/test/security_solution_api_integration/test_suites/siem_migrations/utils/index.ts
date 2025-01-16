@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-import type { GenericFtrProviderContext } from '@kbn/test';
-
-export type FtrProviderContext = GenericFtrProviderContext<{}, {}>;
+export * from './rules';
