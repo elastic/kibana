@@ -8,9 +8,9 @@
 import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
 import {
-  createMigrationRulesFromSavedObjects,
+  createMigrationRules,
   deleteAllMigrationRules,
-  getMigrationRuleSavedObject,
+  getMigrationRuleDocument,
   migrationRulesRouteHelpersFactory,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -28,10 +28,10 @@ export default ({ getService }: FtrProviderContext) => {
     it('should fetch existing rules within specified migration', async () => {
       // create a document
       const migrationId = uuidv4();
-      const migrationRuleSO = getMigrationRuleSavedObject({ migration_id: migrationId });
-      await createMigrationRulesFromSavedObjects(es, [migrationRuleSO]);
+      const migrationRuleDocument = getMigrationRuleDocument({ migration_id: migrationId });
+      await createMigrationRules(es, [migrationRuleDocument]);
 
-      const { '@timestamp': timestamp, updated_at: updatedAt, ...rest } = migrationRuleSO;
+      const { '@timestamp': timestamp, updated_at: updatedAt, ...rest } = migrationRuleDocument;
 
       // fetch migration rule
       const response = await migrationRulesRoutes.get(migrationId);

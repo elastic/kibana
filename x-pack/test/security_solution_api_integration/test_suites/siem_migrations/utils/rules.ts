@@ -17,9 +17,9 @@ import { GetRuleMigrationResponse } from '@kbn/security-solution-plugin/common/s
 
 const SIEM_MIGRATIONS_RULES_INDEX_PATTERN = `${SIEM_MIGRATIONS_INDEX_PATTERN}-rules-default`;
 
-export type RuleMigrationSavedObject = Omit<RuleMigration, 'id'>;
+export type RuleMigrationDocument = Omit<RuleMigration, 'id'>;
 
-const migrationRuleSavedObject: RuleMigrationSavedObject = {
+const migrationRuleDocument: RuleMigrationDocument = {
   '@timestamp': '2025-01-13T15:17:43.571Z',
   migration_id: '25a24356-3aab-401b-a73c-905cb8bf7a6d',
   original_rule: {
@@ -57,16 +57,16 @@ const migrationRuleSavedObject: RuleMigrationSavedObject = {
   },
 };
 
-export const getMigrationRuleSavedObject = (
-  overrideParams: Partial<RuleMigrationSavedObject>
-): RuleMigrationSavedObject => ({
-  ...migrationRuleSavedObject,
+export const getMigrationRuleDocument = (
+  overrideParams: Partial<RuleMigrationDocument>
+): RuleMigrationDocument => ({
+  ...migrationRuleDocument,
   ...overrideParams,
 });
 
-export const createMigrationRulesFromSavedObjects = async (
+export const createMigrationRules = async (
   es: Client,
-  rules: RuleMigrationSavedObject[]
+  rules: RuleMigrationDocument[]
 ): Promise<void> => {
   const createdAt = new Date().toISOString();
   await es.bulk({
