@@ -41,62 +41,78 @@ const messageSchema: z.ZodType<Message> = z.object({
   ),
 });
 
-const functionSchema = z.intersection(
+export const functionSchema = z.intersection(
   z.object({
-    name: z.string(),
-    description: z.string(),
+    name: z.string().describe('Name of the function'),
+    description: z.string().describe('Description of the function'),
   }),
   z.object({
-    parameters: z.any().optional(),
+    parameters: z.any().optional().describe('Parameters for the function'),
   })
 );
 
-const chatCompleteBodyBaseSchema = z.intersection(
+export const chatCompleteBodyBaseSchema = z.intersection(
   z.object({
-    messages: z.array(messageSchema),
-    connectorId: z.string(),
-    persist: BooleanFromPrimitiveType,
+    messages: z
+      .array(messageSchema)
+      .describe('Array of message objects containing the conversation history'),
+    connectorId: z.string().describe('Unique identifier for the connector'),
+    persist: BooleanFromPrimitiveType.describe(
+      'Flag indicating whether to persist the conversation'
+    ),
   }),
   z.object({
-    conversationId: z.string().optional(),
-    title: z.string().optional(),
+    conversationId: z
+      .string()
+      .optional()
+      .describe('Unique identifier for the conversation (if continuing a conversation)'),
+    title: z.string().optional().describe('Title of the conversation'),
     disableFunctions: z
       .union([
         BooleanFromPrimitiveType,
         z.object({
-          except: z.array(z.string()),
+          except: z.array(z.string()).describe('Array of function names to exclude from disabling'),
         }),
       ])
-      .optional(),
+      .optional()
+      .describe(
+        'Control function availability. Can be either a boolean to disable all functions, or an object specifying exceptions.'
+      ),
     instructions: z
       .array(
         z.intersection(
           z.object({
-            id: z.string().optional(),
+            id: z.string().optional().describe('Unique identifier for the instruction'),
           }),
           z.object({
-            text: z.string(),
-            instruction_type: z.union([
-              z.literal('user_instruction'),
-              z.literal('application_instruction'),
-            ]),
+            text: z.string().describe('The instruction content'),
+            instruction_type: z
+              .enum(['user_instruction', 'application_instruction'])
+              .describe('Type of instruction'),
           })
         )
       )
-      .optional(),
+      .optional()
+      .describe('Array of instruction objects'),
   })
 );
 
-const chatCompletePublicQuerySchema = z
+export const chatCompletePublicQuerySchema = z
   .object({
-    format: z.union([z.literal('default'), z.literal('openai')]).optional(),
+    format: z
+      .enum(['default', 'openai'])
+      .optional()
+      .describe('Response format type. If omitted, "default" is used.'),
   })
   .optional();
 
-const chatCompletePublicBodySchema = z.intersection(
+export const chatCompletePublicBodySchema = z.intersection(
   chatCompleteBodyBaseSchema,
   z.object({
-    actions: z.array(functionSchema).optional(),
+    actions: z
+      .array(functionSchema)
+      .optional()
+      .describe('Array of function objects defining available actions'),
   })
 );
 
