@@ -7,14 +7,14 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { validateSpaceId } from './services/validate_space_id';
-import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
-import { ProjectMonitor } from '../../../common/runtime_types';
+import { validateSpaceId } from '../services/validate_space_id';
+import { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
+import { ProjectMonitor } from '../../../../common/runtime_types';
 
-import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { ProjectMonitorFormatter } from '../../synthetics_service/project_monitor/project_monitor_formatter';
+import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { ProjectMonitorFormatter } from '../../../synthetics_service/project_monitor/project_monitor_formatter';
 
-const MAX_PAYLOAD_SIZE = 1048576 * 50; // 50MiB
+const MAX_PAYLOAD_SIZE = 1048576 * 100; // 50MiB
 
 export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
@@ -37,19 +37,29 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
     const { projectName } = request.params;
     const decodedProjectName = decodeURI(projectName);
     const monitors = (request.body?.monitors as ProjectMonitor[]) || [];
+    const lightWeightMonitors = monitors.filter((monitor) => monitor.type !== 'browser');
+    const browserMonitors = monitors.filter((monitor) => monitor.type === 'browser');
 
-    if (monitors.length > 250) {
+    if (browserMonitors.length > 250) {
       return response.badRequest({
         body: {
           message: REQUEST_TOO_LARGE,
         },
       });
     }
+    if (lightWeightMonitors.length > 1500) {
+      return response.badRequest({
+        body: {
+          message: REQUEST_TOO_LARGE_LIGHTWEIGHT,
+        },
+      });
+    }
 
     try {
-      const spaceId = await validateSpaceId(routeContext);
-
-      const permissionError = await validatePermissions(routeContext, monitors);
+      const [spaceId, permissionError] = await Promise.all([
+        validateSpaceId(routeContext),
+        validatePermissions(routeContext, monitors),
+      ]);
 
       if (permissionError) {
         return response.forbidden({ body: { message: permissionError } });
@@ -84,10 +94,18 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
   },
 });
 
-export const REQUEST_TOO_LARGE = i18n.translate('xpack.synthetics.server.project.delete.toolarge', {
+export const REQUEST_TOO_LARGE = i18n.translate('xpack.synthetics.server.project.delete.request', {
   defaultMessage:
-    'Delete request payload is too large. Please send a max of 250 monitors to delete per request',
+    'Request payload is too large. Please send a max of 250 browser monitors per request.',
 });
+
+export const REQUEST_TOO_LARGE_LIGHTWEIGHT = i18n.translate(
+  'xpack.synthetics.server.project.delete.request.lightweight',
+  {
+    defaultMessage:
+      'Request payload is too large. Please send a max of 1500 lightweight monitors per request.',
+  }
+);
 
 export const validatePermissions = async (
   { server, response, request }: RouteContext,
