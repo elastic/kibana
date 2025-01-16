@@ -44,6 +44,7 @@ jest.mock('../app_context', () => ({
           },
         }
       ),
+    getTaskManagerStart: jest.fn(),
   },
 }));
 

@@ -65,7 +65,7 @@
             "label": "from",
             "description": [],
             "signature": [
-              "({ router, defaultHandlerResolutionStrategy, isDev, useVersionResolutionStrategyForInternalPaths, }: ",
+              "({ router, log, defaultHandlerResolutionStrategy, isDev, useVersionResolutionStrategyForInternalPaths, }: ",
               "VersionedRouterArgs",
               ") => ",
               "CoreVersionedRouter"
@@ -79,7 +79,7 @@
                 "id": "def-server.CoreVersionedRouter.from.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    router,\n    defaultHandlerResolutionStrategy,\n    isDev,\n    useVersionResolutionStrategyForInternalPaths,\n  }",
+                "label": "{\n    router,\n    log,\n    defaultHandlerResolutionStrategy,\n    isDev,\n    useVersionResolutionStrategyForInternalPaths,\n  }",
                 "description": [],
                 "signature": [
                   "VersionedRouterArgs"
