@@ -11,14 +11,17 @@ import React, { ChangeEvent, KeyboardEvent, useCallback } from 'react';
 import { EuiFieldSearch, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, keys } from '@elastic/eui';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { i18n } from '@kbn/i18n';
-import { useFindSearchMatches, UseFindSearchMatchesProps } from '../hooks/use_find_search_matches';
+import {
+  useInTableSearchMatches,
+  UseInTableSearchMatchesProps,
+} from './use_in_table_search_matches';
 
-export interface SearchControlProps extends UseFindSearchMatchesProps {
+export interface InTableSearchControlProps extends UseInTableSearchMatchesProps {
   onChange: (searchTerm: string | undefined) => void;
 }
 
-export const SearchControl: React.FC<SearchControlProps> = ({
-  uiSearchTerm,
+export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
+  inTableSearchTerm,
   visibleColumns,
   rows,
   renderCellValue,
@@ -26,17 +29,17 @@ export const SearchControl: React.FC<SearchControlProps> = ({
   onChange,
 }) => {
   const { matchesCount, activeMatchPosition, goToPrevMatch, goToNextMatch, isProcessing } =
-    useFindSearchMatches({
+    useInTableSearchMatches({
       visibleColumns,
       rows,
-      uiSearchTerm,
+      inTableSearchTerm,
       renderCellValue,
       scrollToFoundMatch,
     });
 
   const { inputValue, handleInputChange } = useDebouncedValue({
     onChange,
-    value: uiSearchTerm,
+    value: inTableSearchTerm,
   });
 
   const onInputChange = useCallback(
@@ -66,7 +69,7 @@ export const SearchControl: React.FC<SearchControlProps> = ({
       isClearable
       isLoading={isProcessing}
       append={
-        Boolean(uiSearchTerm?.length) && !isProcessing ? (
+        Boolean(inTableSearchTerm?.length) && !isProcessing ? (
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
             {matchesCount > 0 ? (
               <>
@@ -75,7 +78,7 @@ export const SearchControl: React.FC<SearchControlProps> = ({
                   <EuiButtonIcon
                     iconType="arrowUp"
                     aria-label={i18n.translate(
-                      'unifiedDataTable.searchControl.buttonPreviousMatch',
+                      'unifiedDataTable.inTableSearch.buttonPreviousMatch',
                       {
                         defaultMessage: 'Previous match',
                       }
@@ -87,7 +90,7 @@ export const SearchControl: React.FC<SearchControlProps> = ({
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
                     iconType="arrowDown"
-                    aria-label={i18n.translate('unifiedDataTable.searchControl.buttonNextMatch', {
+                    aria-label={i18n.translate('unifiedDataTable.inTableSearch.buttonNextMatch', {
                       defaultMessage: 'Next match',
                     })}
                     disabled={activeMatchPosition >= matchesCount}
@@ -101,7 +104,7 @@ export const SearchControl: React.FC<SearchControlProps> = ({
           </EuiFlexGroup>
         ) : undefined
       }
-      placeholder={i18n.translate('unifiedDataTable.searchControl.inputPlaceholder', {
+      placeholder={i18n.translate('unifiedDataTable.inTableSearch.inputPlaceholder', {
         defaultMessage: 'Find in the table',
       })}
       value={inputValue}

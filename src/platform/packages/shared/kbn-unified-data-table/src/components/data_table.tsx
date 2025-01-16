@@ -95,7 +95,7 @@ import {
   getAdditionalRowControlColumns,
 } from './custom_control_columns';
 import { useSorting } from '../hooks/use_sorting';
-import { SearchControl } from './search_control';
+import { InTableSearchControl } from './in_table_search';
 
 const CONTROL_COLUMN_IDS_DEFAULT = [SELECT_ROW, OPEN_DETAILS];
 const THEME_DEFAULT = { darkMode: false };
@@ -658,8 +658,8 @@ export const UnifiedDataTable = ({
     changeCurrentPageIndex,
   ]);
 
-  const [uiSearchTerm, setUISearchTerm] = useState<string>('');
-  const [uiSearchTermCss, setUISearchTermCss] = useState<SerializedStyles>();
+  const [inTableSearchTerm, setInTableSearchTerm] = useState<string>('');
+  const [inTableSearchTermCss, setInTableSearchTermCss] = useState<SerializedStyles>();
 
   const unifiedDataTableContextValue = useMemo<DataTableContext>(
     () => ({
@@ -675,7 +675,7 @@ export const UnifiedDataTable = ({
       isPlainRecord,
       pageIndex: isPaginationEnabled ? paginationObj?.pageIndex : 0,
       pageSize: isPaginationEnabled ? paginationObj?.pageSize : displayedRows.length,
-      uiSearchTerm,
+      inTableSearchTerm,
     }),
     [
       componentsTourSteps,
@@ -691,7 +691,7 @@ export const UnifiedDataTable = ({
       paginationObj?.pageIndex,
       paginationObj?.pageSize,
       valueToStringConverter,
-      uiSearchTerm,
+      inTableSearchTerm,
     ]
   );
 
@@ -745,10 +745,10 @@ export const UnifiedDataTable = ({
     ]
   );
 
-  const uiSearchControl = useMemo(() => {
+  const inTableSearchControl = useMemo(() => {
     return (
-      <SearchControl
-        uiSearchTerm={uiSearchTerm}
+      <InTableSearchControl
+        inTableSearchTerm={inTableSearchTerm}
         visibleColumns={visibleColumns}
         rows={displayedRows}
         renderCellValue={renderCellValue}
@@ -760,9 +760,9 @@ export const UnifiedDataTable = ({
           }
 
           // TODO: use a named color token
-          setUISearchTermCss(css`
+          setInTableSearchTermCss(css`
             .euiDataGridRowCell[data-gridcell-row-index='${rowIndex}'][data-gridcell-column-id='${fieldName}']
-              .unifiedDataTable__findMatch[data-match-index='${matchIndex}'] {
+              .unifiedDataTable__inTableSearchMatch[data-match-index='${matchIndex}'] {
               background-color: #ffc30e;
             }
           `);
@@ -786,15 +786,15 @@ export const UnifiedDataTable = ({
           }
         }}
         onChange={(searchTerm) => {
-          setUISearchTerm(searchTerm || '');
-          setUISearchTermCss(undefined);
+          setInTableSearchTerm(searchTerm || '');
+          setInTableSearchTermCss(undefined);
         }}
       />
     );
   }, [
-    uiSearchTerm,
-    setUISearchTerm,
-    setUISearchTermCss,
+    inTableSearchTerm,
+    setInTableSearchTerm,
+    setInTableSearchTermCss,
     displayedRows,
     renderCellValue,
     visibleColumns,
@@ -1062,11 +1062,11 @@ export const UnifiedDataTable = ({
               toolbarProps,
               gridProps: {
                 additionalControls,
-                uiSearchControl,
+                inTableSearchControl,
               },
             })
         : undefined,
-    [renderCustomToolbar, additionalControls, uiSearchControl]
+    [renderCustomToolbar, additionalControls, inTableSearchControl]
   );
 
   const showDisplaySelector = useMemo(():
@@ -1199,7 +1199,7 @@ export const UnifiedDataTable = ({
           data-description={searchDescription}
           data-document-number={displayedRows.length}
           className={classnames(className, 'unifiedDataTable__table')}
-          css={uiSearchTermCss}
+          css={inTableSearchTermCss}
         >
           {isCompareActive ? (
             <CompareDocuments

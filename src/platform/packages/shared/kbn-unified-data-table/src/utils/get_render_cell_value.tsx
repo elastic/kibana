@@ -24,7 +24,10 @@ import type { CustomCellRenderer } from '../types';
 import { SourceDocument } from '../components/source_document';
 import SourcePopoverContent from '../components/source_popover_content';
 import { DataTablePopoverCellValue } from '../components/data_table_cell_value';
-import { CellValueWrapper } from '../hooks/use_find_search_matches';
+import {
+  InTableSearchHighlightsWrapper,
+  InTableSearchHighlightsWrapperProps,
+} from '../components/in_table_search';
 
 export const CELL_CLASS = 'unifiedDataTable__cellValue';
 
@@ -60,11 +63,12 @@ export const getRenderCellValueFn = ({
     isExpandable,
     isExpanded,
     onHighlightsCountFound,
-  }: EuiDataGridCellValueElementProps & { onHighlightsCountFound?: (count: number) => void }) => {
+  }: EuiDataGridCellValueElementProps &
+    Pick<InTableSearchHighlightsWrapperProps, 'onHighlightsCountFound'>) => {
     const row = rows ? rows[rowIndex] : undefined;
     const field = dataView.fields.getByName(columnId);
     const ctx = useContext(UnifiedDataTableContext);
-    const { uiSearchTerm } = ctx;
+    const { inTableSearchTerm } = ctx;
 
     useEffect(() => {
       if (row?.isAnchor) {
@@ -163,13 +167,13 @@ export const getRenderCellValueFn = ({
     };
 
     return (
-      <CellValueWrapper
-        key={uiSearchTerm} // it's very important to have a unique key for each uiSearchTerm change so it can add the highlights again
-        uiSearchTerm={uiSearchTerm}
+      <InTableSearchHighlightsWrapper
+        key={inTableSearchTerm} // it's very important to have a unique key for each inTableSearchTerm change so it can add the highlights again
+        inTableSearchTerm={inTableSearchTerm}
         onHighlightsCountFound={onHighlightsCountFound}
       >
         {render()}
-      </CellValueWrapper>
+      </InTableSearchHighlightsWrapper>
     );
   };
 

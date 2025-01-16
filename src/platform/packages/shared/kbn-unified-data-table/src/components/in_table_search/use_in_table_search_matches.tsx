@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useState, ReactNode, useRef } from 'react';
+import React, { useCallback, useEffect, useState, ReactNode } from 'react';
 import ReactDOM from 'react-dom';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import { escape, memoize } from 'lodash';
-import { UnifiedDataTableContext } from '../table_context';
+import { UnifiedDataTableContext } from '../../table_context';
+import { InTableSearchHighlightsWrapperProps } from './in_table_search_highlights_wrapper';
 
 interface RowMatches {
   rowIndex: number;
@@ -22,12 +22,13 @@ interface RowMatches {
 const DEFAULT_MATCHES: RowMatches[] = [];
 const DEFAULT_ACTIVE_MATCH_POSITION = 1;
 
-export interface UseFindSearchMatchesProps {
+export interface UseInTableSearchMatchesProps {
   visibleColumns: string[];
   rows: DataTableRecord[] | undefined;
-  uiSearchTerm: string | undefined;
+  inTableSearchTerm: string | undefined;
   renderCellValue: (
-    props: EuiDataGridCellValueElementProps & { onHighlightsCountFound?: (count: number) => void }
+    props: EuiDataGridCellValueElementProps &
+      Pick<InTableSearchHighlightsWrapperProps, 'onHighlightsCountFound'>
   ) => ReactNode;
   scrollToFoundMatch: (params: {
     rowIndex: number;
@@ -37,7 +38,7 @@ export interface UseFindSearchMatchesProps {
   }) => void;
 }
 
-export interface UseFindSearchMatchesReturn {
+export interface UseInTableSearchMatchesReturn {
   matchesCount: number;
   activeMatchPosition: number;
   isProcessing: boolean;
@@ -45,13 +46,13 @@ export interface UseFindSearchMatchesReturn {
   goToNextMatch: () => void;
 }
 
-export const useFindSearchMatches = ({
+export const useInTableSearchMatches = ({
   visibleColumns,
   rows,
-  uiSearchTerm,
+  inTableSearchTerm,
   renderCellValue,
   scrollToFoundMatch,
-}: UseFindSearchMatchesProps): UseFindSearchMatchesReturn => {
+}: UseInTableSearchMatchesProps): UseInTableSearchMatchesReturn => {
   const [matchesList, setMatchesList] = useState<RowMatches[]>(DEFAULT_MATCHES);
   const [matchesCount, setMatchesCount] = useState<number>(0);
   const [activeMatchPosition, setActiveMatchPosition] = useState<number>(
@@ -142,7 +143,7 @@ export const useFindSearchMatches = ({
   }, [setActiveMatchPosition, scrollToMatch, matchesList, visibleColumns, matchesCount]);
 
   useEffect(() => {
-    if (!rows?.length || !uiSearchTerm?.length) {
+    if (!rows?.length || !inTableSearchTerm?.length) {
       setMatchesList(DEFAULT_MATCHES);
       setMatchesCount(0);
       setActiveMatchPosition(DEFAULT_ACTIVE_MATCH_POSITION);
@@ -161,7 +162,7 @@ export const useFindSearchMatches = ({
 
         for (const fieldName of visibleColumns) {
           const matchesCountForFieldName = await getCellMatchesCount(
-            uiSearchTerm,
+            inTableSearchTerm,
             rowIndex,
             fieldName,
             renderCellValue
@@ -210,7 +211,7 @@ export const useFindSearchMatches = ({
     scrollToMatch,
     visibleColumns,
     rows,
-    uiSearchTerm,
+    inTableSearchTerm,
   ]);
 
   return {
@@ -223,10 +224,10 @@ export const useFindSearchMatches = ({
 };
 
 function getCellMatchesCount(
-  uiSearchTerm: string,
+  inTableSearchTerm: string,
   rowIndex: number,
   fieldName: string,
-  renderCellValue: UseFindSearchMatchesProps['renderCellValue']
+  renderCellValue: UseInTableSearchMatchesProps['renderCellValue']
 ): Promise<number> {
   const UnifiedDataTableRenderCellValue = renderCellValue;
 
@@ -236,7 +237,7 @@ function getCellMatchesCount(
     ReactDOM.render(
       <UnifiedDataTableContext.Provider
         value={{
-          uiSearchTerm,
+          inTableSearchTerm,
           // TODO: add other context values?
         }}
       >
@@ -257,85 +258,4 @@ function getCellMatchesCount(
       container
     );
   });
-}
-
-export function CellValueWrapper({
-  uiSearchTerm,
-  onHighlightsCountFound,
-  children,
-}: {
-  uiSearchTerm?: string;
-  onHighlightsCountFound?: (count: number) => void;
-  children: ReactNode;
-}) {
-  const cellValueRef = useRef<HTMLDivElement | null>(null);
-  const renderedForSearchTerm = useRef<string>();
-
-  useEffect(() => {
-    if (uiSearchTerm && cellValueRef.current && renderedForSearchTerm.current !== uiSearchTerm) {
-      renderedForSearchTerm.current = uiSearchTerm;
-      const count = modifyDOMAndAddSearchHighlights(
-        cellValueRef.current,
-        uiSearchTerm,
-        Boolean(onHighlightsCountFound)
-      );
-      onHighlightsCountFound?.(count);
-    }
-  }, [uiSearchTerm, onHighlightsCountFound]);
-
-  return <div ref={cellValueRef}>{children}</div>;
-}
-
-const getSearchTermRegExp = memoize((searchTerm: string): RegExp => {
-  return new RegExp(`(${escape(searchTerm.trim())})`, 'gi');
-});
-
-export function modifyDOMAndAddSearchHighlights(
-  originalNode: Node,
-  uiSearchTerm: string,
-  dryRun: boolean
-): number {
-  let matchIndex = 0;
-  const searchTermRegExp = getSearchTermRegExp(uiSearchTerm);
-
-  function insertSearchHighlights(node: Node) {
-    if (node.nodeType === Node.ELEMENT_NODE) {
-      Array.from(node.childNodes).forEach(insertSearchHighlights);
-      return;
-    }
-
-    if (node.nodeType === Node.TEXT_NODE) {
-      const nodeWithText = node as Text;
-      const parts = (nodeWithText.textContent || '').split(searchTermRegExp);
-
-      if (parts.length > 1) {
-        const nodeWithHighlights = document.createDocumentFragment();
-
-        parts.forEach((part) => {
-          if (dryRun && searchTermRegExp.test(part)) {
-            matchIndex++;
-            return;
-          }
-
-          if (searchTermRegExp.test(part)) {
-            const mark = document.createElement('mark');
-            mark.textContent = part;
-            mark.setAttribute('class', 'unifiedDataTable__findMatch');
-            mark.setAttribute('data-match-index', `${matchIndex++}`);
-            nodeWithHighlights.appendChild(mark);
-          } else {
-            nodeWithHighlights.appendChild(document.createTextNode(part));
-          }
-        });
-
-        if (!dryRun) {
-          nodeWithText.replaceWith(nodeWithHighlights);
-        }
-      }
-    }
-  }
-
-  Array.from(originalNode.childNodes).forEach(insertSearchHighlights);
-
-  return matchIndex;
 }
