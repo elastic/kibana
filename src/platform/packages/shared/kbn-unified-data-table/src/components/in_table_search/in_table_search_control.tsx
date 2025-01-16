@@ -7,8 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ChangeEvent, KeyboardEvent, useCallback } from 'react';
-import { EuiFieldSearch, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, keys } from '@elastic/eui';
+import React, { ChangeEvent, KeyboardEvent, FocusEvent, useCallback, useState } from 'react';
+import {
+  EuiFieldSearch,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  keys,
+} from '@elastic/eui';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { i18n } from '@kbn/i18n';
 import { css, type SerializedStyles } from '@emotion/react';
@@ -16,6 +23,23 @@ import {
   useInTableSearchMatches,
   UseInTableSearchMatchesProps,
 } from './use_in_table_search_matches';
+
+const searchInputCss = css`
+  .euiFormControlLayout,
+  input.euiFieldSearch {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: 0;
+  }
+
+  .euiFormControlLayout__append {
+    padding-inline-end: 0 !important;
+  }
+`;
+
+const matchesCss = css`
+  font-variant-numeric: tabular-nums;
+`;
 
 export interface InTableSearchControlProps
   extends Omit<UseInTableSearchMatchesProps, 'scrollToActiveMatch'> {
@@ -72,7 +96,9 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
 
   const { matchesCount, activeMatchPosition, goToPrevMatch, goToNextMatch, isProcessing } =
     useInTableSearchMatches({ ...props, scrollToActiveMatch });
+  const areArrowsDisabled = !matchesCount || isProcessing;
 
+  const [isFocused, setIsFocused] = useState<boolean>(false);
   const { inputValue, handleInputChange } = useDebouncedValue({
     onChange,
     value: props.inTableSearchTerm,
@@ -87,7 +113,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
 
   const onKeyUp = useCallback(
     (event: KeyboardEvent<HTMLInputElement>) => {
-      if (isProcessing) {
+      if (areArrowsDisabled) {
         return;
       }
       if (event.key === keys.ENTER && event.shiftKey) {
@@ -96,54 +122,78 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
         goToNextMatch();
       }
     },
-    [goToPrevMatch, goToNextMatch, isProcessing]
+    [goToPrevMatch, goToNextMatch, areArrowsDisabled]
   );
 
+  const onBlur = useCallback(
+    (event: FocusEvent<HTMLInputElement>) => {
+      if (
+        (!event.relatedTarget ||
+          event.relatedTarget.getAttribute('data-test-subj') !== 'clearSearchButton') &&
+        !inputValue
+      ) {
+        setIsFocused(false);
+      }
+    },
+    [setIsFocused, inputValue]
+  );
+
+  if (!isFocused && !inputValue) {
+    return (
+      <EuiToolTip
+        content={i18n.translate('unifiedDataTable.inTableSearch.inputPlaceholder', {
+          defaultMessage: 'Find in the table',
+        })}
+        delay="long"
+      >
+        <EuiButtonIcon
+          iconType="search"
+          size="xs"
+          color="text"
+          onClick={() => setIsFocused(true)}
+          aria-label={i18n.translate('unifiedDataTable.inTableSearch.inputPlaceholder', {
+            defaultMessage: 'Find in the table',
+          })}
+        />
+      </EuiToolTip>
+    );
+  }
+
   return (
-    <div
-      css={css`
-        .euiFormControlLayout__append {
-          padding-inline-end: 0 !important;
-        }
-      `}
-    >
+    <div css={searchInputCss}>
       <EuiFieldSearch
+        autoFocus
         compressed
-        isClearable
+        isClearable={!isProcessing}
         isLoading={isProcessing}
         append={
-          Boolean(inputValue?.length) && !isProcessing ? (
+          inputValue && typeof matchesCount === 'number' ? (
             <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
-              {matchesCount > 0 ? (
-                <>
-                  <EuiFlexItem
-                    grow={false}
-                  >{`${activeMatchPosition} / ${matchesCount}`}</EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType="arrowUp"
-                      aria-label={i18n.translate(
-                        'unifiedDataTable.inTableSearch.buttonPreviousMatch',
-                        {
-                          defaultMessage: 'Previous match',
-                        }
-                      )}
-                      onClick={goToPrevMatch}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType="arrowDown"
-                      aria-label={i18n.translate('unifiedDataTable.inTableSearch.buttonNextMatch', {
-                        defaultMessage: 'Next match',
-                      })}
-                      onClick={goToNextMatch}
-                    />
-                  </EuiFlexItem>
-                </>
-              ) : (
-                <EuiFlexItem grow={false}>0</EuiFlexItem>
-              )}
+              <EuiFlexItem grow={false} css={matchesCss}>
+                {matchesCount ? `${activeMatchPosition}/${matchesCount}` : '0/0'}&nbsp;
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="arrowUp"
+                  color="text"
+                  disabled={areArrowsDisabled}
+                  aria-label={i18n.translate('unifiedDataTable.inTableSearch.buttonPreviousMatch', {
+                    defaultMessage: 'Previous match',
+                  })}
+                  onClick={goToPrevMatch}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="arrowDown"
+                  color="text"
+                  disabled={areArrowsDisabled}
+                  aria-label={i18n.translate('unifiedDataTable.inTableSearch.buttonNextMatch', {
+                    defaultMessage: 'Next match',
+                  })}
+                  onClick={goToNextMatch}
+                />
+              </EuiFlexItem>
             </EuiFlexGroup>
           ) : undefined
         }
@@ -153,6 +203,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
         value={inputValue}
         onChange={onInputChange}
         onKeyUp={onKeyUp}
+        onBlur={onBlur}
       />
     </div>
   );

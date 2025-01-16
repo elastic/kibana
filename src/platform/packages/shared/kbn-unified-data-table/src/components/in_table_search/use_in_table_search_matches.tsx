@@ -40,7 +40,7 @@ export interface UseInTableSearchMatchesProps {
 }
 
 export interface UseInTableSearchMatchesReturn {
-  matchesCount: number;
+  matchesCount: number | null;
   activeMatchPosition: number;
   isProcessing: boolean;
   goToPrevMatch: () => void;
@@ -59,7 +59,7 @@ export const useInTableSearchMatches = (
     scrollToActiveMatch,
   } = props;
   const [matchesList, setMatchesList] = useState<RowMatches[]>(DEFAULT_MATCHES);
-  const [matchesCount, setMatchesCount] = useState<number>(0);
+  const [matchesCount, setMatchesCount] = useState<number | null>(null);
   const [activeMatchPosition, setActiveMatchPosition] = useState<number>(
     DEFAULT_ACTIVE_MATCH_POSITION
   );
@@ -117,10 +117,14 @@ export const useInTableSearchMatches = (
 
   const goToPrevMatch = useCallback(() => {
     setActiveMatchPosition((prev) => {
+      if (typeof matchesCount !== 'number') {
+        return prev;
+      }
+
       let nextMatchPosition = prev - 1;
 
       if (prev - 1 < 1) {
-        nextMatchPosition = matchesCount; // allow to circle though matches endlessly
+        nextMatchPosition = matchesCount; // allow to endlessly circle though matches
       }
 
       scrollToMatch({
@@ -135,10 +139,14 @@ export const useInTableSearchMatches = (
 
   const goToNextMatch = useCallback(() => {
     setActiveMatchPosition((prev) => {
+      if (typeof matchesCount !== 'number') {
+        return prev;
+      }
+
       let nextMatchPosition = prev + 1;
 
       if (prev + 1 > matchesCount) {
-        nextMatchPosition = 1; // allow to circle though matches endlessly
+        nextMatchPosition = 1; // allow to endlessly circle though matches
       }
 
       scrollToMatch({
@@ -154,7 +162,7 @@ export const useInTableSearchMatches = (
   useEffect(() => {
     if (!rows?.length || !inTableSearchTerm?.length) {
       setMatchesList(DEFAULT_MATCHES);
-      setMatchesCount(0);
+      setMatchesCount(null);
       setActiveMatchPosition(DEFAULT_ACTIVE_MATCH_POSITION);
       return;
     }
