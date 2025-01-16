@@ -29,9 +29,7 @@ interface CaseViewAlertsProps {
 
 export const CaseViewAlerts = ({
   caseData,
-  renderAlertsTable: AlertsTable = DefaultAlertsTable as NonNullable<
-    CaseViewAlertsProps['renderAlertsTable']
-  >,
+  renderAlertsTable: CustomAlertsTable,
   onAlertsTableLoaded,
 }: CaseViewAlertsProps) => {
   const { services } = useKibana();
@@ -63,6 +61,10 @@ export const CaseViewAlerts = ({
     );
   }
 
+  const AlertsTable =
+    CustomAlertsTable ??
+    (DefaultAlertsTable as NonNullable<CaseViewAlertsProps['renderAlertsTable']>);
+
   return isLoadingAlertFeatureIds ? (
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -86,8 +88,9 @@ export const CaseViewAlerts = ({
         // Only provide the services to the default alerts table.
         // Spreading from object to avoid incorrectly overriding
         // services to `undefined` in custom solution tables
-        {...(AlertsTable === DefaultAlertsTable
-          ? {
+        {...(CustomAlertsTable
+          ? {}
+          : {
               services: {
                 data,
                 http,
@@ -99,8 +102,7 @@ export const CaseViewAlerts = ({
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 licensing: licensing!,
               },
-            }
-          : {})}
+            })}
       />
     </EuiFlexItem>
   );
