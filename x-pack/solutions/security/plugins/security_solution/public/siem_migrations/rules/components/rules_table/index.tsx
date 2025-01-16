@@ -19,6 +19,7 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 
 import type { RelatedIntegration, RuleResponse } from '../../../../../common/api/detection_engine';
+import { isMigrationPrebuiltRule } from '../../../../../common/siem_migrations/rules/utils';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { EmptyMigration } from './empty_migration';
@@ -37,7 +38,7 @@ import {
   SiemMigrationRetryFilter,
 } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
-import { useRetryRuleMigration } from '../../service/hooks/use_retry_rules';
+import { useStartMigration } from '../../service/hooks/use_start_migration';
 import type { FilterOptions } from './filters';
 import { MigrationRulesFilter } from './filters';
 import { convertFilterOptions } from './helpers';
@@ -159,7 +160,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     const { mutateAsync: installMigrationRules } = useInstallMigrationRules(migrationId);
     const { mutateAsync: installTranslatedMigrationRules } =
       useInstallTranslatedMigrationRules(migrationId);
-    const { retryRuleMigration, isLoading: isRetryLoading } = useRetryRuleMigration(refetchData);
+    const { startMigration, isLoading: isRetryLoading } = useStartMigration(refetchData);
 
     const [isTableLoading, setTableLoading] = useState(false);
     const installSingleRule = useCallback(
@@ -209,8 +210,8 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     );
 
     const reprocessFailedRules = useCallback(async () => {
-      retryRuleMigration(migrationId, SiemMigrationRetryFilter.FAILED);
-    }, [migrationId, retryRuleMigration]);
+      startMigration(migrationId, SiemMigrationRetryFilter.FAILED);
+    }, [migrationId, startMigration]);
 
     const isLoading =
       isStatsLoading || isPrebuiltRulesLoading || isDataLoading || isTableLoading || isRetryLoading;
@@ -235,19 +236,21 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                 {i18n.INSTALL_WITHOUT_ENABLING_BUTTON_LABEL}
               </EuiButton>
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiButton
-                disabled={!canMigrationRuleBeInstalled}
-                onClick={() => {
-                  installSingleRule(ruleMigration, true);
-                  closeRulePreview();
-                }}
-                fill
-                data-test-subj="installAndEnableMigrationRuleFromFlyoutButton"
-              >
-                {i18n.INSTALL_AND_ENABLE_BUTTON_LABEL}
-              </EuiButton>
-            </EuiFlexItem>
+            {isMigrationPrebuiltRule(ruleMigration.elastic_rule) && (
+              <EuiFlexItem>
+                <EuiButton
+                  disabled={!canMigrationRuleBeInstalled}
+                  onClick={() => {
+                    installSingleRule(ruleMigration, true);
+                    closeRulePreview();
+                  }}
+                  fill
+                  data-test-subj="installAndEnableMigrationRuleFromFlyoutButton"
+                >
+                  {i18n.INSTALL_AND_ENABLE_BUTTON_LABEL}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         );
       },
