@@ -122,7 +122,7 @@ export function InternalDashboardTopNav({
    * Manage chrome visibility when dashboard is in print mode.
    */
   useEffect(() => {
-    if (!embedSettings) coreServices.chrome.setIsVisible(viewMode !== 'print');
+    if (!embedSettings && viewMode === 'print') coreServices.chrome.setIsVisible(false);
   }, [embedSettings, viewMode]);
 
   /**
