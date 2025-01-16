@@ -50,6 +50,7 @@ import { unsecuredActionsClientMock } from '@kbn/actions-plugin/server/unsecured
 import type { PluginStartContract as ActionPluginStartContract } from '@kbn/actions-plugin/server';
 import type { Mutable } from 'utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import { createTelemetryConfigProviderMock } from '../../../common/telemetry_config/mocks';
 import { createSavedObjectsClientFactoryMock } from '../services/saved_objects/saved_objects_client_factory.mocks';
 import { EndpointMetadataService } from '../services/metadata';
 import { createEndpointFleetServicesFactoryMock } from '../services/fleet/endpoint_fleet_services_factory.mocks';
@@ -216,6 +217,7 @@ export const createMockEndpointAppContextServiceStartContract =
       connectorActions: {
         getUnsecuredActionsClient: jest.fn().mockReturnValue(unsecuredActionsClientMock.create()),
       } as unknown as jest.Mocked<ActionPluginStartContract>,
+      telemetryConfigProvider: createTelemetryConfigProviderMock(),
     };
 
     return startContract;
