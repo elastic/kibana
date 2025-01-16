@@ -17,7 +17,6 @@ import {
   EuiPopoverFooter,
   EuiText,
   EuiButtonIcon,
-  EuiTextTruncate,
   EuiButtonEmpty,
   EuiCopy,
   useEuiTheme,
@@ -187,9 +186,19 @@ export function FieldBadgeWithActions({
       renderValue={renderValue}
       renderPopoverTrigger={({ popoverTriggerProps }) => (
         <EuiBadge {...popoverTriggerProps} color="hollow" iconType={icon} iconSide="left">
-          <EuiTextTruncate text={value} truncation="middle" width={120} />
+          {truncateMiddle(value)}
         </EuiBadge>
       )}
     />
   );
+}
+
+const MAX_LENGTH = 20;
+
+function truncateMiddle(value: string): string {
+  if (value.length < MAX_LENGTH) {
+    return value;
+  }
+  const halfLength = MAX_LENGTH / 2;
+  return `${value.slice(0, halfLength)}...${value.slice(-halfLength)}`;
 }
