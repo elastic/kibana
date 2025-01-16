@@ -201,7 +201,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
     <EuiModal
       onClose={() => onClose()}
       data-test-subj="editDataRetentionModal"
-      css={{ minWidth: isBulkEdit ? 650 : 450, maxWidth: 650 }}
+      css={{ width: 650 }}
     >
       <Form form={form} data-test-subj="editDataRetentionForm">
         <EuiModalHeader>
@@ -299,7 +299,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
               )
             }
             componentProps={{
-              fullWidth: isBulkEdit,
+              fullWidth: true,
               euiFieldProps: {
                 disabled:
                   formData.infiniteRetentionPeriod ||
