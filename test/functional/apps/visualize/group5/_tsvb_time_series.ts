@@ -9,6 +9,7 @@
 
 import expect from '@kbn/expect';
 
+import { KbnPalette, getKbnPalettes } from '@kbn/palettes';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -23,6 +24,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const log = getService('log');
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
+  const palettes = getKbnPalettes({ name: 'borealis', darkMode: false });
+  const elasticPalette = palettes.get(KbnPalette.Default);
 
   describe('visual builder', function describeIndexTests() {
     before(async () => {
@@ -308,7 +311,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           expect(areasCount).to.be(2);
           expect(legendNames).to.eql(['apache', 'nginx']);
-          expect(areaColors).to.eql(['#16c5c0', '#a6edea']); // borealis vis colors
+          // We need to point to the palette source here because of how visColors are set
+          // See https://github.com/elastic/kibana/issues/206380
+          expect(areaColors).to.eql(elasticPalette.colors().slice(0, 2));
           expect(firstAreaChartData).to.eql(firstAreaExpectedChartData);
           expect(secondAreaChartData).to.eql(secondAreaExpectedChartData);
         });
