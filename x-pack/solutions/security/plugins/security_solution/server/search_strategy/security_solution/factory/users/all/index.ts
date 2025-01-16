@@ -25,10 +25,9 @@ import type { AllUsersAggEsItem } from '../../../../../../common/search_strategy
 import { buildRiskScoreQuery } from '../../risk_score/all/query.risk_score.dsl';
 import type { RiskSeverity, UserRiskScore } from '../../../../../../common/search_strategy';
 import {
+  EntityType,
   buildUserNamesFilter,
-  getUserRiskIndex,
-  RiskScoreEntity,
-  RiskQueries,
+  getRiskIndex,
 } from '../../../../../../common/search_strategy';
 import { buildAssetCriticalityQuery } from '../../asset_criticality/query.asset_criticality.dsl';
 import { getAssetCriticalityIndex } from '../../../../../../common/entity_analytics/asset_criticality';
@@ -78,13 +77,7 @@ export const allUsers: SecuritySolutionFactory<UsersQueries.users> = {
     const edges = users.splice(cursorStart, querySize - cursorStart);
     const userNames = edges.map(({ name }) => name);
     const enhancedEdges = deps?.spaceId
-      ? await enhanceEdges(
-          edges,
-          userNames,
-          deps.spaceId,
-          deps.esClient,
-          options.isNewRiskScoreModuleInstalled
-        )
+      ? await enhanceEdges(edges, userNames, deps.spaceId, deps.esClient)
       : edges;
 
     return {
@@ -105,11 +98,10 @@ async function enhanceEdges(
   edges: User[],
   userNames: string[],
   spaceId: string,
-  esClient: IScopedClusterClient,
-  isNewRiskScoreModuleInstalled: boolean
+  esClient: IScopedClusterClient
 ): Promise<User[]> {
   const [riskByUserName, criticalityByUserName] = await Promise.all([
-    getUserRiskData(esClient, spaceId, userNames, isNewRiskScoreModuleInstalled).then(
+    getUserRiskData(esClient, spaceId, userNames).then(
       buildRecordFromAggs('user.name', 'user.risk.calculated_level')
     ),
     getUserCriticalityData(esClient, userNames).then(
@@ -129,16 +121,14 @@ async function enhanceEdges(
 export async function getUserRiskData(
   esClient: IScopedClusterClient,
   spaceId: string,
-  userNames: string[],
-  isNewRiskScoreModuleInstalled: boolean
+  userNames: string[]
 ) {
   try {
     const userRiskResponse = await esClient.asCurrentUser.search<UserRiskScore>(
       buildRiskScoreQuery({
-        defaultIndex: [getUserRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled)],
+        defaultIndex: [getRiskIndex(spaceId, true)],
         filterQuery: buildUserNamesFilter(userNames),
-        riskScoreEntity: RiskScoreEntity.user,
-        factoryQueryType: RiskQueries.usersRiskScore,
+        riskScoreEntity: EntityType.user,
       })
     );
     return userRiskResponse;

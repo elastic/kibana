@@ -26,6 +26,7 @@ jest.mock('./app_context');
 jest.mock('./agent_policy');
 jest.mock('./package_policy');
 jest.mock('./audit_logging');
+jest.mock('./secrets');
 
 const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
@@ -316,7 +317,7 @@ describe('Output Service', () => {
   } as unknown as ReturnType<typeof mockedPackagePolicyService.list>;
 
   beforeEach(() => {
-    mockedAgentPolicyService.getByIDs.mockResolvedValue([]);
+    mockedAgentPolicyService.getByIds.mockResolvedValue([]);
     mockedAgentPolicyService.list.mockClear();
     mockedPackagePolicyService.list.mockReset();
     mockedAgentPolicyService.hasAPMIntegration.mockClear();
@@ -334,7 +335,7 @@ describe('Output Service', () => {
   });
 
   afterEach(() => {
-    mockedAgentPolicyService.getByIDs.mockClear();
+    mockedAgentPolicyService.getByIds.mockClear();
   });
 
   describe('create', () => {
@@ -688,7 +689,7 @@ describe('Output Service', () => {
         mockedPackagePolicyService.list.mockResolvedValue(
           mockedPackagePolicyWithFleetServerResolvedValue
         );
-        mockedAgentPolicyService.getByIDs.mockResolvedValue(
+        mockedAgentPolicyService.getByIds.mockResolvedValue(
           (await mockedAgentPolicyWithFleetServerResolvedValue).items
         );
 
@@ -727,7 +728,7 @@ describe('Output Service', () => {
         mockedPackagePolicyService.list.mockResolvedValue(
           mockedPackagePolicyWithSyntheticsResolvedValue
         );
-        mockedAgentPolicyService.getByIDs.mockResolvedValue(
+        mockedAgentPolicyService.getByIds.mockResolvedValue(
           (await mockedAgentPolicyWithSyntheticsResolvedValue).items
         );
 
@@ -845,7 +846,7 @@ describe('Output Service', () => {
         mockedPackagePolicyService.list.mockResolvedValue(
           mockedPackagePolicyWithFleetServerResolvedValue
         );
-        mockedAgentPolicyService.getByIDs.mockResolvedValue(
+        mockedAgentPolicyService.getByIds.mockResolvedValue(
           (await mockedAgentPolicyWithFleetServerResolvedValue).items
         );
 
@@ -884,7 +885,7 @@ describe('Output Service', () => {
         mockedPackagePolicyService.list.mockResolvedValue(
           mockedPackagePolicyWithSyntheticsResolvedValue
         );
-        mockedAgentPolicyService.getByIDs.mockResolvedValue(
+        mockedAgentPolicyService.getByIds.mockResolvedValue(
           (await mockedAgentPolicyWithSyntheticsResolvedValue).items
         );
 

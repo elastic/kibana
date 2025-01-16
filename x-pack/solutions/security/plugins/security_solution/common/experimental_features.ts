@@ -184,12 +184,6 @@ export const allowedExperimentalValues = Object.freeze({
    */
   jamfDataInAnalyzerEnabled: true,
 
-  /*
-   * Disables discover esql tab within timeline
-   *
-   */
-  timelineEsqlTabDisabled: false,
-
   /**
    * Enables graph visualization in alerts flyout
    */
@@ -272,6 +266,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Asset Inventory feature
    */
   assetInventoryUXEnabled: false,
+
+  /**
+   * Enabled Microsoft Defender for  Endpoint actions client
+   */
+  responseActionsMSDefenderEndpointEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
