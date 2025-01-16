@@ -39,6 +39,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { type CriticalityLevelWithUnassigned } from '../../../common/entity_analytics/asset_criticality/types';
 import { useKibana } from '../../common/lib/kibana';
 
+import { AssetCriticalityBadge } from '../../entity_analytics/components/asset_criticality/asset_criticality_badge';
 import { EmptyState } from '../components/empty_state';
 import { AdditionalControls } from '../components/additional_controls';
 
@@ -96,7 +97,7 @@ const customCellRenderer = (rows: DataTableRecord[]) => ({
     const criticality = rows[rowIndex].flattened[
       'asset.criticality'
     ] as CriticalityLevelWithUnassigned;
-    return criticality;
+    return <AssetCriticalityBadge criticalityLevel={criticality} />;
   },
 });
 
