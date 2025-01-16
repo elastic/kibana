@@ -12,6 +12,8 @@ import { indexNameToDataStreamParts, mapPercentageToQuality } from '../utils';
 import { Integration } from './integration';
 import { DataStreamStatType } from './types';
 
+type QualityStat = Omit<DataStreamDocsStat, 'dataset'> & { percentage: number };
+
 export class DataStreamStat {
   rawName: string;
   type: DataStreamType;
@@ -26,14 +28,8 @@ export class DataStreamStat {
   integration?: Integration;
   quality: QualityIndicators;
   docsInTimeRange?: number;
-  degradedDocs: {
-    percentage: number;
-    count: number;
-  };
-  failedDocs: {
-    percentage: number;
-    count: number;
-  };
+  degradedDocs: QualityStat;
+  failedDocs: QualityStat;
 
   private constructor(dataStreamStat: DataStreamStat) {
     this.rawName = dataStreamStat.rawName;
@@ -75,29 +71,37 @@ export class DataStreamStat {
     return new DataStreamStat(dataStreamStatProps);
   }
 
-  public static fromDegradedDocStat({
+  public static fromQualityStats({
+    datasetName,
     degradedDocStat,
+    failedDocStat,
     datasetIntegrationMap,
     totalDocs,
   }: {
-    degradedDocStat: DataStreamDocsStat & { percentage: number };
+    datasetName: string;
+    degradedDocStat: QualityStat;
+    failedDocStat: QualityStat;
     datasetIntegrationMap: Record<string, { integration: Integration; title: string }>;
     totalDocs: number;
   }) {
-    const { type, dataset, namespace } = indexNameToDataStreamParts(degradedDocStat.dataset);
+    const { type, dataset, namespace } = indexNameToDataStreamParts(datasetName);
 
     const dataStreamStatProps = {
-      rawName: degradedDocStat.dataset,
+      rawName: datasetName,
       type,
       name: dataset,
       title: datasetIntegrationMap[dataset]?.title || dataset,
       namespace,
       integration: datasetIntegrationMap[dataset]?.integration,
-      quality: mapPercentageToQuality(degradedDocStat.percentage),
+      quality: mapPercentageToQuality([degradedDocStat.percentage, failedDocStat.percentage]),
       docsInTimeRange: totalDocs,
       degradedDocs: {
         percentage: degradedDocStat.percentage,
         count: degradedDocStat.count,
+      },
+      failedDocs: {
+        percentage: failedDocStat.percentage,
+        count: failedDocStat.count,
       },
     };
 
@@ -107,9 +111,5 @@ export class DataStreamStat {
   public static calculateFilteredSize({ sizeBytes, totalDocs, docsInTimeRange }: DataStreamStat) {
     const avgDocSize = sizeBytes && totalDocs ? sizeBytes / totalDocs : 0;
     return avgDocSize * (docsInTimeRange ?? 0);
-  }
-
-  public static calculatePercentage({ totalDocs, count }: { totalDocs?: number; count?: number }) {
-    return totalDocs && count ? (count / totalDocs) * 100 : 0;
   }
 }

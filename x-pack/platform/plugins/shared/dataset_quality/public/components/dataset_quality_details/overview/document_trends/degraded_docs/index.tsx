@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiAccordion,
   EuiButtonIcon,
@@ -22,23 +20,25 @@ import {
   OnTimeChangeProps,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { css } from '@emotion/react';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram-plugin/public';
+import React, { useCallback, useEffect, useState } from 'react';
+import { DEGRADED_DOCS_QUERY } from '../../../../../../common/constants';
 import {
   discoverAriaText,
   openInDiscoverText,
   overviewDegradedDocsText,
 } from '../../../../../../common/translations';
-import { DegradedDocsChart } from './degraded_docs_chart';
 import {
   useDatasetDetailsRedirectLinkTelemetry,
   useDatasetQualityDetailsState,
   useDegradedDocsChart,
   useRedirectLink,
 } from '../../../../../hooks';
-import { _IGNORED } from '../../../../../../common/es_fields';
 import { NavigationSource } from '../../../../../services/telemetry';
+import { DegradedDocsChart } from './degraded_docs_chart';
 
 const degradedDocsTooltip = (
   <FormattedMessage
@@ -69,14 +69,14 @@ export default function DegradedDocs({ lastReloadTime }: { lastReloadTime: numbe
   );
 
   const { sendTelemetry } = useDatasetDetailsRedirectLinkTelemetry({
-    query: { language: 'kuery', query: `${_IGNORED}: *` },
+    query: { language: 'kuery', query: DEGRADED_DOCS_QUERY },
     navigationSource: NavigationSource.Trend,
   });
 
   const degradedDocLinkLogsExplorer = useRedirectLink({
     dataStreamStat: datasetDetails,
     timeRangeConfig: timeRange,
-    query: { language: 'kuery', query: `${_IGNORED}: *` },
+    query: { language: 'kuery', query: DEGRADED_DOCS_QUERY },
     breakdownField: breakdownDataViewField?.name,
     sendTelemetry,
   });

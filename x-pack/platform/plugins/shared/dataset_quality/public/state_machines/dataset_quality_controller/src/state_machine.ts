@@ -24,6 +24,7 @@ import { DEFAULT_CONTEXT } from './defaults';
 import {
   fetchDatasetStatsFailedNotifier,
   fetchDegradedStatsFailedNotifier,
+  fetchFailedStatsFailedNotifier,
   fetchIntegrationsFailedNotifier,
   fetchTotalDocsFailedNotifier,
 } from './notifications';
@@ -122,6 +123,41 @@ export const createPureDatasetQualityControllerStateMachine = (
                 },
                 REFRESH_DATA: {
                   target: 'degradedDocs.fetching',
+                },
+              },
+            },
+            failedDocs: {
+              initial: 'fetching',
+              states: {
+                fetching: {
+                  invoke: {
+                    src: 'loadFailedDocs',
+                    onDone: {
+                      target: 'loaded',
+                      actions: ['storeFailedDocStats', 'storeDatasets'],
+                    },
+                    onError: [
+                      {
+                        target: 'unauthorized',
+                        cond: 'checkIfActionForbidden',
+                      },
+                      {
+                        target: 'loaded',
+                        actions: ['notifyFetchFailedStatsFailed'],
+                      },
+                    ],
+                  },
+                },
+                loaded: {},
+                unauthorized: { type: 'final' },
+              },
+              on: {
+                UPDATE_TIME_RANGE: {
+                  target: 'failedDocs.fetching',
+                  actions: ['storeTimeRange'],
+                },
+                REFRESH_DATA: {
+                  target: 'failedDocs.fetching',
                 },
               },
             },
@@ -381,6 +417,9 @@ export const createPureDatasetQualityControllerStateMachine = (
         storeDegradedDocStats: assign((_context, event: DoneInvokeEvent<DataStreamDocsStat[]>) => ({
           degradedDocStats: event.data,
         })),
+        storeFailedDocStats: assign((_context, event: DoneInvokeEvent<DataStreamDocsStat[]>) => ({
+          failedDocStats: event.data,
+        })),
         storeNonAggregatableDatasets: assign(
           (_context, event: DoneInvokeEvent<NonAggregatableDatasets>) => ({
             nonAggregatableDatasets: event.data.datasets,
@@ -404,6 +443,7 @@ export const createPureDatasetQualityControllerStateMachine = (
                 datasets: generateDatasets(
                   context.dataStreamStats,
                   context.degradedDocStats,
+                  context.failedDocStats,
                   context.integrations,
                   context.totalDocsStats
                 ),
@@ -447,6 +487,8 @@ export const createDatasetQualityControllerStateMachine = ({
         fetchIntegrationsFailedNotifier(toasts, event.data),
       notifyFetchTotalDocsFailed: (_context, event: DoneInvokeEvent<Error>, meta) =>
         fetchTotalDocsFailedNotifier(toasts, event.data, meta),
+      notifyFetchFailedStatsFailed: (_context, event: DoneInvokeEvent<Error>) =>
+        fetchFailedStatsFailedNotifier(toasts, event.data),
     },
     services: {
       loadDataStreamStats: (context, _event) =>
@@ -483,6 +525,16 @@ export const createDatasetQualityControllerStateMachine = ({
         const { startDate: start, endDate: end } = getDateISORange(context.filters.timeRange);
 
         return dataStreamStatsClient.getDataStreamsDegradedStats({
+          types: context.filters.types as DataStreamType[],
+          datasetQuery: context.filters.query,
+          start,
+          end,
+        });
+      },
+      loadFailedDocs: (context) => {
+        const { startDate: start, endDate: end } = getDateISORange(context.filters.timeRange);
+
+        return dataStreamStatsClient.getDataStreamsFailedStats({
           types: context.filters.types as DataStreamType[],
           datasetQuery: context.filters.query,
           start,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { _IGNORED } from './es_fields';
 import { DataStreamType, QualityIndicators } from './types';
 
 export const DATASET_QUALITY_APP_ID = 'dataset_quality';
@@ -43,5 +44,8 @@ export const UNKOWN_FIELD_PLACEHOLDER = '<unkwon>';
 
 export const KNOWN_TYPES: DataStreamType[] = ['logs', 'metrics', 'traces', 'synthetics'];
 
+export const DEGRADED_DOCS_QUERY = `${_IGNORED}: *`;
+
 export const ALL_PATTERNS_SELECTOR = '::*';
 export const FAILURE_STORE_SELECTOR = '::failures';
+export const DATA_SELECTOR = '::data';
