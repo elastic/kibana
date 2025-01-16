@@ -15,10 +15,8 @@ import {
   ContentReferencesStore,
   esqlQueryReferenceFactory,
   IndexEntry,
-  knowledgeBaseReferenceFactory,
 } from '@kbn/elastic-assistant-common';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { contentReferenceString } from '@kbn/elastic-assistant-common';
 
 export const isModelAlreadyExistsError = (error: Error) => {
   return (

@@ -24,7 +24,7 @@ export const contentReferenceComponentFactory = ({
   contentReferences,
   contentReferencesVisible,
 }: ContentReferenceComponentFactory) => {
-  return (contentReferenceNode: ContentReferenceNode): React.ReactNode => {
+  const ContentReferenceComponent = (contentReferenceNode: ContentReferenceNode): React.ReactNode => {
     if (!contentReferencesVisible) return null;
 
     const defaultNode = (
@@ -69,10 +69,14 @@ export const contentReferenceComponentFactory = ({
             productDocumentationContentReference={contentReference}
           />
         );
-        case 'EsqlQuery':
-        return <EsqlQueryReference contentReferenceNode={contentReferenceNode} esqlContentReference={contentReference}/>
+      case 'EsqlQuery':
+        return <EsqlQueryReference contentReferenceNode={contentReferenceNode} esqlContentReference={contentReference} />
       default:
         return defaultNode;
     }
   };
+
+  ContentReferenceComponent.displayName = 'ContentReferenceComponent'
+
+  return ContentReferenceComponent
 };

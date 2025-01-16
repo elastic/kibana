@@ -17,7 +17,7 @@ interface Props {
   securityAlertsPageContentReference: SecurityAlertsPageContentReference;
 }
 
-export const SecurityAlertsPageReference: React.FC<Props> = ({ contentReferenceNode }) => {
+export const SecurityAlertsPageReference: React.FC<Props> = ({ contentReferenceNode, securityAlertsPageContentReference }) => {
   return (
     <PopoverReference contentReferenceCount={contentReferenceNode.contentReferenceCount}>
       <EuiLink href={`/app/security/alerts`} target="_blank">

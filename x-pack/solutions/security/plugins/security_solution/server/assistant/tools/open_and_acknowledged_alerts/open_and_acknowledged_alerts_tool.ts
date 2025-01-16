@@ -6,7 +6,6 @@
  */
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { Replacements } from '@kbn/elastic-assistant-common';
 import {
   alertReferenceFactory,
   getAnonymizedValue,
@@ -14,12 +13,13 @@ import {
   getRawDataOrDefault,
   sizeIsOutOfRange,
   transformRawData,
+  contentReferenceBlock,
+  Replacements
 } from '@kbn/elastic-assistant-common';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import { contentReferenceBlock } from '@kbn/elastic-assistant-common';
 import { APP_UI_ID } from '../../../../common';
 
 export interface OpenAndAcknowledgedAlertsToolParams extends AssistantToolParams {
