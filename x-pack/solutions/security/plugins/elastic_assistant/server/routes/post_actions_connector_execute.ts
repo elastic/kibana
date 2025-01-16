@@ -16,7 +16,7 @@ import {
   ExecuteConnectorRequestBody,
   Message,
   Replacements,
-  prunedContentReferences
+  prunedContentReferences,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';

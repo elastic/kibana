@@ -24,7 +24,9 @@ export const contentReferenceComponentFactory = ({
   contentReferences,
   contentReferencesVisible,
 }: ContentReferenceComponentFactory) => {
-  const ContentReferenceComponent = (contentReferenceNode: ContentReferenceNode): React.ReactNode => {
+  const ContentReferenceComponent = (
+    contentReferenceNode: ContentReferenceNode
+  ): React.ReactNode => {
     if (!contentReferencesVisible) return null;
 
     const defaultNode = (
@@ -38,7 +40,7 @@ export const contentReferenceComponentFactory = ({
 
     const contentReference = contentReferences[contentReferenceNode.contentReferenceId];
 
-    if (contentReference === undefined) return defaultNode
+    if (contentReference === undefined) return defaultNode;
 
     switch (contentReference.type) {
       case 'KnowledgeBaseEntry':
@@ -70,13 +72,18 @@ export const contentReferenceComponentFactory = ({
           />
         );
       case 'EsqlQuery':
-        return <EsqlQueryReference contentReferenceNode={contentReferenceNode} esqlContentReference={contentReference} />
+        return (
+          <EsqlQueryReference
+            contentReferenceNode={contentReferenceNode}
+            esqlContentReference={contentReference}
+          />
+        );
       default:
         return defaultNode;
     }
   };
 
-  ContentReferenceComponent.displayName = 'ContentReferenceComponent'
+  ContentReferenceComponent.displayName = 'ContentReferenceComponent';
 
-  return ContentReferenceComponent
+  return ContentReferenceComponent;
 };

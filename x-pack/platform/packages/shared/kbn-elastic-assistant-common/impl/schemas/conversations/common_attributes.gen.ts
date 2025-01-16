@@ -176,7 +176,7 @@ export const ContentReference = z.union([
   SecurityAlertContentReference,
   SecurityAlertsPageContentReference,
   ProductDocumentationContentReference,
-  EsqlContentReference
+  EsqlContentReference,
 ]);
 export type ContentReference = z.infer<typeof ContentReference>;
 export const ContentReferences = z.record(z.string(), ContentReference);

@@ -29,7 +29,6 @@ export {
   alertsPageReferenceFactory,
   productDocumentationReferenceFactory,
   esqlQueryReferenceFactory,
-  
   contentReferenceString,
   contentReferenceBlock,
   removeContentReferences,

@@ -217,23 +217,27 @@ export const getStructuredToolForIndexEntry = ({
         const result = await esClient.search(params);
 
         const kbDocs = result.hits.hits.map((hit) => {
-
-          const esqlQuery = `FROM ${hit._index} ${hit._id ? `METADATA _id\n | WHERE _id == "${hit._id}"` : ''}`
+          const esqlQuery = `FROM ${hit._index} ${
+            hit._id ? `METADATA _id\n | WHERE _id == "${hit._id}"` : ''
+          }`;
 
           const esqlQueryReference = contentReferencesStore.add((p) =>
             esqlQueryReferenceFactory(p.id, esqlQuery)
           );
 
           if (indexEntry.outputFields && indexEntry.outputFields.length > 0) {
-            return indexEntry.outputFields.reduce((prev, field) => {
-              // @ts-expect-error
-              return { ...prev, [field]: hit._source[field] };
-            }, { citation: contentReferenceBlock(esqlQueryReference) });
+            return indexEntry.outputFields.reduce(
+              (prev, field) => {
+                // @ts-expect-error
+                return { ...prev, [field]: hit._source[field] };
+              },
+              { citation: contentReferenceBlock(esqlQueryReference) }
+            );
           }
 
           return {
             text: hit.highlight?.[indexEntry.field].join('\n --- \n'),
-            citation: contentReferenceBlock(esqlQueryReference)
+            citation: contentReferenceBlock(esqlQueryReference),
           };
         });
 
@@ -245,7 +249,7 @@ export const getStructuredToolForIndexEntry = ({
           kbDocs
         )}###`;
       } catch (e) {
-        console.log(e)
+        console.log(e);
         logger.error(`Error performing IndexEntry KB Similarity Search: ${e.message}`);
         return `I'm sorry, but I was unable to find any information in the knowledge base. Perhaps this error would be useful to deliver to the user. Be sure to print it below your response and in a codeblock so it is rendered nicely: ${e.message}`;
       }
