@@ -58,6 +58,7 @@ export interface ActivePanel {
 
 export interface GridLayoutStateManager {
   gridLayout$: BehaviorSubject<GridLayoutData>;
+  stableGridLayout$: BehaviorSubject<GridLayoutData>;
   expandedPanelId$: BehaviorSubject<string | undefined>;
   isMobileView$: BehaviorSubject<boolean>;
   accessMode$: BehaviorSubject<GridAccessMode>;
@@ -78,7 +79,7 @@ export interface PanelInteractionEvent {
   /**
    * The type of interaction being performed.
    */
-  type: 'drag' | 'resize';
+  type: 'drag' | 'resize' | 'keyboardDrag' | 'keyboardResize';
 
   /**
    * The id of the panel being interacted with.
@@ -128,3 +129,8 @@ export type UserMouseEvent = MouseEvent | React.MouseEvent<HTMLButtonElement, Mo
 export type UserTouchEvent = TouchEvent | React.TouchEvent<HTMLButtonElement>;
 
 export type UserInteractionEvent = React.UIEvent<HTMLElement> | Event;
+
+export type InteractionStart = (
+  type: 'resize' | 'drag' | 'keyboardDrag' | 'keyboardResize' | 'drop',
+  e: UserMouseEvent | React.KeyboardEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>
+) => void;

@@ -16,10 +16,11 @@ import { css } from '@emotion/react';
 
 import { DragPreview } from '../drag_preview';
 import { GridPanel } from '../grid_panel';
-import { GridLayoutStateManager, PanelInteractionEvent, UserInteractionEvent } from '../types';
+import { GridLayoutStateManager, UserInteractionEvent } from '../types';
 import { getKeysInOrder } from '../utils/resolve_grid_row';
-import { isMouseEvent, isTouchEvent } from '../utils/sensors';
 import { GridRowHeader } from './grid_row_header';
+import { isTouchEvent, isMouseEvent } from '../utils/sensors';
+import { onKeyDown } from '../keyboard';
 
 export interface GridRowProps {
   rowIndex: number;
@@ -27,12 +28,11 @@ export interface GridRowProps {
     panelId: string,
     setDragHandles?: (refs: Array<HTMLElement | null>) => void
   ) => React.ReactNode;
-  setInteractionEvent: (interactionData?: PanelInteractionEvent) => void;
   gridLayoutStateManager: GridLayoutStateManager;
 }
 
 export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
-  ({ rowIndex, renderPanelContents, setInteractionEvent, gridLayoutStateManager }, gridRef) => {
+  ({ rowIndex, renderPanelContents, gridLayoutStateManager }, gridRef) => {
     const currentRow = gridLayoutStateManager.gridLayout$.value[rowIndex];
 
     const [panelIds, setPanelIds] = useState<string[]>(Object.keys(currentRow.panels));
@@ -167,7 +167,8 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
                 if (!panelRef) return;
 
                 if (type === 'drop') {
-                  setInteractionEvent(undefined);
+                  gridLayoutStateManager.activePanel$.next(undefined);
+                  gridLayoutStateManager.interactionEvent$.next(undefined);
                   /**
                    * Ensure the row re-renders to reflect the new panel order after a drag-and-drop interaction, since
                    * the order of rendered panels need to be aligned with how they are displayed in the grid for accessibility
@@ -176,18 +177,46 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
                   setPanelIdsInOrder(
                     getKeysInOrder(gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels)
                   );
-                } else {
+                } else if (type === 'drag' || type === 'resize') {
+                  // set the stableGridLayout$ for the ability to cancel - it's used only for keyboard so maybe not needed here
+                  gridLayoutStateManager.stableGridLayout$.next(
+                    cloneDeep(gridLayoutStateManager.gridLayout$.getValue())
+                  );
                   const panelRect = panelRef.getBoundingClientRect();
                   const pointerOffsets = getPointerOffsets(e, panelRect);
 
-                  setInteractionEvent({
+                  gridLayoutStateManager.interactionEvent$.next({
                     type,
                     id: panelId,
                     panelDiv: panelRef,
                     targetRowIndex: rowIndex,
                     pointerOffsets,
                   });
+                } else if (e.type === 'keydown') {
+                  onKeyDown(e, gridLayoutStateManager, {
+                    rowIndex,
+                    panelId,
+                    panelRef,
+                  });
                 }
+
+                // }
+                // if (type === 'drag' || type === 'resize') {
+                //   // set the stableGridLayout$ for the ability to cancel - it's used only for keyboard so maybe not needed here
+                //   gridLayoutStateManager.stableGridLayout$.next(
+                //     cloneDeep(gridLayoutStateManager.gridLayout$.getValue())
+                //   );
+                //   gridLayoutStateManager.interactionEvent$.next({
+                //     type,
+                //     id: panelId,
+                //     panelDiv: panelRef,
+                //     targetRowIndex: rowIndex,
+                //     pointerOffsets,
+                //   });
+                // }
+                // if (e.type === 'keydown') {
+                //   onKeyDown(e, gridLayoutStateManager, {
+                // }
               }}
               ref={(element) => {
                 if (!gridLayoutStateManager.panelRefs.current[rowIndex]) {
@@ -200,7 +229,7 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
         }),
         {}
       );
-    }, [panelIds, gridLayoutStateManager, renderPanelContents, rowIndex, setInteractionEvent]);
+    }, [panelIds, gridLayoutStateManager, renderPanelContents, rowIndex]);
 
     return (
       <div

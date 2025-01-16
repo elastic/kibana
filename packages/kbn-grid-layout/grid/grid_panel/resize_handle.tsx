@@ -7,18 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import { transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { UserInteractionEvent, PanelInteractionEvent } from '../types';
+import { InteractionStart } from '../types';
 
-export const ResizeHandle = ({
-  interactionStart,
-}: {
-  interactionStart: (type: PanelInteractionEvent['type'] | 'drop', e: UserInteractionEvent) => void;
-}) => {
+export const ResizeHandle = ({ interactionStart }: { interactionStart: InteractionStart }) => {
   const { euiTheme } = useEuiTheme();
   return (
     <button

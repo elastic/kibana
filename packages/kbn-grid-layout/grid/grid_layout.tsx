@@ -152,12 +152,6 @@ export const GridLayout = ({
           rowIndex={rowIndex}
           renderPanelContents={renderPanelContents}
           gridLayoutStateManager={gridLayoutStateManager}
-          setInteractionEvent={(nextInteractionEvent) => {
-            if (!nextInteractionEvent) {
-              gridLayoutStateManager.activePanel$.next(undefined);
-            }
-            gridLayoutStateManager.interactionEvent$.next(nextInteractionEvent);
-          }}
           ref={(element: HTMLDivElement | null) =>
             (gridLayoutStateManager.rowRefs.current[rowIndex] = element)
           }
