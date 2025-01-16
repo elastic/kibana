@@ -41,7 +41,7 @@ export class CreateSLO {
     private logger: Logger,
     private spaceId: string,
     private basePath: IBasePath,
-    private userId: string
+    private username: string
   ) {}
 
   public async execute(params: CreateSLOParams): Promise<CreateSLOResponse> {
@@ -218,8 +218,8 @@ export class CreateSLO {
       tags: params.tags ?? [],
       createdAt: now,
       updatedAt: now,
-      createdBy: this.userId,
-      updatedBy: this.userId,
+      createdBy: this.username,
+      updatedBy: this.username,
       groupBy: !!params.groupBy ? params.groupBy : ALL_VALUE,
       version: SLO_MODEL_VERSION,
     };

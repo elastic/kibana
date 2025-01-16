@@ -155,7 +155,7 @@ const inspectSLORoute = createSloServerRoute({
     const core = await context.core;
     const scopedClusterClient = core.elasticsearch.client;
     const esClient = core.elasticsearch.client.asCurrentUser;
-    const userId = core.security.authc.getCurrentUser()?.username!;
+    const username = core.security.authc.getCurrentUser()?.username!;
     const soClient = core.savedObjects.client;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
@@ -185,7 +185,7 @@ const inspectSLORoute = createSloServerRoute({
       logger,
       spaceId,
       basePath,
-      userId
+      username
     );
 
     return await executeWithErrorHandler(() => createSLO.inspect(params.body));
