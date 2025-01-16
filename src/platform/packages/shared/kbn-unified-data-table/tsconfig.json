@@ -43,6 +43,7 @@
     "@kbn/core-notifications-browser",
     "@kbn/core-capabilities-browser-mocks",
     "@kbn/sort-predicates",
-    "@kbn/visualization-utils"
+    "@kbn/visualization-utils",
+    "@kbn/react-kibana-context-render"
   ]
 }
