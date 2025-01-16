@@ -59,31 +59,41 @@ export function HeaderTitle({ isLoading, slo }: Props) {
             &nbsp;
             {moment(slo.createdAt).format('ll')}
           </EuiText>
-        </EuiFlexItem>{' '}
-        |
-        <EuiFlexItem grow={false}>
-          <EuiText color="subdued" size="xs">
-            <strong>
-              {i18n.translate('xpack.slo.sloDetails.headerTitle.createBy', {
-                defaultMessage: 'Created by',
-              })}
-            </strong>
-            &nbsp;
-            {slo.createdBy}
-          </EuiText>
-        </EuiFlexItem>{' '}
-        |
-        <EuiFlexItem grow={false}>
-          <EuiText color="subdued" size="xs">
-            <strong>
-              {i18n.translate('xpack.slo.sloDetails.headerTitle.updatedBy', {
-                defaultMessage: 'Last updated by',
-              })}
-            </strong>
-            &nbsp;
-            {slo.updatedBy}
-          </EuiText>
         </EuiFlexItem>
+        {slo.createdBy && (
+          <>
+            {' '}
+            |
+            <EuiFlexItem grow={false}>
+              <EuiText color="subdued" size="xs">
+                <strong>
+                  {i18n.translate('xpack.slo.sloDetails.headerTitle.createBy', {
+                    defaultMessage: 'Created by',
+                  })}
+                </strong>
+                &nbsp;
+                {slo.createdBy}
+              </EuiText>
+            </EuiFlexItem>
+          </>
+        )}
+        {slo.updatedBy && (
+          <>
+            {' '}
+            |
+            <EuiFlexItem grow={false}>
+              <EuiText color="subdued" size="xs">
+                <strong>
+                  {i18n.translate('xpack.slo.sloDetails.headerTitle.updatedBy', {
+                    defaultMessage: 'Last updated by',
+                  })}
+                </strong>
+                &nbsp;
+                {slo.updatedBy}
+              </EuiText>
+            </EuiFlexItem>
+          </>
+        )}
       </EuiFlexGroup>
       <SLOGroupings slo={slo} />
     </EuiFlexGroup>
