@@ -192,7 +192,7 @@ export const useGridLayoutEvents = ({
           e,
           (ev) => {
             onPointerMove(ev);
-            handleAutoscroll(scrollInterval, pointerClientPixel.current.y);
+            handleAutoscroll(ev, scrollInterval);
           },
           () => {
             stopAutoScroll(scrollInterval);
