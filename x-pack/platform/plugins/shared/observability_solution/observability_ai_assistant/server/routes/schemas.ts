@@ -99,8 +99,11 @@ export const chatCompletePublicQuerySchema = z
   .object({
     format: z
       .enum(['default', 'openai'])
+      .default('default')
       .optional()
-      .describe('Response format type. If omitted, "default" is used.'),
+      .describe(
+        'Response format type. Values: "default", "openai".  If omitted, "default" is used.'
+      ),
   })
   .optional();
 
