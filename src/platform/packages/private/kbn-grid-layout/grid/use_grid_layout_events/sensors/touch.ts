@@ -7,12 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UserMouseEvent, UserTouchEvent } from '../types';
+export type UserTouchEvent = TouchEvent | React.TouchEvent<HTMLButtonElement>;
 
 export const isTouchEvent = (e: Event | React.UIEvent<HTMLElement>): e is UserTouchEvent => {
   return 'touches' in e;
 };
 
-export const isMouseEvent = (e: Event | React.UIEvent<HTMLElement>): e is UserMouseEvent => {
-  return 'clientX' in e;
+export const attachTouchEvents = (
+  e: UserTouchEvent,
+  onMove: (e: Event) => void,
+  onDragEnd: () => void
+) => {
+  if (e.touches.length > 1) return;
+
+  const onEnd = () => {
+    e.target!.removeEventListener('touchmove', onMove);
+    onDragEnd();
+  };
+
+  e.target!.addEventListener('touchmove', onMove, { passive: false });
+  e.target!.addEventListener('touchend', onEnd, { once: true });
 };

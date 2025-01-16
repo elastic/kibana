@@ -123,8 +123,4 @@ export interface PanelPlacementSettings {
 
 export type GridAccessMode = 'VIEW' | 'EDIT';
 
-export type UserMouseEvent = MouseEvent | React.MouseEvent<HTMLButtonElement, MouseEvent>;
-
-export type UserTouchEvent = TouchEvent | React.TouchEvent<HTMLButtonElement>;
-
 export type UserInteractionEvent = React.UIEvent<HTMLElement> | Event;

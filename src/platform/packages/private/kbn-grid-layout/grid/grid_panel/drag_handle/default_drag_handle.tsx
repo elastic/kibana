@@ -10,12 +10,12 @@ import React from 'react';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { UserMouseEvent, UserTouchEvent } from '../../types';
+import { UserInteractionEvent } from '../../types';
 
 export const DefaultDragHandle = ({
   onDragStart,
 }: {
-  onDragStart: (e: UserMouseEvent | UserTouchEvent) => void;
+  onDragStart: (e: UserInteractionEvent) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
 
