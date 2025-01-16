@@ -195,17 +195,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       .expect(204, '');
 
   const defineSearchSourceAlert = async (alertName: string) => {
-    await retry.waitFor('rule name value is correct', async () => {
-      await testSubjects.setValue('ruleNameInput', alertName);
-      const ruleName = await testSubjects.getAttribute('ruleNameInput', 'value');
-      return ruleName === alertName;
-    });
     await testSubjects.click('thresholdPopover');
     await testSubjects.setValue('alertThresholdInput0', '1');
 
     await testSubjects.click('forLastExpression');
     await testSubjects.setValue('timeWindowSizeNumber', '30');
 
+    await testSubjects.click('ruleFormStep-actions');
     await retry.waitFor('actions accordion to exist', async () => {
       await testSubjects.click('.index-alerting-ActionTypeSelectOption');
       return await testSubjects.exists('alertActionAccordion-0');
@@ -218,6 +214,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       "alert_id": "{{alert.id}}",
       "context_link": "{{context.link}}"
     }`);
+
+    await testSubjects.click('ruleFormStep-details');
+    await retry.waitFor('rule name value is correct', async () => {
+      await testSubjects.setValue('ruleDetailsNameInput', alertName);
+      const ruleName = await testSubjects.getAttribute('ruleDetailsNameInput', 'value');
+      return ruleName === alertName;
+    });
   };
 
   const openDiscoverAlertFlyout = async () => {
@@ -458,7 +461,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return (await dataViewSelector.getVisibleText()) === 'DATA VIEW\nsearch-source-alert-o*';
       });
 
-      await testSubjects.click('saveRuleButton');
+      await testSubjects.click('ruleFormStep-details');
+      await testSubjects.click('ruleFlyoutFooterSaveButton');
 
       const errorElem = await testSubjects.find('esQueryAlertExpressionError');
       const errorText = await errorElem.getVisibleText();
@@ -484,9 +488,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return (await dataViewSelector.getVisibleText()) === `DATA VIEW\n${SOURCE_DATA_VIEW}`;
       });
 
-      await testSubjects.click('saveRuleButton');
+      await testSubjects.click('ruleFormStep-details');
+      await testSubjects.click('ruleFlyoutFooterSaveButton');
       await retry.try(async () => {
-        await testSubjects.missingOrFail('saveRuleButton');
+        await testSubjects.missingOrFail('ruleFlyoutFooterSaveButton');
       });
 
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -594,6 +599,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // create an alert
       await openDiscoverAlertFlyout();
       await defineSearchSourceAlert('test-adhoc-alert');
+      await testSubjects.click('ruleFormStep-details');
       await testSubjects.click('saveRuleButton');
       await retry.try(async () => {
         await testSubjects.missingOrFail('saveRuleButton');
@@ -670,15 +676,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await retry.waitFor('rule name value is correct', async () => {
-        let ruleName;
-        // Rule name input is different in serverless
-        if (await testSubjects.exists('ruleNameInput')) {
-          await testSubjects.setValue('ruleNameInput', newAlert);
-          ruleName = await testSubjects.getAttribute('ruleNameInput', 'value');
-        } else {
-          await testSubjects.setValue('ruleDetailsNameInput', newAlert);
-          ruleName = await testSubjects.getAttribute('ruleDetailsNameInput', 'value');
-        }
+        await testSubjects.click('ruleFormStep-details');
+
+        await testSubjects.setValue('ruleDetailsNameInput', newAlert);
+        const ruleName = await testSubjects.getAttribute('ruleDetailsNameInput', 'value');
+
         return ruleName === newAlert;
       });
 
@@ -702,9 +704,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await comboBox.set('ruleFormConsumerSelect', 'Stack Rules');
       }
 
+      await testSubjects.click('ruleFormStep-details');
       // Save rule button is different in serverless
-      if (await testSubjects.exists('saveRuleButton')) {
-        await testSubjects.click('saveRuleButton');
+      if (await testSubjects.exists('ruleFlyoutFooterSaveButton')) {
+        await testSubjects.click('ruleFlyoutFooterSaveButton');
       } else {
         await testSubjects.click('rulePageFooterSaveButton');
       }

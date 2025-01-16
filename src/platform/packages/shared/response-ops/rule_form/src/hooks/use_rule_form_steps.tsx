@@ -153,12 +153,14 @@ const useCommonRuleFormSteps = ({
           : RULE_FORM_PAGE_RULE_DEFINITION_TITLE,
         status: ruleDefinitionStatus,
         children: <RuleDefinition />,
+        'data-test-subj': 'ruleFormStep-definition',
       },
       [RuleFormStepId.ACTIONS]: canReadConnectors
         ? {
             title: RULE_FORM_PAGE_RULE_ACTIONS_TITLE,
             status: actionsStatus,
             children: <RuleActions />,
+            'data-test-subj': 'ruleFormStep-actions',
           }
         : null,
       [RuleFormStepId.DETAILS]: {
@@ -167,6 +169,7 @@ const useCommonRuleFormSteps = ({
           : RULE_FORM_PAGE_RULE_DETAILS_TITLE,
         status: ruleDetailsStatus,
         children: <RuleDetails />,
+        'data-test-subj': 'ruleFormStep-details',
       },
     }),
     [ruleDefinitionStatus, canReadConnectors, actionsStatus, ruleDetailsStatus, shortTitles]

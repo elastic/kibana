@@ -65,7 +65,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     await page.waitForSelector('text=Monitor status rule');
     await page.getByTestId('intervalInputUnit').selectOption('second');
     await page.getByTestId('intervalInput').fill('20');
-    await page.click(byTestId('saveEditedRuleButton'));
+    await page.click(byTestId('ruleFlyoutFooterCancelButton'));
     await page.waitForSelector("text=Updated 'Synthetics status internal rule'");
   });
 
