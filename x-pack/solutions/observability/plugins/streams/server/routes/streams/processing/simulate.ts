@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import { z } from '@kbn/zod';
 import { notFound, internal, badRequest } from '@hapi/boom';
 import {
@@ -14,6 +16,7 @@ import {
 } from '@kbn/streams-schema';
 import { calculateObjectDiff, flattenObject } from '@kbn/object-utils';
 import { isEmpty } from 'lodash';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { DetectedMappingFailure } from '../../../lib/streams/errors/detected_mapping_failure';
 import { NonAdditiveProcessor } from '../../../lib/streams/errors/non_additive_processor';
 import { SimulationFailed } from '../../../lib/streams/errors/simulation_failed';
@@ -22,8 +25,19 @@ import { createServerRoute } from '../../create_server_route';
 import { DefinitionNotFound } from '../../../lib/streams/errors';
 import { checkAccess } from '../../../lib/streams/stream_crud';
 
+const paramsSchema = z.object({
+  path: z.object({ name: z.string() }),
+  body: z.object({
+    processing: z.array(processingDefinitionSchema),
+    documents: z.array(z.record(z.unknown())),
+    detected_fields: z.array(fieldDefinitionConfigSchema.extend({ name: z.string() })).optional(),
+  }),
+});
+
+type ProcessingSimulateParams = z.infer<typeof paramsSchema>;
+
 export const simulateProcessorRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{id}/processing/_simulate',
+  endpoint: 'POST /api/streams/{name}/processing/_simulate',
   options: {
     access: 'internal',
   },
@@ -34,117 +48,137 @@ export const simulateProcessorRoute = createServerRoute({
         'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
     },
   },
-  params: z.object({
-    path: z.object({ id: z.string() }),
-    body: z.object({
-      processing: z.array(processingDefinitionSchema),
-      documents: z.array(z.record(z.unknown())),
-      detected_fields: z.array(fieldDefinitionConfigSchema.extend({ name: z.string() })).optional(),
-    }),
-  }),
+  params: paramsSchema,
   handler: async ({ params, request, getScopedClients }) => {
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
 
-      const hasAccess = await checkAccess({ id: params.path.id, scopedClusterClient });
+      const hasAccess = await checkAccess({ id: params.path.name, scopedClusterClient });
       if (!hasAccess) {
-        throw new DefinitionNotFound(`Stream definition for ${params.path.id} not found.`);
-      }
-      // Normalize processing definition to pipeline processors
-      const processors = formatToIngestProcessors(params.body.processing);
-      // Convert input documents to ingest simulation format
-      const docs = params.body.documents.map((doc, id) => ({
-        _index: params.path.id,
-        _id: id.toString(),
-        _source: doc,
-      }));
-
-      const simulationBody: any = {
-        docs,
-        pipeline_substitutions: {
-          [`${params.path.id}@stream.processing`]: {
-            processors,
-          },
-        },
-      };
-
-      // Add component template substitutions if detected fields are provided
-      if (params.body.detected_fields) {
-        const properties = computeMappingProperties(params.body.detected_fields);
-
-        simulationBody.component_template_substitutions = {
-          [`${params.path.id}@stream.layer`]: {
-            template: {
-              mappings: {
-                properties,
-              },
-            },
-          },
-        };
+        throw new DefinitionNotFound(`Stream definition for ${params.path.name} not found.`);
       }
 
-      // TODO: update type once Kibana updates to elasticsearch-js 8.17
-      let simulationResult: any;
-      try {
-        // TODO: We should be using scopedClusterClient.asCurrentUser.simulate.ingest() but the ES JS lib currently has a bug. The types also aren't available yet, so we use any.
-        simulationResult = await scopedClusterClient.asCurrentUser.transport.request({
-          method: 'POST',
-          path: `_ingest/_simulate`,
-          body: simulationBody,
-        });
-      } catch (error) {
-        throw new SimulationFailed(error);
-      }
+      const simulationBody = prepareSimulationBody(params);
 
-      const entryWithError = simulationResult.docs.find(isMappingFailure);
-      // If there is at least one document with a mapping failure, throw an error
-      if (entryWithError) {
-        throw new DetectedMappingFailure(
-          `The detected field types might not be compatible with these documents. ${entryWithError.doc.error.reason}`
-        );
-      }
+      const simulationResult = await executeSimulation(scopedClusterClient, simulationBody);
 
-      const simulationDiffs = computeSimulationDiffs(simulationResult, docs);
+      const simulationDiffs = prepareSimulationDiffs(simulationResult, simulationBody.docs);
 
-      const updatedFields = computeUpdatedFields(simulationDiffs);
-      if (!isEmpty(updatedFields)) {
-        throw new NonAdditiveProcessor(
-          `The processor is not additive to the documents. It might update fields [${updatedFields.join()}]`
-        );
-      }
+      assertSimulationResult(simulationResult, simulationDiffs);
 
-      // At this point, we know that the shared detected fields are valid, so we can keep the user type choices
-      const confirmedValidDetectedFields = computeMappingProperties(
-        params.body.detected_fields ?? []
+      return prepareSimulationResponse(
+        simulationResult,
+        simulationBody.docs,
+        simulationDiffs,
+        params.body.detected_fields
       );
-
-      const documents = computeSimulationDocuments(simulationResult, docs);
-      const detectedFields = computeDetectedFields(simulationDiffs, confirmedValidDetectedFields);
-      const successRate = computeSuccessRate(simulationResult);
-      const failureRate = 1 - successRate;
-
-      return {
-        documents,
-        success_rate: parseFloat(successRate.toFixed(2)),
-        failure_rate: parseFloat(failureRate.toFixed(2)),
-        detected_fields: detectedFields,
-      };
     } catch (error) {
       if (error instanceof DefinitionNotFound) {
         throw notFound(error);
       }
-
       if (error instanceof SimulationFailed || error instanceof NonAdditiveProcessor) {
         throw badRequest(error);
       }
-
       throw internal(error);
     }
   },
 });
 
+const prepareSimulationBody = (params: ProcessingSimulateParams) => {
+  const { path, body } = params;
+  const { processing, documents, detected_fields } = body;
+
+  const processors = formatToIngestProcessors(processing);
+  const docs = documents.map((doc, id) => ({
+    _index: path.name,
+    _id: id.toString(),
+    _source: doc,
+  }));
+
+  const simulationBody: any = {
+    docs,
+    pipeline_substitutions: {
+      [`${path.name}@stream.processing`]: {
+        processors,
+      },
+    },
+  };
+
+  if (detected_fields) {
+    const properties = computeMappingProperties(detected_fields);
+    simulationBody.component_template_substitutions = {
+      [`${path.name}@stream.layer`]: {
+        template: {
+          mappings: {
+            properties,
+          },
+        },
+      },
+    };
+  }
+
+  return simulationBody;
+};
+
 // TODO: update type once Kibana updates to elasticsearch-js 8.17
-const computeSimulationDiffs = (
+const executeSimulation = async (
+  scopedClusterClient: IScopedClusterClient,
+  simulationBody: ReturnType<typeof prepareSimulationBody>
+): Promise<any> => {
+  try {
+    // TODO: We should be using scopedClusterClient.asCurrentUser.simulate.ingest() once Kibana updates to elasticsearch-js 8.17
+    return await scopedClusterClient.asCurrentUser.transport.request({
+      method: 'POST',
+      path: `_ingest/_simulate`,
+      body: simulationBody,
+    });
+  } catch (error) {
+    throw new SimulationFailed(error);
+  }
+};
+
+const assertSimulationResult = (
+  simulationResult: Awaited<ReturnType<typeof executeSimulation>>,
+  simulationDiffs: ReturnType<typeof prepareSimulationDiffs>
+) => {
+  // Assert mappings are compatible with the documents
+  const entryWithError = simulationResult.docs.find(isMappingFailure);
+  if (entryWithError) {
+    throw new DetectedMappingFailure(
+      `The detected field types might not be compatible with these documents. ${entryWithError.doc.error.reason}`
+    );
+  }
+  // Assert that the processors are purely additive to the documents
+  const updatedFields = computeUpdatedFields(simulationDiffs);
+  if (!isEmpty(updatedFields)) {
+    throw new NonAdditiveProcessor(
+      `The processor is not additive to the documents. It might update fields [${updatedFields.join()}]`
+    );
+  }
+};
+
+const prepareSimulationResponse = (
+  simulationResult: any,
+  docs: Array<{ _source: Record<string, unknown> }>,
+  simulationDiffs: ReturnType<typeof prepareSimulationDiffs>,
+  detectedFields?: ProcessingSimulateParams['body']['detected_fields']
+) => {
+  const confirmedValidDetectedFields = computeMappingProperties(detectedFields ?? []);
+  const documents = computeSimulationDocuments(simulationResult, docs);
+  const detectedFieldsResult = computeDetectedFields(simulationDiffs, confirmedValidDetectedFields);
+  const successRate = computeSuccessRate(simulationResult);
+  const failureRate = 1 - successRate;
+
+  return {
+    documents,
+    success_rate: parseFloat(successRate.toFixed(2)),
+    failure_rate: parseFloat(failureRate.toFixed(2)),
+    detected_fields: detectedFieldsResult,
+  };
+};
+
+// TODO: update type once Kibana updates to elasticsearch-js 8.17
+const prepareSimulationDiffs = (
   simulation: any,
   sampleDocs: Array<{ _source: Record<string, unknown> }>
 ) => {
@@ -166,7 +200,7 @@ const computeSimulationDiffs = (
 };
 
 // TODO: update type once Kibana updates to elasticsearch-js 8.17
-const computeUpdatedFields = (simulationDiff: ReturnType<typeof computeSimulationDiffs>) => {
+const computeUpdatedFields = (simulationDiff: ReturnType<typeof prepareSimulationDiffs>) => {
   const diffs = simulationDiff
     .map((simulatedDoc: any) => flattenObject(simulatedDoc.updated))
     .flatMap(Object.keys);
@@ -198,7 +232,7 @@ const computeSimulationDocuments = (
 };
 
 const computeDetectedFields = (
-  simulationDiff: ReturnType<typeof computeSimulationDiffs>,
+  simulationDiff: ReturnType<typeof prepareSimulationDiffs>,
   confirmedValidDetectedFields: Record<string, { type: FieldDefinitionConfig['type'] | 'unmapped' }>
 ): Array<{
   name: string;
@@ -226,7 +260,7 @@ const computeSuccessRate = (simulation: any) => {
 };
 
 const computeMappingProperties = (
-  detectedFields: Array<{ name: string; type: FieldDefinitionConfig['type'] }>
+  detectedFields: NonNullable<ProcessingSimulateParams['body']['detected_fields']>
 ) => {
   return Object.fromEntries(detectedFields.map(({ name, type }) => [name, { type }]));
 };
