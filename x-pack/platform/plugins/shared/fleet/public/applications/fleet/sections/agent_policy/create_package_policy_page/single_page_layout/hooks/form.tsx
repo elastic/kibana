@@ -303,15 +303,16 @@ export function useOnSubmit({
     }
   }, [packagePolicy, agentPolicies, updatePackagePolicy, canUseMultipleAgentPolicies]);
 
-  const { handleSetupTechnologyChange, selectedSetupTechnology } = useSetupTechnology({
-    newAgentPolicy,
-    setNewAgentPolicy,
-    updateAgentPolicies,
-    updatePackagePolicy,
-    setSelectedPolicyTab,
-    packageInfo,
-    packagePolicy,
-  });
+  const { handleSetupTechnologyChange, selectedSetupTechnology, defaultSetupTechnology } =
+    useSetupTechnology({
+      newAgentPolicy,
+      setNewAgentPolicy,
+      updateAgentPolicies,
+      updatePackagePolicy,
+      setSelectedPolicyTab,
+      packageInfo,
+      packagePolicy,
+    });
   const setupTechnologyRef = useRef<SetupTechnology | undefined>(selectedSetupTechnology);
   // sync the inputs with the agentless selector change
   useEffect(() => {
@@ -551,6 +552,7 @@ export function useOnSubmit({
     navigateAddAgentHelp,
     handleSetupTechnologyChange,
     selectedSetupTechnology,
+    defaultSetupTechnology,
     isAgentlessSelected,
   };
 }
