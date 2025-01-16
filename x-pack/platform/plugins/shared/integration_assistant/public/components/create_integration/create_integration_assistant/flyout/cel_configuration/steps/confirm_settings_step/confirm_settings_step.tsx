@@ -18,18 +18,15 @@ import {
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import type Oas from 'oas';
-import type { CelAuthType, CelInput } from '../../../../../../../../common';
+import { getAuthDetails, reduceSpecComponents } from '../../../../../../../util/oas';
+import type { CelAuthType, CelInputRequestBody, CelInput } from '../../../../../../../../common';
+import { runCelGraph, getLangSmithOptions, useKibana } from '../../../../../../../common';
 import { useActions, type State } from '../../../../state';
 import * as i18n from './translations';
 import { EndpointSelection } from './endpoint_selection';
 import { AuthSelection } from './auth_selection';
-import { useTelemetry } from '../../../../../telemetry';
-import { getAuthDetails, reduceSpecComponents } from '../../../../../../../util/oas';
-import { useKibana } from '../../../../../../../common/hooks/use_kibana';
-import { type CelInputRequestBody } from '../../../../../../../../common';
-import { getLangSmithOptions } from '../../../../../../../common/lib/lang_smith';
-import { runCelGraph } from '../../../../../../../common/lib/api';
 import { GenerationError } from '../../generation_error';
+import { useTelemetry } from '../../../../../telemetry';
 
 export const translateDisplayAuthToType = (auth: string): string => {
   return auth === 'API Token' ? 'Header' : auth;

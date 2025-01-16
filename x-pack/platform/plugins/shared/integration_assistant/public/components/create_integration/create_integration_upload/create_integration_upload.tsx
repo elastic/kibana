@@ -13,8 +13,11 @@ import { SuccessSection } from '../../../common/components/success_section';
 import { SectionWrapper } from '../../../common/components/section_wrapper';
 import { ButtonsFooter } from '../../../common/components/buttons_footer';
 import { IntegrationImageHeader } from '../../../common/components/integration_image_header';
-import { runInstallPackage, type RequestDeps } from '../../../common/lib/api';
-import { getIntegrationNameFromResponse } from '../../../common/lib/api_parsers';
+import {
+  runInstallPackage,
+  getIntegrationNameFromResponse,
+  type RequestDeps,
+} from '../../../common';
 import { useNavigate, Page } from '../../../common/hooks/use_navigate';
 import { useTelemetry } from '../telemetry';
 import { DocsLinkSubtitle } from './docs_link_subtitle';

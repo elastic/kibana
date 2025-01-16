@@ -6,11 +6,14 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useKibana } from '../../../../../common/hooks/use_kibana';
 import type { BuildIntegrationRequestBody } from '../../../../../../common';
 import type { State } from '../../state';
-import { runBuildIntegration, runInstallPackage } from '../../../../../common/lib/api';
-import { getIntegrationNameFromResponse } from '../../../../../common/lib/api_parsers';
+import {
+  runBuildIntegration,
+  runInstallPackage,
+  getIntegrationNameFromResponse,
+  useKibana,
+} from '../../../../../common';
 import { useTelemetry } from '../../../telemetry';
 
 interface PipelineGenerationProps {

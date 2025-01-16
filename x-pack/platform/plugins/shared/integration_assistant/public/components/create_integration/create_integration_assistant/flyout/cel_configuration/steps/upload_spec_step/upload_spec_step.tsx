@@ -20,13 +20,11 @@ import {
 } from '@elastic/eui';
 import { useActions, type State } from '../../../../state';
 import { ApiDefinitionInput } from './api_definition_input';
-import { useKibana } from '../../../../../../../common/hooks/use_kibana';
 import * as i18n from './translations';
 import * as il8n_ds from '../../../../steps/data_stream_step/translations';
 import { getApiPathsWithDescriptions } from './util';
-import { getLangSmithOptions } from '../../../../../../../common/lib/lang_smith';
 import { type AnalyzeApiRequestBody } from '../../../../../../../../common';
-import { runAnalyzeApiGraph } from '../../../../../../../common/lib/api';
+import { runAnalyzeApiGraph, getLangSmithOptions, useKibana } from '../../../../../../../common';
 import { GenerationError } from '../../generation_error';
 
 interface UploadSpecStepProps {
