@@ -17,11 +17,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
+import type Oas from 'oas';
 import type { CelAuthType, CelInput } from '../../../../../../../../common';
 import { useActions, type State } from '../../../../state';
 import * as i18n from './translations';
 import { EndpointSelection } from './endpoint_selection';
-import type { IntegrationSettings } from '../../../../types';
 import { AuthSelection } from './auth_selection';
 import { useTelemetry } from '../../../../../telemetry';
 import { getAuthDetails, reduceSpecComponents } from '../../../../../../../util/oas';
@@ -39,11 +39,8 @@ const translateAuthTypeToDisplay = (auth: string): string => {
   return auth === 'Header' ? 'API Token' : auth;
 };
 
-const getSpecifiedAuthForPath = (
-  integrationSettings: IntegrationSettings | undefined,
-  path: string
-) => {
-  const authMethods = integrationSettings?.apiSpec?.operation(path, 'get').prepareSecurity();
+const getSpecifiedAuthForPath = (apiSpec: Oas | undefined, path: string) => {
+  const authMethods = apiSpec?.operation(path, 'get').prepareSecurity();
   const specifiedAuth = authMethods ? Object.keys(authMethods) : [];
   return specifiedAuth;
 };
@@ -105,23 +102,27 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
 
     // sets the recommended options on load
     useEffect(() => {
-      const path = suggestedPaths ? suggestedPaths[0] : '';
-      setSelectedPath(suggestedPaths ? suggestedPaths[0] : '');
-      if (path) {
-        const specifiedAuth = getSpecifiedAuthForPath(integrationSettings, path);
-        setSelectedAuth(translateAuthTypeToDisplay(specifiedAuth[0]));
+      if (!selectedPath) {
+        const recommendedPath = suggestedPaths ? suggestedPaths[0] : '';
+        setSelectedPath(recommendedPath);
+        if (recommendedPath) {
+          const specifiedAuth = getSpecifiedAuthForPath(
+            integrationSettings?.apiSpec,
+            recommendedPath
+          );
+          setSelectedAuth(translateAuthTypeToDisplay(specifiedAuth[0]));
+        }
       }
-    }, [integrationSettings, integrationSettings?.apiSpec, suggestedPaths]);
+    }, [integrationSettings?.apiSpec, selectedPath, suggestedPaths]);
 
     // updates the specified auth methods when the selected path is modified
     useEffect(() => {
       const path = coalescedSelectedPath;
       if (path) {
-        const authMethods = integrationSettings?.apiSpec?.operation(path, 'get').prepareSecurity();
-        const specifiedAuth = authMethods ? Object.keys(authMethods) : [];
+        const specifiedAuth = getSpecifiedAuthForPath(integrationSettings?.apiSpec, path);
         setSpecifiedAuthForPath(specifiedAuth);
       }
-    }, [coalescedSelectedPath, integrationSettings?.apiSpec, useOtherPath]);
+    }, [coalescedSelectedPath, integrationSettings?.apiSpec]);
 
     useEffect(() => {
       onUpdateValidation(!fieldValidationErrors.path && !fieldValidationErrors.auth);
