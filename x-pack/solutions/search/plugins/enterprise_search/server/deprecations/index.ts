@@ -192,7 +192,10 @@ export async function getCrawlerDeprecations(
             defaultMessage:
               'Enterprise Search, including Elastic Web Crawler, is not supported in versions >= 9.x.\n\n' +
               'In order to upgrade Native Connectors, metadata records in the `.elastic-connectors` index specific to ' +
-              'Elastic Web Crawler must be removed. For full details, see the documentation. ',
+              'Elastic Web Crawler must be removed.\n\n' +
+              'Be sure to run the separate Crawler Migration Notebook first, if you intend to move these Crawler' +
+              'configuration to the Open Crawler in 9.x.\n\n' +
+              'For full details, see the documentation. ',
           }),
         },
         documentationUrl: docsUrl,
