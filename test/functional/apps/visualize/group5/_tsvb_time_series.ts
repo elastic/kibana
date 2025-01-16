@@ -276,7 +276,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(chartData).to.eql(expectedChartData);
         });
 
-        it('nick - should display correct chart data, label names and area colors for sum aggregation when split by terms', async () => {
+        it('should display correct chart data, label names and area colors for sum aggregation when split by terms', async () => {
           const firstAreaExpectedChartData = [
             [1442620800000, 0],
             [1442664000000, 0],
