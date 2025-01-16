@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { WiredStreamConfigDefinition } from '@kbn/streams-schema';
 import {
-  deleteStream,
+  disableStreams,
   enableStreams,
   fetchDocument,
   forkStream,
@@ -17,38 +17,33 @@ import {
   putStream,
 } from './helpers/requests';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { waitForDocumentInIndex } from '../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
-import { cleanUpRootStream } from './helpers/cleanup';
+import { createStreamsRepositorySupertestClient } from './helpers/repository_client';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esClient = getService('es');
-  const retryService = getService('retry');
-  const logger = getService('log');
+
+  const apiClient = createStreamsRepositorySupertestClient(supertest);
 
   describe('Enrichment', () => {
     before(async () => {
-      await enableStreams(supertest);
+      await enableStreams(apiClient);
       const body = {
         stream: {
           name: 'logs.nginx',
         },
         condition: {
           field: 'host.name',
-          operator: 'eq',
+          operator: 'eq' as const,
           value: 'routeme',
         },
       };
       // We use a forked stream as processing changes cannot be made to the root stream
-      await forkStream(supertest, 'logs', body);
+      await forkStream(apiClient, 'logs', body);
     });
 
     after(async () => {
-      await deleteStream(supertest, 'logs.nginx');
-      await cleanUpRootStream(esClient);
-      await esClient.indices.deleteDataStream({
-        name: ['logs*'],
-      });
+      await disableStreams(apiClient);
     });
 
     it('Place processing steps', async () => {
@@ -101,7 +96,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         },
       };
-      const response = await putStream(supertest, 'logs.nginx', body);
+      const response = await putStream(apiClient, 'logs.nginx', body);
       expect(response).to.have.property('acknowledged', true);
     });
 
@@ -113,18 +108,8 @@ export default function ({ getService }: FtrProviderContext) {
       };
       const response = await indexDocument(esClient, 'logs', doc);
       expect(response.result).to.eql('created');
-      const reroutedDocResponse = await waitForDocumentInIndex({
-        esClient,
-        indexName: 'logs.nginx',
-        retryService,
-        logger,
-      });
 
-      const result = await fetchDocument(
-        esClient,
-        'logs.nginx',
-        reroutedDocResponse.hits?.hits[0]?._id!
-      );
+      const result = await fetchDocument(esClient, 'logs.nginx', response._id);
       expect(result._source).to.eql({
         '@timestamp': '2024-01-01T00:00:10.000Z',
         message: '2023-01-01T00:00:10.000Z error test',
@@ -143,19 +128,8 @@ export default function ({ getService }: FtrProviderContext) {
       };
       const response = await indexDocument(esClient, 'logs', doc);
       expect(response.result).to.eql('created');
-      const reroutedDocResponse = await waitForDocumentInIndex({
-        esClient,
-        indexName: 'logs.nginx',
-        retryService,
-        logger,
-        docCountTarget: 2,
-      });
 
-      const result = await fetchDocument(
-        esClient,
-        'logs.nginx',
-        reroutedDocResponse.hits?.hits[0]?._id!
-      );
+      const result = await fetchDocument(esClient, 'logs.nginx', response._id);
       expect(result._source).to.eql({
         '@timestamp': '2024-01-01T00:00:11.000Z',
         message: '2023-01-01T00:00:10.000Z info mylogger this is the message',
