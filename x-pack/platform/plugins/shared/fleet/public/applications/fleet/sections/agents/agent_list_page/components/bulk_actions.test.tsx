@@ -51,7 +51,7 @@ describe('AgentBulkActions', () => {
   beforeAll(() => {
     mockedExperimentalFeaturesService.get.mockReturnValue({
       diagnosticFileUploadEnabled: true,
-    });
+    } as any);
     jest.mocked(useAuthz).mockReturnValue({
       fleet: {
         allAgents: true,
