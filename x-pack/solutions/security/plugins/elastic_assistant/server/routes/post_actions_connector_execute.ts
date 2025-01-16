@@ -18,6 +18,7 @@ import {
   Replacements,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { prunedContentReferences } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import { buildResponse } from '../lib/build_response';
@@ -30,7 +31,6 @@ import {
   performChecks,
 } from './helpers';
 import { isOpenSourceModel } from './utils';
-import { prunedContentReferences } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -111,7 +111,7 @@ export const postActionsConnectorExecuteRoute = (
           const conversationsDataClient =
             await assistantContext.getAIAssistantConversationsDataClient();
           const promptsDataClient = await assistantContext.getAIAssistantPromptsDataClient();
-          const contentReferencesStore = contentReferencesStoreFactory()
+          const contentReferencesStore = contentReferencesStoreFactory();
 
           onLlmResponse = async (
             content: string,
@@ -119,7 +119,7 @@ export const postActionsConnectorExecuteRoute = (
             isError = false
           ): Promise<void> => {
             if (conversationsDataClient && conversationId) {
-              const contentReferences = prunedContentReferences(content, contentReferencesStore)
+              const contentReferences = prunedContentReferences(content, contentReferencesStore);
 
               await appendAssistantMessageToConversation({
                 conversationId,
@@ -128,7 +128,7 @@ export const postActionsConnectorExecuteRoute = (
                 replacements: latestReplacements,
                 isError,
                 traceData,
-                contentReferences
+                contentReferences,
               });
             }
           };

@@ -176,7 +176,7 @@ export const chatCompleteRoute = (
             }));
           }
 
-          const contentReferencesStore = contentReferencesStoreFactory()
+          const contentReferencesStore = contentReferencesStoreFactory();
 
           const onLlmResponse = async (
             content: string,

@@ -115,8 +115,8 @@ export interface UseAssistantContext {
   nameSpace: string;
   registerPromptContext: RegisterPromptContext;
   selectedSettingsTab: SettingsTabs | null;
-  contentReferencesVisible: boolean, 
-  setContentReferencesVisible: React.Dispatch<React.SetStateAction<boolean>>,
+  contentReferencesVisible: boolean;
+  setContentReferencesVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean | undefined>>;
   setKnowledgeBase: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig | undefined>>;
   setLastConversationId: React.Dispatch<React.SetStateAction<string | undefined>>;
@@ -199,7 +199,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     true
   );
 
-  const [contentReferencesVisible, setContentReferencesVisible] = useState<boolean>(true)
+  const [contentReferencesVisible, setContentReferencesVisible] = useState<boolean>(true);
 
   /**
    * Prompt contexts are used to provide components a way to register and make their data available to the assistant.
@@ -306,7 +306,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       assistantStreamingEnabled: localStorageStreaming ?? true,
       setAssistantStreamingEnabled: setLocalStorageStreaming,
       setKnowledgeBase: setLocalStorageKnowledgeBase,
-      contentReferencesVisible, 
+      contentReferencesVisible,
       setContentReferencesVisible,
       setSelectedSettingsTab,
       setShowAssistantOverlay,
@@ -348,7 +348,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       localStorageStreaming,
       setLocalStorageStreaming,
       setLocalStorageKnowledgeBase,
-      contentReferencesVisible, 
+      contentReferencesVisible,
       setContentReferencesVisible,
       setSessionStorageTraceOptions,
       showAssistantOverlay,

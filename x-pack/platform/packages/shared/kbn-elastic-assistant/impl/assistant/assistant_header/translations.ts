@@ -70,7 +70,6 @@ export const SHOW_CONTENT_REFERENCES = i18n.translate(
   }
 );
 
-
 export const CANCEL_BUTTON_TEXT = i18n.translate(
   'xpack.elasticAssistant.assistant.resetConversationModal.cancelButtonText',
   {

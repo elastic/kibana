@@ -19,8 +19,8 @@ import { DynamicStructuredTool } from '@langchain/core/tools';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import { APP_UI_ID } from '../../../../common';
 import { contentReferenceBlock } from '@kbn/elastic-assistant-common/impl/content_references';
+import { APP_UI_ID } from '../../../../common';
 
 export interface OpenAndAcknowledgedAlertsToolParams extends AssistantToolParams {
   alertsIndexPattern: string;
@@ -89,13 +89,17 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
               getAnonymizedValue,
               onNewReplacements: localOnNewReplacements, // <-- the local callback
               rawData: getRawDataOrDefault(x.fields),
-            })
-            const hitId = x._id
-            const alertReferenceString = hitId != null ? `\nReference,${contentReferenceBlock(params.contentReferencesStore.add(p => alertReferenceFactory(p.id, hitId)))}` : ''
+            });
+            const hitId = x._id;
+            const alertReferenceString =
+              hitId != null
+                ? `\nReference,${contentReferenceBlock(
+                    params.contentReferencesStore.add((p) => alertReferenceFactory(p.id, hitId))
+                  )}`
+                : '';
 
-            return `${transformed}${alertReferenceString}`
-          }
-          )
+            return `${transformed}${alertReferenceString}`;
+          })
         );
       },
       tags: ['alerts', 'open-and-acknowledged-alerts'],

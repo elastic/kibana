@@ -6,7 +6,7 @@
  */
 
 import type { RemarkTokenizer } from '@elastic/eui';
-import { ContentReferenceBlock } from '@kbn/elastic-assistant-common/impl/content_references/types';
+import type { ContentReferenceBlock } from '@kbn/elastic-assistant-common/impl/content_references/types';
 import type { Plugin } from 'unified';
 import type { Node } from 'unist';
 
@@ -14,7 +14,7 @@ export interface ContentReferenceNode extends Node {
   type: 'contentReference';
   contentReferenceId: string;
   contentReferenceCount: number;
-  contentReferenceBlock: ContentReferenceBlock
+  contentReferenceBlock: ContentReferenceBlock;
 }
 
 const START_SIGNAL = '{reference';
@@ -26,9 +26,9 @@ export const ContentReferenceParser: Plugin = function ContentReferenceParser() 
   const Parser = this.Parser;
   const tokenizers = Parser.prototype.inlineTokenizers;
   const methods = Parser.prototype.inlineMethods;
-  
+
   let currentContentReferenceCount = 1;
-  const contentReferenceCounts: Record<string, number> = {}
+  const contentReferenceCounts: Record<string, number> = {};
 
   const tokenizeCustomCitation: RemarkTokenizer = function tokenizeCustomCitation(
     eat,
@@ -67,18 +67,18 @@ export const ContentReferenceParser: Plugin = function ContentReferenceParser() 
         body += char;
       }
 
-      return "";
+      return '';
     }
 
     const contentReferenceId = readArg('(', ')');
 
-    if(contentReferenceId.length > 10){
-        // The contentReferenceId is very long. This is probably an invalid content reference.
-        return false
+    if (contentReferenceId.length > 10) {
+      // The contentReferenceId is very long. This is probably an invalid content reference.
+      return false;
     }
 
     const lastChar = value[index];
-    if(lastChar !== '}') return false
+    if (lastChar !== '}') return false;
 
     const now = eat.now();
 
@@ -89,9 +89,8 @@ export const ContentReferenceParser: Plugin = function ContentReferenceParser() 
       });
     }
 
-
     if (!contentReferenceId) {
-      return false
+      return false;
     }
 
     if (silent) {
@@ -102,20 +101,20 @@ export const ContentReferenceParser: Plugin = function ContentReferenceParser() 
     now.offset += START_SIGNAL.length + 1;
 
     const contentReferenceBlock: ContentReferenceBlock = `{reference(${contentReferenceId})}`;
-    
+
     const getContentReferenceCount = (id: string) => {
-        if(id in contentReferenceCounts) {
-            return contentReferenceCounts[id]
-        }
-        contentReferenceCounts[id] = currentContentReferenceCount++
-        return contentReferenceCounts[id]
-    }
+      if (id in contentReferenceCounts) {
+        return contentReferenceCounts[id];
+      }
+      contentReferenceCounts[id] = currentContentReferenceCount++;
+      return contentReferenceCounts[id];
+    };
 
     return eat(contentReferenceBlock)({
       type: 'contentReference',
-      contentReferenceId: contentReferenceId,
+      contentReferenceId,
       contentReferenceCount: getContentReferenceCount(contentReferenceId),
-      contentReferenceBlock
+      contentReferenceBlock,
     } as ContentReferenceNode);
   };
 

@@ -9,13 +9,13 @@ import { EuiPopover } from '@elastic/eui';
 import React, { useState } from 'react';
 import { ContentReferenceButton } from './content_reference_button';
 
-type Props = {
-  contentReferenceCount: number
+interface Props {
+  contentReferenceCount: number;
 }
 
 export const PopoverReference: React.FC<React.PropsWithChildren<Props>> = ({
   contentReferenceCount,
-  children
+  children,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 

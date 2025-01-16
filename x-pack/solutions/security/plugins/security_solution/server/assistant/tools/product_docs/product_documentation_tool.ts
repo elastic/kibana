@@ -9,10 +9,13 @@ import { DynamicStructuredTool } from '@langchain/core/tools';
 
 import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
+import {
+  contentReferenceBlock,
+  productDocumentationReferenceFactory,
+} from '@kbn/elastic-assistant-common/impl/content_references/references';
+import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
+import type { RetrievedDocument } from '@kbn/llm-tasks-plugin/server/tasks/retrieve_documentation/types';
 import { APP_UI_ID } from '../../../../common';
-import { contentReferenceBlock, productDocumentationReferenceFactory } from '@kbn/elastic-assistant-common/impl/content_references/references';
-import { ContentReferencesStore } from '@kbn/elastic-assistant-common';
-import { RetrievedDocument } from '@kbn/llm-tasks-plugin/server/tasks/retrieve_documentation/types';
 
 const toolDetails = {
   description:
@@ -69,7 +72,9 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
           functionCalling: 'native',
         });
 
-        const documentsWithCitations = response.documents.map(enrichDocument(params.contentReferencesStore))
+        const documentsWithCitations = response.documents.map(
+          enrichDocument(params.contentReferencesStore)
+        );
 
         return {
           content: {
@@ -84,15 +89,17 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
 };
 
 type EnrichedDocument = RetrievedDocument & {
-  citation: string
-}
+  citation: string;
+};
 
 function enrichDocument(contentReferencesStore: ContentReferencesStore) {
   return (document: RetrievedDocument): EnrichedDocument => {
-    const productDocumentationReference = contentReferencesStore.add(p => productDocumentationReferenceFactory(p.id, document.title, document.url))
+    const productDocumentationReference = contentReferencesStore.add((p) =>
+      productDocumentationReferenceFactory(p.id, document.title, document.url)
+    );
     return {
       ...document,
-      citation: contentReferenceBlock(productDocumentationReference)
-    }
-  }
+      citation: contentReferenceBlock(productDocumentationReference),
+    };
+  };
 }

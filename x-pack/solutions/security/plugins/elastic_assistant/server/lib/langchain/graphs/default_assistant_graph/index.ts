@@ -126,7 +126,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   if (isEnabledKnowledgeBase) {
     const kbTools = await dataClients?.kbDataClient?.getAssistantTools({
       esClient,
-      contentReferencesStore
+      contentReferencesStore,
     });
     if (kbTools) {
       tools.push(...kbTools);

@@ -7,11 +7,11 @@ import { ContentReferenceId } from "../types";
  * @returns AlertsCountReference
  */
 export const alertsCountReferenceFactory = (id: string): SecurityAlertsPageContentReference => {
-    return {
-        type: "SecurityAlertsPage",
-        id,
-    }
-}
+  return {
+    type: 'SecurityAlertsPage',
+    id,
+  };
+};
 
 /**
  * Generates a contentReference for when a specific alert is referenced.

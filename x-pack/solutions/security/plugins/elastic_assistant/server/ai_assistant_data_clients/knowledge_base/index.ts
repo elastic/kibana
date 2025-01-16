@@ -644,7 +644,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    */
   public getAssistantTools = async ({
     contentReferencesStore,
-    esClient
+    esClient,
   }: {
     contentReferencesStore: ContentReferencesStore;
     esClient: ElasticsearchClient;
@@ -686,7 +686,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
                 indexEntry,
                 esClient,
                 logger: this.options.logger,
-                contentReferencesStore
+                contentReferencesStore,
               });
             })
         );

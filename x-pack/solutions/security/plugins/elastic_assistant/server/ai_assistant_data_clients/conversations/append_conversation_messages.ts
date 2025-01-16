@@ -103,18 +103,22 @@ export const transformToUpdateScheme = (updatedAt: string, messages: Message[]) 
       is_error: message.isError,
       reader: message.reader,
       role: message.role,
-      ...(message.metadata ? {
-        metadata: {
-          ...(message.metadata.contentReferences ? { content_references: message.metadata.contentReferences } : {})
-        }
-      } : {}),
+      ...(message.metadata
+        ? {
+            metadata: {
+              ...(message.metadata.contentReferences
+                ? { content_references: message.metadata.contentReferences }
+                : {}),
+            },
+          }
+        : {}),
       ...(message.traceData
         ? {
-          trace_data: {
-            trace_id: message.traceData.traceId,
-            transaction_id: message.traceData.transactionId,
-          },
-        }
+            trace_data: {
+              trace_id: message.traceData.traceId,
+              transaction_id: message.traceData.transactionId,
+            },
+          }
         : {}),
     })),
   };
