@@ -17,7 +17,7 @@ interface PrepareOasErrorResult {
   error: string;
 }
 interface PrepareOasSuccessResult {
-  oas: Oas | undefined;
+  oas: Oas;
 }
 type PrepareOasResult = PrepareOasSuccessResult | PrepareOasErrorResult;
 
@@ -31,7 +31,7 @@ type PrepareOasResult = PrepareOasSuccessResult | PrepareOasErrorResult;
  * @returns The parsed OAS object or an error message.
  */
 const prepareOas = (fileContent: string): PrepareOasResult => {
-  let parsedApiSpec: Oas | undefined;
+  let parsedApiSpec: Oas;
 
   try {
     parsedApiSpec = new Oas(fileContent);
@@ -115,7 +115,13 @@ export const ApiDefinitionInput = React.memo<ApiDefinitionInputProps>(
 
           const { oas } = prepareResult;
 
-          if (!oas || Object.keys(oas.getPaths()).length === 0) {
+          const oasPaths = oas.getPaths();
+
+          // Verify we have valid GET paths in the uploaded spec file
+          if (
+            Object.keys(oasPaths).length === 0 ||
+            Object.values(oasPaths).filter((path) => path?.get).length === 0
+          ) {
             setApiFileError(i18n.API_DEFINITION_ERROR.NO_PATHS_IDENTIFIED);
             onModifySpecFile(false);
           }
