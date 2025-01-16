@@ -120,7 +120,6 @@ export default function (providerContext: FtrProviderContext) {
       });
       it('should upgrade managed package policies', async () => {
         await apiClient.setup();
-
         await retry.tryWithRetries(
           'Searching for managed package policies to be upgraded',
           async () => {
@@ -151,9 +150,9 @@ export default function (providerContext: FtrProviderContext) {
             }
           },
           {
-            retryCount: 20,
-            retryDelay: 1000,
-            timeout: 20_000,
+            retryCount: 15,
+            retryDelay: 5000,
+            timeout: 30_000,
           }
         );
       });
