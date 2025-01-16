@@ -29,7 +29,7 @@ const sameClusterRestrictedPackages = [
 export function getAllowedOutputTypes(options: {
   agentPolicy?: AgentPolicy;
   packagePolicy?: Pick<PackagePolicy, 'supports_agentless'>;
-  packageName: string;
+  packageName?: string;
 }): string[] {
   let allowedOutputTypes = Object.values(outputType);
 
