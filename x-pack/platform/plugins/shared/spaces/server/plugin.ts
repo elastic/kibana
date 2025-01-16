@@ -191,7 +191,7 @@ export class SpacesPlugin
       http: core.http,
       log: this.log,
       getSpacesService,
-      getFeatures: () => core.getStartServices().then(([_, { features }]) => features),
+      getFeatures: async () => (await core.getStartServices())[1].features,
     });
 
     setupCapabilities(core, getSpacesService, this.log);

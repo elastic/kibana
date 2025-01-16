@@ -163,7 +163,7 @@ describe.skip('onPostAuthInterceptor', () => {
     initSpacesOnPostAuthRequestInterceptor({
       http: http as unknown as CoreSetup['http'],
       log: loggingMock,
-      getFeatures: () => Promise.resolve(featuresPlugin),
+      getFeatures: async () => featuresPlugin,
       getSpacesService: () => spacesServiceStart,
     });
 
