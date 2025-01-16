@@ -10,7 +10,7 @@ import { css, SerializedStyles } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { MISCONFIGURATION_STATUS } from '@kbn/cloud-security-posture-common';
-import { useMisconfigurationStatusColor } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_status_color';
+import { getMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
 import { calculatePostureScore } from '../../common/utils/helpers';
 import {
   CSP_FINDINGS_COMPLIANCE_SCORE,
@@ -34,7 +34,6 @@ export const ComplianceScoreBar = ({
   overrideCss?: SerializedStyles;
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { getMisconfigurationStatusColor } = useMisconfigurationStatusColor();
   const complianceScore = calculatePostureScore(totalPassed, totalFailed);
 
   // ensures the compliance bar takes full width of its parent

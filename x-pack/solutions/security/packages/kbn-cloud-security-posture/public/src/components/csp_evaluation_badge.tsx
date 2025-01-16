@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { EuiBadge, type EuiBadgeProps } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { MISCONFIGURATION_STATUS } from '@kbn/cloud-security-posture-common';
 import type { MisconfigurationEvaluationStatus } from '@kbn/cloud-security-posture-common';
+import { getMisconfigurationStatusColor } from '../utils/get_finding_colors';
 
 interface Props {
   type?: MisconfigurationEvaluationStatus;
@@ -20,15 +21,9 @@ interface Props {
 // 46px is used to make sure the badge is always the same width.
 const BADGE_WIDTH = '46px';
 
-const getColor = (type: Props['type']): EuiBadgeProps['color'] => {
-  if (type === MISCONFIGURATION_STATUS.PASSED) return 'success';
-  if (type === MISCONFIGURATION_STATUS.FAILED) return 'danger';
-  return 'default';
-};
-
 export const CspEvaluationBadge = ({ type }: Props) => (
   <EuiBadge
-    color={getColor(type)}
+    color={getMisconfigurationStatusColor(type)}
     css={css`
       width: ${BADGE_WIDTH};
       display: flex;

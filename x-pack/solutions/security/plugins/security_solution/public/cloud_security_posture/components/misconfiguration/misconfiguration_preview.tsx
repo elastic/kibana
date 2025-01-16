@@ -12,9 +12,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { i18n } from '@kbn/i18n';
-import { useMisconfigurationStatusColor } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_status_color';
+import { getMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
 import { MISCONFIGURATION_STATUS } from '@kbn/cloud-security-posture-common';
-import type { MisconfigurationEvaluationStatus } from '@kbn/cloud-security-posture-common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT,
@@ -27,11 +26,7 @@ import {
   EntityDetailsLeftPanelTab,
 } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
-export const getFindingsStats = (
-  passedFindingsStats: number,
-  failedFindingsStats: number,
-  getMisconfigurationStatusColor: (status: MisconfigurationEvaluationStatus) => string
-) => {
+export const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: number) => {
   if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
   return [
     {
@@ -114,7 +109,6 @@ export const MisconfigurationsPreview = ({
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT);
   }, []);
   const { euiTheme } = useEuiTheme();
-  const { getMisconfigurationStatusColor } = useMisconfigurationStatusColor();
 
   const goToEntityInsightTab = useCallback(() => {
     openDetailsPanel({
@@ -170,13 +164,7 @@ export const MisconfigurationsPreview = ({
             <EuiFlexItem />
             <EuiFlexItem>
               <EuiSpacer />
-              <DistributionBar
-                stats={getFindingsStats(
-                  passedFindings,
-                  failedFindings,
-                  getMisconfigurationStatusColor
-                )}
-              />
+              <DistributionBar stats={getFindingsStats(passedFindings, failedFindings)} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

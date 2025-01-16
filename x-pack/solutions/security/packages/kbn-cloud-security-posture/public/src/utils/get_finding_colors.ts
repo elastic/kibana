@@ -20,11 +20,21 @@ const isAmsterdam = (euiThemeName: string) => {
   return euiThemeName?.toLowerCase().includes('amsterdam');
 };
 
+// designers blocked the migration to tokens from EUI during the Borealys theme migration. We keep using hardcoded colors until security severity palette is ready
+const SEVERITY_COLOR = {
+  critical: '#E7664C',
+  high: '#DA8B45',
+  medium: '#D6BF57',
+  low: '#54B399',
+  unknown: '#aaa',
+} as const;
+
+// TODO: migrate to security severity palette when it's ready
 export const getSeverityStatusColor = (
   severity: VulnSeverity,
   euiTheme: EuiThemeComputed
 ): string => {
-  // TODO: remove old mapping in main when severity palette is fixed https://github.com/elastic/eui/pull/8254 and Serverless switched to Borealis
+  // TODO: remove old mapping in main Serverless switched to Borealis
   if (euiTheme && isAmsterdam(euiTheme.themeName)) {
     switch (severity) {
       case VULNERABILITIES_SEVERITY.LOW:
@@ -42,15 +52,15 @@ export const getSeverityStatusColor = (
 
   switch (severity) {
     case VULNERABILITIES_SEVERITY.LOW:
-      return euiTheme.colors.vis.euiColorVis0; // TODO: use color from the severity palette? It's not green, decision from design is needed
+      return SEVERITY_COLOR.low;
     case VULNERABILITIES_SEVERITY.MEDIUM:
-      return euiTheme.colors.vis.euiColorSeverity7;
+      return SEVERITY_COLOR.medium;
     case VULNERABILITIES_SEVERITY.HIGH:
-      return euiTheme.colors.vis.euiColorSeverity11;
+      return SEVERITY_COLOR.high;
     case VULNERABILITIES_SEVERITY.CRITICAL:
-      return euiTheme.colors.vis.euiColorSeverity14;
+      return SEVERITY_COLOR.critical;
     default:
-      return euiTheme.colors.vis.euiColorSeverity0;
+      return SEVERITY_COLOR.unknown;
   }
 };
 
@@ -81,16 +91,16 @@ export const getCvsScoreColor = (score: number, euiTheme: EuiThemeComputed): str
   }
 };
 
+// TODO: migrate to tokens when they are ready
 export const getMisconfigurationStatusColor = (
-  status: MisconfigurationEvaluationStatus,
-  euiTheme: EuiThemeComputed
+  status?: MisconfigurationEvaluationStatus
 ): string => {
   switch (status) {
     case MISCONFIGURATION_STATUS.PASSED:
-      return euiTheme.colors.success;
+      return SEVERITY_COLOR.low;
     case MISCONFIGURATION_STATUS.FAILED:
-      return euiTheme.colors.danger;
+      return SEVERITY_COLOR.critical;
     default:
-      return euiTheme.colors.vis.euiColorSeverity0;
+      return SEVERITY_COLOR.unknown;
   }
 };

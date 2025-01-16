@@ -14,18 +14,15 @@ import {
   MISCONFIGURATION,
 } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_findings';
 import { i18n } from '@kbn/i18n';
-import type {
-  CspFindingResult,
-  MisconfigurationEvaluationStatus,
-} from '@kbn/cloud-security-posture-common';
+import type { CspFindingResult } from '@kbn/cloud-security-posture-common';
 import {
   MISCONFIGURATION_STATUS,
   buildMisconfigurationEntityFlyoutPreviewQuery,
 } from '@kbn/cloud-security-posture-common';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common/schema/rules/latest';
-import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
-import { useMisconfigurationStatusColor } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_status_color';
+import { CspEvaluationBadge, getMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
+
 import {
   ENTITY_FLYOUT_EXPAND_MISCONFIGURATION_VIEW_VISITS,
   NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT,
@@ -48,8 +45,7 @@ const getFindingsStats = (
   passedFindingsStats: number,
   failedFindingsStats: number,
   filterFunction: (filter: string) => void,
-  currentFilter: string,
-  getMisconfigurationStatusColor: (status: MisconfigurationEvaluationStatus) => string
+  currentFilter: string
 ) => {
   if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
   return [
@@ -97,8 +93,6 @@ const getFindingsStats = (
  */
 export const MisconfigurationFindingsDetailsTable = memo(
   ({ field, value }: { field: 'host.name' | 'user.name'; value: string }) => {
-    const { getMisconfigurationStatusColor } = useMisconfigurationStatusColor();
-
     useEffect(() => {
       uiMetricService.trackUiMetric(
         METRIC_TYPE.COUNT,
@@ -195,8 +189,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
       passedFindings,
       failedFindings,
       setCurrentFilter,
-      currentFilter,
-      getMisconfigurationStatusColor
+      currentFilter
     );
 
     const columns: Array<EuiBasicTableColumn<MisconfigurationFindingDetailFields>> = [

@@ -81,8 +81,8 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
   const hasMisconfigurationFindings = totalFindings > 0;
 
   const misconfigurationsStats = useMemo(
-    () => getFindingsStats(passedFindings, failedFindings, euiTheme),
-    [passedFindings, failedFindings, euiTheme]
+    () => getFindingsStats(passedFindings, failedFindings),
+    [passedFindings, failedFindings]
   );
 
   const count = useMemo(

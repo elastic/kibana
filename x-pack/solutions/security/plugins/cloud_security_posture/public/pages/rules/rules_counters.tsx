@@ -19,7 +19,7 @@ import { useParams } from 'react-router-dom';
 import { Chart, Partition, PartitionLayout, Settings } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MISCONFIGURATION_STATUS } from '@kbn/cloud-security-posture-common';
-import { useMisconfigurationStatusColor } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_status_color';
+import { getMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
 import { useNavigateFindings } from '@kbn/cloud-security-posture/src/hooks/use_navigate_findings';
 import { useBenchmarkDynamicValues } from '../../common/hooks/use_benchmark_dynamic_values';
 import { getPostureScorePercentage } from '../compliance_dashboard/compliance_charts/compliance_score_chart';
@@ -35,7 +35,6 @@ const EvaluationPieChart = ({ failed, passed }: { failed: number; passed: number
   const {
     services: { charts },
   } = useKibana();
-  const { getMisconfigurationStatusColor } = useMisconfigurationStatusColor();
 
   return (
     <Chart size={{ height: 30, width: 30 }}>
@@ -94,7 +93,6 @@ export const RulesCounters = ({
   setEnabledDisabledItemsFilter: (filterState: string) => void;
 }) => {
   const { http } = useKibana().services;
-  const { getMisconfigurationStatusColor } = useMisconfigurationStatusColor();
   const { getBenchmarkDynamicValues } = useBenchmarkDynamicValues();
   const rulesPageParams = useParams<{ benchmarkId: string; benchmarkVersion: string }>();
   const getBenchmarks = useCspBenchmarkIntegrationsV2();
