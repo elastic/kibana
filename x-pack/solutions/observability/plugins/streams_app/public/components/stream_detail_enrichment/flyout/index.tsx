@@ -19,6 +19,7 @@ import { DangerZone } from './danger_zone';
 import { DissectProcessorForm } from './dissect';
 import { GrokProcessorForm } from './grok';
 import { convertFormStateToProcessing, getDefaultFormState } from '../utils';
+import { useProcessingSimulator } from '../hooks/use_processing_simulator';
 
 const ProcessorOutcomePreview = dynamic(() =>
   import(/* webpackChunkName: "management_processor_outcome" */ './processor_outcome_preview').then(
@@ -29,11 +30,11 @@ const ProcessorOutcomePreview = dynamic(() =>
 );
 
 export interface ProcessorFlyoutProps {
+  definition: ReadStreamDefinition;
   onClose: () => void;
 }
 
 export interface AddProcessorFlyoutProps extends ProcessorFlyoutProps {
-  definition: ReadStreamDefinition;
   onAddProcessor: (newProcessing: ProcessingDefinition, newFields?: DetectedField[]) => void;
 }
 export interface EditProcessorFlyoutProps extends ProcessorFlyoutProps {
@@ -49,7 +50,7 @@ export function AddProcessorFlyout({
 }: AddProcessorFlyoutProps) {
   const defaultValues = useMemo(() => getDefaultFormState('grok'), []);
 
-  const methods = useForm<ProcessorFormState>({ defaultValues });
+  const methods = useForm<ProcessorFormState>({ defaultValues, mode: 'onChange' });
 
   const formFields = methods.watch();
 
@@ -58,11 +59,21 @@ export function AddProcessorFlyout({
     [defaultValues, formFields]
   );
 
-  const handleSubmit: SubmitHandler<ProcessorFormState> = (data) => {
+  const { error, isLoading, refreshSamples, simulation, samples, simulate } =
+    useProcessingSimulator({
+      definition,
+      condition: { field: formFields.field, operator: 'exists' },
+    });
+
+  const handleSubmit: SubmitHandler<ProcessorFormState> = async (data) => {
     const processingDefinition = convertFormStateToProcessing(data);
 
-    onAddProcessor(processingDefinition, data.detected_fields);
-    onClose();
+    simulate(processingDefinition).then((responseBody) => {
+      if (responseBody instanceof Error) return;
+
+      onAddProcessor(processingDefinition, data.detected_fields);
+      onClose();
+    });
   };
 
   return (
@@ -74,7 +85,10 @@ export function AddProcessorFlyout({
         { defaultMessage: 'Add processor' }
       )}
       confirmButton={
-        <EuiButton onClick={methods.handleSubmit(handleSubmit)}>
+        <EuiButton
+          onClick={methods.handleSubmit(handleSubmit)}
+          disabled={!methods.formState.isValid && methods.formState.isSubmitted}
+        >
           {i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.confirmAddProcessor',
             { defaultMessage: 'Add processor' }
@@ -90,7 +104,16 @@ export function AddProcessorFlyout({
           {formFields.type === 'dissect' && <DissectProcessorForm />}
         </EuiForm>
         <EuiHorizontalRule />
-        <ProcessorOutcomePreview definition={definition} formFields={formFields} />
+        <ProcessorOutcomePreview
+          definition={definition}
+          formFields={formFields}
+          simulation={simulation}
+          samples={samples}
+          onSimulate={simulate}
+          onRefreshSamples={refreshSamples}
+          simulationError={error}
+          isLoading={isLoading}
+        />
       </FormProvider>
     </ProcessorFlyoutTemplate>
   );
@@ -107,7 +130,7 @@ export function EditProcessorFlyout({
     [processor]
   );
 
-  const methods = useForm<ProcessorFormState>({ defaultValues });
+  const methods = useForm<ProcessorFormState>({ defaultValues, mode: 'onChange' });
 
   const formFields = methods.watch();
 
@@ -146,7 +169,10 @@ export function EditProcessorFlyout({
         />
       }
       confirmButton={
-        <EuiButton onClick={methods.handleSubmit(handleSubmit)} disabled={!hasChanges}>
+        <EuiButton
+          onClick={methods.handleSubmit(handleSubmit)}
+          disabled={!methods.formState.isValid}
+        >
           {i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.confirmEditProcessor',
             { defaultMessage: 'Update processor' }
