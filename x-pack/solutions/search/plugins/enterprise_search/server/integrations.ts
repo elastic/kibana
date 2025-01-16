@@ -23,7 +23,7 @@ export const registerEnterpriseSearchIntegrations = (
         defaultMessage: 'Add search to your website with the web crawler.',
       }),
       categories: ['search', 'web', 'elastic_stack', 'crawler'],
-      uiInternalPath: '/app/elasticsearch/content/crawlers/new_crawler',
+      uiInternalPath: '/app/elasticsearch/content/crawlers',
       icons: [
         {
           type: 'eui',
