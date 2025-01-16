@@ -7,26 +7,18 @@
 
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
-import { commonFunctionalUIServices } from '@kbn/ftr-common-functional-ui-services';
-import { cypressTestRunner } from './cypress_test_runner';
-import type { FtrProviderContext } from './ftr_provider_context';
+import { cypressTestRunner } from './runner';
 
 async function ftrConfig({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
     require.resolve('@kbn/test-suites-src/common/config')
   );
   const xpackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('@kbn/test-suites-xpack/functional/config.base')
+    require.resolve('../functional/config.base.js')
   );
 
   return {
     ...kibanaCommonTestsConfig.getAll(),
-
-    services: {
-      ...commonFunctionalServices,
-      ...commonFunctionalUIServices,
-    },
 
     esTestCluster: {
       ...xpackFunctionalTestsConfig.get('esTestCluster'),
@@ -49,20 +41,8 @@ async function ftrConfig({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
       ],
     },
-    testRunner: async (ftrProviderContext: FtrProviderContext) => {
-      const result = await cypressTestRunner(ftrProviderContext);
-
-      // set exit code explicitly if at least one Cypress test fails
-      if (
-        result &&
-        ((result as CypressCommandLine.CypressFailedRunResult)?.status === 'failed' ||
-          (result as CypressCommandLine.CypressRunResult)?.totalFailed)
-      ) {
-        process.exitCode = 1;
-      }
-    },
+    testRunner: cypressTestRunner,
   };
 }
 
-// eslint-disable-next-line import/no-default-export
 export default ftrConfig;
