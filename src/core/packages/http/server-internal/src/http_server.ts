@@ -37,6 +37,7 @@ import type {
   IAuthHeadersStorage,
   RouterDeprecatedApiDetails,
   RouteMethod,
+  VersionedRouterRoute,
 } from '@kbn/core-http-server';
 import { performance } from 'perf_hooks';
 import { isBoom } from '@hapi/boom';
@@ -410,10 +411,12 @@ export class HttpServer {
           .map((route) => {
             const access = route.options.access;
             if (route.isVersioned === true) {
-              return [...route.handlers.entries()].map(([_, { options }]) => {
-                const deprecated = options.options?.deprecated;
-                return { route, version: `${options.version}`, deprecated, access };
-              });
+              return [...(route as VersionedRouterRoute).handlers.entries()].map(
+                ([_, { options }]) => {
+                  const deprecated = options.options?.deprecated;
+                  return { route, version: `${options.version}`, deprecated, access };
+                }
+              );
             }
 
             return { route, version: undefined, deprecated: route.options.deprecated, access };
@@ -742,13 +745,22 @@ export class HttpServer {
     });
   }
 
+  private getSecurity(route: RouterRoute) {
+    const securityConfig = route?.security;
+
+    // for versioned routes, we need to check if the security config is a function
+    return typeof securityConfig === 'function' ? securityConfig() : securityConfig;
+  }
+
   private configureRoute(route: RouterRoute) {
     const optionsLogger = this.log.get('options');
     this.log.debug(`registering route handler for [${route.path}]`);
     // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
     const validate = isSafeMethod(route.method) ? undefined : { payload: true };
-    const { authRequired, tags, body = {}, timeout, deprecated } = route.options;
+    const { tags, body = {}, timeout, deprecated } = route.options;
     const { accepts: allow, override, maxBytes, output, parse } = body;
+
+    const authRequired = this.getSecurity(route)?.authc?.enabled ?? route.options.authRequired;
 
     const kibanaRouteOptions: KibanaRouteOptions = {
       xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),

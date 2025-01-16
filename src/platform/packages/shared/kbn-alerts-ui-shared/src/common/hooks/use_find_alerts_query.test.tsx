@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -32,7 +32,7 @@ describe('useFindAlertsQuery', () => {
   });
 
   it('calls the api correctly', async () => {
-    const { result, waitForValueToChange } = renderHook(
+    const { result } = renderHook(
       () =>
         useFindAlertsQuery({
           ...mockServices,
@@ -43,7 +43,7 @@ describe('useFindAlertsQuery', () => {
       }
     );
 
-    await waitForValueToChange(() => result.current.isLoading, { timeout: 5000 });
+    await waitFor(() => expect(result.current.isLoading).toBe(true), { timeout: 5000 });
 
     expect(mockServices.http.post).toHaveBeenCalledTimes(1);
     expect(mockServices.http.post).toBeCalledWith('/internal/rac/alerts/find', {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useNavigateToHostDetails } from './use_navigate_to_host_details';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -14,8 +14,8 @@ import {
   EntityDetailsLeftPanelTab,
 } from '../../shared/components/left_panel/left_panel_header';
 import { HostDetailsPanelKey } from '../../host_details_left';
-import { HostPanelKey } from '..';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
+import { HostPanelKey } from '../../shared/constants';
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../common/hooks/use_experimental_features');

@@ -304,8 +304,9 @@
             "label": "security",
             "description": [],
             "signature": [
+              "Pick<",
               "RouteSecurity",
-              " | undefined"
+              ", \"authz\"> | undefined"
             ],
             "path": "src/core/packages/http/server/src/versioning/types.ts",
             "deprecated": false,
@@ -3012,20 +3013,20 @@
                 "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/get.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/get.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/get.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/get.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/get.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/internal/get.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/get.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/internal/get.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -3073,11 +3074,7 @@
               },
               {
                 "plugin": "@kbn/content-management-favorites-server",
-                "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts"
-              },
-              {
-                "plugin": "@kbn/content-management-content-insights-server",
-                "path": "packages/content-management/content_insights/content_insights_server/src/register.ts"
+                "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts"
               },
               {
                 "plugin": "licensing",
@@ -3086,6 +3083,10 @@
               {
                 "plugin": "licensing",
                 "path": "x-pack/platform/plugins/shared/licensing/server/routes/feature_usage.ts"
+              },
+              {
+                "plugin": "features",
+                "path": "x-pack/platform/plugins/shared/features/server/routes/index.ts"
               },
               {
                 "plugin": "customIntegrations",
@@ -3104,8 +3105,12 @@
                 "path": "src/platform/plugins/shared/home/server/services/sample_data/routes/list.ts"
               },
               {
-                "plugin": "features",
-                "path": "x-pack/platform/plugins/shared/features/server/routes/index.ts"
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/internal/get_active_space.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/internal/get_content_summary.ts"
               },
               {
                 "plugin": "taskManager",
@@ -3118,22 +3123,6 @@
               {
                 "plugin": "taskManager",
                 "path": "x-pack/platform/plugins/shared/task_manager/server/routes/metrics.ts"
-              },
-              {
-                "plugin": "share",
-                "path": "src/platform/plugins/shared/share/server/url_service/http/short_urls/register_get_route.ts"
-              },
-              {
-                "plugin": "share",
-                "path": "src/platform/plugins/shared/share/server/url_service/http/short_urls/register_resolve_route.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/internal/get_active_space.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/internal/get_content_summary.ts"
               },
               {
                 "plugin": "security",
@@ -3222,6 +3211,14 @@
               {
                 "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/server/routes/views/login.ts"
+              },
+              {
+                "plugin": "share",
+                "path": "src/platform/plugins/shared/share/server/url_service/http/short_urls/register_get_route.ts"
+              },
+              {
+                "plugin": "share",
+                "path": "src/platform/plugins/shared/share/server/url_service/http/short_urls/register_resolve_route.ts"
               },
               {
                 "plugin": "monitoringCollection",
@@ -3350,6 +3347,10 @@
               {
                 "plugin": "inference",
                 "path": "x-pack/platform/plugins/shared/inference/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "@kbn/content-management-content-insights-server",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts"
               },
               {
                 "plugin": "banners",
@@ -3544,26 +3545,6 @@
                 "path": "x-pack/platform/plugins/private/rollup/server/routes/api/jobs/register_get_route.ts"
               },
               {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/routes/tags/get_all_tags.ts"
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/routes/tags/get_tag.ts"
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/routes/assignments/find_assignable_objects.ts"
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/routes/assignments/get_assignable_types.ts"
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/routes/internal/find_tags.ts"
-              },
-              {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/app.ts"
               },
@@ -3704,6 +3685,26 @@
                 "path": "x-pack/platform/plugins/private/watcher/server/routes/api/register_load_history_route.ts"
               },
               {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/tags/get_all_tags.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/tags/get_tag.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/assignments/find_assignable_objects.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/assignments/get_assignable_types.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/internal/find_tags.ts"
+              },
+              {
                 "plugin": "ingestPipelines",
                 "path": "x-pack/platform/plugins/shared/ingest_pipelines/server/routes/api/get.ts"
               },
@@ -3804,10 +3805,6 @@
                 "path": "x-pack/platform/plugins/shared/stack_connectors/server/routes/get_well_known_email_service.ts"
               },
               {
-                "plugin": "stackConnectors",
-                "path": "x-pack/platform/plugins/shared/stack_connectors/server/routes/get_inference_services.ts"
-              },
-              {
                 "plugin": "customBranding",
                 "path": "x-pack/platform/plugins/private/custom_branding/server/routes/info.ts"
               },
@@ -3833,7 +3830,7 @@
               },
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/routes/fields.ts"
+                "path": "src/platform/plugins/shared/vis_types/timeseries/server/routes/fields.ts"
               },
               {
                 "plugin": "infra",
@@ -3882,126 +3879,6 @@
               {
                 "plugin": "uptime",
                 "path": "x-pack/solutions/observability/plugins/uptime/server/legacy_uptime/uptime_server.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_extraction_rules.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/adaptive_relevance.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/adaptive_relevance.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/analytics.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/analytics.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/api_logs.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/credentials.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/credentials.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/curations.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/curations.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/documents.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/engines.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/engines.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/engines.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/result_settings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/role_mappings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/schema.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/schema.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/search_settings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/search_ui.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/settings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/source_engines.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/synonyms.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -4160,146 +4037,6 @@
                 "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/stats.ts"
               },
               {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/api_keys.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/groups.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/groups.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/groups.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/oauth.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/overview.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/role_mappings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/security.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/security.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/settings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
                 "plugin": "searchIndices",
                 "path": "x-pack/solutions/search/plugins/search_indices/server/routes/status.ts"
               },
@@ -4360,20 +4097,16 @@
                 "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/ingest_pipeline_routes.ts"
               },
               {
-                "plugin": "assetInventory",
-                "path": "x-pack/solutions/security/plugins/asset_inventory/server/routes/index.ts"
-              },
-              {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/vulnerabilities_dashboard/vulnerabilities_dashboard.ts"
               },
               {
-                "plugin": "apmDataAccess",
-                "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.test.ts"
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_extraction_rules.ts"
               },
               {
-                "plugin": "visTypeTimelion",
-                "path": "src/plugins/vis_types/timelion/server/routes/functions.ts"
+                "plugin": "apmDataAccess",
+                "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.test.ts"
               },
               {
                 "plugin": "ftrApis",
@@ -4418,6 +4151,10 @@
               {
                 "plugin": "savedObjectsManagement",
                 "path": "src/platform/plugins/shared/saved_objects_management/server/routes/get_allowed_types.ts"
+              },
+              {
+                "plugin": "visTypeTimelion",
+                "path": "src/platform/plugins/private/vis_types/timelion/server/routes/functions.ts"
               },
               {
                 "plugin": "mockIdpPlugin",
@@ -4561,19 +4298,11 @@
               },
               {
                 "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+                "path": "src/core/packages/http/server-internal/src/http_server.test.ts"
               },
               {
                 "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_route.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_route.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+                "path": "src/core/packages/http/server-internal/src/http_server.test.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-mocks",
@@ -4650,10 +4379,6 @@
               {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/__mocks__/server.ts"
-              },
-              {
-                "plugin": "stackConnectors",
-                "path": "x-pack/platform/plugins/shared/stack_connectors/server/routes/get_inference_services.test.ts"
               },
               {
                 "plugin": "stackConnectors",
@@ -5460,40 +5185,40 @@
                 "path": "src/core/packages/saved-objects/server-internal/src/routes/deprecations/delete_unknown_types.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/set_many.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/set_many.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/set_many.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/set_many.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/set.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/set.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/set.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/set.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/set_many.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/internal/set_many.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/set_many.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/internal/set_many.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/set.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/internal/set.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/set.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/internal/set.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/validate.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/internal/validate.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -5509,19 +5234,15 @@
               },
               {
                 "plugin": "@kbn/content-management-favorites-server",
-                "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts"
+                "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts"
               },
               {
                 "plugin": "@kbn/content-management-favorites-server",
-                "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts"
+                "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts"
               },
               {
                 "plugin": "contentManagement",
                 "path": "src/platform/plugins/shared/content_management/server/rpc/routes/routes.ts"
-              },
-              {
-                "plugin": "@kbn/content-management-content-insights-server",
-                "path": "packages/content-management/content_insights/content_insights_server/src/register.ts"
               },
               {
                 "plugin": "licensing",
@@ -5538,18 +5259,6 @@
               {
                 "plugin": "home",
                 "path": "src/platform/plugins/shared/home/server/routes/fetch_es_hits_status.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/routes/search.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/routes/explore.ts"
-              },
-              {
-                "plugin": "share",
-                "path": "src/platform/plugins/shared/share/server/url_service/http/short_urls/register_create_route.ts"
               },
               {
                 "plugin": "spaces",
@@ -5654,6 +5363,10 @@
               {
                 "plugin": "encryptedSavedObjects",
                 "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/routes/key_rotation.ts"
+              },
+              {
+                "plugin": "share",
+                "path": "src/platform/plugins/shared/share/server/url_service/http/short_urls/register_create_route.ts"
               },
               {
                 "plugin": "serverless",
@@ -5824,6 +5537,10 @@
                 "path": "x-pack/platform/plugins/shared/inference/server/routes/chat_complete.ts"
               },
               {
+                "plugin": "@kbn/content-management-content-insights-server",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts"
+              },
+              {
                 "plugin": "indexManagement",
                 "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/component_templates/register_create_route.ts"
               },
@@ -5889,10 +5606,6 @@
               },
               {
                 "plugin": "indexManagement",
-                "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/indices/register_unfreeze_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
                 "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/templates/register_delete_route.ts"
               },
               {
@@ -5926,6 +5639,14 @@
               {
                 "plugin": "globalSearch",
                 "path": "x-pack/platform/plugins/shared/global_search/server/routes/find.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/platform/plugins/private/graph/server/routes/search.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/platform/plugins/private/graph/server/routes/explore.ts"
               },
               {
                 "plugin": "indexLifecycleManagement",
@@ -6000,22 +5721,6 @@
                 "path": "x-pack/platform/plugins/private/rollup/server/routes/api/search/register_search_route.ts"
               },
               {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/routes/tags/create_tag.ts"
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/routes/tags/update_tag.ts"
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/routes/assignments/update_tags_assignments.ts"
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/routes/internal/bulk_delete.ts"
-              },
-              {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/repositories.ts"
               },
@@ -6082,6 +5787,22 @@
               {
                 "plugin": "watcher",
                 "path": "x-pack/platform/plugins/private/watcher/server/routes/api/register_list_fields_route.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/tags/create_tag.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/tags/update_tag.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/assignments/update_tags_assignments.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/internal/bulk_delete.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -6225,7 +5946,7 @@
               },
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/routes/vis.ts"
+                "path": "src/platform/plugins/shared/vis_types/timeseries/server/routes/vis.ts"
               },
               {
                 "plugin": "infra",
@@ -6242,114 +5963,6 @@
               {
                 "plugin": "uptime",
                 "path": "x-pack/solutions/observability/plugins/uptime/server/legacy_uptime/uptime_server.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_extraction_rules.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/adaptive_relevance.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/app_search_gated_form.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler_crawl_rules.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler_entry_points.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler_sitemaps.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/credentials.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/curations.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/curations.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/documents.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/engines.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/engines.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/onboarding.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/role_mappings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/role_mappings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/role_mappings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/schema.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/search.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/search.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/search_settings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/source_engines.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/synonyms.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -6496,92 +6109,8 @@
                 "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
               },
               {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/api_keys.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/gated_form.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/groups.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/groups.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/groups.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/oauth.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/role_mappings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/role_mappings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/role_mappings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+                "plugin": "searchIndices",
+                "path": "x-pack/solutions/search/plugins/search_indices/server/routes/indices.ts"
               },
               {
                 "plugin": "searchIndices",
@@ -6648,8 +6177,8 @@
                 "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/connectors_routes.ts"
               },
               {
-                "plugin": "visTypeTimelion",
-                "path": "src/plugins/vis_types/timelion/server/routes/run.ts"
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_extraction_rules.ts"
               },
               {
                 "plugin": "ftrApis",
@@ -6732,6 +6261,10 @@
                 "path": "src/platform/plugins/shared/saved_objects_management/server/routes/scroll_count.ts"
               },
               {
+                "plugin": "visTypeTimelion",
+                "path": "src/platform/plugins/private/vis_types/timelion/server/routes/run.ts"
+              },
+              {
                 "plugin": "mockIdpPlugin",
                 "path": "packages/kbn-mock-idp-plugin/server/plugin.ts"
               },
@@ -6785,10 +6318,6 @@
               },
               {
                 "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-internal/src/router.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
                 "path": "src/core/packages/http/server-internal/src/http_server.test.ts"
               },
               {
@@ -6838,38 +6367,6 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/http/server-internal/src/http_server.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_route.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_route.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_route.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_route.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_route.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_route.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_route.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_route.test.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-mocks",
@@ -7449,14 +6946,6 @@
               },
               {
                 "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authentication/saml.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authentication/saml.test.ts"
-              },
-              {
-                "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/server/routes/deprecations/kibana_user_role.test.ts"
               },
               {
@@ -7781,66 +7270,6 @@
               },
               {
                 "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_extraction_rules.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/adaptive_relevance.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/adaptive_relevance.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler_crawl_rules.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler_entry_points.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler_sitemaps.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/credentials.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/curations.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/result_settings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/role_mappings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/search_settings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/settings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/synonyms.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
                 "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
               },
               {
@@ -7916,48 +7345,12 @@
                 "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/telemetry.ts"
               },
               {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/groups.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/groups.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/role_mappings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/settings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/settings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/settings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
                 "plugin": "searchInferenceEndpoints",
                 "path": "x-pack/solutions/search/plugins/search_inference_endpoints/server/routes.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_extraction_rules.ts"
               },
               {
                 "plugin": "ftrApis",
@@ -7982,10 +7375,6 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/http/server-internal/src/http_server.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_route.test.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-mocks",
@@ -8220,18 +7609,6 @@
                 "path": "x-pack/solutions/observability/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/security.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/http/router-server-internal/src/router.ts"
               },
@@ -8440,28 +7817,24 @@
                 "path": "src/core/packages/saved-objects/server-internal/src/routes/delete.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/delete.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/delete.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/delete.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/delete.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/delete.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/internal/delete.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/delete.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/internal/delete.ts"
               },
               {
                 "plugin": "home",
                 "path": "src/platform/plugins/shared/home/server/services/sample_data/routes/uninstall.ts"
-              },
-              {
-                "plugin": "share",
-                "path": "src/platform/plugins/shared/share/server/url_service/http/short_urls/register_delete_route.ts"
               },
               {
                 "plugin": "security",
@@ -8470,6 +7843,10 @@
               {
                 "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/server/routes/users/delete.ts"
+              },
+              {
+                "plugin": "share",
+                "path": "src/platform/plugins/shared/share/server/url_service/http/short_urls/register_delete_route.ts"
               },
               {
                 "plugin": "actions",
@@ -8524,10 +7901,6 @@
                 "path": "x-pack/platform/plugins/private/reporting/server/test_helpers/create_mock_reportingplugin.ts"
               },
               {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/routes/tags/delete_tag.ts"
-              },
-              {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/repositories.ts"
               },
@@ -8546,6 +7919,10 @@
               {
                 "plugin": "watcher",
                 "path": "x-pack/platform/plugins/private/watcher/server/routes/api/watch/register_delete_route.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/tags/delete_tag.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -8578,58 +7955,6 @@
               {
                 "plugin": "uptime",
                 "path": "x-pack/solutions/observability/plugins/uptime/server/legacy_uptime/uptime_server.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_extraction_rules.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler_crawl_rules.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler_entry_points.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler_sitemaps.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/credentials.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/curations.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/documents.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/engines.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/role_mappings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/source_engines.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/synonyms.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -8680,34 +8005,6 @@
                 "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
               },
               {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/api_keys.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/groups.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/oauth.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/role_mappings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
                 "plugin": "searchIndices",
                 "path": "x-pack/solutions/search/plugins/search_indices/server/routes/documents.ts"
               },
@@ -8718,6 +8015,10 @@
               {
                 "plugin": "serverlessSearch",
                 "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_extraction_rules.ts"
               },
               {
                 "plugin": "ftrApis",
@@ -11403,38 +10704,6 @@
               },
               {
                 "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authentication/common.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authentication/common.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authentication/oidc.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authentication/oidc.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authentication/oidc.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authentication/oidc.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authentication/oidc.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authentication/saml.ts"
-              },
-              {
-                "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/reset_session_page.ts"
               },
               {
@@ -11462,16 +10731,16 @@
                 "path": "x-pack/platform/plugins/shared/security/server/routes/analytics/record_violations.ts"
               },
               {
-                "plugin": "files",
-                "path": "src/platform/plugins/shared/files/server/routes/public_facing/download.ts"
-              },
-              {
                 "plugin": "monitoringCollection",
                 "path": "x-pack/platform/plugins/private/monitoring_collection/server/routes/api/v1/dynamic_route/get_metrics_by_type.ts"
               },
               {
                 "plugin": "monitoringCollection",
                 "path": "x-pack/platform/plugins/private/monitoring_collection/server/routes/api/v1/prometheus/get_metrics.ts"
+              },
+              {
+                "plugin": "files",
+                "path": "src/platform/plugins/shared/files/server/routes/public_facing/download.ts"
               },
               {
                 "plugin": "banners",
@@ -11784,14 +11053,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/lib/capabilities/capabilities_switcher.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-internal/src/request.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-internal/src/request.test.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -12497,9 +11758,6 @@
             "tags": [],
             "label": "isVersioned",
             "description": [],
-            "signature": [
-              "false"
-            ],
             "path": "src/core/packages/http/server/src/router/router.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13420,6 +12678,30 @@
                 "path": "src/core/packages/metrics/server-internal/src/routes/elu_history.ts"
               },
               {
+                "plugin": "cloud",
+                "path": "x-pack/platform/plugins/shared/cloud/server/routes/elasticsearch_route.ts"
+              },
+              {
+                "plugin": "cloud",
+                "path": "x-pack/platform/plugins/shared/cloud/server/routes/get_cloud_data_route.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/get.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/get_all.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/get.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/get_all.ts"
+              },
+              {
                 "plugin": "dataViews",
                 "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/runtime_fields/get_runtime_field.ts"
               },
@@ -13465,47 +12747,23 @@
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
+                "path": "src/platform/plugins/shared/data/server/search/routes/session.ts"
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
+                "path": "src/platform/plugins/shared/data/server/search/routes/session.ts"
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/query/routes.ts"
+                "path": "src/platform/plugins/shared/data/server/query/routes.ts"
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/query/routes.ts"
+                "path": "src/platform/plugins/shared/data/server/query/routes.ts"
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/scripts/route.ts"
-              },
-              {
-                "plugin": "cloud",
-                "path": "x-pack/platform/plugins/shared/cloud/server/routes/elasticsearch_route.ts"
-              },
-              {
-                "plugin": "cloud",
-                "path": "x-pack/platform/plugins/shared/cloud/server/routes/get_cloud_data_route.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/get.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/get_all.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/get.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/get_all.ts"
+                "path": "src/platform/plugins/shared/data/server/scripts/route.ts"
               },
               {
                 "plugin": "controls",
@@ -13853,6 +13111,10 @@
               },
               {
                 "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/saved_objects.ts"
+              },
+              {
+                "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/results_service.ts"
               },
               {
@@ -14133,14 +13395,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_dev_tool_content/routes/read_prebuilt_dev_tool_content_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/index_status/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/tags/routes/get_tags_by_name.ts"
               },
               {
@@ -14246,6 +13500,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/get_prebuilt_rules.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/get_integrations.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -14477,6 +13735,10 @@
               },
               {
                 "plugin": "@kbn/core",
+                "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
                 "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_router.test.ts"
               },
               {
@@ -14595,6 +13857,14 @@
                 "path": "src/core/packages/apps/server-internal/src/core_app.ts"
               },
               {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/put.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/put.ts"
+              },
+              {
                 "plugin": "dataViews",
                 "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/runtime_fields/put_runtime_field.ts"
               },
@@ -14608,19 +13878,11 @@
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
+                "path": "src/platform/plugins/shared/data/server/search/routes/session.ts"
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/query/routes.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/put.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/put.ts"
+                "path": "src/platform/plugins/shared/data/server/query/routes.ts"
               },
               {
                 "plugin": "dashboard",
@@ -14756,14 +14018,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/indices/create_index_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/stored_scripts/create_script_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/tags/routes/create_tag.ts"
               },
               {
@@ -14781,10 +14035,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/stop.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/retry.ts"
               },
               {
                 "plugin": "metricsDataAccess",
@@ -14890,6 +14140,18 @@
             "trackAdoption": true,
             "references": [
               {
+                "plugin": "cloud",
+                "path": "x-pack/platform/plugins/shared/cloud/server/routes/set_cloud_data_route.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/post.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/post.ts"
+              },
+              {
                 "plugin": "dataViews",
                 "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/fields/update_fields.ts"
               },
@@ -14931,55 +14193,43 @@
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
+                "path": "src/platform/plugins/shared/data/server/search/routes/session.ts"
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
+                "path": "src/platform/plugins/shared/data/server/search/routes/session.ts"
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
+                "path": "src/platform/plugins/shared/data/server/search/routes/session.ts"
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
+                "path": "src/platform/plugins/shared/data/server/search/routes/session.ts"
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/search.ts"
+                "path": "src/platform/plugins/shared/data/server/search/routes/search.ts"
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/query/routes.ts"
+                "path": "src/platform/plugins/shared/data/server/query/routes.ts"
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/query/routes.ts"
+                "path": "src/platform/plugins/shared/data/server/query/routes.ts"
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/query/routes.ts"
+                "path": "src/platform/plugins/shared/data/server/query/routes.ts"
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/kql_telemetry/route.ts"
-              },
-              {
-                "plugin": "cloud",
-                "path": "x-pack/platform/plugins/shared/cloud/server/routes/set_cloud_data_route.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/post.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/post.ts"
+                "path": "src/platform/plugins/shared/data/server/kql_telemetry/route.ts"
               },
               {
                 "plugin": "unifiedSearch",
-                "path": "src/plugins/unified_search/server/autocomplete/value_suggestions_route.ts"
+                "path": "src/platform/plugins/shared/unified_search/server/autocomplete/value_suggestions_route.ts"
               },
               {
                 "plugin": "controls",
@@ -15144,6 +14394,10 @@
               {
                 "plugin": "integrationAssistant",
                 "path": "x-pack/platform/plugins/shared/integration_assistant/server/routes/cel_routes.ts"
+              },
+              {
+                "plugin": "integrationAssistant",
+                "path": "x-pack/platform/plugins/shared/integration_assistant/server/routes/analyze_api_route.ts"
               },
               {
                 "plugin": "maps",
@@ -15679,22 +14933,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/indices/delete_indices_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/routes/create_prebuilt_saved_objects.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/routes/delete_prebuilt_saved_objects.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/onboarding/routes/install_risk_scores.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/exceptions/api/manage_exceptions/route.ts"
               },
               {
@@ -15911,7 +15149,19 @@
               },
               {
                 "plugin": "@kbn/core",
+                "path": "src/core/packages/http/router-server-internal/src/router.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
                 "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_router.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_route.test.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -16136,6 +15386,14 @@
             "trackAdoption": true,
             "references": [
               {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/delete.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/delete.ts"
+              },
+              {
                 "plugin": "dataViews",
                 "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/runtime_fields/delete_runtime_field.ts"
               },
@@ -16149,23 +15407,15 @@
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
+                "path": "src/platform/plugins/shared/data/server/search/routes/session.ts"
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/search.ts"
+                "path": "src/platform/plugins/shared/data/server/search/routes/search.ts"
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/query/routes.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/delete.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/delete.ts"
+                "path": "src/platform/plugins/shared/data/server/query/routes.ts"
               },
               {
                 "plugin": "dashboard",
@@ -16278,10 +15528,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/index/delete_index_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/stored_scripts/delete_script_route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -16511,13 +15757,7 @@
             "label": "handlers",
             "description": [],
             "signature": [
-              "{ fn: ",
-              "RequestHandler",
-              "<P, Q, B, ",
-              "RequestHandlerContextBase",
-              ", any, ",
-              "KibanaResponseFactory",
-              ">; options: ",
+              "{ fn: Function; options: ",
               "AddVersionOpts",
               "<P, Q, B>; }[]"
             ],
@@ -16678,6 +15918,24 @@
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "@kbn/core-http-server",
+        "id": "def-server.AnyKibanaRequest",
+        "type": "Type",
+        "tags": [],
+        "label": "AnyKibanaRequest",
+        "description": [],
+        "signature": [
+          "KibanaRequest",
+          "<unknown, unknown, unknown, ",
+          "RouteMethod",
+          ">"
+        ],
+        "path": "src/core/packages/http/server/src/router/request.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/core-http-server",
         "id": "def-server.ApiVersion",
@@ -18216,9 +17474,9 @@
         "label": "RouteSecurityGetter",
         "description": [],
         "signature": [
-          "(request: { headers: ",
+          "(request?: { headers: ",
           "Headers",
-          "; query?: unknown; }) => ",
+          "; query?: unknown; } | undefined) => ",
           "RouteSecurity",
           " | undefined"
         ],
@@ -18237,7 +17495,7 @@
             "signature": [
               "{ headers: ",
               "Headers",
-              "; query?: unknown; }"
+              "; query?: unknown; } | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
             "deprecated": false,

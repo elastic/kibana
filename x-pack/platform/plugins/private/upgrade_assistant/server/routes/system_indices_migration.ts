@@ -19,7 +19,16 @@ export function registerSystemIndicesMigrationRoutes({
 }: RouteDependencies) {
   // GET status of the system indices migration
   router.get(
-    { path: `${API_BASE_PATH}/system_indices_migration`, validate: false },
+    {
+      path: `${API_BASE_PATH}/system_indices_migration`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: false,
+    },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
       try {
         const {
