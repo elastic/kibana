@@ -12,7 +12,7 @@ import { fetchRuleVersionsTriad } from '../../../detection_engine/prebuilt_rules
 import type { RuleMigrationPrebuiltRule } from '../types';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 
-export { RuleVersions };
+export type { RuleVersions };
 export type PrebuildRuleVersionsMap = Map<string, RuleVersions>;
 /* The minimum score required for a integration to be considered correct, might need to change this later */
 const MIN_SCORE = 40 as const;
