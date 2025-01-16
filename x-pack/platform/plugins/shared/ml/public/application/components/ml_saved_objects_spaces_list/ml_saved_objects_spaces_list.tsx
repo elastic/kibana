@@ -18,7 +18,7 @@ import { useToastNotificationService } from '../../services/toast_notification_s
 
 interface Props {
   spacesApi: SpacesPluginStart; // this component is only ever used when spaces is enabled
-  spaceIds: string[];
+  spaceIds?: string[];
   id: string;
   mlSavedObjectType: MlSavedObjectType;
   refresh(): void;
@@ -33,9 +33,10 @@ const modelObjectNoun = i18n.translate('xpack.ml.management.jobsSpacesList.model
   defaultMessage: 'trained model',
 });
 
+const FALLBACK_SPACES_ID: string[] = [];
 export const MLSavedObjectsSpacesList: FC<Props> = ({
   spacesApi,
-  spaceIds,
+  spaceIds = FALLBACK_SPACES_ID,
   id,
   mlSavedObjectType,
   refresh,
