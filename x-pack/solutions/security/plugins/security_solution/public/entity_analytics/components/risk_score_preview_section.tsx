@@ -149,7 +149,7 @@ const RiskEnginePreview = () => {
     bool: { must: [], filter: [], should: [], must_not: [] },
   });
   const entityTypes = useRiskEngineEntityTypes();
-  
+
   const {
     unifiedSearch: {
       ui: { SearchBar },
