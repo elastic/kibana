@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
-import { StackframeWithLineContext } from '@kbn/apm-types';
+import type { StackframeWithLineContext } from '@kbn/apm-types';
 
 function getStackframeLines(stackframe: StackframeWithLineContext) {
   const line = stackframe.line.context;
