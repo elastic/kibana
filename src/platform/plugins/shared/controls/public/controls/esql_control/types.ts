@@ -13,10 +13,14 @@ import type { DefaultControlApi } from '../types';
 
 interface CanClearVariables {
   clearVariables: () => void;
+  resetVariables: () => void;
 }
 
 export const isVariablesControl = (control: unknown): control is CanClearVariables => {
-  return typeof (control as CanClearVariables).clearVariables === 'function';
+  return (
+    typeof (control as CanClearVariables).clearVariables === 'function' &&
+    typeof (control as CanClearVariables).resetVariables === 'function'
+  );
 };
 
 export interface ESQLControlState extends DefaultControlState, Omit<ControlState, 'width'> {}

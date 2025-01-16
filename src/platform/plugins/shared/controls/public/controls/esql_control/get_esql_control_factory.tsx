@@ -93,6 +93,13 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
           clearVariables: () => {
             esqlVariablesService.removeVariable(initialState.variableName);
           },
+          resetVariables: () => {
+            esqlVariablesService.updateVariable({
+              key: selections.variableName$.getValue(),
+              value: selections.selectedOptions$.getValue()[0],
+              type: selections.variableType$.getValue() as ESQLVariableType,
+            });
+          },
           hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
         },
         {
