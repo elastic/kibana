@@ -37,7 +37,7 @@ import {
   type UseDataGridColumnsCellActionsProps,
 } from '@kbn/cell-actions';
 import type { SerializedStyles } from '@emotion/react';
-import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
+import type { ToastsStart, IUiSettingsClient, I18nStart } from '@kbn/core/public';
 import type { Serializable } from '@kbn/utility-types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import {
@@ -286,6 +286,7 @@ export interface UnifiedDataTableProps {
    */
   services: {
     theme: ThemeServiceStart;
+    i18n: I18nStart;
     fieldFormats: FieldFormatsStart;
     uiSettings: IUiSettingsClient;
     dataViewFieldEditor?: DataViewFieldEditorStart;
@@ -410,6 +411,10 @@ export interface UnifiedDataTableProps {
    */
   enableComparisonMode?: boolean;
   /**
+   * Set to true to allow users to search in cell values
+   */
+  enableInTableSearch?: boolean;
+  /**
    * Optional extra props passed to the renderCellValue function/component.
    */
   cellContext?: EuiDataGridProps['cellContext'];
@@ -491,6 +496,7 @@ export const UnifiedDataTable = ({
   rowLineHeightOverride,
   customGridColumnsConfiguration,
   enableComparisonMode,
+  enableInTableSearch,
   cellContext,
   renderCellPopover,
   getRowIndicator,
@@ -756,6 +762,9 @@ export const UnifiedDataTable = ({
   );
 
   const inTableSearchControl = useMemo(() => {
+    if (!enableInTableSearch) {
+      return undefined;
+    }
     return (
       <InTableSearchControl
         inTableSearchTerm={inTableSearchTerm}
@@ -763,6 +772,7 @@ export const UnifiedDataTable = ({
         visibleColumns={visibleColumns}
         rows={displayedRows}
         renderCellValue={renderCellValue}
+        services={services}
         pageSize={isPaginationEnabled ? currentPageSize : null}
         changeToExpectedPage={(expectedPageIndex) => {
           if (isPaginationEnabled && currentPageIndexRef.current !== expectedPageIndex) {
@@ -780,6 +790,7 @@ export const UnifiedDataTable = ({
       />
     );
   }, [
+    enableInTableSearch,
     inTableSearchTerm,
     setInTableSearchTerm,
     setInTableSearchTermCss,
@@ -791,6 +802,7 @@ export const UnifiedDataTable = ({
     changeCurrentPageIndex,
     isPaginationEnabled,
     inTableSearchContextValue,
+    services,
   ]);
 
   const renderCustomPopover = useMemo(

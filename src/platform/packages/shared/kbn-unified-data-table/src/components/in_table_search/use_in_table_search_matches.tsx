@@ -9,10 +9,16 @@
 
 import React, { useCallback, useEffect, useState, ReactNode } from 'react';
 import ReactDOM from 'react-dom';
+import {
+  KibanaRenderContextProvider,
+  KibanaRenderContextProviderProps,
+} from '@kbn/react-kibana-context-render';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { UnifiedDataTableContext, DataTableContext } from '../../table_context';
 import { InTableSearchHighlightsWrapperProps } from './in_table_search_highlights_wrapper';
+
+type Services = Pick<KibanaRenderContextProviderProps, 'i18n' | 'theme'>;
 
 interface RowMatches {
   rowIndex: number;
@@ -37,6 +43,7 @@ export interface UseInTableSearchMatchesProps {
     matchIndex: number;
     shouldJump: boolean;
   }) => void;
+  services: Services;
 }
 
 export interface UseInTableSearchMatchesReturn {
@@ -57,6 +64,7 @@ export const useInTableSearchMatches = (
     tableContext,
     renderCellValue,
     scrollToActiveMatch,
+    services,
   } = props;
   const [matchesList, setMatchesList] = useState<RowMatches[]>(DEFAULT_MATCHES);
   const [matchesCount, setMatchesCount] = useState<number | null>(null);
@@ -184,6 +192,7 @@ export const useInTableSearchMatches = (
             inTableSearchTerm,
             tableContext,
             renderCellValue,
+            services,
           });
 
           if (matchesCountForFieldName) {
@@ -231,6 +240,7 @@ export const useInTableSearchMatches = (
     rows,
     inTableSearchTerm,
     tableContext,
+    services,
   ]);
 
   return {
@@ -248,7 +258,11 @@ function getCellMatchesCount({
   inTableSearchTerm,
   renderCellValue,
   tableContext,
-}: Pick<UseInTableSearchMatchesProps, 'inTableSearchTerm' | 'tableContext' | 'renderCellValue'> & {
+  services,
+}: Pick<
+  UseInTableSearchMatchesProps,
+  'inTableSearchTerm' | 'tableContext' | 'renderCellValue' | 'services'
+> & {
   rowIndex: number;
   fieldName: string;
 }): Promise<number> {
@@ -258,28 +272,30 @@ function getCellMatchesCount({
   // TODO: add a timeout to prevent infinite waiting
   return new Promise((resolve) => {
     ReactDOM.render(
-      <UnifiedDataTableContext.Provider
-        value={{
-          ...tableContext,
-          inTableSearchTerm,
-          pageIndex: 0,
-          pageSize: rowIndex + 1,
-        }}
-      >
-        <UnifiedDataTableRenderCellValue
-          columnId={fieldName}
-          rowIndex={rowIndex}
-          isExpandable={false}
-          isExpanded={false}
-          isDetails={false}
-          colIndex={0}
-          setCellProps={() => {}}
-          onHighlightsCountFound={(count) => {
-            resolve(count);
-            ReactDOM.unmountComponentAtNode(container);
+      <KibanaRenderContextProvider {...services}>
+        <UnifiedDataTableContext.Provider
+          value={{
+            ...tableContext,
+            inTableSearchTerm,
+            pageIndex: 0,
+            pageSize: rowIndex + 1,
           }}
-        />
-      </UnifiedDataTableContext.Provider>,
+        >
+          <UnifiedDataTableRenderCellValue
+            columnId={fieldName}
+            rowIndex={rowIndex}
+            isExpandable={false}
+            isExpanded={false}
+            isDetails={false}
+            colIndex={0}
+            setCellProps={() => {}}
+            onHighlightsCountFound={(count) => {
+              resolve(count);
+              ReactDOM.unmountComponentAtNode(container);
+            }}
+          />
+        </UnifiedDataTableContext.Provider>
+      </KibanaRenderContextProvider>,
       container
     );
   });
