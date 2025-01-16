@@ -7,6 +7,7 @@
 
 import { intersection } from 'lodash';
 import Boom from '@hapi/boom';
+import type { ObservableType } from '../../../common/types/domain/observable/v1';
 import { OWNER_FIELD } from '../../../common/constants';
 import type { CasesSimilarResponse, SimilarCasesSearchRequest } from '../../../common/types/api';
 import { SimilarCasesSearchRequestRt, CasesSimilarResponseRt } from '../../../common/types/api';
@@ -29,7 +30,7 @@ interface Similarity {
 const getSimilarities = (
   a: CaseSavedObjectTransformed,
   b: CaseSavedObjectTransformed,
-  availableObservableTypes: Set<string>
+  availableObservableTypes: Map<string, ObservableType>
 ): Similarity[] => {
   const stringify = (observable: { typeKey: string; value: string }) =>
     [observable.typeKey, observable.value].join(',');
@@ -46,6 +47,7 @@ const getSimilarities = (
       return {
         typeKey,
         value,
+        typeLabel: availableObservableTypes.get(typeKey)?.label,
       };
     })
     .filter((observable) => availableObservableTypes.has(observable.typeKey));
