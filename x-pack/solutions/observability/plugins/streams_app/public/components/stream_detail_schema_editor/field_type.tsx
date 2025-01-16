@@ -6,54 +6,9 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiToken } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FieldDefinitionConfig } from '@kbn/streams-schema';
-
-export const FIELD_TYPE_MAP = {
-  boolean: {
-    icon: 'tokenBoolean',
-    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableBooleanType', {
-      defaultMessage: 'Boolean',
-    }),
-  },
-  date: {
-    icon: 'tokenDate',
-    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableDateType', {
-      defaultMessage: 'Date',
-    }),
-  },
-  keyword: {
-    icon: 'tokenKeyword',
-    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableKeywordType', {
-      defaultMessage: 'Keyword',
-    }),
-  },
-  match_only_text: {
-    icon: 'tokenText',
-    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableTextType', {
-      defaultMessage: 'Text',
-    }),
-  },
-  long: {
-    icon: 'tokenNumber',
-    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableNumberType', {
-      defaultMessage: 'Number',
-    }),
-  },
-  double: {
-    icon: 'tokenNumber',
-    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableNumberType', {
-      defaultMessage: 'Number',
-    }),
-  },
-  ip: {
-    icon: 'tokenIP',
-    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableIpType', {
-      defaultMessage: 'IP',
-    }),
-  },
-};
+import { FIELD_TYPE_MAP } from './configuration_maps';
 
 export const FieldType = ({ type }: { type: FieldDefinitionConfig['type'] }) => {
   return (

@@ -6,31 +6,10 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { FIELD_STATUS_MAP } from './configuration_maps';
 
 export type FieldStatus = 'inherited' | 'mapped' | 'unmapped';
-
-export const FIELD_STATUS_MAP = {
-  inherited: {
-    color: 'hollow',
-    label: i18n.translate('xpack.streams.streamDetailSchemaEditorInheritedStatusLabel', {
-      defaultMessage: 'Inherited',
-    }),
-  },
-  mapped: {
-    color: 'success',
-    label: i18n.translate('xpack.streams.streamDetailSchemaEditorMappedStatusLabel', {
-      defaultMessage: 'Mapped',
-    }),
-  },
-  unmapped: {
-    color: 'default',
-    label: i18n.translate('xpack.streams.streamDetailSchemaEditorUnmappedStatusLabel', {
-      defaultMessage: 'Unmapped',
-    }),
-  },
-};
 
 export const FieldStatus = ({ status }: { status: FieldStatus }) => {
   return (

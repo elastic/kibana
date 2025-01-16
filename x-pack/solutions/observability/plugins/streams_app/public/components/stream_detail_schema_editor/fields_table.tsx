@@ -28,6 +28,7 @@ import { FieldStatus } from './field_status';
 import { FieldEntry, SchemaEditorEditingState } from './hooks/use_editing_state';
 import { SchemaEditorUnpromotingState } from './hooks/use_unpromoting_state';
 import { FieldParent } from './field_parent';
+import { SchemaEditorQueryAndFiltersState } from './hooks/use_query_and_filters';
 
 interface FieldsTableContainerProps {
   definition: ReadStreamDefinition;
@@ -36,6 +37,7 @@ interface FieldsTableContainerProps {
   query?: Query;
   editingState: SchemaEditorEditingState;
   unpromotingState: SchemaEditorUnpromotingState;
+  queryAndFiltersState: SchemaEditorQueryAndFiltersState;
 }
 
 const COLUMNS = {
@@ -74,6 +76,7 @@ export const FieldsTableContainer = ({
   query,
   editingState,
   unpromotingState,
+  queryAndFiltersState,
 }: FieldsTableContainerProps) => {
   const inheritedFields = useMemo(() => {
     return Object.entries(definition.inherited_fields).map(([name, field]) => ({
@@ -134,9 +137,28 @@ export const FieldsTableContainer = ({
     return [...filteredInheritedFields, ...filteredMappedFields, ...filteredUnmappedFields];
   }, [filteredInheritedFields, filteredMappedFields, filteredUnmappedFields]);
 
+  const filteredFieldsWithFilterGroupsApplied = useMemo(() => {
+    const filterGroups = queryAndFiltersState.filterGroups;
+    let fieldsWithFilterGroupsApplied = allFilteredFields;
+
+    if (filterGroups.type && filterGroups.type.length > 0) {
+      fieldsWithFilterGroupsApplied = fieldsWithFilterGroupsApplied.filter(
+        (field) => 'type' in field && filterGroups.type.includes(field.type)
+      );
+    }
+
+    if (filterGroups.status && filterGroups.status.length > 0) {
+      fieldsWithFilterGroupsApplied = fieldsWithFilterGroupsApplied.filter(
+        (field) => 'status' in field && filterGroups.status.includes(field.status)
+      );
+    }
+
+    return fieldsWithFilterGroupsApplied;
+  }, [allFilteredFields, queryAndFiltersState.filterGroups]);
+
   return (
     <FieldsTable
-      fields={allFilteredFields}
+      fields={filteredFieldsWithFilterGroupsApplied}
       editingState={editingState}
       unpromotingState={unpromotingState}
       definition={definition}
