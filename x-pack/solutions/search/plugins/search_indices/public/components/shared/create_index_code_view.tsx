@@ -70,32 +70,36 @@ export const CreateIndexCodeView = ({
           <APIKeyCallout apiKey={apiKey} />
         </EuiFlexItem>
       )}
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
+        <EuiFlexItem grow={false}>
           <GuideSelector selectedWorkflowId={selectedWorkflowId} onChange={changeWorkflowId} />
         </EuiFlexItem>
-        <EuiFlexItem css={{ maxWidth: '300px' }}>
-          <LanguageSelector
-            options={LanguageOptions}
-            selectedLanguage={selectedLanguage}
-            onSelectLanguage={changeCodingLanguage}
-            showLabel
-          />
-        </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <TryInConsoleButton
-            request={selectedCodeExamples.sense.createIndex(codeParams)}
-            application={application}
-            sharePlugin={share}
-            consolePlugin={consolePlugin}
-            telemetryId={`${selectedLanguage}_create_index`}
-            onClick={() => {
-              usageTracker.click([
-                analyticsEvents.runInConsole,
-                `${analyticsEvents.runInConsole}_${selectedLanguage}`,
-              ]);
-            }}
-          />
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem css={{ maxWidth: '300px' }}>
+              <LanguageSelector
+                options={LanguageOptions}
+                selectedLanguage={selectedLanguage}
+                onSelectLanguage={changeCodingLanguage}
+                showLabel
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <TryInConsoleButton
+                request={selectedCodeExamples.sense.createIndex(codeParams)}
+                application={application}
+                sharePlugin={share}
+                consolePlugin={consolePlugin}
+                telemetryId={`${selectedLanguage}_create_index`}
+                onClick={() => {
+                  usageTracker.click([
+                    analyticsEvents.runInConsole,
+                    `${analyticsEvents.runInConsole}_${selectedLanguage}`,
+                  ]);
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
       {selectedCodeExample.installCommand && (

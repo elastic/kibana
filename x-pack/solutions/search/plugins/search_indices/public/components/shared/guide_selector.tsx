@@ -63,7 +63,13 @@ export const GuideSelector: React.FC<GuideSelectorProps> = ({ selectedWorkflowId
   const closePopover = () => setIsPopoverOpen(false);
 
   const PopoverButton = (
-    <EuiButton color="text" iconType="arrowDown" iconSide="right" onClick={onPopoverClick}>
+    <EuiButton
+      color="text"
+      iconType="arrowDown"
+      iconSide="right"
+      onClick={onPopoverClick}
+      data-test-subj="workflowSelectorButton"
+    >
       {i18n.translate('xpack.searchIndices.guideSelector.selectWorkflow', {
         defaultMessage: 'Select a guide',
       })}
