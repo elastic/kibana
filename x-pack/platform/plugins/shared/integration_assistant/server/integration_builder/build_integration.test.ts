@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import { buildPackage, isValidName, renderPackageManifestYAML } from './build_integration';
+import yaml from 'js-yaml';
 import { testIntegration } from '../../__jest__/fixtures/build_integration';
-import { generateUniqueId, ensureDirSync, createSync } from '../util';
+import { DataStream, Docs, InputType, Integration, Pipeline } from '../../common';
+import { createSync, ensureDirSync, generateUniqueId } from '../util';
+import { createAgentInput } from './agent';
+import {
+  buildPackage,
+  isValidDatastreamName,
+  isValidName,
+  renderPackageManifestYAML,
+} from './build_integration';
 import { createDataStream } from './data_stream';
 import { createFieldMapping } from './fields';
-import { createAgentInput } from './agent';
 import { createPipeline } from './pipeline';
-import { DataStream, Docs, InputType, Pipeline, Integration } from '../../common';
-import yaml from 'js-yaml';
 import { createReadme } from './readme_files';
 
 const mockedDataPath = 'path';
@@ -151,8 +156,16 @@ describe('buildPackage', () => {
   });
 
   it('Should call createAgentInput for each datastream', async () => {
-    expect(createAgentInput).toHaveBeenCalledWith(firstDatastreamPath, firstDataStreamInputTypes);
-    expect(createAgentInput).toHaveBeenCalledWith(secondDatastreamPath, secondDataStreamInputTypes);
+    expect(createAgentInput).toHaveBeenCalledWith(
+      firstDatastreamPath,
+      firstDataStreamInputTypes,
+      undefined
+    );
+    expect(createAgentInput).toHaveBeenCalledWith(
+      secondDatastreamPath,
+      secondDataStreamInputTypes,
+      undefined
+    );
   });
 
   it('Should call createPipeline for each datastream', async () => {
@@ -332,5 +345,60 @@ describe('isValidName', () => {
 
   it('should return false for names with empty string', () => {
     expect(isValidName('')).toBe(false);
+  });
+});
+
+describe('isValidDatastreamName', () => {
+  it('should return true for valid names', () => {
+    expect(isValidDatastreamName('validname')).toBe(true);
+    expect(isValidDatastreamName('valid_name')).toBe(true);
+    expect(isValidDatastreamName('anothervalidname')).toBe(true);
+    expect(isValidDatastreamName('ab')).toBe(true);
+  });
+
+  it('should return false for empty string', () => {
+    expect(isValidDatastreamName('')).toBe(false);
+  });
+
+  it('should return false for single char', () => {
+    expect(isValidDatastreamName('a')).toBe(false);
+  });
+
+  it('should return false for names with spaces', () => {
+    expect(isValidDatastreamName('invalid name')).toBe(false);
+    expect(isValidDatastreamName(' invalid')).toBe(false);
+    expect(isValidDatastreamName('invalid ')).toBe(false);
+    expect(isValidDatastreamName('invalid name with spaces')).toBe(false);
+  });
+
+  it('should return false for names with special characters', () => {
+    expect(isValidDatastreamName('invalid@name')).toBe(false);
+    expect(isValidDatastreamName('invalid#name')).toBe(false);
+    expect(isValidDatastreamName('invalid$name')).toBe(false);
+    expect(isValidDatastreamName('invalid%name')).toBe(false);
+    expect(isValidDatastreamName('invalid^name')).toBe(false);
+    expect(isValidDatastreamName('invalid&name')).toBe(false);
+    expect(isValidDatastreamName('invalid*name')).toBe(false);
+    expect(isValidDatastreamName('invalid(name')).toBe(false);
+    expect(isValidDatastreamName('invalid/name')).toBe(false);
+  });
+
+  it('should return false for names with dashes', () => {
+    expect(isValidDatastreamName('invalid-name')).toBe(false);
+    expect(isValidDatastreamName('invalid-name-with-dashes')).toBe(false);
+  });
+
+  it('should return false for names with periods', () => {
+    expect(isValidDatastreamName('invalid.name')).toBe(false);
+    expect(isValidDatastreamName('invalid.name.with.periods')).toBe(false);
+  });
+
+  it('should return false for names with mixed invalid characters', () => {
+    expect(isValidDatastreamName('invalid@name#with$special%characters')).toBe(false);
+    expect(isValidDatastreamName('invalid name with spaces and 123')).toBe(false);
+  });
+
+  it('should return false for names with empty string', () => {
+    expect(isValidDatastreamName('')).toBe(false);
   });
 });
