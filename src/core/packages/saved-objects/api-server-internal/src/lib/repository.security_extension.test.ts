@@ -663,10 +663,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(mockSecurityExt.authorizeCheckConflicts).toHaveBeenCalledTimes(1);
       expect(mockSecurityExt.authorizeCheckConflicts).toHaveBeenCalledWith({
         namespace,
-        objects: [
-          { ...obj1, name: 'Testing' },
-          { ...obj2, name: 'Testing' },
-        ],
+        objects: [obj1, obj2],
       });
     });
   });

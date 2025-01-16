@@ -29,7 +29,7 @@ export class SavedObjectsManagement {
 
   public getTitle(savedObject: SavedObject) {
     const getTitle = this.registry.getType(savedObject.type)?.management?.getTitle;
-    return getTitle ? getTitle(savedObject) : this._getTitle(savedObject);
+    return getTitle ? getTitle(savedObject) : undefined;
   }
 
   public getEditUrl(savedObject: SavedObject) {
@@ -48,17 +48,5 @@ export class SavedObjectsManagement {
 
   public isHidden(savedObject: SavedObject) {
     return this.registry.getType(savedObject.type)?.hidden ?? false;
-  }
-
-  private _getTitle(savedObject: SavedObject): string | undefined {
-    const attributes = (savedObject.attributes ?? {}) as { name?: string; title?: string };
-    const fallbackTitle = attributes.name ?? attributes.title;
-    const nameAttribute = this.registry.getType(savedObject.type)?.nameAttribute;
-
-    if (nameAttribute) {
-      return attributes[nameAttribute as keyof (typeof savedObject)['attributes']] ?? fallbackTitle;
-    }
-
-    return fallbackTitle;
   }
 }
