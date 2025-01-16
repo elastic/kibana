@@ -39,9 +39,7 @@ export const simulateProcessorRoute = createServerRoute({
     body: z.object({
       processing: z.array(processingDefinitionSchema),
       documents: z.array(z.record(z.unknown())),
-      detected_fields: z
-        .array(z.object({ name: z.string(), type: fieldDefinitionConfigSchema.shape.type }))
-        .optional(),
+      detected_fields: z.array(fieldDefinitionConfigSchema.extend({ name: z.string() })).optional(),
     }),
   }),
   handler: async ({ params, request, getScopedClients }) => {
