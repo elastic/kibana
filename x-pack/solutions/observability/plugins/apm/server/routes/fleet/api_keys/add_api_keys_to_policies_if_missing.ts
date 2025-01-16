@@ -7,9 +7,12 @@
 
 import { omit } from 'lodash';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import type { CoreStart, Logger } from '@kbn/core/server';
+import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
-import { getInternalSavedObjectsClient } from '../../../lib/helpers/get_internal_saved_objects_client';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { filter, take } from 'rxjs';
+
+import { getInternalSavedObjectsClientForSpaceId } from '../../../lib/helpers/get_internal_saved_objects_client';
 import type { APMPluginStartDependencies } from '../../../types';
 import { getApmPackagePolicies } from '../get_apm_package_policies';
 import { createApmAgentConfigApiKey, createApmSourceMapApiKey } from './create_apm_api_keys';
@@ -19,10 +22,12 @@ export async function addApiKeysToEveryPackagePolicyIfMissing({
   coreStartPromise,
   pluginStartPromise,
   logger,
+  licensing,
 }: {
   coreStartPromise: Promise<CoreStart>;
   pluginStartPromise: Promise<APMPluginStartDependencies>;
   logger: Logger;
+  licensing: LicensingPluginSetup;
 }) {
   const coreStart = await coreStartPromise;
   const { fleet } = await pluginStartPromise;
@@ -30,15 +35,34 @@ export async function addApiKeysToEveryPackagePolicyIfMissing({
     return;
   }
 
+  // We need to wait for the licence feature to be available,
+  // to have our internal saved object client with encrypted saved object working properly
+  await licensing.license$
+    .pipe(
+      filter(
+        (licence) =>
+          licence.getFeature('security').isEnabled && licence.getFeature('security').isAvailable
+      ),
+      take(1)
+    )
+    .toPromise();
+
   const apmFleetPolicies = await getApmPackagePolicies({
     coreStart,
     fleetPluginStart: fleet,
   });
 
+  // const savedObjectsClient = await getInternalSavedObjectsClient(coreStart);
+
   return Promise.all(
     apmFleetPolicies.items.map((policy) => {
+      const savedObjectsClient = getInternalSavedObjectsClientForSpaceId(
+        coreStart,
+        policy.spaceIds?.[0]
+      );
       return addApiKeysToPackagePolicyIfMissing({
         policy,
+        savedObjectsClient,
         coreStart,
         fleet,
         logger,
@@ -50,10 +74,12 @@ export async function addApiKeysToEveryPackagePolicyIfMissing({
 export async function addApiKeysToPackagePolicyIfMissing({
   policy,
   coreStart,
+  savedObjectsClient,
   fleet,
   logger,
 }: {
   policy: PackagePolicy;
+  savedObjectsClient: SavedObjectsClientContract;
   coreStart: CoreStart;
   fleet: FleetStartContract;
   logger: Logger;
@@ -85,7 +111,7 @@ export async function addApiKeysToPackagePolicyIfMissing({
   });
 
   const internalESClient = coreStart.elasticsearch.client.asInternalUser;
-  const savedObjectsClient = await getInternalSavedObjectsClient(coreStart);
+
   const newPolicy = await fleet.packagePolicyService.update(
     savedObjectsClient,
     internalESClient,
