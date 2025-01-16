@@ -117,7 +117,7 @@ export class RuleMigrationsDataPrebuiltRulesClient extends RuleMigrationsDataBas
         size: RETURNED_RULES,
         min_score: MIN_SCORE,
       })
-      .then(this.processResponseHits.bind(this))
+      .then((response) => this.processResponseHits(response))
       .catch((error) => {
         this.logger.error(`Error querying prebuilt rule details for ELSER: ${error.message}`);
         throw error;
