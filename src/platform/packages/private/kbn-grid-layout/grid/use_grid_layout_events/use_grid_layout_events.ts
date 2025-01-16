@@ -49,8 +49,7 @@ export const useGridLayoutEvents = ({
         gridLayoutStateManager;
       const interactionEvent = interactionEvent$.value;
       if (!interactionEvent) {
-        // if no interaction event, stop auto scroll (if necessary) and return early
-        stopAutoScroll(scrollInterval);
+        // if no interaction event return early
         return;
       }
 
@@ -78,10 +77,6 @@ export const useGridLayoutEvents = ({
 
       if (isMouseEvent(e) || isTouchEvent(e)) {
         pointerClientPixel.current = getPointerPosition(e);
-      }
-
-      if (!isTouchEvent(e)) {
-        handleAutoscroll(scrollInterval, pointerClientPixel.current.y);
       }
 
       const currentRuntimeSettings = runtimeSettings$.value;
@@ -193,10 +188,17 @@ export const useGridLayoutEvents = ({
       e.stopPropagation();
 
       if (isMouseEvent(e)) {
-        attachMouseEvents(e, onPointerMove, () => {
-          stopAutoScroll(scrollInterval);
-          finishInteraction(gridLayoutStateManager);
-        });
+        attachMouseEvents(
+          e,
+          (ev) => {
+            onPointerMove(ev);
+            handleAutoscroll(scrollInterval, pointerClientPixel.current.y);
+          },
+          () => {
+            stopAutoScroll(scrollInterval);
+            finishInteraction(gridLayoutStateManager);
+          }
+        );
       } else if (isTouchEvent(e)) {
         attachTouchEvents(e, onPointerMove, () => {
           finishInteraction(gridLayoutStateManager);
