@@ -63,7 +63,7 @@ import {
   RuleActionAlertsFilterProperty,
   RuleActionKey,
 } from '@kbn/alerting-plugin/common';
-import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
+import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '@kbn/alerts-ui-shared/src/common/constants/rule_flapping';
 import type { Flapping } from '@kbn/alerting-types';

@@ -14,7 +14,7 @@ import {
   SecurityConnectorFeatureId,
   UptimeConnectorFeatureId,
   CasesConnectorFeatureId,
-} from '@kbn/actions-plugin/common/connector_feature_config';
+} from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import { TheHiveConnector } from './thehive';
 import {

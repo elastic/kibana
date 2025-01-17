@@ -19,7 +19,7 @@ import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/connector_feature_config';
+} from '@kbn/actions-plugin/common';
 import { postPagerduty } from './post_pagerduty';
 import { convertTimestamp } from '../lib/convert_timestamp';
 
