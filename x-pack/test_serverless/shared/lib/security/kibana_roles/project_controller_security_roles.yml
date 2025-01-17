@@ -1,5 +1,5 @@
 # -----
-# Source: https://github.com/elastic/elasticsearch-controller/blob/main/helm/values.yaml
+# Source: elasticsearch-controller/blob/main/helm/values.yaml
 # The project-specific roles are defined under config.project-settings.security.elasticsearch.predefined-roles.
 # -----
 
