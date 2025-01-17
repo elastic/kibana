@@ -44,6 +44,7 @@ const blockingMessageDisplayLocations: UserMessagesDisplayLocationId[] = [
 ];
 
 type ReloadReason =
+  | 'ESQLvariables'
   | 'attributes'
   | 'savedObjectId'
   | 'overrides'
@@ -61,7 +62,12 @@ function getSearchContext(parentApi: unknown) {
         timeRange$: new BehaviorSubject(undefined),
       };
 
+  const esqlVariables = apiPublishesESQLVariables(parentApi)
+    ? parentApi.esqlVariables$.value
+    : ([] as ESQLControlVariable[]);
+
   return {
+    esqlVariables,
     filters: unifiedSearch$.filters$.getValue(),
     query: unifiedSearch$.query$.getValue(),
     timeRange: unifiedSearch$.timeRange$.getValue(),
@@ -260,19 +266,7 @@ export function loadEmbeddableData(
   const mergedSubscriptions = merge(
     // on search context change, reload
     fetch$(api).pipe(map(() => 'searchContext' as ReloadReason)),
-    esqlVariables$.pipe(
-      map((variables) => {
-        /**
-         * TODO: instead of just reloading lens on any ESQL variables change, we should select
-         * only the variables that are used in the current query and reload only when they change.
-         *
-         * We also do nothing with the variables here. They should be passed in as part of the query context
-         * like filters / query / time range ETC.
-         */
-        console.log('variables are', variables);
-        return 'searchContext' as ReloadReason;
-      })
-    ),
+    esqlVariables$.pipe(map(() => 'ESQLvariables' as ReloadReason)),
     // On state change, reload
     // this is used to refresh the chart on inline editing
     // just make sure to avoid to rerender if there's no substantial change

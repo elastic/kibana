@@ -10,11 +10,7 @@
 import { DataView } from '@kbn/data-views-plugin/common';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
-import {
-  PublishesESQLVariable,
-  apiPublishesESQLVariable,
-  esqlVariablesService,
-} from '@kbn/esql-variables/common';
+import { PublishesESQLVariable, apiPublishesESQLVariable } from '@kbn/esql-variables/common';
 import { i18n } from '@kbn/i18n';
 import {
   apiHasSaveNotification,
@@ -28,7 +24,7 @@ import {
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import fastIsEqual from 'fast-deep-equal';
 import React, { useEffect } from 'react';
-import { BehaviorSubject, debounceTime, tap } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import type {
   ControlGroupChainingSystem,
   ControlGroupRuntimeState,
@@ -241,25 +237,9 @@ export const getControlGroupEmbeddableFactory = () => {
       const childrenESQLVariablesSubscription = combineCompatibleChildrenApis<
         PublishesESQLVariable,
         ESQLControlVariable[]
-      >(api, 'esqlVariable$', apiPublishesESQLVariable, [])
-        .pipe(
-          tap((newESQLVariables) => {
-            /**
-             * TODO: Here we directly send all of the variables from the control group to the service.
-             * Instead, the individual lens panels which listen to these variables should pass them in as
-             * query context.
-             */
-
-            esqlVariablesService.clearVariables();
-            for (const variable of newESQLVariables) {
-              esqlVariablesService.addVariable(variable);
-            }
-          }),
-          debounceTime(10)
-        )
-        .subscribe((newESQLVariables) => {
-          esqlVariables$.next(newESQLVariables);
-        });
+      >(api, 'esqlVariable$', apiPublishesESQLVariable, []).subscribe((newESQLVariables) => {
+        esqlVariables$.next(newESQLVariables);
+      });
 
       const saveNotificationSubscription = apiHasSaveNotification(parentApi)
         ? parentApi.saveNotification$.subscribe(() => {

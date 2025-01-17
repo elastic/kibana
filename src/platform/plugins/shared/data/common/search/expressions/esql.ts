@@ -15,7 +15,6 @@ import type {
   IKibanaSearchResponse,
   ISearchGeneric,
 } from '@kbn/search-types';
-import { esqlVariablesService } from '@kbn/esql-variables/common';
 import type {
   Datatable,
   DatatableColumn,
@@ -191,9 +190,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             const esQueryConfigs = getEsQueryConfig(
               uiSettings as Parameters<typeof getEsQueryConfig>[0]
             );
-            const variables = esqlVariablesService.getVariables();
-
-            const namedParams = getNamedParams(query, input.timeRange, variables);
+            const namedParams = getNamedParams(query, input.timeRange, input.esqlVariables);
 
             if (namedParams.length) {
               params.params = namedParams;
@@ -325,7 +322,6 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           );
         }),
         map(({ rawResponse: body, warning }) => {
-          const variables = esqlVariablesService.getVariables();
           // all_columns in the response means that there is a separation between
           // columns with data and empty columns
           // columns contain only columns with data while all_columns everything
@@ -359,7 +355,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
 
           const updatedWithVariablesColumns = mapVariableToColumn(
             query,
-            variables,
+            input?.esqlVariables ?? [],
             allColumns as DatatableColumn[]
           );
 
