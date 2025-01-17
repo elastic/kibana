@@ -122,6 +122,10 @@ export const EsqlContentReference = BaseContentReference.extend({
    * The ESQL query
    */
   query: z.string(),
+  /**
+   * Query label
+   */
+  label: z.string(),
 });
 
 /**
@@ -220,6 +224,10 @@ export const Message = z.object({
    * trace Data
    */
   traceData: TraceData.optional(),
+  /**
+   * Metadata
+   */
+  metadata: MessageMetadata.optional(),
 });
 
 export type ApiConfig = z.infer<typeof ApiConfig>;

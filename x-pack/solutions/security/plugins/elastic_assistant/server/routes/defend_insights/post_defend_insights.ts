@@ -11,6 +11,7 @@ import type { IKibanaResponse } from '@kbn/core/server';
 
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import {
+  contentReferencesStoreFactory,
   DEFEND_INSIGHTS,
   DefendInsightsPostRequestBody,
   DefendInsightsPostResponse,
@@ -141,6 +142,9 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             latestReplacements = { ...latestReplacements, ...newReplacements };
           };
 
+          const contentReferencesStore = contentReferencesStoreFactory()
+
+
           const assistantToolParams = getAssistantToolParams({
             endpointIds,
             insightType,
@@ -149,6 +153,7 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             apiConfig,
             esClient,
             latestReplacements,
+            contentReferencesStore,
             connectorTimeout: CONNECTOR_TIMEOUT,
             langChainTimeout: LANG_CHAIN_TIMEOUT,
             langSmithProject,

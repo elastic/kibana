@@ -221,7 +221,7 @@ export const getStructuredToolForIndexEntry = ({
           const esqlQuery = `FROM ${hit._index} ${hit._id ? `METADATA _id\n | WHERE _id == "${hit._id}"` : ''}`
 
           const esqlQueryReference = contentReferencesStore.add((p) =>
-            esqlQueryReferenceFactory(p.id, esqlQuery)
+            esqlQueryReferenceFactory(p.id, esqlQuery, hit._index)
           );
 
           if (indexEntry.outputFields && indexEntry.outputFields.length > 0) {
@@ -245,7 +245,6 @@ export const getStructuredToolForIndexEntry = ({
           kbDocs
         )}###`;
       } catch (e) {
-        console.log(e)
         logger.error(`Error performing IndexEntry KB Similarity Search: ${e.message}`);
         return `I'm sorry, but I was unable to find any information in the knowledge base. Perhaps this error would be useful to deliver to the user. Be sure to print it below your response and in a codeblock so it is rendered nicely: ${e.message}`;
       }

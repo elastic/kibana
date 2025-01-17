@@ -15,7 +15,7 @@ import {
 } from './helpers';
 import { authenticatedUser } from '../../__mocks__/user';
 import { getCreateKnowledgeBaseEntrySchemaMock } from '../../__mocks__/knowledge_base_entry_schema.mock';
-import { IndexEntry } from '@kbn/elastic-assistant-common';
+import { contentReferencesStoreFactory, IndexEntry } from '@kbn/elastic-assistant-common';
 
 // Mock dependencies
 jest.mock('@elastic/elasticsearch');
@@ -153,12 +153,14 @@ describe('getStructuredToolForIndexEntry', () => {
   const mockEsClient = {} as ElasticsearchClient;
 
   const mockIndexEntry = getCreateKnowledgeBaseEntrySchemaMock({ type: 'index' }) as IndexEntry;
+  const contentReferencesStore = contentReferencesStoreFactory()
 
   it('should return a DynamicStructuredTool with correct name and schema', () => {
     const tool = getStructuredToolForIndexEntry({
       indexEntry: mockIndexEntry,
       esClient: mockEsClient,
       logger: mockLogger,
+      contentReferencesStore
     });
 
     expect(tool).toBeInstanceOf(DynamicStructuredTool);
@@ -194,6 +196,7 @@ describe('getStructuredToolForIndexEntry', () => {
       indexEntry: mockIndexEntry,
       esClient: mockEsClient,
       logger: mockLogger,
+      contentReferencesStore
     });
 
     const input = { query: 'testQuery', field1: 'value1', field2: 2 };
@@ -211,6 +214,7 @@ describe('getStructuredToolForIndexEntry', () => {
       indexEntry: mockIndexEntry,
       esClient: mockEsClient,
       logger: mockLogger,
+      contentReferencesStore
     });
 
     const input = { query: 'testQuery', field1: 'value1', field2: 2 };
@@ -230,6 +234,7 @@ describe('getStructuredToolForIndexEntry', () => {
       }) as IndexEntry,
       esClient: mockEsClient,
       logger: mockLogger,
+      contentReferencesStore
     });
 
     const nameRegex = /^[a-zA-Z0-9_-]+$/;
@@ -244,6 +249,7 @@ describe('getStructuredToolForIndexEntry', () => {
       }) as IndexEntry,
       esClient: mockEsClient,
       logger: mockLogger,
+      contentReferencesStore
     });
 
     expect(tool.lc_kwargs.name).toMatch('testing');

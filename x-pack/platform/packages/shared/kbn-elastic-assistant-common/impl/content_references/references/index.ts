@@ -57,10 +57,11 @@ export const knowledgeBaseReferenceFactory = (
  * @param label content reference label
  * @returns KnowledgeBaseReference
  */
-export const esqlQueryReferenceFactory = (id: ContentReferenceId, query: string): EsqlContentReference => {
+export const esqlQueryReferenceFactory = (id: ContentReferenceId, query: string, label: string): EsqlContentReference => {
     return {
         type: "EsqlQuery",
         id,
+        label,
         query
     }
 }
