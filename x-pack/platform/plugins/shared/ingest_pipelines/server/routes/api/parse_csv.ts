@@ -23,6 +23,12 @@ export const registerParseCsvRoute = ({ router }: RouteDependencies): void => {
   router.post<void, void, ReqBody>(
     {
       path: `${API_BASE_PATH}/parse_csv`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Manually implements ES priv check to match mgmt app',
+        },
+      },
       validate: {
         body: bodySchema,
       },
