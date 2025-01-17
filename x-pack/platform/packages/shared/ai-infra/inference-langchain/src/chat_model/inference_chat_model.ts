@@ -12,6 +12,7 @@ import {
   type BaseChatModelParams,
   type BaseChatModelCallOptions,
   type BindToolsInput,
+  type LangSmithParams,
 } from '@langchain/core/language_models/chat_models';
 import type {
   BaseLanguageModelInput,
@@ -72,8 +73,6 @@ type InvocationParams = Omit<ChatCompleteOptions, 'messages' | 'system' | 'strea
 // TODO: _combineLLMOutput ?
 // https://github.com/langchain-ai/langchainjs/blob/main/libs/langchain-openai/src/chat_models.ts#L1944
 
-// TODO: _identifyingParams / identifyingParams ?
-
 /**
  * Langchain chatModel utilizing the inference API under the hood for communication with the LLM.
  *
@@ -122,6 +121,28 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     // Some agent / langchain stuff have behavior depending on the model type, so we use base_chat_model for now.
     // See: https://github.com/langchain-ai/langchainjs/blob/fb699647a310c620140842776f4a7432c53e02fa/langchain/src/agents/openai/index.ts#L185
     return 'base_chat_model';
+  }
+
+  _identifyingParams() {
+    return {
+      model_name: this.model,
+      ...this.invocationParams({}),
+    };
+  }
+
+  identifyingParams() {
+    return this._identifyingParams();
+  }
+
+  getLsParams(options: this['ParsedCallOptions']): LangSmithParams {
+    const params = this.invocationParams(options);
+    return {
+      // TODO: retrieve provider from connector config
+      ls_provider: 'inference',
+      ls_model_name: this.model,
+      ls_model_type: 'chat',
+      ls_temperature: params.temperature ?? undefined,
+    };
   }
 
   override bindTools(tools: BindToolsInput[], kwargs?: Partial<InferenceChatModelCallOptions>) {
