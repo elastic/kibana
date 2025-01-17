@@ -29,7 +29,8 @@ import {
   EuiBetaBadge,
   EuiToolTip,
 } from '@elastic/eui';
-import { esqlVariablesService } from '@kbn/esql-variables/common';
+import { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import { variableExists } from '@kbn/esql-variables/common';
 import { EsqlControlType } from '../types';
 import { TooltipWrapper } from './tooltip_wrapper';
 
@@ -140,10 +141,12 @@ export function ControlType({
 
 export function VariableName({
   variableName,
+  esqlVariables = [],
   isControlInEditMode,
   onVariableNameChange,
 }: {
   variableName: string;
+  esqlVariables?: ESQLControlVariable[];
   isControlInEditMode: boolean;
   onVariableNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
@@ -165,14 +168,14 @@ export function VariableName({
       autoFocus
       isInvalid={
         !variableName ||
-        (esqlVariablesService.variableExists(variableName.replace('?', '')) && !isControlInEditMode)
+        (variableExists(esqlVariables, variableName.replace('?', '')) && !isControlInEditMode)
       }
       error={
         !variableName
           ? i18n.translate('esql.flyout.variableName.error', {
               defaultMessage: 'Variable name is required',
             })
-          : esqlVariablesService.variableExists(variableName) && !isControlInEditMode
+          : variableExists(esqlVariables, variableName) && !isControlInEditMode
           ? i18n.translate('esql.flyout.variableNameExists.error', {
               defaultMessage: 'Variable name already exists',
             })
@@ -343,13 +346,8 @@ export function Footer({
 }) {
   const onCancel = useCallback(() => {
     closeFlyout();
-    // remove the variable from the service
-    if (!isControlInEditMode && !esqlVariablesService.variableExists(variableName)) {
-      esqlVariablesService.removeVariable(variableName);
-    }
-
     onCancelControl?.();
-  }, [closeFlyout, isControlInEditMode, onCancelControl, variableName]);
+  }, [closeFlyout, onCancelControl]);
 
   return (
     <EuiFlyoutFooter>

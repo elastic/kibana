@@ -7,18 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { BehaviorSubject } from 'rxjs';
-import { css } from '@emotion/react';
 import { EuiComboBox } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { apiPublishesESQLVariables } from '@kbn/esql-variables/common';
+import { i18n } from '@kbn/i18n';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { ESQL_CONTROL } from '../../../common';
-import type { ESQLControlState, ESQLControlApi } from './types';
-import { ControlFactory } from '../types';
 import { uiActionsService } from '../../services/kibana_services';
 import { initializeDefaultControlApi } from '../initialize_default_control_api';
+import { ControlFactory } from '../types';
 import { initializeESQLControlSelections } from './esql_control_selections';
+import type { ESQLControlApi, ESQLControlState } from './types';
 
 const displayName = i18n.translate('controls.esqlValuesControl.displayName', {
   defaultMessage: 'Static values list',
@@ -53,7 +54,11 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
               ...initialState,
               ...defaultControl.serialize().rawState,
             };
+            const variablesInParent = apiPublishesESQLVariables(api.parentApi)
+              ? api.parentApi.esqlVariables$.value
+              : [];
             await uiActionsService.getTrigger('ESQL_CONTROL_TRIGGER').exec({
+              esqlVariables: variablesInParent,
               queryString: initialState.esqlQuery,
               variableType: initialState.variableType,
               controlType: initialState.controlType,

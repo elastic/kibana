@@ -30,7 +30,7 @@ import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
-import { ESQLRealField } from '@kbn/esql-validation-autocomplete';
+import { ESQLControlVariable, ESQLRealField } from '@kbn/esql-validation-autocomplete';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
 import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
 import { EditorFooter } from './editor_footer';
@@ -65,11 +65,13 @@ const triggerControl = async (
   variableType: ESQLVariableType,
   position: monaco.Position | null | undefined,
   uiActions: ESQLEditorDeps['uiActions'],
+  esqlVariables?: ESQLControlVariable[],
   onSaveControl?: ESQLEditorProps['onSaveControl'],
   onCancelControl?: ESQLEditorProps['onCancelControl']
 ) => {
   await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
     queryString,
+    esqlVariables,
     variableType,
     cursorPosition: position,
     onSaveControl,
@@ -99,6 +101,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   onSaveControl,
   onCancelControl,
   supportsControls,
+  esqlVariables,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const datePickerOpenStatusRef = useRef<boolean>(false);
@@ -113,7 +116,6 @@ export const ESQLEditor = memo(function ESQLEditor({
     fieldsMetadata,
     uiSettings,
     uiActions,
-    esqlService,
   } = kibana.services;
 
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
@@ -220,13 +222,13 @@ export const ESQLEditor = memo(function ESQLEditor({
   }, [code, query.esql]);
 
   // Enable the variables service if the feature is supported in the consumer app
-  useEffect(() => {
-    if (supportsControls) {
-      esqlService.enableSuggestions();
-    } else {
-      esqlService.disableSuggestions();
-    }
-  }, [esqlService, supportsControls]);
+  // useEffect(() => {
+  //   if (supportsControls) {
+  //     esqlService.enableSuggestions();
+  //   } else {
+  //     esqlService.disableSuggestions();
+  //   }
+  // }, [esqlService, supportsControls]);
 
   const toggleHistory = useCallback((status: boolean) => {
     setIsHistoryOpen(status);
@@ -278,6 +280,7 @@ export const ESQLEditor = memo(function ESQLEditor({
       ESQLVariableType.TIME_LITERAL,
       position,
       uiActions,
+      esqlVariables,
       onSaveControl,
       onCancelControl
     );
@@ -290,6 +293,7 @@ export const ESQLEditor = memo(function ESQLEditor({
       ESQLVariableType.FIELDS,
       position,
       uiActions,
+      esqlVariables,
       onSaveControl,
       onCancelControl
     );
@@ -302,6 +306,7 @@ export const ESQLEditor = memo(function ESQLEditor({
       ESQLVariableType.VALUES,
       position,
       uiActions,
+      esqlVariables,
       onSaveControl,
       onCancelControl
     );
@@ -451,16 +456,17 @@ export const ESQLEditor = memo(function ESQLEditor({
       // @ts-expect-error To prevent circular type import, type defined here is partial of full client
       getFieldsMetadata: fieldsMetadata?.getClient(),
       getVariablesByType: (type: ESQLVariableType) => {
-        return esqlService.getVariablesByType(type);
+        // TODO - what is this used for?
+        return [];
+        // return esqlService.getVariablesByType(type);
       },
-      canSuggestVariables: () => {
-        return esqlService.areSuggestionsEnabled;
-      },
+      canSuggestVariables: () => Boolean(supportsControls),
       getJoinIndices: kibana.services?.esql?.getJoinIndicesAutocomplete,
     };
     return callbacks;
   }, [
     fieldsMetadata,
+    kibana.services?.esql?.getJoinIndicesAutocomplete,
     dataSourcesCache,
     query.esql,
     memoizedSources,
@@ -472,8 +478,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     abortController,
     indexManagementApiService,
     histogramBarTarget,
-    esqlService,
-    kibana.services?.esql?.getJoinIndicesAutocomplete,
+    supportsControls,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {
