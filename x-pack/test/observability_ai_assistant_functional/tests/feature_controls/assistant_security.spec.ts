@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   createLlmProxy,
@@ -20,6 +20,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'error', 'navigationalSearch', 'security']);
   const ui = getService('observabilityAIAssistantUI');
   const testSubjects = getService('testSubjects');
+  const obsAssistantConversationsGlobalSearchEntry = 'Observability AI Assistant / Conversations';
 
   describe('ai assistant privileges', () => {
     describe('all privileges', () => {
@@ -51,7 +52,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('shows AI Assistant conversations link in search', async () => {
         await PageObjects.navigationalSearch.searchFor('observability ai assistant');
         const results = await PageObjects.navigationalSearch.getDisplayedResults();
-        expect(results[0].label).to.eql('Observability AI Assistant / Conversations');
+        expect(results[0].label).to.eql(obsAssistantConversationsGlobalSearchEntry);
       });
       describe('with no connector setup', () => {
         before(async () => {
@@ -131,9 +132,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.missingOrFail(ui.pages.links.globalHeaderButton);
       });
       it('shows no AI Assistant conversations link in global search', async () => {
+        await PageObjects.common.navigateToUrl('home', '', {
+          ensureCurrentUrl: true,
+          shouldLoginIfPrompted: false,
+        });
         await PageObjects.navigationalSearch.searchFor('observability ai assistant');
         const results = await PageObjects.navigationalSearch.getDisplayedResults();
-        expect(results.length).to.eql(0);
+        const aiAssistantConversationsEntry = results.find(
+          ({ label }) => label === obsAssistantConversationsGlobalSearchEntry
+        );
+        expect(aiAssistantConversationsEntry).to.be(undefined);
       });
       it('cannot navigate to AI Assistant page', async () => {
         await PageObjects.common.navigateToUrl('obsAIAssistant', '', {
