@@ -138,7 +138,7 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
 
     const onChangeOtherPath = useCallback(
       (field: EuiComboBoxOptionOption[]) => {
-        const path = field && field.length ? field[0].label : undefined;
+        const path = field?.[0]?.label;
         setSelectedOtherPath(path);
         setFieldValidationErrors((current) => ({ ...current, path: path === undefined }));
       },
