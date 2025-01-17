@@ -61,7 +61,7 @@
               "AlertingKibanaPrivilege",
               " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | undefined; category: ",
               "AppCategory",
-              "; management?: { [sectionId: string]: readonly string[]; } | undefined; app: readonly string[]; readonly deprecated?: Readonly<{ notice: string; }> | undefined; privileges: { all: ",
+              "; management?: { [sectionId: string]: readonly string[]; } | undefined; app: readonly string[]; readonly deprecated?: Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined; privileges: { all: ",
               {
                 "pluginId": "features",
                 "scope": "common",
@@ -170,7 +170,7 @@
           "AlertingKibanaPrivilege",
           " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | undefined; category: ",
           "AppCategory",
-          "; management?: { [sectionId: string]: readonly string[]; } | undefined; app: readonly string[]; readonly deprecated?: Readonly<{ notice: string; }> | undefined; privileges: { all: ",
+          "; management?: { [sectionId: string]: readonly string[]; } | undefined; app: readonly string[]; readonly deprecated?: Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined; privileges: { all: ",
           {
             "pluginId": "features",
             "scope": "common",

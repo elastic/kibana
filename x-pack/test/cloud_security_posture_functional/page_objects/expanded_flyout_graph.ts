@@ -12,7 +12,7 @@ import { FtrService } from '../../functional/ftr_provider_context';
 import type { QueryBarProvider } from '../services/query_bar_provider';
 
 const GRAPH_PREVIEW_TITLE_LINK_TEST_ID = 'securitySolutionFlyoutGraphPreviewTitleLink';
-const NODE_EXPAND_BUTTON_TEST_ID = 'nodeExpandButton';
+const NODE_EXPAND_BUTTON_TEST_ID = 'cloudSecurityGraphNodeExpandButton';
 const GRAPH_INVESTIGATION_TEST_ID = 'cloudSecurityGraphGraphInvestigation';
 const GRAPH_NODE_EXPAND_POPOVER_TEST_ID = `${GRAPH_INVESTIGATION_TEST_ID}GraphNodeExpandPopover`;
 const GRAPH_NODE_POPOVER_EXPLORE_RELATED_TEST_ID = `${GRAPH_INVESTIGATION_TEST_ID}ExploreRelatedEntities`;
@@ -20,6 +20,7 @@ const GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_TEST_ID = `${GRAPH_INVESTIGATION_TEST_I
 const GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID = `${GRAPH_INVESTIGATION_TEST_ID}ShowActionsOnEntity`;
 const GRAPH_LABEL_EXPAND_POPOVER_TEST_ID = `${GRAPH_INVESTIGATION_TEST_ID}GraphLabelExpandPopover`;
 const GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID = `${GRAPH_INVESTIGATION_TEST_ID}ShowEventsWithThisAction`;
+const GRAPH_ACTIONS_TOGGLE_SEARCH_ID = `${GRAPH_INVESTIGATION_TEST_ID}ToggleSearch`;
 const GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID = `${GRAPH_INVESTIGATION_TEST_ID}InvestigateInTimeline`;
 type Filter = Parameters<FilterBarService['addFilter']>[0];
 
@@ -42,6 +43,10 @@ export class ExpandedFlyoutGraph extends FtrService {
     await graph.scrollIntoView();
     const nodes = await graph.findAllByCssSelector('.react-flow__nodes .react-flow__node');
     expect(nodes.length).to.be(expected);
+  }
+
+  async toggleSearchBar(): Promise<void> {
+    await this.testSubjects.click(GRAPH_ACTIONS_TOGGLE_SEARCH_ID);
   }
 
   async selectNode(nodeId: string): Promise<WebElementWrapper> {
@@ -78,6 +83,16 @@ export class ExpandedFlyoutGraph extends FtrService {
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
+  async hideActionsOnEntity(nodeId: string): Promise<void> {
+    await this.clickOnNodeExpandButton(nodeId);
+    const btnText = await this.testSubjects.getVisibleText(
+      GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID
+    );
+    expect(btnText).to.be('Hide actions on this entity');
+    await this.testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID);
+    await this.pageObjects.header.waitUntilLoadingHasFinished();
+  }
+
   async exploreRelatedEntities(nodeId: string): Promise<void> {
     await this.clickOnNodeExpandButton(nodeId);
     await this.testSubjects.click(GRAPH_NODE_POPOVER_EXPLORE_RELATED_TEST_ID);
@@ -86,6 +101,16 @@ export class ExpandedFlyoutGraph extends FtrService {
 
   async showEventsOfSameAction(nodeId: string): Promise<void> {
     await this.clickOnNodeExpandButton(nodeId, GRAPH_LABEL_EXPAND_POPOVER_TEST_ID);
+    await this.testSubjects.click(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID);
+    await this.pageObjects.header.waitUntilLoadingHasFinished();
+  }
+
+  async hideEventsOfSameAction(nodeId: string): Promise<void> {
+    await this.clickOnNodeExpandButton(nodeId, GRAPH_LABEL_EXPAND_POPOVER_TEST_ID);
+    const btnText = await this.testSubjects.getVisibleText(
+      GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID
+    );
+    expect(btnText).to.be('Hide events with this action');
     await this.testSubjects.click(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
