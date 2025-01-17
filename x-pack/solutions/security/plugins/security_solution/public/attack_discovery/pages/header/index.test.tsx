@@ -6,7 +6,8 @@
  */
 
 import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
@@ -15,12 +16,27 @@ import { Header } from '.';
 
 jest.mock('../../../assistant/use_assistant_availability');
 
+jest.mock('@kbn/elastic-assistant-common', () => {
+  const original = jest.requireActual('@kbn/elastic-assistant-common');
+
+  return {
+    ...original,
+    defaultAssistantFeatures: {
+      ...original.defaultAssistantFeatures,
+      attackDiscoveryAlertFiltering: jest.mocked<boolean>(false), // <-- feature flag is off by default
+    },
+  };
+});
+
 describe('Actions', () => {
   beforeEach(() => {
     (useAssistantAvailability as jest.Mock).mockReturnValue({
       hasAssistantPrivilege: true,
       isAssistantEnabled: true,
     });
+
+    jest.clearAllMocks();
+    (defaultAssistantFeatures.attackDiscoveryAlertFiltering as jest.Mocked<boolean>) = false; // reset feature flag to off
   });
 
   it('renders the connector selector', () => {
@@ -179,5 +195,33 @@ describe('Actions', () => {
     const generate = screen.getByTestId('generate');
 
     expect(generate).toBeDisabled();
+  });
+
+  it('invokes openFlyout when the settings button is clicked, when the attackDiscoveryAlertFiltering feature flag is on', async () => {
+    (defaultAssistantFeatures.attackDiscoveryAlertFiltering as jest.Mocked<boolean>) = true;
+    const openFlyout = jest.fn();
+
+    render(
+      <TestProviders>
+        <Header
+          stats={null}
+          connectorId="testConnectorId"
+          connectorsAreConfigured={true}
+          isDisabledActions={false}
+          isLoading={false}
+          localStorageAttackDiscoveryMaxAlerts={`${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`}
+          onCancel={jest.fn()}
+          onConnectorIdSelected={jest.fn()}
+          onGenerate={jest.fn()}
+          openFlyout={openFlyout}
+          setLocalStorageAttackDiscoveryMaxAlerts={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    const settings = screen.getByTestId('openAlertSelection');
+    fireEvent.click(settings);
+
+    await waitFor(() => expect(openFlyout).toHaveBeenCalled());
   });
 });
