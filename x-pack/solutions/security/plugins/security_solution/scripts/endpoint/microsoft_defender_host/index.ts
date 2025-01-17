@@ -235,7 +235,11 @@ const runCli: RunFn = async ({ log, flags }) => {
     }),
     createDetectionEngineMicrosoftDefenderRuleIfNeeded(kbnClient, log, agentPolicyNamespace),
     // Trigger alert on the windows VM
-    msVm.exec('curl -o /tmp/eicar.com.txt https://secure.eicar.org/eicar.com.txt'),
+    msVm.exec('curl -o /tmp/eicar.com.txt https://secure.eicar.org/eicar.com.txt').catch((err) => {
+      log.warning(
+        `Attempted to trigger an alert on host [${msVm.name}], but failed with: ${err.message}`
+      );
+    }),
   ]);
 
   log.info(`Done!
