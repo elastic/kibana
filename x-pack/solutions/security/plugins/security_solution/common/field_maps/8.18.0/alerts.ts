@@ -6,16 +6,36 @@
  */
 
 import { alertsFieldMap8160 } from '../8.16.0';
-import { ALERT_SERVICE_CRITICALITY } from '../field_names';
+import {
+  ALERT_SERVICE_CRITICALITY,
+  ALERT_SERVICE_RISK_SCORE_CALCULATED_LEVEL,
+  ALERT_SERVICE_RISK_SCORE_CALCULATED_SCORE_NORM,
+} from '../field_names';
 
 export const alertsFieldMap8180 = {
   ...alertsFieldMap8160,
   /**
-   * Stores the criticality level for the host, as determined by analysts, in relation to the alert.
+   * Stores the criticality level for the service, as determined by analysts, in relation to the alert.
    * The Criticality level is copied from the asset criticality index.
    */
   [ALERT_SERVICE_CRITICALITY]: {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+
+  /**
+   * Stores the risk score level and score_norm level for the service, as determined by the Risk Engine, in relation to the alert.
+   * The Risk score is copied from the risk score index.
+   */
+  [ALERT_SERVICE_RISK_SCORE_CALCULATED_LEVEL]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+    ignore_above: 1024,
+  },
+  [ALERT_SERVICE_RISK_SCORE_CALCULATED_SCORE_NORM]: {
+    type: 'float',
     array: false,
     required: false,
   },

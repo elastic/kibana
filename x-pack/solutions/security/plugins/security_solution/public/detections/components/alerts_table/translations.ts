@@ -141,9 +141,9 @@ export const ALERTS_HEADERS_HOST_CRITICALITY = i18n.translate(
 );
 
 export const ALERTS_HEADERS_SERVICE_RISK_LEVEL = i18n.translate(
-  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.serviceCriticality',
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.serviceRiskLevel',
   {
-    defaultMessage: 'Service Criticality',
+    defaultMessage: 'Service Risk Level',
   }
 );
 
