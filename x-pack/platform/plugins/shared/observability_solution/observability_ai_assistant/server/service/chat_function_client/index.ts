@@ -9,6 +9,7 @@
 import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv';
 import dedent from 'dedent';
 import { compact, keyBy } from 'lodash';
+import { safeJsonParse } from '../../../common/utils/safe_json_parse';
 import { FunctionVisibility, type FunctionResponse } from '../../../common/functions/types';
 import type {
   AdHocInstruction,
@@ -183,7 +184,7 @@ export class ChatFunctionClient {
       throw new Error(`Function ${name} not found`);
     }
 
-    const parsedArguments = args ? JSON.parse(args) : {};
+    const parsedArguments = safeJsonParse(args);
 
     this.validate(name, parsedArguments);
 

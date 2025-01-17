@@ -21,6 +21,7 @@ import {
   switchMap,
   throwError,
 } from 'rxjs';
+import { safeJsonParse } from '../../../../common/utils/safe_json_parse';
 import { CONTEXT_FUNCTION_NAME } from '../../../functions/context';
 import { createFunctionNotFoundError, Message, MessageRole } from '../../../../common';
 import {
@@ -283,7 +284,7 @@ export function continueConversation({
       try {
         functionClient.validate(
           functionCallName,
-          JSON.parse(lastMessage.function_call!.arguments || '{}')
+          safeJsonParse(lastMessage.function_call?.arguments)
         );
       } catch (error) {
         // return a function response error for the LLM to handle

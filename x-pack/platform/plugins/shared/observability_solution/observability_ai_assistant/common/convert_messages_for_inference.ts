@@ -12,6 +12,7 @@ import {
 } from '@kbn/inference-common';
 import { generateFakeToolCallId } from '@kbn/inference-plugin/common';
 import { Message, MessageRole } from '.';
+import { safeJsonParse } from './utils/safe_json_parse';
 
 export function convertMessagesForInference(messages: Message[]): InferenceMessage[] {
   const inferenceMessages: InferenceMessage[] = [];
@@ -27,7 +28,7 @@ export function convertMessagesForInference(messages: Message[]): InferenceMessa
                 {
                   function: {
                     name: message.message.function_call.name,
-                    arguments: JSON.parse(message.message.function_call.arguments || '{}'),
+                    arguments: safeJsonParse(message.message.function_call.arguments),
                   },
                   toolCallId: generateFakeToolCallId(),
                 },
@@ -54,7 +55,7 @@ export function convertMessagesForInference(messages: Message[]): InferenceMessa
       inferenceMessages.push({
         name: message.message.name!,
         role: InferenceMessageRole.Tool,
-        response: JSON.parse(message.message.content ?? '{}'),
+        response: safeJsonParse(message.message.content),
         toolCallId: toolCallRequest.toolCalls![0].toolCallId,
       });
 

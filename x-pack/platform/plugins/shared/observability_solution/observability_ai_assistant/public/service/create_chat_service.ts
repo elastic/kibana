@@ -25,6 +25,7 @@ import {
 } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
+import { safeJsonParse } from '../../common/utils/safe_json_parse';
 import { ChatCompletionChunkEvent, Message, MessageRole } from '../../common';
 import {
   StreamingChatResponseEventType,
@@ -231,11 +232,10 @@ class ChatService {
       throw new Error(`Function ${name} not found`);
     }
 
-    const parsedArguments = args ? JSON.parse(args) : {};
-
+    const parsedArguments = safeJsonParse(args);
     const parsedResponse = {
-      content: JSON.parse(response.content ?? '{}'),
-      data: JSON.parse(response.data ?? '{}'),
+      content: safeJsonParse(response.content),
+      data: safeJsonParse(response.data),
     };
 
     return fn?.({

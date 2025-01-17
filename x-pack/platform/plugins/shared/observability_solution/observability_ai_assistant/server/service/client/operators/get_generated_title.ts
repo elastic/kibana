@@ -7,6 +7,7 @@
 
 import { catchError, last, map, Observable, of, tap } from 'rxjs';
 import { Logger } from '@kbn/logging';
+import { safeJsonParse } from '../../../../common/utils/safe_json_parse';
 import type { ObservabilityAIAssistantClient } from '..';
 import { Message, MessageRole } from '../../../../common';
 import { concatenateChatCompletionChunks } from '../../../../common/utils/concatenate_chat_completion_chunks';
@@ -80,10 +81,12 @@ export function getGeneratedTitle({
       concatenateChatCompletionChunks(),
       last(),
       map((concatenatedMessage) => {
-        const title: string =
-          (concatenatedMessage.message.function_call.name
-            ? JSON.parse(concatenatedMessage.message.function_call.arguments).title
-            : concatenatedMessage.message?.content) || '';
+        const parsedArgs = safeJsonParse<{ title: string }>(
+          concatenatedMessage.message.function_call.arguments
+        );
+
+        const title =
+          ('title' in parsedArgs ? parsedArgs.title : concatenatedMessage.message?.content) || '';
 
         // This captures a string enclosed in single or double quotes.
         // It extracts the string content without the quotes.

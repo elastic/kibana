@@ -17,6 +17,7 @@ import {
   shareReplay,
   toArray,
 } from 'rxjs';
+import { safeJsonParse } from '../../common/utils/safe_json_parse';
 import {
   MessageRole,
   StreamingChatResponseEventType,
@@ -155,7 +156,7 @@ export function complete(
           .respond({
             signal,
             client,
-            args: JSON.parse(functionCall.arguments || '{}'),
+            args: safeJsonParse(functionCall.arguments),
             connectorId,
             messages: allMessages,
           })

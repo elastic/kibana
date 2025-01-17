@@ -9,6 +9,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { castArray, chunk, groupBy, uniq } from 'lodash';
 import { lastValueFrom } from 'rxjs';
+import { safeJsonParse } from '../../../common/utils/safe_json_parse';
 import { MessageRole, ShortIdTable, type Message } from '../../../common';
 import { concatenateChatCompletionChunks } from '../../../common/utils/concatenate_chat_completion_chunks';
 import { FunctionCallChatFunction } from '../../service/types';
@@ -149,12 +150,12 @@ export async function getRelevantFieldNames({
 
       const chunkResponse = await lastValueFrom(chunkResponse$);
 
-      return chunkResponse.message?.function_call?.arguments
-        ? (
-            JSON.parse(chunkResponse.message.function_call.arguments) as {
-              fieldIds: string[];
-            }
-          ).fieldIds
+      const parsedArgs = safeJsonParse<{ fieldIds: string[] }>(
+        chunkResponse.message.function_call.arguments
+      );
+
+      return 'fieldIds' in parsedArgs
+        ? parsedArgs.fieldIds
             .map((fieldId) => {
               const fieldName = shortIdTable.lookup(fieldId);
               return fieldName ?? fieldId;
