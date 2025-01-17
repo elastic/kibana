@@ -11,7 +11,11 @@ export default function searchSolutionNavigation({
   getPageObjects,
   getService,
 }: FtrProviderContext) {
-  const { common, searchClassicNavigation } = getPageObjects(['common', 'searchClassicNavigation']);
+  const { common, searchClassicNavigation, indexManagement } = getPageObjects([
+    'common',
+    'searchClassicNavigation',
+    'indexManagement',
+  ]);
   const spaces = getService('spaces');
   const browser = getService('browser');
 
@@ -43,7 +47,7 @@ export default function searchSolutionNavigation({
       await searchClassicNavigation.expectAllNavItems([
         { id: 'Home', label: 'Home' },
         { id: 'Content', label: 'Content' },
-        { id: 'Indices', label: 'Indices' },
+        { id: 'Indices', label: 'Index Management' },
         { id: 'Connectors', label: 'Connectors' },
         { id: 'Crawlers', label: 'Web Crawlers' },
         { id: 'Build', label: 'Build' },
@@ -64,12 +68,6 @@ export default function searchSolutionNavigation({
 
       await searchClassicNavigation.expectNavItemExists('Home');
 
-      // Check Content
-      // > Indices
-      await searchClassicNavigation.clickNavItem('Indices');
-      await searchClassicNavigation.expectNavItemActive('Indices');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Content');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Elasticsearch indices');
       // > Connectors
       await searchClassicNavigation.clickNavItem('Connectors');
       await searchClassicNavigation.expectNavItemActive('Connectors');
@@ -129,6 +127,11 @@ export default function searchSolutionNavigation({
       await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('AI Search');
 
       await expectNoPageReload();
+    });
+
+    it("should redirect to index management when clicking on 'Indices'", async () => {
+      await searchClassicNavigation.clickNavItem('Indices');
+      await indexManagement.expectToBeOnIndicesManagement();
     });
   });
 }
