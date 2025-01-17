@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React, { useCallback, useMemo } from 'react';
 import { useSelector } from '@xstate/react';
-import { useCallback, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import { DegradedField } from '../../common/data_streams_stats';
 import { SortDirection } from '../../common/types';
@@ -23,21 +24,31 @@ import {
   degradedFieldCauseFieldMalformed,
   degradedFieldCauseFieldMalformedTooltip,
 } from '../../common/translations';
+import { QualityIssueType } from '../state_machines/dataset_quality_details_controller';
 
 export type DegradedFieldSortField = keyof DegradedField;
 
-export function useDegradedFields() {
+export function useQualityIssues() {
   const { service } = useDatasetQualityDetailsState();
   const {
     services: { fieldFormats },
   } = useKibanaContextForPlugin();
 
-  const { degradedFields, expandedDegradedField, showCurrentQualityIssues } = useSelector(
-    service,
-    (state) => state.context
-  );
+  const {
+    degradedFields,
+    expandedQualityIssue: expandedDegradedField,
+    showCurrentQualityIssues,
+    failedDocsErrors,
+  } = useSelector(service, (state) => state.context);
   const { data, table } = degradedFields ?? {};
   const { page, rowsPerPage, sort } = table;
+
+  const { data: failedDocsErrorsData, table: failedDocsErrorsTable } = failedDocsErrors ?? {};
+  const {
+    page: failedDocsErrorsPage,
+    rowsPerPage: failedDocsErrorsRowsPerPage,
+    sort: failedDocsErrorsSort,
+  } = failedDocsErrorsTable;
 
   const totalItemCount = data?.length ?? 0;
 
@@ -74,7 +85,10 @@ export function useDegradedFields() {
   }, [data, sort.field, sort.direction, page, rowsPerPage]);
 
   const expandedRenderedItem = useMemo(() => {
-    return renderedItems.find((item) => item.name === expandedDegradedField);
+    return renderedItems.find(
+      (item) =>
+        item.name === expandedDegradedField?.name && item.type === expandedDegradedField?.type
+    );
   }, [expandedDegradedField, renderedItems]);
 
   const isDegradedFieldsLoading = useSelector(
@@ -90,11 +104,20 @@ export function useDegradedFields() {
   );
 
   const openDegradedFieldFlyout = useCallback(
-    (fieldName: string) => {
-      if (expandedDegradedField === fieldName) {
+    (fieldName: string, qualityIssueType: QualityIssueType) => {
+      if (
+        expandedDegradedField?.name === fieldName &&
+        expandedDegradedField?.type === qualityIssueType
+      ) {
         service.send({ type: 'CLOSE_DEGRADED_FIELD_FLYOUT' });
       } else {
-        service.send({ type: 'OPEN_DEGRADED_FIELD_FLYOUT', fieldName });
+        service.send({
+          type: 'OPEN_DEGRADED_FIELD_FLYOUT',
+          qualityIssue: {
+            name: fieldName,
+            type: qualityIssueType,
+          },
+        });
       }
     },
     [expandedDegradedField, service]
@@ -212,6 +235,52 @@ export function useDegradedFields() {
     service.send('ROLLOVER_DATA_STREAM');
   }, [service]);
 
+  const renderedFailedDocsErrorsItems = useMemo(() => {
+    const sortedItems = orderBy(
+      failedDocsErrorsData,
+      failedDocsErrorsSort.field,
+      failedDocsErrorsSort.direction
+    );
+    return sortedItems.slice(
+      failedDocsErrorsPage * failedDocsErrorsRowsPerPage,
+      (failedDocsErrorsPage + 1) * failedDocsErrorsRowsPerPage
+    );
+  }, [
+    failedDocsErrorsData,
+    failedDocsErrorsSort.field,
+    failedDocsErrorsSort.direction,
+    failedDocsErrorsPage,
+    failedDocsErrorsRowsPerPage,
+  ]);
+
+  const resultsCount = useMemo(() => {
+    const startNumberItemsOnPage =
+      failedDocsErrorsRowsPerPage * failedDocsErrorsPage +
+      (renderedFailedDocsErrorsItems.length ? 1 : 0);
+    const endNumberItemsOnPage =
+      failedDocsErrorsRowsPerPage * failedDocsErrorsPage + renderedFailedDocsErrorsItems.length;
+
+    return failedDocsErrorsRowsPerPage === 0 ? (
+      <strong>
+        {i18n.translate('xpack.datasetQuality.resultsCount.strong.lllLabel', {
+          defaultMessage: 'lll',
+        })}
+      </strong>
+    ) : (
+      <>
+        <strong>
+          {startNumberItemsOnPage}-{endNumberItemsOnPage}
+        </strong>{' '}
+        {' of '} {failedDocsErrorsData?.length}
+      </>
+    );
+  }, [
+    failedDocsErrorsRowsPerPage,
+    failedDocsErrorsPage,
+    renderedFailedDocsErrorsItems.length,
+    failedDocsErrorsData?.length,
+  ]);
+
   return {
     isDegradedFieldsLoading,
     pagination,
@@ -238,5 +307,8 @@ export function useDegradedFields() {
     isRolloverRequired,
     isMitigationAppliedSuccessfully,
     triggerRollover,
+    renderedFailedDocsErrorsItems,
+    failedDocsErrorsSort: { sort: failedDocsErrorsSort },
+    resultsCount,
   };
 }

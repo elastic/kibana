@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiBasicTable, EuiEmptyPrompt } from '@elastic/eui';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-import { getDegradedFieldsColumns } from './columns';
+import React from 'react';
 import {
   overviewDegradedFieldsTableLoadingText,
-  overviewDegradedFieldsTableNoData,
+  qualityIssuesTableNoData,
 } from '../../../../../common/translations';
-import { useDegradedFields } from '../../../../hooks/use_degraded_fields';
+import { useQualityIssues } from '../../../../hooks/use_quality_issues';
+import { getQualityIssuesColumns } from './columns';
 
 export const DegradedFieldTable = () => {
   const {
@@ -25,15 +25,15 @@ export const DegradedFieldTable = () => {
     fieldFormats,
     expandedDegradedField,
     openDegradedFieldFlyout,
-  } = useDegradedFields();
+  } = useQualityIssues();
   const dateFormatter = fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE, [
     ES_FIELD_TYPES.DATE,
   ]);
-  const columns = getDegradedFieldsColumns({
+  const columns = getQualityIssuesColumns({
     dateFormatter,
     isLoading: isDegradedFieldsLoading,
-    expandedDegradedField,
-    openDegradedFieldFlyout,
+    expandedQualityIssue: expandedDegradedField,
+    openQualityIssueFlyout: openDegradedFieldFlyout,
   });
 
   return (
@@ -56,7 +56,7 @@ export const DegradedFieldTable = () => {
           <EuiEmptyPrompt
             data-test-subj="datasetQualityDetailsDegradedTableNoData"
             layout="vertical"
-            title={<h2>{overviewDegradedFieldsTableNoData}</h2>}
+            title={<h2>{qualityIssuesTableNoData}</h2>}
             hasBorder={false}
             titleSize="m"
           />

@@ -29,11 +29,11 @@ import {
   degradedFieldValuesColumnName,
   lastOccurrenceColumnName,
 } from '../../../../common/translations';
-import { useDegradedFields } from '../../../hooks';
+import { useQualityIssues } from '../../../hooks';
 import { SparkPlot } from '../../common/spark_plot';
-import { DegradedField } from '../../../../common/api_types';
+import { QualityIssue } from '../../../../common/api_types';
 
-export const DegradedFieldInfo = ({ fieldList }: { fieldList?: DegradedField }) => {
+export const DegradedFieldInfo = ({ fieldList }: { fieldList?: QualityIssue }) => {
   const { euiTheme } = useEuiTheme();
 
   const {
@@ -43,7 +43,7 @@ export const DegradedFieldInfo = ({ fieldList }: { fieldList?: DegradedField }) 
     isAnalysisInProgress,
     degradedFieldAnalysisFormattedResult,
     degradedFieldAnalysis,
-  } = useDegradedFields();
+  } = useQualityIssues();
 
   const dateFormatter = fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE, [
     ES_FIELD_TYPES.DATE,

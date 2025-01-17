@@ -11,10 +11,10 @@ import { EuiFlexGroup, EuiLoadingChart, OnTimeChangeProps } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
 import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 
-import { flyoutDegradedDocsTrendText } from '../../../../../../common/translations';
-import { useKibanaContextForPlugin } from '../../../../../utils';
-import { TimeRangeConfig } from '../../../../../../common/types';
-import { useDegradedDocsChart } from '../../../../../hooks';
+import { flyoutDegradedDocsTrendText } from '../../../../../common/translations';
+import { useKibanaContextForPlugin } from '../../../../utils';
+import { TimeRangeConfig } from '../../../../../common/types';
+import { useQualityIssuesDocsChart } from '../../../../hooks';
 
 const CHART_HEIGHT = 180;
 const DISABLED_ACTIONS = [
@@ -24,9 +24,9 @@ const DISABLED_ACTIONS = [
   'create-ml-ad-job-action',
 ];
 
-interface DegradedDocsChartProps
+interface TrendDocsChartProps
   extends Pick<
-    ReturnType<typeof useDegradedDocsChart>,
+    ReturnType<typeof useQualityIssuesDocsChart>,
     'attributes' | 'isChartLoading' | 'onChartLoading' | 'extraActions'
   > {
   timeRange: TimeRangeConfig;
@@ -34,7 +34,7 @@ interface DegradedDocsChartProps
   onTimeRangeChange: (props: Pick<OnTimeChangeProps, 'start' | 'end'>) => void;
 }
 
-export function DegradedDocsChart({
+export function TrendDocsChart({
   attributes,
   isChartLoading,
   onChartLoading,
@@ -42,7 +42,7 @@ export function DegradedDocsChart({
   timeRange,
   lastReloadTime,
   onTimeRangeChange,
-}: DegradedDocsChartProps) {
+}: TrendDocsChartProps) {
   const {
     services: { lens },
   } = useKibanaContextForPlugin();

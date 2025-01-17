@@ -6,7 +6,6 @@
  */
 
 import type { DoneInvokeEvent } from 'xstate';
-import type { DegradedFieldSortField } from '../../hooks';
 import {
   Dashboard,
   DataStreamDetails,
@@ -15,12 +14,14 @@ import {
   DegradedFieldAnalysis,
   DegradedFieldResponse,
   DegradedFieldValues,
+  FailedDocsDetails,
   NonAggregatableDatasets,
   QualityIssue,
   UpdateFieldLimitResponse,
 } from '../../../common/api_types';
-import { TableCriteria, TimeRangeConfig } from '../../../common/types';
 import { IntegrationType } from '../../../common/data_stream_details';
+import { TableCriteria, TimeRangeConfig } from '../../../common/types';
+import type { DegradedFieldSortField } from '../../hooks';
 
 export type QualityIssueType = QualityIssue['type'];
 
@@ -231,13 +232,20 @@ export type DatasetQualityDetailsControllerEvent =
     }
   | {
       type: 'OPEN_DEGRADED_FIELD_FLYOUT';
-      fieldName: string | undefined;
+      qualityIssue: {
+        name: string;
+        type: QualityIssueType;
+      };
     }
   | {
       type: 'CLOSE_DEGRADED_FIELD_FLYOUT';
     }
   | {
       type: 'DEGRADED_FIELDS_LOADED';
+    }
+  | {
+      type: 'QUALITY_ISSUES_CHART_CHANGE';
+      qualityIssuesChart: QualityIssueType;
     }
   | {
       type: 'BREAKDOWN_FIELD_CHANGE';
@@ -258,6 +266,7 @@ export type DatasetQualityDetailsControllerEvent =
   | DoneInvokeEvent<DataStreamDetails>
   | DoneInvokeEvent<Error>
   | DoneInvokeEvent<boolean>
+  | DoneInvokeEvent<FailedDocsDetails>
   | DoneInvokeEvent<DegradedFieldResponse>
   | DoneInvokeEvent<DegradedFieldValues>
   | DoneInvokeEvent<DataStreamSettings>

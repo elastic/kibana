@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './degraded_fields';
+export * from './quality_issues';

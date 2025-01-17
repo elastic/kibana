@@ -27,7 +27,7 @@ export const useDatasetQualityDetailsState = () => {
     timeRange,
     breakdownField,
     isIndexNotFoundError,
-    expandedDegradedField,
+    expandedQualityIssue,
   } = useSelector(service, (state) => state.context) ?? {};
 
   const isNonAggregatable = useSelector(service, (state) =>
@@ -104,6 +104,8 @@ export const useDatasetQualityDetailsState = () => {
     rawName: dataStream,
   };
 
+  const docsTrendChart = useSelector(service, (state) => state.context.qualityIssuesChart);
+
   const loadingState = useSelector(service, (state) => ({
     nonAggregatableDatasetLoading: state.matches('initializing.nonAggregatableDataset.fetching'),
     dataStreamDetailsLoading: state.matches('initializing.dataStreamDetails.fetching'),
@@ -153,6 +155,7 @@ export const useDatasetQualityDetailsState = () => {
     datasetDetails,
     degradedFields,
     dataStreamDetails,
+    docsTrendChart,
     breakdownField,
     isBreakdownFieldEcs,
     isBreakdownFieldAsserted,
@@ -164,7 +167,7 @@ export const useDatasetQualityDetailsState = () => {
     integrationDetails,
     canUserAccessDashboards,
     canUserViewIntegrations,
-    expandedDegradedField,
+    expandedQualityIssue,
     isDegradedFieldFlyoutOpen,
   };
 };

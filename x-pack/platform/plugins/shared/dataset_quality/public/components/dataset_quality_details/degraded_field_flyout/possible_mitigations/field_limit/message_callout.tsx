@@ -16,7 +16,7 @@ import {
   fieldLimitMitigationSuccessComponentTemplateLinkText,
   fieldLimitMitigationSuccessMessage,
 } from '../../../../../../common/translations';
-import { useDatasetQualityDetailsState, useDegradedFields } from '../../../../../hooks';
+import { useDatasetQualityDetailsState, useQualityIssues } from '../../../../../hooks';
 import { getComponentTemplatePrefixFromIndexTemplate } from '../../../../../../common/utils/component_template_name';
 import { useKibanaContextForPlugin } from '../../../../../utils';
 
@@ -26,7 +26,7 @@ export function MessageCallout() {
     newFieldLimitData,
     isRolloverRequired,
     isMitigationAppliedSuccessfully,
-  } = useDegradedFields();
+  } = useQualityIssues();
   const { error: serverError } = newFieldLimitData ?? {};
 
   if (serverError) {
@@ -82,7 +82,7 @@ export function SuccessCallout() {
 }
 
 export function ManualRolloverCallout() {
-  const { triggerRollover, isRolloverInProgress } = useDegradedFields();
+  const { triggerRollover, isRolloverInProgress } = useQualityIssues();
   return (
     <EuiCallOut
       title={fieldLimitMitigationPartiallyFailedMessage}

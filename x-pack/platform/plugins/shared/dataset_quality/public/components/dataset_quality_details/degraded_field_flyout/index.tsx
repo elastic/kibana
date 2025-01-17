@@ -26,7 +26,7 @@ import { NavigationSource } from '../../../services/telemetry';
 import {
   useDatasetDetailsRedirectLinkTelemetry,
   useDatasetQualityDetailsState,
-  useDegradedFields,
+  useQualityIssues,
   useRedirectLink,
 } from '../../../hooks';
 import {
@@ -34,7 +34,7 @@ import {
   discoverAriaText,
   fieldIgnoredText,
   openInDiscoverText,
-  overviewDegradedFieldsSectionTitle,
+  overviewQualityIssuesSectionTitle,
 } from '../../../../common/translations';
 import { DegradedFieldInfo } from './field_info';
 import { _IGNORED } from '../../../../common/es_fields';
@@ -49,7 +49,7 @@ export default function DegradedFieldFlyout() {
     renderedItems,
     isAnalysisInProgress,
     degradedFieldAnalysisFormattedResult,
-  } = useDegradedFields();
+  } = useQualityIssues();
   const { dataStreamSettings, datasetDetails, timeRange } = useDatasetQualityDetailsState();
   const pushedFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'pushedFlyoutTitle',
@@ -57,7 +57,7 @@ export default function DegradedFieldFlyout() {
 
   const fieldList = useMemo(() => {
     return renderedItems.find((item) => {
-      return item.name === expandedDegradedField;
+      return item.name === expandedDegradedField?.name;
     });
   }, [renderedItems, expandedDegradedField]);
 
@@ -85,12 +85,13 @@ export default function DegradedFieldFlyout() {
       data-test-subj={'datasetQualityDetailsDegradedFieldFlyout'}
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiBadge color="warning">{overviewDegradedFieldsSectionTitle}</EuiBadge>
+        <EuiBadge color="warning">{overviewQualityIssuesSectionTitle}</EuiBadge>
         <EuiSpacer size="s" />
         <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
           <EuiTitle size="m">
             <EuiText>
-              {expandedDegradedField} <span style={{ fontWeight: 400 }}>{fieldIgnoredText}</span>
+              {expandedDegradedField?.name}{' '}
+              <span style={{ fontWeight: 400 }}>{fieldIgnoredText}</span>
             </EuiText>
           </EuiTitle>
           <EuiToolTip content={openInDiscoverText}>

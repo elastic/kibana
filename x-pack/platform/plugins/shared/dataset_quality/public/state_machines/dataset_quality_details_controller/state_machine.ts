@@ -5,18 +5,9 @@
  * 2.0.
  */
 
-import { assign, createMachine, DoneInvokeEvent, InterpreterFrom, raise } from 'xstate';
-import { getDateISORange } from '@kbn/timerange';
 import type { IToasts } from '@kbn/core-notifications-browser';
-import {
-  DatasetQualityDetailsControllerContext,
-  DatasetQualityDetailsControllerEvent,
-  DatasetQualityDetailsControllerTypeState,
-} from './types';
-import { DatasetQualityStartDeps } from '../../types';
-import { IDataStreamsStatsClient } from '../../services/data_streams_stats';
-import { IDataStreamDetailsClient } from '../../services/data_stream_details';
-import { indexNameToDataStreamParts } from '../../../common/utils';
+import { getDateISORange } from '@kbn/timerange';
+import { assign, createMachine, DoneInvokeEvent, InterpreterFrom, raise } from 'xstate';
 import {
   Dashboard,
   DataStreamDetails,
@@ -24,20 +15,32 @@ import {
   DegradedFieldAnalysis,
   DegradedFieldResponse,
   DegradedFieldValues,
+  FailedDocsDetails,
   NonAggregatableDatasets,
+  QualityIssue,
   UpdateFieldLimitResponse,
 } from '../../../common/api_types';
+import { indexNameToDataStreamParts } from '../../../common/utils';
+import { IDataStreamDetailsClient } from '../../services/data_stream_details';
+import { IDataStreamsStatsClient } from '../../services/data_streams_stats';
+import { DatasetQualityStartDeps } from '../../types';
 import { fetchNonAggregatableDatasetsFailedNotifier } from '../common/notifications';
+import {
+  DatasetQualityDetailsControllerContext,
+  DatasetQualityDetailsControllerEvent,
+  DatasetQualityDetailsControllerTypeState,
+  QualityIssueType,
+} from './types';
 
 import { IntegrationType } from '../../../common/data_stream_details';
 import {
-  fetchDataStreamDetailsFailedNotifier,
   assertBreakdownFieldEcsFailedNotifier,
-  fetchDataStreamSettingsFailedNotifier,
+  fetchDataStreamDetailsFailedNotifier,
   fetchDataStreamIntegrationFailedNotifier,
+  fetchDataStreamSettingsFailedNotifier,
   fetchIntegrationDashboardsFailedNotifier,
-  updateFieldLimitFailedNotifier,
   rolloverDataStreamFailedNotifier,
+  updateFieldLimitFailedNotifier,
 } from './notifications';
 
 export const createPureDatasetQualityDetailsControllerStateMachine = (
@@ -122,6 +125,10 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                         '#DatasetQualityDetailsController.initializing.checkBreakdownFieldIsEcs.fetching',
                       actions: ['storeBreakDownField'],
                     },
+                    QUALITY_ISSUES_CHART_CHANGE: {
+                      target: 'done',
+                      actions: ['storeQualityIssuesChart'],
+                    },
                   },
                 },
               },
@@ -152,7 +159,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                   invoke: {
                     src: 'loadDataStreamSettings',
                     onDone: {
-                      target: 'fetchingDataStreamDegradedFields',
+                      target: 'qualityIssues',
                       actions: ['storeDataStreamSettings'],
                     },
                     onError: [
@@ -168,42 +175,81 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                   },
                 },
                 errorFetchingDataStreamSettings: {},
-                fetchingDataStreamDegradedFields: {
-                  invoke: {
-                    src: 'loadDegradedFields',
-                    onDone: {
-                      target: 'doneFetchingDegradedFields',
-                      actions: ['storeDegradedFields', 'raiseDegradedFieldsLoaded'],
+                qualityIssues: {
+                  type: 'parallel',
+                  states: {
+                    dataStreamDegradedFields: {
+                      initial: 'fetchingDataStreamDegradedFields',
+                      states: {
+                        fetchingDataStreamDegradedFields: {
+                          invoke: {
+                            src: 'loadDegradedFields',
+                            onDone: {
+                              target: 'done',
+                              actions: ['storeDegradedFields', 'raiseDegradedFieldsLoaded'],
+                            },
+                            onError: [
+                              {
+                                target: '#DatasetQualityDetailsController.indexNotFound',
+                                cond: 'isIndexNotFoundError',
+                              },
+                              {
+                                target: 'errorFetchingDegradedFields',
+                              },
+                            ],
+                          },
+                        },
+                        errorFetchingDegradedFields: {},
+                        done: {
+                          on: {
+                            TOGGLE_CURRENT_QUALITY_ISSUES: {
+                              target: 'fetchingDataStreamDegradedFields',
+                              actions: ['toggleCurrentQualityIssues'],
+                            },
+                          },
+                        },
+                      },
                     },
-                    onError: [
-                      {
-                        target: '#DatasetQualityDetailsController.indexNotFound',
-                        cond: 'isIndexNotFoundError',
+                    dataStreamFailedDocs: {
+                      initial: 'fetching',
+                      states: {
+                        fetching: {
+                          invoke: {
+                            src: 'loadFailedDocsDetails',
+                            onDone: {
+                              target: 'done',
+                              actions: ['storeFailedDocsDetails', 'raiseDegradedFieldsLoaded'],
+                            },
+                            onError: [
+                              {
+                                target: '#DatasetQualityDetailsController.indexNotFound',
+                                cond: 'isIndexNotFoundError',
+                              },
+                              {
+                                target: 'errorFetchingFailedDocs',
+                              },
+                            ],
+                          },
+                        },
+                        errorFetchingFailedDocs: {},
+                        done: {},
                       },
-                      {
-                        target: 'errorFetchingDegradedFields',
+                    },
+                    done: {
+                      on: {
+                        UPDATE_DEGRADED_FIELDS_TABLE_CRITERIA: {
+                          target: 'done',
+                          actions: ['storeDegradedFieldTableOptions'],
+                        },
+                        OPEN_DEGRADED_FIELD_FLYOUT: {
+                          target:
+                            '#DatasetQualityDetailsController.initializing.degradedFieldFlyout.open',
+                          actions: ['storeExpandedDegradedField', 'resetFieldLimitServerResponse'],
+                        },
                       },
-                    ],
+                    },
                   },
                 },
-                doneFetchingDegradedFields: {
-                  on: {
-                    UPDATE_DEGRADED_FIELDS_TABLE_CRITERIA: {
-                      target: 'doneFetchingDegradedFields',
-                      actions: ['storeDegradedFieldTableOptions'],
-                    },
-                    OPEN_DEGRADED_FIELD_FLYOUT: {
-                      target:
-                        '#DatasetQualityDetailsController.initializing.degradedFieldFlyout.open',
-                      actions: ['storeExpandedDegradedField', 'resetFieldLimitServerResponse'],
-                    },
-                    TOGGLE_CURRENT_QUALITY_ISSUES: {
-                      target: 'fetchingDataStreamDegradedFields',
-                      actions: ['toggleCurrentQualityIssues'],
-                    },
-                  },
-                },
-                errorFetchingDegradedFields: {},
               },
               on: {
                 UPDATE_TIME_RANGE: {
@@ -437,6 +483,11 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
               }
             : {};
         }),
+        storeQualityIssuesChart: assign((_context, event) => {
+          return 'qualityIssuesChart' in event
+            ? { qualityIssuesChart: event.qualityIssuesChart }
+            : {};
+        }),
         storeBreakDownField: assign((_context, event) => {
           return 'breakdownField' in event ? { breakdownField: event.breakdownField } : {};
         }),
@@ -447,12 +498,43 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
               }
             : {};
         }),
+        storeFailedDocsDetails: assign((context, event: DoneInvokeEvent<FailedDocsDetails>) => {
+          return 'data' in event
+            ? {
+                degradedFields: {
+                  ...context.degradedFields,
+                  data: [
+                    ...(context.degradedFields.data ?? []).filter(
+                      (field) => field.type !== 'failed'
+                    ),
+                    ...(event.data.timeSeries.length > 0
+                      ? [
+                          {
+                            ...event.data,
+                            name: 'failedDocs',
+                            type: 'failed' as QualityIssueType,
+                          },
+                        ]
+                      : []),
+                  ],
+                },
+              }
+            : {};
+        }),
         storeDegradedFields: assign((context, event: DoneInvokeEvent<DegradedFieldResponse>) => {
           return 'data' in event
             ? {
                 degradedFields: {
                   ...context.degradedFields,
-                  data: event.data.degradedFields,
+                  data: [
+                    ...(context.degradedFields.data ?? []).filter(
+                      (field) => field.type !== 'degraded'
+                    ),
+                    ...(event.data.degradedFields.map((field) => ({
+                      ...field,
+                      type: 'degraded',
+                    })) as QualityIssue[]),
+                  ],
                 },
               }
             : {};
@@ -483,7 +565,10 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
         }),
         storeExpandedDegradedField: assign((_, event) => {
           return {
-            expandedDegradedField: 'fieldName' in event ? event.fieldName : undefined,
+            expandedQualityIssue:
+              'qualityIssue' in event
+                ? { name: event.qualityIssue.name, type: event.qualityIssue.type }
+                : undefined,
           };
         }),
         toggleCurrentQualityIssues: assign((context) => {
@@ -492,16 +577,6 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
           };
         }),
         raiseDegradedFieldsLoaded: raise('DEGRADED_FIELDS_LOADED'),
-        resetDegradedFieldPageAndRowsPerPage: assign((context, _event) => ({
-          degradedFields: {
-            ...context.degradedFields,
-            table: {
-              ...context.degradedFields.table,
-              page: 0,
-              rowsPerPage: 10,
-            },
-          },
-        })),
         storeDataStreamSettings: assign((_context, event: DoneInvokeEvent<DataStreamSettings>) => {
           return 'data' in event
             ? {
@@ -570,16 +645,16 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
         },
         shouldOpenFlyout: (context) => {
           return (
-            Boolean(context.expandedDegradedField) &&
+            Boolean(context.expandedQualityIssue) &&
             Boolean(
               context.degradedFields.data?.some(
-                (field) => field.name === context.expandedDegradedField
+                (field) => field.name === context.expandedQualityIssue?.name
               )
             )
           );
         },
         hasNoDegradedFieldsSelected: (context) => {
-          return !Boolean(context.expandedDegradedField);
+          return !Boolean(context.expandedQualityIssue);
         },
         hasFailedToUpdateLastBackingIndex: (_, event) => {
           return (
@@ -678,6 +753,15 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
 
         return false;
       },
+      loadFailedDocsDetails: (context) => {
+        const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
+
+        return dataStreamDetailsClient.getFailedDocsDetails({
+          dataStream: context.dataStream,
+          start,
+          end,
+        });
+      },
       loadDegradedFields: (context) => {
         const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
 
@@ -699,10 +783,10 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
       },
 
       loadDegradedFieldValues: (context) => {
-        if ('expandedDegradedField' in context && context.expandedDegradedField) {
+        if ('expandedQualityIssue' in context && context.expandedQualityIssue) {
           return dataStreamDetailsClient.getDataStreamDegradedFieldValues({
             dataStream: context.dataStream,
-            degradedField: context.expandedDegradedField,
+            degradedField: context.expandedQualityIssue.name,
           });
         }
         return Promise.resolve();
@@ -710,16 +794,28 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
       analyzeDegradedField: (context) => {
         if (context?.degradedFields?.data?.length) {
           const selectedDegradedField = context.degradedFields.data.find(
-            (field) => field.name === context.expandedDegradedField
+            (field) => field.name === context.expandedQualityIssue?.name
           );
 
-          if (selectedDegradedField) {
+          if (selectedDegradedField && selectedDegradedField.type === 'degraded') {
             return dataStreamDetailsClient.analyzeDegradedField({
               dataStream: context.dataStream,
-              degradedField: context.expandedDegradedField!,
-              lastBackingIndex: selectedDegradedField.indexFieldWasLastPresentIn,
+              degradedField: context.expandedQualityIssue?.name!,
+              lastBackingIndex: selectedDegradedField.indexFieldWasLastPresentIn!,
             });
           }
+        }
+        return Promise.resolve();
+      },
+      loadfailedDocsErrors: (context) => {
+        if ('expandedQualityIssue' in context && context.expandedQualityIssue) {
+          const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
+
+          return dataStreamDetailsClient.getFailedDocsErrors({
+            dataStream: context.dataStream,
+            start,
+            end,
+          });
         }
         return Promise.resolve();
       },

@@ -18,28 +18,28 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 import {
-  overviewDegradedFieldsSectionTitle,
-  overviewDegradedFieldsSectionTitleTooltip,
-  overviewDegradedFieldToggleSwitch,
-  overviewDegradedFieldToggleSwitchTooltip,
+  overviewQualityIssuesSectionTitle,
+  overviewQualityIssueSectionTitleTooltip,
+  currentIssuesToggleSwitch,
+  currentIssuesToggleSwitchTooltip,
   overviewQualityIssuesAccordionTechPreviewBadge,
 } from '../../../../../common/translations';
 import { DegradedFieldTable } from './table';
-import { useDegradedFields } from '../../../../hooks';
+import { useQualityIssues } from '../../../../hooks';
 
-export function DegradedFields() {
+export function QualityIssues() {
   const accordionId = useGeneratedHtmlId({
-    prefix: overviewDegradedFieldsSectionTitle,
+    prefix: overviewQualityIssuesSectionTitle,
   });
   const toggleTextSwitchId = useGeneratedHtmlId({ prefix: 'toggleTextSwitch' });
 
   const { totalItemCount, toggleCurrentQualityIssues, showCurrentQualityIssues } =
-    useDegradedFields();
+    useQualityIssues();
 
   const latestBackingIndexToggle = (
     <>
       <EuiSwitch
-        label={overviewDegradedFieldToggleSwitch}
+        label={currentIssuesToggleSwitch}
         checked={showCurrentQualityIssues}
         onChange={toggleCurrentQualityIssues}
         aria-describedby={toggleTextSwitchId}
@@ -47,16 +47,16 @@ export function DegradedFields() {
         data-test-subj="datasetQualityDetailsOverviewDegradedFieldToggleSwitch"
         css={{ marginRight: '5px' }}
       />
-      <EuiIconTip content={overviewDegradedFieldToggleSwitchTooltip} position="top" />
+      <EuiIconTip content={currentIssuesToggleSwitchTooltip} position="top" />
     </>
   );
 
   const accordionTitle = (
     <EuiFlexGroup alignItems="center" gutterSize="s" direction="row">
       <EuiTitle size="xxs">
-        <h6>{overviewDegradedFieldsSectionTitle}</h6>
+        <h6>{overviewQualityIssuesSectionTitle}</h6>
       </EuiTitle>
-      <EuiIconTip content={overviewDegradedFieldsSectionTitleTooltip} color="subdued" size="m" />
+      <EuiIconTip content={overviewQualityIssueSectionTitleTooltip} color="subdued" size="m" />
       <EuiBadge
         color="default"
         data-test-subj="datasetQualityDetailsOverviewDegradedFieldTitleCount"

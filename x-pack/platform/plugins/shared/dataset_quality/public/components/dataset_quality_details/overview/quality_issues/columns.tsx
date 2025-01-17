@@ -5,59 +5,63 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiBasicTableColumn, EuiButtonIcon, EuiText, formatNumber } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import { EuiBasicTableColumn, EuiButtonIcon } from '@elastic/eui';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { formatNumber } from '@elastic/eui';
-
-import { DegradedField } from '../../../../../common/api_types';
-import { SparkPlot } from '../../../common/spark_plot';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
+import { QualityIssue } from '../../../../../common/api_types';
 import { NUMBER_FORMAT } from '../../../../../common/constants';
 import {
   countColumnName,
-  fieldColumnName,
+  documentIndexFailed,
+  issueColumnName,
   lastOccurrenceColumnName,
 } from '../../../../../common/translations';
+import { QualityIssueType } from '../../../../state_machines/dataset_quality_details_controller';
+import { SparkPlot } from '../../../common/spark_plot';
 
 const expandDatasetAriaLabel = i18n.translate(
-  'xpack.datasetQuality.details.degradedFieldTable.expandLabel',
+  'xpack.datasetQuality.details.qualityIssuesTable.expandLabel',
   {
     defaultMessage: 'Expand',
   }
 );
 const collapseDatasetAriaLabel = i18n.translate(
-  'xpack.datasetQuality.details.degradedFieldTable.collapseLabel',
+  'xpack.datasetQuality.details.qualityIssuesTable.collapseLabel',
   {
     defaultMessage: 'Collapse',
   }
 );
 
-export const getDegradedFieldsColumns = ({
+export const getQualityIssuesColumns = ({
   dateFormatter,
   isLoading,
-  expandedDegradedField,
-  openDegradedFieldFlyout,
+  expandedQualityIssue,
+  openQualityIssueFlyout,
 }: {
   dateFormatter: FieldFormat;
   isLoading: boolean;
-  expandedDegradedField?: string;
-  openDegradedFieldFlyout: (name: string) => void;
-}): Array<EuiBasicTableColumn<DegradedField>> => [
+  expandedQualityIssue?: {
+    name: string;
+    type: QualityIssueType;
+  };
+  openQualityIssueFlyout: (name: string, type: QualityIssueType) => void;
+}): Array<EuiBasicTableColumn<QualityIssue>> => [
   {
     name: '',
     field: 'name',
-    render: (_, { name }) => {
-      const isExpanded = name === expandedDegradedField;
+    render: (_, { name, type }) => {
+      const isExpanded = name === expandedQualityIssue?.name && type === expandedQualityIssue?.type;
 
       const onExpandClick = () => {
-        openDegradedFieldFlyout(name);
+        openQualityIssueFlyout(name, type);
       };
 
       return (
         <EuiButtonIcon
-          data-test-subj="datasetQualityDetailsDegradedFieldsExpandButton"
+          data-test-subj="datasetQualityDetailsQualityIssuesExpandButton"
           size="xs"
           color="text"
           onClick={onExpandClick}
@@ -75,8 +79,27 @@ export const getDegradedFieldsColumns = ({
     `,
   },
   {
-    name: fieldColumnName,
+    name: issueColumnName,
     field: 'name',
+    render: (_, { name, type }) => {
+      return type === 'degraded' ? (
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.datasetQuality.details.qualityIssues.degradedField"
+            defaultMessage="{name} field ignored"
+            values={{
+              name: (
+                <>
+                  <strong>{name}</strong>{' '}
+                </>
+              ),
+            }}
+          />
+        </EuiText>
+      ) : (
+        <>{documentIndexFailed}</>
+      );
+    },
   },
   {
     name: countColumnName,
