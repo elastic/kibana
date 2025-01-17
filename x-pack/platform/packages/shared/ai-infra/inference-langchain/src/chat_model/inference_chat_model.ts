@@ -5,15 +5,29 @@
  * 2.0.
  */
 
+import type { z } from '@kbn/zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 import {
   BaseChatModel,
   type BaseChatModelParams,
   type BaseChatModelCallOptions,
   type BindToolsInput,
 } from '@langchain/core/language_models/chat_models';
-import type { BaseMessage } from '@langchain/core/messages';
+import type {
+  BaseLanguageModelInput,
+  StructuredOutputMethodOptions,
+  ToolDefinition,
+} from '@langchain/core/language_models/base';
+import type { BaseMessage, AIMessageChunk } from '@langchain/core/messages';
 import type { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
+import { isZodSchema } from '@langchain/core/utils/types';
 import { ChatGenerationChunk, ChatResult, ChatGeneration } from '@langchain/core/outputs';
+import {
+  Runnable,
+  RunnablePassthrough,
+  RunnableSequence,
+  RunnableLambda,
+} from '@langchain/core/runnables';
 import {
   ChatCompleteAPI,
   ChatCompleteOptions,
@@ -57,9 +71,6 @@ type InvocationParams = Omit<ChatCompleteOptions, 'messages' | 'system' | 'strea
 
 // TODO: _combineLLMOutput ?
 // https://github.com/langchain-ai/langchainjs/blob/main/libs/langchain-openai/src/chat_models.ts#L1944
-
-// TODO: withStructuredOutput ?
-// https://github.com/langchain-ai/langchainjs/blob/main/libs/langchain-openai/src/chat_models.ts#L1967
 
 // TODO: _identifyingParams / identifyingParams ?
 
@@ -219,5 +230,93 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
         throw new Error('AbortError');
       }
     }
+  }
+
+  withStructuredOutput<RunOutput extends Record<string, any> = Record<string, any>>(
+    outputSchema: z.ZodType<RunOutput> | Record<string, any>,
+    config?: StructuredOutputMethodOptions<false>
+  ): Runnable<BaseLanguageModelInput, RunOutput>;
+  withStructuredOutput<RunOutput extends Record<string, any> = Record<string, any>>(
+    outputSchema: z.ZodType<RunOutput> | Record<string, any>,
+    config?: StructuredOutputMethodOptions<true>
+  ): Runnable<BaseLanguageModelInput, { raw: BaseMessage; parsed: RunOutput }>;
+  withStructuredOutput<RunOutput extends Record<string, any> = Record<string, any>>(
+    outputSchema: z.ZodType<RunOutput> | Record<string, any>,
+    config?: StructuredOutputMethodOptions<boolean>
+  ):
+    | Runnable<BaseLanguageModelInput, RunOutput>
+    | Runnable<BaseLanguageModelInput, { raw: BaseMessage; parsed: RunOutput }> {
+    const schema: z.ZodType<RunOutput> | Record<string, any> = outputSchema;
+    const name = config?.name;
+    const description = schema.description ?? 'A function available to call.';
+    const includeRaw = config?.includeRaw;
+
+    let functionName = name ?? 'extract';
+    let tools: ToolDefinition[];
+    if (isZodSchema(schema)) {
+      tools = [
+        {
+          type: 'function',
+          function: {
+            name: functionName,
+            description,
+            parameters: zodToJsonSchema(schema),
+          },
+        },
+      ];
+    } else {
+      if ('name' in schema) {
+        functionName = schema.name;
+      }
+      tools = [
+        {
+          type: 'function',
+          function: {
+            name: functionName,
+            description,
+            parameters: schema,
+          },
+        },
+      ];
+    }
+
+    const llm = this.bindTools(tools, { tool_choice: functionName });
+
+    const outputParser = RunnableLambda.from<AIMessageChunk, RunOutput>(
+      (input: AIMessageChunk): RunOutput => {
+        if (!input.tool_calls || input.tool_calls.length === 0) {
+          throw new Error('No tool calls found in the response.');
+        }
+        const toolCall = input.tool_calls.find((tc) => tc.name === functionName);
+        if (!toolCall) {
+          throw new Error(`No tool call found with name ${functionName}.`);
+        }
+        return toolCall.args as RunOutput;
+      }
+    );
+
+    if (!includeRaw) {
+      return llm.pipe(outputParser).withConfig({
+        runName: 'StructuredOutput',
+      }) as Runnable<BaseLanguageModelInput, RunOutput>;
+    }
+
+    const parserAssign = RunnablePassthrough.assign({
+      parsed: (input: any, cfg) => outputParser.invoke(input.raw, cfg),
+    });
+    const parserNone = RunnablePassthrough.assign({
+      parsed: () => null,
+    });
+    const parsedWithFallback = parserAssign.withFallbacks({
+      fallbacks: [parserNone],
+    });
+    return RunnableSequence.from<BaseLanguageModelInput, { raw: BaseMessage; parsed: RunOutput }>([
+      {
+        raw: llm,
+      },
+      parsedWithFallback,
+    ]).withConfig({
+      runName: 'StructuredOutputRunnable',
+    });
   }
 }
