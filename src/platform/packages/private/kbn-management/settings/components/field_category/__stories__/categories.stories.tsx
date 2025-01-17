@@ -61,7 +61,6 @@ export const Categories: Story<Params> = (params) => {
         });
         return { successfulValidation: true, valid: true };
       }}
-      getDataViewLink={(url: string) => url}
     >
       <Component
         {...{

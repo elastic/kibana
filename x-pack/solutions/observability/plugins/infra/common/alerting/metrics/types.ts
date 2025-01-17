@@ -63,7 +63,7 @@ export interface InventoryMetricThresholdParams {
 export interface SearchConfigurationWithExtractedReferenceType {
   // Index will be a data view spec after extracting references
   index: DataViewSpec;
-  query: {
+  query?: {
     query: string;
     language: string;
   };
@@ -75,7 +75,7 @@ export interface MetricThresholdParams {
   filterQuery?: string;
   filterQueryText?: string;
   sourceId?: string;
-  searchConfiguration: SearchConfigurationWithExtractedReferenceType;
+  searchConfiguration?: SearchConfigurationWithExtractedReferenceType;
   alertOnNoData?: boolean;
   alertOnGroupDisappear?: boolean;
 }

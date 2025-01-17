@@ -86,7 +86,6 @@ export const getStory = (
             });
             return { successfulValidation: true, valid: true };
           }}
-          getDataViewLink={(url: string) => url}
         >
           <EuiPanel>
             <Story />

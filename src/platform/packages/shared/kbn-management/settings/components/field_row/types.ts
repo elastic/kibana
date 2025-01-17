@@ -20,7 +20,7 @@ import type {
  */
 export interface Services {
   links: { [key: string]: string };
-  getDataViewLink: (url: string) => string;
+  getDataViewLink?: (url: string) => string;
 }
 
 /**

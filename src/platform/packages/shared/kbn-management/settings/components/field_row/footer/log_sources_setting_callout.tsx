@@ -22,7 +22,7 @@ const LOG_SOURCES_NOT_USED_BY_RULES = i18n.translate(
 
 export const LogSourcesSettingCallout = () => {
   const { getDataViewLink } = useServices();
-  const viewDataViewLink = getDataViewLink(
+  const viewDataViewLink = getDataViewLink?.(
     '/app/management/kibana/dataViews/dataView/log_rules_data_view'
   );
 
@@ -43,7 +43,7 @@ export const LogSourcesSettingCallout = () => {
         <EuiSpacer size="s" />
         <EuiLink
           data-test-subj="logSourcesViewDataViewLink"
-          href={viewDataViewLink}
+          href={viewDataViewLink || ''}
           target="_blank"
         >
           <FormattedMessage

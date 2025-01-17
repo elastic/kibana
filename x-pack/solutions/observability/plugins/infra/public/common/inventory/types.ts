@@ -129,7 +129,7 @@ export interface InfraWaffleMapOptions {
   groupBy: SnapshotGroupBy;
   legend: InfraWaffleMapLegend;
   sort: WaffleSortOption;
-  searchConfiguration: InfraThresholdSearchSourceFields;
+  searchConfiguration?: InfraThresholdSearchSourceFields;
 }
 
 export interface InfraOptions {
