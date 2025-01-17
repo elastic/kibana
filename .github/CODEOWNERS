@@ -2187,6 +2187,7 @@ x-pack/test/security_solution_api_integration/test_suites/detections_response/te
 x-pack/test/security_solution_api_integration/test_suites/detections_response/user_roles @elastic/security-detections-response
 x-pack/test/security_solution_api_integration/test_suites/explore @elastic/security-threat-hunting-explore
 x-pack/test/security_solution_api_integration/test_suites/investigations @elastic/security-threat-hunting-investigations
+x-pack/test/security_solution_api_integration/test_suites/siem_migrations @elastic/security-threat-hunting
 x-pack/test/security_solution_api_integration/test_suites/sources @elastic/security-detections-response
 /x-pack/test/common/utils/security_solution/detections_response @elastic/security-detections-response
 /x-pack/test/functional/es_archives/signals @elastic/security-detections-response
