@@ -112,7 +112,7 @@ export const ProfileQueryEditor = memo(() => {
       {/* Form */}
       <EuiFlexItem grow={false}>
         <EuiForm>
-          <EuiFlexGroup direction="row" gutterSize="s" alignItems="flexEnd">
+          <EuiFlexGroup responsive={false} direction="row" gutterSize="s" alignItems="flexEnd">
             <EuiFlexItem>
               <EuiFormRow
                 fullWidth
