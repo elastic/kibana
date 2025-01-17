@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
+  EuiText,
   keys,
 } from '@elastic/eui';
 import { useDebouncedValue } from '@kbn/visualization-utils';
@@ -34,6 +35,7 @@ const searchInputCss = css`
 
   .euiFormControlLayout__append {
     padding-inline-end: 0 !important;
+    background: none;
   }
 `;
 
@@ -170,7 +172,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
     return (
       <EuiToolTip
         content={i18n.translate('unifiedDataTable.inTableSearch.inputPlaceholder', {
-          defaultMessage: 'Find in the table',
+          defaultMessage: 'Search in the table',
         })}
         delay="long"
       >
@@ -180,7 +182,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
           color="text"
           onClick={() => setIsFocused(true)}
           aria-label={i18n.translate('unifiedDataTable.inTableSearch.inputPlaceholder', {
-            defaultMessage: 'Find in the table',
+            defaultMessage: 'Search in the table',
           })}
         />
       </EuiToolTip>
@@ -195,38 +197,38 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
         isClearable={!isProcessing}
         isLoading={isProcessing}
         append={
-          inputValue && typeof matchesCount === 'number' ? (
-            <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
-              <EuiFlexItem grow={false} css={matchesCss}>
+          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
+            <EuiFlexItem grow={false} css={matchesCss}>
+              <EuiText color="subdued" size="s">
                 {matchesCount ? `${activeMatchPosition}/${matchesCount}` : '0/0'}&nbsp;
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="arrowUp"
-                  color="text"
-                  disabled={areArrowsDisabled}
-                  aria-label={i18n.translate('unifiedDataTable.inTableSearch.buttonPreviousMatch', {
-                    defaultMessage: 'Previous match',
-                  })}
-                  onClick={goToPrevMatch}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="arrowDown"
-                  color="text"
-                  disabled={areArrowsDisabled}
-                  aria-label={i18n.translate('unifiedDataTable.inTableSearch.buttonNextMatch', {
-                    defaultMessage: 'Next match',
-                  })}
-                  onClick={goToNextMatch}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : undefined
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="arrowUp"
+                color="text"
+                disabled={areArrowsDisabled}
+                aria-label={i18n.translate('unifiedDataTable.inTableSearch.buttonPreviousMatch', {
+                  defaultMessage: 'Previous match',
+                })}
+                onClick={goToPrevMatch}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="arrowDown"
+                color="text"
+                disabled={areArrowsDisabled}
+                aria-label={i18n.translate('unifiedDataTable.inTableSearch.buttonNextMatch', {
+                  defaultMessage: 'Next match',
+                })}
+                onClick={goToNextMatch}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         }
         placeholder={i18n.translate('unifiedDataTable.inTableSearch.inputPlaceholder', {
-          defaultMessage: 'Find in the table',
+          defaultMessage: 'Search in the table',
         })}
         value={inputValue}
         onChange={onInputChange}
