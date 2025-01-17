@@ -35,7 +35,7 @@ export const MISCONFIGURATIONS_GROUPS_UNIT = (
         values: { groupCount },
         defaultMessage: `{groupCount} {groupCount, plural, =1 {rule} other {rules}}`,
       });
-    case FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
+    case FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID:
       return i18n.translate('xpack.csp.findings.groupUnit.cloudAccount', {
         values: { groupCount },
         defaultMessage: `{groupCount} {groupCount, plural, =1 {cloud account} other {cloud accounts}}`,
@@ -91,9 +91,9 @@ export const defaultGroupingOptions: GroupOption[] = [
   },
   {
     label: i18n.translate('xpack.csp.findings.latestFindings.groupByCloudAccount', {
-      defaultMessage: 'Cloud account',
+      defaultMessage: 'Cloud account ID',
     }),
-    key: FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME,
+    key: FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID,
   },
   {
     label: i18n.translate('xpack.csp.findings.latestFindings.groupByKubernetesCluster', {

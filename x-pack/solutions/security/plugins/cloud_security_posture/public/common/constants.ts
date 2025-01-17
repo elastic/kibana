@@ -176,6 +176,7 @@ export const FINDINGS_GROUPING_OPTIONS = {
   RULE_NAME: 'rule.name',
   RULE_SECTION: 'rule.section',
   CLOUD_ACCOUNT_NAME: 'cloud.account.name',
+  CLOUD_ACCOUNT_ID: 'cloud.account.id',
   ORCHESTRATOR_CLUSTER_NAME: 'orchestrator.cluster.name',
 };
 
@@ -225,5 +226,5 @@ the fields from the runtime mappings if they are removed from the Data Table.
 export const CDR_VULNERABILITY_GROUPING_RUNTIME_MAPPING_FIELDS: Record<string, string[]> = {};
 export const CDR_MISCONFIGURATION_GROUPING_RUNTIME_MAPPING_FIELDS: Record<string, string[]> = {
   [FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME]: ['orchestrator.cluster.name'],
-  [FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME]: ['cloud.account.name'],
+  [FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID]: ['cloud.account.id'],
 };

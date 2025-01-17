@@ -64,7 +64,7 @@ export const AccountsEvaluatedWidget = ({
   const navToFindingsByCloudProvider = (provider: string) => {
     navToFindings(
       { 'cloud.provider': provider, 'rule.benchmark.posture_type': CSPM_POLICY_TEMPLATE },
-      [FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME]
+      [FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID]
     );
   };
 

@@ -34,7 +34,7 @@ export const BenchmarkDetailsBox = ({ benchmark }: { benchmark: BenchmarkData })
   const navToFindings = useNavigateFindings();
 
   const handleClickCloudProvider = () =>
-    navToFindings(getBenchmarkIdQuery(benchmark), [FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME]);
+    navToFindings(getBenchmarkIdQuery(benchmark), [FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID]);
 
   const handleClickCluster = () =>
     navToFindings(getBenchmarkIdQuery(benchmark), [

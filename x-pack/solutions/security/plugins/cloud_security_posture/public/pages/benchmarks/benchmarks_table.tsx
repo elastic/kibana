@@ -190,7 +190,7 @@ const getBenchmarkTableColumns = (
       const isKspmBenchmark = ['cis_k8s', 'cis_eks'].includes(benchmark.id);
       const groupByField = isKspmBenchmark
         ? FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME
-        : FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME;
+        : FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID;
 
       return (
         <EuiButtonEmpty

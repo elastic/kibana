@@ -98,11 +98,12 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
         getTermAggregation('benchmarkName', 'rule.benchmark.name'),
         getTermAggregation('benchmarkVersion', 'rule.benchmark.version'),
       ];
-    case FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
+    case FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID:
       return [
         ...aggMetrics,
         getTermAggregation('benchmarkName', 'rule.benchmark.name'),
         getTermAggregation('benchmarkId', 'rule.benchmark.id'),
+        getTermAggregation('accountName', 'cloud.account.name'),
       ];
     case FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME:
       return [
