@@ -61,7 +61,13 @@ const mockDataViews = {
   getExistingIndices: jest.fn().mockResolvedValue(['index-2']),
 } as unknown as DataViewsContract;
 const queryClient = new QueryClient();
-const Wrapper = ({ children, history = createMemoryHistory(), }: { children: React.ReactNode, history?: History }) => (
+const Wrapper = ({
+  children,
+  history = createMemoryHistory(),
+}: {
+  children: React.ReactNode;
+  history?: History;
+}) => (
   <I18nProvider>
     <Router history={history}>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>

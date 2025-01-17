@@ -27,7 +27,7 @@ export const ContentReferenceButton: React.FC<Props> = ({
           alignItems: 'start',
         },
       }}
-      data-test-subj='ContentReferenceButton'
+      data-test-subj="ContentReferenceButton"
       {...euiButtonEmptyProps}
     >
       <sup>{`[${contentReferenceCount}]`}</sup>

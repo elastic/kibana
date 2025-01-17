@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import type { ClientMessage } from '@kbn/elastic-assistant';
 import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
 import { EuiCopy } from '@elastic/eui';
-import { CommentActions } from '.'
+import { CommentActions } from '.';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -26,7 +26,10 @@ const Wrapper: React.FC<React.PropsWithChildren> = ({ children }) => {
 describe('CommentActions', () => {
   it.each([
     [`Only this should be copied!{reference(exampleReferenceId)}`, 'Only this should be copied!'],
-    [`Only this.{reference(exampleReferenceId)} should be copied!{reference(exampleReferenceId)}`, 'Only this should be copied!'],
+    [
+      `Only this.{reference(exampleReferenceId)} should be copied!{reference(exampleReferenceId)}`,
+      'Only this should be copied!',
+    ],
     [`{reference(exampleReferenceId)}`, ''],
   ])("textToCopy is correct when input is '%s'", async (input, expected) => {
     const message: ClientMessage = {

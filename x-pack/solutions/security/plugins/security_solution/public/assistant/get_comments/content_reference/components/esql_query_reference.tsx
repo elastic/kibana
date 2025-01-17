@@ -21,7 +21,10 @@ export const EsqlQueryReference: React.FC<Props> = ({
   esqlContentReference,
 }) => {
   return (
-    <PopoverReference contentReferenceCount={contentReferenceNode.contentReferenceCount} data-test-subj='EsqlQueryReference'>
+    <PopoverReference
+      contentReferenceCount={contentReferenceNode.contentReferenceCount}
+      data-test-subj="EsqlQueryReference"
+    >
       <EuiLink
         href={`/app/discover#/?_a=(dataSource:(type:esql),interval:auto,query:(esql:'${encodeURIComponent(
           esqlContentReference.query

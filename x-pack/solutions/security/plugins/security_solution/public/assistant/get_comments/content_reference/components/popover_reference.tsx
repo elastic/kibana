@@ -11,7 +11,7 @@ import { ContentReferenceButton } from './content_reference_button';
 
 interface Props {
   contentReferenceCount: number;
-  "data-test-subj"?: string
+  'data-test-subj'?: string;
 }
 
 export const PopoverReference: React.FC<React.PropsWithChildren<Props>> = ({
