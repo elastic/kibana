@@ -38,7 +38,7 @@ import {
   SiemMigrationRetryFilter,
 } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
-import { useRetryRuleMigration } from '../../service/hooks/use_retry_rules';
+import { useStartMigration } from '../../service/hooks/use_start_migration';
 import type { FilterOptions } from './filters';
 import { MigrationRulesFilter } from './filters';
 import { convertFilterOptions } from './helpers';
@@ -160,7 +160,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     const { mutateAsync: installMigrationRules } = useInstallMigrationRules(migrationId);
     const { mutateAsync: installTranslatedMigrationRules } =
       useInstallTranslatedMigrationRules(migrationId);
-    const { retryRuleMigration, isLoading: isRetryLoading } = useRetryRuleMigration(refetchData);
+    const { startMigration, isLoading: isRetryLoading } = useStartMigration(refetchData);
 
     const [isTableLoading, setTableLoading] = useState(false);
     const installSingleRule = useCallback(
@@ -210,8 +210,8 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     );
 
     const reprocessFailedRules = useCallback(async () => {
-      retryRuleMigration(migrationId, SiemMigrationRetryFilter.FAILED);
-    }, [migrationId, retryRuleMigration]);
+      startMigration(migrationId, SiemMigrationRetryFilter.FAILED);
+    }, [migrationId, startMigration]);
 
     const isLoading =
       isStatsLoading || isPrebuiltRulesLoading || isDataLoading || isTableLoading || isRetryLoading;
@@ -262,24 +262,18 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
         if (!isLoading && ruleMigrations.length) {
           const ruleMigration = ruleMigrations.find((item) => item.id === ruleId);
           let matchedPrebuiltRule: RuleResponse | undefined;
-          const relatedIntegrations: RelatedIntegration[] = [];
+          let relatedIntegrations: RelatedIntegration[] = [];
           if (ruleMigration) {
             // Find matched prebuilt rule if any and prioritize its installed version
-            const matchedPrebuiltRuleVersion = ruleMigration.elastic_rule?.prebuilt_rule_id
-              ? prebuiltRules[ruleMigration.elastic_rule.prebuilt_rule_id]
-              : undefined;
-            matchedPrebuiltRule =
-              matchedPrebuiltRuleVersion?.current ?? matchedPrebuiltRuleVersion?.target;
+            const prebuiltRuleId = ruleMigration.elastic_rule?.prebuilt_rule_id;
+            const prebuiltRuleVersions = prebuiltRuleId ? prebuiltRules[prebuiltRuleId] : undefined;
+            matchedPrebuiltRule = prebuiltRuleVersions?.current ?? prebuiltRuleVersions?.target;
 
-            if (integrations) {
-              if (matchedPrebuiltRule?.related_integrations) {
-                relatedIntegrations.push(...matchedPrebuiltRule.related_integrations);
-              } else if (ruleMigration.elastic_rule?.integration_id) {
-                const integration = integrations[ruleMigration.elastic_rule.integration_id];
-                if (integration) {
-                  relatedIntegrations.push(integration);
-                }
-              }
+            const integrationIds = ruleMigration.elastic_rule?.integration_ids;
+            if (integrations && integrationIds) {
+              relatedIntegrations = integrationIds
+                .map((integrationId) => integrations[integrationId])
+                .filter((integration) => integration != null);
             }
           }
           return { ruleMigration, matchedPrebuiltRule, relatedIntegrations, isIntegrationsLoading };
