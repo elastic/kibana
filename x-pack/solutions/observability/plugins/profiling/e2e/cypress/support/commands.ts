@@ -38,10 +38,6 @@ Cypress.Commands.add('loginAsElastic', () => {
   });
 });
 
-Cypress.Commands.add('waitUntilPageContentIsLoaded', () => {
-  cy.getByTestSubj('kbnAppWrapper visibleChrome').find('[aria-busy=false]').should('be.visible');
-});
-
 Cypress.Commands.add('getByTestSubj', (selector: string) => {
   return cy.get(`[data-test-subj="${selector}"]`);
 });
@@ -66,9 +62,8 @@ Cypress.Commands.add(
     cy.contains(key);
     cy.getByTestSubj(`autocompleteSuggestion-field-${key}-`).click();
     // Do not close quotes here as it will not display the suggestion box
-    cy.getByTestSubj(dataTestSubj).type(`: "${value}`);
+    cy.getByTestSubj(dataTestSubj).type(`: ${value}`);
     if (waitForSuggestion) {
-      cy.waitUntilPageContentIsLoaded();
       cy.getByTestSubj(Cypress.$.escapeSelector(`autocompleteSuggestion-value-"${value}"-`))
         .should('be.visible')
         .click({ force: true });
