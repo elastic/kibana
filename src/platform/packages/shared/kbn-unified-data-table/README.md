@@ -56,7 +56,6 @@ Props description:
 *Required **services** list:
 ```
     theme: ThemeServiceStart;
-    i18n: I18nStart;
     fieldFormats: FieldFormatsStart;
     uiSettings: IUiSettingsClient;
     dataViewFieldEditor: DataViewFieldEditorStart;

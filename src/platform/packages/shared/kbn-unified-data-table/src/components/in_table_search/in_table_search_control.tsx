@@ -49,7 +49,7 @@ export interface InTableSearchControlProps
   extends Omit<UseInTableSearchMatchesProps, 'scrollToActiveMatch'> {
   pageSize: number | null; // null when the pagination is disabled
   changeToExpectedPage: (pageIndex: number) => void;
-  scrollToCell: (params: { rowIndex: number; columnIndex: number; align: 'start' }) => void;
+  scrollToCell: (params: { rowIndex: number; columnIndex: number; align: 'smart' }) => void;
   shouldOverrideCmdF: (element: HTMLElement) => boolean;
   onChange: (searchTerm: string | undefined) => void;
   onChangeCss: (styles: SerializedStyles) => void;
@@ -93,15 +93,22 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
         scrollToCell({
           rowIndex: visibleRowIndex,
           columnIndex: Number(columnIndex),
-          align: 'start',
+          align: 'smart',
         });
       }
     },
     [pageSize, changeToExpectedPage, scrollToCell, onChangeCss]
   );
 
-  const { matchesCount, activeMatchPosition, goToPrevMatch, goToNextMatch, isProcessing } =
-    useInTableSearchMatches({ ...props, scrollToActiveMatch });
+  const {
+    matchesCount,
+    activeMatchPosition,
+    isProcessing,
+    cellsShadowPortal,
+    goToPrevMatch,
+    goToNextMatch,
+    resetState,
+  } = useInTableSearchMatches({ ...props, scrollToActiveMatch });
   const areArrowsDisabled = !matchesCount || isProcessing;
 
   const [isFocused, setIsFocused] = useState<boolean>(false);
@@ -113,6 +120,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
   const hideInput = useCallback(
     (shouldFocusTheButton?: boolean) => {
       setIsFocused(false);
+      resetState();
 
       if (shouldFocusTheButton) {
         setTimeout(() => {
@@ -121,7 +129,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
         }, 350);
       }
     },
-    [setIsFocused]
+    [setIsFocused, resetState]
   );
 
   const { inputValue, handleInputChange } = useDebouncedValue({
@@ -257,6 +265,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
         onKeyUp={onKeyUp}
         onBlur={onBlur}
       />
+      {cellsShadowPortal}
     </div>
   );
 };

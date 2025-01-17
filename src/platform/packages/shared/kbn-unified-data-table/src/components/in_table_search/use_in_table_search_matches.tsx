@@ -7,30 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useState, ReactNode } from 'react';
-import ReactDOM from 'react-dom';
-import {
-  KibanaRenderContextProvider,
-  KibanaRenderContextProviderProps,
-} from '@kbn/react-kibana-context-render';
+import React, { useCallback, useEffect, useState, ReactNode, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { UnifiedDataTableContext, DataTableContext } from '../../table_context';
 import { InTableSearchHighlightsWrapperProps } from './in_table_search_highlights_wrapper';
 
-type Services = Pick<KibanaRenderContextProviderProps, 'i18n' | 'theme'>;
+let latestTimeoutTimer: NodeJS.Timeout | null = null;
 
 interface RowMatches {
   rowIndex: number;
   rowMatchesCount: number;
   matchesCountPerField: Record<string, number>;
 }
-const DEFAULT_MATCHES: RowMatches[] = [];
-const DEFAULT_ACTIVE_MATCH_POSITION = 1;
 
 export interface UseInTableSearchMatchesProps {
   visibleColumns: string[];
-  rows: DataTableRecord[] | undefined;
+  rows: DataTableRecord[];
   inTableSearchTerm: string | undefined;
   tableContext: Omit<DataTableContext, 'inTableSearchTerm' | 'pageIndex' | 'pageSize'>;
   renderCellValue: (
@@ -43,16 +37,32 @@ export interface UseInTableSearchMatchesProps {
     matchIndex: number;
     shouldJump: boolean;
   }) => void;
-  services: Services;
 }
 
-export interface UseInTableSearchMatchesReturn {
+interface UseInTableSearchMatchesState {
+  matchesList: RowMatches[];
   matchesCount: number | null;
   activeMatchPosition: number;
   isProcessing: boolean;
+  cellsShadowPortal: ReactNode | null;
+}
+
+export interface UseInTableSearchMatchesReturn
+  extends Omit<UseInTableSearchMatchesState, 'matchesList'> {
   goToPrevMatch: () => void;
   goToNextMatch: () => void;
+  resetState: () => void;
 }
+
+const DEFAULT_MATCHES: RowMatches[] = [];
+const DEFAULT_ACTIVE_MATCH_POSITION = 1;
+const INITIAL_STATE: UseInTableSearchMatchesState = {
+  matchesList: DEFAULT_MATCHES,
+  matchesCount: null,
+  activeMatchPosition: DEFAULT_ACTIVE_MATCH_POSITION,
+  isProcessing: false,
+  cellsShadowPortal: null,
+};
 
 export const useInTableSearchMatches = (
   props: UseInTableSearchMatchesProps
@@ -64,14 +74,10 @@ export const useInTableSearchMatches = (
     tableContext,
     renderCellValue,
     scrollToActiveMatch,
-    services,
   } = props;
-  const [matchesList, setMatchesList] = useState<RowMatches[]>(DEFAULT_MATCHES);
-  const [matchesCount, setMatchesCount] = useState<number | null>(null);
-  const [activeMatchPosition, setActiveMatchPosition] = useState<number>(
-    DEFAULT_ACTIVE_MATCH_POSITION
-  );
-  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [state, setState] = useState<UseInTableSearchMatchesState>(INITIAL_STATE);
+  const { matchesList, matchesCount, activeMatchPosition, isProcessing, cellsShadowPortal } = state;
+  const numberOfRunsRef = useRef<number>(0);
 
   const scrollToMatch = useCallback(
     ({
@@ -124,15 +130,15 @@ export const useInTableSearchMatches = (
   );
 
   const goToPrevMatch = useCallback(() => {
-    setActiveMatchPosition((prev) => {
-      if (typeof matchesCount !== 'number') {
-        return prev;
+    setState((prevState) => {
+      if (typeof prevState.matchesCount !== 'number') {
+        return prevState;
       }
 
-      let nextMatchPosition = prev - 1;
+      let nextMatchPosition = prevState.activeMatchPosition - 1;
 
-      if (prev - 1 < 1) {
-        nextMatchPosition = matchesCount; // allow to endlessly circle though matches
+      if (nextMatchPosition < 1) {
+        nextMatchPosition = prevState.matchesCount; // allow to endlessly circle though matches
       }
 
       scrollToMatch({
@@ -141,19 +147,23 @@ export const useInTableSearchMatches = (
         activeColumns: visibleColumns,
         shouldJump: true,
       });
-      return nextMatchPosition;
+
+      return {
+        ...prevState,
+        activeMatchPosition: nextMatchPosition,
+      };
     });
-  }, [setActiveMatchPosition, scrollToMatch, matchesList, visibleColumns, matchesCount]);
+  }, [setState, scrollToMatch, matchesList, visibleColumns]);
 
   const goToNextMatch = useCallback(() => {
-    setActiveMatchPosition((prev) => {
-      if (typeof matchesCount !== 'number') {
-        return prev;
+    setState((prevState) => {
+      if (typeof prevState.matchesCount !== 'number') {
+        return prevState;
       }
 
-      let nextMatchPosition = prev + 1;
+      let nextMatchPosition = prevState.activeMatchPosition + 1;
 
-      if (prev + 1 > matchesCount) {
+      if (nextMatchPosition > prevState.matchesCount) {
         nextMatchPosition = 1; // allow to endlessly circle though matches
       }
 
@@ -163,153 +173,167 @@ export const useInTableSearchMatches = (
         activeColumns: visibleColumns,
         shouldJump: true,
       });
-      return nextMatchPosition;
+
+      return {
+        ...prevState,
+        activeMatchPosition: nextMatchPosition,
+      };
     });
-  }, [setActiveMatchPosition, scrollToMatch, matchesList, visibleColumns, matchesCount]);
+  }, [setState, scrollToMatch, matchesList, visibleColumns]);
 
   useEffect(() => {
+    numberOfRunsRef.current += 1;
+
     if (!rows?.length || !inTableSearchTerm?.length) {
-      setMatchesList(DEFAULT_MATCHES);
-      setMatchesCount(null);
-      setActiveMatchPosition(DEFAULT_ACTIVE_MATCH_POSITION);
+      setState(INITIAL_STATE);
       return;
     }
 
-    setIsProcessing(true);
+    const numberOfRuns = numberOfRunsRef.current;
 
-    const findMatches = async () => {
-      const { matchesList: nextMatchesList, totalMatchesCount } = await getCellMatchesCounts({
-        inTableSearchTerm,
-        tableContext,
-        renderCellValue,
-        rows,
-        visibleColumns,
-        services,
-      });
+    stopTimer(latestTimeoutTimer);
 
-      const nextActiveMatchPosition = DEFAULT_ACTIVE_MATCH_POSITION;
-      setMatchesList(nextMatchesList);
-      setMatchesCount(totalMatchesCount);
-      setActiveMatchPosition(nextActiveMatchPosition);
-      setIsProcessing(false);
+    setState((prevState) => ({
+      ...prevState,
+      isProcessing: true,
+      cellsShadowPortal: (
+        <AllCellsHighlightsCounter
+          key={numberOfRuns}
+          inTableSearchTerm={inTableSearchTerm}
+          tableContext={tableContext}
+          renderCellValue={renderCellValue}
+          rows={rows}
+          visibleColumns={visibleColumns}
+          onFinish={({ matchesList: nextMatchesList, totalMatchesCount }) => {
+            setState({
+              matchesList: nextMatchesList,
+              matchesCount: totalMatchesCount,
+              activeMatchPosition: DEFAULT_ACTIVE_MATCH_POSITION,
+              isProcessing: false,
+              cellsShadowPortal: null,
+            });
 
-      if (totalMatchesCount > 0) {
-        scrollToMatch({
-          matchPosition: nextActiveMatchPosition,
-          activeMatchesList: nextMatchesList,
-          activeColumns: visibleColumns,
-          shouldJump: false,
-        });
-      }
-    };
-
-    void findMatches();
+            if (totalMatchesCount > 0) {
+              scrollToMatch({
+                matchPosition: DEFAULT_ACTIVE_MATCH_POSITION,
+                activeMatchesList: nextMatchesList,
+                activeColumns: visibleColumns,
+                shouldJump: true,
+              });
+            }
+          }}
+        />
+      ),
+    }));
   }, [
-    setMatchesList,
-    setMatchesCount,
-    setActiveMatchPosition,
-    setIsProcessing,
+    setState,
     renderCellValue,
     scrollToMatch,
     visibleColumns,
     rows,
     inTableSearchTerm,
     tableContext,
-    services,
   ]);
+
+  const resetState = useCallback(() => {
+    stopTimer(latestTimeoutTimer);
+    setState(INITIAL_STATE);
+  }, [setState]);
 
   return {
     matchesCount,
     activeMatchPosition,
     goToPrevMatch,
     goToNextMatch,
+    resetState,
     isProcessing,
+    cellsShadowPortal,
   };
 };
 
-function getCellMatchesCounts(
-  props: Pick<
-    UseInTableSearchMatchesProps,
-    | 'inTableSearchTerm'
-    | 'tableContext'
-    | 'renderCellValue'
-    | 'rows'
-    | 'visibleColumns'
-    | 'services'
-  >
-): Promise<{ matchesList: RowMatches[]; totalMatchesCount: number }> {
-  const { rows, visibleColumns } = props;
+type AllCellsProps = Pick<
+  UseInTableSearchMatchesProps,
+  'inTableSearchTerm' | 'tableContext' | 'renderCellValue' | 'rows' | 'visibleColumns'
+>;
 
-  if (!rows?.length || !visibleColumns?.length) {
-    return Promise.resolve({ matchesList: DEFAULT_MATCHES, totalMatchesCount: 0 });
+function AllCellsHighlightsCounter(
+  props: AllCellsProps & {
+    onFinish: (params: { matchesList: RowMatches[]; totalMatchesCount: number }) => void;
   }
+) {
+  const [container] = useState(() => document.createDocumentFragment());
+  const { rows, visibleColumns, onFinish } = props;
+  const resultsMapRef = useRef<Record<number, Record<string, number>>>({});
+  const remainingNumberOfResultsRef = useRef<number>(rows.length * visibleColumns.length);
 
-  const resultsMap: Record<number, Record<string, number>> = {};
-  let remainingNumberOfResults = rows.length * visibleColumns.length;
+  const onHighlightsCountFound = useCallback(
+    (rowIndex: number, fieldName: string, count: number) => {
+      remainingNumberOfResultsRef.current = remainingNumberOfResultsRef.current - 1;
 
-  const onHighlightsCountFound = (rowIndex: number, fieldName: string, count: number) => {
-    remainingNumberOfResults--;
+      if (count === 0) {
+        return;
+      }
 
-    if (count === 0) {
-      return;
-    }
+      if (!resultsMapRef.current[rowIndex]) {
+        resultsMapRef.current[rowIndex] = {};
+      }
+      resultsMapRef.current[rowIndex][fieldName] = count;
+    },
+    []
+  );
 
-    if (!resultsMap[rowIndex]) {
-      resultsMap[rowIndex] = {};
-    }
-    resultsMap[rowIndex][fieldName] = count;
-  };
+  const onComplete = useCallback(() => {
+    let totalMatchesCount = 0;
+    const newMatchesList: RowMatches[] = [];
 
-  const container = document.createElement('div');
+    Object.keys(resultsMapRef.current)
+      .map((rowIndex) => Number(rowIndex))
+      .sort((a, b) => a - b)
+      .forEach((rowIndex) => {
+        const matchesCountPerField = resultsMapRef.current[rowIndex];
+        const rowMatchesCount = Object.values(matchesCountPerField).reduce(
+          (acc, count) => acc + count,
+          0
+        );
 
-  return new Promise<{ matchesList: RowMatches[]; totalMatchesCount: number }>((resolve) => {
-    const finish = () => {
-      let totalMatchesCount = 0;
-      const newMatchesList: RowMatches[] = [];
-
-      Object.keys(resultsMap)
-        .map((rowIndex) => Number(rowIndex))
-        .sort((a, b) => a - b)
-        .forEach((rowIndex) => {
-          const matchesCountPerField = resultsMap[rowIndex];
-          const rowMatchesCount = Object.values(matchesCountPerField).reduce(
-            (acc, count) => acc + count,
-            0
-          );
-
-          newMatchesList.push({
-            rowIndex,
-            rowMatchesCount,
-            matchesCountPerField,
-          });
-          totalMatchesCount += rowMatchesCount;
+        newMatchesList.push({
+          rowIndex,
+          rowMatchesCount,
+          matchesCountPerField,
         });
+        totalMatchesCount += rowMatchesCount;
+      });
 
-      resolve({ matchesList: newMatchesList, totalMatchesCount });
-      ReactDOM.unmountComponentAtNode(container);
+    onFinish({ matchesList: newMatchesList, totalMatchesCount });
+  }, [onFinish]);
+
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const [_] = useState(() => {
+    const newTimer = setTimeout(onComplete, 30000);
+    timerRef.current = newTimer;
+    return registerTimer(newTimer);
+  });
+
+  useEffect(() => {
+    return () => {
+      stopTimer(timerRef.current);
     };
+  }, []);
 
-    const timer = setTimeout(() => {
-      // time out if rendering takes longer
-      finish();
-    }, 60000);
+  return createPortal(
+    <AllCells
+      {...props}
+      onHighlightsCountFound={(rowIndex, fieldName, count) => {
+        onHighlightsCountFound(rowIndex, fieldName, count);
 
-    // render all cells in parallel and get the count of highlights as the result
-    ReactDOM.render(
-      <AllCells
-        {...props}
-        onHighlightsCountFound={(rowIndex, fieldName, count) => {
-          onHighlightsCountFound(rowIndex, fieldName, count);
-
-          if (remainingNumberOfResults === 0) {
-            clearTimeout(timer);
-            finish();
-          }
-        }}
-      />,
-      container
-    );
-  }).catch(() => ({ matchesList: DEFAULT_MATCHES, totalMatchesCount: 0 })); // catching unexpected errors
+        if (remainingNumberOfResultsRef.current === 0) {
+          stopTimer(timerRef.current);
+          onComplete();
+        }
+      }}
+    />,
+    container
+  );
 }
 
 function AllCells({
@@ -318,51 +342,47 @@ function AllCells({
   visibleColumns,
   renderCellValue,
   tableContext,
-  services,
   onHighlightsCountFound,
-}: Pick<
-  UseInTableSearchMatchesProps,
-  'inTableSearchTerm' | 'tableContext' | 'renderCellValue' | 'rows' | 'visibleColumns' | 'services'
-> & { onHighlightsCountFound: (rowIndex: number, fieldName: string, count: number) => void }) {
+}: AllCellsProps & {
+  onHighlightsCountFound: (rowIndex: number, fieldName: string, count: number) => void;
+}) {
   const UnifiedDataTableRenderCellValue = renderCellValue;
 
   return (
-    <KibanaRenderContextProvider {...services}>
-      <UnifiedDataTableContext.Provider
-        value={{
-          ...tableContext,
-          inTableSearchTerm,
-          pageIndex: 0,
-          pageSize: rows?.length ?? 0,
-        }}
-      >
-        {(rows || []).flatMap((_, rowIndex) => {
-          return visibleColumns.map((fieldName) => {
-            return (
-              <ErrorBoundary
-                key={`${rowIndex}-${fieldName}`}
-                onError={() => {
-                  onHighlightsCountFound(rowIndex, fieldName, 0);
+    <UnifiedDataTableContext.Provider
+      value={{
+        ...tableContext,
+        inTableSearchTerm,
+        pageIndex: 0,
+        pageSize: rows?.length ?? 0,
+      }}
+    >
+      {(rows || []).flatMap((_, rowIndex) => {
+        return visibleColumns.map((fieldName) => {
+          return (
+            <ErrorBoundary
+              key={`${rowIndex}-${fieldName}`}
+              onError={() => {
+                onHighlightsCountFound(rowIndex, fieldName, 0);
+              }}
+            >
+              <UnifiedDataTableRenderCellValue
+                columnId={fieldName}
+                rowIndex={rowIndex}
+                isExpandable={false}
+                isExpanded={false}
+                isDetails={false}
+                colIndex={0}
+                setCellProps={() => {}}
+                onHighlightsCountFound={(count) => {
+                  onHighlightsCountFound(rowIndex, fieldName, count);
                 }}
-              >
-                <UnifiedDataTableRenderCellValue
-                  columnId={fieldName}
-                  rowIndex={rowIndex}
-                  isExpandable={false}
-                  isExpanded={false}
-                  isDetails={false}
-                  colIndex={0}
-                  setCellProps={() => {}}
-                  onHighlightsCountFound={(count) => {
-                    onHighlightsCountFound(rowIndex, fieldName, count);
-                  }}
-                />
-              </ErrorBoundary>
-            );
-          });
-        })}
-      </UnifiedDataTableContext.Provider>
-    </KibanaRenderContextProvider>
+              />
+            </ErrorBoundary>
+          );
+        });
+      })}
+    </UnifiedDataTableContext.Provider>
   );
 }
 
@@ -394,5 +414,17 @@ export class ErrorBoundary extends React.Component<
     }
 
     return this.props.children;
+  }
+}
+
+function registerTimer(timer: NodeJS.Timeout) {
+  stopTimer(latestTimeoutTimer);
+  latestTimeoutTimer = timer;
+  return timer;
+}
+
+function stopTimer(timer: NodeJS.Timeout | null) {
+  if (timer) {
+    clearTimeout(timer);
   }
 }

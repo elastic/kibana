@@ -37,7 +37,7 @@ import {
   type UseDataGridColumnsCellActionsProps,
 } from '@kbn/cell-actions';
 import type { SerializedStyles } from '@emotion/react';
-import type { ToastsStart, IUiSettingsClient, I18nStart } from '@kbn/core/public';
+import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import type { Serializable } from '@kbn/utility-types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import {
@@ -286,7 +286,6 @@ export interface UnifiedDataTableProps {
    */
   services: {
     theme: ThemeServiceStart;
-    i18n: I18nStart;
     fieldFormats: FieldFormatsStart;
     uiSettings: IUiSettingsClient;
     dataViewFieldEditor?: DataViewFieldEditorStart;
@@ -773,7 +772,6 @@ export const UnifiedDataTable = ({
         visibleColumns={visibleColumns}
         rows={displayedRows}
         renderCellValue={renderCellValue}
-        services={services}
         pageSize={isPaginationEnabled ? currentPageSize : null}
         changeToExpectedPage={(expectedPageIndex) => {
           if (isPaginationEnabled && currentPageIndexRef.current !== expectedPageIndex) {
@@ -786,10 +784,7 @@ export const UnifiedDataTable = ({
         shouldOverrideCmdF={(element) => {
           return dataGridWrapper?.contains?.(element) ?? false;
         }}
-        onChange={(searchTerm) => {
-          setInTableSearchTerm(searchTerm || '');
-          setInTableSearchTermCss(undefined);
-        }}
+        onChange={(searchTerm) => setInTableSearchTerm(searchTerm || '')}
         onChangeCss={(styles) => setInTableSearchTermCss(styles)}
       />
     );
@@ -807,7 +802,6 @@ export const UnifiedDataTable = ({
     changeCurrentPageIndex,
     isPaginationEnabled,
     inTableSearchContextValue,
-    services,
   ]);
 
   const renderCustomPopover = useMemo(

@@ -123,7 +123,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     return {
       data: props.data,
       theme: props.core.theme,
-      i18n: props.core.i18n,
       uiSettings: props.core.uiSettings,
       toastNotifications: props.core.notifications.toasts,
       fieldFormats: props.fieldFormats,
@@ -132,7 +131,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   }, [
     props.core.notifications.toasts,
     props.core.theme,
-    props.core.i18n,
     props.core.uiSettings,
     props.data,
     props.fieldFormats,
