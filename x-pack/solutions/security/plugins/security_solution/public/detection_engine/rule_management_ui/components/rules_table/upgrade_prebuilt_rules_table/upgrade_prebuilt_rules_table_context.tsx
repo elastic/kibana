@@ -97,10 +97,6 @@ export interface UpgradePrebuiltRulesTableActions {
   upgradeAllRules: () => void;
   setFilterOptions: Dispatch<SetStateAction<UpgradePrebuiltRulesTableFilterOptions>>;
   openRulePreview: (ruleId: string) => void;
-  /**
-   * Set field as currently edited in the rule upgrade flyout
-   */
-  setFieldAsCurrentlyEdited: (fieldName: string, isEditing: boolean) => void;
 }
 
 export interface UpgradePrebuiltRulesContextType {
@@ -392,7 +388,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     () => filteredRuleUpgradeStates.map(({ target_rule: targetRule }) => targetRule),
     [filteredRuleUpgradeStates]
   );
-  const { rulePreviewFlyout, openRulePreview, setFieldAsCurrentlyEdited } = useRulePreviewFlyout({
+  const { rulePreviewFlyout, openRulePreview } = useRulePreviewFlyout({
     rules: filteredRules,
     subHeaderFactory,
     ruleActionsFactory,
@@ -410,9 +406,8 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       upgradeAllRules,
       setFilterOptions,
       openRulePreview,
-      setFieldAsCurrentlyEdited,
     }),
-    [refetch, upgradeRules, upgradeAllRules, openRulePreview, setFieldAsCurrentlyEdited]
+    [refetch, upgradeRules, upgradeAllRules, openRulePreview]
   );
 
   const providerValue = useMemo<UpgradePrebuiltRulesContextType>(

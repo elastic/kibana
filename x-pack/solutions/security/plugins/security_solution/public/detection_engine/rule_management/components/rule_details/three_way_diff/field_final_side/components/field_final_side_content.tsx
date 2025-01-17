@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
-import { useUpgradePrebuiltRulesTableContext } from '../../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table_context';
+import { useRulePreviewContext } from '../../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/rule_preview_context';
 import { FieldFinalReadOnly } from '../../final_readonly';
 import { FieldFinalEdit } from '../../final_edit';
 import { assertUnreachable } from '../../../../../../../../common/utility_types';
@@ -21,7 +21,7 @@ export function FieldFinalSideContent(): JSX.Element {
   const { fieldName, rightSideMode, setEditMode, setReadOnlyMode } = useFieldUpgradeContext();
   const {
     actions: { setFieldAsCurrentlyEdited },
-  } = useUpgradePrebuiltRulesTableContext();
+  } = useRulePreviewContext();
 
   switch (rightSideMode) {
     case FieldFinalSideMode.Readonly:

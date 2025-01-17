@@ -8,7 +8,7 @@
 import type { PropsWithChildren } from 'react';
 import React, { useCallback } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { useUpgradePrebuiltRulesTableContext } from '../../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table_context';
+import { useRulePreviewContext } from '../../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/rule_preview_context';
 import type { DiffableAllFields } from '../../../../../../../../common/api/detection_engine';
 import { FieldUpgradeSideHeader } from '../../field_upgrade_side_header';
 import { assertUnreachable } from '../../../../../../../../common/utility_types';
@@ -26,7 +26,7 @@ export function FieldFinalSideHeader(): JSX.Element {
   const { form } = useFieldEditFormContext();
   const {
     actions: { setFieldAsCurrentlyEdited },
-  } = useUpgradePrebuiltRulesTableContext();
+  } = useRulePreviewContext();
 
   const handleAccept = useCallback(
     () =>

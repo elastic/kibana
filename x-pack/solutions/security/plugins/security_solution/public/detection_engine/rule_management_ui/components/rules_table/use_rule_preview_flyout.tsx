@@ -12,7 +12,7 @@ import { invariant } from '../../../../../common/utils/invariant';
 import type { RuleSignatureId } from '../../../../../common/api/detection_engine';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { RuleDetailsFlyout } from '../../../rule_management/components/rule_details/rule_details_flyout';
-
+import { useRulePreviewContext } from './upgrade_prebuilt_rules_table/rule_preview_context';
 interface UseRulePreviewFlyoutParams {
   rules: RuleResponse[];
   ruleActionsFactory: (
@@ -37,7 +37,6 @@ interface UseRulePreviewFlyoutResult {
   rulePreviewFlyout: ReactNode;
   openRulePreview: (ruleId: RuleSignatureId) => void;
   closeRulePreview: () => void;
-  setFieldAsCurrentlyEdited: (fieldName: string, isEditing: boolean) => void;
 }
 
 export function useRulePreviewFlyout({
@@ -48,30 +47,9 @@ export function useRulePreviewFlyout({
   flyoutProps,
 }: UseRulePreviewFlyoutParams): UseRulePreviewFlyoutResult {
   const [rule, setRuleForPreview] = useState<RuleResponse | undefined>();
-  const [editedFields, setEditedFields] = useState<Record<string, boolean>>({});
-
-  const clearEditedFields = useCallback(() => {
-    setEditedFields({});
-  }, []);
-
-  const setFieldAsCurrentlyEdited = useCallback(
-    (fieldName: string, isEditing: boolean) => {
-      setEditedFields((prev) => {
-        const updatedMap = { ...prev };
-        if (isEditing) {
-          updatedMap[fieldName] = true;
-        } else {
-          delete updatedMap[fieldName];
-        }
-        return updatedMap;
-      });
-    },
-    [setEditedFields]
-  );
-
-  const isAnyFieldCurrentlyEdited = useCallback(() => {
-    return Object.keys(editedFields).length > 0;
-  }, [editedFields]);
+  const {
+    actions: { isAnyFieldCurrentlyEdited, clearEditedFields },
+  } = useRulePreviewContext();
 
   const closeRulePreview = useCallback(() => {
     setRuleForPreview(undefined);
@@ -115,6 +93,5 @@ export function useRulePreviewFlyout({
       [rules, setRuleForPreview]
     ),
     closeRulePreview,
-    setFieldAsCurrentlyEdited,
   };
 }
