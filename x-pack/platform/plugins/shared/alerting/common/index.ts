@@ -103,7 +103,6 @@ export type {
   RuleTaskState,
   RuleTaskParams,
 } from '@kbn/alerting-state-types';
-export type { AlertingFrameworkHealth, Flapping } from '@kbn/alerting-types';
 export type {
   RuleStatusValues,
   AlertStatusValues,

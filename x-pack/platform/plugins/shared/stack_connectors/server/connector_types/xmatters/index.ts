@@ -17,7 +17,7 @@ import {
 import {
   AlertingConnectorFeatureId,
   SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/types';
+} from '@kbn/actions-plugin/common/connector_feature_config';
 import { postXmatters } from './post_xmatters';
 
 export type XmattersConnectorType = ConnectorType<

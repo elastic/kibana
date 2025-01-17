@@ -21,7 +21,7 @@ import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/types';
+} from '@kbn/actions-plugin/common/connector_feature_config';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
 

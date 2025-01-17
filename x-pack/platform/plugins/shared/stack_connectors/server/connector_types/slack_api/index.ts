@@ -10,7 +10,7 @@ import {
   UptimeConnectorFeatureId,
   AlertingConnectorFeatureId,
   SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/types';
+} from '@kbn/actions-plugin/common/connector_feature_config';
 import { Logger } from '@kbn/core/server';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';

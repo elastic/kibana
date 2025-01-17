@@ -9,7 +9,7 @@ import {
   AlertingConnectorFeatureId,
   SecurityConnectorFeatureId,
   UptimeConnectorFeatureId,
-} from '@kbn/actions-plugin/common';
+} from '@kbn/actions-plugin/common/connector_feature_config';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import {
   SubActionConnectorType,
