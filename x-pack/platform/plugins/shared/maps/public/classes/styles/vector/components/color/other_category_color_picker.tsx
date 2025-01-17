@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFormRow, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MbValidatedColorPicker } from './mb_validated_color_picker';
-import { OTHER_CATEGORY_DEFAULT_COLOR_TOKEN, OTHER_CATEGORY_LABEL } from '../../style_util';
+import { OTHER_CATEGORY_DEFAULT_COLOR, OTHER_CATEGORY_LABEL } from '../../style_util';
 
 interface Props {
   onChange: (color: string) => void;
@@ -40,7 +40,7 @@ export function OtherCategoryColorPicker(props: Props) {
           swatches={OTHER_CATEGORY_SWATCHES}
           prepend={OTHER_CATEGORY_LABEL}
           onChange={props.onChange}
-          color={props.color ? props.color : euiTheme.colors[OTHER_CATEGORY_DEFAULT_COLOR_TOKEN]}
+          color={props.color ? props.color : OTHER_CATEGORY_DEFAULT_COLOR}
         />
       </EuiToolTip>
     </EuiFormRow>
