@@ -21,7 +21,7 @@ const isAmsterdam = (euiThemeName: string) => {
 };
 
 // designers blocked the migration to tokens from EUI during the Borealys theme migration. We keep using hardcoded colors until security severity palette is ready
-const SEVERITY_COLOR = {
+export const SEVERITY_COLOR = {
   critical: '#E7664C',
   high: '#DA8B45',
   medium: '#D6BF57',
