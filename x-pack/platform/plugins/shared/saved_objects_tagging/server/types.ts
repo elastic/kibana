@@ -16,6 +16,8 @@ import {
 } from '@kbn/saved-objects-tagging-oss-plugin/server';
 import type { ITagsClient } from '../common/types';
 
+export type { CreateTagAssignmentServiceOptions } from '@kbn/saved-objects-tagging-oss-plugin/server';
+
 export interface ITagsRequestHandlerContext {
   tagsClient: ITagsClient;
   assignmentService: IAssignmentService;
@@ -23,11 +25,6 @@ export interface ITagsRequestHandlerContext {
 
 /** @public */
 export interface CreateTagClientOptions {
-  client: SavedObjectsClientContract;
-}
-
-/** @public */
-export interface CreateTagAssignmentServiceOptions {
   client: SavedObjectsClientContract;
 }
 

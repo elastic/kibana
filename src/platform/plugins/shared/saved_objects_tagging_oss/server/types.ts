@@ -30,6 +30,11 @@ export interface AssignmentServiceOptions {
   internal?: boolean;
 }
 
+/** @public */
+export interface CreateTagAssignmentServiceOptions {
+  client: SavedObjectsClientContract;
+}
+
 export interface IAssignmentService {
   findAssignableObjects(options: FindAssignableObjectsOptions): Promise<AssignableObject[]>;
   getAssignableTypes(types?: string[]): Promise<string[]>;
@@ -51,7 +56,9 @@ export interface SavedObjectsTaggingApiServer {
    *          When trying to assign or unassign tags on behalf of a user, use the `tags` request handler context
    *          instead.
    */
-  createInternalAssignmentService: (options: AssignmentServiceOptions) => IAssignmentService;
+  createInternalAssignmentService: (
+    options: CreateTagAssignmentServiceOptions
+  ) => IAssignmentService;
   getTagsFromReferences: (
     references: SavedObjectReference[],
     allTags: Tag[]

@@ -20,4 +20,5 @@ export type {
   SavedObjectsTaggingApiServer,
   IAssignmentService,
   AssignmentServiceOptions,
+  CreateTagAssignmentServiceOptions,
 } from './types';
