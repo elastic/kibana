@@ -75,6 +75,7 @@ export const Category = ({ isFiltered, category, isSavingEnabled }: FieldCategor
         });
         return { successfulValidation: true, valid: true };
       }}
+      getDataViewLink={(url: string) => url}
       {...{ isSavingEnabled, onFieldChange }}
     >
       <Component category={category} fieldCount={count} onClearQuery={onClearQuery}>
