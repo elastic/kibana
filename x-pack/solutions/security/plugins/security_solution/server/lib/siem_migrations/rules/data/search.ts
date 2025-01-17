@@ -16,40 +16,40 @@ export const conditions = {
     return { term: { translation_result: RuleTranslationResult.FULL } };
   },
   isNotFullyTranslated(): QueryDslQueryContainer {
-    return { bool: { must_not: this.isFullyTranslated() } };
+    return { bool: { must_not: conditions.isFullyTranslated() } };
   },
   isPartiallyTranslated(): QueryDslQueryContainer {
     return { term: { translation_result: RuleTranslationResult.PARTIAL } };
   },
   isNotPartiallyTranslated(): QueryDslQueryContainer {
-    return { bool: { must_not: this.isPartiallyTranslated() } };
+    return { bool: { must_not: conditions.isPartiallyTranslated() } };
   },
   isUntranslatable(): QueryDslQueryContainer {
     return { term: { translation_result: RuleTranslationResult.UNTRANSLATABLE } };
   },
   isNotUntranslatable(): QueryDslQueryContainer {
-    return { bool: { must_not: this.isUntranslatable() } };
+    return { bool: { must_not: conditions.isUntranslatable() } };
   },
   isInstalled(): QueryDslQueryContainer {
     return { exists: { field: 'elastic_rule.id' } };
   },
   isNotInstalled(): QueryDslQueryContainer {
-    return { bool: { must_not: this.isInstalled() } };
+    return { bool: { must_not: conditions.isInstalled() } };
   },
   isPrebuilt(): QueryDslQueryContainer {
     return { exists: { field: 'elastic_rule.prebuilt_rule_id' } };
   },
   isCustom(): QueryDslQueryContainer {
-    return { bool: { must_not: this.isPrebuilt() } };
+    return { bool: { must_not: conditions.isPrebuilt() } };
   },
   matchTitle(title: string): QueryDslQueryContainer {
     return { match: { 'elastic_rule.title': title } };
   },
   isInstallable(): QueryDslQueryContainer[] {
-    return [this.isFullyTranslated(), this.isNotInstalled()];
+    return [conditions.isFullyTranslated(), conditions.isNotInstalled()];
   },
   isNotInstallable(): QueryDslQueryContainer[] {
-    return [this.isNotFullyTranslated(), this.isInstalled()];
+    return [conditions.isNotFullyTranslated(), conditions.isInstalled()];
   },
   isFailed(): QueryDslQueryContainer {
     return { term: { status: SiemMigrationStatus.FAILED } };
