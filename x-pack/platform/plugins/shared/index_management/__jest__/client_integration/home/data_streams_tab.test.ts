@@ -533,6 +533,30 @@ describe('Data Streams tab', () => {
         testBed.component.update();
       });
 
+      test('shows bulk edit callout for reduced data retention', async () => {
+        const {
+          actions: { selectDataStream, clickBulkEditDataRetentionButton },
+        } = testBed;
+
+        selectDataStream('dataStream1', true);
+        selectDataStream('dataStream2', true);
+
+        clickBulkEditDataRetentionButton();
+
+        // Decrease data retention value to 5d (it was 7d initially)
+        testBed.form.setInputValue('dataRetentionValue', '5');
+
+        // Verify that callout is displayed
+        expect(testBed.exists('reducedDataRetentionCallout')).toBeTruthy();
+
+        // Verify message in callout
+        const calloutText = testBed.find('reducedDataRetentionCallout').text();
+        expect(calloutText).toContain(
+          'The retention period will be reduced for 2 data streams. Data older than then new retention period will be permanently deleted.'
+        );
+        expect(calloutText).toContain('Affected data streams: dataStream1, dataStream2');
+      });
+
       test('can set data retention period for mutliple data streams', async () => {
         const {
           actions: { selectDataStream, clickBulkEditDataRetentionButton },
@@ -794,6 +818,28 @@ describe('Data Streams tab', () => {
           expect(httpSetup.put).toHaveBeenLastCalledWith(
             `${API_BASE_PATH}/data_streams/data_retention`,
             expect.objectContaining({ body: JSON.stringify({ dataStreams: ['dataStream1'] }) })
+          );
+        });
+
+        test('shows single edit callout for reduced data retention', async () => {
+          const {
+            actions: { clickNameAt, clickEditDataRetentionButton },
+          } = testBed;
+
+          await clickNameAt(0);
+
+          clickEditDataRetentionButton();
+
+          // Decrease data retention value to 5d (it was 7d initially)
+          testBed.form.setInputValue('dataRetentionValue', '5');
+
+          // Verify that callout is displayed
+          expect(testBed.exists('reducedDataRetentionCallout')).toBeTruthy();
+
+          // Verify message in callout
+          const calloutText = testBed.find('reducedDataRetentionCallout').text();
+          expect(calloutText).toContain(
+            'The retention period will be reduced. Data older than then new retention period will be permanently deleted.'
           );
         });
       });

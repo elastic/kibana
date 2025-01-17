@@ -95,6 +95,7 @@ export type TestSubjects =
   | 'editDataRetentionButton'
   | 'bulkEditDataRetentionButton'
   | 'dataStreamActionsPopoverButton'
+  | 'reducedDataRetentionCallout'
   | 'errorWhenCreatingCallout'
   | 'manageDataStreamButton'
   | 'dataRetentionValue'
