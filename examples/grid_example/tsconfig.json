@@ -3,7 +3,13 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["index.ts", "public/**/*.ts", "public/**/*.tsx", "../../typings/**/*"],
+  "include": [
+    "index.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "../../typings/**/*",
+    "public/**/*.json"
+  ],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/grid-layout",
@@ -11,7 +17,15 @@
     "@kbn/core",
     "@kbn/developer-examples-plugin",
     "@kbn/core-lifecycle-browser",
+    "@kbn/embeddable-plugin",
     "@kbn/react-kibana-mount",
     "@kbn/i18n",
+    "@kbn/embeddable-examples-plugin",
+    "@kbn/react-kibana-context-render",
+    "@kbn/presentation-publishing",
+    "@kbn/es-query",
+    "@kbn/ui-actions-plugin",
+    "@kbn/embeddable-examples-plugin",
+    "@kbn/presentation-containers"
   ]
 }

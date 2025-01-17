@@ -14,13 +14,7 @@
           "({\n  connectors,\n  currentUser,\n  flyoutPositionMode,\n  initialConversationId,\n  initialMessages,\n  initialTitle,\n  knowledgeBase,\n  showLinkToConversationsApp,\n  onConversationUpdate,\n  onToggleFlyoutPositionMode,\n  navigateToConversation,\n}: { connectors: ",
           "UseGenAIConnectorsResult",
           "; currentUser?: Pick<",
-          {
-            "pluginId": "@kbn/core-security-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSecurityCommonPluginApi",
-            "section": "def-common.AuthenticatedUser",
-            "text": "AuthenticatedUser"
-          },
+          "AuthenticatedUser",
           ", \"username\" | \"full_name\"> | undefined; flyoutPositionMode?: ",
           {
             "pluginId": "@kbn/ai-assistant",
@@ -57,7 +51,7 @@
           },
           ") => void) | undefined; navigateToConversation?: ((conversationId?: string | undefined) => void) | undefined; }) => React.JSX.Element"
         ],
-        "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -68,7 +62,7 @@
             "tags": [],
             "label": "{\n  connectors,\n  currentUser,\n  flyoutPositionMode,\n  initialConversationId,\n  initialMessages,\n  initialTitle,\n  knowledgeBase,\n  showLinkToConversationsApp,\n  onConversationUpdate,\n  onToggleFlyoutPositionMode,\n  navigateToConversation,\n}",
             "description": [],
-            "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -82,7 +76,7 @@
                 "signature": [
                   "UseGenAIConnectorsResult"
                 ],
-                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -95,16 +89,10 @@
                 "description": [],
                 "signature": [
                   "Pick<",
-                  {
-                    "pluginId": "@kbn/core-security-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSecurityCommonPluginApi",
-                    "section": "def-common.AuthenticatedUser",
-                    "text": "AuthenticatedUser"
-                  },
+                  "AuthenticatedUser",
                   ", \"username\" | \"full_name\"> | undefined"
                 ],
-                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -125,7 +113,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -139,7 +127,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -160,7 +148,7 @@
                   },
                   "[] | undefined"
                 ],
-                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -174,7 +162,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -194,7 +182,7 @@
                     "text": "UseKnowledgeBaseResult"
                   }
                 ],
-                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -205,7 +193,7 @@
                 "tags": [],
                 "label": "showLinkToConversationsApp",
                 "description": [],
-                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -221,7 +209,7 @@
                   "TokenCount",
                   " | undefined; }; }) => void"
                 ],
-                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -232,7 +220,7 @@
                     "tags": [],
                     "label": "conversation",
                     "description": [],
-                    "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                    "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -248,7 +236,7 @@
                           "TokenCount",
                           " | undefined; }"
                         ],
-                        "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -275,7 +263,7 @@
                   },
                   ") => void) | undefined"
                 ],
-                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -295,7 +283,7 @@
                         "text": "FlyoutPositionMode"
                       }
                     ],
-                    "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                    "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -313,7 +301,7 @@
                 "signature": [
                   "((conversationId?: string | undefined) => void) | undefined"
                 ],
-                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -327,7 +315,7 @@
                     "signature": [
                       "string | undefined"
                     ],
-                    "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                    "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": false
@@ -349,7 +337,7 @@
         "label": "ChatFlyout",
         "description": [],
         "signature": [
-          "({\n  initialTitle,\n  initialMessages,\n  initialFlyoutPositionMode,\n  isOpen,\n  onClose,\n  navigateToConversation,\n  hideConversationList,\n}: { initialTitle: string; initialMessages: ",
+          "({\n  initialTitle,\n  initialMessages,\n  initialFlyoutPositionMode,\n  onFlyoutPositionModeChange,\n  isOpen,\n  onClose,\n  navigateToConversation,\n  hideConversationList,\n}: { initialTitle: string; initialMessages: ",
           {
             "pluginId": "observabilityAIAssistant",
             "scope": "common",
@@ -365,9 +353,17 @@
             "section": "def-public.FlyoutPositionMode",
             "text": "FlyoutPositionMode"
           },
-          " | undefined; isOpen: boolean; onClose: () => void; navigateToConversation?: ((conversationId?: string | undefined) => void) | undefined; hideConversationList?: boolean | undefined; }) => React.JSX.Element | null"
+          " | undefined; onFlyoutPositionModeChange?: ((next: ",
+          {
+            "pluginId": "@kbn/ai-assistant",
+            "scope": "public",
+            "docId": "kibKbnAiAssistantPluginApi",
+            "section": "def-public.FlyoutPositionMode",
+            "text": "FlyoutPositionMode"
+          },
+          ") => void) | undefined; isOpen: boolean; onClose: () => void; navigateToConversation?: ((conversationId?: string | undefined) => void) | undefined; hideConversationList?: boolean | undefined; }) => React.JSX.Element | null"
         ],
-        "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -376,9 +372,9 @@
             "id": "def-public.ChatFlyout.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  initialTitle,\n  initialMessages,\n  initialFlyoutPositionMode,\n  isOpen,\n  onClose,\n  navigateToConversation,\n  hideConversationList,\n}",
+            "label": "{\n  initialTitle,\n  initialMessages,\n  initialFlyoutPositionMode,\n  onFlyoutPositionModeChange,\n  isOpen,\n  onClose,\n  navigateToConversation,\n  hideConversationList,\n}",
             "description": [],
-            "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -389,7 +385,7 @@
                 "tags": [],
                 "label": "initialTitle",
                 "description": [],
-                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -410,7 +406,7 @@
                   },
                   "[]"
                 ],
-                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -431,9 +427,55 @@
                   },
                   " | undefined"
                 ],
-                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
                 "deprecated": false,
                 "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatFlyout.$1.onFlyoutPositionModeChange",
+                "type": "Function",
+                "tags": [],
+                "label": "onFlyoutPositionModeChange",
+                "description": [],
+                "signature": [
+                  "((next: ",
+                  {
+                    "pluginId": "@kbn/ai-assistant",
+                    "scope": "public",
+                    "docId": "kibKbnAiAssistantPluginApi",
+                    "section": "def-public.FlyoutPositionMode",
+                    "text": "FlyoutPositionMode"
+                  },
+                  ") => void) | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/ai-assistant",
+                    "id": "def-public.ChatFlyout.$1.onFlyoutPositionModeChange.$1",
+                    "type": "Enum",
+                    "tags": [],
+                    "label": "next",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/ai-assistant",
+                        "scope": "public",
+                        "docId": "kibKbnAiAssistantPluginApi",
+                        "section": "def-public.FlyoutPositionMode",
+                        "text": "FlyoutPositionMode"
+                      }
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
               },
               {
                 "parentPluginId": "@kbn/ai-assistant",
@@ -442,7 +484,7 @@
                 "tags": [],
                 "label": "isOpen",
                 "description": [],
-                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -456,7 +498,7 @@
                 "signature": [
                   "() => void"
                 ],
-                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -472,7 +514,7 @@
                 "signature": [
                   "((conversationId?: string | undefined) => void) | undefined"
                 ],
-                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -486,7 +528,7 @@
                     "signature": [
                       "string | undefined"
                     ],
-                    "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                    "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": false
@@ -504,7 +546,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -524,7 +566,7 @@
         "signature": [
           "({\n  visible,\n  setContainer,\n  style,\n}: { visible?: boolean | undefined; setContainer?: ((element: HTMLDivElement | null) => void) | undefined; style: React.CSSProperties; }) => React.JSX.Element"
         ],
-        "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_inline_edit.tsx",
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_inline_edit.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -535,7 +577,7 @@
             "tags": [],
             "label": "{\n  visible,\n  setContainer,\n  style,\n}",
             "description": [],
-            "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_inline_edit.tsx",
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_inline_edit.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -549,7 +591,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_inline_edit.tsx",
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_inline_edit.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -563,7 +605,7 @@
                 "signature": [
                   "((element: HTMLDivElement | null) => void) | undefined"
                 ],
-                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_inline_edit.tsx",
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_inline_edit.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -577,7 +619,7 @@
                     "signature": [
                       "HTMLDivElement | null"
                     ],
-                    "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_inline_edit.tsx",
+                    "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_inline_edit.tsx",
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": false
@@ -595,7 +637,7 @@
                 "signature": [
                   "React.CSSProperties"
                 ],
-                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_inline_edit.tsx",
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_inline_edit.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -631,7 +673,7 @@
           },
           "[]; }>; isLoading: boolean; selectedConversationId?: string | undefined; onConversationSelect?: ((conversationId?: string | undefined) => void) | undefined; onConversationDeleteClick: (conversationId: string) => void; newConversationHref?: string | undefined; getConversationHref?: ((conversationId: string) => string) | undefined; }) => React.JSX.Element"
         ],
-        "path": "x-pack/packages/kbn-ai-assistant/src/chat/conversation_list.tsx",
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -642,7 +684,7 @@
             "tags": [],
             "label": "{\n  conversations,\n  isLoading,\n  selectedConversationId,\n  onConversationSelect,\n  onConversationDeleteClick,\n  newConversationHref,\n  getConversationHref,\n}",
             "description": [],
-            "path": "x-pack/packages/kbn-ai-assistant/src/chat/conversation_list.tsx",
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -664,7 +706,7 @@
                   },
                   "[]; }> & { refresh: () => void; }"
                 ],
-                "path": "x-pack/packages/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -675,7 +717,7 @@
                 "tags": [],
                 "label": "isLoading",
                 "description": [],
-                "path": "x-pack/packages/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -689,7 +731,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/packages/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -703,7 +745,7 @@
                 "signature": [
                   "((conversationId?: string | undefined) => void) | undefined"
                 ],
-                "path": "x-pack/packages/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -717,7 +759,7 @@
                     "signature": [
                       "string | undefined"
                     ],
-                    "path": "x-pack/packages/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                    "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": false
@@ -735,7 +777,7 @@
                 "signature": [
                   "(conversationId: string) => void"
                 ],
-                "path": "x-pack/packages/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -749,7 +791,7 @@
                     "signature": [
                       "string"
                     ],
-                    "path": "x-pack/packages/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                    "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -767,7 +809,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/packages/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -781,7 +823,7 @@
                 "signature": [
                   "((conversationId: string) => string) | undefined"
                 ],
-                "path": "x-pack/packages/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -795,7 +837,7 @@
                     "signature": [
                       "string"
                     ],
-                    "path": "x-pack/packages/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                    "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -819,7 +861,7 @@
         "signature": [
           "({ conversationId, navigateToConversation, getConversationHref, newConversationHref, scopes, }: ConversationViewProps) => React.JSX.Element"
         ],
-        "path": "x-pack/packages/kbn-ai-assistant/src/conversation/conversation_view.tsx",
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/conversation/conversation_view.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -833,7 +875,7 @@
             "signature": [
               "ConversationViewProps"
             ],
-            "path": "x-pack/packages/kbn-ai-assistant/src/conversation/conversation_view.tsx",
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/conversation/conversation_view.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -861,7 +903,7 @@
             "text": "ObservabilityAIAssistantService"
           }
         ],
-        "path": "x-pack/packages/kbn-ai-assistant/src/service/create_app_service.ts",
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/service/create_app_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -872,7 +914,7 @@
             "tags": [],
             "label": "{\n  pluginsStart,\n}",
             "description": [],
-            "path": "x-pack/packages/kbn-ai-assistant/src/service/create_app_service.ts",
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/service/create_app_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -886,7 +928,7 @@
                 "signature": [
                   "AIAssistantPluginStartDependencies"
                 ],
-                "path": "x-pack/packages/kbn-ai-assistant/src/service/create_app_service.ts",
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/service/create_app_service.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -930,7 +972,7 @@
           },
           "[]"
         ],
-        "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -951,7 +993,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -972,7 +1014,7 @@
                 "text": "Message"
               }
             ],
-            "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -998,7 +1040,7 @@
             "text": "ObservabilityAIAssistantService"
           }
         ],
-        "path": "x-pack/packages/kbn-ai-assistant/src/hooks/use_ai_assistant_app_service.ts",
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_ai_assistant_app_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1022,7 +1064,25 @@
             "text": "ObservabilityAIAssistantChatService"
           }
         ],
-        "path": "x-pack/packages/kbn-ai-assistant/src/hooks/use_ai_assistant_chat_service.ts",
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_ai_assistant_chat_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.useGenAIConnectors",
+        "type": "Function",
+        "tags": [],
+        "label": "useGenAIConnectors",
+        "description": [],
+        "signature": [
+          "() => ",
+          "UseGenAIConnectorsResult"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_genai_connectors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1046,7 +1106,7 @@
             "text": "UseKnowledgeBaseResult"
           }
         ],
-        "path": "x-pack/packages/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1071,7 +1131,7 @@
           },
           "[]"
         ],
-        "path": "x-pack/packages/kbn-ai-assistant/src/hooks/use_scopes.ts",
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_scopes.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1087,7 +1147,7 @@
         "tags": [],
         "label": "UseKnowledgeBaseResult",
         "description": [],
-        "path": "x-pack/packages/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1101,13 +1161,13 @@
             "signature": [
               "State<{ errorMessage?: string | undefined; ready: boolean; enabled: boolean; endpoint?: Partial<",
               "InferenceInferenceEndpointInfo",
-              "> | undefined; model_stats?: { deployment_state: ",
-              "MlDeploymentState",
-              " | undefined; allocation_state: ",
+              "> | undefined; model_stats?: { deployment_state?: ",
+              "MlDeploymentAssignmentState",
+              " | undefined; allocation_state?: ",
               "MlDeploymentAllocationState",
-              " | undefined; } | undefined; }> & { refresh: () => void; }"
+              " | undefined; allocation_count?: number | undefined; } | undefined; }> & { refresh: () => void; }"
             ],
-            "path": "x-pack/packages/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1118,7 +1178,7 @@
             "tags": [],
             "label": "isInstalling",
             "description": [],
-            "path": "x-pack/packages/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1132,7 +1192,7 @@
             "signature": [
               "Error | undefined"
             ],
-            "path": "x-pack/packages/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1146,7 +1206,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "x-pack/packages/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1164,7 +1224,7 @@
         "tags": [],
         "label": "FlyoutPositionMode",
         "description": [],
-        "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1187,7 +1247,19 @@
             "text": "ObservabilityAIAssistantService"
           }
         ],
-        "path": "x-pack/packages/kbn-ai-assistant/src/service/create_app_service.ts",
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/service/create_app_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.UseGenAIConnectorsResult",
+        "type": "Type",
+        "tags": [],
+        "label": "UseGenAIConnectorsResult",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_genai_connectors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

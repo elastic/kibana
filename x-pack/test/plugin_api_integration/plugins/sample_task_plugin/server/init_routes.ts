@@ -218,45 +218,6 @@ export function initRoutes(
 
   router.post(
     {
-      path: `/api/sample_tasks/ephemeral_run_now`,
-      validate: {
-        body: schema.object({
-          task: schema.object({
-            taskType: schema.string(),
-            state: schema.recordOf(schema.string(), schema.any()),
-            params: schema.recordOf(schema.string(), schema.any()),
-          }),
-        }),
-      },
-    },
-    async function (
-      context: RequestHandlerContext,
-      req: KibanaRequest<
-        any,
-        any,
-        {
-          task: {
-            taskType: string;
-            params: Record<string, any>;
-            state: Record<string, any>;
-          };
-        },
-        any
-      >,
-      res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
-      const { task } = req.body;
-      try {
-        const taskManager = await taskManagerStart;
-        return res.ok({ body: await taskManager.ephemeralRunNow(task) });
-      } catch (err) {
-        return res.ok({ body: { task, error: `${err}` } });
-      }
-    }
-  );
-
-  router.post(
-    {
       path: `/api/sample_tasks/ensure_scheduled`,
       validate: {
         body: schema.object({

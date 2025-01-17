@@ -27,7 +27,7 @@
         "description": [
           "\nRepresents a configurable utility class for working with time buckets."
         ],
-        "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+        "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,7 +43,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -65,7 +65,7 @@
                     "text": "TimeBucketsConfig"
                   }
                 ],
-                "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+                "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -85,7 +85,7 @@
             "signature": [
               "(barTarget: number) => void"
             ],
-            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -101,7 +101,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+                "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -121,7 +121,7 @@
             "signature": [
               "(maxBars: number) => void"
             ],
-            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -137,7 +137,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+                "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -157,7 +157,7 @@
             "signature": [
               "(interval: string) => void"
             ],
-            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -173,7 +173,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+                "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -201,7 +201,7 @@
               },
               ") => void"
             ],
-            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -223,7 +223,7 @@
                     "text": "TimeRangeBounds"
                   }
                 ],
-                "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+                "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -243,7 +243,7 @@
             "signature": [
               "() => { min: moment.Moment; max: moment.Moment; }"
             ],
-            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -270,7 +270,7 @@
                 "text": "TimeBucketsInterval"
               }
             ],
-            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -297,7 +297,7 @@
                 "text": "TimeBucketsInterval"
               }
             ],
-            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -313,7 +313,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+                "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -335,7 +335,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -384,7 +384,7 @@
           },
           ">"
         ],
-        "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+        "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -406,7 +406,7 @@
                 "text": "TimeRangeBounds"
               }
             ],
-            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -429,7 +429,7 @@
                 "text": "TimeBucketsInterval"
               }
             ],
-            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -446,7 +446,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -468,13 +468,7 @@
         ],
         "signature": [
           "(uiSettings: ",
-          {
-            "pluginId": "@kbn/core-ui-settings-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-            "section": "def-public.IUiSettingsClient",
-            "text": "IUiSettingsClient"
-          },
+          "IUiSettingsClient",
           ") => ",
           {
             "pluginId": "@kbn/ml-time-buckets",
@@ -484,7 +478,7 @@
             "text": "TimeBuckets"
           }
         ],
-        "path": "x-pack/packages/ml/time_buckets/use_time_buckets.ts",
+        "path": "x-pack/platform/packages/private/ml/time_buckets/use_time_buckets.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -498,15 +492,9 @@
               "The UI settings client instance used to retrieve UI settings."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
-            "path": "x-pack/packages/ml/time_buckets/use_time_buckets.ts",
+            "path": "x-pack/platform/packages/private/ml/time_buckets/use_time_buckets.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -528,7 +516,7 @@
         "description": [
           "\nConfiguration options for initializing TimeBuckets."
         ],
-        "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+        "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -541,7 +529,7 @@
             "description": [
               "\nThe maximum number of bars to display on the histogram."
             ],
-            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -554,7 +542,7 @@
             "description": [
               "\nThe targeted number of bars for the histogram."
             ],
-            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -567,7 +555,7 @@
             "description": [
               "\nThe date format string."
             ],
-            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -583,7 +571,7 @@
             "signature": [
               "string[][]"
             ],
-            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -599,7 +587,7 @@
         "description": [
           "\nDefines the structure for time intervals used within TimeBuckets."
         ],
-        "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+        "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -615,7 +603,7 @@
             "signature": [
               "() => number"
             ],
-            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -633,7 +621,7 @@
             "signature": [
               "() => number"
             ],
-            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -648,7 +636,7 @@
             "description": [
               "\nThe string expression representing the interval."
             ],
-            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -664,7 +652,7 @@
         "description": [
           "\nRepresents the minimum and maximum time bounds for a time range."
         ],
-        "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+        "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -680,7 +668,7 @@
             "signature": [
               "moment.Moment | undefined"
             ],
-            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -696,7 +684,7 @@
             "signature": [
               "moment.Moment | undefined"
             ],
-            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }

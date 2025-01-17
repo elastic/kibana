@@ -72,7 +72,6 @@ xpack.cloud.serverless.project_type: search
 
 ## Enable the Serverless Search plugin
 xpack.serverless.search.enabled: true
-xpack.searchIndices.enabled: true
 
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/elasticsearch
@@ -115,12 +114,6 @@ xpack.ml.nlp:
 xpack.ml.compatibleModuleType: 'search'
 
 data_visualizer.resultLinks.fileBeat.enabled: false
-
-# Search Playground
-xpack.searchPlayground.ui.enabled: true
-
-# Search InferenceEndpoints
-xpack.searchInferenceEndpoints.ui.enabled: true
 
 # Search Notebooks
 xpack.search.notebooks.catalog.url: https://elastic-enterprise-search.s3.us-east-2.amazonaws.com/serverless/catalog.json

@@ -10,9 +10,8 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { ADD_PANEL_TRIGGER, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { PageApi } from '../types';
 
-export function AddButton({ pageApi, uiActions }: { pageApi: PageApi; uiActions: UiActionsStart }) {
+export function AddButton({ pageApi, uiActions }: { pageApi: unknown; uiActions: UiActionsStart }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [items, setItems] = useState<ReactElement[]>([]);
 
@@ -25,36 +24,24 @@ export function AddButton({ pageApi, uiActions }: { pageApi: PageApi; uiActions:
         id: ADD_PANEL_TRIGGER,
       },
     };
-    const actionsPromises = uiActions.getTriggerActions(ADD_PANEL_TRIGGER).map(async (action) => {
-      return {
-        isCompatible: await action.isCompatible(actionContext),
-        action,
-      };
-    });
 
-    Promise.all(actionsPromises).then((actions) => {
-      if (cancelled) {
-        return;
-      }
+    uiActions.getTriggerCompatibleActions(ADD_PANEL_TRIGGER, actionContext).then((actions) => {
+      if (cancelled) return;
 
-      const nextItems = actions
-        .filter(
-          ({ action, isCompatible }) => isCompatible && action.id !== 'ACTION_CREATE_ESQL_CHART'
-        )
-        .map(({ action }) => {
-          return (
-            <EuiContextMenuItem
-              key={action.id}
-              icon="share"
-              onClick={() => {
-                action.execute(actionContext);
-                setIsPopoverOpen(false);
-              }}
-            >
-              {action.getDisplayName(actionContext)}
-            </EuiContextMenuItem>
-          );
-        });
+      const nextItems = actions.map((action) => {
+        return (
+          <EuiContextMenuItem
+            key={action.id}
+            icon="share"
+            onClick={() => {
+              action.execute(actionContext);
+              setIsPopoverOpen(false);
+            }}
+          >
+            {action.getDisplayName(actionContext)}
+          </EuiContextMenuItem>
+        );
+      });
       setItems(nextItems);
     });
 
@@ -73,7 +60,7 @@ export function AddButton({ pageApi, uiActions }: { pageApi: PageApi; uiActions:
             setIsPopoverOpen(!isPopoverOpen);
           }}
         >
-          Add
+          Add panel
         </EuiButton>
       }
       isOpen={isPopoverOpen}
