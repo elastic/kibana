@@ -105,3 +105,8 @@ export async function simulateFieldsForStream(supertest: Agent, id: string, body
   const response = await req.send(body).expect(200);
   return response.body;
 }
+
+export async function simulateProcessingForStream(supertest: Agent, id: string, body: JsonObject) {
+  const req = supertest.post(`/api/streams/${id}/processing/_simulate`).set('kbn-xsrf', 'xxx');
+  return req.send(body);
+}

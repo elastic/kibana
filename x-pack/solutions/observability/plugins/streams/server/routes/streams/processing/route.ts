@@ -53,8 +53,8 @@ export const simulateProcessorRoute = createServerRoute({
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
 
-      const hasAccess = await checkAccess({ id: params.path.name, scopedClusterClient });
-      if (!hasAccess) {
+      const { read } = await checkAccess({ id: params.path.name, scopedClusterClient });
+      if (!read) {
         throw new DefinitionNotFound(`Stream definition for ${params.path.name} not found.`);
       }
 
@@ -76,7 +76,11 @@ export const simulateProcessorRoute = createServerRoute({
       if (error instanceof DefinitionNotFound) {
         throw notFound(error);
       }
-      if (error instanceof SimulationFailed || error instanceof NonAdditiveProcessor) {
+      if (
+        error instanceof SimulationFailed ||
+        error instanceof NonAdditiveProcessor ||
+        error instanceof DetectedMappingFailure
+      ) {
         throw badRequest(error);
       }
       throw internal(error);
