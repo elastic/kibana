@@ -10,7 +10,11 @@ import React from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DynamicStyleProperty, OTHER_CATEGORY_KEY } from './dynamic_style_property';
-import { makeMbClampedNumberExpression, dynamicRound } from '../style_util';
+import {
+  makeMbClampedNumberExpression,
+  dynamicRound,
+  OTHER_CATEGORY_DEFAULT_COLOR,
+} from '../style_util';
 import {
   getOrdinalMbColorRampStops,
   getPercentilesMbColorRampStops,
@@ -246,7 +250,9 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       return this._chartsPaletteServiceGetColor('__other__');
     }
 
-    return this._options.otherCategoryColor;
+    return this._options.otherCategoryColor
+      ? this._options.otherCategoryColor
+      : OTHER_CATEGORY_DEFAULT_COLOR;
   }
 
   _getColorPaletteStops() {

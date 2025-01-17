@@ -53,7 +53,6 @@ describe('renderLegendDetailRow', () => {
         color: 'Blues',
         type: undefined,
         fieldMetaOptions,
-        otherCategoryColor: '#d3dae6',
       });
 
       const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
@@ -73,7 +72,6 @@ describe('renderLegendDetailRow', () => {
         color: 'Blues',
         type: undefined,
         fieldMetaOptions,
-        otherCategoryColor: '#d3dae6',
       });
       colorStyle.getRangeFieldMeta = () => {
         return {
@@ -104,7 +102,6 @@ describe('renderLegendDetailRow', () => {
           isEnabled: true,
           percentiles: [50, 75, 90, 95, 99],
         },
-        otherCategoryColor: '#d3dae6',
       });
       colorStyle.getPercentilesFieldMeta = () => {
         return [
@@ -144,7 +141,6 @@ describe('renderLegendDetailRow', () => {
           },
         ],
         fieldMetaOptions,
-        otherCategoryColor: '#d3dae6',
       });
 
       const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
@@ -167,7 +163,6 @@ describe('renderLegendDetailRow', () => {
         useCustomColorPalette: false,
         colorCategory: 'palette_0',
         fieldMetaOptions,
-        otherCategoryColor: '#d3dae6',
       });
 
       const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
@@ -201,7 +196,6 @@ describe('renderLegendDetailRow', () => {
           },
         ],
         fieldMetaOptions,
-        otherCategoryColor: '#d3dae6',
       });
 
       const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
@@ -218,7 +212,6 @@ test('Should pluck the categorical style-meta from fieldmeta', async () => {
     type: COLOR_MAP_TYPE.CATEGORICAL,
     colorCategory: 'palette_0',
     fieldMetaOptions,
-    otherCategoryColor: '#d3dae6',
   });
 
   const meta = colorStyle._pluckCategoricalStyleMetaFromFieldMetaData({
@@ -247,7 +240,6 @@ describe('supportsFieldMeta', () => {
     const dynamicStyleOptions = {
       type: COLOR_MAP_TYPE.ORDINAL,
       fieldMetaOptions,
-      otherCategoryColor: '#d3dae6',
     };
     const styleProp = makeProperty(dynamicStyleOptions);
 
@@ -258,7 +250,6 @@ describe('supportsFieldMeta', () => {
     const dynamicStyleOptions = {
       type: COLOR_MAP_TYPE.CATEGORICAL,
       fieldMetaOptions,
-      otherCategoryColor: '#d3dae6',
     };
     const styleProp = makeProperty(dynamicStyleOptions);
 
@@ -275,7 +266,6 @@ describe('supportsFieldMeta', () => {
     const options = {
       type: COLOR_MAP_TYPE.ORDINAL,
       fieldMetaOptions: { isEnabled: true },
-      otherCategoryColor: '#d3dae6',
     };
 
     const styleProp = new DynamicColorProperty(
@@ -295,7 +285,6 @@ describe('supportsFieldMeta', () => {
     const dynamicStyleOptions = {
       type: COLOR_MAP_TYPE.ORDINAL,
       fieldMetaOptions,
-      otherCategoryColor: '#d3dae6',
     };
 
     const styleProp = new DynamicColorProperty(
@@ -317,7 +306,6 @@ describe('supportsFieldMeta', () => {
       useCustomColorRamp: true,
       customColorRamp: [],
       fieldMetaOptions,
-      otherCategoryColor: '#d3dae6',
     };
     const styleProp = makeProperty(dynamicStyleOptions);
 
@@ -330,7 +318,6 @@ describe('supportsFieldMeta', () => {
       useCustomColorPalette: true,
       customColorPalette: [],
       fieldMetaOptions,
-      otherCategoryColor: '#d3dae6',
     };
     const styleProp = makeProperty(dynamicStyleOptions);
 
@@ -344,7 +331,6 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
       const dynamicStyleOptions = {
         type: COLOR_MAP_TYPE.ORDINAL,
         fieldMetaOptions,
-        otherCategoryColor: '#d3dae6',
       };
       const colorProperty = makeProperty(dynamicStyleOptions);
       expect(colorProperty._getMbColor()).toBeNull();
@@ -366,7 +352,6 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.ORDINAL,
           fieldMetaOptions,
-          otherCategoryColor: '#d3dae6',
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
         expect(colorProperty._getMbColor()).toBeNull();
@@ -397,7 +382,6 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
           type: COLOR_MAP_TYPE.ORDINAL,
           color: 'Blues',
           fieldMetaOptions: { isEnabled: true },
-          otherCategoryColor: '#d3dae6',
         };
 
         const colorProperty = new DynamicColorProperty(
@@ -458,7 +442,6 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
           type: COLOR_MAP_TYPE.ORDINAL,
           useCustomColorRamp: true,
           fieldMetaOptions,
-          otherCategoryColor: '#d3dae6',
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
         expect(colorProperty._getMbColor()).toBeNull();
@@ -470,7 +453,6 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
           useCustomColorRamp: true,
           customColorRamp: [],
           fieldMetaOptions,
-          otherCategoryColor: '#d3dae6',
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
         expect(colorProperty._getMbColor()).toBeNull();
@@ -498,7 +480,6 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
             { stop: 100, color: '#072f6b' },
           ],
           fieldMetaOptions: { isEnabled: true },
-          otherCategoryColor: '#d3dae6',
         };
 
         const colorProperty = new DynamicColorProperty(
@@ -553,7 +534,6 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
             { stop: 100, color: '#072f6b' },
           ],
           fieldMetaOptions: { isEnabled: true },
-          otherCategoryColor: '#d3dae6',
         };
 
         const colorProperty = new DynamicColorProperty(
@@ -593,7 +573,6 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
       const dynamicStyleOptions = {
         type: COLOR_MAP_TYPE.CATEGORICAL,
         fieldMetaOptions,
-        otherCategoryColor: '#d3dae6',
       };
       const colorProperty = makeProperty(dynamicStyleOptions);
       expect(colorProperty._getMbColor()).toBe('#d3dae6');
@@ -604,7 +583,6 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
         type: COLOR_MAP_TYPE.CATEGORICAL,
         field: {},
         fieldMetaOptions,
-        otherCategoryColor: '#d3dae6',
       };
       // @ts-expect-error - test is verifing behavior when field is invalid.
       const colorProperty = makeProperty(dynamicStyleOptions);
@@ -616,7 +594,6 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.CATEGORICAL,
           fieldMetaOptions,
-          otherCategoryColor: '#d3dae6',
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
         expect(colorProperty._getMbColor()).toBe('#d3dae6');
@@ -626,7 +603,7 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.CATEGORICAL,
           colorCategory: 'palette_0',
-          otherCategoryColor: 'grey',
+
           fieldMetaOptions,
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
@@ -648,7 +625,6 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
           type: COLOR_MAP_TYPE.CATEGORICAL,
           useCustomColorPalette: true,
           fieldMetaOptions,
-          otherCategoryColor: '#d3dae6',
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
         expect(colorProperty._getMbColor()).toBe('#d3dae6');
@@ -660,7 +636,6 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
           useCustomColorPalette: true,
           customColorPalette: [],
           fieldMetaOptions,
-          otherCategoryColor: '#d3dae6',
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
         expect(colorProperty._getMbColor()).toBe('#d3dae6');
@@ -671,7 +646,7 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
           type: COLOR_MAP_TYPE.CATEGORICAL,
           useCustomColorPalette: true,
           customColorPalette: [{ stop: 'MX', color: '#072f6b' }],
-          otherCategoryColor: '#f7faff',
+
           fieldMetaOptions,
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
@@ -692,7 +667,6 @@ test('isCategorical should return true when type is categorical', async () => {
     type: COLOR_MAP_TYPE.CATEGORICAL,
     colorCategory: 'palette_0',
     fieldMetaOptions,
-    otherCategoryColor: '#d3dae6',
   });
 
   expect(categoricalColorStyle.isOrdinal()).toEqual(false);
@@ -704,7 +678,6 @@ test('isOrdinal should return true when type is ordinal', async () => {
     type: undefined,
     color: 'Blues',
     fieldMetaOptions,
-    otherCategoryColor: '#d3dae6',
   });
 
   expect(ordinalColorStyle.isOrdinal()).toEqual(true);
@@ -716,7 +689,6 @@ test('Should read out ordinal type correctly', async () => {
     type: COLOR_MAP_TYPE.ORDINAL,
     colorCategory: 'palette_0',
     fieldMetaOptions,
-    otherCategoryColor: '#d3dae6',
   });
 
   expect(ordinalColorStyle2.isOrdinal()).toEqual(true);
@@ -730,7 +702,6 @@ describe('renderDataMappingPopover', () => {
         color: 'Blues',
         type: undefined,
         fieldMetaOptions,
-        otherCategoryColor: '#d3dae6',
       },
       undefined,
       mockField

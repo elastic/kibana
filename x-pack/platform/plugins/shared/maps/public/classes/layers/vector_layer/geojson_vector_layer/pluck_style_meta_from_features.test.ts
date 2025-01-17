@@ -24,8 +24,6 @@ import {
   pluckStyleMetaFromFeatures,
 } from './pluck_style_meta_from_features';
 
-const otherCategoryColor = '#d3d3d3';
-
 describe('pluckStyleMetaFromFeatures', () => {
   test('Should identify when feature collection only contains points', async () => {
     const features = [
@@ -220,7 +218,6 @@ describe('pluckStyleMetaFromFeatures', () => {
         origin: FIELD_ORIGIN.SOURCE,
         name: 'myDynamicField',
       },
-      otherCategoryColor,
     } as ColorDynamicOptions;
     const field = new InlineField({
       fieldName: dynamicColorOptions.field!.name,
@@ -289,7 +286,6 @@ describe('pluckStyleMetaFromFeatures', () => {
         origin: FIELD_ORIGIN.SOURCE,
         name: 'count',
       },
-      otherCategoryColor,
     } as ColorDynamicOptions;
     const field = new InlineField({
       fieldName: dynamicColorOptions.field!.name,
@@ -397,7 +393,6 @@ describe('pluckCategoricalStyleMetaFromFeatures', () => {
         type: COLOR_MAP_TYPE.CATEGORICAL,
         colorCategory: 'palette_0',
         fieldMetaOptions: { isEnabled: true },
-        otherCategoryColor,
       },
       VECTOR_STYLES.LINE_COLOR,
       field,
@@ -428,7 +423,6 @@ describe('pluckCategoricalStyleMetaFromFeatures', () => {
         type: COLOR_MAP_TYPE.CATEGORICAL,
         colorCategory: 'palette_0',
         fieldMetaOptions: { isEnabled: true },
-        otherCategoryColor,
       },
       VECTOR_STYLES.LINE_COLOR,
       field,
