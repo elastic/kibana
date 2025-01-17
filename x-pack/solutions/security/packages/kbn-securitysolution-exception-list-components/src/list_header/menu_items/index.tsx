@@ -10,10 +10,14 @@ import { css } from '@emotion/react';
 import React, { FC, useMemo } from 'react';
 
 import { HeaderMenu } from '../../header_menu';
-import { noLinkedRulesCss } from '../list_header.styles';
 import * as i18n from '../../translations';
 import { Rule } from '../../types';
 import { generateLinkedRulesMenuItems } from '../../generate_linked_rules_menu_item';
+
+const noLinkedRulesCss = css`
+  width: max-content;
+`;
+
 interface MenuItemsProps {
   isReadonly: boolean;
   dataTestSubj?: string;
