@@ -12,7 +12,7 @@ import { collectValues } from './field_utils';
 export const UNIVERSAL_DEFINITION_VERSION = '1.0.0';
 export const UNIVERSAL_IDENTITY_FIELD = 'related.entity';
 
-const entityMetadataExtractorProcessor = {
+export const entityMetadataExtractorProcessor = {
   script: {
     tag: 'entity_metadata_extractor',
     on_failure: [

@@ -17,6 +17,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [...functionalConfig.get('kbnTestServer.serverArgs')],
     },
+    // esTestCluster: {
+    //   serverArgs: ['xpack.ml.enabled=false'],
+    // },
     testFiles: [require.resolve('..')],
     junit: {
       reportName: 'Entity Analytics - Entity Store Integration Tests - ESS Env - Trial License',
