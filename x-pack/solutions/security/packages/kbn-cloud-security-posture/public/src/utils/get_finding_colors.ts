@@ -20,7 +20,8 @@ const isAmsterdam = (euiThemeName: string) => {
   return euiThemeName?.toLowerCase().includes('amsterdam');
 };
 
-// designers blocked the migration to tokens from EUI during the Borealys theme migration. We keep using hardcoded colors until security severity palette is ready
+// Designers blocked the migration to tokens from EUI during the Borealys theme migration.
+// We keep using hardcoded colors until security severity palette is ready https://github.com/elastic/kibana/issues/203387
 export const SEVERITY_COLOR = {
   critical: '#E7664C',
   high: '#DA8B45',
@@ -29,12 +30,12 @@ export const SEVERITY_COLOR = {
   unknown: '#aaa',
 } as const;
 
-// TODO: migrate to security severity palette when it's ready
+// TODO: migrate to security severity palette when it's ready https://github.com/elastic/kibana/issues/203387
 export const getSeverityStatusColor = (
   severity: VulnSeverity,
   euiTheme: EuiThemeComputed
 ): string => {
-  // TODO: remove old mapping in main Serverless switched to Borealis
+  // TODO: remove old mapping in main after Serverless switched to Borealis
   if (euiTheme && isAmsterdam(euiTheme.themeName)) {
     switch (severity) {
       case VULNERABILITIES_SEVERITY.LOW:
@@ -65,7 +66,7 @@ export const getSeverityStatusColor = (
 };
 
 export const getCvsScoreColor = (score: number, euiTheme: EuiThemeComputed): string | undefined => {
-  // TODO: remove old mapping in main when severity palette is fixed https://github.com/elastic/eui/pull/8254 and Serverless switched to Borealis
+  // TODO: remove old mapping in main when Serverless switched to Borealis
   if (euiTheme && isAmsterdam(euiTheme.themeName)) {
     if (score <= 4) {
       return euiThemeVars.euiColorVis0; // low severity
@@ -91,7 +92,7 @@ export const getCvsScoreColor = (score: number, euiTheme: EuiThemeComputed): str
   }
 };
 
-// TODO: migrate to tokens when they are ready
+// TODO: migrate to EUI color tokens when they are ready https://github.com/elastic/kibana/issues/203387
 export const getMisconfigurationStatusColor = (
   status?: MisconfigurationEvaluationStatus
 ): string => {
