@@ -38,12 +38,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
-        'bfetch:disable': true,
-        enableESQL: true,
       });
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await common.navigateToApp('discover');
-      await header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
@@ -114,14 +111,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expectedRefreshRequest?: number;
     }) => {
       it(`should send no more than ${expectedRequests} search requests (documents + chart) on page load`, async () => {
-        await browser.refresh();
+        if (type === 'ese') {
+          await browser.refresh();
+        }
         await browser.execute(async () => {
           performance.setResourceTimingBufferSize(Number.MAX_SAFE_INTEGER);
         });
-        await waitForLoadingToFinish();
-        // one more requests for fields in ESQL mode
-        const actualExpectedRequests = type === 'esql' ? expectedRequests + 1 : expectedRequests;
-        await expectSearchCount(type, actualExpectedRequests);
+        if (type === 'esql') {
+          await expectSearches(type, expectedRequests, async () => {
+            await queryBar.clickQuerySubmitButton();
+          });
+        } else {
+          await expectSearchCount(type, expectedRequests);
+        }
       });
 
       it(`should send no more than ${expectedRequests} requests (documents + chart) when refreshing`, async () => {
@@ -143,6 +145,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'Sep 21, 2015 @ 06:31:44.000',
             'Sep 23, 2015 @ 00:00:00.000'
           );
+        });
+      });
+
+      it(`should send no requests (documents + chart) when toggling the chart visibility`, async () => {
+        await expectSearches(type, 0, async () => {
+          // hide chart
+          await discover.toggleChartVisibility();
+          // show chart
+          await discover.toggleChartVisibility();
+        });
+      });
+      it(`should send a request for chart data when toggling the chart visibility after a time range change`, async () => {
+        // hide chart
+        await discover.toggleChartVisibility();
+        await timePicker.setAbsoluteRange(
+          'Sep 21, 2015 @ 06:31:44.000',
+          'Sep 24, 2015 @ 00:00:00.000'
+        );
+        await waitForLoadingToFinish();
+        await expectSearches(type, 1, async () => {
+          // show chart, we expect a request for the chart data, since the time range changed
+          await discover.toggleChartVisibility();
         });
       });
 
@@ -173,9 +197,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('Clearing saved search');
         await expectSearches(
           type,
-          type === 'esql' ? actualExpectedRequests + 2 : actualExpectedRequests,
+          type === 'esql' ? actualExpectedRequests + 1 : actualExpectedRequests,
           async () => {
             await testSubjects.click('discoverNewButton');
+            if (type === 'esql') {
+              await queryBar.clickQuerySubmitButton();
+            }
             await waitForLoadingToFinish();
           }
         );
@@ -204,15 +231,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         query1: 'bytes > 1000',
         query2: 'bytes < 2000',
         setQuery: (query) => queryBar.setQuery(query),
-      });
-
-      it(`should send no more than 2 requests (documents + chart) when toggling the chart visibility`, async () => {
-        await expectSearches(type, 2, async () => {
-          await discover.toggleChartVisibility();
-        });
-        await expectSearches(type, 2, async () => {
-          await discover.toggleChartVisibility();
-        });
       });
 
       it('should send no more than 2 requests (documents + chart) when adding a filter', async () => {
@@ -256,21 +274,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
     });
-    // Currently ES|QL checks are disabled due to various flakiness
-    // Note that ES|QL also checks for different number of requests due to the fields request triggered
-    // by the ES|QL Editor
-    describe.skip('ES|QL mode', () => {
+    describe('ES|QL mode', () => {
       const type = 'esql';
       before(async () => {
+        await kibanaServer.uiSettings.update({
+          'discover:searchOnPageLoad': false,
+        });
         await common.navigateToApp('discover');
-        await header.waitUntilLoadingHasFinished();
         await discover.selectTextBaseLang();
       });
 
       beforeEach(async () => {
         await monacoEditor.setCodeEditorValue('from logstash-* | where bytes > 1000 ');
-        await queryBar.clickQuerySubmitButton();
-        await waitForLoadingToFinish();
       });
 
       getSharedTests({
@@ -281,15 +296,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         savedSearchesRequests: 2,
         setQuery: (query) => monacoEditor.setCodeEditorValue(query),
         expectedRequests: 2,
-      });
-
-      it(`should send requests (documents + chart) when toggling the chart visibility`, async () => {
-        await expectSearches(type, 1, async () => {
-          await discover.toggleChartVisibility();
-        });
-        await expectSearches(type, 3, async () => {
-          await discover.toggleChartVisibility();
-        });
       });
     });
   });

@@ -18,10 +18,8 @@ import {
   PublishesViewMode,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-
 import { getContainerParentFromAPI, PresentationContainer } from '@kbn/presentation-containers';
-
-export const ACTION_REMOVE_PANEL = 'deletePanel';
+import { ACTION_REMOVE_PANEL } from './constants';
 
 export type RemovePanelActionApi = PublishesViewMode &
   HasUniqueId &

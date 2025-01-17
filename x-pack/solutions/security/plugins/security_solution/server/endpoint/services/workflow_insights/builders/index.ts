@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 
 import type { DefendInsight, DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common';
 
@@ -21,6 +21,7 @@ export interface BuildWorkflowInsightParams {
   defendInsights: DefendInsight[];
   request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;
   endpointMetadataService: EndpointMetadataService;
+  esClient: ElasticsearchClient;
 }
 
 export function buildWorkflowInsights(
