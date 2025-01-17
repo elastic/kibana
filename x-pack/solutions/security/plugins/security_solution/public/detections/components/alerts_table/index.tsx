@@ -139,7 +139,7 @@ const EuiDataGridContainer = styled.div<GridContainerProps>`
 interface DetectionEngineAlertTableProps
   extends SetOptional<SecurityAlertsTableProps, 'id' | 'ruleTypeIds' | 'query'> {
   inputFilters?: Filter[];
-  tableType: TableId;
+  tableType?: TableId;
   sourcererScope?: SourcererScopeName;
   isLoading?: boolean;
   onRuleChange?: () => void;
