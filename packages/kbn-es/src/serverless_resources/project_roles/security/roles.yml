@@ -1,8 +1,12 @@
 # -----
-# Source: project-controller/blob/main/internal/project/security/config/roles.yml
+# Source: https://github.com/elastic/elasticsearch-controller/blob/main/helm/values.yaml
+# The project-specific roles are defined under config.project-settings.security.elasticsearch.predefined-roles.
 # -----
 # modeled after the t1_analyst minus osquery run saved queries privilege
 viewer:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: []
   indices:
     - names:
@@ -46,7 +50,7 @@ viewer:
         - feature_siem.read
         - feature_siem.read_alerts
         - feature_siem.endpoint_list_read
-        - feature_securitySolutionCasesV2.read
+        - feature_securitySolutionCases.read
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -56,12 +60,14 @@ viewer:
         - feature_dashboard.all
         - feature_maps.all
         - feature_visualize.all
-        - feature_dataQuality.all
       resources: '*'
   run_as: []
 
 # modeled after t3_analyst
 editor:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: []
   indices:
     - names:
@@ -126,7 +132,7 @@ editor:
         - feature_siem.process_operations_all
         - feature_siem.actions_log_management_all # Response actions history
         - feature_siem.file_operations_all
-        - feature_securitySolutionCasesV2.all
+        - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -140,6 +146,9 @@ editor:
   run_as: []
 
 t1_analyst:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: []
   indices:
     - names:
@@ -177,7 +186,7 @@ t1_analyst:
         - feature_siem.read
         - feature_siem.read_alerts
         - feature_siem.endpoint_list_read
-        - feature_securitySolutionCasesV2.read
+        - feature_securitySolutionCases.read
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -191,6 +200,9 @@ t1_analyst:
       resources: '*'
 
 t2_analyst:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: []
   indices:
     - names:
@@ -232,7 +244,7 @@ t2_analyst:
         - feature_siem.read
         - feature_siem.read_alerts
         - feature_siem.endpoint_list_read
-        - feature_securitySolutionCasesV2.all
+        - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -246,6 +258,9 @@ t2_analyst:
       resources: '*'
 
 t3_analyst:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: []
   indices:
     - names:
@@ -303,8 +318,7 @@ t3_analyst:
         - feature_siem.actions_log_management_all # Response actions history
         - feature_siem.file_operations_all
         - feature_siem.scan_operations_all
-        - feature_siem.workflow_insights_all
-        - feature_securitySolutionCasesV2.all
+        - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -317,6 +331,9 @@ t3_analyst:
       resources: '*'
 
 threat_intelligence_analyst:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: []
   indices:
     - names:
@@ -366,7 +383,7 @@ threat_intelligence_analyst:
         - feature_siem.all
         - feature_siem.endpoint_list_read
         - feature_siem.blocklist_all
-        - feature_securitySolutionCasesV2.all
+        - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -379,6 +396,9 @@ threat_intelligence_analyst:
       resources: '*'
 
 rule_author:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: []
   indices:
     - names:
@@ -411,6 +431,7 @@ rule_author:
       privileges:
         - read
         - write
+        - view_index_metadata
     - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
@@ -434,8 +455,7 @@ rule_author:
         - feature_siem.host_isolation_exceptions_read
         - feature_siem.blocklist_all # Elastic Defend Policy Management
         - feature_siem.actions_log_management_read
-        - feature_siem.workflow_insights_all
-        - feature_securitySolutionCasesV2.all
+        - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -448,6 +468,9 @@ rule_author:
       resources: '*'
 
 soc_manager:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: []
   indices:
     - names:
@@ -461,6 +484,7 @@ soc_manager:
         - winlogbeat-*
         - logstash-*
         - .asset-criticality.asset-criticality-*
+        - .entities.v1.latest.security_*
       privileges:
         - read
         - write
@@ -485,7 +509,6 @@ soc_manager:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
-        - .entities.v1.latest.security_*
         - '.ml-anomalies-*'
       privileges:
         - read
@@ -508,8 +531,7 @@ soc_manager:
         - feature_siem.file_operations_all
         - feature_siem.execute_operations_all
         - feature_siem.scan_operations_all
-        - feature_siem.workflow_insights_all
-        - feature_securitySolutionCasesV2.all
+        - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
@@ -523,6 +545,9 @@ soc_manager:
       resources: '*'
 
 detections_admin:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: ['manage_index_templates', 'manage_transform']
   indices:
     - names:
@@ -569,7 +594,7 @@ detections_admin:
         - feature_siem.all
         - feature_siem.read_alerts
         - feature_siem.crud_alerts
-        - feature_securitySolutionCasesV2.all
+        - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
@@ -582,6 +607,9 @@ detections_admin:
       resources: '*'
 
 platform_engineer:
+  metadata:
+    _public: true
+    _reserved: true
   cluster:
     - manage
   indices:
@@ -628,8 +656,7 @@ platform_engineer:
         - feature_siem.host_isolation_exceptions_all
         - feature_siem.blocklist_all # Elastic Defend Policy Management
         - feature_siem.actions_log_management_read
-        - feature_siem.workflow_insights_all
-        - feature_securitySolutionCasesV2.all
+        - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
@@ -645,6 +672,9 @@ platform_engineer:
       resources: '*'
 
 endpoint_operations_analyst:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: []
   indices:
     - names:
@@ -702,8 +732,7 @@ endpoint_operations_analyst:
         - feature_siem.file_operations_all
         - feature_siem.execute_operations_all
         - feature_siem.scan_operations_all
-        - feature_siem.workflow_insights_all
-        - feature_securitySolutionCasesV2.all
+        - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
@@ -718,6 +747,9 @@ endpoint_operations_analyst:
       resources: '*'
 
 endpoint_policy_manager:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: []
   indices:
     - names:
@@ -738,6 +770,7 @@ endpoint_policy_manager:
         - logstash-*
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
+        - '.ml-anomalies-*'
       privileges:
         - read
     - names:
@@ -761,10 +794,6 @@ endpoint_policy_manager:
         - read
         - write
         - manage
-    - names:
-        - '.ml-anomalies-*'
-      privileges:
-        - read
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -778,8 +807,7 @@ endpoint_policy_manager:
         - feature_siem.event_filters_all
         - feature_siem.host_isolation_exceptions_all
         - feature_siem.blocklist_all # Elastic Defend Policy Management
-        - feature_siem.workflow_insights_all
-        - feature_securitySolutionCasesV2.all
+        - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
@@ -795,6 +823,9 @@ endpoint_policy_manager:
 
 # admin role defined in elasticsearch controller
 admin:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: ['all']
   indices:
     - names: ['*']
@@ -807,6 +838,9 @@ admin:
 
 # temporarily added for testing purpose
 system_indices_superuser:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: ['all']
   indices:
     - names: ['*']

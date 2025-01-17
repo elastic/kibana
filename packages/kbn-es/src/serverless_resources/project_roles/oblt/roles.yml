@@ -1,7 +1,11 @@
 # -----
-# Source: project-controller/blob/main/internal/project/security/config/roles.yml
+# Source: https://github.com/elastic/elasticsearch-controller/blob/main/helm/values.yaml
+# The project-specific roles are defined under config.project-settings.observability.elasticsearch.predefined-roles.
 # -----
 viewer:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: []
   indices:
     - names:
@@ -38,6 +42,9 @@ viewer:
         - '*'
   run_as: []
 editor:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: []
   indices:
     - names:
@@ -91,6 +98,9 @@ editor:
 
 # admin role defined in elasticsearch controller
 admin:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: ['all']
   indices:
     - names: ['*']
@@ -103,6 +113,9 @@ admin:
 
 # temporarily added for testing purpose
 system_indices_superuser:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: ['all']
   indices:
     - names: ['*']

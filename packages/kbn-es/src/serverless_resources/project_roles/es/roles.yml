@@ -1,7 +1,11 @@
 # -----
-# Source: project-controller/blob/main/internal/project/esproject/config/roles.yml
+# Source: https://github.com/elastic/elasticsearch-controller/blob/main/helm/values.yaml
+# The project-specific roles are defined under config.project-settings.elasticsearch.elasticsearch.predefined-roles.
 # -----
 viewer:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: ['manage_own_api_key', 'read_pipeline']
   indices:
     - names:
@@ -16,6 +20,9 @@ viewer:
       resources:
         - '*'
 developer:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: ['all']
   indices:
     - names:

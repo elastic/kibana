@@ -1,8 +1,13 @@
 # -----
-# Source: https://github.com/elastic/project-controller/blob/main/internal/project/security/config/roles.yml
+# Source: https://github.com/elastic/elasticsearch-controller/blob/main/helm/values.yaml
+# The project-specific roles are defined under config.project-settings.security.elasticsearch.predefined-roles.
+# -----
 
 # modeled after the t1_analyst minus osquery run saved queries privilege
 viewer:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: []
   indices:
     - names:
@@ -30,6 +35,7 @@ viewer:
         - packetbeat-*
         - winlogbeat-*
         - metrics-endpoint.metadata_current_*
+        - logstash-*
         - ".fleet-agents*"
         - ".fleet-actions*"
         - "risk-score.risk-score-*"
@@ -53,8 +59,6 @@ viewer:
         - feature_osquery.read
         - feature_discover.all
         - feature_dashboard.all
-        - feature_canvas.all
-        - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
       resources: "*"
@@ -62,6 +66,9 @@ viewer:
 
 # modeled after t3_analyst
 editor:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: []
   indices:
     - names:
@@ -83,6 +90,7 @@ editor:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
+        - logstash-*
       privileges:
         - read
         - write
@@ -133,15 +141,16 @@ editor:
         - feature_osquery.all
         - feature_discover.all
         - feature_dashboard.all
-        - feature_canvas.all
-        - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
       resources: "*"
   run_as: []
 
 t1_analyst:
-  cluster:
+  metadata:
+    _public: true
+    _reserved: true
+  cluster: []
   indices:
     - names:
         - ".alerts-security*"
@@ -161,6 +170,7 @@ t1_analyst:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
+        - logstash-*
         - metrics-endpoint.metadata_current_*
         - ".fleet-agents*"
         - ".fleet-actions*"
@@ -186,14 +196,15 @@ t1_analyst:
         - feature_osquery.run_saved_queries
         - feature_discover.all
         - feature_dashboard.all
-        - feature_canvas.all
-        - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
       resources: "*"
 
 t2_analyst:
-  cluster:
+  metadata:
+    _public: true
+    _reserved: true
+  cluster: []
   indices:
     - names:
         - .alerts-security*
@@ -213,6 +224,7 @@ t2_analyst:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
+        - logstash-*
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
         - .fleet-actions*
@@ -242,14 +254,15 @@ t2_analyst:
         - feature_osquery.run_saved_queries
         - feature_discover.all
         - feature_dashboard.all
-        - feature_canvas.all
-        - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
       resources: "*"
 
 t3_analyst:
-  cluster:
+  metadata:
+    _public: true
+    _reserved: true
+  cluster: []
   indices:
     - names:
         - apm-*-transaction*
@@ -260,6 +273,7 @@ t3_analyst:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
+        - logstash-*
         - .asset-criticality.asset-criticality-*
       privileges:
         - read
@@ -305,7 +319,6 @@ t3_analyst:
         - feature_siem.actions_log_management_all # Response actions history
         - feature_siem.file_operations_all
         - feature_siem.scan_operations_all
-        - feature_siem.workflow_insights_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -314,14 +327,15 @@ t3_analyst:
         - feature_osquery.all
         - feature_discover.all
         - feature_dashboard.all
-        - feature_canvas.all
-        - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
       resources: "*"
 
 threat_intelligence_analyst:
-  cluster:
+  metadata:
+    _public: true
+    _reserved: true
+  cluster: []
   indices:
     - names:
         - apm-*-transaction*
@@ -332,15 +346,21 @@ threat_intelligence_analyst:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
+        - logstash-*
       privileges:
         - read
     - names:
-        - .lists*
-        - .items*
         - .asset-criticality.asset-criticality-*
       privileges:
         - read
         - write
+    - names:
+        - .lists*
+        - .items*
+      privileges:
+        - read
+        - write
+        - view_index_metadata
     - names:
         - .alerts-security*
         - .siem-signals-*
@@ -372,14 +392,15 @@ threat_intelligence_analyst:
         - feature_osquery.all
         - feature_discover.all
         - feature_dashboard.all
-        - feature_canvas.all
-        - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
       resources: "*"
 
 rule_author:
-  cluster:
+  metadata:
+    _public: true
+    _reserved: true
+  cluster: []
   indices:
     - names:
         - apm-*-transaction*
@@ -390,6 +411,7 @@ rule_author:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
+        - logstash-*
         - .asset-criticality.asset-criticality-*
       privileges:
         - read
@@ -434,7 +456,6 @@ rule_author:
         - feature_siem.host_isolation_exceptions_read
         - feature_siem.blocklist_all # Elastic Defend Policy Management
         - feature_siem.actions_log_management_read
-        - feature_siem.workflow_insights_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -443,14 +464,15 @@ rule_author:
         - feature_osquery.all
         - feature_discover.all
         - feature_dashboard.all
-        - feature_canvas.all
-        - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
       resources: "*"
 
 soc_manager:
-  cluster:
+  metadata:
+    _public: true
+    _reserved: true
+  cluster: []
   indices:
     - names:
         - apm-*-transaction*
@@ -461,6 +483,7 @@ soc_manager:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
+        - logstash-*
         - .asset-criticality.asset-criticality-*
         - .entities.v1.latest.security_*
       privileges:
@@ -487,7 +510,6 @@ soc_manager:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
-        - .asset-criticality.asset-criticality-*
         - ".ml-anomalies-*"
       privileges:
         - read
@@ -495,7 +517,6 @@ soc_manager:
     - application: "kibana-.kibana"
       privileges:
         - feature_ml.read
-        - feature_generalCases.all
         - feature_siem.all
         - feature_siem.read_alerts
         - feature_siem.crud_alerts
@@ -511,9 +532,7 @@ soc_manager:
         - feature_siem.file_operations_all
         - feature_siem.execute_operations_all
         - feature_siem.scan_operations_all
-        - feature_siem.workflow_insights_all
         - feature_securitySolutionCases.all
-        - feature_observabilityCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
@@ -522,13 +541,14 @@ soc_manager:
         - feature_indexPatterns.all
         - feature_discover.all
         - feature_dashboard.all
-        - feature_canvas.all
-        - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
       resources: "*"
 
 detections_admin:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: ["manage_index_templates", "manage_transform"]
   indices:
     - names:
@@ -540,6 +560,7 @@ detections_admin:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
+        - logstash-*
         - .lists*
         - .items*
         - .alerts-security*
@@ -582,13 +603,14 @@ detections_admin:
         - feature_dev_tools.all
         - feature_discover.all
         - feature_dashboard.all
-        - feature_canvas.all
-        - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
       resources: "*"
 
 platform_engineer:
+  metadata:
+    _public: true
+    _reserved: true
   cluster:
     - manage
   indices:
@@ -601,6 +623,7 @@ platform_engineer:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
+        - logstash-*
         - .lists*
         - .items*
         - .alerts-security*
@@ -634,7 +657,6 @@ platform_engineer:
         - feature_siem.host_isolation_exceptions_all
         - feature_siem.blocklist_all # Elastic Defend Policy Management
         - feature_siem.actions_log_management_read
-        - feature_siem.workflow_insights_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -646,14 +668,15 @@ platform_engineer:
         - feature_indexPatterns.all
         - feature_discover.all
         - feature_dashboard.all
-        - feature_canvas.all
-        - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
       resources: "*"
 
 endpoint_operations_analyst:
-  cluster:
+  metadata:
+    _public: true
+    _reserved: true
+  cluster: []
   indices:
     - names:
         - metrics-endpoint.metadata_current_*
@@ -670,6 +693,7 @@ endpoint_operations_analyst:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
+        - logstash-*
         - .lists*
         - .items*
         - risk-score.risk-score-*
@@ -705,11 +729,10 @@ endpoint_operations_analyst:
         - feature_siem.blocklist_all
         - feature_siem.host_isolation_all
         - feature_siem.process_operations_all
-        - feature_siem.actions_log_management_all # Response History
+        - feature_siem.actions_log_management_all
         - feature_siem.file_operations_all
-        - feature_siem.execute_operations_all # Execute
+        - feature_siem.execute_operations_all
         - feature_siem.scan_operations_all
-        - feature_siem.workflow_insights_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -720,14 +743,15 @@ endpoint_operations_analyst:
         - feature_fleetv2.all
         - feature_discover.all
         - feature_dashboard.all
-        - feature_canvas.all
-        - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
       resources: "*"
 
 endpoint_policy_manager:
-  cluster:
+  metadata:
+    _public: true
+    _reserved: true
+  cluster: []
   indices:
     - names:
         - metrics-endpoint.metadata_current_*
@@ -744,18 +768,24 @@ endpoint_policy_manager:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
+        - logstash-*
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
         - ".ml-anomalies-*"
       privileges:
         - read
     - names:
-        - .lists*
-        - .items*
         - .asset-criticality.asset-criticality-*
       privileges:
         - read
         - write
+    - names:
+        - .lists*
+        - .items*
+      privileges:
+        - read
+        - write
+        - view_index_metadata
     - names:
         - .alerts-security*
         - .siem-signals-*
@@ -778,7 +808,6 @@ endpoint_policy_manager:
         - feature_siem.event_filters_all
         - feature_siem.host_isolation_exceptions_all
         - feature_siem.blocklist_all # Elastic Defend Policy Management
-        - feature_siem.workflow_insights_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -789,8 +818,6 @@ endpoint_policy_manager:
         - feature_fleetv2.all
         - feature_discover.all
         - feature_dashboard.all
-        - feature_canvas.all
-        - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
       resources: "*"
