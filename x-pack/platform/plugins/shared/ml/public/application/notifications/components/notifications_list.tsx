@@ -212,7 +212,7 @@ export const NotificationsList: FC = () => {
         ),
         sortable: false,
         truncateText: {
-          lines: 2,
+          lines: 8,
         },
         'data-test-subj': 'mlNotificationMessage',
       },
