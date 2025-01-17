@@ -10,7 +10,6 @@ import { render } from '@testing-library/react';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { Aggregators } from '../../../../../common/custom_threshold_rule/types';
 import {
   buildCustomThresholdAlert,
@@ -25,8 +24,10 @@ describe('AlertDetailsAppSection', () => {
     return render(
       <IntlProvider locale="en">
         <LogRateAnalysis
-          alert={buildCustomThresholdAlert(alert, {
-            [ALERT_RULE_PARAMETERS]: {
+          alert={buildCustomThresholdAlert(alert)}
+          rule={{
+            ...buildCustomThresholdRule(),
+            params: {
               ...buildCustomThresholdRule().params,
               criteria: [
                 {
@@ -44,7 +45,7 @@ describe('AlertDetailsAppSection', () => {
                 },
               ],
             },
-          })}
+          }}
           dataView={{}}
           services={{
             ...kibanaStartMock.startContract().services,
