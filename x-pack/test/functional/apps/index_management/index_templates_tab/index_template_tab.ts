@@ -258,7 +258,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('shows link to ingest pipeline when default pipeline is set', async () => {
         // Open details flyout
-        await pageObjects.indexManagement.clickIndexTemplateAt(0);
+        await pageObjects.indexManagement.clickIndexTemplate(TEST_TEMPLATE);
 
         // Click on the linked ingest pipeline button
         const linkedPipelineButton = await testSubjects.find('linkedIngestPipeline');

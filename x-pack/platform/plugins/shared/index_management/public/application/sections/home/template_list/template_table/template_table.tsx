@@ -61,7 +61,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
                 uiMetricService.trackMetric(METRIC_TYPE.CLICK, UIM_TEMPLATE_SHOW_DETAILS_CLICK)
               )}
               role="button"
-              data-test-subj="templateDetailsLink"
+              data-test-subj={`templateDetailsLink-${name}`}
             >
               {name}
             </EuiLink>{' '}

@@ -38,9 +38,8 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       await policyDetailsLinks[indexOfRow].click();
     },
 
-    async clickIndexTemplateAt(indexOfRow: number): Promise<void> {
-      const indexTemplateDetailsLink = await testSubjects.findAll('templateDetailsLink');
-      await indexTemplateDetailsLink[indexOfRow].click();
+    async clickIndexTemplate(name: string): Promise<void> {
+      await testSubjects.click(`templateDetailsLink-${name}`);
     },
 
     async clickBulkEditDataRetention(dataStreamNames: string[]): Promise<void> {
