@@ -10,6 +10,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/security-plugin",
   ],
   "exclude": [
     "target/**/*",
