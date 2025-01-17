@@ -14,20 +14,13 @@
         {{ package_name }}.{{ data_stream_name }}
       required: true
       show_user: true
-    - name: pipeline
-      type: text
-      title: Ingest Pipeline
-      description: |
-        The Ingest Node pipeline ID to be used by the integration.
-      required: false
-      show_user: true
     - name: resource_url
       type: text
       title: Resource URL
       description: i.e. scheme://host:port/path
       show_user: true
       required: true
-      default: https://server.example.com:8089/api
+      default: {{ url }}
     - name: resource_interval
       type: text
       title: Resource Interval
@@ -68,31 +61,39 @@
       required: false
       default: |
         #products: '(?i)(Elasticsearch|Beats|Logstash|Kibana)'
-        #solutions: '(?i)(Search|Observability|Security)'
+        #solutions: '(?i)(Search|Observability|Security)'{% if configFields|length %}{% for key, value in configFields %}
+    - name: {{ key }}
+      type: {{ value.type }}
+      title: {{ key }}
+      description: "{{ value.description }}"
+      show_user: true
+      required: true{% if value.default %}
+      default: {{ value.default }}{% endif %}{% if value.type == 'password' %}
+      secret: true{% endif %}{% endfor %}{% endif %}{% if auth == 'basic' or showAll %}
     - name: username
       type: text
       title: Basic Auth Username
       show_user: true
-      required: false
+      required: {% if showAll %} false {% else %} true {% endif %}
       description: The username to be used with Basic Auth headers
     - name: password
       type: password
       title: Basic Auth Password
       show_user: true
-      required: false
+      required: {% if showAll %} false {% else %} true {% endif %}
       description: The password to be used with Basic Auth headers
-      secret: true
+      secret: true{% endif %}{% if auth == 'digest' or showAll %}
     - name: digest_username
       type: text
       title: Digest Auth Username
       show_user: true
-      required: false
+      required: {% if showAll %} false {% else %} true {% endif %}
       description: The username to be used with Digest Auth headers
     - name: digest_password
       type: password
       title: Digest Auth Password
       show_user: true
-      required: false
+      required: {% if showAll %} false {% else %} true {% endif %}
       description: The password to be used with Digest Auth headers
       secret: true
     - name: digest_no_reuse
@@ -100,19 +101,19 @@
       title: Digest No Challenge Reuse
       show_user: true
       required: false
-      description: Selecting no challenge reuse prevents the transport from reusing digest challenges
+      description: Selecting no challenge reuse prevents the transport from reusing digest challenges{% endif %}{% if auth == 'oauth2' or showAll %}
     - name: oauth_id
       type: text
       title: OAuth2 Client ID
       description: Client ID used for OAuth2 authentication
       show_user: true
-      required: false
+      required: {% if showAll %} false {% else %} true {% endif %}
     - name: oauth_secret
       type: password
       title: OAuth2 Client Secret
       description: Client secret used for OAuth2 authentication
       show_user: true
-      required: false
+      required: {% if showAll %} false {% else %} true {% endif %}
       secret: true
     - name: oauth_token_url
       type: text
@@ -120,7 +121,7 @@
       description: The URL endpoint that will be used to generate the tokens during the oAuth2 flow. It is required if no oauth_custom variable is set or provider is not specified in oauth_custom variable.
       show_user: true
       required: false
-      secret: false
+      secret: false{% endif %}
     - name: redact_fields
       type: text
       title: Redacted fields
@@ -218,7 +219,7 @@
       description: The maximum burst size. Burst is the maximum number of resource requests that can be made above the overall rate limit.
       show_user: false
       multi: false
-      required: false
+      required: false{% if auth == 'oauth2' or showAll %}
     - name: oauth_provider
       type: text
       title: OAuth2 Provider
@@ -309,7 +310,7 @@
       description: Set of values that will be sent on each resource to the token_url. Each param key can have multiple values. Can be set for all providers except google.
       show_user: false
       multi: false
-      required: false
+      required: false{% endif %}
     - name: enable_request_tracer
       type: bool
       title: Enable request tracing
