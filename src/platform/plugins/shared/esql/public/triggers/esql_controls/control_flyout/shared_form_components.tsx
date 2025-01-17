@@ -159,7 +159,7 @@ export function VariableName({
         defaultMessage: 'Name',
       })}
       helpText={i18n.translate('esql.flyout.variableName.helpText', {
-        defaultMessage: 'This name will be prefaced with n "?" in the editor',
+        defaultMessage: 'This name will be prefaced with a "?" in the editor',
       })}
       fullWidth
       autoFocus
