@@ -71,7 +71,6 @@ export function LensEmbeddableComponent({
     <div
       style={{ width: '100%', height: '100%' }}
       data-rendering-count={renderCount + 1}
-      data-render-complete={hasRendered}
       {...title}
       {...description}
       data-shared-item
