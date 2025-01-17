@@ -21,6 +21,26 @@ describe('getGeneratedTitle', () => {
     },
   ];
 
+  function createChatCompletionResponse(content: {
+    content?: string;
+    function_call?: { name: string; arguments: { [key: string]: string } };
+  }): ChatCompleteResponse {
+    return {
+      content: content.content || '',
+      toolCalls: content.function_call
+        ? [
+            {
+              toolCallId: 'test_id',
+              function: {
+                name: content.function_call?.name,
+                arguments: content.function_call?.arguments,
+              },
+            },
+          ]
+        : [],
+    };
+  }
+
   function callGenerateTitle(...rest: [ChatCompleteResponse[]] | [{}, ChatCompleteResponse[]]) {
     const options = rest.length === 1 ? {} : rest[0];
     const chunks = rest.length === 1 ? rest[0] : rest[1];
@@ -43,22 +63,14 @@ describe('getGeneratedTitle', () => {
     return { chatSpy, title$ };
   }
 
-  it('', async () => {
+  it('returns the given title as a string', async () => {
     const { title$ } = callGenerateTitle([
-      {
-        content: '',
-        toolCalls: [
-          {
-            toolCallId: 'test_id',
-            function: {
-              name: 'title_conversation',
-              arguments: {
-                title: 'My title',
-              },
-            },
-          },
-        ],
-      },
+      createChatCompletionResponse({
+        function_call: {
+          name: 'title_conversation',
+          arguments: { title: 'My title' },
+        },
+      }),
     ]);
 
     const title = await lastValueFrom(
@@ -69,20 +81,12 @@ describe('getGeneratedTitle', () => {
   });
   it('calls chat with the user message', async () => {
     const { chatSpy, title$ } = callGenerateTitle([
-      {
-        content: '',
-        toolCalls: [
-          {
-            toolCallId: 'test_id',
-            function: {
-              name: TITLE_CONVERSATION_FUNCTION_NAME,
-              arguments: {
-                title: 'My title',
-              },
-            },
-          },
-        ],
-      },
+      createChatCompletionResponse({
+        function_call: {
+          name: TITLE_CONVERSATION_FUNCTION_NAME,
+          arguments: { title: 'My title' },
+        },
+      }),
     ]);
 
     await lastValueFrom(title$);
@@ -97,20 +101,12 @@ describe('getGeneratedTitle', () => {
   it('strips quotes from the title', async () => {
     async function testTitle(title: string) {
       const { title$ } = callGenerateTitle([
-        {
-          content: '',
-          toolCalls: [
-            {
-              toolCallId: 'test_id',
-              function: {
-                name: 'title_conversation',
-                arguments: {
-                  title,
-                },
-              },
-            },
-          ],
-        },
+        createChatCompletionResponse({
+          function_call: {
+            name: 'title_conversation',
+            arguments: { title },
+          },
+        }),
       ]);
 
       return await lastValueFrom(
