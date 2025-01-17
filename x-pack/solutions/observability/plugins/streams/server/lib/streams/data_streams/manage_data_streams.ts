@@ -8,6 +8,7 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { retryTransientEsErrors } from '../helpers/retry';
+import { StreamLifecycle } from '@kbn/streams-schema';
 
 interface DataStreamManagementOptions {
   esClient: ElasticsearchClient;
@@ -96,23 +97,51 @@ export async function rolloverDataStreamIfNecessary({
 export async function updateDataStreamLifecycle({
   esClient,
   logger,
-  name,
-  retention,
+  names,
+  lifecycle,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
-  name: string;
-  retention?: string;
+  names: string[];
+  lifecycle?: StreamLifecycle;
 }) {
   try {
-    await retryTransientEsErrors(
-      () =>
-        esClient.indices.putDataLifecycle({
-          name,
-          data_retention: retention,
-        }),
-      { logger }
-    );
+    if (!lifecycle || lifecycle.type === 'ilm') {
+      await retryTransientEsErrors(
+        () =>
+          esClient.indices.deleteDataLifecycle({
+            name: names,
+          }),
+        { logger }
+      );
+    }
+
+    if (lifecycle?.type == 'dlm') {
+      await retryTransientEsErrors(
+        () =>
+          esClient.indices.putDataLifecycle({
+            name: names,
+            data_retention: lifecycle.data_retention,
+          }),
+        { logger }
+      );
+    }
+
+    const dataStreams = await esClient.indices.getDataStream({ name: names });
+    for (const dataStream of dataStreams.data_streams) {
+      logger.info(`updating settings for data stream ${dataStream.name} backing indices`);
+      await retryTransientEsErrors(
+        () =>
+          esClient.indices.putSettings({
+            index: dataStream.indices.map((index) => index.index_name),
+            settings: {
+              'lifecycle.prefer_ilm': lifecycle?.type === 'ilm',
+              'lifecycle.name': lifecycle?.type === 'ilm' ? lifecycle.policy : null,
+            },
+          }),
+        { logger }
+      );
+    }
   } catch (err: any) {
     logger.error(`Error updating data stream lifecycle: ${err.message}`);
     throw err;

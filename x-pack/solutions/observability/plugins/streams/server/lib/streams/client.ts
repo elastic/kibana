@@ -182,9 +182,7 @@ export class StreamsClient {
         scopedClusterClient,
       });
 
-      if (definition.stream.ingest.lifecycle) {
-        await this.updateStreamLifecycle(definition);
-      }
+      await this.updateStreamLifecycle(definition);
     } else if (isIngestStream(definition)) {
       await syncIngestStreamDefinitionObjects({
         definition,
@@ -780,35 +778,28 @@ export class StreamsClient {
 
   private async updateStreamLifecycle(root: WiredStreamDefinition) {
     const lifecycle = root.stream.ingest.lifecycle;
-    if (!lifecycle) {
-      throw new Error('Stream definition does not define a lifecycle');
-    }
-
-    if (lifecycle.type !== 'dlm') {
-      throw new Error('Only dlm lifecycle is supported');
-    }
 
     const { logger, scopedClusterClient } = this.dependencies;
     const descendants = await this.getDescendants(root.name);
 
+    const streamsToUpdate = [];
     const queue = [root];
     while (queue.length > 0) {
       const definition = queue.shift()!;
 
       if (isDescendantOf(root.name, definition.name) && definition.stream.ingest.lifecycle) {
-        logger.info('Ignoring lifecycle updating for stream and descendants ' + definition.name);
         continue;
       }
-      logger.info('Updating lifecycle for stream ' + definition.name);
 
-      await updateDataStreamLifecycle({
-        esClient: scopedClusterClient.asCurrentUser,
-        name: definition.name,
-        retention: lifecycle.data_retention,
-        logger,
-      });
-
+      streamsToUpdate.push(definition.name);
       queue.push(...descendants.filter((child) => isChildOf(definition.name, child.name)));
     }
+
+    await updateDataStreamLifecycle({
+      esClient: scopedClusterClient.asCurrentUser,
+      names: streamsToUpdate,
+      lifecycle,
+      logger,
+    });
   }
 }
