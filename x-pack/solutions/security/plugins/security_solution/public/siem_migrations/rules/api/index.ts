@@ -24,7 +24,6 @@ import {
   SIEM_RULE_MIGRATION_RESOURCES_MISSING_PATH,
   SIEM_RULE_MIGRATION_RESOURCES_PATH,
   SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH,
-  SIEM_RULE_MIGRATION_RETRY_PATH,
   SIEM_RULE_MIGRATIONS_INTEGRATIONS_PATH,
 } from '../../../../common/siem_migrations/constants';
 import type {
@@ -42,9 +41,7 @@ import type {
   UpsertRuleMigrationResourcesResponse,
   GetRuleMigrationPrebuiltRulesResponse,
   UpdateRuleMigrationResponse,
-  RetryRuleMigrationRequestBody,
   StartRuleMigrationResponse,
-  RetryRuleMigrationResponse,
   GetRuleMigrationIntegrationsResponse,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 
@@ -142,6 +139,8 @@ export interface StartRuleMigrationParams {
   migrationId: string;
   /** The connector id to use for the migration */
   connectorId: string;
+  /** Optional indicator to retry the migration with specific filtering criteria */
+  retry?: SiemMigrationRetryFilter;
   /** Optional LangSmithOptions to use for the for the migration */
   langSmithOptions?: LangSmithOptions;
   /** Optional AbortSignal for cancelling request */
@@ -151,48 +150,17 @@ export interface StartRuleMigrationParams {
 export const startRuleMigration = async ({
   migrationId,
   connectorId,
+  retry,
   langSmithOptions,
   signal,
 }: StartRuleMigrationParams): Promise<StartRuleMigrationResponse> => {
-  const body: StartRuleMigrationRequestBody = { connector_id: connectorId };
-  if (langSmithOptions) {
-    body.langsmith_options = langSmithOptions;
-  }
+  const body: StartRuleMigrationRequestBody = {
+    connector_id: connectorId,
+    retry,
+    langsmith_options: langSmithOptions,
+  };
   return KibanaServices.get().http.put<StartRuleMigrationResponse>(
     replaceParams(SIEM_RULE_MIGRATION_START_PATH, { migration_id: migrationId }),
-    { body: JSON.stringify(body), version: '1', signal }
-  );
-};
-
-export interface RetryRuleMigrationParams {
-  /** `id` of the migration to reprocess rules for */
-  migrationId: string;
-  /** The connector id to use for the reprocessing */
-  connectorId: string;
-  /** Optional LangSmithOptions to use for the for the reprocessing */
-  langSmithOptions?: LangSmithOptions;
-  /** Optional indicator to filter migration rules to retry */
-  filter?: SiemMigrationRetryFilter;
-  /** Optional AbortSignal for cancelling request */
-  signal?: AbortSignal;
-}
-/** Starts a reprocessing of migration rules in a specific migration. */
-export const retryRuleMigration = async ({
-  migrationId,
-  connectorId,
-  langSmithOptions,
-  filter,
-  signal,
-}: RetryRuleMigrationParams): Promise<RetryRuleMigrationResponse> => {
-  const body: RetryRuleMigrationRequestBody = {
-    connector_id: connectorId,
-    filter,
-  };
-  if (langSmithOptions) {
-    body.langsmith_options = langSmithOptions;
-  }
-  return KibanaServices.get().http.put<RetryRuleMigrationResponse>(
-    replaceParams(SIEM_RULE_MIGRATION_RETRY_PATH, { migration_id: migrationId }),
     { body: JSON.stringify(body), version: '1', signal }
   );
 };
