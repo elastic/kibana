@@ -381,6 +381,7 @@ export const ESQLEditor = memo(function ESQLEditor({
       },
       // @ts-expect-error To prevent circular type import, type defined here is partial of full client
       getFieldsMetadata: fieldsMetadata?.getClient(),
+      getJoinIndices: kibana.services?.esql?.getJoinIndicesAutocomplete,
     };
     return callbacks;
   }, [
@@ -396,6 +397,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     indexManagementApiService,
     histogramBarTarget,
     fieldsMetadata,
+    kibana.services?.esql?.getJoinIndicesAutocomplete,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {
