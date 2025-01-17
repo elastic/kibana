@@ -23,6 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('parse csv', function () {
     before(async () => {
       await security.role.create(roleName, {
+        kibana: [],
         elasticsearch: {
           elasticsearch: { cluster: ['manage_pipeline', 'cluster:monitor/nodes/info'] },
         },
@@ -35,6 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       await security.role.create(roleName2, {
+        kibana: [],
         elasticsearch: {
           elasticsearch: { cluster: ['monitor'] },
         },
