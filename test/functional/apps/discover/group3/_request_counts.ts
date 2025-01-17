@@ -148,6 +148,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
+      it(`should send no requests (documents + chart) when toggling the chart visibility`, async () => {
+        await expectSearches(type, 0, async () => {
+          // hide chart
+          await discover.toggleChartVisibility();
+          // show chart
+          await discover.toggleChartVisibility();
+        });
+      });
+      it(`should send a request for chart data when toggling the chart visibility after a time range change`, async () => {
+        // hide chart
+        await discover.toggleChartVisibility();
+        await timePicker.setAbsoluteRange(
+          'Sep 21, 2015 @ 06:31:44.000',
+          'Sep 24, 2015 @ 00:00:00.000'
+        );
+        await waitForLoadingToFinish();
+        await expectSearches(type, 1, async () => {
+          // show chart, we expect a request for the chart data, since the time range changed
+          await discover.toggleChartVisibility();
+        });
+      });
+
       it(`should send ${savedSearchesRequests} requests for saved search changes`, async () => {
         await setQuery(query1);
         await queryBar.clickQuerySubmitButton();
@@ -209,15 +231,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         query1: 'bytes > 1000',
         query2: 'bytes < 2000',
         setQuery: (query) => queryBar.setQuery(query),
-      });
-
-      it(`should send no more than 2 requests (documents + chart) when toggling the chart visibility`, async () => {
-        await expectSearches(type, 2, async () => {
-          await discover.toggleChartVisibility();
-        });
-        await expectSearches(type, 2, async () => {
-          await discover.toggleChartVisibility();
-        });
       });
 
       it('should send no more than 2 requests (documents + chart) when adding a filter', async () => {
@@ -283,15 +296,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         savedSearchesRequests: 2,
         setQuery: (query) => monacoEditor.setCodeEditorValue(query),
         expectedRequests: 2,
-      });
-
-      it(`should send requests (documents + chart) when toggling the chart visibility`, async () => {
-        await expectSearches(type, 1, async () => {
-          await discover.toggleChartVisibility();
-        });
-        await expectSearches(type, 3, async () => {
-          await discover.toggleChartVisibility();
-        });
       });
     });
   });
