@@ -235,4 +235,3 @@ const getAdditionalAgentlessPolicyInfo = (
           : [],
       };
 };
-
