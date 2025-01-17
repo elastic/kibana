@@ -29,6 +29,8 @@ export interface InferenceConnectorAdapter {
       messages: Message[];
       system?: string;
       functionCalling?: FunctionCallingMode;
+      temperature?: number;
+      modelName?: string;
       abortSignal?: AbortSignal;
       logger: Logger;
     } & ToolOptions
