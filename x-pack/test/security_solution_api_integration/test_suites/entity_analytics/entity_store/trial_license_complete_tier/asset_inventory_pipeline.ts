@@ -54,106 +54,104 @@ export default ({ getService }: FtrProviderContext) => {
           cloud: { super: 123 },
         };
 
-        const doc = {
-          historical: undefined,
-          ...metadata,
-        };
+        const doc = metadata;
 
-        const processor = dynamicNewestRetentionSteps({ fields: [{ destination: 'static' }] });
+        const processor = dynamicNewestRetentionSteps([]);
         const result = await applyIngestProcessorToDoc([processor], doc, es, log);
 
         return expect(result).to.eql(doc);
       });
 
-      // it('should return history value if no latest value is found', async () => {
-      //   const metadata = {
-      //     cloud: { super: 123 },
-      //   };
+      it('should return history value if no latest value is found', async () => {
+        const metadata = {
+          cloud: { super: 123 },
+        };
 
-      //   const doc = {
-      //     historical: metadata,
-      //   };
+        const doc = {
+          historical: metadata,
+        };
 
-      //   const processor = dynamicNewestRetentionSteps({ fields: [] });
-      //   const result = await applyIngestProcessorToDoc([processor], doc, es, log);
+        const processor = dynamicNewestRetentionSteps([]);
+        const result = await applyIngestProcessorToDoc([processor], doc, es, log);
 
-      //   return expect(result).to.eql({
-      //     ...doc,
-      //     ...metadata,
-      //   });
-      // });
+        return expect(result).to.eql({
+          ...doc,
+          ...metadata,
+        });
+      });
 
-      // it('should return latest value if both historical and latest values exist', async () => {
-      //   const metadata = {
-      //     cloud: { super: 123 },
-      //   };
+      it('should return latest value if both historical and latest values exist', async () => {
+        const metadata = {
+          cloud: { super: 123 },
+        };
 
-      //   const historical = {
-      //     cloud: { super: 456 },
-      //   };
+        const historical = {
+          cloud: { super: 456 },
+        };
 
-      //   const doc = {
-      //     historical,
-      //     ...metadata,
-      //   };
+        const doc = {
+          historical,
+          ...metadata,
+        };
 
-      //   const processor = dynamicNewestRetentionSteps({ fields: [] });
-      //   const result = await applyIngestProcessorToDoc([processor], doc, es, log);
+        const processor = dynamicNewestRetentionSteps([]);
+        const result = await applyIngestProcessorToDoc([processor], doc, es, log);
 
-      //   return expect(result).to.eql(doc);
-      // });
+        return expect(result).to.eql(doc);
+      });
 
-      // it('should merge nested object preserving historical values not found in latest', async () => {
-      //   const metadata = {
-      //     cloud: { host: 'test' },
-      //     okta: { foo: { bar: { baz: 1 } } },
-      //   };
+      it('should merge nested object preserving historical values not found in latest', async () => {
+        const metadata = {
+          cloud: { host: 'test' },
+          okta: { foo: { bar: { baz: 1 } } },
+        };
 
-      //   const historical = {
-      //     cloud: { user: 'agent' },
-      //     okta: { foo: { bar: { qux: 11 } } },
-      //   };
+        const historical = {
+          cloud: { user: 'agent' },
+          okta: { foo: { bar: { qux: 11 } } },
+        };
 
-      //   const doc = {
-      //     historical,
-      //     ...metadata,
-      //   };
+        const doc = {
+          historical,
+          ...metadata,
+        };
 
-      //   const processor = dynamicNewestRetentionSteps({ fields: [] });
-      //   const result = await applyIngestProcessorToDoc([processor], doc, es, log);
+        const processor = dynamicNewestRetentionSteps([]);
+        const result = await applyIngestProcessorToDoc([processor], doc, es, log);
 
-      //   return expect(result).to.eql({
-      //     historical,
-      //     cloud: { host: 'test', user: 'agent' },
-      //     okta: { foo: { bar: { baz: 1, qux: 11 } } },
-      //   });
-      // });
+        return expect(result).to.eql({
+          historical,
+          cloud: { host: 'test', user: 'agent' },
+          okta: { foo: { bar: { baz: 1, qux: 11 } } },
+        });
+      });
 
-      // it('should ignore historical static fields', async () => {
-      //   const metadata = {
-      //     cloud: { host: 'test' },
-      //   };
+      it('should ignore historical static fields', async () => {
+        const metadata = {
+          cloud: { host: 'test' },
+        };
 
-      //   const historical = {
-      //     static: 'static',
-      //     cloud: { user: 'agent' },
-      //     okta: { foo: { bar: { qux: 1 } } },
-      //   };
+        const historical = {
+          static: 'static',
+          cloud: { user: 'agent' },
+          okta: { foo: { bar: { qux: 1 } } },
+        };
 
-      //   const doc = {
-      //     historical,
-      //     ...metadata,
-      //   };
+        const doc = {
+          historical,
+          ...metadata,
+        };
 
-      //   const processor = dynamicNewestRetentionSteps({ fields: [{ destination: 'static' }] });
-      //   const result = await applyIngestProcessorToDoc([processor], doc, es, log);
+        const staticFields = ['static'];
+        const processor = dynamicNewestRetentionSteps(staticFields);
+        const result = await applyIngestProcessorToDoc([processor], doc, es, log);
 
-      //   return expect(result).to.eql({
-      //     historical,
-      //     cloud: { host: 'test', user: 'agent' },
-      //     okta: { foo: { bar: { qux: 1 } } },
-      //   });
-      // });
+        return expect(result).to.eql({
+          historical,
+          cloud: { host: 'test', user: 'agent' },
+          okta: { foo: { bar: { qux: 1 } } },
+        });
+      });
     });
   });
 };

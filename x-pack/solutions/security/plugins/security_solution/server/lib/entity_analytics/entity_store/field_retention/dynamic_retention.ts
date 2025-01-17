@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { EntityEngineInstallationDescriptor } from '../installation/types';
-
-export const dynamicNewestRetentionSteps = (description: EntityEngineInstallationDescriptor) => {
-  const staticFields = description.fields.map((field) => `"${field.destination}"`).join(',');
+export const dynamicNewestRetentionSteps = (ignoreFields: string[]) => {
+  const staticFields = ignoreFields.map((field) => `"${field}"`).join(',');
 
   const painless = /* java */ `
     Map mergeFields(Map latest, Map historical, Set staticFields) {
@@ -36,12 +34,10 @@ export const dynamicNewestRetentionSteps = (description: EntityEngineInstallatio
       ctx = mergeFields(ctx, ctx.historical, staticFields);
     }
   `;
-  return [
-    {
-      script: {
-        source: painless,
-        lang: 'painless',
-      },
+  return {
+    script: {
+      source: painless,
+      lang: 'painless',
     },
-  ];
+  };
 };

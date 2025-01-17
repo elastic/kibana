@@ -39,7 +39,7 @@ export const applyIngestProcessorToDoc = async (
     }
     return firstDoc?.doc?._source;
   } catch (e) {
-    log.error('Error running pipeline: ', e);
+    log.error('Error running pipeline');
     throw e;
   }
 };

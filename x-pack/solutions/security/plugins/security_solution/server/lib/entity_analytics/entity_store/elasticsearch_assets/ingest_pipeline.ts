@@ -98,7 +98,9 @@ const buildIngestPipeline = ({
     ),
     ...getRemoveEmptyFieldSteps([...allEntityFields, 'asset', `${description.entityType}.risk`]),
     removeEntityDefinitionFieldsStep(),
-    ...(description.dynamic ? dynamicNewestRetentionSteps(description) : []),
+    ...(description.dynamic
+      ? [dynamicNewestRetentionSteps(description.fields.map((field) => field.destination))]
+      : []),
     ...(!debugMode
       ? [
           {
