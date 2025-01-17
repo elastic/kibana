@@ -7,5 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ScoutEventsReport, ScoutReportEventAction } from './events';
-export { ScoutFailureReport, type TestFailure } from './failed_test';
+export interface TestFailure {
+  id: string;
+  suite: string;
+  title: string;
+  target: string;
+  command: string;
+  location: string;
+  owner: string[];
+  plugin?: {
+    id: string;
+    visibility: string;
+    group: string;
+  };
+  duration: number;
+  error: {
+    message?: string;
+    stack_trace?: string;
+  };
+  stdout?: string;
+  attachments: Array<{
+    name: string;
+    path?: string;
+    contentType: string;
+  }>;
+}

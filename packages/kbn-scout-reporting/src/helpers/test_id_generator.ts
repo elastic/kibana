@@ -7,5 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ScoutEventsReport, ScoutReportEventAction } from './events';
-export { ScoutFailureReport, type TestFailure } from './failed_test';
+import { createHash, randomBytes } from 'node:crypto';
+
+export function generateTestRunId() {
+  return randomBytes(8).toString('hex');
+}
+
+export function getTestIDForTitle(title: string) {
+  return createHash('sha256').update(title).digest('hex').slice(0, 31);
+}
