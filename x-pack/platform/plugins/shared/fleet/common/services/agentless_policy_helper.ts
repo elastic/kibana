@@ -7,12 +7,9 @@
 
 import { AGENTLESS_DISABLED_INPUTS } from '../constants';
 import { PackagePolicyValidationError } from '../errors';
-import type {
-  NewPackagePolicyInput,
-  PackageInfo,
-  PackagePolicyInput,
-  RegistryPolicyTemplate,
-} from '../types';
+import type { NewPackagePolicyInput, PackageInfo, RegistryPolicyTemplate } from '../types';
+
+import type { SimplifiedInputs } from './simplified_package_policy_helper';
 
 export const isAgentlessIntegration = (
   packageInfo: Pick<PackageInfo, 'policy_templates'> | undefined
@@ -60,27 +57,41 @@ export const isOnlyAgentlessPolicyTemplate = (policyTemplate: RegistryPolicyTemp
 /*
  * Check if the package policy inputs is not allowed in agentless
  */
-export function inputNotAllowedInAgentless(
-  packagePolicyInput: PackagePolicyInput | NewPackagePolicyInput,
-  supportsAgentless?: boolean | null
-) {
-  return supportsAgentless === true && AGENTLESS_DISABLED_INPUTS.includes(packagePolicyInput.type);
+export function inputNotAllowedInAgentless(inputType: string, supportsAgentless?: boolean | null) {
+  return supportsAgentless === true && AGENTLESS_DISABLED_INPUTS.includes(inputType);
 }
 
 /*
  * Throw error if trying to enabling an input that is not allowed in agentless
  */
-export function checkAgentlessInputs(
-  packagePolicyInputs: NewPackagePolicyInput[],
+export function validateAgentlessInputs(
+  packagePolicyInputs: NewPackagePolicyInput[] | SimplifiedInputs,
   supportsAgentless?: boolean | null
 ) {
-  return packagePolicyInputs.forEach((input) => {
-    if (inputNotAllowedInAgentless(input, supportsAgentless) && input.enabled === true) {
-      throw new PackagePolicyValidationError(
-        `Input ${input.type} is not allowed: types '${AGENTLESS_DISABLED_INPUTS.map(
-          (name) => name
-        ).join(', ')}' cannot be enabled for an Agentless integration`
-      );
-    }
-  });
+  if (Array.isArray(packagePolicyInputs)) {
+    return packagePolicyInputs.forEach((input) => {
+      throwIfInputNotAllowed(input.type, input.enabled, supportsAgentless);
+    });
+  } else {
+    Object.keys(packagePolicyInputs).forEach((inputName) => {
+      const input = packagePolicyInputs[inputName];
+      const match = inputName.match(/\-(\w*)$/);
+      const inputType = match && match.length > 0 ? match[1] : '';
+      throwIfInputNotAllowed(inputType, input?.enabled ?? false, supportsAgentless);
+    });
+  }
+}
+
+function throwIfInputNotAllowed(
+  inputType: string,
+  inputEnabled: boolean,
+  supportsAgentless?: boolean | null
+) {
+  if (inputNotAllowedInAgentless(inputType, supportsAgentless) && inputEnabled === true) {
+    throw new PackagePolicyValidationError(
+      `Input ${inputType} is not allowed: types '${AGENTLESS_DISABLED_INPUTS.map(
+        (name) => name
+      ).join(', ')}' cannot be enabled for an Agentless integration`
+    );
+  }
 }

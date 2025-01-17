@@ -1915,7 +1915,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               (!input.policy_template || input.policy_template === i.policy_template)
           );
           // disable some inputs in case of agentless integration
-          const enabled = inputNotAllowedInAgentless(input, newPolicy?.supports_agentless)
+          const enabled = inputNotAllowedInAgentless(input.type, newPolicy?.supports_agentless)
             ? false
             : input.enabled;
 

@@ -202,7 +202,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
     }
 
     if (
-      inputNotAllowedInAgentless(packagePolicyInput, packagePolicy?.supports_agentless) ||
+      inputNotAllowedInAgentless(packagePolicyInput.type, packagePolicy?.supports_agentless) ||
       enabled === false
     ) {
       packagePolicyInput.enabled = false;
@@ -223,7 +223,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
 
       if (
         streamEnabled === false ||
-        inputNotAllowedInAgentless(packagePolicyInput, packagePolicy?.supports_agentless)
+        inputNotAllowedInAgentless(packagePolicyInput.type, packagePolicy?.supports_agentless)
       ) {
         packagePolicyStream.enabled = false;
       } else {
