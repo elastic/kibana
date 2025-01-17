@@ -12,7 +12,7 @@ import { inheritedFieldDefinitionSchema, lifecycleSchema } from '../common';
 export const wiredReadStreamDefinitonSchema = wiredStreamDefinitonSchema
   .extend({
     inherited_fields: inheritedFieldDefinitionSchema,
-    lifecycle: lifecycleSchema,
+    effectiveLifecycle: lifecycleSchema.and(z.object({ from: z.string() })),
   })
   .strict();
 
