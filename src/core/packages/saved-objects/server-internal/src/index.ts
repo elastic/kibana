@@ -18,3 +18,4 @@ export type {
   InternalSavedObjectsRequestHandlerContext,
   InternalSavedObjectRouter,
 } from './internal_types';
+export { MIN_SAVED_OBJECT_TYPES_COUNT } from './object_types';

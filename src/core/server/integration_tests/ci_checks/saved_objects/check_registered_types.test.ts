@@ -15,6 +15,7 @@ import {
   createRootWithCorePlugins,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
+import { MIN_SAVED_OBJECT_TYPES_COUNT } from '@kbn/core-saved-objects-server-internal';
 
 describe('checking migration metadata changes on all registered SO types', () => {
   let esServer: TestElasticsearchUtils;
@@ -46,6 +47,8 @@ describe('checking migration metadata changes on all registered SO types', () =>
   // This test is meant to fail when any change is made in registered types that could potentially impact the SO migration.
   // Just update the snapshot by running this test file via jest_integration with `-u` and push the update.
   // The intent is to trigger a code review from the Core team to review the SO type changes.
+  // The number of types in the hashMap should never be reduced, it can only increase.
+  // Removing saved object types is forbidden after 8.8.
   it('detecting migration related changes in registered types', () => {
     const allTypes = typeRegistry.getAllTypes();
 
@@ -185,22 +188,6 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "workplace_search_telemetry": "52b32b47ee576f554ac77cb1d5896dfbcfe9a1fb",
       }
     `);
-  });
-
-  // This test is meant to fail when any change is made in the number of registered types.
-  // as of 8.8,
-  // Just update the snapshot by running this test file via jest_integration with `-u` and push the update.
-  // The intent is to trigger a code review from the Core team to review the SO type changes.
-  it.skip('detecting no deregistered types', () => {
-    const allTypes = typeRegistry.getAllTypes();
-
-    const hashMap = allTypes.reduce((map, type) => {
-      map[type.name] = getMigrationHash(type);
-      return map;
-    }, {} as Record<string, string>);
-    const hashedSOTypes = Object.keys(hashMap).sort();
-    const registeredSOTypes = allTypes.map(({ name }) => name).sort();
-    expect(hashedSOTypes.length).toBeGreaterThanOrEqual(registeredSOTypes.length);
-    expect(hashedSOTypes).toEqual(registeredSOTypes); // ensure that all types registered are hashed already or need to be added to the hash. If there's a type that's hashed and no longer registered, fail.
+    expect(Object.keys(hashMap).length).toEqual(MIN_SAVED_OBJECT_TYPES_COUNT);
   });
 });
