@@ -99,7 +99,6 @@ function InternalAlertsPage() {
 
   const onUpdate = ({ isLoading, totalCount }: TableUpdateHandlerArgs) => {
     if (!isLoading) {
-      console.log('totalCount:', totalCount);
       onPageReady({
         customMetrics: {
           key1: 'total_alert_count',
