@@ -8,7 +8,7 @@
  */
 
 import React, { ReactNode, useEffect, useRef } from 'react';
-import { escape, memoize } from 'lodash';
+import { escapeRegExp, memoize } from 'lodash';
 
 export interface InTableSearchHighlightsWrapperProps {
   inTableSearchTerm?: string;
@@ -44,7 +44,7 @@ export const InTableSearchHighlightsWrapper: React.FC<InTableSearchHighlightsWra
 };
 
 const getSearchTermRegExp = memoize((searchTerm: string): RegExp => {
-  return new RegExp(`(${escape(searchTerm.trim())})`, 'gi');
+  return new RegExp(`(${escapeRegExp(searchTerm.trim())})`, 'gi');
 });
 
 function modifyDOMAndAddSearchHighlights(
