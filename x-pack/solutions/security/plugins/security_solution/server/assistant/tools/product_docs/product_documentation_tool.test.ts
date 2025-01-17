@@ -13,6 +13,7 @@ import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/
 import { loggerMock } from '@kbn/logging-mocks';
 import { PRODUCT_DOCUMENTATION_TOOL } from './product_documentation_tool';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
+import { contentReferencesStoreFactory } from '@kbn/elastic-assistant-common';
 
 describe('ProductDocumentationTool', () => {
   const chain = {} as RetrievalQAChain;
@@ -27,6 +28,7 @@ describe('ProductDocumentationTool', () => {
     retrieveDocumentationAvailable: jest.fn(),
   } as LlmTasksPluginStart;
   const connectorId = 'fake-connector';
+  const contentReferencesStore = contentReferencesStoreFactory()
   const defaultArgs = {
     chain,
     esClient,
@@ -35,6 +37,7 @@ describe('ProductDocumentationTool', () => {
     llmTasks,
     connectorId,
     isEnabledKnowledgeBase: true,
+    contentReferencesStore
   };
   beforeEach(() => {
     jest.clearAllMocks();

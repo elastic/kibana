@@ -14,6 +14,7 @@ import type { RetrievalQAChain } from 'langchain/chains';
 import { mockAlertsFieldsApi } from '@kbn/elastic-assistant-plugin/server/__mocks__/alerts';
 import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
 import { loggerMock } from '@kbn/logging-mocks';
+import { contentReferencesStoreFactory } from '@kbn/elastic-assistant-common';
 
 const MAX_SIZE = 10000;
 
@@ -34,11 +35,13 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
   const isEnabledKnowledgeBase = true;
   const chain = {} as unknown as RetrievalQAChain;
   const logger = loggerMock.create();
+  const contentReferencesStore = contentReferencesStoreFactory()
   const rest = {
     isEnabledKnowledgeBase,
     esClient,
     chain,
     logger,
+    contentReferencesStore
   };
 
   const anonymizationFields = [

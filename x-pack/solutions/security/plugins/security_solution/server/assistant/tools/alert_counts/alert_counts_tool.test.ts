@@ -12,6 +12,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { ALERT_COUNTS_TOOL } from './alert_counts_tool';
 import type { RetrievalQAChain } from 'langchain/chains';
 import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
+import { contentReferencesStoreFactory } from '@kbn/elastic-assistant-common';
 
 describe('AlertCountsTool', () => {
   const alertsIndexPattern = 'alerts-index';
@@ -30,10 +31,12 @@ describe('AlertCountsTool', () => {
   const isEnabledKnowledgeBase = true;
   const chain = {} as unknown as RetrievalQAChain;
   const logger = loggerMock.create();
+  const contentReferencesStore = contentReferencesStoreFactory()
   const rest = {
     isEnabledKnowledgeBase,
     chain,
     logger,
+    contentReferencesStore
   };
 
   beforeEach(() => {
