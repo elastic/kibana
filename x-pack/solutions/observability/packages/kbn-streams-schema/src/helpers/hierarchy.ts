@@ -56,7 +56,7 @@ export function getParentId(id: string) {
   return parts.slice(0, parts.length - 1).join('.');
 }
 
-export function isRoot(id: string) {
+export function isWiredRoot(id: string) {
   return id.split('.').length === 1;
 }
 

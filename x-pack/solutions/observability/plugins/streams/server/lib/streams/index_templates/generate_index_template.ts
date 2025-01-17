@@ -35,7 +35,7 @@ export function generateIndexTemplate(
     composedOf = [
       `${classicRoot.name}@stream.layer`,
       ...datasetParts.slice(commonParts).map((part, index) => {
-        return `${classicRoot.name.split('-')[0]}-${classicRootDatasetParts
+        return `${classicRoot.name.split('-')[0]}-${datasetParts
           .slice(0, commonParts + index + 1)
           .join('.')}-${classicRoot.name.split('-')[2]}@stream.layer`;
       }),

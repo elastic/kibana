@@ -46,7 +46,7 @@ export async function syncWiredStreamDefinitionObjects({
   definition: WiredStreamDefinition;
   unwiredRoot?: StreamDefinition;
 }) {
-  const componentTemplate = generateLayer(definition.name, definition);
+  const componentTemplate = generateLayer(definition.name, definition, Boolean(unwiredRoot));
   await upsertComponent({
     esClient: scopedClusterClient.asCurrentUser,
     logger,
@@ -188,6 +188,7 @@ export async function syncIngestStreamDefinitionObjects({
   definition,
   dataStream,
   scopedClusterClient,
+  logger,
 }: SyncStreamParamsBase & {
   dataStream: IndicesDataStream;
   definition: IngestStreamDefinition;
@@ -254,6 +255,13 @@ export async function syncIngestStreamDefinitionObjects({
   }
 
   await executePlan(executionPlan, scopedClusterClient);
+  // generate component template that will be picked up by wired children
+  const componentTemplate = generateLayer(definition.name, definition, true);
+  await upsertComponent({
+    esClient: scopedClusterClient.asCurrentUser,
+    logger,
+    component: componentTemplate,
+  });
 }
 
 async function executePlan(

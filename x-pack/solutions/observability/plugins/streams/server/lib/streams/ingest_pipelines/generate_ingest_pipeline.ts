@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StreamDefinition, isRoot } from '@kbn/streams-schema';
+import { StreamDefinition, isWiredRoot } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { logsDefaultPipelineProcessors } from './logs_default_pipeline';
 import { getProcessingPipelineName } from './name';
@@ -15,7 +15,7 @@ export function generateIngestPipeline(id: string, definition: StreamDefinition)
   return {
     id: getProcessingPipelineName(id),
     processors: [
-      ...(isRoot(definition.name) ? logsDefaultPipelineProcessors : []),
+      ...(isWiredRoot(definition.name) ? logsDefaultPipelineProcessors : []),
       ...formatToIngestProcessors(definition.stream.ingest.processing),
       {
         pipeline: {

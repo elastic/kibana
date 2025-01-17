@@ -296,7 +296,6 @@ export class StreamsClient {
         existingDefinition: existingDefinition as WiredStreamDefinition,
         definition,
       });
-      console.log('validatewiredstreamresult', JSON.stringify(validateWiredStreamResult, null, 2));
 
       parentDefinition = validateWiredStreamResult.parentDefinition;
     }
@@ -337,8 +336,6 @@ export class StreamsClient {
     const descendantsById = keyBy(descendants, (stream) => stream.name);
 
     const parentId = getParentId(definition.name);
-    console.log(parentId);
-    console.log(JSON.stringify(ancestors, null, 2));
 
     const parentDefinition = parentId
       ? ancestors.find((parent) => parent.name === parentId)
@@ -438,7 +435,6 @@ export class StreamsClient {
     const { parentDefinition: updatedParentDefinition } = await this.validateAndUpsertStream({
       definition: childDefinition,
     });
-    console.log('updated parent', JSON.stringify(updatedParentDefinition, null, 2));
 
     await this.updateStreamRouting({
       definition: updatedParentDefinition!,
@@ -629,6 +625,9 @@ export class StreamsClient {
     const { assetClient, logger, scopedClusterClient } = this.dependencies;
 
     if (!isWiredStream(definition)) {
+      for (const child of definition.stream.ingest.routing) {
+        await this.deleteStream(child.name);
+      }
       await deleteUnmanagedStreamObjects({
         scopedClusterClient,
         id: definition.name,
@@ -639,7 +638,7 @@ export class StreamsClient {
 
       // need to update parent first to cut off documents streaming down
       if (parentId) {
-        const parentDefinition = (await this.getStream(parentId)) as WiredStreamDefinition;
+        const parentDefinition = await this.getStream(parentId);
 
         await this.updateStreamRouting({
           definition: parentDefinition,
@@ -770,8 +769,6 @@ export class StreamsClient {
         },
       });
 
-      console.log('prefixstreams', JSON.stringify(streams, null, 2));
-
       streams
         .filter((s) => !isWiredStream(s))
         .forEach((stream) => {
@@ -794,9 +791,6 @@ export class StreamsClient {
   async getAncestors(definition: StreamDefinition): Promise<StreamDefinition[]> {
     const unwiredRoot = await this.getUnwiredRootForStream(definition as WiredStreamDefinition);
     const ancestorIds = getAncestors(definition.name, unwiredRoot?.name);
-
-    console.log('unwired root', JSON.stringify(unwiredRoot, null, 2));
-    console.log('ancestor ids', JSON.stringify(ancestorIds, null, 2));
 
     return await this.getManagedStreams({
       query: {
