@@ -1,0 +1,26 @@
+summary: Get chat completion via the Observability AI Assistant.
+value:
+  - type: chatCompletionMessage
+    id: "message-id"
+    message:
+      content: "sample output"
+  - type: messageAdd
+    id: "message-id"
+    message:
+      @timestamp: "2025-01-17T15:45:46.255Z"
+      message:
+        content: "sample output"
+        function_call:
+          name: "function name"
+          arguments: "function arguments"
+          trigger: "message trigger"
+        role: "message role"
+  - conversation:
+      title: "my title"
+      id: "message-id"
+      token_count:
+        completion: 154
+        prompt: 1044
+        total: 1198
+      last_updated: "2025-01-17T15:45:46.258Z"
+    type: conversationCreate

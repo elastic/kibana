@@ -1,0 +1,16 @@
+# overlays.yaml
+overlay: 1.0.0
+info:
+  title: Overlays for the Observability AI Assistant chat completion examples
+  version: 0.0.1
+actions:
+  - target: "$.paths['/api/observability_ai_assistant/chat/complete']['post']"
+    description: 'Add examples for chat completion'
+    update:
+      responses:
+        200:
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                createChatCompletionResponse:
+                  $ref: '../examples/create_observability_ai_assistant_chat_completion.yaml'
