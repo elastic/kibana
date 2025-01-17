@@ -91,7 +91,7 @@ describe('getValueForSelectedField', () => {
         },
       },
       highlight: {
-        semantic_text_des: [
+        test: [
           'This book explores the origins of the universe.',
           'The beginning with the Big Bang—an immense explosion that created space, time, and matter. It delves into how black holes, regions of space where gravity is so strong that not even light can escape, play a crucial role in the evolution of galaxies and the universe as a whole. Stephen Hawking’s groundbreaking discoveries about black hole radiation, often referred to as Hawking Radiation, are also discussed in detail.',
         ],

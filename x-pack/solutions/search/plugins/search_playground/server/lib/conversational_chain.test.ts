@@ -237,7 +237,7 @@ describe('conversational chain', () => {
         {
           _index: 'index',
           _id: '1',
-          highlight: { semantic_text_des: ['value'] },
+          highlight: { field: ['value'] },
         },
       ],
       expectedDocs: [
