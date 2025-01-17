@@ -32,13 +32,14 @@ import {
 import {
   ChatCompleteAPI,
   ChatCompleteOptions,
+  ChatCompleteCompositeResponse,
   FunctionCallingMode,
   ToolOptions,
   isChatCompletionChunkEvent,
   isChatCompletionTokenCountEvent,
 } from '@kbn/inference-common';
 import type { ToolChoice } from './types';
-import { toAsyncIterator } from './utils/observable_to_generator';
+import { toAsyncIterator, wrapInferenceError } from './utils';
 import {
   messagesToInference,
   toolDefinitionToInference,
@@ -66,9 +67,6 @@ export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions 
 }
 
 type InvocationParams = Omit<ChatCompleteOptions, 'messages' | 'system' | 'stream'>;
-
-// TODO: retry support using completionWithRetry? or should we delegate to the inference plugin?
-// https://github.com/langchain-ai/langchainjs/blob/main/libs/langchain-openai/src/chat_models.ts#L1838
 
 /**
  * Langchain chatModel utilizing the inference API under the hood for communication with the LLM.
@@ -163,13 +161,31 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     };
   }
 
+  async completionWithRetry(
+    request: ChatCompleteOptions<ToolOptions, false>
+  ): Promise<ChatCompleteCompositeResponse<ToolOptions, false>>;
+  async completionWithRetry(
+    request: ChatCompleteOptions<ToolOptions, true>
+  ): Promise<ChatCompleteCompositeResponse<ToolOptions, true>>;
+  async completionWithRetry(
+    request: ChatCompleteOptions<ToolOptions, boolean>
+  ): Promise<ChatCompleteCompositeResponse<ToolOptions, boolean>> {
+    return this.caller.call(async () => {
+      try {
+        return await this.chatComplete(request);
+      } catch (e) {
+        throw wrapInferenceError(e);
+      }
+    });
+  }
+
   async _generate(
     baseMessages: BaseMessage[],
     options: this['ParsedCallOptions'],
     runManager?: CallbackManagerForLLMRun
   ): Promise<ChatResult> {
     const { system, messages } = messagesToInference(baseMessages);
-    const response = await this.chatComplete({
+    const response = await this.completionWithRetry({
       ...this.invocationParams(options),
       system,
       messages,
@@ -207,7 +223,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     runManager?: CallbackManagerForLLMRun
   ): AsyncGenerator<ChatGenerationChunk> {
     const { system, messages } = messagesToInference(baseMessages);
-    const response$ = this.chatComplete({
+    const response$ = await this.completionWithRetry({
       ...this.invocationParams(options),
       system,
       messages,
