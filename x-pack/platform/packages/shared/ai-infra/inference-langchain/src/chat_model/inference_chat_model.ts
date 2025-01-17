@@ -38,7 +38,6 @@ import {
 export interface InferenceChatModelParams
   extends BaseChatModelParams,
     Partial<InferenceChatModelCallOptions> {
-  streaming: boolean;
   connectorId: string;
   chatComplete: ChatCompleteAPI;
 }
@@ -48,6 +47,7 @@ export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions 
   tools?: BindToolsInput[];
   tool_choice?: ToolChoice;
   temperature?: number;
+  model?: string;
 }
 
 type InvocationParams = Omit<ChatCompleteOptions, 'messages' | 'system' | 'stream'>;
@@ -77,11 +77,21 @@ type InvocationParams = Omit<ChatCompleteOptions, 'messages' | 'system' | 'strea
  * ```
  */
 export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOptions> {
-  private chatComplete: ChatCompleteAPI;
-  private connectorId: string;
-  protected streaming: boolean;
+  private readonly chatComplete: ChatCompleteAPI;
+  private readonly connectorId: string;
+
   protected temperature?: number;
   protected functionCallingMode?: FunctionCallingMode;
+  protected model?: string;
+
+  constructor(args: InferenceChatModelParams) {
+    super(args);
+    this.chatComplete = args.chatComplete;
+    this.connectorId = args.connectorId;
+    this.temperature = args.temperature;
+    this.functionCallingMode = args.functionCallingMode;
+    this.model = args.model;
+  }
 
   static lc_name() {
     return 'InferenceChatModel';
@@ -89,15 +99,6 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
 
   public get callKeys() {
     return [...super.callKeys, 'functionCallingMode', 'tools', 'tool_choice', 'temperature'];
-  }
-
-  constructor(args: InferenceChatModelParams) {
-    super(args);
-    this.chatComplete = args.chatComplete;
-    this.connectorId = args.connectorId;
-    this.streaming = args.streaming;
-    this.temperature = args.temperature;
-    this.functionCallingMode = args.functionCallingMode;
   }
 
   _llmType() {
@@ -125,6 +126,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     return {
       connectorId: this.connectorId,
       functionCalling: options.functionCallingMode,
+      modelName: options.model,
       temperature: options.temperature,
       tools: options.tools ? toolDefinitionToInference(options.tools) : undefined,
       toolChoice: options.tool_choice ? toolChoiceToInference(options.tool_choice) : undefined,
