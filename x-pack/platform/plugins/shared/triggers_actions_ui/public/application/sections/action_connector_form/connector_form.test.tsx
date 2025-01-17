@@ -106,7 +106,7 @@ describe('ConnectorForm', () => {
 
     await act(async () => {
       const submit = onChange.mock.calls[0][0].submit;
-      await submit();
+      submit();
     });
 
     await waitFor(() => expect(onChange).toHaveBeenCalled());
