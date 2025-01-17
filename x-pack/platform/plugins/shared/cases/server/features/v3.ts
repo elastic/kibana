@@ -55,7 +55,9 @@ export const getV3 = (): KibanaFeatureConfig => {
           read: [APP_ID],
           update: [APP_ID],
           push: [APP_ID],
-          assignCase: [APP_ID],
+          createComment: [APP_ID],
+          reopenCase: [APP_ID],
+          // assign: [APP_ID],
         },
         management: {
           insightsAndAlerting: [APP_ID],
@@ -211,9 +213,9 @@ export const getV3 = (): KibanaFeatureConfig => {
                   read: [],
                 },
                 cases: {
-                  assignCase: [APP_ID],
+                  assign: [APP_ID],
                 },
-                ui: capabilities.assignCase,
+                ui: capabilities.assign,
               },
             ],
           },

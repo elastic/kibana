@@ -36,7 +36,7 @@ export const getCasesFeatureV3 = (
         read: [observabilityFeatureId],
         update: [observabilityFeatureId],
         push: [observabilityFeatureId],
-        assignCase: [observabilityFeatureId],
+        assign: [observabilityFeatureId],
       },
       savedObject: {
         all: [...filesSavedObjectTypes],
@@ -187,7 +187,7 @@ export const getCasesFeatureV3 = (
           groupType: 'independent',
           privileges: [
             {
-              id: 'cases_assign',
+              id: 'assign',
               name: i18n.translate('xpack.observability.features.assignUsersSubFeatureName', {
                 defaultMessage: 'Assign users to cases',
               }),
@@ -197,9 +197,9 @@ export const getCasesFeatureV3 = (
                 read: [],
               },
               cases: {
-                assignCase: [observabilityFeatureId],
+                assign: [observabilityFeatureId],
               },
-              ui: casesCapabilities.assignCase,
+              ui: casesCapabilities.assign,
             },
           ],
         },

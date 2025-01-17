@@ -396,7 +396,7 @@ describe('useActions', () => {
           connectors: true,
           settings: false,
           createComment: false,
-          assignCase: false,
+          assign: false,
         },
       });
 
@@ -432,7 +432,7 @@ describe('useActions', () => {
           connectors: true,
           settings: false,
           createComment: false,
-          assignCase: false,
+          assign: false,
         },
       });
 
@@ -468,7 +468,7 @@ describe('useActions', () => {
           connectors: true,
           settings: false,
           createComment: false,
-          assignCase: false,
+          assign: false,
         },
       });
 

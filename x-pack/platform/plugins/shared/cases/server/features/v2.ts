@@ -64,6 +64,9 @@ export const getV2 = (): KibanaFeatureConfig => {
           read: [APP_ID],
           update: [APP_ID],
           push: [APP_ID],
+          createComment: [APP_ID],
+          reopenCase: [APP_ID],
+          assign: [APP_ID],
         },
         management: {
           insightsAndAlerting: [APP_ID],
@@ -78,7 +81,7 @@ export const getV2 = (): KibanaFeatureConfig => {
           minimal: [
             {
               feature: FEATURE_ID_V3,
-              privileges: ['minimal_all', 'create_comment', 'case_reopen', 'cases_assign'],
+              privileges: ['minimal_all', 'create_comment', 'case_reopen'],
             },
           ],
         },

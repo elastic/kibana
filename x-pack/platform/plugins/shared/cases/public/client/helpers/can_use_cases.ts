@@ -45,7 +45,7 @@ export const canUseCases =
         acc.settings = acc.settings || userCapabilitiesForOwner.settings;
         acc.reopenCase = acc.reopenCase || userCapabilitiesForOwner.reopenCase;
         acc.createComment = acc.createComment || userCapabilitiesForOwner.createComment;
-        acc.assignCase = acc.assignCase || userCapabilitiesForOwner.assignCase;
+        acc.assign = acc.assign || userCapabilitiesForOwner.assign;
 
         const allFromAcc =
           acc.create &&
@@ -57,7 +57,7 @@ export const canUseCases =
           acc.settings &&
           acc.reopenCase &&
           acc.createComment &&
-          acc.assignCase;
+          acc.assign;
 
         acc.all = acc.all || userCapabilitiesForOwner.all || allFromAcc;
 
@@ -74,7 +74,7 @@ export const canUseCases =
         settings: false,
         reopenCase: false,
         createComment: false,
-        assignCase: false,
+        assign: false,
       }
     );
 

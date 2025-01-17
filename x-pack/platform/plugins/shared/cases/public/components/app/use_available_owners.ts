@@ -22,7 +22,6 @@ export const useAvailableCasesOwners = (
   capabilities: Capability[] = allCasePermissions
 ): string[] => {
   const { capabilities: kibanaCapabilities } = useKibana().services.application;
-
   return Object.entries(kibanaCapabilities).reduce(
     (availableOwners: string[], [featureId, kibanaCapability]) => {
       if (!featureId.endsWith('CasesV3')) {

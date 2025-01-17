@@ -73,7 +73,7 @@ export class FeaturePrivilegeCasesBuilder extends BaseFeaturePrivilegeBuilder {
       ...getCasesPrivilege(settingsOperations, privilegeDefinition.cases?.settings),
       ...getCasesPrivilege(createCommentOperations, privilegeDefinition.cases?.createComment),
       ...getCasesPrivilege(reopenOperations, privilegeDefinition.cases?.reopenCase),
-      ...getCasesPrivilege(assignOperations, privilegeDefinition.cases?.assignCase),
+      ...getCasesPrivilege(assignOperations, privilegeDefinition.cases?.assign),
     ]);
   }
 }

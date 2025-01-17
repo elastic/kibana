@@ -16,7 +16,7 @@ describe('permissions', () => {
       ['delete'],
       ['push'],
       ['all'],
-      ['assignCase'],
+      ['assign'],
       ['createComment'],
     ];
 
@@ -44,7 +44,7 @@ describe('permissions', () => {
         'update',
         'delete',
         'push',
-        'assignCase',
+        'assign',
         'createComment',
       ]);
     });

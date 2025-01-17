@@ -60,7 +60,7 @@ export const getCasesBaseKibanaFeature = ({
           push: [APP_ID],
           createComment: [APP_ID],
           reopenCase: [APP_ID],
-          assignCase: [APP_ID],
+          assign: [APP_ID],
         },
         savedObject: {
           all: [...savedObjects.files],
@@ -72,7 +72,7 @@ export const getCasesBaseKibanaFeature = ({
           minimal: [
             {
               feature: CASES_FEATURE_ID_V3,
-              privileges: ['minimal_all', 'create_comment', 'case_reopen', 'cases_assign'],
+              privileges: ['minimal_all', 'create_comment', 'case_reopen', 'assign'],
             },
           ],
         },

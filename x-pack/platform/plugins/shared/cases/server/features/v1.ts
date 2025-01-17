@@ -61,7 +61,7 @@ export const getV1 = (): KibanaFeatureConfig => {
           push: [APP_ID],
           createComment: [APP_ID],
           reopenCase: [APP_ID],
-          assignCase: [APP_ID],
+          assign: [APP_ID],
         },
         management: {
           insightsAndAlerting: [APP_ID],

@@ -31,7 +31,7 @@ export const getUICapabilities = (
   const settings = !!featureCapabilities?.[CASES_SETTINGS_CAPABILITY];
   const reopenCase = !!featureCapabilities?.[CASES_REOPEN_CAPABILITY];
   const createComment = !!featureCapabilities?.[CREATE_COMMENT_CAPABILITY];
-  const assignCase = !!featureCapabilities?.[ASSIGN_CASE_CAPABILITY];
+  const assign = !!featureCapabilities?.[ASSIGN_CASE_CAPABILITY];
 
   const all =
     create &&
@@ -43,7 +43,7 @@ export const getUICapabilities = (
     settings &&
     reopenCase &&
     createComment &&
-    assignCase;
+    assign;
 
   return {
     all,
@@ -56,6 +56,6 @@ export const getUICapabilities = (
     settings,
     reopenCase,
     createComment,
-    assignCase,
+    assign,
   };
 };

@@ -95,10 +95,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
      * in the useBulkActions hook.
      */
     const showBulkActions =
-      (permissions.update ||
-        permissions.delete ||
-        permissions.reopenCase ||
-        permissions.assignCase) &&
+      (permissions.update || permissions.delete || permissions.reopenCase || permissions.assign) &&
       selectedCases.length > 0;
 
     const visibleCases =

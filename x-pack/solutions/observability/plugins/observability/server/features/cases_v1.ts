@@ -52,7 +52,7 @@ export const getCasesFeature = (
         push: [observabilityFeatureId],
         createComment: [observabilityFeatureId],
         reopenCase: [observabilityFeatureId],
-        assignCase: [observabilityFeatureId],
+        assign: [observabilityFeatureId],
       },
       savedObject: {
         all: [...filesSavedObjectTypes],

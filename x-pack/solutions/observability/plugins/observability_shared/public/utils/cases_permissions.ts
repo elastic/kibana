@@ -16,7 +16,7 @@ export const noCasesPermissions = () => ({
   settings: false,
   createComment: false,
   reopenCase: false,
-  assignCase: false,
+  assign: false,
 });
 
 export const allCasesPermissions = () => ({
@@ -30,5 +30,5 @@ export const allCasesPermissions = () => ({
   settings: true,
   createComment: true,
   reopenCase: true,
-  assignCase: true,
+  assign: true,
 });

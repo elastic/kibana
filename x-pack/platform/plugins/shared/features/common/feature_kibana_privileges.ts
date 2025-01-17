@@ -243,11 +243,11 @@ export interface FeatureKibanaPrivileges {
      * @example
      * ```ts
      *  {
-     *    assignCase: ['securitySolution']
+     *    assign: ['securitySolution']
      *  }
      * ```
      */
-    assignCase?: readonly string[];
+    assign?: readonly string[];
   };
 
   /**
