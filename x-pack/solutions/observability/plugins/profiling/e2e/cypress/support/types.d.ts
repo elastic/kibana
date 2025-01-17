@@ -21,6 +21,7 @@ declare namespace Cypress {
         [key: string]: string | undefined;
       }
     ): void;
+    waitUntilPageContentIsLoaded(): void;
     addKqlFilter(params: {
       key: string;
       value: string;
