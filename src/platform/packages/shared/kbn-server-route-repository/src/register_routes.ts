@@ -53,7 +53,7 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
   const router = core.http.createRouter();
 
   routes.forEach((route) => {
-    const { endpoint, handler, security } = route;
+    const { endpoint, handler, security, summary, description } = route;
 
     const params = 'params' in route ? route.params : undefined;
 
@@ -160,8 +160,8 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
             ...options,
             access,
           },
-          ...(options.summary ? { summary: options.summary } : {}),
-          ...(options.description ? { description: options.description } : {}),
+          summary,
+          description,
           security,
           validate: validationObject,
         },
@@ -171,8 +171,8 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
       router.versioned[method]({
         path: pathname,
         access,
-        ...(options.summary ? { summary: options.summary } : {}),
-        ...(options.description ? { description: options.description } : {}),
+        summary,
+        description,
         // @ts-expect-error we are essentially calling multiple methods at the same type so TS gets confused
         options: omit(options, 'access', 'description', 'summary', 'deprecated', 'discontinued'),
         security,
