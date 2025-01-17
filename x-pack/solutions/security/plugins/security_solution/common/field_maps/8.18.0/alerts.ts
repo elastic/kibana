@@ -32,7 +32,6 @@ export const alertsFieldMap8180 = {
     type: 'keyword',
     array: false,
     required: false,
-    ignore_above: 1024,
   },
   [ALERT_SERVICE_RISK_SCORE_CALCULATED_SCORE_NORM]: {
     type: 'float',
