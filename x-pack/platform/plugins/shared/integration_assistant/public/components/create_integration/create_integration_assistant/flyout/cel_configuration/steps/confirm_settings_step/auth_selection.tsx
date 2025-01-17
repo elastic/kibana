@@ -44,13 +44,13 @@ export const AuthSelection = React.memo<AuthSelectionProps>(
     showValidation,
     onChangeAuth,
   }) => {
-    const options = AUTH_OPTIONS.map<EuiComboBoxOptionOption>((option) =>
-      {
-          id: option,
-          label: option,
-          ...(isRecommended(option, specifiedAuthForPath) && { append: <EuiBadge>{i18n.RECOMMENDED}</EuiBadge> }),
-      }
-    );
+    const options = AUTH_OPTIONS.map<EuiComboBoxOptionOption>((option) => ({
+      id: option,
+      label: option,
+      ...(isRecommended(option, specifiedAuthForPath) && {
+        append: <EuiBadge>{i18n.RECOMMENDED}</EuiBadge>,
+      }),
+    }));
 
     return (
       <EuiFormRow fullWidth data-test-subj="confirmAuth">
