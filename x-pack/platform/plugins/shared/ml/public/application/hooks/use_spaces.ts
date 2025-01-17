@@ -13,7 +13,6 @@ export const useCanManageSpacesAndSavedObjects = () => {
   const {
     services: { spaces, application },
   } = useMlKibana();
-
   const canManageSpacesAndSavedObjects = useMemo(
     () =>
       spaces !== undefined &&

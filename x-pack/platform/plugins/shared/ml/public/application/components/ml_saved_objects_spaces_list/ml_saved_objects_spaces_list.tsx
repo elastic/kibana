@@ -38,7 +38,7 @@ export const MLSavedObjectsSpacesList: FC<Props> = ({
   spacesApi,
   spaceIds = FALLBACK_SPACES_ID,
   id,
-  mlSavedObjectType,
+  mlSavedObjectType = ML_JOB_SAVED_OBJECT_TYPE as MlSavedObjectType,
   refresh,
 }) => {
   const {
@@ -94,7 +94,7 @@ export const MLSavedObjectsSpacesList: FC<Props> = ({
 
   const shareToSpaceFlyoutProps: ShareToSpaceFlyoutProps = {
     savedObjectTarget: {
-      type: mlSavedObjectType === 'anomaly-detector' ? ML_JOB_SAVED_OBJECT_TYPE : mlSavedObjectType,
+      type: ML_JOB_SAVED_OBJECT_TYPE,
       id,
       namespaces: spaceIds,
       title: id,
