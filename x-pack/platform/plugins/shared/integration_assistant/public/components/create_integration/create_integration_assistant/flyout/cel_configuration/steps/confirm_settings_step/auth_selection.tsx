@@ -45,13 +45,11 @@ export const AuthSelection = React.memo<AuthSelectionProps>(
     onChangeAuth,
   }) => {
     const options = AUTH_OPTIONS.map<EuiComboBoxOptionOption>((option) =>
-      isRecommended(option, specifiedAuthForPath)
-        ? {
-            id: option,
-            label: option,
-            append: <EuiBadge>{i18n.RECOMMENDED}</EuiBadge>,
-          }
-        : { id: option, label: option }
+      {
+          id: option,
+          label: option,
+          ...(isRecommended(option, specifiedAuthForPath) && { append: <EuiBadge>{i18n.RECOMMENDED}</EuiBadge> }),
+      }
     );
 
     return (
