@@ -63,7 +63,9 @@ export const readStreamRoute = createServerRoute({
 
       const ancestors = await streamsClient.getAncestors(streamDefinition);
 
-      const lifecycle = getDataStreamLifecycle(dataStream);
+      const lifecycle = dataStream
+        ? getDataStreamLifecycle(dataStream)
+        : { type: 'error' as const, message: 'missing_data_stream' };
 
       if (!isWiredStream(streamDefinition)) {
         return {

@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import { StreamDefinition, WiredStreamDefinition, isWiredStream } from '@kbn/streams-schema';
+import {
+  IngestStreamDefinition,
+  StreamDefinition,
+  WiredStreamDefinition,
+  isDSNS,
+  isWiredStream,
+} from '@kbn/streams-schema';
 import { difference, isEqual } from 'lodash';
 import { RootStreamImmutabilityException } from '../errors';
 import { MalformedStream } from '../errors/malformed_stream';
 import { MalformedChildren } from '../errors/malformed_children';
+import { MalformedStreamId } from '../errors/malformed_stream_id';
 
 /*
  * Changes to mappings (fields) and processing rules are not allowed on the root stream.
@@ -57,6 +64,12 @@ export function validateStreamTypeChanges(
 
   if (fromWiredToIngest) {
     throw new MalformedStream('Cannot change wired stream to ingest stream');
+  }
+}
+
+export function validateUnwiredStreamChildren(streamDefinition: IngestStreamDefinition) {
+  if (streamDefinition.stream.ingest.routing.length > 0 && !isDSNS(streamDefinition.name)) {
+    throw new MalformedStreamId('Only streams following the DSNS can be forked');
   }
 }
 

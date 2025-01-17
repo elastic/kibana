@@ -41,6 +41,7 @@ import {
   validateRootStreamChanges,
   validateStreamChildrenChanges,
   validateStreamTypeChanges,
+  validateUnwiredStreamChildren,
 } from './helpers/validate_stream';
 import { rootStreamDefinition } from './root_stream_definition';
 import { StreamsStorageClient } from './service';
@@ -51,6 +52,7 @@ import {
   deleteUnmanagedStreamObjects,
   getUnmanagedElasticsearchAssets,
 } from './stream_crud';
+import { MalformedStream } from './errors/malformed_stream';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -154,7 +156,7 @@ export class StreamsClient {
    * not exist yet.
    */
   async resyncStreams(): Promise<ResyncStreamsResponse> {
-    const streams = await this.getManagedStreams();
+    const streams = await this.getStreamDefinitions();
 
     const streamsWithDepth = streams.map((stream) => ({
       stream,
@@ -182,11 +184,15 @@ export class StreamsClient {
         unwiredRoot: await this.getUnwiredRootForStream(definition),
       });
     } else if (isIngestStream(definition)) {
+      const dataStream = await this.getDataStream(definition.name);
+      if (!dataStream) {
+        throw new MalformedStream(`Data stream ${definition.name} could not be found`);
+      }
       await syncIngestStreamDefinitionObjects({
         definition,
         scopedClusterClient,
         logger,
-        dataStream: await this.getDataStream(definition.name),
+        dataStream,
       });
     }
 
@@ -289,6 +295,10 @@ export class StreamsClient {
         (existingDefinition as undefined | WiredStreamDefinition) || rootStreamDefinition,
         definition
       );
+    }
+
+    if (isIngestStream(definition)) {
+      validateUnwiredStreamChildren(definition);
     }
 
     if (isWiredStream(definition)) {
@@ -419,6 +429,9 @@ export class StreamsClient {
         `The stream with ID (${name}) already exists as a child of the parent stream`
       );
     }
+    if (isIngestStream(parentDefinition) && !isDSNS(parentDefinition.name)) {
+      throw new MalformedStreamId('Only streams following the DSNS can be forked');
+    }
     if (!isChildOf(parentDefinition.name, childDefinition.name)) {
       throw new MalformedStreamId(
         `The ID (${name}) from the new stream must start with the parent's id (${parentDefinition.name}), followed by a dot and a name`
@@ -479,6 +492,9 @@ export class StreamsClient {
       .catch(async (error) => {
         if (isElasticsearch404(error)) {
           const dataStream = await this.getDataStream(name);
+          if (!dataStream) {
+            throw new DefinitionNotFound(`Cannot find stream ${name}`);
+          }
           return await this.getDataStreamAsIngestStream(dataStream);
         }
         throw error;
@@ -493,7 +509,7 @@ export class StreamsClient {
     return definition;
   }
 
-  async getDataStream(name: string): Promise<IndicesDataStream> {
+  async getDataStream(name: string): Promise<IndicesDataStream | undefined> {
     return this.dependencies.scopedClusterClient.asCurrentUser.indices
       .getDataStream({ name })
       .then((response) => {
@@ -549,7 +565,7 @@ export class StreamsClient {
    */
   async listStreams(): Promise<StreamDefinition[]> {
     const [managedStreams, unmanagedStreams] = await Promise.all([
-      this.getManagedStreams(),
+      this.getStreamDefinitions(),
       this.getUnmanagedDataStreams(),
     ]);
 
@@ -588,7 +604,7 @@ export class StreamsClient {
   /**
    * Lists managed streams, and verifies access to it.
    */
-  private async getManagedStreams({ query }: { query?: QueryDslQueryContainer } = {}): Promise<
+  private async getStreamDefinitions({ query }: { query?: QueryDslQueryContainer } = {}): Promise<
     StreamDefinition[]
   > {
     const { scopedClusterClient, storageClient } = this.dependencies;
@@ -755,7 +771,7 @@ export class StreamsClient {
       const datasetParts = dataset.split('.');
       const datasetPrefix = datasetParts[0];
 
-      const streams = await this.getManagedStreams({
+      const streams = await this.getStreamDefinitions({
         query: {
           bool: {
             filter: [
@@ -792,7 +808,7 @@ export class StreamsClient {
     const unwiredRoot = await this.getUnwiredRootForStream(definition as WiredStreamDefinition);
     const ancestorIds = getAncestors(definition.name, unwiredRoot?.name);
 
-    return await this.getManagedStreams({
+    return await this.getStreamDefinitions({
       query: {
         bool: {
           filter: [{ terms: { name: ancestorIds } }],
@@ -802,7 +818,7 @@ export class StreamsClient {
   }
 
   async getDescendants(name: string): Promise<WiredStreamDefinition[]> {
-    return this.getManagedStreams({
+    return this.getStreamDefinitions({
       query: {
         bool: {
           filter: [
