@@ -12,12 +12,20 @@ import type {
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationIntegration, RuleMigrationPrebuiltRule } from '../types';
 
-export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<Omit<RuleMigration, 'id'>>> = {
+/**
+ * The `id` is not indexed, we assign _id.
+ * The `original_rule` and `elastic_rule` are regular objects, no need to define them as nested type
+ **/
+type RuleMigrationKeys = Exclude<
+  SchemaFieldMapKeys<RuleMigration>,
+  'id' | 'original_rule' | 'elastic_rule'
+>;
+
+export const ruleMigrationsFieldMap: FieldMap<RuleMigrationKeys> = {
   '@timestamp': { type: 'date', required: false },
   migration_id: { type: 'keyword', required: true },
   created_by: { type: 'keyword', required: true },
   status: { type: 'keyword', required: true },
-  original_rule: { type: 'nested', required: true },
   'original_rule.vendor': { type: 'keyword', required: true },
   'original_rule.id': { type: 'keyword', required: true },
   'original_rule.title': { type: 'text', required: true, fields: { keyword: { type: 'keyword' } } },
@@ -26,7 +34,6 @@ export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<Omit<RuleMigrat
   'original_rule.query_language': { type: 'keyword', required: true },
   'original_rule.annotations': { type: 'nested', required: false },
   'original_rule.annotations.mitre_attack': { type: 'keyword', array: true, required: false },
-  elastic_rule: { type: 'nested', required: false },
   'elastic_rule.title': { type: 'text', required: true, fields: { keyword: { type: 'keyword' } } },
   'elastic_rule.integration_ids': { type: 'keyword', required: false, array: true },
   'elastic_rule.query': { type: 'text', required: true },

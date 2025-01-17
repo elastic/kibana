@@ -16,59 +16,34 @@ export const conditions = {
     return { term: { translation_result: RuleTranslationResult.FULL } };
   },
   isNotFullyTranslated(): QueryDslQueryContainer {
-    return { bool: { must_not: conditions.isFullyTranslated() } };
+    return { bool: { must_not: this.isFullyTranslated() } };
   },
   isPartiallyTranslated(): QueryDslQueryContainer {
     return { term: { translation_result: RuleTranslationResult.PARTIAL } };
   },
   isNotPartiallyTranslated(): QueryDslQueryContainer {
-    return { bool: { must_not: conditions.isPartiallyTranslated() } };
+    return { bool: { must_not: this.isPartiallyTranslated() } };
   },
   isUntranslatable(): QueryDslQueryContainer {
     return { term: { translation_result: RuleTranslationResult.UNTRANSLATABLE } };
   },
   isNotUntranslatable(): QueryDslQueryContainer {
-    return { bool: { must_not: conditions.isUntranslatable() } };
+    return { bool: { must_not: this.isUntranslatable() } };
   },
   isInstalled(): QueryDslQueryContainer {
-    return {
-      nested: {
-        path: 'elastic_rule',
-        query: { exists: { field: 'elastic_rule.id' } },
-      },
-    };
+    return { exists: { field: 'elastic_rule.id' } };
   },
   isNotInstalled(): QueryDslQueryContainer {
-    return {
-      nested: {
-        path: 'elastic_rule',
-        query: { bool: { must_not: { exists: { field: 'elastic_rule.id' } } } },
-      },
-    };
+    return { bool: { must_not: this.isInstalled() } };
   },
   isPrebuilt(): QueryDslQueryContainer {
-    return {
-      nested: {
-        path: 'elastic_rule',
-        query: { exists: { field: 'elastic_rule.prebuilt_rule_id' } },
-      },
-    };
+    return { exists: { field: 'elastic_rule.prebuilt_rule_id' } };
   },
   isCustom(): QueryDslQueryContainer {
-    return {
-      nested: {
-        path: 'elastic_rule',
-        query: { bool: { must_not: { exists: { field: 'elastic_rule.prebuilt_rule_id' } } } },
-      },
-    };
+    return { bool: { must_not: this.isPrebuilt() } };
   },
   matchTitle(title: string): QueryDslQueryContainer {
-    return {
-      nested: {
-        path: 'elastic_rule',
-        query: { match: { 'elastic_rule.title': title } },
-      },
-    };
+    return { match: { 'elastic_rule.title': title } };
   },
   isInstallable(): QueryDslQueryContainer[] {
     return [this.isFullyTranslated(), this.isNotInstalled()];
