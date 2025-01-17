@@ -15,15 +15,7 @@ export type {
   ActionTypeExecutorRawResult,
   ActionsPublicConfigType,
 } from './types';
-export {
-  AlertingConnectorFeatureId,
-  CasesConnectorFeatureId,
-  UptimeConnectorFeatureId,
-  SecurityConnectorFeatureId,
-  GenerativeAIForSecurityConnectorFeatureId,
-  InvalidEmailReason,
-  isActionTypeExecutorResult,
-} from './types';
+export { InvalidEmailReason, isActionTypeExecutorResult } from './types';
 export {
   ALERT_HISTORY_PREFIX,
   AlertHistoryDefaultIndexName,
