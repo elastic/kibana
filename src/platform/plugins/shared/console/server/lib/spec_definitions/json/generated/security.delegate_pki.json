@@ -1,5 +1,5 @@
 {
-  "connector.sync_job_claim": {
+  "security.delegate_pki": {
     "url_params": {
       "error_trace": "__flag__",
       "filter_path": [],
@@ -7,12 +7,12 @@
       "pretty": "__flag__"
     },
     "methods": [
-      "PUT"
+      "POST"
     ],
     "patterns": [
-      "_connector/_sync_job/{connector_sync_job_id}/_claim"
+      "_security/delegate_pki"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/claim-connector-sync-job-api.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/security-api-delegate-pki-authentication.html",
     "availability": {
       "stack": true,
       "serverless": false

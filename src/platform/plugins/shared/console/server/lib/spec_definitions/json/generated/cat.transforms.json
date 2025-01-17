@@ -40,11 +40,6 @@
         "version"
       ],
       "help": "__flag__",
-      "master_timeout": [
-        "30s",
-        "-1",
-        "0"
-      ],
       "s": [
         "changes_last_detection_time",
         "checkpoint",
