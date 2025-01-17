@@ -34,7 +34,11 @@ export default function ({ getService }: FtrProviderContext) {
         full_name: 'a kibana user',
       });
 
-      await security.role.create(roleName2, {});
+      await security.role.create(roleName2, {
+        elasticsearch: {
+          elasticsearch: { cluster: ['monitor'] },
+        },
+      });
 
       await security.user.create(username2, {
         password2,
