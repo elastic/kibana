@@ -98,9 +98,9 @@ export interface UpgradePrebuiltRulesTableActions {
   setFilterOptions: Dispatch<SetStateAction<UpgradePrebuiltRulesTableFilterOptions>>;
   openRulePreview: (ruleId: string) => void;
   /**
-   * Sets a field as currently being edited in the rule upgrade flyout
+   * Set field as currently edited in the rule upgrade flyout
    */
-  setFieldAsCurrentlyEdited: (editing: boolean) => void;
+  setFieldAsCurrentlyEdited: (fieldName: string, isEditing: boolean) => void;
 }
 
 export interface UpgradePrebuiltRulesContextType {
@@ -134,14 +134,6 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     ruleSource: [],
   });
   const { addError } = useAppToasts();
-
-  const [noOfFieldsCurrentlyEdited, setNoOfFieldsCurrentlyEdited] = useState<number>(0);
-  const setFieldAsCurrentlyEdited = useCallback(
-    (editing: boolean) => {
-      setNoOfFieldsCurrentlyEdited((prev) => (editing ? prev + 1 : prev - 1));
-    },
-    [setNoOfFieldsCurrentlyEdited]
-  );
 
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
 
@@ -282,7 +274,11 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     [rulesUpgradeState]
   );
   const ruleActionsFactory = useCallback(
-    (rule: RuleResponse, closeRulePreview: () => void) => {
+    (
+      rule: RuleResponse,
+      closeRulePreview: () => void,
+      isAnyFieldCurrentlyEdited: () => boolean
+    ) => {
       const ruleUpgradeState = rulesUpgradeState[rule.rule_id];
       if (!ruleUpgradeState) {
         return null;
@@ -296,7 +292,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
             isRefetching ||
             isUpgradingSecurityPackages ||
             (ruleUpgradeState.hasUnresolvedConflicts && !hasRuleTypeChange) ||
-            noOfFieldsCurrentlyEdited > 0
+            isAnyFieldCurrentlyEdited()
           }
           onClick={() => {
             if (hasRuleTypeChange) {
@@ -321,7 +317,6 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       isUpgradingSecurityPackages,
       upgradeRulesToTarget,
       upgradeRulesToResolved,
-      noOfFieldsCurrentlyEdited,
     ]
   );
   const extraTabsFactory = useCallback(
@@ -397,7 +392,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     () => filteredRuleUpgradeStates.map(({ target_rule: targetRule }) => targetRule),
     [filteredRuleUpgradeStates]
   );
-  const { rulePreviewFlyout, openRulePreview } = useRulePreviewFlyout({
+  const { rulePreviewFlyout, openRulePreview, setFieldAsCurrentlyEdited } = useRulePreviewFlyout({
     rules: filteredRules,
     subHeaderFactory,
     ruleActionsFactory,

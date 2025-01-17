@@ -15,7 +15,11 @@ import { RuleDetailsFlyout } from '../../../rule_management/components/rule_deta
 
 interface UseRulePreviewFlyoutParams {
   rules: RuleResponse[];
-  ruleActionsFactory: (rule: RuleResponse, closeRulePreview: () => void) => ReactNode;
+  ruleActionsFactory: (
+    rule: RuleResponse,
+    closeRulePreview: () => void,
+    isAnyFieldCurrentlyEdited: () => boolean
+  ) => ReactNode;
   extraTabsFactory?: (rule: RuleResponse) => EuiTabbedContentTab[];
   subHeaderFactory?: (rule: RuleResponse) => ReactNode;
   flyoutProps: RulePreviewFlyoutProps;
@@ -33,6 +37,7 @@ interface UseRulePreviewFlyoutResult {
   rulePreviewFlyout: ReactNode;
   openRulePreview: (ruleId: RuleSignatureId) => void;
   closeRulePreview: () => void;
+  setFieldAsCurrentlyEdited: (fieldName: string, isEditing: boolean) => void;
 }
 
 export function useRulePreviewFlyout({
@@ -43,18 +48,48 @@ export function useRulePreviewFlyout({
   flyoutProps,
 }: UseRulePreviewFlyoutParams): UseRulePreviewFlyoutResult {
   const [rule, setRuleForPreview] = useState<RuleResponse | undefined>();
-  const closeRulePreview = useCallback(() => setRuleForPreview(undefined), []);
-  const subHeader = useMemo(
-    () => (rule ? subHeaderFactory?.(rule) : null),
-    [subHeaderFactory, rule]
+  const [editedFields, setEditedFields] = useState<Record<string, boolean>>({});
+
+  const clearEditedFields = useCallback(() => {
+    setEditedFields({});
+  }, []);
+
+  const setFieldAsCurrentlyEdited = useCallback(
+    (fieldName: string, isEditing: boolean) => {
+      setEditedFields((prev) => {
+        const updatedMap = { ...prev };
+        if (isEditing) {
+          updatedMap[fieldName] = true;
+        } else {
+          delete updatedMap[fieldName];
+        }
+        return updatedMap;
+      });
+    },
+    [setEditedFields]
   );
+
+  const isAnyFieldCurrentlyEdited = useCallback(() => {
+    return Object.keys(editedFields).length > 0;
+  }, [editedFields]);
+
+  const closeRulePreview = useCallback(() => {
+    setRuleForPreview(undefined);
+    clearEditedFields();
+  }, [clearEditedFields]);
+
   const ruleActions = useMemo(
-    () => rule && ruleActionsFactory(rule, closeRulePreview),
-    [rule, ruleActionsFactory, closeRulePreview]
+    () => rule && ruleActionsFactory(rule, closeRulePreview, isAnyFieldCurrentlyEdited),
+    [rule, ruleActionsFactory, closeRulePreview, isAnyFieldCurrentlyEdited]
   );
   const extraTabs = useMemo(
     () => (rule && extraTabsFactory ? extraTabsFactory(rule) : []),
     [rule, extraTabsFactory]
+  );
+
+  const subHeader = useMemo(
+    () => (rule ? subHeaderFactory?.(rule) : null),
+    [subHeaderFactory, rule]
   );
 
   return {
@@ -80,5 +115,6 @@ export function useRulePreviewFlyout({
       [rules, setRuleForPreview]
     ),
     closeRulePreview,
+    setFieldAsCurrentlyEdited,
   };
 }

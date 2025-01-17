@@ -8,6 +8,7 @@
 import type { PropsWithChildren } from 'react';
 import React, { useCallback } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { useUpgradePrebuiltRulesTableContext } from '../../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table_context';
 import type { DiffableAllFields } from '../../../../../../../../common/api/detection_engine';
 import { FieldUpgradeSideHeader } from '../../field_upgrade_side_header';
 import { assertUnreachable } from '../../../../../../../../common/utility_types';
@@ -18,7 +19,6 @@ import {
 import { useFieldEditFormContext } from '../context/field_edit_form_context';
 import { FieldFinalSideHelpInfo } from './field_final_side_help_info';
 import * as i18n from './translations';
-import { useUpgradePrebuiltRulesTableContext } from '../../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table_context';
 
 export function FieldFinalSideHeader(): JSX.Element {
   const { fieldName, hasConflict, rightSideMode, finalDiffableRule, setRuleFieldResolvedValue } =
@@ -62,7 +62,7 @@ export function FieldFinalSideHeader(): JSX.Element {
               disabled={!form?.isValid}
               onClick={() => {
                 handleSave();
-                setFieldAsCurrentlyEdited(false);
+                setFieldAsCurrentlyEdited(fieldName, false);
               }}
             >
               {hasConflict ? i18n.SAVE_AND_ACCEPT : i18n.SAVE}

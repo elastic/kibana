@@ -18,7 +18,7 @@ import {
 import * as i18n from './translations';
 
 export function FieldFinalSideContent(): JSX.Element {
-  const { rightSideMode, setEditMode, setReadOnlyMode } = useFieldUpgradeContext();
+  const { fieldName, rightSideMode, setEditMode, setReadOnlyMode } = useFieldUpgradeContext();
   const {
     actions: { setFieldAsCurrentlyEdited },
   } = useUpgradePrebuiltRulesTableContext();
@@ -32,7 +32,7 @@ export function FieldFinalSideContent(): JSX.Element {
               iconType="pencil"
               onClick={() => {
                 setEditMode();
-                setFieldAsCurrentlyEdited(true);
+                setFieldAsCurrentlyEdited(fieldName, true);
               }}
             >
               {i18n.EDIT}
@@ -49,7 +49,7 @@ export function FieldFinalSideContent(): JSX.Element {
               iconType="cross"
               onClick={() => {
                 setReadOnlyMode();
-                setFieldAsCurrentlyEdited(false);
+                setFieldAsCurrentlyEdited(fieldName, false);
               }}
             >
               {i18n.CANCEL}
