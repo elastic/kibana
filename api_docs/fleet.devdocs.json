@@ -26202,6 +26202,21 @@
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewAgentPolicy.required_versions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "required_versions",
+            "description": [],
+            "signature": [
+              "AgentTargetVersion",
+              "[] | null | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

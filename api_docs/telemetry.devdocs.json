@@ -201,6 +201,19 @@
             "path": "src/platform/plugins/shared/telemetry/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "telemetry",
+            "id": "def-public.TelemetryPluginConfig.localShipper",
+            "type": "boolean",
+            "tags": [],
+            "label": "localShipper",
+            "description": [
+              "Should use the local EBT shipper to persist events in the local ES"
+            ],
+            "path": "src/platform/plugins/shared/telemetry/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
