@@ -70,9 +70,6 @@ type InvocationParams = Omit<ChatCompleteOptions, 'messages' | 'system' | 'strea
 // TODO: retry support using completionWithRetry? or should we delegate to the inference plugin?
 // https://github.com/langchain-ai/langchainjs/blob/main/libs/langchain-openai/src/chat_models.ts#L1838
 
-// TODO: _combineLLMOutput ?
-// https://github.com/langchain-ai/langchainjs/blob/main/libs/langchain-openai/src/chat_models.ts#L1944
-
 /**
  * Langchain chatModel utilizing the inference API under the hood for communication with the LLM.
  *
@@ -339,5 +336,12 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     ]).withConfig({
       runName: 'StructuredOutputRunnable',
     });
+  }
+
+  // I have no idea what this is really doing or when this is called,
+  // but most chatModels implement it while returning an empty object or array,
+  // so I figured we should do the same
+  _combineLLMOutput() {
+    return {};
   }
 }
