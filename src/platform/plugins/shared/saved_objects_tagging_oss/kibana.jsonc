@@ -12,6 +12,7 @@
     "server": true,
     "optionalPlugins": [
       "savedObjects"
-    ]
-  }
+    ],
+    "extraPublicDirs": ["common"]
+  },
 }
