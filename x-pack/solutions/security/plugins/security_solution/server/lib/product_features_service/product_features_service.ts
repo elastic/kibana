@@ -14,19 +14,22 @@
 import type { AuthzEnabled, HttpServiceSetup, Logger, RouteAuthz } from '@kbn/core/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { ProductFeatureKeyType } from '@kbn/security-solution-features';
+import type {
+  ProductFeatureKeyType,
+  ProductFeaturesConfigurator,
+} from '@kbn/security-solution-features';
 import {
   getAssistantFeature,
   getAttackDiscoveryFeature,
   getCasesFeature,
   getSecurityFeature,
   getCasesV2Feature,
+  getSiemMigrationsFeature,
 } from '@kbn/security-solution-features/product_features';
 import type { RecursiveReadonly } from '@kbn/utility-types';
 import type { ExperimentalFeatures } from '../../../common';
 import { APP_ID } from '../../../common';
 import { ProductFeatures } from './product_features';
-import type { ProductFeaturesConfigurator } from './types';
 import { securityDefaultSavedObjects } from './security_saved_objects';
 import { casesApiTags, casesUiCapabilities } from './cases_privileges';
 
@@ -39,6 +42,8 @@ export class ProductFeaturesService {
   private casesProductV2Features: ProductFeatures;
   private securityAssistantProductFeatures: ProductFeatures;
   private attackDiscoveryProductFeatures: ProductFeatures;
+  private siemMigrationsProductFeatures: ProductFeatures;
+
   private productFeatures?: Set<ProductFeatureKeyType>;
 
   constructor(
@@ -97,6 +102,14 @@ export class ProductFeaturesService {
       attackDiscoveryFeature.baseKibanaFeature,
       attackDiscoveryFeature.baseKibanaSubFeatureIds
     );
+
+    const siemMigrationsFeature = getSiemMigrationsFeature();
+    this.siemMigrationsProductFeatures = new ProductFeatures(
+      this.logger,
+      siemMigrationsFeature.subFeaturesMap,
+      siemMigrationsFeature.baseKibanaFeature,
+      siemMigrationsFeature.baseKibanaSubFeatureIds
+    );
   }
 
   public init(featuresSetup: FeaturesPluginSetup) {
@@ -105,6 +118,7 @@ export class ProductFeaturesService {
     this.casesProductV2Features.init(featuresSetup);
     this.securityAssistantProductFeatures.init(featuresSetup);
     this.attackDiscoveryProductFeatures.init(featuresSetup);
+    this.siemMigrationsProductFeatures.init(featuresSetup);
   }
 
   public setProductFeaturesConfigurator(configurator: ProductFeaturesConfigurator) {
@@ -121,12 +135,16 @@ export class ProductFeaturesService {
     const attackDiscoveryProductFeaturesConfig = configurator.attackDiscovery();
     this.attackDiscoveryProductFeatures.setConfig(attackDiscoveryProductFeaturesConfig);
 
+    const siemMigrationsProductFeaturesConfig = configurator.siemMigrations();
+    this.siemMigrationsProductFeatures.setConfig(siemMigrationsProductFeaturesConfig);
+
     this.productFeatures = new Set<ProductFeatureKeyType>(
       Object.freeze([
         ...securityProductFeaturesConfig.keys(),
         ...casesProductFeaturesConfig.keys(),
         ...securityAssistantProductFeaturesConfig.keys(),
         ...attackDiscoveryProductFeaturesConfig.keys(),
+        ...siemMigrationsProductFeaturesConfig.keys(),
       ]) as readonly ProductFeatureKeyType[]
     );
   }

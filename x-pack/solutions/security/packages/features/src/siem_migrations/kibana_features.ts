@@ -9,27 +9,27 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { i18n } from '@kbn/i18n';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
-import { APP_ID, ATTACK_DISCOVERY_FEATURE_ID } from '../constants';
+import { APP_ID, SIEM_MIGRATIONS_FEATURE_ID } from '../constants';
 import { type BaseKibanaFeatureConfig } from '../types';
 
-export const getAttackDiscoveryBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
-  id: ATTACK_DISCOVERY_FEATURE_ID,
+export const getSiemMigrationsBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
+  id: SIEM_MIGRATIONS_FEATURE_ID,
   name: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionAttackDiscoveryTitle',
+    'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionSiemMigrationsTitle',
     {
-      defaultMessage: 'Attack discovery',
+      defaultMessage: 'SIEM migrations',
     }
   ),
-  order: 1400,
+  order: 1500,
   category: DEFAULT_APP_CATEGORIES.security,
   scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
-  app: [ATTACK_DISCOVERY_FEATURE_ID, 'kibana'],
+  app: [SIEM_MIGRATIONS_FEATURE_ID, 'kibana'],
   catalogue: [APP_ID],
   minimumLicense: 'enterprise',
   privileges: {
     all: {
-      api: ['elasticAssistant'],
-      app: [ATTACK_DISCOVERY_FEATURE_ID, 'kibana'],
+      api: [],
+      app: [SIEM_MIGRATIONS_FEATURE_ID, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {
         all: [],

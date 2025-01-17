@@ -21,6 +21,7 @@ export const SECURITY_SOLUTION_CASES_APP_ID = 'securitySolutionCases' as const;
 
 export const ASSISTANT_FEATURE_ID = 'securitySolutionAssistant' as const;
 export const ATTACK_DISCOVERY_FEATURE_ID = 'securitySolutionAttackDiscovery' as const;
+export const SIEM_MIGRATIONS_FEATURE_ID = 'securitySolutionSiemMigrations' as const;
 
 // Same as the plugin id defined by Cloud Security Posture
 export const CLOUD_POSTURE_APP_ID = 'csp' as const;

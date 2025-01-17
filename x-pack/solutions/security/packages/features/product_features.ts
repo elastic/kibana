@@ -9,3 +9,4 @@ export { getSecurityFeature } from './src/security';
 export { getCasesFeature, getCasesV2Feature } from './src/cases';
 export { getAssistantFeature } from './src/assistant';
 export { getAttackDiscoveryFeature } from './src/attack_discovery';
+export { getSiemMigrationsFeature } from './src/siem_migrations';

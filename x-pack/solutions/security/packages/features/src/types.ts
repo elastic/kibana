@@ -20,6 +20,7 @@ import type {
   AssistantSubFeatureId,
   CasesSubFeatureId,
   SecuritySubFeatureId,
+  ProductFeatureSiemMigrationsKey,
 } from './product_features_keys';
 
 export type { ProductFeatureKeyType };
@@ -57,10 +58,23 @@ export type ProductFeaturesAttackDiscoveryConfig = Map<
   ProductFeatureKibanaConfig
 >;
 
+export type ProductFeaturesSiemMigrationsConfig = Map<
+  ProductFeatureSiemMigrationsKey,
+  ProductFeatureKibanaConfig
+>;
+
 export type AppSubFeaturesMap<T extends string = string> = Map<T, SubFeatureConfig>;
 
 export interface ProductFeatureParams<T extends string = string> {
   baseKibanaFeature: BaseKibanaFeatureConfig;
   baseKibanaSubFeatureIds: T[];
   subFeaturesMap: AppSubFeaturesMap<T>;
+}
+
+export interface ProductFeaturesConfigurator {
+  security: () => ProductFeaturesConfig<SecuritySubFeatureId>;
+  cases: () => ProductFeaturesConfig<CasesSubFeatureId>;
+  securityAssistant: () => ProductFeaturesConfig<AssistantSubFeatureId>;
+  attackDiscovery: () => ProductFeaturesConfig;
+  siemMigrations: () => ProductFeaturesConfig;
 }

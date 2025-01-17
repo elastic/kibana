@@ -9,10 +9,11 @@ import type { Logger } from '@kbn/logging';
 
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { ProductFeatureKeys } from '@kbn/security-solution-features';
-import { getAttackDiscoveryProductFeaturesConfigurator } from './attack_discovery_product_features_config';
 import { getCasesProductFeaturesConfigurator } from './cases_product_features_config';
 import { getSecurityProductFeaturesConfigurator } from './security_product_features_config';
 import { getSecurityAssistantProductFeaturesConfigurator } from './assistant_product_features_config';
+import { getAttackDiscoveryProductFeaturesConfigurator } from './attack_discovery_product_features_config';
+import { getSiemMigrationsProductFeaturesConfigurator } from './siem_migrations_product_features_config';
 import { enableRuleActions } from '../rules/enable_rule_actions';
 import type { ServerlessSecurityConfig } from '../config';
 import type { Tier, SecuritySolutionServerlessPluginSetupDeps } from '../types';
@@ -33,13 +34,14 @@ export const registerProductFeatures = (
 
   // register product features for the main security solution product features service
   pluginsSetup.securitySolution.setProductFeaturesConfigurator({
-    attackDiscovery: getAttackDiscoveryProductFeaturesConfigurator(enabledProductFeatureKeys),
     security: getSecurityProductFeaturesConfigurator(
       enabledProductFeatureKeys,
       config.experimentalFeatures
     ),
     cases: getCasesProductFeaturesConfigurator(enabledProductFeatureKeys),
     securityAssistant: getSecurityAssistantProductFeaturesConfigurator(enabledProductFeatureKeys),
+    attackDiscovery: getAttackDiscoveryProductFeaturesConfigurator(enabledProductFeatureKeys),
+    siemMigrations: getSiemMigrationsProductFeaturesConfigurator(enabledProductFeatureKeys),
   });
 
   // enable rule actions based on the enabled product features
