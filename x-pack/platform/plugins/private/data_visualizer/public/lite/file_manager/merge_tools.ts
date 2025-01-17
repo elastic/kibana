@@ -5,7 +5,18 @@
  * 2.0.
  */
 
-import type { FileWrapper } from './file_wrapper';
+import type { AnalyzedFile, FileWrapper } from './file_wrapper';
+
+export interface MappingClash {
+  fieldName: string;
+  existingType: string;
+  clashingType: { fileName: string; newType: string; fileIndex: number };
+}
+
+export interface FileClash {
+  fileName: string;
+  clash: boolean;
+}
 
 export function createMergedMappings(files: FileWrapper[]) {
   const mappings = files.map((file) => file.getMappings() ?? { properties: {} });
@@ -17,7 +28,7 @@ export function createMergedMappings(files: FileWrapper[]) {
     // eslint-disable-next-line no-console
     console.log('mappings strings are the same');
 
-    return { mergedMappings: mappings[0], fieldClashes: [] };
+    return { mergedMappings: mappings[0], mappingClashes: [] };
   }
 
   const fieldsPerFile = mappings.map((m) => {
@@ -31,7 +42,7 @@ export function createMergedMappings(files: FileWrapper[]) {
       .sort((a, b) => a.name.localeCompare(b.name));
   });
 
-  const fieldClashes: any[] = [];
+  const mappingClashes: MappingClash[] = [];
 
   const mergedMappingsMap = fieldsPerFile.reduce((acc, fields, i) => {
     fields.forEach((field) => {
@@ -49,9 +60,14 @@ export function createMergedMappings(files: FileWrapper[]) {
           } else if (existingField.type === 'text' && field.value.type === 'keyword') {
             // do nothing
           } else {
-            fieldClashes.push({
+            mappingClashes.push({
               fieldName: field.name,
-              fieldTypes: [existingField.type, field.value.type],
+              existingType: existingField.type,
+              clashingType: {
+                fileName: files[i].getFileName(),
+                newType: field.value.type,
+                fileIndex: i,
+              },
             });
           }
         }
@@ -67,9 +83,9 @@ export function createMergedMappings(files: FileWrapper[]) {
   // eslint-disable-next-line no-console
   console.log('mergedMappings', mergedMappings);
   // eslint-disable-next-line no-console
-  console.log('fieldClashes', fieldClashes);
+  console.log('mappingClashes', mappingClashes);
 
-  return { mergedMappings, fieldClashes };
+  return { mergedMappings, mappingClashes };
 }
 
 export function createMergedPipeline(files: FileWrapper[], commonFileFormat: string) {
@@ -151,4 +167,47 @@ export function createMergedPipeline(files: FileWrapper[], commonFileFormat: str
   console.log('mergedPipeline', mergedPipeline);
 
   return mergedPipeline ?? null;
+}
+
+export function getMappingClashInfo(
+  mappingClashes: MappingClash[],
+  filesStatus: AnalyzedFile[]
+): FileClash[] {
+  const clashCounts = filesStatus
+    .reduce<Array<{ index: number; count: number }>>((acc, file, i) => {
+      const ff = { index: i, count: 0 };
+      mappingClashes.forEach((clash) => {
+        if (clash.clashingType.fileIndex === i) {
+          ff.count++;
+        }
+      });
+      acc.push(ff);
+      return acc;
+    }, [])
+    .sort((a, b) => b.count - a.count);
+
+  const middleIndex = Math.floor(clashCounts.length / 2);
+
+  // const median =
+  //   clashCounts.length % 2 === 0
+  //     ? (clashCounts[middleIndex - 1].count + clashCounts[middleIndex].count) / 2
+  //     : clashCounts[middleIndex].count;#
+  const median = clashCounts[middleIndex].count;
+
+  const medianAboveZero = median > 0;
+  const zeroCount = clashCounts.filter((c) => c.count === 0).length;
+  const aboveZeroCount = clashCounts.length - zeroCount;
+  const allClash = zeroCount === aboveZeroCount;
+
+  clashCounts.sort((a, b) => a.index - b.index);
+
+  return clashCounts.map((c) => {
+    return {
+      fileName: filesStatus[c.index].fileName,
+      clash:
+        allClash ||
+        (medianAboveZero === false && c.count > 0) ||
+        (medianAboveZero && c.count === 0),
+    };
+  });
 }

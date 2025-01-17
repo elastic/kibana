@@ -23,7 +23,8 @@ import {
 } from '../../application/file_data_visualizer/components/import_view/import';
 import { AutoDeploy } from '../../application/file_data_visualizer/components/import_view/auto_deploy';
 import type { FileUploadResults } from '../flyout/create_flyout';
-import { createMergedMappings, createMergedPipeline } from './merge_tools';
+import type { FileClash } from './merge_tools';
+import { createMergedMappings, createMergedPipeline, getMappingClashInfo } from './merge_tools';
 
 export enum STATUS {
   NA,
@@ -41,6 +42,8 @@ export interface UploadStatus {
   dataViewCreated: STATUS;
   fileImport: STATUS;
   filesStatus: AnalyzedFile[];
+  // mappingClashes: MappingClash[];
+  fileClashes: FileClash[];
 }
 
 export class FileManager {
@@ -67,6 +70,8 @@ export class FileManager {
     dataViewCreated: STATUS.NA,
     fileImport: STATUS.NOT_STARTED,
     filesStatus: [],
+    // mappingClashes: [],
+    fileClashes: [],
   });
 
   constructor(
@@ -88,12 +93,21 @@ export class FileManager {
         }
 
         const formatOk = this.checkFormat();
-        const { fieldClashes, mergedMappings } = this.createMergedMappings();
-        const mappingsOk = fieldClashes.length === 0;
+        const { mappingClashes, mergedMappings } = this.createMergedMappings();
+        const mappingsOk = mappingClashes.length === 0;
         if (mappingsOk) {
           this.mappings = mergedMappings;
           this.pipeline = this.createMergedPipeline();
           this.addSemanticTextField();
+          this.setStatus({
+            // mappingClashes: [],
+            fileClashes: [],
+          });
+        } else {
+          this.setStatus({
+            // mappingClashes,
+            fileClashes: getMappingClashInfo(mappingClashes, statuses),
+          });
         }
         this.analysisOk$.next(mappingsOk && formatOk);
       }
@@ -140,19 +154,6 @@ export class FileManager {
   public getFiles() {
     return this.files$.getValue();
   }
-
-  // private checkMappings() {
-  //   // console.log('checkMappings');
-  //   const files = this.getFiles();
-  //   const mappings = new Map<string, any>(
-  //     files.map((file) => [file.getFileName(), file.getMappings()])
-  //   );
-
-  //   // drill down and extract each field with it's type. then compare the fields and types.
-  //   // if types are different we have a problem.
-
-  //   return true;
-  // }
 
   private checkFormat() {
     // console.log('checkFormat');

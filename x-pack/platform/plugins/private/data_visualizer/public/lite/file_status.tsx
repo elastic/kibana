@@ -23,13 +23,19 @@ interface Props {
   uploadStatus: UploadStatus;
   fileStatus: AnalyzedFile;
   deleteFile: () => void;
-  key: number;
+  index: number;
 }
 
-export const FileStatus: FC<Props> = ({ fileStatus, uploadStatus, key, deleteFile }) => {
+export const FileStatus: FC<Props> = ({ fileStatus, uploadStatus, deleteFile, index }) => {
+  const clash = uploadStatus.fileClashes[index]?.clash;
   return (
-    <React.Fragment key={key}>
-      <EuiPanel hasShadow={false} hasBorder paddingSize="s">
+    <React.Fragment>
+      <EuiPanel
+        hasShadow={false}
+        hasBorder
+        paddingSize="s"
+        color={clash ? 'danger' : 'transparent'}
+      >
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={8}>
             <EuiText size="xs">

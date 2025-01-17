@@ -24,6 +24,7 @@ import { FileManager } from './file_manager';
 import { STATUS } from './file_manager/file_manager';
 import { FileStatus } from './file_status';
 import { OverallUploadStatus } from './overall_upload_status';
+import { MappingClashWarning } from './mapping_clash_warning';
 
 interface Props {
   dataStart: DataPublicPluginStart;
@@ -61,6 +62,10 @@ export const FileUploadLiteView: FC<Props> = ({
   const filesStatus = useObservable(fm.analysisStatus$, []);
   const filesOk = useObservable(fm.analysisOk$, false);
   const uploadStatus = useObservable(fm.uploadStatus$, fm.uploadStatus$.getValue());
+  const fileClashes = useMemo(
+    () => uploadStatus.fileClashes.some((f) => f.clash),
+    [uploadStatus.fileClashes]
+  );
 
   const onFilePickerChange = useCallback(
     (files: FileList | null) => {
@@ -131,9 +136,14 @@ export const FileUploadLiteView: FC<Props> = ({
               fileStatus={status}
               key={i}
               deleteFile={() => deleteFile(i)}
+              index={i}
             />
           ))}
         </>
+
+        {fileClashes ? (
+          <MappingClashWarning uploadStatus={uploadStatus} filesStatus={filesStatus} />
+        ) : null}
 
         <EuiSpacer />
 
