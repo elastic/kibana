@@ -124,6 +124,9 @@ export const RuleForm = (props: RuleFormProps) => {
     actionTypeRegistry,
     id,
     ruleTypeId,
+    validConsumers,
+    multiConsumerSelection,
+    isServerless,
     onCancel,
     onSubmit,
   ]);
