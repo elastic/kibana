@@ -368,115 +368,110 @@ export class FleetPlugin
             },
           ],
         },
-        subFeatures: experimentalFeatures.subfeaturePrivileges
-          ? [
+        subFeatures: [
+          {
+            name: 'Agents',
+            requireAllSpaces,
+            privilegeGroups: [
               {
-                name: 'Agents',
-                requireAllSpaces,
-                privilegeGroups: [
+                groupType: 'mutually_exclusive',
+                privileges: [
                   {
-                    groupType: 'mutually_exclusive',
-                    privileges: [
-                      {
-                        id: `agents_all`,
-                        api: [`${PLUGIN_ID}-agents-read`, `${PLUGIN_ID}-agents-all`],
-                        name: 'All',
-                        ui: ['agents_read', 'agents_all'],
-                        savedObject: {
-                          all: allSavedObjectTypes,
-                          read: allSavedObjectTypes,
-                        },
-                        includeIn: 'all',
-                      },
-                      {
-                        id: `agents_read`,
-                        api: [`${PLUGIN_ID}-agents-read`],
-                        name: 'Read',
-                        ui: ['agents_read'],
-                        savedObject: {
-                          all: [],
-                          read: allSavedObjectTypes,
-                        },
-                        includeIn: 'read',
-                        alerting: {},
-                      },
-                    ],
+                    id: `agents_all`,
+                    api: [`${PLUGIN_ID}-agents-read`, `${PLUGIN_ID}-agents-all`],
+                    name: 'All',
+                    ui: ['agents_read', 'agents_all'],
+                    savedObject: {
+                      all: allSavedObjectTypes,
+                      read: allSavedObjectTypes,
+                    },
+                    includeIn: 'all',
+                  },
+                  {
+                    id: `agents_read`,
+                    api: [`${PLUGIN_ID}-agents-read`],
+                    name: 'Read',
+                    ui: ['agents_read'],
+                    savedObject: {
+                      all: [],
+                      read: allSavedObjectTypes,
+                    },
+                    includeIn: 'read',
+                    alerting: {},
                   },
                 ],
               },
+            ],
+          },
+          {
+            name: 'Agent policies',
+            requireAllSpaces,
+            privilegeGroups: [
               {
-                name: 'Agent policies',
-                requireAllSpaces,
-                privilegeGroups: [
+                groupType: 'mutually_exclusive',
+                privileges: [
                   {
-                    groupType: 'mutually_exclusive',
-                    privileges: [
-                      {
-                        id: `agent_policies_all`,
-                        api: [
-                          `${PLUGIN_ID}-agent-policies-read`,
-                          `${PLUGIN_ID}-agent-policies-all`,
-                        ],
-                        name: 'All',
-                        ui: ['agent_policies_read', 'agent_policies_all'],
-                        savedObject: {
-                          all: allSavedObjectTypes,
-                          read: allSavedObjectTypes,
-                        },
-                        includeIn: 'all',
-                      },
-                      {
-                        id: `agent_policies_read`,
-                        api: [`${PLUGIN_ID}-agent-policies-read`],
-                        name: 'Read',
-                        ui: ['agent_policies_read'],
-                        savedObject: {
-                          all: [],
-                          read: allSavedObjectTypes,
-                        },
-                        includeIn: 'read',
-                        alerting: {},
-                      },
-                    ],
+                    id: `agent_policies_all`,
+                    api: [`${PLUGIN_ID}-agent-policies-read`, `${PLUGIN_ID}-agent-policies-all`],
+                    name: 'All',
+                    ui: ['agent_policies_read', 'agent_policies_all'],
+                    savedObject: {
+                      all: allSavedObjectTypes,
+                      read: allSavedObjectTypes,
+                    },
+                    includeIn: 'all',
+                  },
+                  {
+                    id: `agent_policies_read`,
+                    api: [`${PLUGIN_ID}-agent-policies-read`],
+                    name: 'Read',
+                    ui: ['agent_policies_read'],
+                    savedObject: {
+                      all: [],
+                      read: allSavedObjectTypes,
+                    },
+                    includeIn: 'read',
+                    alerting: {},
                   },
                 ],
               },
+            ],
+          },
+          {
+            name: 'Settings',
+            requireAllSpaces,
+            privilegeGroups: [
               {
-                name: 'Settings',
-                requireAllSpaces,
-                privilegeGroups: [
+                groupType: 'mutually_exclusive',
+                privileges: [
                   {
-                    groupType: 'mutually_exclusive',
-                    privileges: [
-                      {
-                        id: `settings_all`,
-                        api: [`${PLUGIN_ID}-settings-read`, `${PLUGIN_ID}-settings-all`],
-                        name: 'All',
-                        ui: ['settings_read', 'settings_all'],
-                        savedObject: {
-                          all: allSavedObjectTypes,
-                          read: allSavedObjectTypes,
-                        },
-                        includeIn: 'all',
-                      },
-                      {
-                        id: `settings_read`,
-                        api: [`${PLUGIN_ID}-settings-read`],
-                        name: 'Read',
-                        ui: ['settings_read'],
-                        savedObject: {
-                          all: [],
-                          read: allSavedObjectTypes,
-                        },
-                        includeIn: 'read',
-                        alerting: {},
-                      },
-                    ],
+                    id: `settings_all`,
+                    api: [`${PLUGIN_ID}-settings-read`, `${PLUGIN_ID}-settings-all`],
+                    name: 'All',
+                    ui: ['settings_read', 'settings_all'],
+                    savedObject: {
+                      all: allSavedObjectTypes,
+                      read: allSavedObjectTypes,
+                    },
+                    includeIn: 'all',
+                  },
+                  {
+                    id: `settings_read`,
+                    api: [`${PLUGIN_ID}-settings-read`],
+                    name: 'Read',
+                    ui: ['settings_read'],
+                    savedObject: {
+                      all: [],
+                      read: allSavedObjectTypes,
+                    },
+                    includeIn: 'read',
+                    alerting: {},
                   },
                 ],
               },
-            ]
-          : [],
+            ],
+          },
+        ],
         privileges: {
           all: {
             api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`],

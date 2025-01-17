@@ -128,10 +128,6 @@ describe('callEnterpriseSearchConfigAPI', () => {
     expect(await callEnterpriseSearchConfigAPI(mockDependencies)).toEqual({
       ...DEFAULT_INITIAL_APP_DATA,
       kibanaVersion: '1.0.0',
-      access: {
-        hasAppSearchAccess: true,
-        hasWorkplaceSearchAccess: false,
-      },
       features: {
         hasNativeConnectors: true,
         hasWebCrawler: true,
@@ -145,10 +141,6 @@ describe('callEnterpriseSearchConfigAPI', () => {
 
     expect(await callEnterpriseSearchConfigAPI(mockDependencies)).toEqual({
       kibanaVersion: '1.0.0',
-      access: {
-        hasAppSearchAccess: false,
-        hasWorkplaceSearchAccess: false,
-      },
       features: {
         hasNativeConnectors: true,
         hasWebCrawler: true,
@@ -217,10 +209,6 @@ describe('callEnterpriseSearchConfigAPI', () => {
     };
 
     expect(await callEnterpriseSearchConfigAPI({ ...mockDependencies, config })).toEqual({
-      access: {
-        hasAppSearchAccess: false,
-        hasWorkplaceSearchAccess: false,
-      },
       features: {
         hasConnectors: false,
         hasDefaultIngestPipeline: false,
