@@ -49,6 +49,21 @@ For Elastic Security solution release information, refer to {security-guide}/rel
 === Breaking changes
 
 [discrete]
+[[REPO-PR]]
+.Removed legacy security rules bulk endpoints (9.0.0)
+[%collapsible]
+====
+*Details* +
+ADD MORE DETAILS ON WHAT IS CHANGING AND A LINK TO THE PR INTRODUCING THE CHANGE
+
+*Impact* +
+ADD INFORMATION ABOUT WHAT THIS CHANGE WILL BREAK FOR USERS
+
+*Action* +
+ADD INSTRUCTIONS FOR USERS LOOKING TO UPGRADE. HOW CAN THEY WORK AROUND THIS?
+====
+
+[discrete]
 [[breaking-199598]]
 .Remove deprecated endpoint management endpoints (9.0.0)
 [%collapsible]
