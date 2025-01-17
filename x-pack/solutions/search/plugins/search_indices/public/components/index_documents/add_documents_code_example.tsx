@@ -75,6 +75,7 @@ export const AddDocumentsCodeExample = ({
       apiKey: apiKey || undefined,
     };
   }, [indexName, elasticsearchUrl, sampleDocuments, codeSampleMappings, indexHasMappings, apiKey]);
+  const [panelRef, setPanelRef] = useState(null);
 
   return (
     <EuiPanel
@@ -82,6 +83,7 @@ export const AddDocumentsCodeExample = ({
       hasShadow={false}
       paddingSize="m"
       data-test-subj="SearchIndicesAddDocumentsCode"
+      panelRef={setPanelRef}
     >
       <EuiFlexGroup direction="column">
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -96,6 +98,8 @@ export const AddDocumentsCodeExample = ({
                     `${AnalyticsEvents.indexDetailsCodeLanguageSelect}_${workflowId}`,
                   ]);
                 }}
+                showTour
+                container={panelRef}
               />
             </EuiFlexItem>
           )}

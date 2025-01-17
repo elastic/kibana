@@ -46,9 +46,16 @@ const PopoverCard: React.FC<PopoverCardProps> = ({ workflow, onChange, isSelecte
 interface GuideSelectorProps {
   selectedWorkflowId: WorkflowId;
   onChange: (workflow: WorkflowId) => void;
+  showTour: boolean;
+  container?: HTMLElement | null;
 }
 
-export const GuideSelector: React.FC<GuideSelectorProps> = ({ selectedWorkflowId, onChange }) => {
+export const GuideSelector: React.FC<GuideSelectorProps> = ({
+  selectedWorkflowId,
+  onChange,
+  showTour,
+  container,
+}) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { tourIsOpen, setTourIsOpen } = useGuideTour();
 
@@ -83,6 +90,7 @@ export const GuideSelector: React.FC<GuideSelectorProps> = ({ selectedWorkflowId
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       title="Select a workflow"
+      container={container}
     >
       <>
         <EuiFlexGroup gutterSize="m" style={{ maxWidth: '960px' }}>
@@ -100,7 +108,7 @@ export const GuideSelector: React.FC<GuideSelectorProps> = ({ selectedWorkflowId
     </EuiPopover>
   );
 
-  return (
+  return showTour ? (
     <EuiTourStep
       content={
         <EuiText>
@@ -123,5 +131,7 @@ export const GuideSelector: React.FC<GuideSelectorProps> = ({ selectedWorkflowId
     >
       <Popover />
     </EuiTourStep>
+  ) : (
+    <Popover />
   );
 };

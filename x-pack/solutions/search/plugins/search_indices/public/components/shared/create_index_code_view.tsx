@@ -76,6 +76,7 @@ export const CreateIndexCodeView = ({
             <GuideSelector
               selectedWorkflowId={selectedWorkflow?.id || 'default'}
               onChange={changeWorkflowId}
+              showTour={false}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
