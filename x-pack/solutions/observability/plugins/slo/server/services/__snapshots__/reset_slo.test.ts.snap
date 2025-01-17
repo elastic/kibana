@@ -529,13 +529,15 @@ exports[`ResetSLO happy path resets all associated resources 8`] = `
           },
           Object {
             "set": Object {
-              "field": "updatedBy",
+              "field": "slo.updatedBy",
+              "ignore_failure": true,
               "value": "irrelevant",
             },
           },
           Object {
             "set": Object {
-              "field": "createdBy",
+              "field": "slo.createdBy",
+              "ignore_failure": true,
               "value": "irrelevant",
             },
           },
