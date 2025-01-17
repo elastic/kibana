@@ -6,7 +6,7 @@
  */
 
 import { connect } from 'react-redux';
-import { ClusterPayload } from '../../../../common/lib';
+import { Cluster, ClusterPayload } from '../../../../common/lib';
 import { RemoteClusterEdit as RemoteClusterEditView } from './remote_cluster_edit';
 
 import {
@@ -53,7 +53,19 @@ const mapDispatchToProps = (dispatch: (action: any) => void) => {
   };
 };
 
-export const RemoteClusterEdit = connect(
+interface Props {
+  isLoading: boolean;
+  cluster: Cluster;
+  startEditingCluster: (clusterName: string) => void;
+  stopEditingCluster: () => void;
+  editCluster: (cluster: ClusterPayload) => void;
+  isEditingCluster: boolean;
+  getEditClusterError?: object;
+  clearEditClusterErrors: () => void;
+  openDetailPanel: (clusterName: string) => void;
+}
+
+export const RemoteClusterEdit: React.FC<Props> = connect(
   mapStateToProps,
   mapDispatchToProps
 )(RemoteClusterEditView);

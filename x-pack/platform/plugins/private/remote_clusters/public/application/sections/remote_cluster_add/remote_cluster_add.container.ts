@@ -31,4 +31,14 @@ const mapDispatchToProps = (dispatch: (action: any) => void) => {
   };
 };
 
-export const RemoteClusterAdd = connect(mapStateToProps, mapDispatchToProps)(RemoteClusterAddView);
+interface Props {
+  addCluster: (cluster: ClusterPayload) => void;
+  isAddingCluster: boolean;
+  addClusterError?: { message: string };
+  clearAddClusterErrors: () => void;
+}
+
+export const RemoteClusterAdd: React.FC<Props> = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(RemoteClusterAddView);
