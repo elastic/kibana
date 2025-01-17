@@ -7,21 +7,25 @@
 
 import expect from '@kbn/expect';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import { createStreamsRepositorySupertestClient } from './helpers/repository_client';
+import {
+  StreamsSupertestRepositoryClient,
+  createStreamsRepositorySupertestClient,
+} from './helpers/repository_client';
 import { disableStreams, enableStreams, fetchDocument, indexDocument } from './helpers/requests';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const supertest = getService('supertest');
+  const roleScopedSupertest = getService('roleScopedSupertest');
   const esClient = getService('es');
   const config = getService('config');
   const isServerless = !!config.get('serverless');
 
   const TEST_STREAM_NAME = 'logs-test-default';
 
-  const apiClient = createStreamsRepositorySupertestClient(supertest);
+  let apiClient: StreamsSupertestRepositoryClient;
 
   describe('Classic streams', () => {
     before(async () => {
+      apiClient = await createStreamsRepositorySupertestClient(roleScopedSupertest);
       await enableStreams(apiClient);
     });
 

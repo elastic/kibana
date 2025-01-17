@@ -6,16 +6,19 @@
  */
 import expect from '@kbn/expect';
 import { disableStreams, enableStreams, indexDocument } from '../helpers/requests';
-import { createStreamsRepositorySupertestClient } from '../helpers/repository_client';
+import {
+  StreamsSupertestRepositoryClient,
+  createStreamsRepositorySupertestClient,
+} from '../helpers/repository_client';
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const supertest = getService('supertest');
+  const roleScopedSupertest = getService('roleScopedSupertest');
   const esClient = getService('es');
 
-  const kibanaServer = getService('kibanaServer');
+  let apiClient: StreamsSupertestRepositoryClient;
 
-  const apiClient = createStreamsRepositorySupertestClient(supertest);
+  const kibanaServer = getService('kibanaServer');
 
   const SPACE_ID = 'default';
   const ARCHIVES = [
@@ -107,6 +110,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   describe('Asset links', () => {
     before(async () => {
+      apiClient = await createStreamsRepositorySupertestClient(roleScopedSupertest);
       await enableStreams(apiClient);
 
       await indexDocument(esClient, 'logs', {

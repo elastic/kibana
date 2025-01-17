@@ -7,7 +7,10 @@
 
 import expect from '@kbn/expect';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import { createStreamsRepositorySupertestClient } from './helpers/repository_client';
+import {
+  StreamsSupertestRepositoryClient,
+  createStreamsRepositorySupertestClient,
+} from './helpers/repository_client';
 import {
   disableStreams,
   enableStreams,
@@ -17,10 +20,9 @@ import {
 } from './helpers/requests';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const supertest = getService('supertest');
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  let apiClient: StreamsSupertestRepositoryClient;
   const esClient = getService('es');
-
-  const apiClient = createStreamsRepositorySupertestClient(supertest);
 
   interface Resources {
     indices: string[];
@@ -56,6 +58,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const response = await apiClient.fetch('GET /api/streams/_status').expect(200);
       return response.body.enabled;
     }
+
+    before(async () => {
+      apiClient = await createStreamsRepositorySupertestClient(roleScopedSupertest);
+    });
 
     describe('initially', () => {
       let resources: Resources;

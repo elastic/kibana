@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
-import supertest from 'supertest';
+import { RoleScopedSupertestProvider } from '../../../../services/role_scoped_supertest';
 import {
   RepositorySupertestClient,
   getApiClientFromSupertest,
@@ -13,8 +13,8 @@ import {
 
 export type StreamsSupertestRepositoryClient = RepositorySupertestClient<StreamsRouteRepository>;
 
-export function createStreamsRepositorySupertestClient(
-  st: supertest.Agent
-): StreamsSupertestRepositoryClient {
+export async function createStreamsRepositorySupertestClient(
+  st: ReturnType<typeof RoleScopedSupertestProvider>
+): Promise<StreamsSupertestRepositoryClient> {
   return getApiClientFromSupertest<StreamsRouteRepository>(st);
 }

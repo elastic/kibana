@@ -9,7 +9,10 @@ import expect from '@kbn/expect';
 import { WiredStreamConfigDefinition, WiredStreamDefinition } from '@kbn/streams-schema';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { disableStreams, enableStreams, putStream } from './helpers/requests';
-import { createStreamsRepositorySupertestClient } from './helpers/repository_client';
+import {
+  StreamsSupertestRepositoryClient,
+  createStreamsRepositorySupertestClient,
+} from './helpers/repository_client';
 
 const rootStreamDefinition: WiredStreamDefinition = {
   name: 'logs',
@@ -38,11 +41,12 @@ const rootStreamDefinition: WiredStreamDefinition = {
 };
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const supertest = getService('supertest');
-  const apiClient = createStreamsRepositorySupertestClient(supertest);
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  let apiClient: StreamsSupertestRepositoryClient;
 
   describe('Root stream', () => {
     before(async () => {
+      apiClient = await createStreamsRepositorySupertestClient(roleScopedSupertest);
       await enableStreams(apiClient);
     });
 

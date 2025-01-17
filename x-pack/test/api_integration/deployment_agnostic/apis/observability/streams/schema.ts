@@ -8,16 +8,20 @@
 import expect from '@kbn/expect';
 import { disableStreams, enableStreams, forkStream, indexDocument } from './helpers/requests';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import { createStreamsRepositorySupertestClient } from './helpers/repository_client';
+import {
+  StreamsSupertestRepositoryClient,
+  createStreamsRepositorySupertestClient,
+} from './helpers/repository_client';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const supertest = getService('supertest');
+  const roleScopedSupertest = getService('roleScopedSupertest');
   const esClient = getService('es');
 
-  const apiClient = createStreamsRepositorySupertestClient(supertest);
+  let apiClient: StreamsSupertestRepositoryClient;
 
   describe('Streams Schema', () => {
     before(async () => {
+      apiClient = await createStreamsRepositorySupertestClient(roleScopedSupertest);
       await enableStreams(apiClient);
 
       const doc = {
