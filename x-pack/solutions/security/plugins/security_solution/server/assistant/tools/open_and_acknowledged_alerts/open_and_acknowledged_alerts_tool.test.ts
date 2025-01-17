@@ -35,13 +35,13 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
   const isEnabledKnowledgeBase = true;
   const chain = {} as unknown as RetrievalQAChain;
   const logger = loggerMock.create();
-  const contentReferencesStore = contentReferencesStoreFactory()
+  const contentReferencesStore = contentReferencesStoreFactory();
   const rest = {
     isEnabledKnowledgeBase,
     esClient,
     chain,
     logger,
-    contentReferencesStore
+    contentReferencesStore,
   };
 
   const anonymizationFields = [

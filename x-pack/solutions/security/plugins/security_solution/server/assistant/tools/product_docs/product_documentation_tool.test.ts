@@ -28,7 +28,7 @@ describe('ProductDocumentationTool', () => {
     retrieveDocumentationAvailable: jest.fn(),
   } as LlmTasksPluginStart;
   const connectorId = 'fake-connector';
-  const contentReferencesStore = contentReferencesStoreFactory()
+  const contentReferencesStore = contentReferencesStoreFactory();
   const defaultArgs = {
     chain,
     esClient,
@@ -37,7 +37,7 @@ describe('ProductDocumentationTool', () => {
     llmTasks,
     connectorId,
     isEnabledKnowledgeBase: true,
-    contentReferencesStore
+    contentReferencesStore,
   };
   beforeEach(() => {
     jest.clearAllMocks();
