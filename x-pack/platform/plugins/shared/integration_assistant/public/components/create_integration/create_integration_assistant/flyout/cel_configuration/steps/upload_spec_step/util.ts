@@ -14,7 +14,7 @@ export const getApiPathsWithDescriptions = (apiSpec: Oas | undefined): ApiPathOp
   if (pathObjs) {
     for (const [path, pathObj] of Object.entries(pathObjs)) {
       if (pathObj?.get) {
-       pathMap[path] = pathObj?.get?.getDescription() || pathObj?.get?.getSummary();
+        pathMap[path] = pathObj?.get?.getDescription() || pathObj?.get?.getSummary();
       }
     }
   }
