@@ -7,10 +7,10 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import {
-  UpdateTagAssignmentsOptions,
-  FindAssignableObjectsOptions,
   AssignableObject,
-} from '../../../common/assignments';
+  FindAssignableObjectsOptions,
+  UpdateTagAssignmentsOptions,
+} from '@kbn/saved-objects-tagging-oss-plugin/common';
 import {
   FindAssignableObjectResponse,
   GetAssignableTypesResponse,

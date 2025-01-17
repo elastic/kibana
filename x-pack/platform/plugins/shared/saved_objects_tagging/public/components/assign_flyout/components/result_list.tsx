@@ -8,9 +8,9 @@
 import React, { FC } from 'react';
 import { EuiIcon, EuiSelectable, EuiSelectableOption, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AssignableObject } from '../../../../common/assignments';
+import { AssignableObject, getKey } from '@kbn/saved-objects-tagging-oss-plugin/common';
 import { AssignmentAction, AssignmentOverrideMap, AssignmentStatusMap } from '../types';
-import { getKey, getOverriddenStatus, getAssignmentAction } from '../utils';
+import { getOverriddenStatus, getAssignmentAction } from '../utils';
 
 export interface AssignFlyoutResultListProps {
   isLoading: boolean;

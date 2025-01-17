@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AssignableObject } from './assignments';
+import { AssignableObject } from '@kbn/saved-objects-tagging-oss-plugin/common';
 
 export interface FindAssignableObjectResponse {
   objects: AssignableObject[];

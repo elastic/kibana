@@ -6,7 +6,7 @@
  */
 
 import type { SavedObject, SavedObjectsType } from '@kbn/core/server';
-import { AssignableObject } from '../../../common/assignments';
+import { AssignableObject } from '@kbn/saved-objects-tagging-oss-plugin/common';
 import { tagSavedObjectTypeName } from '../../../common';
 
 export const toAssignableObject = (
