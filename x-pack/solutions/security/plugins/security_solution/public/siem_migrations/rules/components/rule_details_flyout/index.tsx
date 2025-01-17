@@ -101,7 +101,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
 
     const handleTranslationUpdate = useCallback(
       async (ruleName: string, ruleQuery: string) => {
-        if (!ruleMigration || isLoading) {
+        if (isLoading) {
           return;
         }
         setIsUpdating(true);
@@ -139,13 +139,11 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
         name: i18n.TRANSLATION_TAB_LABEL,
         content: (
           <TabContentPadding>
-            {ruleMigration && (
-              <TranslationTab
-                ruleMigration={ruleMigration}
-                matchedPrebuiltRule={matchedPrebuiltRule}
-                onTranslationUpdate={handleTranslationUpdate}
-              />
-            )}
+            <TranslationTab
+              ruleMigration={ruleMigration}
+              matchedPrebuiltRule={matchedPrebuiltRule}
+              onTranslationUpdate={handleTranslationUpdate}
+            />
           </TabContentPadding>
         ),
       }),
@@ -242,7 +240,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
           <EuiTitle size="m">
             <h2 id={migrationsRulesFlyoutTitleId}>
               {ruleDetailsToOverview?.name ??
-                ruleMigration?.original_rule.title ??
+                ruleMigration.original_rule.title ??
                 i18n.UNKNOWN_MIGRATION_RULE_TITLE}
             </h2>
           </EuiTitle>

@@ -9848,6 +9848,30 @@
                               }
                             ]
                           },
+                          "required_versions": {
+                            "items": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "percentage": {
+                                  "description": "Target percentage of agents to auto upgrade",
+                                  "maximum": 100,
+                                  "minimum": 0,
+                                  "type": "number"
+                                },
+                                "version": {
+                                  "description": "Target version for automatic agent upgrade",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "version",
+                                "percentage"
+                              ],
+                              "type": "object"
+                            },
+                            "nullable": true,
+                            "type": "array"
+                          },
                           "revision": {
                             "type": "number"
                           },
@@ -10203,6 +10227,30 @@
                     "description": "Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.",
                     "nullable": true,
                     "type": "object"
+                  },
+                  "required_versions": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "percentage": {
+                          "description": "Target percentage of agents to auto upgrade",
+                          "maximum": 100,
+                          "minimum": 0,
+                          "type": "number"
+                        },
+                        "version": {
+                          "description": "Target version for automatic agent upgrade",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "version",
+                        "percentage"
+                      ],
+                      "type": "object"
+                    },
+                    "nullable": true,
+                    "type": "array"
                   },
                   "space_ids": {
                     "items": {
@@ -10860,6 +10908,30 @@
                               "type": "array"
                             }
                           ]
+                        },
+                        "required_versions": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "percentage": {
+                                "description": "Target percentage of agents to auto upgrade",
+                                "maximum": 100,
+                                "minimum": 0,
+                                "type": "number"
+                              },
+                              "version": {
+                                "description": "Target version for automatic agent upgrade",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "version",
+                              "percentage"
+                            ],
+                            "type": "object"
+                          },
+                          "nullable": true,
+                          "type": "array"
                         },
                         "revision": {
                           "type": "number"
@@ -11645,6 +11717,30 @@
                                 "type": "array"
                               }
                             ]
+                          },
+                          "required_versions": {
+                            "items": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "percentage": {
+                                  "description": "Target percentage of agents to auto upgrade",
+                                  "maximum": 100,
+                                  "minimum": 0,
+                                  "type": "number"
+                                },
+                                "version": {
+                                  "description": "Target version for automatic agent upgrade",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "version",
+                                "percentage"
+                              ],
+                              "type": "object"
+                            },
+                            "nullable": true,
+                            "type": "array"
                           },
                           "revision": {
                             "type": "number"
@@ -12667,6 +12763,30 @@
                             }
                           ]
                         },
+                        "required_versions": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "percentage": {
+                                "description": "Target percentage of agents to auto upgrade",
+                                "maximum": 100,
+                                "minimum": 0,
+                                "type": "number"
+                              },
+                              "version": {
+                                "description": "Target version for automatic agent upgrade",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "version",
+                              "percentage"
+                            ],
+                            "type": "object"
+                          },
+                          "nullable": true,
+                          "type": "array"
+                        },
                         "revision": {
                           "type": "number"
                         },
@@ -13020,6 +13140,30 @@
                     "description": "Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.",
                     "nullable": true,
                     "type": "object"
+                  },
+                  "required_versions": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "percentage": {
+                          "description": "Target percentage of agents to auto upgrade",
+                          "maximum": 100,
+                          "minimum": 0,
+                          "type": "number"
+                        },
+                        "version": {
+                          "description": "Target version for automatic agent upgrade",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "version",
+                        "percentage"
+                      ],
+                      "type": "object"
+                    },
+                    "nullable": true,
+                    "type": "array"
                   },
                   "space_ids": {
                     "items": {
@@ -13677,6 +13821,30 @@
                               "type": "array"
                             }
                           ]
+                        },
+                        "required_versions": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "percentage": {
+                                "description": "Target percentage of agents to auto upgrade",
+                                "maximum": 100,
+                                "minimum": 0,
+                                "type": "number"
+                              },
+                              "version": {
+                                "description": "Target version for automatic agent upgrade",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "version",
+                              "percentage"
+                            ],
+                            "type": "object"
+                          },
+                          "nullable": true,
+                          "type": "array"
                         },
                         "revision": {
                           "type": "number"
@@ -14462,6 +14630,30 @@
                               "type": "array"
                             }
                           ]
+                        },
+                        "required_versions": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "percentage": {
+                                "description": "Target percentage of agents to auto upgrade",
+                                "maximum": 100,
+                                "minimum": 0,
+                                "type": "number"
+                              },
+                              "version": {
+                                "description": "Target version for automatic agent upgrade",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "version",
+                              "percentage"
+                            ],
+                            "type": "object"
+                          },
+                          "nullable": true,
+                          "type": "array"
                         },
                         "revision": {
                           "type": "number"
