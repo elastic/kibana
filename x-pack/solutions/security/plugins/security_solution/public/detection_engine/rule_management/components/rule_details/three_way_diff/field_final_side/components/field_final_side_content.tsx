@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
+import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { useRulePreviewContext } from '../../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/rule_preview_context';
 import { FieldFinalReadOnly } from '../../final_readonly';
 import { FieldFinalEdit } from '../../final_edit';
@@ -38,7 +39,12 @@ export function FieldFinalSideContent(): JSX.Element {
               {i18n.EDIT}
             </EuiButtonEmpty>
           </EuiFlexGroup>
-          <FieldFinalReadOnly />
+          <KibanaSectionErrorBoundary
+            key="rule-field-readonly-view"
+            sectionName={i18n.READONLY_MODE}
+          >
+            <FieldFinalReadOnly />
+          </KibanaSectionErrorBoundary>
         </>
       );
     case FieldFinalSideMode.Edit:
@@ -55,7 +61,9 @@ export function FieldFinalSideContent(): JSX.Element {
               {i18n.CANCEL}
             </EuiButtonEmpty>
           </EuiFlexGroup>
-          <FieldFinalEdit />
+          <KibanaSectionErrorBoundary key="rule-field-editing-view" sectionName={i18n.EDIT_MODE}>
+            <FieldFinalEdit />
+          </KibanaSectionErrorBoundary>
         </>
       );
     default:
