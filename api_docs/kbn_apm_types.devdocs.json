@@ -2590,6 +2590,9 @@
             "tags": [],
             "label": "original",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/solutions/observability/packages/kbn-apm-types/src/es_schemas/raw/fields/user_agent.ts",
             "deprecated": false,
             "trackAdoption": false

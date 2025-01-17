@@ -34,6 +34,7 @@
     "@kbn/alerting-plugin",
     "@kbn/std",
     "@kbn/safer-lodash-set",
-    "@kbn/streams-schema"
+    "@kbn/streams-schema",
+    "@kbn/es-errors"
   ]
 }
