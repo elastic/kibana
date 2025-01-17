@@ -14,7 +14,7 @@ describe('pruneContentReferences', () => {
 
         const alertsPageReference1 = contentReferencesStore.add(p => alertsPageReferenceFactory(p.id))
         const alertsPageReference2 = contentReferencesStore.add(p => alertsPageReferenceFactory(p.id))
-        contentReferencesStore.add(p => alertsPageReferenceFactory(p.id))
+        contentReferencesStore.add(p => alertsPageReferenceFactory(p.id)) // this one should get pruned
 
         const content = `Example ${contentReferenceBlock(alertsPageReference1)} example ${contentReferenceBlock(alertsPageReference2)}`
 
