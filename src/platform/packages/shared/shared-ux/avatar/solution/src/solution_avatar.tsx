@@ -21,6 +21,8 @@ import {
 
 import { SolutionNameType } from './types';
 
+import textureImage from './assets/texture.svg';
+
 export type KnownSolutionProps = DistributiveOmit<EuiAvatarProps, 'size' | 'name' | 'iconType'> & {
   /**
    * Any EuiAvatar size available, or `xxl` for custom large, brand-focused version
@@ -71,7 +73,7 @@ export const KibanaSolutionAvatar = (props: KibanaSolutionAvatarProps) => {
       height: 100px;
       border-radius: 100px;
       display: inline-block;
-      background: ${euiTheme.colors.backgroundBasePlain} url('assets/texture.svg') no-repeat;
+      background: ${euiTheme.colors.backgroundBasePlain} url(${textureImage}) no-repeat;
       background-size: cover, 125%;
       text-align: center;
     `,
