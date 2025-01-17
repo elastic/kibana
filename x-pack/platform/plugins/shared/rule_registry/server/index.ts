@@ -10,9 +10,6 @@
 import { PluginInitializerContext } from '@kbn/core/server';
 
 export type { RuleRegistryPluginSetupContract, RuleRegistryPluginStartContract } from './plugin';
-export type { IRuleDataService, RuleDataPluginService } from './rule_data_plugin_service';
-export { RuleDataClient } from './rule_data_client';
-export type { IRuleDataClient } from './rule_data_client/types';
 export type {
   RacRequestHandlerContext,
   RacApiRequestHandlerContext,
@@ -39,13 +36,8 @@ export {
   RuleDataWriteDisabledError,
   RuleDataWriterInitializationError,
 } from './rule_data_plugin_service';
-export type {
-  RuleDataClientConstructorOptions,
-  WaitResult,
-  IRuleDataClient,
-  IRuleDataReader,
-  IRuleDataWriter,
-} from './rule_data_client';
+export type { RuleDataClientConstructorOptions, WaitResult } from './rule_data_client';
+export type { IRuleDataClient, IRuleDataReader, IRuleDataWriter } from './rule_data_client/types';
 export { RuleDataClient } from './rule_data_client';
 export type { AlertAuditEventParams } from './alert_data_client/audit_events';
 export {
