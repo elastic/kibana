@@ -19,6 +19,7 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type { EntityType } from '../../../../../../common/search_strategy';
 import { LIST_ENTITIES_URL } from '../../../../../../common/entity_analytics/entity_store/constants';
 import type { ListEntitiesResponse } from '../../../../../../common/api/entity_analytics/entity_store/entities/list_entities.gen';
 import { ListEntitiesRequestQuery } from '../../../../../../common/api/entity_analytics/entity_store/entities/list_entities.gen';
@@ -57,14 +58,14 @@ export const listEntitiesRoute = (router: EntityAnalyticsRoutesDeps['router'], l
             per_page: perPage = 10,
             sort_field: sortField = '@timestamp',
             sort_order: sortOrder = 'desc',
-            entities_types: entityTypes,
+            entity_types: entityTypes,
             filterQuery,
           } = request.query;
 
           const securitySolution = await context.securitySolution;
           const entityStoreClient = securitySolution.getEntityStoreDataClient();
           const { records, total, inspect } = await entityStoreClient.searchEntities({
-            entityTypes,
+            entityTypes: entityTypes as EntityType[], // convert from OpenApi type to internal type
             filterQuery,
             page,
             perPage,

@@ -244,6 +244,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         logger: this.logger,
         telemetry: core.analytics,
         taskManager: plugins.taskManager,
+        experimentalFeatures,
       });
     }
 
