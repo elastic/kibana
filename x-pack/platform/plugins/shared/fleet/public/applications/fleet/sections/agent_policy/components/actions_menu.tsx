@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 
 import type { AgentPolicy } from '../../../types';
-import { useAuthz } from '../../../hooks';
+import { useAgentPolicyRefresh, useAuthz } from '../../../hooks';
 import {
   AgentEnrollmentFlyout,
   ContextMenuActions,
@@ -53,6 +53,7 @@ export const AgentPolicyActionMenu = memo<{
     const [isUpgradeAgentsModalOpen, setIsUpgradeAgentsModalOpen] = useState<boolean>(false);
     const [isManageAutoUpgradeAgentsModalOpen, setIsManageAutoUpgradeAgentsModalOpen] =
       useState<boolean>(false);
+    const refreshAgentPolicy = useAgentPolicyRefresh();
 
     const isFleetServerPolicy = useMemo(
       () =>
@@ -298,8 +299,10 @@ export const AgentPolicyActionMenu = memo<{
                 <EuiPortal>
                   <ManageAutoUpgradeAgentsModal
                     agentPolicy={agentPolicy}
+                    agentCount={agentPolicy.agents || 0}
                     onClose={() => {
                       setIsManageAutoUpgradeAgentsModalOpen(false);
+                      refreshAgentPolicy();
                     }}
                   />
                 </EuiPortal>

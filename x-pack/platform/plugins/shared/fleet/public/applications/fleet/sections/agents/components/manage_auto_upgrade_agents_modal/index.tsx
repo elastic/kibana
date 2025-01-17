@@ -9,10 +9,12 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiConfirmModal,
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
   EuiFormRow,
   EuiSpacer,
   EuiSuperSelect,
@@ -28,21 +30,25 @@ import {
   useGetAgentsAvailableVersionsQuery,
   useStartServices,
 } from '../../../../../../hooks';
+import { checkTargetVersionsValidity } from '../../../../../../../common/services';
 
 export interface ManageAutoUpgradeAgentsModalProps {
   onClose: () => void;
   agentPolicy: AgentPolicy;
+  agentCount: number;
 }
 
 export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
   ManageAutoUpgradeAgentsModalProps
-> = ({ onClose, agentPolicy }) => {
+> = ({ onClose, agentPolicy, agentCount }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { notifications } = useStartServices();
   const [targetVersions, setTargetVersions] = useState(agentPolicy.required_versions || []);
   const { data: agentsAvailableVersions } = useGetAgentsAvailableVersionsQuery({
     enabled: true,
   });
+  const latestVersion = agentsAvailableVersions?.items[0];
+  const [errors, setErrors] = useState<string[]>([]);
 
   const submitUpdateAgentPolicy = async () => {
     setIsLoading(true);
@@ -76,11 +82,18 @@ export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
       );
     }
     setIsLoading(false);
+    onClose();
   };
 
   async function onSubmit() {
-    // TODO warn on affected agents
     await submitUpdateAgentPolicy();
+  }
+
+  async function updateTargetVersions(newVersions: AgentTargetVersion[]) {
+    const error = checkTargetVersionsValidity(newVersions);
+    setErrors(error ? [error] : []);
+
+    setTargetVersions(newVersions);
   }
 
   return (
@@ -94,7 +107,7 @@ export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
       }
       onCancel={onClose}
       onConfirm={onSubmit}
-      confirmButtonDisabled={isLoading}
+      confirmButtonDisabled={isLoading || errors.length > 0}
       cancelButtonText={
         <FormattedMessage
           id="xpack.fleet.manageAutoUpgradeAgents.cancelButtonLabel"
@@ -111,38 +124,61 @@ export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
     >
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
+          {agentCount > 0 ? (
+            <>
+              <EuiCallOut
+                iconType="iInCircle"
+                title={i18n.translate('xpack.fleet.manageAutoUpgradeAgents.calloutTitle', {
+                  defaultMessage:
+                    'This action will update {agentCount, plural, one {# agent} other {# agents}}',
+                  values: {
+                    agentCount,
+                  },
+                })}
+              />
+              <EuiSpacer size="m" />
+            </>
+          ) : null}
           <FormattedMessage
             id="xpack.fleet.manageAutoUpgradeAgents.descriptionText"
             defaultMessage="Add the target agent version for automatic upgrades."
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          {targetVersions.map((requiredVersion, index) => (
-            <>
-              <TargetVersionsRow
-                agentsAvailableVersions={agentsAvailableVersions?.items || []}
-                requiredVersion={requiredVersion}
-                key={index}
-                onRemove={() => {
-                  setTargetVersions(targetVersions.filter((_, i) => i !== index));
-                }}
-                onUpdate={(version: string, percentage: number) => {
-                  setTargetVersions(
-                    targetVersions.map((targetVersion, i) =>
-                      i === index ? { version, percentage } : targetVersion
-                    )
-                  );
-                }}
-              />
-              <EuiSpacer size="s" />
-            </>
-          ))}
+          <EuiForm isInvalid={errors.length > 0} error={errors} component="form">
+            {targetVersions.map((requiredVersion, index) => (
+              <>
+                <TargetVersionsRow
+                  agentsAvailableVersions={agentsAvailableVersions?.items || []}
+                  requiredVersion={requiredVersion}
+                  key={index}
+                  onRemove={() => {
+                    updateTargetVersions(targetVersions.filter((_, i) => i !== index));
+                  }}
+                  onUpdate={(version: string, percentage: number) => {
+                    updateTargetVersions(
+                      targetVersions.map((targetVersion, i) =>
+                        i === index ? { version, percentage } : targetVersion
+                      )
+                    );
+                  }}
+                />
+                <EuiSpacer size="s" />
+              </>
+            ))}
+          </EuiForm>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow>
             <EuiButtonEmpty
               onClick={() => {
-                setTargetVersions([...targetVersions, { version: '', percentage: 100 }]);
+                updateTargetVersions([
+                  ...targetVersions,
+                  {
+                    version: latestVersion || '',
+                    percentage: targetVersions.length === 0 ? 100 : 1,
+                  },
+                ]);
               }}
               iconType="plusInCircle"
             >
@@ -169,13 +205,13 @@ const TargetVersionsRow: React.FunctionComponent<{
     inputDisplay: version,
   }));
 
-  const [version, setVersion] = useState(requiredVersion.version || options[1].value);
+  const [version, setVersion] = useState(requiredVersion.version);
 
   const onVersionChange = (value: string) => {
     setVersion(value);
   };
 
-  const [percentage, setPercentage] = useState(requiredVersion.percentage || 100);
+  const [percentage, setPercentage] = useState(requiredVersion.percentage);
 
   const onPercentageChange = (value: number) => {
     setPercentage(value);
@@ -223,6 +259,7 @@ const TargetVersionsRow: React.FunctionComponent<{
             min={0}
             step={1}
             max={100}
+            required
           />
         </EuiFormRow>
       </EuiFlexItem>
