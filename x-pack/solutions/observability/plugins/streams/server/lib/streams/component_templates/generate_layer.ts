@@ -33,11 +33,12 @@ export function generateLayer(
     }
     properties[field] = property;
   });
+
   return {
     name: getComponentTemplateName(id),
     template: {
-      settings: isRoot(definition.name) ? logsSettings : {},
-      lifecycle: isRoot(definition.name) ? logsLifecycle : undefined,
+      lifecycle: getTemplateLifecycle(definition),
+      settings: getTemplateSettings(definition),
       mappings: {
         subobjects: false,
         dynamic: false,
@@ -50,4 +51,35 @@ export function generateLayer(
       description: `Default settings for the ${id} stream`,
     },
   };
+}
+
+function getTemplateLifecycle(definition: WiredStreamDefinition) {
+  if (isRoot(definition.name)) {
+    return logsLifecycle;
+  }
+
+  if (!definition.stream.ingest.lifecycle || definition.stream.ingest.lifecycle.type === 'ilm') {
+    return undefined;
+  }
+
+  return { data_retention: definition.stream.ingest.lifecycle.data_retention };
+}
+
+function getTemplateSettings(definition: WiredStreamDefinition) {
+  if (isRoot(definition.name)) {
+    return logsSettings;
+  }
+
+  if (!definition.stream.ingest.lifecycle) {
+    return undefined;
+  }
+
+  if (definition.stream.ingest.lifecycle?.type === 'ilm') {
+    return {
+      'index.lifecycle.prefer_ilm': true,
+      'index.lifecycle.name': definition.stream.ingest.lifecycle.policy,
+    };
+  }
+
+  return { 'index.lifecycle.prefer_ilm': false, 'index.lifecycle.name': undefined };
 }

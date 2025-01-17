@@ -6,7 +6,12 @@
  */
 
 import { z } from '@kbn/zod';
-import { fieldDefinitionSchema, processingDefinitionSchema, streamChildSchema } from '../common';
+import {
+  fieldDefinitionSchema,
+  lifecycleSchema,
+  processingDefinitionSchema,
+  streamChildSchema,
+} from '../common';
 
 export const wiredStreamConfigDefinitonSchema = z
   .object({
@@ -16,6 +21,7 @@ export const wiredStreamConfigDefinitonSchema = z
         fields: fieldDefinitionSchema,
       }),
       routing: z.array(streamChildSchema),
+      lifecycle: z.optional(lifecycleSchema),
     }),
   })
   .strict();

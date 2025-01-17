@@ -92,3 +92,29 @@ export async function rolloverDataStreamIfNecessary({
     }
   }
 }
+
+export async function updateDataStreamLifecycle({
+  esClient,
+  logger,
+  name,
+  retention,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  name: string;
+  retention?: string;
+}) {
+  try {
+    await retryTransientEsErrors(
+      () =>
+        esClient.indices.putDataLifecycle({
+          name,
+          data_retention: retention,
+        }),
+      { logger }
+    );
+  } catch (err: any) {
+    logger.error(`Error updating data stream lifecycle: ${err.message}`);
+    throw err;
+  }
+}
