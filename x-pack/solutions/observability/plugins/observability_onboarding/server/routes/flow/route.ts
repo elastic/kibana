@@ -30,7 +30,12 @@ import { makeTar, type Entry } from './make_tar';
 
 const updateOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'PUT /internal/observability_onboarding/flow/{onboardingId}',
-  options: { tags: [] },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'Authorization is checked by the Saved Object client',
+    },
+  },
   params: t.type({
     path: t.type({
       onboardingId: t.string,
@@ -65,7 +70,13 @@ const updateOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
 
 const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/flow/{id}/step/{name}',
-  options: { tags: [] },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        "This endpoint is meant to be called from user's terminal and authenticated using API key with a limited privileges. For this reason there is no authorization and saved object is accessed using an internal Kibana user (the API key used by the user should not have those privileges)",
+    },
+  },
   params: t.type({
     path: t.type({
       id: t.string,
@@ -129,7 +140,12 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
 
 const getProgressRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/flow/{onboardingId}/progress',
-  options: { tags: [] },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'Authorization is checked by the Saved Object client',
+    },
+  },
   params: t.type({
     path: t.type({
       onboardingId: t.string,
@@ -190,7 +206,12 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
  */
 const createFlowRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/flow',
-  options: { tags: [] },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'Authorization is checked by the Saved Object client',
+    },
+  },
   params: t.type({
     body: t.type({
       name: t.string,
@@ -308,7 +329,13 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
  */
 const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/flow/{onboardingId}/integrations/install',
-  options: { tags: [] },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        "This endpoint is meant to be called from user's terminal. Authorization is partially checked by the Package Service client, and saved object is accessed using internal Kibana user because the API key used for installing integrations should not have those privileges.",
+    },
+  },
   params: t.type({
     path: t.type({
       onboardingId: t.string,

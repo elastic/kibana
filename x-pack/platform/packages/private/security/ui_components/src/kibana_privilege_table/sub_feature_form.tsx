@@ -34,6 +34,7 @@ interface Props {
   onChange: (selectedPrivileges: string[]) => void;
   disabled?: boolean;
   categoryId?: string;
+  allSpacesSelected?: boolean;
 }
 
 export const SubFeatureForm = (props: Props) => {
@@ -157,12 +158,18 @@ export const SubFeatureForm = (props: Props) => {
     privilegeGroup: SubFeaturePrivilegeGroup,
     index: number
   ) {
+    const nonePrivilege = {
+      id: NO_PRIVILEGE_VALUE,
+      label: 'None',
+      isDisabled: props.disabled,
+    };
+
     const firstSelectedPrivilege =
       props.privilegeCalculator.getSelectedMutuallyExclusiveSubFeaturePrivilege(
         props.featureId,
         privilegeGroup,
         props.privilegeIndex
-      );
+      ) ?? nonePrivilege;
 
     const options = [
       ...privilegeGroup.privileges.map((privilege, privilegeIndex) => {
@@ -174,11 +181,12 @@ export const SubFeatureForm = (props: Props) => {
       }),
     ];
 
-    options.push({
-      id: NO_PRIVILEGE_VALUE,
-      label: 'None',
-      isDisabled: props.disabled,
-    });
+    options.push(nonePrivilege);
+
+    const idSelected =
+      props.subFeature.requireAllSpaces && !props.allSpacesSelected
+        ? nonePrivilege.id
+        : firstSelectedPrivilege.id;
 
     return (
       <EuiButtonGroup
@@ -187,7 +195,7 @@ export const SubFeatureForm = (props: Props) => {
         data-test-subj="mutexSubFeaturePrivilegeControl"
         isFullWidth
         options={options}
-        idSelected={firstSelectedPrivilege?.id ?? NO_PRIVILEGE_VALUE}
+        idSelected={idSelected}
         isDisabled={props.disabled}
         onChange={(selectedPrivilegeId: string) => {
           // Deselect all privileges which belong to this mutually-exclusive group
