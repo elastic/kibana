@@ -12,7 +12,7 @@ import { useKibana } from '../../../utils/kibana_react';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useFetchAlertDetail } from '../../../hooks/use_fetch_alert_detail';
 import { useFetchAlertData } from '../../../hooks/use_fetch_alert_data';
-import { LazyAlertsFlyout } from '../../..';
+import { LazyAlertsFlyout, ObservabilityAlertsTable } from '../../..';
 import { CASES_PATH, paths } from '../../../../common/locators/paths';
 
 export interface CasesProps {
@@ -63,6 +63,7 @@ export function Cases({ permissions }: CasesProps) {
         }}
         showAlertDetails={handleShowAlertDetails}
         useFetchAlertData={useFetchAlertData}
+        renderAlertsTable={(props) => <ObservabilityAlertsTable {...props} />}
       />
 
       {alertDetail && selectedAlertId !== '' && !alertLoading ? (
