@@ -21,7 +21,7 @@ export const createIntegrationsColumn = ({
   ) => { relatedIntegrations?: RelatedIntegration[]; isIntegrationsLoading?: boolean } | undefined;
 }): TableColumn => {
   return {
-    field: 'elastic_rule.integration_id',
+    field: 'elastic_rule.integration_ids',
     name: i18n.COLUMN_INTEGRATIONS,
     render: (_, rule: RuleMigration) => {
       const migrationRuleData = getMigrationRuleData(rule.id);
