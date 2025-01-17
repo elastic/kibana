@@ -14,9 +14,9 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import {
   generateTestRunId,
   getTestIDForTitle,
-  ScoutReport,
-  ScoutReportEventAction,
   datasources,
+  ScoutEventsReport,
+  ScoutReportEventAction,
 } from '@kbn/scout-reporting';
 import {
   getOwningTeamsForPath,
@@ -40,7 +40,7 @@ export class ScoutFTRReporter {
   readonly log: ToolingLog;
   readonly name: string;
   readonly runId: string;
-  private report: ScoutReport;
+  private report: ScoutEventsReport;
   private readonly codeOwnersEntries: CodeOwnersEntry[];
 
   constructor(private runner: Runner, private reporterOptions: ScoutFTRReporterOptions = {}) {
@@ -53,7 +53,7 @@ export class ScoutFTRReporter {
     this.runId = generateTestRunId();
     this.log.info(`Scout test run ID: ${this.runId}`);
 
-    this.report = new ScoutReport(this.log);
+    this.report = new ScoutEventsReport(this.log);
     this.codeOwnersEntries = getCodeOwnersEntries();
 
     // Register event listeners
