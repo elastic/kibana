@@ -113,12 +113,6 @@ describe('useRowHeightsOptions', () => {
       previousConfigRowHeight: CONFIG_ROW_HEIGHT,
     });
     expect(onUpdateRowHeight).toHaveBeenLastCalledWith(-1);
-    result.current.onChangeRowHeight?.(RowHeightMode.single);
-    expect(storage.get('discover:dataGridRowHeight')).toEqual({
-      previousRowHeight: 1,
-      previousConfigRowHeight: CONFIG_ROW_HEIGHT,
-    });
-    expect(onUpdateRowHeight).toHaveBeenLastCalledWith(1);
     result.current.onChangeRowHeight?.(RowHeightMode.custom);
     expect(storage.get('discover:dataGridRowHeight')).toEqual({
       previousRowHeight: CONFIG_ROW_HEIGHT,
