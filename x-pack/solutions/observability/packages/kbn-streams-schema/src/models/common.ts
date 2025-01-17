@@ -138,8 +138,10 @@ export const elasticsearchAssetSchema = z.array(
 
 export type ElasticsearchAsset = z.infer<typeof elasticsearchAssetSchema>;
 
+export const durationSchema = z.string().regex(/^\d+[m|d|s|h]$/);
+
 export const lifecycleSchema = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('dlm'), data_retention: z.optional(z.string()) }),
+  z.object({ type: z.literal('dlm'), data_retention: z.optional(durationSchema) }),
   z.object({ type: z.literal('ilm'), policy: z.string() }),
 ]);
 
