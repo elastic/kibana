@@ -51,7 +51,7 @@ import {
   deleteUnmanagedStreamObjects,
   getUnmanagedElasticsearchAssets,
 } from './stream_crud';
-import { updateDataStreamLifecycle } from './data_streams/manage_data_streams';
+import { updateDataStreamsLifecycle } from './data_streams/manage_data_streams';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -777,28 +777,27 @@ export class StreamsClient {
   }
 
   private async updateStreamLifecycle(root: WiredStreamDefinition) {
-    const lifecycle = root.stream.ingest.lifecycle;
-
     const { logger, scopedClusterClient } = this.dependencies;
     const descendants = await this.getDescendants(root.name);
 
-    const streamsToUpdate = [];
+    const toUpdate = [];
     const queue = [root];
     while (queue.length > 0) {
       const definition = queue.shift()!;
 
       if (isDescendantOf(root.name, definition.name) && definition.stream.ingest.lifecycle) {
+        // ignore subtrees with a lifecycle override
         continue;
       }
 
-      streamsToUpdate.push(definition.name);
+      toUpdate.push(definition.name);
       queue.push(...descendants.filter((child) => isChildOf(definition.name, child.name)));
     }
 
-    await updateDataStreamLifecycle({
+    await updateDataStreamsLifecycle({
       esClient: scopedClusterClient.asCurrentUser,
-      names: streamsToUpdate,
-      lifecycle,
+      names: toUpdate,
+      lifecycle: root.stream.ingest.lifecycle,
       logger,
     });
   }

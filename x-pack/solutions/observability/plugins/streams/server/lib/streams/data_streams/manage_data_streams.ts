@@ -94,7 +94,7 @@ export async function rolloverDataStreamIfNecessary({
   }
 }
 
-export async function updateDataStreamLifecycle({
+export async function updateDataStreamsLifecycle({
   esClient,
   logger,
   names,
@@ -114,9 +114,7 @@ export async function updateDataStreamLifecycle({
           }),
         { logger }
       );
-    }
-
-    if (lifecycle?.type == 'dlm') {
+    } else if (lifecycle.type == 'dlm') {
       await retryTransientEsErrors(
         () =>
           esClient.indices.putDataLifecycle({
