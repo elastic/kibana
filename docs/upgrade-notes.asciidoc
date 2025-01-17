@@ -49,7 +49,7 @@ For Elastic Security solution release information, refer to {security-guide}/rel
 === Breaking changes
 
 [discrete]
-[[REPO-PR]]
+[[breaking-207091]]
 .Removed legacy security rules bulk endpoints (9.0.0)
 [%collapsible]
 ====
