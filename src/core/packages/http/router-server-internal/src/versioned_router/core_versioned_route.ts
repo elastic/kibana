@@ -25,6 +25,7 @@ import type {
 } from '@kbn/core-http-server';
 import { Request } from '@hapi/hapi';
 import { Logger } from '@kbn/logging';
+import { Env } from '@kbn/config';
 import type { HandlerResolutionStrategy, Method, Options } from './types';
 
 import {
@@ -47,8 +48,7 @@ import { RouteValidator } from '../validator';
 import { getWarningHeaderMessageFromRouteDeprecation } from '../get_warning_header_message';
 
 interface InternalVersionedRouteConfig<M extends RouteMethod> extends VersionedRouteConfig<M> {
-  isDev: boolean;
-  kibanaVersion: string;
+  env: Env;
   useVersionResolutionStrategyForInternalPaths: Map<string, boolean>;
   defaultHandlerResolutionStrategy: HandlerResolutionStrategy;
 }
@@ -88,8 +88,7 @@ export class CoreVersionedRoute implements VersionedRoute {
 
   private useDefaultStrategyForPath: boolean;
   private isPublic: boolean;
-  private isDev: boolean;
-  private kibanaVersion: string;
+  private env: Env;
   private enableQueryVersion: boolean;
   private defaultSecurityConfig: RouteSecurity | undefined;
   private defaultHandlerResolutionStrategy: HandlerResolutionStrategy;
@@ -101,15 +100,13 @@ export class CoreVersionedRoute implements VersionedRoute {
     internalOptions: InternalVersionedRouteConfig<Method>
   ) {
     const {
-      isDev,
-      kibanaVersion,
+      env,
       useVersionResolutionStrategyForInternalPaths,
       defaultHandlerResolutionStrategy,
       ...options
     } = internalOptions;
     this.isPublic = options.access === 'public';
-    this.isDev = isDev;
-    this.kibanaVersion = kibanaVersion;
+    this.env = env;
     this.defaultHandlerResolutionStrategy = defaultHandlerResolutionStrategy;
     this.useDefaultStrategyForPath =
       this.isPublic || useVersionResolutionStrategyForInternalPaths.has(path);
@@ -151,7 +148,7 @@ export class CoreVersionedRoute implements VersionedRoute {
     if (!maybeVersion) {
       if (this.useDefaultStrategyForPath) {
         version = this.getDefaultVersion();
-      } else if (!this.isDev && !this.isPublic) {
+      } else if (!this.env.mode.dev && !this.isPublic) {
         // When in production, we default internal routes to v1 to allow
         // gracefully onboarding of un-versioned to versioned routes
         version = '1';
@@ -224,14 +221,14 @@ export class CoreVersionedRoute implements VersionedRoute {
         {
           warning: getWarningHeaderMessageFromRouteDeprecation(
             handler.options.options.deprecated,
-            this.kibanaVersion
+            this.env.packageInfo.version
           ),
         },
         response
       );
     }
 
-    if (this.isDev && validation?.response?.[response.status]?.body) {
+    if (this.env.mode.dev && validation?.response?.[response.status]?.body) {
       const { [response.status]: responseValidation, unsafe } = validation.response;
       try {
         const validator = RouteValidator.from({
@@ -253,7 +250,7 @@ export class CoreVersionedRoute implements VersionedRoute {
   private validateVersion(version: string) {
     // We do an additional check here while we only have a single allowed public version
     // for all public Kibana HTTP APIs
-    if (this.isDev && this.isPublic) {
+    if (this.env.mode.dev && this.isPublic) {
       const message = isAllowedPublicVersion(version);
       if (message) {
         throw new Error(message);

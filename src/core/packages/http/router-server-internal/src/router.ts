@@ -30,6 +30,7 @@ import type {
   IKibanaResponse,
 } from '@kbn/core-http-server';
 import type { RouteSecurityGetter } from '@kbn/core-http-server';
+import { Env } from '@kbn/config';
 import { CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest, getProtocolFromRequest } from './request';
 import { kibanaResponseFactory } from './response';
@@ -72,10 +73,7 @@ export type InternalRouterRoute = Omit<RouterRoute, 'handler'> & {
 
 /** @internal */
 export interface RouterOptions {
-  /** Whether we are running in development */
-  isDev?: boolean;
-
-  kibanaVersion?: string;
+  env: Env;
 
   /** Plugin for which this router was registered */
   pluginId?: symbol;
@@ -205,7 +203,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       if (getProtocolFromRequest(request) === 'http2' && kibanaResponse.options.headers) {
         kibanaResponse.options.headers = stripIllegalHttp2Headers({
           headers: kibanaResponse.options.headers,
-          isDev: this.options.isDev ?? false,
+          isDev: this.options.env.mode.dev,
           logger: this.log,
           requestContext: `${request.route.method} ${request.route.path}`,
         });
@@ -235,8 +233,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     if (this.versionedRouter === undefined) {
       this.versionedRouter = CoreVersionedRouter.from({
         router: this,
-        isDev: this.options.isDev,
-        kibanaVersion: this.options.kibanaVersion,
+        env: this.options.env,
         log: this.log,
         ...this.options.versionedRouterOptions,
       });

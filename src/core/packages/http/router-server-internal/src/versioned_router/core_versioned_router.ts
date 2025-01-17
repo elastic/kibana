@@ -15,6 +15,7 @@ import type {
 } from '@kbn/core-http-server';
 import { omit } from 'lodash';
 import { Logger } from '@kbn/logging';
+import { Env } from '@kbn/config';
 import { CoreVersionedRoute } from './core_versioned_route';
 import type { HandlerResolutionStrategy, Method } from './types';
 import type { Router } from '../router';
@@ -30,8 +31,7 @@ export interface VersionedRouterArgs {
    */
   defaultHandlerResolutionStrategy?: HandlerResolutionStrategy;
   /** Whether Kibana is running in a dev environment */
-  isDev?: boolean;
-  kibanaVersion?: string;
+  env: Env;
   /**
    * List of internal paths that should use the default handler resolution strategy. By default this
    * is no routes ([]) because ONLY Elastic clients are intended to call internal routes.
@@ -58,16 +58,14 @@ export class CoreVersionedRouter implements VersionedRouter {
     router,
     log,
     defaultHandlerResolutionStrategy,
-    isDev,
-    kibanaVersion,
+    env,
     useVersionResolutionStrategyForInternalPaths,
   }: VersionedRouterArgs) {
     return new CoreVersionedRouter(
       router,
       log,
       defaultHandlerResolutionStrategy,
-      isDev,
-      kibanaVersion,
+      env,
       useVersionResolutionStrategyForInternalPaths
     );
   }
@@ -75,8 +73,7 @@ export class CoreVersionedRouter implements VersionedRouter {
     public readonly router: Router,
     private readonly log: Logger,
     public readonly defaultHandlerResolutionStrategy: HandlerResolutionStrategy = 'oldest',
-    public readonly isDev: boolean = false,
-    public readonly kibanaVersion: string = '',
+    public readonly env: Env,
     useVersionResolutionStrategyForInternalPaths: string[] = []
   ) {
     this.pluginId = this.router.pluginId;
@@ -98,8 +95,7 @@ export class CoreVersionedRouter implements VersionedRouter {
           defaultHandlerResolutionStrategy: this.defaultHandlerResolutionStrategy,
           useVersionResolutionStrategyForInternalPaths:
             this.useVersionResolutionStrategyForInternalPaths,
-          isDev: this.isDev,
-          kibanaVersion: this.kibanaVersion,
+          env: this.env,
         },
       });
       this.routes.add(route);
