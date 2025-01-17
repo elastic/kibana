@@ -90,7 +90,7 @@ export const GuideSelector: React.FC<GuideSelectorProps> = ({
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       title="Select a workflow"
-      container={container}
+      container={container || undefined}
     >
       <>
         <EuiFlexGroup gutterSize="m" style={{ maxWidth: '960px' }}>

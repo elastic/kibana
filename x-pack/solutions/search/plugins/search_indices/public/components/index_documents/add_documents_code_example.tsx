@@ -75,7 +75,7 @@ export const AddDocumentsCodeExample = ({
       apiKey: apiKey || undefined,
     };
   }, [indexName, elasticsearchUrl, sampleDocuments, codeSampleMappings, indexHasMappings, apiKey]);
-  const [panelRef, setPanelRef] = useState(null);
+  const [panelRef, setPanelRef] = useState<HTMLDivElement | null>(null);
 
   return (
     <EuiPanel
