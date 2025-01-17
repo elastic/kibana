@@ -106,21 +106,6 @@ import {
 } from './utils';
 import { decodeCasesFindResponse, decodeCasesSimilarResponse } from '../api/decoders';
 
-export const getCase = async (
-  caseId: string,
-  includeComments: boolean = true,
-  signal: AbortSignal
-): Promise<CaseUI> => {
-  const response = await KibanaServices.get().http.fetch<Case>(getCaseDetailsUrl(caseId), {
-    method: 'GET',
-    query: {
-      includeComments,
-    },
-    signal,
-  });
-  return convertCaseToCamelCase(decodeCaseResponse(response));
-};
-
 export const resolveCase = async ({
   caseId,
   signal,

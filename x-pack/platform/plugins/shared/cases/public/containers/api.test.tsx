@@ -22,7 +22,6 @@ import {
   deleteCases,
   deleteComment,
   getActionLicense,
-  getCase,
   getCases,
   findCaseUserActions,
   getTags,
@@ -135,34 +134,6 @@ describe('Cases API', () => {
     });
   });
 
-  describe('getCase', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(basicCaseSnake);
-    });
-    const data = basicCase.id;
-
-    it('should be called with correct check url, method, signal', async () => {
-      await getCase(data, true, abortCtrl.signal);
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}`, {
-        method: 'GET',
-        query: { includeComments: true },
-        signal: abortCtrl.signal,
-      });
-    });
-
-    it('should return correct response', async () => {
-      const resp = await getCase(data, true, abortCtrl.signal);
-      expect(resp).toEqual(basicCase);
-    });
-
-    it('should not covert to camel case registered attachments', async () => {
-      fetchMock.mockResolvedValue(caseWithRegisteredAttachmentsSnake);
-      const resp = await getCase(data, true, abortCtrl.signal);
-      expect(resp).toEqual(caseWithRegisteredAttachments);
-    });
-  });
-
   describe('resolveCase', () => {
     const aliasTargetId = '12345';
     const basicResolveCase = {
@@ -180,6 +151,9 @@ describe('Cases API', () => {
       await resolveCase({ caseId, signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${caseId}/resolve`, {
         method: 'GET',
+        query: {
+          includeComments: false,
+        },
         signal: abortCtrl.signal,
       });
     });
