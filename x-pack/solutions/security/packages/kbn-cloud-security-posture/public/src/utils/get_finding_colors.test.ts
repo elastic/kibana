@@ -10,15 +10,6 @@ import { EuiThemeComputed } from '@elastic/eui';
 
 const mockEuiThemeBorealis = {
   themeName: 'borialis',
-  colors: {
-    vis: {
-      euiColorVis0: 'low-severity-color',
-      euiColorSeverity7: 'medium-severity-color',
-      euiColorSeverity11: 'high-severity-color',
-      euiColorSeverity14: 'critical-severity-color',
-      euiColorSeverity0: 'unknown-severity-color',
-    },
-  },
 };
 
 describe('getSeverityStatusColor', () => {
