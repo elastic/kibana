@@ -119,7 +119,6 @@ export const ApiDefinitionInput = React.memo<ApiDefinitionInputProps>(
 
           // Verify we have valid GET paths in the uploaded spec file
           if (
-            Object.keys(oasPaths).length === 0 ||
             Object.values(oasPaths).filter((path) => path?.get).length === 0
           ) {
             setApiFileError(i18n.API_DEFINITION_ERROR.NO_PATHS_IDENTIFIED);
