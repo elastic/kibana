@@ -61,8 +61,8 @@ Cypress.Commands.add(
     cy.getByTestSubj(dataTestSubj).type(key);
     cy.contains(key);
     cy.getByTestSubj(`autocompleteSuggestion-field-${key}-`).click();
-    // Do not close quotes here as it will not display the suggestion box
-    cy.getByTestSubj(dataTestSubj).type(`: ${value}`);
+
+    cy.getByTestSubj(dataTestSubj).type(`: `);
     if (waitForSuggestion) {
       cy.getByTestSubj(Cypress.$.escapeSelector(`autocompleteSuggestion-value-"${value}"-`))
         .should('be.visible')
