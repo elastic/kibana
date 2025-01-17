@@ -16,10 +16,8 @@ xpack.searchIndices.enabled: false
 ## Fine-tune the security solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
   ### Dashboard feature is hidden in Role management since it's automatically granted by SIEM feature.
-  dashboard.hidden: true
   dashboard_v2.hidden: true
   ### Discover feature is hidden in Role management since it's automatically granted by SIEM feature.
-  discover.hidden: true
   discover_v2.hidden: true
   ### Machine Learning feature is moved from Analytics category to the Security one as the last item.
   ml:

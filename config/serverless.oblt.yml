@@ -36,7 +36,6 @@ xpack.features.overrides:
   ### Discover feature should be moved from Analytics category to the Observability one and its privileges are
   ### fine-tuned to grant access to Observability app.
   discover:
-    category: "observability"
     privileges:
       # Discover `All` feature privilege should implicitly grant `All` access to Observability app.
       all.composedOf:

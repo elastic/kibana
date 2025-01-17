@@ -92,7 +92,6 @@ xpack.features.overrides:
           privileges: [ "generate_report" ]
   ### Visualize feature is hidden in Role management since it's automatically granted by Dashboard feature.
   visualize:
-    hidden: true
     ### The short URL sub-feature privilege should be always granted.
     subFeatures.privileges.url_create.includeIn: "read"
   visualize_v2:
