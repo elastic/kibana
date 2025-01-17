@@ -125,12 +125,12 @@ export function DiscoverMainRoute({
           // Although ES|QL doesn't need a data view, we still need to load the data view list to
           // ensure the data view is available for the user to switch to classic mode
           // however, we don't need to wait for those requirements to load, which makes loading a bit more snappy
-          stateContainer.actions.loadDataRequirements();
+          stateContainer.actions.loadDataRequirements(true);
           return true;
         }
 
         const { hasUserDataViewValue, hasESDataValue, defaultDataViewExists } =
-          await stateContainer.actions.loadDataRequirements();
+          await stateContainer.actions.loadDataRequirements(true);
 
         if (!hasUserDataViewValue || !defaultDataViewExists) {
           setNoDataState({
@@ -190,7 +190,7 @@ export function DiscoverMainRoute({
       } catch (e) {
         if (e instanceof NoDataViewError) {
           const { hasUserDataViewValue, hasESDataValue } =
-            await stateContainer.actions.loadDataRequirements();
+            await stateContainer.actions.loadDataRequirements(false);
 
           setNoDataState({
             showNoDataPage: true,

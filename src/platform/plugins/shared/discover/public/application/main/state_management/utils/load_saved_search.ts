@@ -119,9 +119,6 @@ export const loadSavedSearch = async (
         services,
         internalStateContainer,
       });
-      if (!stateDataView) {
-        throw new NoDataViewError();
-      }
       const dataViewDifferentToAppState = stateDataView.id !== savedSearchDataViewId;
       if (
         !nextSavedSearch.isTextBasedQuery &&

@@ -173,7 +173,7 @@ export interface DiscoverStateContainer {
     /**
      * Loading information about data and data views that are required for the current session
      */
-    loadDataRequirements: () => Promise<DiscoverStateDataRequirements>;
+    loadDataRequirements: (useCache: boolean) => Promise<DiscoverStateDataRequirements>;
     /**
      * Load a saved search by id or create a new one that's not persisted yet
      * @param LoadParams - optional parameters to load a saved search
@@ -339,7 +339,7 @@ export function getDiscoverStateContainer({
     return dataViewList;
   };
 
-  const loadDataRequirementsHelper = async (sessKey: string) => {
+  const loadDataRequirementsHelper = async (sessKey?: string) => {
     try {
       const [hasUserDataViewValue, hasESDataValue, defaultDataViewExists, dataViewList] =
         await Promise.all([
@@ -354,7 +354,10 @@ export function getDiscoverStateContainer({
         defaultDataViewExists,
         dataViewList,
       };
-      sessionStorage.setItem(sessKey, JSON.stringify(result));
+      if (sessKey) {
+        sessionStorage.setItem(sessKey, JSON.stringify(result));
+      }
+
       return {
         hasUserDataViewValue,
         hasESDataValue,
@@ -369,30 +372,34 @@ export function getDiscoverStateContainer({
     }
   };
 
-  const loadDataRequirements = async () => {
+  const loadDataRequirements = async (useCache: boolean = true) => {
     const currentUser = await services.core.security.authc.getCurrentUser();
     const currentSpace = await services.spaces?.getActiveSpace();
-    const sessionKey = `discover:session:dataRequirements:${currentUser.profile_uid}:${currentSpace?.id}`;
-    const sessionValue = sessionStorage.getItem(sessionKey);
-    const sessionValueParsed = JSON.parse(sessionValue || '{}') as DiscoverStateDataRequirements;
-    const useSessionValue =
-      sessionValue &&
-      sessionValueParsed &&
-      sessionValueParsed.hasUserDataViewValue &&
-      sessionValueParsed.hasESDataValue &&
-      sessionValueParsed.defaultDataViewExists;
+    if (useCache) {
+      const sessionKey = `discover:session:dataRequirements:${currentUser.profile_uid}:${currentSpace?.id}`;
 
-    if (useSessionValue) {
-      // just use the value stored in the session if data/dataviews are available
-      if (sessionValueParsed.dataViewList) {
-        internalStateContainer.transitions.setSavedDataViews(sessionValueParsed.dataViewList);
+      const sessionValue = sessionStorage.getItem(sessionKey);
+      const sessionValueParsed = JSON.parse(sessionValue || '{}') as DiscoverStateDataRequirements;
+      const useSessionValue =
+        sessionValue &&
+        sessionValueParsed &&
+        sessionValueParsed.hasUserDataViewValue &&
+        sessionValueParsed.hasESDataValue &&
+        sessionValueParsed.defaultDataViewExists;
+
+      if (useSessionValue) {
+        // just use the value stored in the session if data/dataviews are available
+        if (sessionValueParsed.dataViewList) {
+          internalStateContainer.transitions.setSavedDataViews(sessionValueParsed.dataViewList);
+        }
+        // refresh the values in the background
+        loadDataRequirementsHelper(sessionKey);
+        // return the value in browser session
+        return sessionValueParsed;
       }
-      // refresh the values in the background
-      loadDataRequirementsHelper(sessionKey);
-      // return the value in browser session
-      return sessionValueParsed;
     }
-    return loadDataRequirementsHelper(sessionKey);
+
+    return loadDataRequirementsHelper();
   };
 
   /**

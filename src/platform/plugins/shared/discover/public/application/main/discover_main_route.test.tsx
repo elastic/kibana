@@ -26,18 +26,6 @@ import type { SpacesApi } from '@kbn/spaces-plugin/public';
 
 let mockCustomizationService: DiscoverCustomizationService | undefined;
 
-// mock browser session storage
-const sessionStorage = {
-  value: {
-    getItem: jest.fn(),
-    setItem: jest.fn(),
-    removeItem: jest.fn(),
-  },
-  writable: true,
-  configurable: true,
-};
-Object.defineProperty(window, 'sessionStorage', sessionStorage);
-
 jest.mock('../../customizations', () => {
   const originalModule = jest.requireActual('../../customizations');
   return {
