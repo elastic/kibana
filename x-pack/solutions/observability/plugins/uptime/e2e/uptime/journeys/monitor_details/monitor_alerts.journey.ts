@@ -69,7 +69,14 @@ journey('MonitorAlerts', async ({ page, params }: { page: Page; params: any }) =
   });
 
   step('close anomaly detection flyout', async () => {
-    await page.click(byTestId('cancelSaveRuleButton'));
+    await page.click(byTestId('ruleFlyoutFooterCancelButton'));
+    if (
+      await page.waitForSelector(byTestId('ruleFlyoutConfirmCancelConfirmButton'), {
+        timeout: 1000,
+      })
+    ) {
+      await page.click(byTestId('ruleFlyoutConfirmCancelConfirmButton'));
+    }
   });
 
   step('open anomaly detection alert', async () => {
