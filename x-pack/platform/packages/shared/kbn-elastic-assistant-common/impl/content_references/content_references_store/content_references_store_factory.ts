@@ -11,7 +11,7 @@ export const contentReferencesStoreFactory: () => ContentReferencesStore = () =>
   const store = new Map<string, ContentReference>();
 
   const add: ContentReferencesStore['add'] = (creator) => {
-    const entry = creator({ id: generateInsecureId() });
+    const entry = creator({ id: generateUnsecureId() });
     store.set(entry.id, entry);
     return entry;
   };
@@ -23,9 +23,9 @@ export const contentReferencesStoreFactory: () => ContentReferencesStore = () =>
   /**
    * Generates an ID that does not exist in the store yet. This is not cryptographically secure.
    * @param size Size of ID to generate
-   * @returns
+   * @returns an unsecure Id
    */
-  const generateInsecureId = (size = 5): string => {
+  const generateUnsecureId = (size = 5): string => {
     let id = '';
     for (let i = 0; i < size; i++) {
       id += CONTENT_REFERENCE_ID_ALPHABET.charAt(
@@ -33,7 +33,7 @@ export const contentReferencesStoreFactory: () => ContentReferencesStore = () =>
       );
     }
     if (store.has(id)) {
-      return generateInsecureId(size + 1);
+      return generateUnsecureId(size + 1);
     }
     return id;
   };
