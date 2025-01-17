@@ -86,6 +86,13 @@ export interface OutputOptions<
    */
   previousMessages?: Message[];
   /**
+   * The model name identifier to use. Can be defined to use another model than the
+   * default one, when using connectors / providers exposing multiple models.
+   *
+   * Defaults to the default model as defined by the used connector.
+   */
+  modelName?: string;
+  /**
    * Function calling mode, defaults to "native".
    */
   functionCalling?: FunctionCallingMode;
@@ -96,7 +103,10 @@ export interface OutputOptions<
    * Defaults to false.
    */
   stream?: TStream;
-
+  /**
+   * Optional signal that can be used to forcefully abort the request.
+   */
+  abortSignal?: AbortSignal;
   /**
    * Optional configuration for retrying the call if an error occurs.
    */

@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { AssistantAvatar } from '../assistant_avatar';
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
 
 export interface InsightBaseProps {
   title: string;
@@ -66,7 +66,7 @@ export function InsightBase({
           <EuiFlexGroup wrap responsive={false} gutterSize="m" data-test-subj={dataTestSubj}>
             <EuiFlexItem grow={false}>
               <EuiSpacer size="xs" />
-              <AssistantAvatar size="xs" />
+              <AssistantIcon size="m" />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFlexGroup gutterSize="s" alignItems="center">

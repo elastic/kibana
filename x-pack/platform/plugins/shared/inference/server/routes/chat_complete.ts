@@ -87,6 +87,8 @@ const chatCompleteBodySchema: Type<ChatCompleteRequestBody> = schema.object({
   functionCalling: schema.maybe(
     schema.oneOf([schema.literal('native'), schema.literal('simulated')])
   ),
+  temperature: schema.maybe(schema.number()),
+  modelName: schema.maybe(schema.string()),
 });
 
 export function registerChatCompleteRoute({
@@ -109,6 +111,9 @@ export function registerChatCompleteRoute({
       .getStartServices()
       .then(([coreStart, pluginsStart]) => pluginsStart.actions);
 
+    const abortController = new AbortController();
+    request.events.aborted$.subscribe(() => abortController.abort());
+
     const client = createInferenceClient({ request, actions, logger });
 
     const { connectorId, messages, system, toolChoice, tools, functionCalling } = request.body;
@@ -121,6 +126,7 @@ export function registerChatCompleteRoute({
       tools,
       functionCalling,
       stream,
+      abortSignal: abortController.signal,
     });
   }
 

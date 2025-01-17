@@ -33,12 +33,14 @@ describe('createOutputApi', () => {
       connectorId: '.my-connector',
       system: 'system',
       input: 'input message',
+      modelName: 'gpt-4o',
     });
 
     expect(chatComplete).toHaveBeenCalledTimes(1);
     expect(chatComplete).toHaveBeenCalledWith({
       connectorId: '.my-connector',
       functionCalling: 'native',
+      modelName: 'gpt-4o',
       stream: false,
       system: 'system',
       messages: [
@@ -195,5 +197,27 @@ describe('createOutputApi', () => {
         })
       ).toThrowError('Retry options are not supported in streaming mode');
     });
+  });
+
+  it('propagates the abort signal when provided', async () => {
+    chatComplete.mockResolvedValue(Promise.resolve({ content: 'content', toolCalls: [] }));
+
+    const output = createOutputApi(chatComplete);
+
+    const abortController = new AbortController();
+
+    await output({
+      id: 'id',
+      connectorId: '.my-connector',
+      input: 'input message',
+      abortSignal: abortController.signal,
+    });
+
+    expect(chatComplete).toHaveBeenCalledTimes(1);
+    expect(chatComplete).toHaveBeenCalledWith(
+      expect.objectContaining({
+        abortSignal: abortController.signal,
+      })
+    );
   });
 });

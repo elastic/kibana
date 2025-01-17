@@ -11,6 +11,7 @@ xpack.search.notebooks.enabled: false
 xpack.searchPlayground.enabled: false
 xpack.searchInferenceEndpoints.enabled: false
 xpack.inventory.enabled: false
+xpack.searchIndices.enabled: false
 
 ## Fine-tune the security solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
@@ -106,7 +107,7 @@ xpack.fleet.internal.registry.excludePackages: [
     'dga',
 
     # Unsupported in serverless
-    'cloud-defend',
+    'cloud_defend',
   ]
 # fleet_server package installed to publish agent metrics
 xpack.fleet.packages:

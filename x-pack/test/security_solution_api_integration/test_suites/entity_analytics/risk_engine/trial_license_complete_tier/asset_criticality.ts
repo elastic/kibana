@@ -70,6 +70,9 @@ export default ({ getService }: FtrProviderContext) => {
         expect(
           assetCriticalityIndexResult['.asset-criticality.asset-criticality-default']?.mappings
         ).to.eql({
+          _meta: {
+            version: 2,
+          },
           dynamic: 'strict',
           properties: {
             '@timestamp': {
@@ -83,6 +86,20 @@ export default ({ getService }: FtrProviderContext) => {
             },
             id_value: {
               type: 'keyword',
+            },
+            service: {
+              properties: {
+                asset: {
+                  properties: {
+                    criticality: {
+                      type: 'keyword',
+                    },
+                  },
+                },
+                name: {
+                  type: 'keyword',
+                },
+              },
             },
             updated_at: {
               type: 'date',

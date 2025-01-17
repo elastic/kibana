@@ -5,28 +5,29 @@
  * 2.0.
  */
 
-import { euiDarkVars as euiVars } from '@kbn/ui-theme';
+import type { EuiThemeComputed } from '@elastic/eui';
 
 import { stringHash } from '@kbn/ml-string-hash';
 
-const COLORS = [
-  euiVars.euiColorVis0,
-  euiVars.euiColorVis1,
-  euiVars.euiColorVis2,
-  euiVars.euiColorVis3,
-  euiVars.euiColorVis4,
-  euiVars.euiColorVis5,
-  euiVars.euiColorVis6,
-  euiVars.euiColorVis7,
-  euiVars.euiColorVis8,
-  euiVars.euiColorVis9,
-  euiVars.euiColorDarkShade,
-  euiVars.euiColorPrimary,
-];
-
 const colorMap: Record<string, string> = Object.create(null);
 
-export function tabColor(name: string): string {
+export function tabColor(name: string, euiTheme: EuiThemeComputed): string {
+  const COLORS = [
+    // Amsterdam + Borealis
+    euiTheme.colors.vis.euiColorVis0,
+    euiTheme.colors.vis.euiColorVis1,
+    euiTheme.colors.vis.euiColorVis2,
+    euiTheme.colors.vis.euiColorVis3,
+    euiTheme.colors.vis.euiColorVis4,
+    euiTheme.colors.vis.euiColorVis5,
+    euiTheme.colors.vis.euiColorVis6,
+    euiTheme.colors.vis.euiColorVis7,
+    euiTheme.colors.vis.euiColorVis8,
+    euiTheme.colors.vis.euiColorVis9,
+    euiTheme.colors.darkShade,
+    euiTheme.colors.primary,
+  ];
+
   if (colorMap[name] === undefined) {
     const n = stringHash(name);
     const color = COLORS[n % COLORS.length];

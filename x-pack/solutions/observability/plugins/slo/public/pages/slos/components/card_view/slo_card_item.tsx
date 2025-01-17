@@ -6,7 +6,7 @@
  */
 
 import { Chart, isMetricElementEvent, Metric, MetricTrendShape, Settings } from '@elastic/charts';
-import { EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
+import { EuiIcon, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -19,10 +19,14 @@ import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { SloDeleteModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
+import { SloDisableConfirmationModal } from '../../../../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';
+import { SloEnableConfirmationModal } from '../../../../components/slo/enable_confirmation_modal/slo_enable_confirmation_modal';
 import { SloResetConfirmationModal } from '../../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
+import { useDisableSlo } from '../../../../hooks/use_disable_slo';
+import { useEnableSlo } from '../../../../hooks/use_enable_slo';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { useResetSlo } from '../../../../hooks/use_reset_slo';
 import { BurnRateRuleParams } from '../../../../typings';
-import { useKibana } from '../../../../hooks/use_kibana';
 import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
 import { useSloListActions } from '../../hooks/use_slo_list_actions';
 import { useSloFormattedSummary } from '../../hooks/use_slo_summary';
@@ -44,11 +48,12 @@ export interface Props {
 }
 
 export const useSloCardColor = (status?: SLOWithSummaryResponse['summary']['status']) => {
+  const { euiTheme } = useEuiTheme();
   const colors = {
-    DEGRADING: useEuiBackgroundColor('warning'),
-    VIOLATED: useEuiBackgroundColor('danger'),
-    HEALTHY: useEuiBackgroundColor('success'),
-    NO_DATA: useEuiBackgroundColor('subdued'),
+    DEGRADING: euiTheme.colors.backgroundBaseWarning,
+    VIOLATED: euiTheme.colors.backgroundBaseDanger,
+    HEALTHY: euiTheme.colors.backgroundBaseSuccess,
+    NO_DATA: euiTheme.colors.backgroundBaseSubdued,
   };
 
   return { cardColor: colors[status ?? 'NO_DATA'], colors };
@@ -72,6 +77,8 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
   const [isEditRuleFlyoutOpen, setIsEditRuleFlyoutOpen] = useState(false);
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
   const [isResetConfirmationModalOpen, setResetConfirmationModalOpen] = useState(false);
+  const [isEnableConfirmationModalOpen, setEnableConfirmationModalOpen] = useState(false);
+  const [isDisableConfirmationModalOpen, setDisableConfirmationModalOpen] = useState(false);
   const [isDashboardAttachmentReady, setDashboardAttachmentReady] = useState(false);
 
   const historicalSliData = formatHistoricalData(historicalSummary, 'sli_value');
@@ -86,15 +93,33 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
     setDeleteConfirmationModalOpen(false);
   };
 
-  const { mutateAsync: resetSlo, isLoading: isResetLoading } = useResetSlo();
+  const { mutate: resetSlo, isLoading: isResetLoading } = useResetSlo();
+  const { mutate: enableSlo, isLoading: isEnableLoading } = useEnableSlo();
+  const { mutate: disableSlo, isLoading: isDisableLoading } = useDisableSlo();
 
-  const handleResetConfirm = async () => {
-    await resetSlo({ id: slo.id, name: slo.name });
+  const handleResetConfirm = () => {
+    resetSlo({ id: slo.id, name: slo.name });
     setResetConfirmationModalOpen(false);
   };
 
   const handleResetCancel = () => {
     setResetConfirmationModalOpen(false);
+  };
+
+  const handleEnableCancel = () => {
+    setEnableConfirmationModalOpen(false);
+  };
+  const handleEnableConfirm = () => {
+    enableSlo({ id: slo.id, name: slo.name });
+    setEnableConfirmationModalOpen(false);
+  };
+
+  const handleDisableCancel = () => {
+    setDisableConfirmationModalOpen(false);
+  };
+  const handleDisableConfirm = () => {
+    disableSlo({ id: slo.id, name: slo.name });
+    setDisableConfirmationModalOpen(false);
   };
 
   return (
@@ -143,7 +168,6 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
               rules={rules}
               activeAlerts={activeAlerts}
               handleCreateRule={handleCreateRule}
-              hasGroupBy={Boolean(slo.groupBy && slo.groupBy !== ALL_VALUE)}
             />
           }
         />
@@ -158,6 +182,8 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
             setIsEditRuleFlyoutOpen={setIsEditRuleFlyoutOpen}
             setDashboardAttachmentReady={setDashboardAttachmentReady}
             setResetConfirmationModalOpen={setResetConfirmationModalOpen}
+            setEnableConfirmationModalOpen={setEnableConfirmationModalOpen}
+            setDisableConfirmationModalOpen={setDisableConfirmationModalOpen}
           />
         </div>
       </EuiPanel>
@@ -185,6 +211,24 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
           onCancel={handleResetCancel}
           onConfirm={handleResetConfirm}
           isLoading={isResetLoading}
+        />
+      ) : null}
+
+      {isEnableConfirmationModalOpen ? (
+        <SloEnableConfirmationModal
+          slo={slo}
+          onCancel={handleEnableCancel}
+          onConfirm={handleEnableConfirm}
+          isLoading={isEnableLoading}
+        />
+      ) : null}
+
+      {isDisableConfirmationModalOpen ? (
+        <SloDisableConfirmationModal
+          slo={slo}
+          onCancel={handleDisableCancel}
+          onConfirm={handleDisableConfirm}
+          isLoading={isDisableLoading}
         />
       ) : null}
 

@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
-import { css } from '@emotion/css';
-import React, { Suspense, useCallback, useMemo, useState } from 'react';
-import type {
-  ActionConnector,
-  ActionType,
-  ActionTypeRegistryContract,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSuperSelect,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import React, { useCallback, useMemo } from 'react';
 
 import { euiThemeVars } from '@kbn/ui-theme';
 import { some } from 'lodash';
-import { AddConnectorModal } from '@kbn/elastic-assistant/impl/connectorland/add_connector_modal';
 import * as i18n from './translations';
 
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
@@ -28,40 +29,23 @@ const placeholderCss = css`
   }
 `;
 
-interface ConnectorSelectorOption {
-  value: string;
-  'data-test-subj': string;
-  inputDisplay: React.JSX.Element;
-  dropdownDisplay: React.JSX.Element;
+export interface ConnectorDetails {
+  id: string;
+  name: string;
+  description: string;
 }
+
 export interface ConnectorSelectorProps {
+  connectors: ConnectorDetails[];
+  onChange: (connectorId: string) => void;
+  selectedId?: string;
+  onNewConnectorClicked?: () => void;
   isDisabled?: boolean;
-  isOpen?: boolean;
-  onConnectorSelectionChange: (connectorId: string) => void;
-  onConnectorSaved?: () => void;
-  selectedConnectorId?: string;
-  setIsOpen?: (isOpen: boolean) => void;
-  actionTypeRegistry: ActionTypeRegistryContract;
-  actionTypes: ActionType[];
-  onRefetchConnectors: () => void;
-  connectorOptions: ConnectorSelectorOption[];
 }
 
 export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
-  ({
-    isDisabled = false,
-    isOpen = false,
-    selectedConnectorId,
-    onConnectorSelectionChange,
-    setIsOpen,
-    actionTypeRegistry,
-    actionTypes,
-    onConnectorSaved,
-    onRefetchConnectors,
-    connectorOptions,
-  }) => {
-    const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
-    const [selectedActionType, setSelectedActionType] = useState<ActionType | null>(null);
+  ({ connectors, onChange, selectedId, onNewConnectorClicked, isDisabled }) => {
+    const { euiTheme } = useEuiTheme();
 
     const localIsDisabled = isDisabled;
 
@@ -92,76 +76,88 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
     }, [localIsDisabled]);
 
     const connectorExists = useMemo(
-      () => some(connectorOptions, ['value', selectedConnectorId]),
-      [connectorOptions, selectedConnectorId]
+      () => some(connectors, ['id', selectedId]),
+      [connectors, selectedId]
     );
 
-    // Only include add new connector option if user has privilege
+    const connectorOptionMapped = connectors.map((connector) => ({
+      value: connector.id,
+      'data-test-subj': connector.id,
+      inputDisplay: (
+        <EuiText
+          css={css`
+            margin-right: 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          `}
+          size="s"
+          color={euiTheme.colors.primary}
+        >
+          {connector.name}
+        </EuiText>
+      ),
+      dropdownDisplay: (
+        <React.Fragment key={connector.id}>
+          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" alignItems="center">
+            <EuiFlexItem grow={false} data-test-subj={`connector-${connector.name}`}>
+              <strong>{connector.name}</strong>
+              <EuiText size="xs" color="subdued">
+                <p>{connector.description}</p>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </React.Fragment>
+      ),
+    }));
+
     const allConnectorOptions = useMemo(
       () =>
-        onConnectorSaved ? [...connectorOptions, addNewConnectorOption] : [...connectorOptions],
-      [onConnectorSaved, connectorOptions, addNewConnectorOption]
+        onNewConnectorClicked
+          ? [...connectorOptionMapped, addNewConnectorOption]
+          : [...connectorOptionMapped],
+      [onNewConnectorClicked, connectorOptionMapped, addNewConnectorOption]
     );
-
-    const cleanupAndCloseModal = useCallback(() => {
-      setIsOpen?.(false);
-      setIsConnectorModalVisible(false);
-      setSelectedActionType(null);
-    }, [setIsOpen]);
-
-    const [modalForceOpen, setModalForceOpen] = useState(isOpen);
 
     const onChangeConnector = useCallback(
       (connectorId: string) => {
         if (connectorId === ADD_NEW_CONNECTOR) {
-          setModalForceOpen(false);
-          setIsConnectorModalVisible(true);
+          onNewConnectorClicked?.();
           return;
         }
-        onConnectorSelectionChange(connectorId);
+        onChange(connectorId);
       },
-      [onConnectorSelectionChange]
-    );
-
-    const onSaveConnector = useCallback(
-      (connector: ActionConnector) => {
-        onConnectorSelectionChange(connector.id);
-        onRefetchConnectors?.();
-        onConnectorSaved?.();
-        cleanupAndCloseModal();
-      },
-      [cleanupAndCloseModal, onConnectorSelectionChange, onRefetchConnectors, onConnectorSaved]
+      [onChange, onNewConnectorClicked]
     );
 
     return (
       <>
-        {!connectorExists && !connectorOptions.length ? (
+        {!connectorExists && !connectors.length ? (
           <EuiButtonEmpty
             data-test-subj="addNewConnectorButton"
             iconType="plusInCircle"
             isDisabled={localIsDisabled}
             size="xs"
-            onClick={() => setIsConnectorModalVisible(true)}
+            onClick={() => onNewConnectorClicked?.()}
           >
             {i18n.ADD_CONNECTOR}
           </EuiButtonEmpty>
         ) : (
           <EuiSuperSelect
             aria-label={i18n.CONNECTOR_SELECTOR_TITLE}
-            className={placeholderCss}
+            css={placeholderCss}
             compressed={true}
             data-test-subj="connector-selector"
             disabled={localIsDisabled}
             hasDividers={true}
-            isOpen={modalForceOpen}
+            // isOpen={modalForceOpen}
             onChange={onChangeConnector}
             options={allConnectorOptions}
-            valueOfSelected={selectedConnectorId}
+            valueOfSelected={selectedId}
             placeholder={i18n.CONNECTOR_SELECTOR_PLACEHOLDER}
             popoverProps={{ panelMinWidth: 400, anchorPosition: 'downRight' }}
           />
         )}
-        {isConnectorModalVisible && (
+        {/* {isConnectorModalVisible && (
           // Crashing management app otherwise
           <Suspense fallback>
             <AddConnectorModal
@@ -173,7 +169,7 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
               selectedActionType={selectedActionType}
             />
           </Suspense>
-        )}
+        )} */}
       </>
     );
   }
