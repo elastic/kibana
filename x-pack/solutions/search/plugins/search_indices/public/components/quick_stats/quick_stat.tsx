@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-
 import {
   EuiAccordion,
   EuiDescriptionList,
@@ -21,20 +20,22 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 
-interface BaseQuickStatProps {
+export interface BaseQuickStatProps {
   icon: string;
   iconColor: string;
   title: string;
-  secondaryTitle: React.ReactNode;
+  secondaryTitle?: React.ReactNode;
   open: boolean;
   content?: React.ReactNode;
-  stats: Array<{
-    title: string;
-    description: NonNullable<React.ReactNode>;
-  }>;
+  stats: QuickStatDefinition[];
   setOpen: (open: boolean) => void;
-  first?: boolean;
   tooltipContent?: string;
+  statsColumnWidths?: [string | number, string | number] | undefined;
+}
+
+export interface QuickStatDefinition {
+  title: string;
+  description: NonNullable<React.ReactNode>;
 }
 
 export const QuickStat: React.FC<BaseQuickStatProps> = ({
@@ -43,11 +44,11 @@ export const QuickStat: React.FC<BaseQuickStatProps> = ({
   stats,
   open,
   setOpen,
-  first,
   secondaryTitle,
   iconColor,
   content,
   tooltipContent,
+  statsColumnWidths,
   ...rest
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -60,6 +61,7 @@ export const QuickStat: React.FC<BaseQuickStatProps> = ({
   return (
     <EuiAccordion
       forceState={open ? 'open' : 'closed'}
+      data-test-subj={id}
       onToggle={() => setOpen(!open)}
       paddingSize="none"
       id={id}
@@ -67,8 +69,6 @@ export const QuickStat: React.FC<BaseQuickStatProps> = ({
       arrowDisplay="right"
       {...rest}
       css={{
-        borderLeft: euiTheme.border.thin,
-        ...(first ? { borderLeftWidth: 0 } : {}),
         '.euiAccordion__arrow': {
           marginRight: euiTheme.size.s,
         },
@@ -76,7 +76,6 @@ export const QuickStat: React.FC<BaseQuickStatProps> = ({
           background: euiTheme.colors.emptyShade,
         },
         '.euiAccordion__children': {
-          borderTop: euiTheme.border.thin,
           padding: euiTheme.size.m,
         },
       }}
@@ -84,21 +83,25 @@ export const QuickStat: React.FC<BaseQuickStatProps> = ({
         <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon type={icon} color={iconColor} />
+              <span>
+                <EuiIcon type={icon} color={iconColor} />
+              </span>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiTitle size="xxs">
                 <h4>{title}</h4>
               </EuiTitle>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
-                {secondaryTitle}
-              </EuiText>
-            </EuiFlexItem>
+            {secondaryTitle && (
+              <EuiFlexItem grow={false}>
+                <EuiText size="s" color="subdued">
+                  {secondaryTitle}
+                </EuiText>
+              </EuiFlexItem>
+            )}
             {tooltipContent && (
-              <EuiFlexItem>
-                <EuiIconTip content={tooltipContent} />
+              <EuiFlexItem grow={false}>
+                <EuiIconTip content={tooltipContent} display="block" />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -113,7 +116,7 @@ export const QuickStat: React.FC<BaseQuickStatProps> = ({
             <EuiDescriptionList
               type="column"
               listItems={stats}
-              columnWidths={[3, 1]}
+              columnWidths={statsColumnWidths ?? [3, 1]}
               compressed
               descriptionProps={{
                 color: 'subdued',

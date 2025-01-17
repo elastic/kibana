@@ -5,34 +5,28 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { type EuiThemeComputed } from '@elastic/eui';
+import React from 'react';
+import { useEuiTheme } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { SetupAISearchButton } from './setup_ai_search_button';
-import { countVectorBasedTypesFromMappings } from './mappings_convertor';
+import { VectorFieldTypes } from './mappings_convertor';
 import { QuickStat } from './quick_stat';
-import { Mappings } from '../../types';
 
 export interface AISearchQuickStatProps {
-  euiTheme: EuiThemeComputed<{}>;
-  mappings: Mappings;
+  mappingStats: VectorFieldTypes;
+  vectorFieldCount: number;
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const AISearchQuickStat = ({
-  euiTheme,
-  mappings,
+  mappingStats,
+  vectorFieldCount,
   open,
   setOpen,
 }: AISearchQuickStatProps) => {
-  const { mappingStats, vectorFieldCount } = useMemo(() => {
-    const stats = countVectorBasedTypesFromMappings(mappings);
-    const vectorFields = stats.sparse_vector + stats.dense_vector + stats.semantic_text;
-    return { mappingStats: stats, vectorFieldCount: vectorFields };
-  }, [mappings]);
-
+  const { euiTheme } = useEuiTheme();
   return (
     <QuickStat
       open={open}

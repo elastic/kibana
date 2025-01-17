@@ -12,25 +12,26 @@ import { EuiI18nNumber, useEuiTheme } from '@elastic/eui';
 
 import { QuickStat } from './quick_stat';
 import {
+  DELETED_COUNT_LABEL,
   DOCUMENT_COUNT_LABEL,
   DOCUMENT_COUNT_TOOLTIP,
-  INDEX_SIZE_LABEL,
   TOTAL_COUNT_LABEL,
 } from './constants';
+import { VectorFieldTypes } from './mappings_convertor';
 
-export interface StatelessDocumentCountStatProps {
+export interface StatefulDocumentCountStatProps {
   index: Index;
-  documentCount: number;
+  mappingStats: VectorFieldTypes;
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const StatelessDocumentCountStat = ({
+export const StatefulDocumentCountStat = ({
   index,
-  documentCount,
   open,
   setOpen,
-}: StatelessDocumentCountStatProps) => {
+  mappingStats,
+}: StatefulDocumentCountStatProps) => {
   const { euiTheme } = useEuiTheme();
   return (
     <QuickStat
@@ -40,18 +41,18 @@ export const StatelessDocumentCountStat = ({
       iconColor={euiTheme.colors.fullShade}
       title={DOCUMENT_COUNT_LABEL}
       data-test-subj="QuickStatsDocumentCount"
-      secondaryTitle={<EuiI18nNumber value={documentCount} />}
+      secondaryTitle={<EuiI18nNumber value={index.documents ?? 0} />}
       stats={[
         {
           title: TOTAL_COUNT_LABEL,
-          description: <EuiI18nNumber value={documentCount} />,
+          description: <EuiI18nNumber value={index.documents ?? 0} />,
         },
         {
-          title: INDEX_SIZE_LABEL,
-          description: index.size ?? '0b',
+          title: DELETED_COUNT_LABEL,
+          description: <EuiI18nNumber value={index.documents_deleted ?? 0} />,
         },
       ]}
-      tooltipContent={DOCUMENT_COUNT_TOOLTIP}
+      tooltipContent={mappingStats.semantic_text > 0 ? DOCUMENT_COUNT_TOOLTIP : undefined}
     />
   );
 };
