@@ -25,6 +25,8 @@ import {
   UseInTableSearchMatchesProps,
 } from './use_in_table_search_matches';
 
+const BUTTON_TEST_SUBJ = 'startInTableSearchButton';
+
 const searchInputCss = css`
   .euiFormControlLayout,
   input.euiFieldSearch {
@@ -103,6 +105,25 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
   const areArrowsDisabled = !matchesCount || isProcessing;
 
   const [isFocused, setIsFocused] = useState<boolean>(false);
+
+  const focusInput = useCallback(() => {
+    setIsFocused(true);
+  }, [setIsFocused]);
+
+  const hideInput = useCallback(
+    (shouldFocusTheButton?: boolean) => {
+      setIsFocused(false);
+
+      if (shouldFocusTheButton) {
+        setTimeout(() => {
+          const button = document.querySelector(`[data-test-subj='${BUTTON_TEST_SUBJ}']`);
+          (button as HTMLButtonElement)?.focus();
+        }, 350);
+      }
+    },
+    [setIsFocused]
+  );
+
   const { inputValue, handleInputChange } = useDebouncedValue({
     onChange,
     value: props.inTableSearchTerm,
@@ -118,7 +139,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
   const onKeyUp = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
       if (event.key === keys.ESCAPE) {
-        setIsFocused(false);
+        hideInput(true);
         return;
       }
 
@@ -132,7 +153,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
         goToNextMatch();
       }
     },
-    [goToPrevMatch, goToNextMatch, areArrowsDisabled]
+    [goToPrevMatch, goToNextMatch, hideInput, areArrowsDisabled]
   );
 
   const onBlur = useCallback(
@@ -142,10 +163,10 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
           event.relatedTarget.getAttribute('data-test-subj') !== 'clearSearchButton') &&
         !inputValue
       ) {
-        setIsFocused(false);
+        hideInput();
       }
     },
-    [setIsFocused, inputValue]
+    [hideInput, inputValue]
   );
 
   useEffect(() => {
@@ -156,7 +177,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
         shouldOverrideCmdF(event.target as HTMLElement)
       ) {
         event.preventDefault(); // prevent default browser find-in-page behavior
-        setIsFocused(true);
+        focusInput();
       }
     };
 
@@ -166,7 +187,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
     return () => {
       document.removeEventListener('keydown', handleGlobalKeyDown);
     };
-  }, [setIsFocused, shouldOverrideCmdF]);
+  }, [focusInput, shouldOverrideCmdF]);
 
   if (!isFocused && !inputValue) {
     return (
@@ -177,10 +198,11 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
         delay="long"
       >
         <EuiButtonIcon
+          data-test-subj={BUTTON_TEST_SUBJ}
           iconType="search"
           size="xs"
           color="text"
-          onClick={() => setIsFocused(true)}
+          onClick={focusInput}
           aria-label={i18n.translate('unifiedDataTable.inTableSearch.inputPlaceholder', {
             defaultMessage: 'Search in the table',
           })}
