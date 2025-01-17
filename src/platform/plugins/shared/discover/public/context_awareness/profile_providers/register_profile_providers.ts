@@ -29,6 +29,7 @@ import {
 import type { DiscoverServices } from '../../build_services';
 import { createObservabilityRootProfileProvider } from './observability/observability_root_profile';
 import { createDeprecationLogsDataSourceProfileProvider } from './common/deprecation_logs';
+import { createTracesDataSourceProfileProvider } from './observability/traces';
 
 /**
  * Register profile providers for root, data source, and document contexts to the profile profile services
@@ -133,6 +134,7 @@ const createRootProfileProviders = (providerServices: ProfileProviderServices) =
  * @returns An array of available data source profile providers
  */
 const createDataSourceProfileProviders = (providerServices: ProfileProviderServices) => [
+  createTracesDataSourceProfileProvider(),
   createExampleDataSourceProfileProvider(),
   createDeprecationLogsDataSourceProfileProvider(),
   ...createObservabilityLogsDataSourceProfileProviders(providerServices),
