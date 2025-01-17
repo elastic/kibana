@@ -124,7 +124,7 @@ const mockKibana = () => {
       storage: {
         get: () => {},
       },
-      triggersActionsUi: { mockGetRuleFormFlyout },
+      triggersActionsUi: { getRuleFormFlyout: mockGetRuleFormFlyout },
       uiSettings: {
         get: (settings: string) => {
           if (settings === 'dateFormat') return 'YYYY-MM-DD';

@@ -55,7 +55,7 @@ export const RuleFlyoutConfirmCancel = ({ onBack, onConfirm }: RuleFlyoutShowReq
               fill
               color="danger"
               onClick={onConfirm}
-              data-test-subj="ruleFlyoutConfirmCancelConfigmButton"
+              data-test-subj="ruleFlyoutConfirmCancelConfirmButton"
             >
               {RULE_FORM_CANCEL_MODAL_CONFIRM}
             </EuiButton>
