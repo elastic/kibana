@@ -10,11 +10,15 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
+    "**/*.tsx"
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/repo-info",
+    "@kbn/dev-cli-runner",
+    "@kbn/repo-packages",
+    "@kbn/tooling-log"
   ]
 }
