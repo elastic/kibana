@@ -8,12 +8,12 @@
 import React from 'react';
 import { type AppMockRenderer, createAppMockRenderer } from '../../common/mock';
 import { SimilarCasesTable, type SimilarCasesTableProps } from './table';
-import { mockCase, mockObservables } from '../../containers/mock';
+import { mockCase, mockSimilarObservables } from '../../containers/mock';
 
 describe('SimilarCasesTable', () => {
   let appMock: AppMockRenderer;
   const props: SimilarCasesTableProps = {
-    cases: [{ ...mockCase, similarities: { observables: mockObservables } }],
+    cases: [{ ...mockCase, similarities: { observables: mockSimilarObservables } }],
     isLoading: false,
     onChange: jest.fn(),
     pagination: { pageIndex: 0, totalItemCount: 1 },
