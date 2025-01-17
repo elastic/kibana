@@ -245,9 +245,8 @@ export const parseFieldsCapabilities = (
         )!;
         const nestedField = isFieldNested(fieldKey, fieldCapsResponse);
         const semanticFieldMapping = getSemanticField(fieldKey, semanticTextFields);
-        
-        if (isFieldInIndex(field, 'text', index) && semanticFieldMapping) {
 
+        if (isFieldInIndex(field, 'text', index) && semanticFieldMapping) {
           // only use this when embeddingType and inferenceId is defined
           // this requires semantic_text field to be set up correctly and ingested
           if (
