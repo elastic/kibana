@@ -22,7 +22,7 @@ export const SecurityAlertsPageReference: React.FC<Props> = ({
   securityAlertsPageContentReference,
 }) => {
   return (
-    <PopoverReference contentReferenceCount={contentReferenceNode.contentReferenceCount}>
+    <PopoverReference contentReferenceCount={contentReferenceNode.contentReferenceCount} data-test-subj='SecurityAlertsPageReference'>
       <EuiLink href={`/app/security/alerts`} target="_blank">
         {SECURITY_ALERTS_PAGE_REFERENCE_LABEL}
       </EuiLink>

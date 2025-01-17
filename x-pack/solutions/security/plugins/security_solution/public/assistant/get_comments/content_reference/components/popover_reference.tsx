@@ -11,11 +11,13 @@ import { ContentReferenceButton } from './content_reference_button';
 
 interface Props {
   contentReferenceCount: number;
+  "data-test-subj"?: string
 }
 
 export const PopoverReference: React.FC<React.PropsWithChildren<Props>> = ({
   contentReferenceCount,
   children,
+  ...rest
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -38,6 +40,7 @@ export const PopoverReference: React.FC<React.PropsWithChildren<Props>> = ({
       closePopover={closePopover}
       onMouseLeave={closePopover}
       anchorPosition="upCenter"
+      {...rest}
     >
       {children}
     </EuiPopover>

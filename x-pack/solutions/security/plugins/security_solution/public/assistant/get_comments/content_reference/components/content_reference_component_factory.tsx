@@ -40,7 +40,7 @@ export const contentReferenceComponentFactory = ({
 
     const contentReference = contentReferences[contentReferenceNode.contentReferenceId];
 
-    if (contentReference === undefined) return defaultNode;
+    if (contentReference === undefined) return null;
 
     switch (contentReference.type) {
       case 'KnowledgeBaseEntry':

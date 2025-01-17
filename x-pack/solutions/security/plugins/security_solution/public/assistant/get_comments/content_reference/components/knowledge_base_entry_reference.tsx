@@ -22,7 +22,7 @@ export const KnowledgeBaseEntryReference: React.FC<Props> = ({
   knowledgeBaseEntryContentReference,
 }) => {
   return (
-    <PopoverReference contentReferenceCount={contentReferenceNode.contentReferenceCount}>
+    <PopoverReference contentReferenceCount={contentReferenceNode.contentReferenceCount} data-test-subj='KnowledgeBaseEntryReference'>
       <EuiLink
         href={`/app/management/kibana/securityAiAssistantManagement?tab=knowledge_base&entry_search_term=${knowledgeBaseEntryContentReference.knowledgeBaseEntryId}`}
         target="_blank"

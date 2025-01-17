@@ -21,7 +21,7 @@ export const ProductDocumentationReference: React.FC<Props> = ({
   productDocumentationContentReference,
 }) => {
   return (
-    <PopoverReference contentReferenceCount={contentReferenceNode.contentReferenceCount}>
+    <PopoverReference contentReferenceCount={contentReferenceNode.contentReferenceCount} data-test-subj='ProductDocumentationReference'>
       <EuiLink href={productDocumentationContentReference.url} target="_blank">
         {productDocumentationContentReference.title}
       </EuiLink>

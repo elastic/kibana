@@ -19,15 +19,6 @@ import { contentReferencesStoreFactory, IndexEntry } from '@kbn/elastic-assistan
 
 // Mock dependencies
 jest.mock('@elastic/elasticsearch');
-jest.mock('@kbn/zod', () => ({
-  z: {
-    string: jest.fn().mockReturnValue({ describe: (str: string) => str }),
-    number: jest.fn().mockReturnValue({ describe: (str: string) => str }),
-    boolean: jest.fn().mockReturnValue({ describe: (str: string) => str }),
-    object: jest.fn().mockReturnValue({ describe: (str: string) => str }),
-    any: jest.fn().mockReturnValue({ describe: (str: string) => str }),
-  },
-}));
 jest.mock('lodash');
 
 describe('isModelAlreadyExistsError', () => {
