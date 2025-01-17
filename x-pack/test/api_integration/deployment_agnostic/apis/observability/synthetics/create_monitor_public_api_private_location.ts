@@ -5,20 +5,24 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import rawExpect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { PrivateLocation } from '@kbn/synthetics-plugin/common/runtime_types';
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
+import { LOCATION_REQUIRED_ERROR } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/monitor_validation';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { addMonitorAPIHelper, omitMonitorKeys } from './create_monitor';
-import { LOCAL_PUBLIC_LOCATION } from './helpers/location';
+import { PrivateLocationTestService } from '../../../services/synthetics_private_location';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  describe('AddNewMonitorsPublicAPI - Public locations', function () {
-    this.tags(['skipCloud', 'skipMKI']);
+  describe('AddNewMonitorsPublicAPI - Private locations', function () {
     const supertestAPI = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');
     let editorUser: RoleCredentials;
+    let privateLocation: PrivateLocation;
+    const privateLocationTestService = new PrivateLocationTestService(getService);
 
     async function addMonitorAPI(monitor: any, statusCode: number = 200) {
       return await addMonitorAPIHelper(supertestAPI, monitor, statusCode, editorUser, samlAuth);
@@ -27,21 +31,73 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+      privateLocation = await privateLocationTestService.addTestPrivateLocation();
     });
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
+    it('should return error for empty monitor', async function () {
+      const { message } = await addMonitorAPI({}, 400);
+      expect(message).eql('Invalid value "undefined" supplied to "type"');
+    });
+
+    it('return error if no location specified', async () => {
+      const { message } = await addMonitorAPI({ type: 'http' }, 400);
+      expect(message).eql(LOCATION_REQUIRED_ERROR);
+    });
+
+    it('return error if invalid location specified', async () => {
+      const { message } = await addMonitorAPI({ type: 'http', locations: ['mars'] }, 400);
+      rawExpect(message).toContain(
+        "Invalid locations specified. Elastic managed Location(s) 'mars' not found."
+      );
+    });
+
+    it('return error if invalid private location specified', async () => {
+      const { message } = await addMonitorAPI(
+        {
+          type: 'http',
+          locations: ['mars'],
+          privateLocations: ['moon'],
+        },
+        400
+      );
+      expect(message).eql('Invalid monitor key(s) for http type:  privateLocations');
+
+      const result = await addMonitorAPI(
+        {
+          type: 'http',
+          locations: ['mars'],
+          private_locations: ['moon'],
+        },
+        400
+      );
+      rawExpect(result.message).toContain("Private Location(s) 'moon' not found.");
+    });
+
+    it('return error for origin project', async () => {
+      const { message } = await addMonitorAPI(
+        {
+          type: 'http',
+          locations: ['dev'],
+          url: 'https://www.google.com',
+          origin: 'project',
+        },
+        400
+      );
+      expect(message).eql('Unsupported origin type project, only ui type is supported via API.');
+    });
+
     describe('HTTP Monitor', () => {
       const defaultFields = DEFAULT_FIELDS.http;
-
       it('return error empty http', async () => {
         const { message, attributes } = await addMonitorAPI(
           {
             type: 'http',
-            locations: [LOCAL_PUBLIC_LOCATION.id],
-            private_locations: [],
+            locations: [],
+            private_locations: [privateLocation.id],
           },
           400
         );
@@ -57,7 +113,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('base http monitor', async () => {
         const monitor = {
           type: 'http',
-          locations: [LOCAL_PUBLIC_LOCATION.id],
+          private_locations: [privateLocation.id],
           url: 'https://www.google.com',
         };
         const { body: result } = await addMonitorAPI(monitor);
@@ -66,7 +122,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           omitMonitorKeys({
             ...defaultFields,
             ...monitor,
-            locations: [LOCAL_PUBLIC_LOCATION],
+            locations: [privateLocation],
             name: 'https://www.google.com',
           })
         );
@@ -76,7 +132,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const name = `test name ${uuidv4()}`;
         const monitor = {
           type: 'http',
-          locations: [LOCAL_PUBLIC_LOCATION.id],
+          private_locations: [privateLocation.id],
           url: 'https://www.google.com',
           name,
           retest_on_failure: true,
@@ -87,7 +143,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           omitMonitorKeys({
             ...defaultFields,
             ...monitor,
-            locations: [LOCAL_PUBLIC_LOCATION],
+            locations: [privateLocation],
             name,
             retest_on_failure: true,
           })
@@ -98,7 +154,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const name = `test name ${uuidv4()}`;
         const monitor = {
           type: 'http',
-          locations: [LOCAL_PUBLIC_LOCATION.id],
+          private_locations: [privateLocation.id],
           url: 'https://www.google.com',
           name,
           retest_on_failure: false,
@@ -109,7 +165,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           omitMonitorKeys({
             ...defaultFields,
             ...monitor,
-            locations: [LOCAL_PUBLIC_LOCATION],
+            locations: [privateLocation],
             name,
             max_attempts: 1,
             retest_on_failure: undefined, // this key is not part of the SO and should not be defined
@@ -124,7 +180,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('base tcp monitor', async () => {
         const monitor = {
           type: 'tcp',
-          locations: [LOCAL_PUBLIC_LOCATION.id],
+          private_locations: [privateLocation.id],
           host: 'https://www.google.com/',
         };
         const { body: result } = await addMonitorAPI(monitor);
@@ -133,7 +189,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           omitMonitorKeys({
             ...defaultFields,
             ...monitor,
-            locations: [LOCAL_PUBLIC_LOCATION],
+            locations: [privateLocation],
             name: 'https://www.google.com/',
           })
         );
@@ -146,7 +202,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('base icmp monitor', async () => {
         const monitor = {
           type: 'icmp',
-          locations: [LOCAL_PUBLIC_LOCATION.id],
+          private_locations: [privateLocation.id],
           host: 'https://8.8.8.8',
         };
         const { body: result } = await addMonitorAPI(monitor);
@@ -155,7 +211,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           omitMonitorKeys({
             ...defaultFields,
             ...monitor,
-            locations: [LOCAL_PUBLIC_LOCATION],
+            locations: [privateLocation],
             name: 'https://8.8.8.8',
           })
         );
@@ -168,7 +224,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('empty browser monitor', async () => {
         const monitor = {
           type: 'browser',
-          locations: [LOCAL_PUBLIC_LOCATION.id],
+          private_locations: [privateLocation.id],
           name: 'simple journey',
         };
         const result = await addMonitorAPI(monitor, 400);
@@ -187,7 +243,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('base browser monitor', async () => {
         const monitor = {
           type: 'browser',
-          locations: [LOCAL_PUBLIC_LOCATION.id],
+          private_locations: [privateLocation.id],
           name: 'simple journey',
           'source.inline.script': 'step("simple journey", async () => {});',
         };
@@ -197,7 +253,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           omitMonitorKeys({
             ...defaultFields,
             ...monitor,
-            locations: [LOCAL_PUBLIC_LOCATION],
+            locations: [privateLocation],
           })
         );
       });
@@ -205,7 +261,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('base browser monitor with inline_script', async () => {
         const monitor = {
           type: 'browser',
-          locations: [LOCAL_PUBLIC_LOCATION.id],
+          private_locations: [privateLocation.id],
           name: 'simple journey inline_script',
           inline_script: 'step("simple journey", async () => {});',
         };
@@ -215,7 +271,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           omitMonitorKeys({
             ...defaultFields,
             ...monitor,
-            locations: [LOCAL_PUBLIC_LOCATION],
+            locations: [privateLocation],
           })
         );
       });
