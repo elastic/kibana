@@ -71,7 +71,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   tableColumns: Array<EuiBasicTableColumn<T>>;
   hasUpdatedAtMetadata: boolean;
   hasRecentlyAccessedMetadata: boolean;
-  customSortingOptions: CustomSortingOptions;
+  customSortingOptions?: CustomSortingOptions;
   deleteItems: TableListViewTableProps<T>['deleteItems'];
   tableItemsRowActions: TableItemsRowActions;
   renderCreateButton: () => React.ReactElement | undefined;

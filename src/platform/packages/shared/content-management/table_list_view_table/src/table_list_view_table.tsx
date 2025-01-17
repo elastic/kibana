@@ -422,7 +422,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       isDeletingItems: false,
       showDeleteModal: false,
       hasUpdatedAtMetadata: false,
-      hasSortByTypeOption: false,
       hasCreatedByMetadata: false,
       hasRecentlyAccessedMetadata: recentlyAccessed ? recentlyAccessed.get().length > 0 : false,
       selectedIds: [],

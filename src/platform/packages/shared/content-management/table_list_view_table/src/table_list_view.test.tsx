@@ -22,6 +22,7 @@ import { getTagList, localStorageMock } from './mocks';
 import { TableListViewTable, type TableListViewTableProps } from './table_list_view_table';
 import { getActions } from './table_list_view.test.helpers';
 import type { Services } from './services';
+import { CustomSortingOptions } from './components/table_sort_select';
 
 const mockUseEffect = useEffect;
 
@@ -327,6 +328,85 @@ describe('TableListView', () => {
         ['Item 1Item 1 description', twoDaysAgoToString],
         ['Item 3Item 3 description', '-'], // Empty column as no updatedAt provided
       ]);
+    });
+  });
+
+  describe('column sorting with custom columns', () => {
+    const customSortingOptions: CustomSortingOptions = {
+      field: 'customColumn',
+      sortingLabels: [
+        {
+          label: 'Custom column A-Z',
+          direction: 'asc',
+        },
+        {
+          label: 'Custom column Z-A',
+          direction: 'desc',
+        },
+      ],
+    };
+
+    const setupCustomColumnSorting = registerTestBed<string, TableListViewTableProps>(
+      WithServices<TableListViewTableProps>(TableListViewTable, {
+        TagList: getTagList({ references: [] }),
+      }),
+      {
+        defaultProps: { ...requiredProps, customSortingOptions },
+      }
+    );
+
+    const hits: Array<UserContentCommonSchema & { field: string }> = [
+      {
+        id: '123',
+        updatedAt: twoDaysAgo.toISOString(),
+        type: 'maps',
+        attributes: {
+          title: '',
+        },
+        references: [],
+        field: 'customColumn',
+      },
+      {
+        id: '456',
+        updatedAt: yesterday.toISOString(),
+        type: 'vega',
+        attributes: {
+          title: '',
+        },
+        references: [],
+        field: 'customColumn',
+      },
+    ];
+
+    test('should display 6 sorting options when custom columns are present', async () => {
+      let testBed: TestBed;
+
+      await act(async () => {
+        testBed = setupCustomColumnSorting({
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+        });
+      });
+      const { openSortSelect } = getActions(testBed!);
+      const { component, find } = testBed!;
+      component.update();
+
+      act(() => {
+        openSortSelect();
+      });
+      component.update();
+
+      const filterOptions = find('sortSelect').find('li');
+
+      expect(filterOptions.length).toBe(6);
+      expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
+        'Name A-Z ',
+        'Name Z-A ',
+        'Custom column A-Z ',
+        'Custom column Z-A ',
+        'Recently updated. Checked option. ',
+        'Least recently updated ',
+      ]);
+      component.unmount();
     });
   });
 

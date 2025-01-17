@@ -30,7 +30,7 @@ type SortItem = EuiSelectableOption & {
   direction: Direction;
 };
 
-export type SortColumnField = 'updatedAt' | 'attributes.title' | 'accessedAt' | (string & {});
+export type SortColumnField = 'updatedAt' | 'attributes.title' | 'accessedAt' | string;
 
 const i18nText = {
   accessedDescSort: i18n.translate(
@@ -78,7 +78,7 @@ interface Props {
   hasUpdatedAtMetadata: boolean;
   hasRecentlyAccessedMetadata: boolean;
   tableSort: State['tableSort'];
-  customSortingOptions: CustomSortingOptions;
+  customSortingOptions?: CustomSortingOptions;
   onChange?: (column: SortColumnField, direction: Direction) => void;
 }
 
