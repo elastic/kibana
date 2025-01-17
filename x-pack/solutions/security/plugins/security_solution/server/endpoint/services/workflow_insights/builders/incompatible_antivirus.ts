@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import { get as _get, uniqBy } from 'lodash';
 
 import type { DefendInsight } from '@kbn/elastic-assistant-common';
 
@@ -15,6 +16,7 @@ import type { SecurityWorkflowInsight } from '../../../../../common/endpoint/typ
 import type { SupportedHostOsType } from '../../../../../common/endpoint/constants';
 import type { BuildWorkflowInsightParams } from '.';
 
+import { FILE_EVENTS_INDEX_PATTERN } from '../../../../../common/endpoint/constants';
 import {
   ActionType,
   Category,
@@ -23,66 +25,160 @@ import {
 } from '../../../../../common/endpoint/types/workflow_insights';
 import { groupEndpointIdsByOS } from '../helpers';
 
+interface FileEventDoc {
+  process: {
+    code_signature?: {
+      subject_name: string;
+      trusted: boolean;
+    };
+    Ext?: {
+      code_signature?: {
+        subject_name: string;
+        trusted: boolean;
+      };
+    };
+  };
+}
+
 export async function buildIncompatibleAntivirusWorkflowInsights(
   params: BuildWorkflowInsightParams
 ): Promise<SecurityWorkflowInsight[]> {
   const currentTime = moment();
-  const { defendInsights, request, endpointMetadataService } = params;
+  const { defendInsights, request, endpointMetadataService, esClient } = params;
   const { insightType, endpointIds, apiConfig } = request.body;
 
   const osEndpointIdsMap = await groupEndpointIdsByOS(endpointIds, endpointMetadataService);
-  return defendInsights.flatMap((defendInsight: DefendInsight) => {
-    const filePaths = Array.from(new Set((defendInsight.events ?? []).map((event) => event.value)));
 
-    return Object.keys(osEndpointIdsMap).flatMap((os) =>
-      filePaths.map((filePath) => ({
-        '@timestamp': currentTime,
-        // TODO add i18n support
-        message: 'Incompatible antiviruses detected',
-        category: Category.Endpoint,
-        type: insightType,
-        source: {
-          type: SourceType.LlmConnector,
-          id: apiConfig.connectorId,
-          // TODO use actual time range when we add support
-          data_range_start: currentTime,
-          data_range_end: currentTime.clone().add(24, 'hours'),
-        },
-        target: {
-          type: TargetType.Endpoint,
-          ids: endpointIds,
-        },
-        action: {
-          type: ActionType.Refreshed,
-          timestamp: currentTime,
-        },
-        value: defendInsight.group,
-        remediation: {
-          exception_list_items: [
-            {
-              list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
-              name: defendInsight.group,
-              description: 'Suggested by Security Workflow Insights',
-              entries: [
+  const insightsPromises = defendInsights.map(
+    async (defendInsight: DefendInsight): Promise<SecurityWorkflowInsight[]> => {
+      const uniqueFilePathsInsights = uniqBy(defendInsight.events, 'value');
+      const eventIds = Array.from(new Set(uniqueFilePathsInsights.map((event) => event.id)));
+
+      const codeSignaturesHits = (
+        await esClient.search<FileEventDoc>({
+          index: FILE_EVENTS_INDEX_PATTERN,
+          query: {
+            bool: {
+              must: [
                 {
-                  field: 'process.executable.caseless',
-                  operator: 'included',
-                  type: 'match',
-                  value: filePath,
+                  terms: {
+                    _id: eventIds,
+                  },
+                },
+                {
+                  bool: {
+                    should: [
+                      {
+                        term: {
+                          'process.code_signature.trusted': true,
+                        },
+                      },
+                      {
+                        term: {
+                          'process.Ext.code_signature.trusted': true,
+                        },
+                      },
+                    ],
+                  },
                 },
               ],
-              // TODO add per policy support
-              tags: ['policy:all'],
-              os_types: [os as SupportedHostOsType],
             },
-          ],
-        },
-        metadata: {
-          notes: {
-            llm_model: apiConfig.model ?? '',
           },
-        },
-      }))
-    );
-  });
+        })
+      ).hits.hits;
+
+      const createRemediation = (
+        filePath: string,
+        os: string,
+        signatureField?: string,
+        signatureValue?: string
+      ): SecurityWorkflowInsight => {
+        return {
+          '@timestamp': currentTime,
+          // TODO add i18n support
+          message: 'Incompatible antiviruses detected',
+          category: Category.Endpoint,
+          type: insightType,
+          source: {
+            type: SourceType.LlmConnector,
+            id: apiConfig.connectorId,
+            // TODO use actual time range when we add support
+            data_range_start: currentTime,
+            data_range_end: currentTime.clone().add(24, 'hours'),
+          },
+          target: {
+            type: TargetType.Endpoint,
+            ids: endpointIds,
+          },
+          action: {
+            type: ActionType.Refreshed,
+            timestamp: currentTime,
+          },
+          value: `${defendInsight.group} ${filePath}${signatureValue ? ` ${signatureValue}` : ''}`,
+          metadata: {
+            notes: {
+              llm_model: apiConfig.model ?? '',
+            },
+            display_name: defendInsight.group,
+          },
+          remediation: {
+            exception_list_items: [
+              {
+                list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
+                name: defendInsight.group,
+                description: 'Suggested by Security Workflow Insights',
+                entries: [
+                  {
+                    field: 'process.executable.caseless',
+                    operator: 'included' as const,
+                    type: 'match' as const,
+                    value: filePath,
+                  },
+                  ...(signatureField && signatureValue
+                    ? [
+                        {
+                          field: signatureField,
+                          operator: 'included' as const,
+                          type: 'match' as const,
+                          value: signatureValue,
+                        },
+                      ]
+                    : []),
+                ],
+                // TODO add per policy support
+                tags: ['policy:all'],
+                os_types: [os as SupportedHostOsType],
+              },
+            ],
+          },
+        };
+      };
+
+      return Object.keys(osEndpointIdsMap).flatMap((os): SecurityWorkflowInsight[] => {
+        return uniqueFilePathsInsights.map((insight) => {
+          const { value: filePath, id } = insight;
+
+          if (codeSignaturesHits.length) {
+            const codeSignatureSearchHit = codeSignaturesHits.find((hit) => hit._id === id);
+
+            if (codeSignatureSearchHit) {
+              const extPath = os === 'windows' ? '.Ext' : '';
+              const field = `process${extPath}.code_signature`;
+              const value = _get(
+                codeSignatureSearchHit,
+                `_source.${field}.subject_name`,
+                'invalid subject name'
+              );
+              return createRemediation(filePath, os, field, value);
+            }
+          }
+
+          return createRemediation(filePath, os);
+        });
+      });
+    }
+  );
+
+  const insightsArr = await Promise.all(insightsPromises);
+  return insightsArr.flat();
 }

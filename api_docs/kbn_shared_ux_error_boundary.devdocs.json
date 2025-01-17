@@ -29,7 +29,7 @@
           "\nImplementation of Kibana Error Boundary"
         ],
         "signature": [
-          "(props: ErrorBoundaryProps) => React.JSX.Element"
+          "(props: { children?: React.ReactNode; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/error_boundary/src/ui/error_boundary.tsx",
         "deprecated": false,
@@ -45,7 +45,7 @@
               "- ErrorBoundaryProps"
             ],
             "signature": [
-              "ErrorBoundaryProps"
+              "{ children?: React.ReactNode; }"
             ],
             "path": "src/platform/packages/shared/shared-ux/error_boundary/src/ui/error_boundary.tsx",
             "deprecated": false,
@@ -87,6 +87,41 @@
               ">"
             ],
             "path": "src/platform/packages/shared/shared-ux/error_boundary/src/services/error_boundary_services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-error-boundary",
+        "id": "def-common.KibanaSectionErrorBoundary",
+        "type": "Function",
+        "tags": [],
+        "label": "KibanaSectionErrorBoundary",
+        "description": [
+          "\n`KibanaSectionErrorBoundary` is designed to capture errors at a granular level.\n\nIn general, it's best to use `KibanaErrorBoundary` and block the whole page.\nUsers will see an error state on the page and think that there are instabilities in the system.\nThey will be / should be wary about making any changes in a UI showing an error, since it risks\nfurther instability.\n\nIf it is acceptable to assume the risk of allowing users to interact with a UI that\nhas an error state, then using `KibanaSectionErrorBoundary` may be an acceptable alternative,\nbut this must be judged on a case-by-case basis."
+        ],
+        "signature": [
+          "(props: React.PropsWithChildren<SectionErrorBoundaryProps>) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/error_boundary/src/ui/section_error_boundary.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-error-boundary",
+            "id": "def-common.KibanaSectionErrorBoundary.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<SectionErrorBoundaryProps>"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/error_boundary/src/ui/section_error_boundary.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

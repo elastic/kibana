@@ -42,6 +42,8 @@ export const RuleUpgrade = memo(function RuleUpgrade({
         totalNumOfFields={totalNumOfFields}
         numOfFieldsWithUpdates={numOfFieldsWithUpdates}
         numOfConflicts={numOfSolvableConflicts + numOfNonSolvableConflicts}
+        currentVersionNumber={ruleUpgradeState.current_rule.version}
+        targetVersionNumber={ruleUpgradeState.target_rule.version}
       />
       <EuiSpacer size="s" />
       <RuleUpgradeCallout
