@@ -27,7 +27,9 @@ export const PhaseIcon: FunctionComponent<Props> = ({ enabled, phase }) => {
     cold: isBorealis
       ? euiTheme.colors.vis.euiColorVis2
       : euiTheme.colors.vis.euiColorVisBehindText1,
-    frozen: euiTheme.colors.vis.euiColorVis4,
+    frozen: isBorealis
+      ? euiTheme.colors.vis.euiColorVis4
+      : euiTheme.colors.vis.euiColorVisBehindText4,
     delete: euiTheme.colors.darkShade,
   };
 
