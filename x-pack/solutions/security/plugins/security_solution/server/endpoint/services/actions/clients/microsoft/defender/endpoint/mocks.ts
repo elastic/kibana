@@ -153,29 +153,32 @@ const createMicrosoftMachineActionMock = (
   };
 };
 
-const createMicrosoftGetActionsApiResponseMock =
-  (): MicrosoftDefenderEndpointGetActionsResponse => {
-    return {
-      '@odata.context': 'some-context',
-      '@odata.count': 1,
-      total: 1,
-      page: 1,
-      pageSize: 0,
-      value: [createMicrosoftMachineActionMock()],
-    };
+const createMicrosoftGetActionsApiResponseMock = (
+  overrides: Partial<MicrosoftDefenderEndpointMachineAction> = {}
+): MicrosoftDefenderEndpointGetActionsResponse => {
+  return {
+    '@odata.context': 'some-context',
+    '@odata.count': 1,
+    total: 1,
+    page: 1,
+    pageSize: 0,
+    value: [createMicrosoftMachineActionMock(overrides)],
   };
+};
 
-const createMicrosoftGetMachineListApiResponseMock =
-  (): MicrosoftDefenderEndpointAgentListResponse => {
-    return {
-      '@odata.context': 'some-context',
-      '@odata.count': 1,
-      total: 1,
-      page: 1,
-      pageSize: 0,
-      value: [createMicrosoftMachineMock()],
-    };
+const createMicrosoftGetMachineListApiResponseMock = (
+  /** Any overrides to the 1 machine action that is included in the mock response */
+  machineActionOverrides: Partial<MicrosoftDefenderEndpointMachine> = {}
+): MicrosoftDefenderEndpointAgentListResponse => {
+  return {
+    '@odata.context': 'some-context',
+    '@odata.count': 1,
+    total: 1,
+    page: 1,
+    pageSize: 0,
+    value: [createMicrosoftMachineMock(machineActionOverrides)],
   };
+};
 
 export const microsoftDefenderMock = {
   createConstructorOptions: createMsDefenderClientConstructorOptionsMock,
