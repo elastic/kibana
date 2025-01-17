@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  IndicesIndexSettings,
-  IndicesDataStreamLifecycle,
-} from '@elastic/elasticsearch/lib/api/types';
+import { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 
 export const logsSettings: IndicesIndexSettings = {
   index: {
@@ -22,5 +19,3 @@ export const logsSettings: IndicesIndexSettings = {
     },
   },
 };
-
-export const logsLifecycle: IndicesDataStreamLifecycle = {};

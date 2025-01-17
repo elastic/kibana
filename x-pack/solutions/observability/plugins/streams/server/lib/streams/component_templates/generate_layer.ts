@@ -12,7 +12,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import { WiredStreamDefinition, isRoot } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
-import { logsSettings, logsLifecycle } from './logs_layer';
+import { logsSettings } from './logs_layer';
 import { getComponentTemplateName } from './name';
 
 export function generateLayer(
@@ -54,10 +54,6 @@ export function generateLayer(
 }
 
 function getTemplateLifecycle(definition: WiredStreamDefinition) {
-  if (isRoot(definition.name)) {
-    return logsLifecycle;
-  }
-
   if (!definition.stream.ingest.lifecycle || definition.stream.ingest.lifecycle.type === 'ilm') {
     return undefined;
   }

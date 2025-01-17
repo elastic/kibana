@@ -13,6 +13,9 @@ export const rootStreamDefinition: WiredStreamDefinition = {
     ingest: {
       processing: [],
       routing: [],
+      lifecycle: {
+        type: 'dlm',
+      },
       wired: {
         fields: {
           '@timestamp': {
