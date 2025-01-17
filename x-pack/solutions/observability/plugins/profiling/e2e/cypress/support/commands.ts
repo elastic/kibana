@@ -69,9 +69,9 @@ Cypress.Commands.add(
     cy.getByTestSubj(dataTestSubj).type(`: "${value}`);
     if (waitForSuggestion) {
       cy.waitUntilPageContentIsLoaded();
-      cy.getByTestSubj(
-        Cypress.$.escapeSelector(`autocompleteSuggestion-value-"${value}"-`)
-      ).click();
+      cy.getByTestSubj(Cypress.$.escapeSelector(`autocompleteSuggestion-value-"${value}"-`))
+        .should('be.visible')
+        .click({ force: true });
     }
     cy.getByTestSubj(dataTestSubj).type('{enter}');
   }
