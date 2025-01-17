@@ -94,7 +94,7 @@ export class KibanaClient {
     this.axios = axios.create({
       headers: {
         'kbn-xsrf': 'foo',
-        'x-elastic-internal-origin': 'observability-ai-assistant',
+        'x-elastic-internal-origin': 'kibana',
       },
     });
   }
