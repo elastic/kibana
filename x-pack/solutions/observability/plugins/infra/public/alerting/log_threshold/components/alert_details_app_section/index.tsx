@@ -67,10 +67,7 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
         try {
           logsDataView = await data.dataViews.get('log_rules_data_view');
         } catch (error) {
-          const defaultDataViewExists = await data.dataViews.defaultDataViewExists();
-          logsDataView = defaultDataViewExists
-            ? await data.dataViews.getDefaultDataView()
-            : undefined;
+          setDataViewError(error);
         }
 
         if (logsDataView) {

@@ -53,7 +53,6 @@ import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewSelectPopover } from '@kbn/stack-alerts-plugin/public';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import type { SnapshotCustomMetricInput } from '../../../../common/http_api';
 import { SnapshotCustomMetricInputRT } from '../../../../common/http_api';
 import type { FilterQuery, InventoryMetricConditions } from '../../../../common/alerting/metrics';
@@ -148,15 +147,8 @@ export const Expressions: React.FC<Props> = (props) => {
 
           try {
             metricsDataView = await data.dataViews.get('infra_rules_data_view');
-          } catch (error: any) {
-            if (!(error instanceof SavedObjectNotFound)) {
-              setParamsError(error);
-            } else {
-              const defaultDataViewExists = await data.dataViews.defaultDataViewExists();
-              metricsDataView = defaultDataViewExists
-                ? await data.dataViews.getDefaultDataView()
-                : undefined;
-            }
+          } catch (error) {
+            setParamsError(error);
           }
 
           if (metricsDataView) {

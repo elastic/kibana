@@ -24,7 +24,6 @@ import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewSelectPopover } from '@kbn/stack-alerts-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import type {
   PartialCountRuleParams,
   PartialCriteria as PartialCriteriaType,
@@ -125,15 +124,8 @@ export const ExpressionEditor: React.FC<Props> = (props) => {
 
         try {
           logsDataView = await data.dataViews.get('log_rules_data_view');
-        } catch (error: any) {
-          if (!(error instanceof SavedObjectNotFound)) {
-            setParamsError(error);
-          } else {
-            const defaultDataViewExists = await data.dataViews.defaultDataViewExists();
-            logsDataView = defaultDataViewExists
-              ? await data.dataViews.getDefaultDataView()
-              : undefined;
-          }
+        } catch (error) {
+          setParamsError(error);
         }
 
         if (logsDataView) {

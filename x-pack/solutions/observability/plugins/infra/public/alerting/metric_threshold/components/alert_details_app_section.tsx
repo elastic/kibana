@@ -106,10 +106,7 @@ export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
         try {
           metricsDataView = await data.dataViews.get('infra_rules_data_view');
         } catch (error) {
-          const defaultDataViewExists = await data.dataViews.defaultDataViewExists();
-          metricsDataView = defaultDataViewExists
-            ? await data.dataViews.getDefaultDataView()
-            : undefined;
+          setDataViewError(error);
         }
 
         if (metricsDataView) {
