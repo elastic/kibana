@@ -64,7 +64,7 @@ export const ScheduleItemField = ({
   const { value, setValue } = field;
 
   const { euiTheme } = useEuiTheme();
-  const durationFormRowStyles = css`
+  const formRowStyles = css`
     max-width: none;
 
     .euiFormControlLayout__append {
@@ -75,7 +75,7 @@ export const ScheduleItemField = ({
       color: ${euiTheme.colors.primary};
     }
   `;
-  const durationUnitSelectStyles = css`
+  const timeUnitSelectStyles = css`
     min-width: 106px; // Preserve layout when disabled & dropdown arrow is not rendered
     box-shadow: none;
     background: ${euiTheme.colors.backgroundBasePrimary} !important;
@@ -140,7 +140,7 @@ export const ScheduleItemField = ({
 
   return (
     <EuiFormRow
-      className={durationFormRowStyles}
+      className={formRowStyles}
       label={label}
       helpText={field.helpText}
       error={errorMessage}
@@ -152,7 +152,7 @@ export const ScheduleItemField = ({
       <EuiFieldNumber
         append={
           <EuiSelect
-            className={durationUnitSelectStyles}
+            className={timeUnitSelectStyles}
             fullWidth
             options={timeTypeOptions.filter((type) => timeTypes.includes(type.value))}
             onChange={onChangeTimeType}
