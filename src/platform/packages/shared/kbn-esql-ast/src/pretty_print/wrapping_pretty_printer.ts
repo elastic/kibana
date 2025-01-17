@@ -478,10 +478,11 @@ export class WrappingPrettyPrinter {
         !(value.type === 'function' && value.subtype === 'variadic-call');
       const castType = ctx.node.castType;
 
-      let { txt: valueFormatted, indented: valueIndented } = ctx.visitValue({
+      const valueResult = ctx.visitValue({
         indent: inp.indent,
         remaining: inp.remaining - castType.length - 2,
       });
+      let { txt: valueFormatted } = valueResult;
 
       if (wrapInBrackets) {
         valueFormatted = `(${valueFormatted})`;
@@ -492,7 +493,7 @@ export class WrappingPrettyPrinter {
         inp.indent,
         ctx.node,
         formatted,
-        valueIndented
+        valueResult.indented
       );
 
       return { txt, indented };
