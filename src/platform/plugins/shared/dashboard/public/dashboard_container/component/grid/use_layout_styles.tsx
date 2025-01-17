@@ -30,13 +30,24 @@ export const useLayoutStyles = () => {
      * is resolved, we should swap these out for the drag-specific colour tokens
      */
     return css`
-      .kbnGridRow--targeted {
-        background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
-          calc((var(--kbnGridGutterSize) / 2) * -1px);
-        background-size: calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * 1px)
-          calc((var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) * 1px);
-        background-image: ${getRadialGradient('top left')}, ${getRadialGradient('top right')},
-          ${getRadialGradient('bottom left')}, ${getRadialGradient('bottom right')};
+      &.kbnGrid {
+        // remove margin top + bottom on grid in favour of padding in row
+        padding-bottom: 0px;
+      }
+
+      .kbnGridRow {
+        // use padding in grid row so that dotted grid is not cut off
+        padding-bottom: calc(var(--kbnGridGutterSize) * 1px);
+
+        &--targeted {
+          background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
+            calc((var(--kbnGridGutterSize) / 2) * -1px);
+          background-size: calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * 1px)
+            calc((var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) * 1px);
+          background-image: ${getRadialGradient('top left')}, ${getRadialGradient('top right')},
+            ${getRadialGradient('bottom left')}, ${getRadialGradient('bottom right')};
+          background-origin: content-box;
+        }
       }
 
       .kbnGridPanel--dragPreview {

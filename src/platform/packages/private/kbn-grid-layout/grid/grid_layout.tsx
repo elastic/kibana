@@ -179,7 +179,7 @@ export const GridLayout = ({
         }}
         className={classNames('kbnGrid', className)}
         css={css`
-          margin: calc(var(--kbnGridGutterSize) * 1px);
+          padding: calc(var(--kbnGridGutterSize) * 1px);
 
           &:has(.kbnGridPanel--expanded) {
             ${expandedPanelStyles}
@@ -210,9 +210,6 @@ const singleColumnStyles = css`
 
 const expandedPanelStyles = css`
   height: 100%;
-  // switch to padding so that the panel does not extend the height of the parent
-  margin: 0px;
-  padding: calc(var(--kbnGridGutterSize) * 1px);
 
   & .kbnGridRowContainer:has(.kbnGridPanel--expanded) {
     // targets the grid row container that contains the expanded panel
