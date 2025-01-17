@@ -87,7 +87,7 @@ export function runCli() {
         };
 
         await Tasks.initTargets(context);
-        await Tasks.buildWebpackPackages(context);
+        await Tasks.buildWebpackBundlesWithMoon(context);
         await Tasks.optimize(context);
         await Tasks.brotliCompressBundles(context);
         await Tasks.writePublicAssets(context);
@@ -165,7 +165,7 @@ export function runCli() {
         };
 
         await Tasks.initDev(context);
-        await Tasks.buildWebpackPackages(context);
+        await Tasks.buildWebpackBundlesWithMoon(context);
         await Tasks.optimize(context);
       },
     })

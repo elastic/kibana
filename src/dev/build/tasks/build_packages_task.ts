@@ -109,7 +109,7 @@ export const BuildPackages: Task = {
     const pkgFileMap = new PackageFileMap(packages, await getRepoFiles());
 
     log.info(`Building webpack artifacts which are necessary for the build`);
-    await buildWebpackBundles(log, {
+    await buildWebpackBundlesWithMoon(log, {
       quiet: false,
       dist: true,
       reactVersion: process.env.REACT_18 ? '18' : '17',
@@ -337,4 +337,24 @@ export async function buildWebpackBundles(
     log.info(`building ${packagePath}`);
     await buildPackage(packagePath);
   }
+}
+
+export async function buildWebpackBundlesWithMoon(
+  log: ToolingLog,
+  { quiet, dist, reactVersion }: { quiet: boolean; dist: boolean; reactVersion: string }
+) {
+  const stdioOptions: Array<'ignore' | 'pipe' | 'inherit'> = quiet
+    ? ['ignore', 'pipe', 'pipe']
+    : ['inherit', 'inherit', 'inherit'];
+  const packageNames = ['@kbn/ui-shared-deps-npm', '@kbn/ui-shared-deps-src', '@kbn/monaco'];
+
+  const moonTargets = packageNames.map((n) => `${n}:build`);
+  await execa('moon', moonTargets.concat(dist ? ['--dist'] : []), {
+    cwd: REPO_ROOT,
+    env: {
+      ...process.env,
+      REACT_VERSION: reactVersion,
+    },
+    stdio: stdioOptions,
+  });
 }

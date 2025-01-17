@@ -29,5 +29,11 @@
       "**/test_fixtures/**",
       "**/test_helpers/**"
     ]
+  },
+  "dependencies": {
+    "@kbn/esql-ast": "link:../kbn-esql-ast",
+    "@kbn/esql-validation-autocomplete": "link:../kbn-esql-validation-autocomplete",
+    "@kbn/i18n": "link:../kbn-i18n",
+    "@kbn/repo-info": "link:../kbn-repo-info"
   }
 }

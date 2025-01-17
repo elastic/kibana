@@ -1,7 +1,13 @@
 $schema: https://moonrepo.dev/schemas/project.json
 id: kibana
-type: application
+type: unknown
+language: unknown
+
+project:
+  name: "kibana"
+  description: "Kibana root project"
+
+toolchain:
+  default: system
+
 tasks:
-  greet:
-    command: "echo 'Hello, World!'"
-    toolchain: "system

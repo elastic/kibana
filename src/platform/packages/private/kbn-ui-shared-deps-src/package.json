@@ -13,5 +13,8 @@
       "src/**/*"
     ],
     "exclude": []
+  },
+  "dependencies": {
+    "@kbn/repo-info": "link:../../shared/kbn-repo-info"
   }
 }

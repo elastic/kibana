@@ -3,12 +3,14 @@ $schema: https://moonrepo.dev/schemas/workspace.json
 
 projects:
   globs:
+    - examples/**/moon.yml
+    - test/**/moon.yml
     - packages/**/moon.yml
     - plugins/**/moon.yml
     - src/**/moon.yml
     - x-pack/**/moon.yml
+#    - moon.yml # because we do linking at the root level, every project is project will appear as a dependency
   sources:
-    kibana: moon.yml
     kibana-buildkite: .buildkite/moon.yml
 vcs:
   defaultBranch: main

@@ -8,12 +8,13 @@ node:
   version: 20.15.1
   packageManager: yarn
   yarn:
-    version: 1.22.19
+    version: 1.22.21
   inferTasksFromScripts: true
   dependencyVersionFormat: link
   rootPackageOnly: true
   syncPackageManagerField: true
   syncVersionManagerConfig: nvm
+  dedupeOnLockfileChange: false
 
 
 # Configures how moon integrates with TypeScript.
@@ -31,26 +32,26 @@ typescript:
   includeSharedTypes: true
 
   # Name of `tsconfig.json` file in each project root.
-  projectConfigFileName: 'tsconfig.json'
+  projectConfigFileName: 'tsconfig.moon.json'
 
   # Path to the TypeScript root, relative from the workspace root.
-  # root: '.'
+  root: '.'
 
   # Name of `tsconfig.json` file in the TypeScript root.
-  # rootConfigFileName: 'tsconfig.json'
+  rootConfigFileName: 'tsconfig.moonbase.json'
 
   # Name of the config file in the workspace root that defines shared compiler
   # options for all project reference based config files.
-  # rootOptionsConfigFileName: 'tsconfig.options.json'
+  rootOptionsConfigFileName: 'tsconfig.options.json'
 
   # Update a project's `tsconfig.json` to route the `outDir` compiler option
   # to moon's `.moon/cache` directory.
-  routeOutDirToCache: false
+  routeOutDirToCache: true
 
   # Sync a project's dependencies as project references within the
   # project's `tsconfig.json` and the workspace root `tsconfig.json`.
-  syncProjectReferences: false
+  syncProjectReferences: true
 
   # Sync a project's project references as import aliases to the `paths`
   # compiler option in each applicable project.
-  syncProjectReferencesToPaths: false
+  syncProjectReferencesToPaths: true

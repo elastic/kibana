@@ -117,6 +117,7 @@ report.asciidoc
 # Automatically generated and user-modifiable
 /tsconfig.refs.json
 *.type_check.json
+*.moon.json
 
 # Yarn local mirror content
 .yarn-local-mirror

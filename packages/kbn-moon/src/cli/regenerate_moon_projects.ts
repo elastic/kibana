@@ -30,20 +30,21 @@ function generateProjectConfig(projectConfigTemplate: string, pkg: Package, kiba
   const projectConfig: any = yaml.load(projectConfigTemplate);
   projectConfig.id = pkg.name;
 
-  // is not a moon config, but it's useful to have at hand
-  projectConfig.sourceRoot = pkg.normalizedRepoRelativeDir;
-  if (pkg.isPlugin() || pkg.normalizedRepoRelativeDir.match(/^x-pack/)) {
-    projectConfig.type = 'application';
-  } else if (pkg.normalizedRepoRelativeDir.match(/^packages/)) {
-    projectConfig.type = 'library';
-  } else if (pkg.normalizedRepoRelativeDir.match(/^src/)) {
-    projectConfig.type = 'tool';
-  } else {
-    projectConfig.type = 'unknown';
-  }
+  // Cannot use, moon is too strict when prescribing who can depend on what
+  // if (pkg.isPlugin() || pkg.normalizedRepoRelativeDir.match(/^x-pack/)) {
+  //   projectConfig.type = 'application';
+  // } else if (pkg.normalizedRepoRelativeDir.match(/^packages/)) {
+  //   projectConfig.type = 'library';
+  // } else if (pkg.normalizedRepoRelativeDir.match(/^src/)) {
+  //   projectConfig.type = 'tool';
+  // } else {
+  projectConfig.type = 'unknown';
+  // }
+
+  const owner = Array.isArray(kibanaJsonc.owner) ? kibanaJsonc.owner[0] : kibanaJsonc.owner;
 
   projectConfig.owners = {
-    defaultOwner: kibanaJsonc.owner[0],
+    defaultOwner: owner,
   };
 
   projectConfig.toolchain = {
@@ -52,10 +53,13 @@ function generateProjectConfig(projectConfigTemplate: string, pkg: Package, kiba
 
   projectConfig.project = {
     name: pkg.name,
-    description: '',
+    description: `Moon project for ${pkg.name}`,
     channel: '',
-    owner: kibanaJsonc.owner[0],
-    metadata: {},
+    owner,
+    metadata: {
+      // is not a moon config, but it's useful to have at hand
+      sourceRoot: pkg.normalizedRepoRelativeDir,
+    },
   };
 
   projectConfig.tags = [pkg.getGroup(), kibanaJsonc.type, kibanaJsonc.devOnly ? 'dev' : 'prod'];
@@ -69,10 +73,12 @@ function updateFieldsFromTsConfig(
     log,
     tsConfigPath,
     implicitDependencies,
+    allPackageIds,
   }: {
     tsConfigPath: string;
     implicitDependencies: boolean;
     log: ToolingLog;
+    allPackageIds: string[];
   }
 ) {
   log.verbose(`Reading tsconfig from ${tsConfigPath}`);
@@ -81,11 +87,17 @@ function updateFieldsFromTsConfig(
   // eslint-disable-next-line no-eval
   const tsConfig = eval('0,' + readFile(tsConfigPath));
 
+  const rootRelativeTypings = path.join(
+    path.relative(projectConfig.project.metadata.sourceRoot, REPO_ROOT),
+    'typings'
+  );
+
   const tsInclude = (tsConfig.include || []).map((e: string) => `${e}`);
   const tsExclude = (tsConfig.exclude || []).map((e: string) => `!${e}`);
   const src = tsInclude
     .concat(tsExclude)
-    .map((e: string) => e.replace(/.*typings/, '{workspaceRoot}/typings'));
+    .map((e: string) => e.replace(/.*typings/, rootRelativeTypings))
+    .filter((e: string) => !e.startsWith('..')); // in Moon, parent-relative file deps are not allowed
   projectConfig.fileGroups = {
     src,
   };
@@ -93,14 +105,16 @@ function updateFieldsFromTsConfig(
   const dependencies = tsConfig.kbn_references;
   if (implicitDependencies && dependencies) {
     // TODO: some dependencies are referenced as objects
-    projectConfig.dependsOn = dependencies.filter((e: any) => typeof e === 'string');
+    projectConfig.dependsOn = dependencies
+      .filter((e: any) => typeof e === 'string')
+      .filter((e: string) => allPackageIds.includes(e));
   }
 }
 
 async function updateProjectJestConfig(projectConfig: any, params: { log: ToolingLog }) {
   const { log } = params;
 
-  const jestConfigName = findAny(projectConfig.sourceRoot, [
+  const jestConfigName = findAny(projectConfig.project.metadata.sourceRoot, [
     'jest.config.js',
     'jest.config.cjs',
     'jest.config.json',
@@ -108,14 +122,12 @@ async function updateProjectJestConfig(projectConfig: any, params: { log: Toolin
 
   if (!jestConfigName) {
     log.warning(
-      `Could not find jest config for ${projectConfig.name} @ ${projectConfig.sourceRoot}`
+      `Could not find jest config for ${projectConfig.name} @ ${projectConfig.project.metadata.sourceRoot}`
     );
     delete projectConfig.tasks.jest;
   } else {
     projectConfig.tasks.jest = {
-      options: {
-        jestConfig: `${jestConfigName}`,
-      },
+      args: ['--config', `${jestConfigName}`],
     };
   }
 }
@@ -125,7 +137,7 @@ async function updateProjectLintConfig(
   params: { log: ToolingLog; eslintIgnore: string }
 ) {
   const { log, eslintIgnore } = params;
-  if (eslintIgnore.split('\n').includes('/' + projectConfig.sourceRoot)) {
+  if (eslintIgnore.split('\n').includes('/' + projectConfig.project.metadata.sourceRoot)) {
     log.info(
       `Skipping lint task for project ${projectConfig.name}. It's explicitly ignored in .eslintignore`
     );
@@ -133,7 +145,10 @@ async function updateProjectLintConfig(
     return;
   }
 
-  const eslintConfigName = findAny(projectConfig.sourceRoot, ['.eslintrc.js', '.eslintrc.json']);
+  const eslintConfigName = findAny(projectConfig.project.metadata.sourceRoot, [
+    '.eslintrc.js',
+    '.eslintrc.json',
+  ]);
 
   if (eslintConfigName) {
     projectConfig.tasks.lint = {
@@ -153,7 +168,7 @@ export function regenerateMoonProjects() {
         (flags.filter as string | string[]) || undefined;
       const update = flags.update as boolean | undefined;
       const dryRun = flags['dry-run'] as boolean | undefined;
-      const implicitDependencies = !!flags['implicit-dependencies'];
+      const implicitDependencies = !!flags.dependencies;
 
       const template = readFile(path.resolve(__dirname, './moon.template.yml'));
 
@@ -166,6 +181,8 @@ export function regenerateMoonProjects() {
 
       const eslintIgnore = readFile(path.resolve(REPO_ROOT, '.eslintignore'));
 
+      const allPackageIds = filteredPackages.map((pkg) => pkg.name);
+
       for (const pkg of filteredPackages) {
         log.verbose(`Generating project configuration for ${pkg.name}`);
         const kibanaJsonc = readJsonc(path.resolve(pkg.normalizedRepoRelativeDir, 'kibana.jsonc'));
@@ -177,11 +194,14 @@ export function regenerateMoonProjects() {
             tsConfigPath,
             implicitDependencies,
             log,
+            allPackageIds,
           });
         } else {
           delete projectConfig.tasks.typecheck;
           log.warning(`Skipping ${pkg.name} - no tsconfig.json found.`);
         }
+
+        delete projectConfig.tasks.typecheck;
 
         await updateProjectJestConfig(projectConfig, {
           log,
@@ -217,13 +237,13 @@ export function regenerateMoonProjects() {
       `,
       flags: {
         string: ['filter'],
-        boolean: ['dry-run', 'update', 'implicit-dependencies'],
+        boolean: ['dry-run', 'update', 'dependencies'],
         default: {},
         alias: {},
         help: `
           --filter                    Filter packages by name or directory
           --update                    Update existing project configuration(s)
-          --no-implicit-dependencies  Do not include implicitDependencies section in the project configuration
+          --dependencies     Include dependsOn section in the project configuration
           --dry-run                   Do not write to disk
         `,
       },
@@ -301,7 +321,7 @@ function readJsonc(filePath: string) {
       .replace(/,([}\]])/g, '$1');
     return JSON.parse(fileCleaned);
   } catch (e) {
-    // eslint-ignore-next-line no-console
+    // eslint-disable-next-line no-console
     console.error(`Failed to read ${filePath}: `, fileCleaned);
     throw e;
   }
@@ -310,7 +330,6 @@ function readJsonc(filePath: string) {
 const KEY_PRIORITY = [
   '$schema',
   'id',
-  'sourceRoot',
   'type',
   'owners',
   'toolchain',

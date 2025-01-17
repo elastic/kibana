@@ -29,6 +29,19 @@ export async function buildPackage(packageName, { quiet, reactVersion }) {
   });
 }
 
+export async function buildPackagesWithMoon(packageNames, { quiet, reactVersion }) {
+  const moonTargets = packageNames.map((n) => `${n}:build`);
+  await run('moon', moonTargets, {
+    cwd: REPO_ROOT,
+    env: {
+      ...process.env,
+      REPO_ROOT,
+      REACT_VERSION: reactVersion,
+    },
+    pipe: !quiet
+  });
+}
+
 /**
  * Runs the build script in watch mode for a single package
  * @param {string} packageName

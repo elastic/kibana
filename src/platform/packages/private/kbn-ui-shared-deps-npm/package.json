@@ -25,5 +25,9 @@
       "**/test_fixtures/**",
       "**/test_helpers/**"
     ]
+  },
+  "dependencies": {
+    "@kbn/repo-info": "link:../../shared/kbn-repo-info",
+    "@kbn/ui-shared-deps-src": "link:../kbn-ui-shared-deps-src"
   }
 }

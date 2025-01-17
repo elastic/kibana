@@ -11,7 +11,14 @@ tasks:
       - $projectRoot/jest.config.js
   lint: {}
   typecheck:
+    deps:
+      - '^:typecheck'
+      - 'genTypecheckConfig'
+    command: tsc
     args:
+      - --project
+      - ./tsconfig.type_check.json
+      - --pretty
       - --noEmit
       - --skipLibCheck
       - --incremental
@@ -19,6 +26,6 @@ tasks:
       - target/types/tsconfig.type_check.tsbuildinfo
     inputs:
       - '@group(src)'
-      - '@group(global:tsConfigs)'
+      - '@group(globalTsConfigs)'
     outputs:
       - target

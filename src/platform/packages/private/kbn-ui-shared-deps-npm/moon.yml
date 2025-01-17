@@ -1,5 +1,5 @@
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/moon'
+id: '@kbn/ui-shared-deps-npm'
 type: unknown
 owners:
   defaultOwner: '@elastic/kibana-operations'
@@ -7,21 +7,24 @@ toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/moon'
-  description: Moon project for @kbn/moon
+  name: '@kbn/ui-shared-deps-npm'
+  description: Moon project for @kbn/ui-shared-deps-npm
   channel: ''
   owner: '@elastic/kibana-operations'
   metadata:
-    sourceRoot: packages/kbn-moon
-dependsOn: []
+    sourceRoot: src/platform/packages/private/kbn-ui-shared-deps-npm
+dependsOn:
+  - '@kbn/repo-info'
+  - '@kbn/ui-shared-deps-src'
 tags:
-  - common
+  - platform
   - shared-common
-  - dev
+  - prod
 fileGroups:
   src:
     - '**/*.ts'
-    - '**/*.tsx'
+    - '**/*.js'
+    - '!**/*.config.js'
     - '!target/**/*'
 tasks:
   lint: {}
