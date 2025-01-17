@@ -8,6 +8,7 @@
 import { registerRoutesMock, createTagUsageCollectorMock } from './plugin.test.mocks';
 
 import { coreMock } from '@kbn/core/server/mocks';
+import { savedObjectTaggingOssPluginMock } from '@kbn/saved-objects-tagging-oss-plugin/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { SavedObjectTaggingPlugin } from './plugin';
@@ -17,10 +18,12 @@ describe('SavedObjectTaggingPlugin', () => {
   let plugin: SavedObjectTaggingPlugin;
   let featuresPluginSetup: ReturnType<typeof featuresPluginMock.createSetup>;
   let usageCollectionSetup: ReturnType<typeof usageCollectionPluginMock.createSetupContract>;
+  let savedObjectTaggingOssSetup: ReturnType<typeof savedObjectTaggingOssPluginMock.createSetup>;
 
   beforeEach(() => {
     plugin = new SavedObjectTaggingPlugin();
     featuresPluginSetup = featuresPluginMock.createSetup();
+    savedObjectTaggingOssSetup = savedObjectTaggingOssPluginMock.createSetup();
     usageCollectionSetup = usageCollectionPluginMock.createSetupContract();
     // `usageCollection` 'mocked' implementation use the real `CollectorSet` implementation
     // that throws when registering things that are not collectors.
@@ -35,13 +38,19 @@ describe('SavedObjectTaggingPlugin', () => {
 
   describe('#setup', () => {
     it('registers routes', async () => {
-      await plugin.setup(coreMock.createSetup(), { features: featuresPluginSetup });
+      await plugin.setup(coreMock.createSetup(), {
+        features: featuresPluginSetup,
+        savedObjectsTaggingOss: savedObjectTaggingOssSetup,
+      });
       expect(registerRoutesMock).toHaveBeenCalledTimes(1);
     });
 
     it('registers the globalSearch route handler context', async () => {
       const coreSetup = coreMock.createSetup();
-      plugin.setup(coreSetup, { features: featuresPluginSetup });
+      plugin.setup(coreSetup, {
+        features: featuresPluginSetup,
+        savedObjectsTaggingOss: savedObjectTaggingOssSetup,
+      });
       expect(coreSetup.http.registerRouteHandlerContext).toHaveBeenCalledTimes(1);
       expect(coreSetup.http.registerRouteHandlerContext).toHaveBeenCalledWith(
         'tags',
@@ -50,7 +59,10 @@ describe('SavedObjectTaggingPlugin', () => {
     });
 
     it('registers the `savedObjectsTagging` feature', async () => {
-      plugin.setup(coreMock.createSetup(), { features: featuresPluginSetup });
+      plugin.setup(coreMock.createSetup(), {
+        features: featuresPluginSetup,
+        savedObjectsTaggingOss: savedObjectTaggingOssSetup,
+      });
       expect(featuresPluginSetup.registerKibanaFeature).toHaveBeenCalledTimes(1);
       expect(featuresPluginSetup.registerKibanaFeature).toHaveBeenCalledWith(
         savedObjectsTaggingFeature
@@ -64,6 +76,7 @@ describe('SavedObjectTaggingPlugin', () => {
       plugin.setup(coreMock.createSetup(), {
         features: featuresPluginSetup,
         usageCollection: usageCollectionSetup,
+        savedObjectsTaggingOss: savedObjectTaggingOssSetup,
       });
 
       expect(usageCollectionSetup.registerCollector).toHaveBeenCalledTimes(1);
@@ -73,12 +86,18 @@ describe('SavedObjectTaggingPlugin', () => {
 
   describe('#start', () => {
     it('returns the expected contract', () => {
-      plugin.setup(coreMock.createSetup(), { features: featuresPluginSetup });
+      plugin.setup(coreMock.createSetup(), {
+        features: featuresPluginSetup,
+        savedObjectsTaggingOss: savedObjectTaggingOssSetup,
+      });
       const contract = plugin.start(coreMock.createStart(), {});
 
       expect(contract).toEqual({
         createTagClient: expect.any(Function),
         createInternalAssignmentService: expect.any(Function),
+        convertTagNameToId: expect.any(Function),
+        getTagsFromReferences: expect.any(Function),
+        replaceTagReferences: expect.any(Function),
       });
     });
   });
