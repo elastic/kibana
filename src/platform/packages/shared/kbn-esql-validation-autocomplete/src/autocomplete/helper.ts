@@ -571,7 +571,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
           operatorReturnType === 'unknown' || operatorReturnType === 'unsupported'
             ? 'any'
             : operatorReturnType,
-        ignored: ['='],
+        ignored: ['=', ':'],
       })
     );
   } else {

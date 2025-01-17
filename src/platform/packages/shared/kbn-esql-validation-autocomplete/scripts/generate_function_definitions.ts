@@ -277,9 +277,11 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
           ...param,
           type: convertDateTime(param.type),
           description: undefined,
-          ...(idx === 0 && FULL_TEXT_SEARCH_FUNCTIONS.includes(ESFunctionDefinition.name)
+          ...(FULL_TEXT_SEARCH_FUNCTIONS.includes(ESFunctionDefinition.name)
             ? // Default to false. If set to true, this parameter does not accept a function or literal, only fields.
-              { fieldsOnly: true }
+              idx === 0
+              ? { fieldsOnly: true }
+              : { constantOnly: true }
             : {}),
         })),
         returnType: convertDateTime(signature.returnType),
@@ -619,7 +621,6 @@ const enrichOperators = (
 
     const isInOperator = op.name === 'in';
     const isLikeOperator = /like/i.test(op.name);
-    const isMatchOperator = /match/i.test(op.name);
 
     let signatures = op.signatures.map((s) => ({
       ...s,
@@ -660,16 +661,16 @@ const enrichOperators = (
       }));
     }
 
-    if (isMatchOperator) {
-      // for "match" and ":", the first param should be fieldsOnly, second should be constantOnly
-      signatures = signatures.map((s) => ({
-        ...s,
-        params: s.params.map((p, idx) => ({
-          ...p,
-          ...(idx === 1 ? { constantOnly: true } : { fieldsOnly: true }),
-        })),
-      }));
-    }
+    // if (isMatchOperator) {
+    //   // for "match" and ":", the first param should be fieldsOnly, second should be constantOnly
+    //   signatures = signatures.map((s) => ({
+    //     ...s,
+    //     params: s.params.map((p, idx) => ({
+    //       ...p,
+    //       ...(idx === 1 ? { constantOnly: true } : { fieldsOnly: true }),
+    //     })),
+    //   }));
+    // }
 
     if (
       Object.hasOwn(operatorsMeta, op.name) &&
@@ -836,6 +837,11 @@ ${functionsType === 'operators' ? `import { isNumericType } from '../../shared/e
 
     const functionDefinition = getFunctionDefinition(ESDefinition);
     const isLikeOperator = functionDefinition.name.toLowerCase().includes('like');
+
+    if (functionDefinition.name.toLowerCase() === 'match') {
+      scalarFunctionDefinitions.push({ ...functionDefinition, type: 'eval' });
+      continue;
+    }
     if (functionDefinition.type === 'operator' || isLikeOperator) {
       operatorDefinitions.push(functionDefinition);
     }

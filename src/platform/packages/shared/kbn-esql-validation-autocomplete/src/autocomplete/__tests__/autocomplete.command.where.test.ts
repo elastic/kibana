@@ -212,10 +212,18 @@ describe('WHERE <expression>', () => {
       ]);
       await assertSuggestions('from index | WHERE not /', [
         ...getFieldNamesByType('boolean').map((name) => attachTriggerCommand(`${name} `)),
-        ...getFunctionSignaturesByReturnType('where', 'boolean', { scalar: true }),
+        ...getFunctionSignaturesByReturnType('where', 'boolean', { scalar: true }, undefined, [
+          ':',
+        ]),
       ]);
       await assertSuggestions('FROM index | WHERE NOT ENDS_WITH(keywordField, "foo") /', [
-        ...getFunctionSignaturesByReturnType('where', 'boolean', { builtin: true }, ['boolean']),
+        ...getFunctionSignaturesByReturnType(
+          'where',
+          'boolean',
+          { builtin: true },
+          ['boolean'],
+          [':']
+        ),
         pipeCompleteItem,
       ]);
       await assertSuggestions('from index | WHERE keywordField IS NOT/', [
@@ -290,9 +298,13 @@ describe('WHERE <expression>', () => {
       const { assertSuggestions } = await setup();
 
       await assertSuggestions('FROM index | WHERE doubleField + doubleField /', [
-        ...getFunctionSignaturesByReturnType('where', 'any', { builtin: true, skipAssign: true }, [
-          'double',
-        ]),
+        ...getFunctionSignaturesByReturnType(
+          'where',
+          'any',
+          { builtin: true, skipAssign: true },
+          ['double'],
+          [':']
+        ),
       ]);
     });
 
