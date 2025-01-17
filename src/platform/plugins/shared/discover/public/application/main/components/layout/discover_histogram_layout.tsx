@@ -75,6 +75,18 @@ export const DiscoverHistogramLayout = ({
   if (!searchSessionId && !isEsqlMode) {
     return null;
   }
+  if (hideChart) {
+    return (
+      <>
+        <DiscoverMainContent
+          {...mainContentProps}
+          stateContainer={stateContainer}
+          dataView={dataView}
+          panelsToggle={renderCustomChartToggleActions()}
+        />
+      </>
+    );
+  }
 
   return (
     <UnifiedHistogramContainer

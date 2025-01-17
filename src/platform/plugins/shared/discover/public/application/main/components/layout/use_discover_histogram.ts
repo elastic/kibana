@@ -267,15 +267,15 @@ export const useDiscoverHistogram = ({
    * Data fetching
    */
 
-  const skipRefetch = useRef<boolean>();
+  const skipRefetch = useRef<number | undefined>();
 
   // Skip refetching when showing the chart since Lens will
   // automatically fetch when the chart is shown
   useEffect(() => {
     if (skipRefetch.current === undefined) {
-      skipRefetch.current = false;
-    } else {
-      skipRefetch.current = !hideChart;
+      skipRefetch.current = 0;
+    } else if (!hideChart) {
+      skipRefetch.current = 3;
     }
   }, [hideChart]);
 
@@ -304,13 +304,14 @@ export const useDiscoverHistogram = ({
     }
 
     const subscription = fetchChart$.subscribe((source) => {
-      if (!skipRefetch.current) {
+      if (skipRefetch.current === 0) {
         if (source === 'discover') addLog('Unified Histogram - Discover refetch');
         if (source === 'lens') addLog('Unified Histogram - Lens suggestion refetch');
         unifiedHistogram.refetch();
+      } else {
+        addLog('Unified Histogram - Skip refetch');
+        skipRefetch.current = skipRefetch.current! - 1;
       }
-
-      skipRefetch.current = false;
     });
 
     // triggering the initial request for total hits hook
@@ -494,8 +495,25 @@ const createTotalHitsObservable = (state$?: Observable<UnifiedHistogramState>) =
 
 const createCurrentSuggestionObservable = (state$: Observable<UnifiedHistogramState>) => {
   return state$.pipe(
-    map((state) => state.currentSuggestionContext),
-    distinctUntilChanged(isEqual)
+    // Emit the previous and current state as a pair
+    pairwise(),
+    // Filter out the transition where chartHidden changes from false to true
+    filter(([prev, curr]) => {
+      const isTransition = prev.chartHidden && !curr.chartHidden;
+      if (isTransition) {
+        // console.log('Filtered out transition from chartHidden: false to true');
+        return false;
+      }
+      /**
+      const differences = getDifferences(
+        prev.currentSuggestionContext.suggestion,
+        curr.currentSuggestionContext.suggestion
+      );
+      console.log('Differences in currentSuggestionContext:', differences);
+       **/
+
+      return !isEqual(prev.currentSuggestionContext, curr.currentSuggestionContext);
+    })
   );
 };
 

@@ -13,7 +13,6 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
@@ -66,14 +65,6 @@ export interface DataTotalHitsMsg extends DataMsg {
   result?: number;
 }
 
-export interface DataChartsMessage extends DataMsg {
-  response?: SearchResponse;
-}
-
-export interface DataAvailableFieldsMsg extends DataMsg {
-  fields?: string[];
-}
-
 export interface DiscoverDataStateContainer {
   /**
    * Implicitly starting fetching data from ES
@@ -106,7 +97,7 @@ export interface DiscoverDataStateContainer {
   /**
    * resetting all data observable to initial state
    */
-  reset: () => void;
+  reset: (status?: FetchStatus) => void;
 
   /**
    * cancels the running queries
@@ -371,8 +362,9 @@ export function getDataStateContainer({
     return refetch$;
   };
 
-  const reset = () => {
-    sendResetMsg(dataSubjects, getInitialFetchStatus());
+  const reset = (status?: FetchStatus) => {
+    const fetchStatus = status || getInitialFetchStatus();
+    sendResetMsg(dataSubjects, fetchStatus);
   };
 
   const cancel = () => {

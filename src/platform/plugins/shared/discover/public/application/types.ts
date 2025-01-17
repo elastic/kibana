@@ -12,6 +12,7 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 
 export enum FetchStatus {
+  SETUP = 'setup',
   UNINITIALIZED = 'uninitialized',
   LOADING = 'loading',
   LOADING_MORE = 'loading_more',

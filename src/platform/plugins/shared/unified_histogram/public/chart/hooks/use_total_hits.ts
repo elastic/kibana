@@ -129,7 +129,7 @@ const fetchTotalHits = async ({
   onTotalHitsChange?.(response.resultStatus, response.result);
 };
 
-const fetchTotalHitsSearchSource = async ({
+export const fetchTotalHitsSearchSource = async ({
   services: { data },
   abortController,
   dataView,

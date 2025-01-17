@@ -7,20 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Adapters } from '@kbn/inspector-plugin/common';
+import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import {
   BehaviorSubject,
+  catchError,
   combineLatest,
   distinctUntilChanged,
   filter,
   firstValueFrom,
+  lastValueFrom,
+  map,
+  of,
   race,
   switchMap,
 } from 'rxjs';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { isEqual } from 'lodash';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import { type Filter, isOfAggregateQueryType, type TimeRange } from '@kbn/es-query';
+import { DataView, DataViewType } from '@kbn/data-views-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { isRunningResponse, SearchSource } from '@kbn/data-plugin/common';
 import type { DiscoverAppState } from '../state_management/discover_app_state_container';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
@@ -121,6 +128,27 @@ export function fetchAll(
           timeRange: getInternalState().dataRequestParams.timeRangeAbsolute,
         })
       : fetchDocuments(searchSource, fetchDeps);
+
+    const responseTotalHits =
+      (getAppState().hideChart || !dataView.getTimeField()) && query && !isEsqlQuery
+        ? fetchTotalHitsSearchSource({
+            services,
+            searchSessionId: fetchDeps.searchSessionId,
+            adapter: inspectorAdapters.requests,
+            abortSignal: abortController.signal,
+            searchSource: savedSearch.searchSource.createChild(),
+            dataView,
+            filters: getInternalState().customFilters,
+            timeRange: getInternalState().dataRequestParams.timeRangeAbsolute!,
+          })
+        : undefined;
+    responseTotalHits?.then(({ result, resultStatus }) => {
+      dataSubjects.totalHits$.next({
+        fetchStatus: resultStatus,
+        result,
+      });
+    });
+
     const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';
     const startTime = window.performance.now();
 
@@ -285,4 +313,83 @@ const noResultsFound = (subject: DataMain$) => {
       (a, b) => a.fetchStatus === b.fetchStatus && a.foundDocuments === b.foundDocuments
     )
   );
+};
+
+const fetchTotalHitsSearchSource = async ({
+  services: { data },
+  abortSignal,
+  adapter,
+  dataView,
+  searchSessionId,
+  searchSource,
+  filters: originalFilters,
+  timeRange,
+}: {
+  services: DiscoverServices;
+  abortSignal: AbortSignal;
+  dataView: DataView;
+  searchSessionId: string | undefined;
+  searchSource: SearchSource;
+  adapter: RequestAdapter | undefined;
+  filters: Filter[];
+  timeRange: TimeRange;
+}) => {
+  searchSource.setField('index', dataView).setField('size', 0).setField('trackTotalHits', true);
+
+  let filters = originalFilters;
+
+  if (dataView.type === DataViewType.ROLLUP) {
+    // We treat that data view as "normal" even if it was a rollup data view,
+    // since the rollup endpoint does not support querying individual documents, but we
+    // can get them from the regular _search API that will be used if the data view
+    // not a rollup data view.
+    searchSource.setOverwriteDataViewType(undefined);
+  } else {
+    // Set the date range filter fields from timeFilter using the absolute format.
+    // Search sessions requires that it be converted from a relative range
+    const timeFilter = data.query.timefilter.timefilter.createFilter(dataView, timeRange);
+
+    if (timeFilter) {
+      filters = [...filters, timeFilter];
+    }
+  }
+
+  searchSource.setField('filter', filters);
+
+  // Let the consumer inspect the request if they want to track it
+  const inspector = adapter
+    ? {
+        adapter,
+        title: i18n.translate('discover.inspectorRequestDataTitleTotalHits', {
+          defaultMessage: 'Total hits',
+        }),
+        description: i18n.translate('discover.inspectorRequestDescriptionTotalHits', {
+          defaultMessage: 'This request queries Elasticsearch to fetch the total hits.',
+        }),
+      }
+    : undefined;
+
+  const fetch$ = searchSource
+    .fetch$({
+      inspector,
+      sessionId: searchSessionId,
+      abortSignal,
+      executionContext: {
+        description: 'fetch total hits',
+      },
+      disableWarningToasts: true, // TODO: show warnings as a badge next to total hits number
+    })
+    .pipe(
+      filter((res) => !isRunningResponse(res)),
+      map((res) => res.rawResponse.hits.total as number),
+      catchError((error: Error) => of(error))
+    );
+
+  const result = await lastValueFrom(fetch$);
+
+  const resultStatus = result instanceof Error ? FetchStatus.ERROR : FetchStatus.COMPLETE;
+
+  const nrOfHits = result instanceof Error ? undefined : result;
+
+  return { resultStatus, result: nrOfHits };
 };

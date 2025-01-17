@@ -160,7 +160,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('Creating saved search');
         await expectSearches(
           type,
-          type === 'esql' ? actualExpectedRequests + 2 : actualExpectedRequests,
+          type === 'esql' ? actualExpectedRequests + 1 : actualExpectedRequests,
           async () => {
             await discover.saveSearch(savedSearch);
           }
@@ -187,7 +187,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('Loading saved search');
         await expectSearches(
           type,
-          type === 'esql' ? actualExpectedRequests + 2 : actualExpectedRequests,
+          type === 'esql' ? actualExpectedRequests + 1 : actualExpectedRequests,
           async () => {
             await discover.loadSavedSearch(savedSearch);
           }
@@ -289,7 +289,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await expectSearches(type, 1, async () => {
           await discover.toggleChartVisibility();
         });
-        await expectSearches(type, 3, async () => {
+        await expectSearches(type, 2, async () => {
           await discover.toggleChartVisibility();
         });
       });

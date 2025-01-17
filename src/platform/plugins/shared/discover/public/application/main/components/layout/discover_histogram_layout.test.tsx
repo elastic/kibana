@@ -62,7 +62,6 @@ function getStateContainer(savedSearch?: SavedSearch) {
 }
 
 const mountComponent = async ({
-  isEsqlMode = false,
   storage,
   savedSearch = savedSearchMockWithTimeField,
   searchSessionId = '123',
@@ -133,6 +132,7 @@ const mountComponent = async ({
         }
         isChartAvailable={undefined}
         renderedFor="root"
+        services={services}
       />
     ),
   };
@@ -178,8 +178,6 @@ describe('Discover histogram layout component', () => {
       const { component } = await mountComponent();
       expect(component.find(PanelsToggle).first().prop('isChartAvailable')).toBe(undefined);
       expect(component.find(PanelsToggle).first().prop('renderedFor')).toBe('histogram');
-      expect(component.find(PanelsToggle).last().prop('isChartAvailable')).toBe(true);
-      expect(component.find(PanelsToggle).last().prop('renderedFor')).toBe('tabs');
     });
   });
 });

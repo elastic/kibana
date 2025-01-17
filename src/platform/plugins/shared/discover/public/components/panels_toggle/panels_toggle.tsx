@@ -12,6 +12,8 @@ import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 import { IconButtonGroup } from '@kbn/shared-ux-button-toolbar';
+import { setChartHidden } from '@kbn/unified-histogram-plugin/public';
+import { DiscoverServices } from '../..';
 import { useAppStateSelector } from '../../application/main/state_management/discover_app_state_container';
 import { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
 import { SidebarToggleState } from '../../application/types';
@@ -21,6 +23,7 @@ export interface PanelsToggleProps {
   sidebarToggleState$: BehaviorSubject<SidebarToggleState>;
   renderedFor: 'histogram' | 'prompt' | 'tabs' | 'root';
   isChartAvailable: boolean | undefined; // it will be injected in `DiscoverMainContent` when rendering View mode tabs or in `DiscoverLayout` when rendering No results or Error prompt
+  services: DiscoverServices;
 }
 
 /**
@@ -36,12 +39,14 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
   sidebarToggleState$,
   renderedFor,
   isChartAvailable,
+  services,
 }) => {
   const isChartHidden = useAppStateSelector((state) => Boolean(state.hideChart));
 
   const onToggleChart = useCallback(() => {
+    setChartHidden(services.storage, 'discover', !isChartHidden);
     stateContainer.appState.update({ hideChart: !isChartHidden });
-  }, [stateContainer, isChartHidden]);
+  }, [stateContainer, isChartHidden, services.storage]);
 
   const sidebarToggleState = useObservable(sidebarToggleState$);
   const isSidebarCollapsed = sidebarToggleState?.isCollapsed ?? false;

@@ -63,6 +63,7 @@ export interface DiscoverLayoutProps {
 }
 
 export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
+  const services = useDiscoverServices();
   const {
     trackUiMetric,
     capabilities,
@@ -76,7 +77,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     dataVisualizer: dataVisualizerService,
     ebtManager,
     fieldsMetadata,
-  } = useDiscoverServices();
+  } = services;
   const pageBackgroundColor = useEuiBackgroundColor('plain');
   const globalQueryState = data.query.getState();
   const { main$ } = stateContainer.dataState.data$;
@@ -324,9 +325,10 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         sidebarToggleState$={sidebarToggleState$}
         renderedFor="root"
         isChartAvailable={undefined}
+        services={services}
       />
     );
-  }, [stateContainer, sidebarToggleState$]);
+  }, [stateContainer, sidebarToggleState$, services]);
 
   const mainDisplay = useMemo(() => {
     if (resultState === 'uninitialized') {

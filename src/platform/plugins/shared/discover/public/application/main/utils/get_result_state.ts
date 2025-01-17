@@ -21,7 +21,7 @@ export const resultStatuses = {
  * Determines what is displayed in Discover main view (loading view, data view, empty data view, ...)
  */
 export function getResultState(fetchStatus: FetchStatus, foundDocuments: boolean = false) {
-  if (fetchStatus === FetchStatus.UNINITIALIZED) {
+  if (fetchStatus === FetchStatus.UNINITIALIZED || fetchStatus === FetchStatus.SETUP) {
     return resultStatuses.UNINITIALIZED;
   }
   if (fetchStatus === FetchStatus.ERROR) return resultStatuses.NO_RESULTS;
