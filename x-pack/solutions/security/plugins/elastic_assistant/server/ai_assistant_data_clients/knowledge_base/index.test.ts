@@ -521,7 +521,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
       const result = await client.getAssistantTools({
         esClient: esClientMock,
-        contentReferencesStore: contentReferencesStoreFactory()
+        contentReferencesStore: contentReferencesStoreFactory(),
       });
 
       expect(result).toHaveLength(1);
@@ -536,7 +536,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
       const result = await client.getAssistantTools({
         esClient: esClientMock,
-        contentReferencesStore: contentReferencesStoreFactory()
+        contentReferencesStore: contentReferencesStoreFactory(),
       });
 
       expect(result).toEqual([]);
@@ -549,7 +549,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
       const result = await client.getAssistantTools({
         esClient: esClientMock,
-        contentReferencesStore: contentReferencesStoreFactory()
+        contentReferencesStore: contentReferencesStoreFactory(),
       });
 
       expect(result).toEqual([]);

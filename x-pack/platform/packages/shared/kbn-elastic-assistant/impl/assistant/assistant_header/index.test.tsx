@@ -42,7 +42,7 @@ const testProps = {
   refetchAnonymizationFieldsResults: jest.fn(),
   allPrompts: [],
   contentReferencesVisible: true,
-  setContentReferencesVisible: jest.fn()
+  setContentReferencesVisible: jest.fn(),
 };
 
 jest.mock('../../connectorland/use_load_connectors', () => ({

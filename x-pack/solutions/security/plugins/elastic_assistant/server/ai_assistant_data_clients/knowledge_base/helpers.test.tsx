@@ -153,14 +153,14 @@ describe('getStructuredToolForIndexEntry', () => {
   const mockEsClient = {} as ElasticsearchClient;
 
   const mockIndexEntry = getCreateKnowledgeBaseEntrySchemaMock({ type: 'index' }) as IndexEntry;
-  const contentReferencesStore = contentReferencesStoreFactory()
+  const contentReferencesStore = contentReferencesStoreFactory();
 
   it('should return a DynamicStructuredTool with correct name and schema', () => {
     const tool = getStructuredToolForIndexEntry({
       indexEntry: mockIndexEntry,
       esClient: mockEsClient,
       logger: mockLogger,
-      contentReferencesStore
+      contentReferencesStore,
     });
 
     expect(tool).toBeInstanceOf(DynamicStructuredTool);
@@ -196,7 +196,7 @@ describe('getStructuredToolForIndexEntry', () => {
       indexEntry: mockIndexEntry,
       esClient: mockEsClient,
       logger: mockLogger,
-      contentReferencesStore
+      contentReferencesStore,
     });
 
     const input = { query: 'testQuery', field1: 'value1', field2: 2 };
@@ -214,7 +214,7 @@ describe('getStructuredToolForIndexEntry', () => {
       indexEntry: mockIndexEntry,
       esClient: mockEsClient,
       logger: mockLogger,
-      contentReferencesStore
+      contentReferencesStore,
     });
 
     const input = { query: 'testQuery', field1: 'value1', field2: 2 };
@@ -234,7 +234,7 @@ describe('getStructuredToolForIndexEntry', () => {
       }) as IndexEntry,
       esClient: mockEsClient,
       logger: mockLogger,
-      contentReferencesStore
+      contentReferencesStore,
     });
 
     const nameRegex = /^[a-zA-Z0-9_-]+$/;
@@ -249,7 +249,7 @@ describe('getStructuredToolForIndexEntry', () => {
       }) as IndexEntry,
       esClient: mockEsClient,
       logger: mockLogger,
-      contentReferencesStore
+      contentReferencesStore,
     });
 
     expect(tool.lc_kwargs.name).toMatch('testing');

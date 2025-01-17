@@ -59,7 +59,7 @@ describe('defend insights route helpers', () => {
         latestReplacements: {},
         onNewReplacements: jest.fn(),
         request: {} as any,
-        contentReferencesStore: {} as ContentReferencesStore
+        contentReferencesStore: {} as ContentReferencesStore,
       };
       const result = getAssistantToolParams(params);
 

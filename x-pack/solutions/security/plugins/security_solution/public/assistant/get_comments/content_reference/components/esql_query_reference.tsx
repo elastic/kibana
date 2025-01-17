@@ -16,12 +16,20 @@ interface Props {
   esqlContentReference: EsqlContentReference;
 }
 
-export const EsqlQueryReference: React.FC<Props> = ({ contentReferenceNode, esqlContentReference }) => {
-    return (
-        <PopoverReference contentReferenceCount={contentReferenceNode.contentReferenceCount}>
-            <EuiLink href={`/app/discover#/?_a=(dataSource:(type:esql),interval:auto,query:(esql:'${encodeURIComponent(esqlContentReference.query)}'))`} target="_blank">
-                {esqlContentReference.label}
-            </EuiLink>
-        </PopoverReference>
-    );
-}
+export const EsqlQueryReference: React.FC<Props> = ({
+  contentReferenceNode,
+  esqlContentReference,
+}) => {
+  return (
+    <PopoverReference contentReferenceCount={contentReferenceNode.contentReferenceCount}>
+      <EuiLink
+        href={`/app/discover#/?_a=(dataSource:(type:esql),interval:auto,query:(esql:'${encodeURIComponent(
+          esqlContentReference.query
+        )}'))`}
+        target="_blank"
+      >
+        {esqlContentReference.label}
+      </EuiLink>
+    </PopoverReference>
+  );
+};
