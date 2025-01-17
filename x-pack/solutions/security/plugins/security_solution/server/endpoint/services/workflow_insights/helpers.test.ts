@@ -258,7 +258,7 @@ describe('helpers', () => {
     it('should generate the correct hashed id', () => {
       const insight = getDefaultInsight();
       const result = generateInsightId(insight);
-      const expectedHash = '529b77322b4888a34c670909e725559be6e39529da7c5d270852f590ca56ef39';
+      const expectedHash = '6b1a7a9625decbf899db4fbf78105a0eff9ef98e3f2dadc2781d59996b55445e';
       expect(result).toBe(expectedHash);
     });
   });

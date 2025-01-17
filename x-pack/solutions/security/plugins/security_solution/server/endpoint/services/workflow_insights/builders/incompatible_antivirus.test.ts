@@ -94,7 +94,9 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
         type: ActionType.Refreshed,
         timestamp: expect.any(moment),
       },
-      value: 'AVGAntivirus',
+      value: `AVGAntivirus /Applications/AVGAntivirus.app/Contents/Backend/services/com.avg.activity${
+        signerValue ? ` ${signerValue}` : ''
+      }`,
       remediation: {
         exception_list_items: [
           {
@@ -128,6 +130,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
         notes: {
           llm_model: 'model-1',
         },
+        display_name: 'AVGAntivirus',
       },
     });
 
