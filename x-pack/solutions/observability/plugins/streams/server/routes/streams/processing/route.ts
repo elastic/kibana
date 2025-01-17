@@ -26,7 +26,7 @@ import { DefinitionNotFound } from '../../../lib/streams/errors';
 import { checkAccess } from '../../../lib/streams/stream_crud';
 
 const paramsSchema = z.object({
-  path: z.object({ name: z.string() }),
+  path: z.object({ id: z.string() }),
   body: z.object({
     processing: z.array(processingDefinitionSchema),
     documents: z.array(z.record(z.unknown())),
@@ -37,7 +37,7 @@ const paramsSchema = z.object({
 type ProcessingSimulateParams = z.infer<typeof paramsSchema>;
 
 export const simulateProcessorRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{name}/processing/_simulate',
+  endpoint: 'POST /api/streams/{id}/processing/_simulate',
   options: {
     access: 'internal',
   },
@@ -53,9 +53,9 @@ export const simulateProcessorRoute = createServerRoute({
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
 
-      const { read } = await checkAccess({ id: params.path.name, scopedClusterClient });
+      const { read } = await checkAccess({ id: params.path.id, scopedClusterClient });
       if (!read) {
-        throw new DefinitionNotFound(`Stream definition for ${params.path.name} not found.`);
+        throw new DefinitionNotFound(`Stream definition for ${params.path.id} not found.`);
       }
 
       const simulationBody = prepareSimulationBody(params);
@@ -94,7 +94,7 @@ const prepareSimulationBody = (params: ProcessingSimulateParams) => {
 
   const processors = formatToIngestProcessors(processing);
   const docs = documents.map((doc, id) => ({
-    _index: path.name,
+    _index: path.id,
     _id: id.toString(),
     _source: doc,
   }));
@@ -102,7 +102,7 @@ const prepareSimulationBody = (params: ProcessingSimulateParams) => {
   const simulationBody: any = {
     docs,
     pipeline_substitutions: {
-      [`${path.name}@stream.processing`]: {
+      [`${path.id}@stream.processing`]: {
         processors,
       },
     },
@@ -111,7 +111,7 @@ const prepareSimulationBody = (params: ProcessingSimulateParams) => {
   if (detected_fields) {
     const properties = computeMappingProperties(detected_fields);
     simulationBody.component_template_substitutions = {
-      [`${path.name}@stream.layer`]: {
+      [`${path.id}@stream.layer`]: {
         template: {
           mappings: {
             properties,
