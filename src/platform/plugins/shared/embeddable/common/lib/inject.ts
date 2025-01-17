@@ -8,9 +8,10 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { SavedObjectReference } from '@kbn/core/types';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { CommonEmbeddableStartContract, EmbeddableStateWithType } from '../types';
 import { injectBaseEmbeddableInput } from './migrate_base_input';
+import { injectSavedObjectIdRef } from './saved_object_id_references';
 
 export const getInjectFunction = (embeddables: CommonEmbeddableStartContract) => {
   return (state: EmbeddableStateWithType, references: SavedObjectReference[]) => {
@@ -18,6 +19,7 @@ export const getInjectFunction = (embeddables: CommonEmbeddableStartContract) =>
     const factory = embeddables.getEmbeddableFactory?.(state.type);
 
     let updatedInput = injectBaseEmbeddableInput(state, references);
+    updatedInput = injectSavedObjectIdRef(updatedInput, references);
 
     if (factory) {
       updatedInput = factory.inject(updatedInput, references) as EmbeddableStateWithType;
