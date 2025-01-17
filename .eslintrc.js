@@ -328,6 +328,20 @@ module.exports = {
       },
     },
     /**
+     * Consistent type imports
+     */
+    {
+      files: [
+        'src/**/*.{ts,tsx}',
+        'x-pack/**/*.{ts,tsx}',
+        'packages/**/*.{ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/consistent-type-exports': 'error',
+        '@typescript-eslint/consistent-type-imports': 'error',
+      },
+    },
+    /**
      * Files that require triple-license headers, settings
      * are overridden below for files that require Elastic
      * Licence headers
