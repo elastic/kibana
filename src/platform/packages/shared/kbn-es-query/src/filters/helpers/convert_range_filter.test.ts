@@ -24,4 +24,15 @@ describe('convertRangeFilterToTimeRange', () => {
 
     expect(convertedRangeFilter).toEqual(filterAfterConvertedRangeFilter);
   });
+
+  it('should return converted range for relative dates', () => {
+    const filter: any = { query: { range: { '@timestamp': { gte: 'now-1d', lte: 'now' } } } };
+    const filterAfterConvertedRangeFilter = {
+      from: 'now-1d',
+      to: 'now',
+    };
+    const convertedRangeFilter = convertRangeFilterToTimeRange(filter);
+
+    expect(convertedRangeFilter).toEqual(filterAfterConvertedRangeFilter);
+  });
 });
