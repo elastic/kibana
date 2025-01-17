@@ -35,4 +35,17 @@ describe('convertRangeFilterToTimeRange', () => {
 
     expect(convertedRangeFilter).toEqual(filterAfterConvertedRangeFilter);
   });
+
+  it('should return converted range for relative dates without now', () => {
+    const filter: any = {
+      query: { range: { '@timestamp': { gte: '2024.02.01', lte: '2024.02.01||+1M/d' } } },
+    };
+    const filterAfterConvertedRangeFilter = {
+      from: moment('2024.02.01'),
+      to: '2024.02.01||+1M/d',
+    };
+    const convertedRangeFilter = convertRangeFilterToTimeRange(filter);
+
+    expect(convertedRangeFilter).toEqual(filterAfterConvertedRangeFilter);
+  });
 });
