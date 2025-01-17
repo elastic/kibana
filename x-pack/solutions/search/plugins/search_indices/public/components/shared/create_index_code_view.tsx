@@ -102,7 +102,7 @@ export const CreateIndexCodeView = ({
               <h4>{selectedWorkflow?.title}</h4>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <EuiText color="subdued">
+            <EuiText color="subdued" size="s">
               <p>{selectedWorkflow?.summary}</p>
             </EuiText>
           </EuiFlexItem>
