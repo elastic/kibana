@@ -9,7 +9,7 @@ import { EuiButton } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { RiskScoreEntity } from '../../../../common/search_strategy';
+import type { EntityType } from '../../../../common/search_strategy';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useKibana } from '../../../common/lib/kibana';
 import type { inputsModel } from '../../../common/store';
@@ -22,7 +22,7 @@ const RiskScoreRestartButtonComponent = ({
   riskScoreEntity,
 }: {
   refetch: inputsModel.Refetch;
-  riskScoreEntity: RiskScoreEntity;
+  riskScoreEntity: EntityType;
 }) => {
   const { fetch, isLoading } = useFetch(
     REQUEST_NAMES.REFRESH_RISK_SCORE,

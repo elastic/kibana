@@ -1,10 +1,9 @@
 disabled:
   # Cypress configs, for now these are still run manually
+  - x-pack/test/apm_cypress/cli_config.ts
   - x-pack/solutions/observability/plugins/observability_onboarding/e2e/ftr_config_open.ts
   - x-pack/solutions/observability/plugins/observability_onboarding/e2e/ftr_config_runner.ts
   - x-pack/solutions/observability/plugins/observability_onboarding/e2e/ftr_config.ts
-  - x-pack/solutions/observability/plugins/apm/ftr_e2e/ftr_config_run.ts
-  - x-pack/solutions/observability/plugins/apm/ftr_e2e/ftr_config.ts
   - x-pack/solutions/observability/plugins/inventory/e2e/ftr_config_run.ts
   - x-pack/solutions/observability/plugins/inventory/e2e/ftr_config.ts
   - x-pack/solutions/observability/plugins/profiling/e2e/ftr_config_open.ts

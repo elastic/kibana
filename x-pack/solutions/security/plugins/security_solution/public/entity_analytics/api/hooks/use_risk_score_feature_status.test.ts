@@ -9,7 +9,7 @@ import { renderHook, act } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 
 import { useRiskScoreFeatureStatus } from './use_risk_score_feature_status';
-import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { EntityType } from '../../../../common/search_strategy';
 import { useFetch } from '../../../common/hooks/use_fetch';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { useHasSecurityCapability } from '../../../helper_hooks';
@@ -49,7 +49,7 @@ describe(`risk score feature status`, () => {
   test('does not search if license is not valid, and initial isDeprecated state is false', () => {
     mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: false });
     const { result } = renderHook(
-      () => useRiskScoreFeatureStatus(RiskScoreEntity.host, 'the_right_one'),
+      () => useRiskScoreFeatureStatus(EntityType.host, 'the_right_one'),
       {
         wrapper: TestProviders,
       }
@@ -67,7 +67,7 @@ describe(`risk score feature status`, () => {
   test("does not search if the user doesn't has entity analytics capability", () => {
     mockUseHasSecurityCapability.mockReturnValue(false);
     const { result } = renderHook(
-      () => useRiskScoreFeatureStatus(RiskScoreEntity.host, 'the_right_one'),
+      () => useRiskScoreFeatureStatus(EntityType.host, 'the_right_one'),
       {
         wrapper: TestProviders,
       }
@@ -84,13 +84,13 @@ describe(`risk score feature status`, () => {
 
   test('runs search if feature is enabled, and initial isDeprecated state is true', () => {
     const { result } = renderHook(
-      () => useRiskScoreFeatureStatus(RiskScoreEntity.host, 'the_right_one'),
+      () => useRiskScoreFeatureStatus(EntityType.host, 'the_right_one'),
       {
         wrapper: TestProviders,
       }
     );
     expect(mockFetch).toHaveBeenCalledWith({
-      query: { entity: RiskScoreEntity.host, indexName: 'the_right_one' },
+      query: { entity: EntityType.host, indexName: 'the_right_one' },
     });
     expect(result.current).toEqual({
       ...defaultResult,
@@ -100,7 +100,7 @@ describe(`risk score feature status`, () => {
 
   test('updates state after search returns isDeprecated = false', () => {
     const { result, rerender } = renderHook(
-      () => useRiskScoreFeatureStatus(RiskScoreEntity.host, 'the_right_one'),
+      () => useRiskScoreFeatureStatus(EntityType.host, 'the_right_one'),
       {
         wrapper: TestProviders,
       }
