@@ -1163,6 +1163,16 @@ finalize it.
         .send(props.body as object);
     },
     /**
+     * Initializes Privileged User Monitoring by creating the necessary indices and mappings and starting the Privileged User Monitoring task
+     */
+    initPrivmon(kibanaSpace: string = 'default') {
+      return supertest
+        .post(routeWithNamespace('/api/privmon/init', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
      * Initializes the Risk Engine by creating the necessary indices and mappings, removing old transforms, and starting the new risk engine
      */
     initRiskEngine(kibanaSpace: string = 'default') {

@@ -33,6 +33,7 @@ import { createDetectionRulesClient } from './lib/detection_engine/rule_manageme
 import { buildMlAuthz } from './lib/machine_learning/authz';
 import { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entity_store_data_client';
 import type { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
+import { PrivmonDataClient } from './lib/entity_analytics/privmon/privmon_data_client';
 
 export interface IRequestContextFactory {
   create(
@@ -242,6 +243,14 @@ export class RequestContextFactory implements IRequestContextFactory {
           telemetry: core.analytics,
         });
       }),
+      getPrivmonDataClient: memoize(
+        () =>
+          new PrivmonDataClient({
+            logger: options.logger,
+            esClient: coreContext.elasticsearch.client.asCurrentUser,
+            namespace: getSpaceId(),
+          })
+      ),
     };
   }
 }

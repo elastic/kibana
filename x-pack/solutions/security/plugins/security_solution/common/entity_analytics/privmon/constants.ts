@@ -1,0 +1,20 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+export const PRIVMON_URL = `/api/privmon` as const;
+export const PRIVMON_INIT_URL = `${PRIVMON_URL}/init` as const;
+
+export const PRIVMON_INDEX_PREFIX = 'risk-score.risk-monitoring';
+export const PRIVMON_INDEX_PATTERN = `${PRIVMON_INDEX_PREFIX}.*`;
+
+export const PRIVMON_LOGINS_INDEX_PATTERN = `${PRIVMON_INDEX_PREFIX}.logins-*`;
+export const PRIVMON_LOGINS_INDEX_TEMPLATE_NAME = `${PRIVMON_INDEX_PREFIX}.logins`;
+
+export const PRIVMON_PRIVILEGES_INDEX_PATTERN = `${PRIVMON_INDEX_PREFIX}.privileges-*`;
+export const PRIVMON_PRIVILEGES_INDEX_TEMPLATE_NAME = `${PRIVMON_INDEX_PREFIX}.privileges`;
+
+export const PRIVMON_USERS_INDEX_PATTERN = `${PRIVMON_INDEX_PREFIX}.users.*`;
+export const PRIVMON_USERS_INDEX_TEMPLATE_NAME = `${PRIVMON_INDEX_PREFIX}.users`;

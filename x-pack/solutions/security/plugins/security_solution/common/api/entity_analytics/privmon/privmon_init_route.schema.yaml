@@ -1,0 +1,64 @@
+openapi: 3.0.0
+info:
+  version: '1'
+  title: Privileged User Monitoring API
+  description: These APIs allow the consumer to manage Privileged User Monitoring within Entity Analytics.
+paths:
+  /api/privmon/init:
+    post:
+      x-labels: [ess, serverless]
+      x-internal: true
+      x-codegen-enabled: true
+      operationId: InitPrivmon
+      summary: Initialize Privileged User Monitoring
+      description: Initializes Privileged User Monitoring by creating the necessary indices and mappings and starting the Privileged User Monitoring task
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - result
+                properties:
+                  result:
+                    $ref: '#/components/schemas/InitPrivmonResult'
+        '400':
+          description: Task manager is unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.schema.yaml#/components/schemas/TaskManagerUnavailableResponse'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InitPrivmonErrorResponse'
+
+components:
+  schemas:
+    InitPrivmonResult:
+      type: object
+      required:
+        - successful
+        - errors
+      properties:
+        successful:
+          type: boolean
+        errors:
+          type: array
+          items:
+            type: string
+
+    InitPrivmonErrorResponse:
+      type: object
+      required:
+        - message
+        - full_error
+      properties:
+        message:
+          type: string
+        full_error:
+          type: string

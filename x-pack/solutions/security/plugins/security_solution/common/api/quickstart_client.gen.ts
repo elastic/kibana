@@ -279,6 +279,7 @@ import type {
   GetEntityStoreStatusRequestQueryInput,
   GetEntityStoreStatusResponse,
 } from './entity_analytics/entity_store/status.gen';
+import type { InitPrivmonResponse } from './entity_analytics/privmon/privmon_init_route.gen';
 import type { CleanUpRiskEngineResponse } from './entity_analytics/risk_engine/engine_cleanup_route.gen';
 import type {
   ConfigureRiskEngineSavedObjectRequestBodyInput,
@@ -1674,6 +1675,21 @@ finalize it.
         },
         method: 'POST',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Initializes Privileged User Monitoring by creating the necessary indices and mappings and starting the Privileged User Monitoring task
+   */
+  async initPrivmon() {
+    this.log.info(`${new Date().toISOString()} Calling API InitPrivmon`);
+    return this.kbnClient
+      .request<InitPrivmonResponse>({
+        path: '/api/privmon/init',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
