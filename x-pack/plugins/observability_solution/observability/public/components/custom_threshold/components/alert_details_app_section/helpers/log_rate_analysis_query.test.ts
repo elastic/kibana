@@ -118,14 +118,12 @@ describe('buildEsQuery', () => {
   ];
 
   test.each(testData)('should generate correct es query for $title', ({ alert, params }) => {
-    expect(getLogRateAnalysisEQQuery(
-      alert,
-      params,
-      {
+    expect(
+      getLogRateAnalysisEQQuery(alert, params, {
         allowLeadingWildcards: true,
         queryStringOptions: {},
         ignoreFilterIfFieldNotInIndex: false,
-      }
-    )).toMatchSnapshot();
+      })
+    ).toMatchSnapshot();
   });
 });

@@ -61,7 +61,11 @@ export function LogRateAnalysis({
   >();
 
   useEffect(() => {
-    const esSearchRequest = getLogRateAnalysisEQQuery(alert, rule.params, getEsQueryConfig(uiSettings));
+    const esSearchRequest = getLogRateAnalysisEQQuery(
+      alert,
+      rule.params,
+      getEsQueryConfig(uiSettings)
+    );
 
     if (esSearchRequest) {
       setEsSearchQuery(esSearchRequest);
