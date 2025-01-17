@@ -22,13 +22,13 @@ import {
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
-import type { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
 } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import type { CloudPostureEntityIdentifier } from '../entity_insight';
 
 const VulnerabilitiesCount = ({
   vulnerabilitiesTotal,
@@ -71,7 +71,7 @@ export const VulnerabilitiesPreview = ({
   openDetailsPanel,
 }: {
   value: string;
-  field: EntityIdentifierFields;
+  field: CloudPostureEntityIdentifier;
   isPreviewMode?: boolean;
   isLinkEnabled: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;

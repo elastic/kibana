@@ -33,8 +33,8 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks/use_get_navigation_url_params';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
-import type { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
+import type { CloudPostureEntityIdentifier } from '../entity_insight';
 
 type MisconfigurationSortFieldType =
   | MISCONFIGURATION.RESULT_EVALUATION
@@ -93,7 +93,7 @@ const getFindingsStats = (
  * Insights view displayed in the document details expandable flyout left section
  */
 export const MisconfigurationFindingsDetailsTable = memo(
-  ({ field, value }: { field: EntityIdentifierFields; value: string }) => {
+  ({ field, value }: { field: CloudPostureEntityIdentifier; value: string }) => {
     useEffect(() => {
       uiMetricService.trackUiMetric(
         METRIC_TYPE.COUNT,
@@ -179,7 +179,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
       return getNavUrlParams({ 'rule.id': ruleId, 'resource.id': resourceId }, 'configurations');
     };
 
-    const getFindingsPageUrl = (name: string, queryField: EntityIdentifierFields) => {
+    const getFindingsPageUrl = (name: string, queryField: CloudPostureEntityIdentifier) => {
       return getNavUrlParams({ [queryField]: name }, 'configurations', ['rule.name']);
     };
 

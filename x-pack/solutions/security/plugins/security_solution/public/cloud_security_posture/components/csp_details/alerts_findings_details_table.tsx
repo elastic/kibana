@@ -20,7 +20,6 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { buildEntityAlertsQuery } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
-import type { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 import type { AlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import {
@@ -40,6 +39,7 @@ import { SeverityBadge } from '../../../common/components/severity_badge';
 import { ALERT_PREVIEW_BANNER } from '../../../flyout/document_details/preview/constants';
 import { FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../common/types';
 import { useNonClosedAlerts } from '../../hooks/use_non_closed_alerts';
+import type { CloudPostureEntityIdentifier } from '../entity_insight';
 
 enum KIBANA_ALERTS {
   SEVERITY = 'kibana.alert.severity',
@@ -77,7 +77,7 @@ interface AlertsDetailsFields {
 }
 
 export const AlertsDetailsTable = memo(
-  ({ field, value }: { field: EntityIdentifierFields; value: string }) => {
+  ({ field, value }: { field: CloudPostureEntityIdentifier; value: string }) => {
     useEffect(() => {
       uiMetricService.trackUiMetric(
         METRIC_TYPE.COUNT,

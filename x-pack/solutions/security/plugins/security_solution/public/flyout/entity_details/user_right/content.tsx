@@ -17,7 +17,7 @@ import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_sum
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { ManagedUser } from './components/managed_user';
 import type { ManagedUserData } from './types';
-import { EntityType, EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
+import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import { USER_PANEL_RISK_SCORE_QUERY_ID } from '.';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 import { ObservedEntity } from '../shared/components/observed_entity';
@@ -80,7 +80,7 @@ export const UserPanelContent = ({
       />
       <EntityInsight
         value={userName}
-        field={EntityTypeToIdentifierField[EntityType.user]}
+        field={EntityIdentifierFields.userName}
         isPreviewMode={isPreviewMode}
         isLinkEnabled={isLinkEnabled}
         openDetailsPanel={openDetailsPanel}

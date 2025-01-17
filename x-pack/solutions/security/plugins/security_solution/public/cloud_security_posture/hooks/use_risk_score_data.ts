@@ -14,14 +14,14 @@ import {
 } from '../../../common/search_strategy';
 import { useRiskScore } from '../../entity_analytics/api/hooks/use_risk_score';
 import { FIRST_RECORD_PAGINATION } from '../../entity_analytics/common';
-import type { EntityIdentifierFields } from '../../../common/entity_analytics/types';
 import { EntityType } from '../../../common/entity_analytics/types';
+import type { CloudPostureEntityIdentifier } from '../components/entity_insight';
 
 export const useHasRiskScore = ({
   field,
   value,
 }: {
-  field: EntityIdentifierFields;
+  field: CloudPostureEntityIdentifier;
   value: string;
 }) => {
   const isHostNameField = field === 'host.name';

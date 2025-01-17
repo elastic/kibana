@@ -12,11 +12,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
-import type { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { MisconfigurationFindingsDetailsTable } from './misconfiguration_findings_details_table';
 import { VulnerabilitiesFindingsDetailsTable } from './vulnerabilities_findings_details_table';
 import { AlertsDetailsTable } from './alerts_findings_details_table';
+import type { CloudPostureEntityIdentifier } from '../entity_insight';
 
 /**
  * Insights view displayed in the document details expandable flyout left section
@@ -43,7 +43,7 @@ function isCspFlyoutPanelProps(
 }
 
 export const InsightsTabCsp = memo(
-  ({ value, field }: { value: string; field: EntityIdentifierFields }) => {
+  ({ value, field }: { value: string; field: CloudPostureEntityIdentifier }) => {
     const panels = useExpandableFlyoutState();
 
     let hasMisconfigurationFindings = false;
