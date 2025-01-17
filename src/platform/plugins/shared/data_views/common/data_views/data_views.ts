@@ -1225,7 +1225,6 @@ export class DataViewsService {
   ) {
     const dataView = await this.createFromSpec(spec, skipFetchFields, displayErrors);
     await this.createSavedObject(dataView, overwrite);
-    await this.setDefault(dataView.id!);
     if (setAsDefault) {
       await this.setDefault(dataView.id!);
     }
