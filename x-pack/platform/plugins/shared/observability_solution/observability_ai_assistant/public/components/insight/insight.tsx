@@ -14,6 +14,7 @@ import {
   EuiText,
   EuiTextArea,
   EuiCallOut,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep, isArray, isEmpty, last, once } from 'lodash';
@@ -288,16 +289,47 @@ export function Insight({
     [service]
   );
 
+  const getPromptToEdit = () => {
+    const clonedMessages = cloneDeep(messages.messages);
+    const lastUserPrompt = getLastMessageOfType(clonedMessages, MessageRole.User)?.message.content;
+
+    if (!lastUserPrompt) {
+      return '';
+    }
+
+    try {
+      const { instructions = '' } = JSON.parse(lastUserPrompt);
+      return instructions.trim();
+    } catch (e) {
+      return '';
+    }
+  };
+
   const onEditPrompt = (newPrompt: string) => {
     const clonedMessages = cloneDeep(messages.messages);
     const userMessage = getLastMessageOfType(clonedMessages, MessageRole.User);
     if (!userMessage) return false;
 
-    userMessage.message.content = newPrompt;
-    setIsPromptUpdated(true);
-    setMessages({ messages: clonedMessages, status: FETCH_STATUS.SUCCESS });
-    setEditingPrompt(false);
-    return true;
+    try {
+      const parsedContent = JSON.parse(userMessage.message.content || '');
+
+      if (!parsedContent.instructions) {
+        return false;
+      }
+
+      // Assign the updated instructions
+      parsedContent.instructions = newPrompt;
+      userMessage.message.content = JSON.stringify(parsedContent);
+
+      setIsPromptUpdated(true);
+      setMessages({ messages: clonedMessages, status: FETCH_STATUS.SUCCESS });
+      setEditingPrompt(false);
+      return true;
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to edit prompt:', e);
+      return false;
+    }
   };
 
   const handleCancel = () => {
@@ -372,15 +404,15 @@ export function Insight({
       </>
     );
   } else if (isEditingPrompt) {
-    children = (
-      <PromptEdit
-        initialPrompt={
-          getLastMessageOfType(messages.messages, MessageRole.User)?.message.content || ''
-        }
-        onSend={onEditPrompt}
-        onCancel={handleCancel}
-      />
-    );
+    const promptToEdit = getPromptToEdit();
+
+    if (messages.status === FETCH_STATUS.SUCCESS && promptToEdit) {
+      children = (
+        <PromptEdit initialPrompt={promptToEdit} onSend={onEditPrompt} onCancel={handleCancel} />
+      );
+    } else {
+      children = <EuiLoadingSpinner size="m" />;
+    }
   } else if (!connectors.loading && !connectors.connectors?.length) {
     children = (
       <MissingCredentialsCallout connectorsManagementHref={getConnectorsManagementHref(http!)} />
