@@ -178,40 +178,15 @@ export const useInTableSearchMatches = (
     setIsProcessing(true);
 
     const findMatches = async () => {
-      const result: RowMatches[] = [];
-      let totalMatchesCount = 0;
+      const { matchesList: nextMatchesList, totalMatchesCount } = await getCellMatchesCounts({
+        inTableSearchTerm,
+        tableContext,
+        renderCellValue,
+        rows,
+        visibleColumns,
+        services,
+      });
 
-      for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-        const matchesCountPerField: Record<string, number> = {};
-        let rowMatchesCount = 0;
-
-        for (const fieldName of visibleColumns) {
-          const matchesCountForFieldName = await getCellMatchesCount({
-            rowIndex,
-            fieldName,
-            inTableSearchTerm,
-            tableContext,
-            renderCellValue,
-            services,
-          });
-
-          if (matchesCountForFieldName) {
-            matchesCountPerField[fieldName] = matchesCountForFieldName;
-            totalMatchesCount += matchesCountForFieldName;
-            rowMatchesCount += matchesCountForFieldName;
-          }
-        }
-
-        if (Object.keys(matchesCountPerField).length) {
-          result.push({
-            rowIndex,
-            rowMatchesCount,
-            matchesCountPerField,
-          });
-        }
-      }
-
-      const nextMatchesList = totalMatchesCount > 0 ? result : DEFAULT_MATCHES;
       const nextActiveMatchPosition = DEFAULT_ACTIVE_MATCH_POSITION;
       setMatchesList(nextMatchesList);
       setMatchesCount(totalMatchesCount);
@@ -252,61 +227,172 @@ export const useInTableSearchMatches = (
   };
 };
 
-function getCellMatchesCount({
-  rowIndex,
-  fieldName,
-  inTableSearchTerm,
-  renderCellValue,
-  tableContext,
-  services,
-}: Pick<
-  UseInTableSearchMatchesProps,
-  'inTableSearchTerm' | 'tableContext' | 'renderCellValue' | 'services'
-> & {
-  rowIndex: number;
-  fieldName: string;
-}): Promise<number> {
-  const UnifiedDataTableRenderCellValue = renderCellValue;
+function getCellMatchesCounts(
+  props: Pick<
+    UseInTableSearchMatchesProps,
+    | 'inTableSearchTerm'
+    | 'tableContext'
+    | 'renderCellValue'
+    | 'rows'
+    | 'visibleColumns'
+    | 'services'
+  >
+): Promise<{ matchesList: RowMatches[]; totalMatchesCount: number }> {
+  const { rows, visibleColumns } = props;
+
+  if (!rows?.length || !visibleColumns?.length) {
+    return Promise.resolve({ matchesList: DEFAULT_MATCHES, totalMatchesCount: 0 });
+  }
+
+  const resultsMap: Record<number, Record<string, number>> = {};
+  let remainingNumberOfResults = rows.length * visibleColumns.length;
+
+  const onHighlightsCountFound = (rowIndex: number, fieldName: string, count: number) => {
+    remainingNumberOfResults--;
+
+    if (count === 0) {
+      return;
+    }
+
+    if (!resultsMap[rowIndex]) {
+      resultsMap[rowIndex] = {};
+    }
+    resultsMap[rowIndex][fieldName] = count;
+  };
 
   const container = document.createElement('div');
 
-  return new Promise<number>((resolve) => {
-    const finish = (count: number) => {
-      resolve(count);
+  return new Promise<{ matchesList: RowMatches[]; totalMatchesCount: number }>((resolve) => {
+    const finish = () => {
+      let totalMatchesCount = 0;
+      const newMatchesList: RowMatches[] = [];
+
+      Object.keys(resultsMap)
+        .map((rowIndex) => Number(rowIndex))
+        .sort((a, b) => a - b)
+        .forEach((rowIndex) => {
+          const matchesCountPerField = resultsMap[rowIndex];
+          const rowMatchesCount = Object.values(matchesCountPerField).reduce(
+            (acc, count) => acc + count,
+            0
+          );
+
+          newMatchesList.push({
+            rowIndex,
+            rowMatchesCount,
+            matchesCountPerField,
+          });
+          totalMatchesCount += rowMatchesCount;
+        });
+
+      resolve({ matchesList: newMatchesList, totalMatchesCount });
       ReactDOM.unmountComponentAtNode(container);
     };
 
     const timer = setTimeout(() => {
       // time out if rendering takes longer
-      finish(0);
-    }, 1000);
+      finish();
+    }, 60000);
 
+    // render all cells in parallel and get the count of highlights as the result
     ReactDOM.render(
-      <KibanaRenderContextProvider {...services}>
-        <UnifiedDataTableContext.Provider
-          value={{
-            ...tableContext,
-            inTableSearchTerm,
-            pageIndex: 0,
-            pageSize: rowIndex + 1,
-          }}
-        >
-          <UnifiedDataTableRenderCellValue
-            columnId={fieldName}
-            rowIndex={rowIndex}
-            isExpandable={false}
-            isExpanded={false}
-            isDetails={false}
-            colIndex={0}
-            setCellProps={() => {}}
-            onHighlightsCountFound={(count) => {
-              clearTimeout(timer);
-              finish(count);
-            }}
-          />
-        </UnifiedDataTableContext.Provider>
-      </KibanaRenderContextProvider>,
+      <AllCells
+        {...props}
+        onHighlightsCountFound={(rowIndex, fieldName, count) => {
+          onHighlightsCountFound(rowIndex, fieldName, count);
+
+          if (remainingNumberOfResults === 0) {
+            clearTimeout(timer);
+            finish();
+          }
+        }}
+      />,
       container
     );
-  }).catch(() => 0); // catching unexpected errors
+  }).catch(() => ({ matchesList: DEFAULT_MATCHES, totalMatchesCount: 0 })); // catching unexpected errors
+}
+
+function AllCells({
+  inTableSearchTerm,
+  rows,
+  visibleColumns,
+  renderCellValue,
+  tableContext,
+  services,
+  onHighlightsCountFound,
+}: Pick<
+  UseInTableSearchMatchesProps,
+  'inTableSearchTerm' | 'tableContext' | 'renderCellValue' | 'rows' | 'visibleColumns' | 'services'
+> & { onHighlightsCountFound: (rowIndex: number, fieldName: string, count: number) => void }) {
+  const UnifiedDataTableRenderCellValue = renderCellValue;
+
+  return (
+    <KibanaRenderContextProvider {...services}>
+      <UnifiedDataTableContext.Provider
+        value={{
+          ...tableContext,
+          inTableSearchTerm,
+          pageIndex: 0,
+          pageSize: rows?.length ?? 0,
+        }}
+      >
+        {(rows || []).flatMap((_, rowIndex) => {
+          return visibleColumns.map((fieldName) => {
+            return (
+              <ErrorBoundary
+                key={`${rowIndex}-${fieldName}`}
+                onError={() => {
+                  onHighlightsCountFound(rowIndex, fieldName, 0);
+                }}
+              >
+                <UnifiedDataTableRenderCellValue
+                  columnId={fieldName}
+                  rowIndex={rowIndex}
+                  isExpandable={false}
+                  isExpanded={false}
+                  isDetails={false}
+                  colIndex={0}
+                  setCellProps={() => {}}
+                  onHighlightsCountFound={(count) => {
+                    onHighlightsCountFound(rowIndex, fieldName, count);
+                  }}
+                />
+              </ErrorBoundary>
+            );
+          });
+        })}
+      </UnifiedDataTableContext.Provider>
+    </KibanaRenderContextProvider>
+  );
+}
+
+/**
+ * Renders nothing instead of a component which triggered an exception.
+ */
+export class ErrorBoundary extends React.Component<
+  React.PropsWithChildren<{
+    onError?: () => void;
+  }>,
+  { hasError: boolean }
+> {
+  constructor(props: {}) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch() {
+    this.props.onError?.();
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return null;
+    }
+
+    return this.props.children;
+  }
 }
