@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IAssignmentService } from './assignment_service';
+import { IAssignmentService } from '@kbn/saved-objects-tagging-oss-plugin/server';
 
 const getAssigmentServiceMock = () => {
   const mock: jest.Mocked<IAssignmentService> = {

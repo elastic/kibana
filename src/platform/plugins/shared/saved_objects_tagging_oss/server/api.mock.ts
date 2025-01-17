@@ -31,6 +31,8 @@ const createClientMock = () => {
 const createAssignmentServiceMock = () => {
   const mock: jest.Mocked<IAssignmentService> = {
     findAssignableObjects: jest.fn(),
+    getAssignableTypes: jest.fn(),
+    updateTagAssignments: jest.fn(),
   };
 
   return mock;

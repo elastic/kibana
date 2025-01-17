@@ -13,6 +13,9 @@ const createStartMock = () => {
   const start: jest.Mocked<SavedObjectTaggingStart> = {
     createTagClient: jest.fn(),
     createInternalAssignmentService: jest.fn(),
+    convertTagNameToId: jest.fn(),
+    getTagsFromReferences: jest.fn(),
+    replaceTagReferences: jest.fn(),
   };
 
   start.createTagClient.mockImplementation(() => tagsClientMock.create());

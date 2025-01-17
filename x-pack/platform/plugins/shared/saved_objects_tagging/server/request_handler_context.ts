@@ -7,9 +7,10 @@
 
 import type { CoreRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { IAssignmentService } from '@kbn/saved-objects-tagging-oss-plugin/server';
 import type { ITagsClient } from '../common/types';
 import type { ITagsRequestHandlerContext } from './types';
-import { TagsClient, type IAssignmentService, AssignmentService } from './services';
+import { TagsClient, AssignmentService } from './services';
 
 export class TagsRequestHandlerContext implements ITagsRequestHandlerContext {
   #client?: ITagsClient;

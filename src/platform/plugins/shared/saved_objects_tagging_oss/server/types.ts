@@ -15,7 +15,12 @@ import {
 } from '@kbn/core/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { ITagsClient } from '../common';
-import { AssignableObject, FindAssignableObjectsOptions, Tag } from '../common/types';
+import {
+  AssignableObject,
+  FindAssignableObjectsOptions,
+  Tag,
+  UpdateTagAssignmentsOptions,
+} from '../common/types';
 
 export interface AssignmentServiceOptions {
   request?: KibanaRequest;
@@ -27,6 +32,8 @@ export interface AssignmentServiceOptions {
 
 export interface IAssignmentService {
   findAssignableObjects(options: FindAssignableObjectsOptions): Promise<AssignableObject[]>;
+  getAssignableTypes(types?: string[]): Promise<string[]>;
+  updateTagAssignments(options: UpdateTagAssignmentsOptions): Promise<void>;
 }
 
 export interface SavedObjectsTaggingApiServer {
