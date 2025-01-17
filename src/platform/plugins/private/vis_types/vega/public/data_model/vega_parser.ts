@@ -12,14 +12,12 @@ import schemaParser from 'vega-schema-url-parser';
 import semVerCompare from 'semver/functions/compare';
 import semVerCoerce from 'semver/functions/coerce';
 import hjson from 'hjson';
-import { euiPaletteColorBlind } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { logger, Warn, None, version as vegaVersion, scheme } from 'vega';
 import { compile, TopLevelSpec, version as vegaLiteVersion } from 'vega-lite';
 
 import type { CoreTheme } from '@kbn/core/public';
-import { KbnPalette, getKbnPalettes } from '@kbn/palettes';
 import { EsQueryParser } from './es_query_parser';
 import { Utils, getVegaThemeColors } from './utils';
 import { EmsFileParser } from './ems_file_parser';
@@ -40,9 +38,6 @@ import {
   ControlsDirection,
   KibanaConfig,
 } from './types';
-
-// Set default single color to match other Kibana visualizations
-const defaultColor: string = euiPaletteColorBlind()[0];
 
 const locToDirMap: Record<string, ControlsLocation> = {
   left: 'row-reverse',
@@ -704,14 +699,15 @@ The URL is an identifier only. Kibana and your browser will never access this UR
    */
   _setDefaultColors() {
     // Add the default palette
-    const palettes = getKbnPalettes(this.theme);
-    scheme('elastic', palettes.get(KbnPalette.Default).colors());
+    const paletteColors = getVegaThemeColors(this.theme, 'visColors');
+    scheme('elastic', paletteColors);
 
     // Default category coloring to the Elastic color scheme
     this._setDefaultValue({ scheme: 'elastic' }, 'config', 'range', 'category');
 
+    const defaultColor = getVegaThemeColors(this.theme, 'default');
     if (this.isVegaLite) {
-      // Vega-Lite: set default color, works for fill and strike --  config: { mark:  { color: '#54B399' }}
+      // Vega-Lite: set default color, works for fill and strike --  config: { mark:  { color: 'euiColorVis0' }}
       this._setDefaultValue(defaultColor, 'config', 'mark', 'color');
     } else {
       // Vega - global mark has very strange behavior, must customize each mark type individually
