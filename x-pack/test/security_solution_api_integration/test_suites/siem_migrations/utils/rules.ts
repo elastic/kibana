@@ -47,7 +47,7 @@ const migrationRuleDocument: RuleMigrationDocument = {
   translation_result: 'partial',
   elastic_rule: {
     severity: 'low',
-    integration_id: '',
+    integration_ids: [],
     query:
       'FROM [indexPattern]\n| STATS lastTime = max(_time), tag = values(tag), count BY dest, user, app',
     description:
