@@ -14,6 +14,7 @@ import {
   type TransportRequestParams,
   type TransportRequestOptions,
   type TransportResult,
+  type RequestBody,
 } from '@elastic/elasticsearch';
 import { isUnauthorizedError } from '@kbn/es-errors';
 import { InternalUnauthorizedErrorHandler, isRetryResult } from './retry_unauthorized';
@@ -23,6 +24,16 @@ type TransportClass = typeof Transport;
 export type ErrorHandlerAccessor = () => InternalUnauthorizedErrorHandler;
 
 const noop = () => undefined;
+
+export function transformLegacyBody(
+  input: RequestBody | { body: RequestBody } | undefined
+): RequestBody | undefined {
+  if (typeof input === 'object' && input !== null && 'body' in input) {
+    const { body, ...rest } = input;
+    return { ...rest, ...body };
+  }
+  return input;
+}
 
 export const createTransport = ({
   getExecutionContext = noop,
@@ -67,6 +78,9 @@ export const createTransport = ({
         ...this.headers,
         ...options?.headers,
       };
+
+      // Remove the body param in preparation for 9.0
+      params.body = transformLegacyBody(params.body);
 
       try {
         return (await super.request(params, opts)) as TransportResult<any, any>;
