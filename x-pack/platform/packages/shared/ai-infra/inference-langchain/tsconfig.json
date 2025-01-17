@@ -14,6 +14,7 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/inference-common"
+    "@kbn/inference-common",
+    "@kbn/zod"
   ]
 }
