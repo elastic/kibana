@@ -48,7 +48,11 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       const hasSearchSynonymsPrivilege = await asCurrentUser.security.hasPrivileges({
         cluster: ['manage_search_synonyms'],
       });
-      // TODO: no permissions check for synonyms:read and return 403
+      if (!hasSearchSynonymsPrivilege.has_all_requested) {
+        return response.forbidden({
+          body: "Your user doesn't have manage_search_synonyms privileges",
+        });
+      }
       const result = await fetchSynonymSets(asCurrentUser, {
         from: request.query.from,
         size: request.query.size,
