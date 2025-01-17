@@ -605,7 +605,6 @@
     "@kbn/kibana-react-plugin": "link:src/platform/plugins/shared/kibana_react",
     "@kbn/kibana-usage-collection-plugin": "link:src/platform/plugins/private/kibana_usage_collection",
     "@kbn/kibana-utils-plugin": "link:src/platform/plugins/shared/kibana_utils",
-    "@kbn/kubernetes-security-plugin": "link:x-pack/solutions/security/plugins/kubernetes_security",
     "@kbn/langchain": "link:x-pack/platform/packages/shared/kbn-langchain",
     "@kbn/language-documentation": "link:src/platform/packages/private/kbn-language-documentation",
     "@kbn/lens-config-builder-example-plugin": "link:x-pack/examples/lens_config_builder_example",
