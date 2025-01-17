@@ -8,6 +8,7 @@
  */
 
 import { URL } from 'url';
+import { Observable } from 'rxjs';
 import { TelemetryPluginStart, TelemetryPluginSetup } from './plugin';
 
 export type Setup = jest.Mocked<TelemetryPluginSetup>;
@@ -30,6 +31,7 @@ function createSetupContract(): Setup {
 function createStartContract(): Start {
   const startContract: Start = {
     getIsOptedIn: jest.fn(),
+    isOptedIn$: new Observable<boolean>(),
   };
 
   return startContract;
