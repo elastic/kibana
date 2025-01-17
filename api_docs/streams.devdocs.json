@@ -63,17 +63,7 @@
               "section": "def-common.RouteRepositoryClient",
               "text": "RouteRepositoryClient"
             },
-            "<{ \"POST /api/streams/{id}/schema/fields_simulation\": ",
-            {
-              "pluginId": "@kbn/server-route-repository-utils",
-              "scope": "common",
-              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-              "section": "def-common.ServerRoute",
-              "text": "ServerRoute"
-            },
-            "<\"POST /api/streams/{id}/schema/fields_simulation\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; body: Zod.ZodObject<{ field_definitions: Zod.ZodArray<Zod.ZodObject<Zod.objectUtil.extendShape<{ type: Zod.ZodEnum<[\"keyword\", \"match_only_text\", \"long\", \"double\", \"date\", \"boolean\", \"ip\"]>; format: Zod.ZodOptional<Zod.ZodString>; }, { name: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { field_definitions: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }[]; }, { field_definitions: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }[]; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { field_definitions: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }[]; }; }, { path: { id: string; }; body: { field_definitions: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }[]; }; }>, ",
-            "StreamsRouteHandlerResources",
-            ", { status: \"unknown\" | \"success\" | \"failure\"; simulationError: string | null; documentsWithRuntimeFieldsApplied: unknown[] | null; }, undefined>; \"POST /api/streams/{id}/processing/_simulate\": ",
+            "<{ \"POST /api/streams/{id}/processing/_simulate\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -147,7 +137,17 @@
             },
             "; }[]; }; }>, ",
             "StreamsRouteHandlerResources",
-            ", { documents: { value: Record<PropertyKey, unknown>; isMatch: boolean; }[]; success_rate: number; failure_rate: number; detected_fields: { name: string; type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\" | \"unmapped\"; }[]; }, undefined>; \"GET /api/streams/{id}/schema/unmapped_fields\": ",
+            ", { documents: { value: Record<PropertyKey, unknown>; isMatch: boolean; }[]; success_rate: number; failure_rate: number; detected_fields: { name: string; type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\" | \"unmapped\"; }[]; }, undefined>; \"POST /api/streams/{id}/schema/fields_simulation\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"POST /api/streams/{id}/schema/fields_simulation\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; body: Zod.ZodObject<{ field_definitions: Zod.ZodArray<Zod.ZodObject<Zod.objectUtil.extendShape<{ type: Zod.ZodEnum<[\"keyword\", \"match_only_text\", \"long\", \"double\", \"date\", \"boolean\", \"ip\"]>; format: Zod.ZodOptional<Zod.ZodString>; }, { name: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { field_definitions: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }[]; }, { field_definitions: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }[]; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { field_definitions: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }[]; }; }, { path: { id: string; }; body: { field_definitions: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }[]; }; }>, ",
+            "StreamsRouteHandlerResources",
+            ", { status: \"unknown\" | \"success\" | \"failure\"; simulationError: string | null; documentsWithRuntimeFieldsApplied: unknown[] | null; }, undefined>; \"GET /api/streams/{id}/schema/unmapped_fields\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -157,19 +157,7 @@
             },
             "<\"GET /api/streams/{id}/schema/unmapped_fields\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; }, { path: { id: string; }; }>, ",
             "StreamsRouteHandlerResources",
-            ", { unmappedFields: string[]; }, undefined>; \"GET /api/streams/{id}/_details\": ",
-            {
-              "pluginId": "@kbn/server-route-repository-utils",
-              "scope": "common",
-              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-              "section": "def-common.ServerRoute",
-              "text": "ServerRoute"
-            },
-            "<\"GET /api/streams/{id}/_details\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; query: Zod.ZodObject<{ start: Zod.ZodString; end: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { start: string; end: string; }, { start: string; end: string; }>; }, \"strip\", Zod.ZodTypeAny, { query: { start: string; end: string; }; path: { id: string; }; }, { query: { start: string; end: string; }; path: { id: string; }; }>, ",
-            "StreamsRouteHandlerResources",
-            ", ",
-            "StreamDetailsResponse",
-            ", undefined>; \"POST /api/streams/{id}/_sample\": ",
+            ", { unmappedFields: string[]; }, undefined>; \"POST /api/streams/{id}/_sample\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -227,7 +215,543 @@
             },
             "; }; }>, ",
             "StreamsRouteHandlerResources",
-            ", { documents: unknown[]; }, undefined>; \"POST /api/streams/{id}/dashboards/_bulk\": ",
+            ", { documents: unknown[]; }, undefined>; \"GET /api/streams/_status\": { endpoint: \"GET /api/streams/_status\"; handler: ServerRouteHandler<",
+            "StreamsRouteHandlerResources",
+            ", undefined, { enabled: boolean; }>; security?: ",
+            "RouteSecurity",
+            " | undefined; }; \"POST /api/streams/_resync\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"POST /api/streams/_resync\", Zod.ZodObject<{}, \"strip\", Zod.ZodTypeAny, {}, {}>, ",
+            "StreamsRouteHandlerResources",
+            ", ",
+            "ResyncStreamsResponse",
+            ", undefined>; \"POST /api/streams/{id}/_fork\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"POST /api/streams/{id}/_fork\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; body: Zod.ZodObject<{ stream: Zod.ZodObject<{ name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; }, { name: string; }>; condition: Zod.ZodType<",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            ", Zod.ZodTypeDef, ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            ">; }, \"strip\", Zod.ZodTypeAny, { stream: { name: string; }; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }, { stream: { name: string; }; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { stream: { name: string; }; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }; }, { path: { id: string; }; body: { stream: { name: string; }; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }; }>, ",
+            "StreamsRouteHandlerResources",
+            ", { acknowledged: true; }, undefined>; \"POST /api/streams/_disable\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"POST /api/streams/_disable\", Zod.ZodObject<{}, \"strip\", Zod.ZodTypeAny, {}, {}>, ",
+            "StreamsRouteHandlerResources",
+            ", ",
+            "DisableStreamsResponse",
+            ", undefined>; \"POST /api/streams/_enable\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"POST /api/streams/_enable\", Zod.ZodObject<{}, \"strip\", Zod.ZodTypeAny, {}, {}>, ",
+            "StreamsRouteHandlerResources",
+            ", ",
+            "EnableStreamsResponse",
+            ", undefined>; \"DELETE /api/streams/{id}\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"DELETE /api/streams/{id}\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; }, { path: { id: string; }; }>, ",
+            "StreamsRouteHandlerResources",
+            ", { acknowledged: true; }, undefined>; \"PUT /api/streams/{id}\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"PUT /api/streams/{id}\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; body: Zod.ZodUnion<[Zod.ZodObject<{ ingest: Zod.ZodObject<{ processing: Zod.ZodArray<Zod.ZodObject<{ condition: Zod.ZodOptional<Zod.ZodType<",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            ", Zod.ZodTypeDef, ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            ">>; config: Zod.ZodUnion<[Zod.ZodObject<{ grok: Zod.ZodObject<{ field: Zod.ZodString; patterns: Zod.ZodArray<Zod.ZodString, \"many\">; pattern_definitions: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodString>>; ignore_failure: Zod.ZodOptional<Zod.ZodBoolean>; ignore_missing: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }, { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; }, { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; }>, Zod.ZodObject<{ dissect: Zod.ZodObject<{ field: Zod.ZodString; pattern: Zod.ZodString; append_separator: Zod.ZodOptional<Zod.ZodString>; ignore_failure: Zod.ZodOptional<Zod.ZodBoolean>; ignore_missing: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }, { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }, { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }>]>; }, \"strip\", Zod.ZodTypeAny, { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }, { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }>, \"many\">; wired: Zod.ZodObject<{ fields: Zod.ZodRecord<Zod.ZodString, Zod.ZodObject<{ type: Zod.ZodEnum<[\"keyword\", \"match_only_text\", \"long\", \"double\", \"date\", \"boolean\", \"ip\"]>; format: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }, { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }>; routing: Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; condition: Zod.ZodOptional<Zod.ZodType<",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            ", Zod.ZodTypeDef, ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            ">>; }, \"strip\", Zod.ZodTypeAny, { name: string; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }, { name: string; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { routing: { name: string; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }, { routing: { name: string; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }>; }, \"strict\", Zod.ZodTypeAny, { ingest: { routing: { name: string; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }, { ingest: { routing: { name: string; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }>, Zod.ZodObject<{ ingest: Zod.ZodObject<{ processing: Zod.ZodArray<Zod.ZodObject<{ condition: Zod.ZodOptional<Zod.ZodType<",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            ", Zod.ZodTypeDef, ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            ">>; config: Zod.ZodUnion<[Zod.ZodObject<{ grok: Zod.ZodObject<{ field: Zod.ZodString; patterns: Zod.ZodArray<Zod.ZodString, \"many\">; pattern_definitions: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodString>>; ignore_failure: Zod.ZodOptional<Zod.ZodBoolean>; ignore_missing: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }, { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; }, { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; }>, Zod.ZodObject<{ dissect: Zod.ZodObject<{ field: Zod.ZodString; pattern: Zod.ZodString; append_separator: Zod.ZodOptional<Zod.ZodString>; ignore_failure: Zod.ZodOptional<Zod.ZodBoolean>; ignore_missing: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }, { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }, { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }>]>; }, \"strip\", Zod.ZodTypeAny, { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }, { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }>, \"many\">; routing: Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; condition: Zod.ZodOptional<Zod.ZodType<",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            ", Zod.ZodTypeDef, ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            ">>; }, \"strip\", Zod.ZodTypeAny, { name: string; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }, { name: string; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { routing: { name: string; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; }, { routing: { name: string; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; }>; }, \"strict\", Zod.ZodTypeAny, { ingest: { routing: { name: string; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; }; }, { ingest: { routing: { name: string; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; }; }>]>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { ingest: { routing: { name: string; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; } | { ingest: { routing: { name: string; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; }; }; }, { path: { id: string; }; body: { ingest: { routing: { name: string; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; } | { ingest: { routing: { name: string; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; }; }; }>, ",
+            "StreamsRouteHandlerResources",
+            ", ",
+            "UpsertStreamResponse",
+            ", undefined>; \"GET /api/streams\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"GET /api/streams\", Zod.ZodObject<{}, \"strip\", Zod.ZodTypeAny, {}, {}>, ",
+            "StreamsRouteHandlerResources",
+            ", { streams: ({ name: string; stream: { ingest: { routing: { name: string; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; } | { name: string; stream: { ingest: { routing: { name: string; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; })[]; }, undefined>; \"GET /api/streams/{id}/_details\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"GET /api/streams/{id}/_details\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; query: Zod.ZodObject<{ start: Zod.ZodString; end: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { start: string; end: string; }, { start: string; end: string; }>; }, \"strip\", Zod.ZodTypeAny, { query: { start: string; end: string; }; path: { id: string; }; }, { query: { start: string; end: string; }; path: { id: string; }; }>, ",
+            "StreamsRouteHandlerResources",
+            ", ",
+            "StreamDetailsResponse",
+            ", undefined>; \"GET /api/streams/{id}\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"GET /api/streams/{id}\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; }, { path: { id: string; }; }>, ",
+            "StreamsRouteHandlerResources",
+            ", { name: string; lifecycle: { type: \"dlm\"; data_retention?: string | undefined; } | { type: \"ilm\"; policy: string; }; stream: { ingest: { routing: { name: string; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }; inherited_fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; from: string; format?: string | undefined; }>; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; } | { name: string; lifecycle: { type: \"dlm\"; data_retention?: string | undefined; } | { type: \"ilm\"; policy: string; }; stream: { ingest: { routing: { name: string; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
+            },
+            "; }[]; }; }; inherited_fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; from: string; format?: string | undefined; }>; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }, undefined>; \"POST /api/streams/{id}/dashboards/_bulk\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -287,17 +811,7 @@
             "StreamsRouteHandlerResources",
             ", ",
             "ListDashboardsResponse",
-            ", undefined>; \"POST /api/streams/_disable\": ",
-            {
-              "pluginId": "@kbn/server-route-repository-utils",
-              "scope": "common",
-              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-              "section": "def-common.ServerRoute",
-              "text": "ServerRoute"
-            },
-            "<\"POST /api/streams/_disable\", Zod.ZodObject<{}, \"strip\", Zod.ZodTypeAny, {}, {}>, ",
-            "StreamsRouteHandlerResources",
-            ", { acknowledged: true; }, undefined>; \"POST /internal/streams/esql\": ",
+            ", undefined>; \"POST /internal/streams/esql\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -309,513 +823,7 @@
             "StreamsRouteHandlerResources",
             ", ",
             "UnparsedEsqlResponse",
-            ", undefined>; \"GET /api/streams/_status\": { endpoint: \"GET /api/streams/_status\"; handler: ServerRouteHandler<",
-            "StreamsRouteHandlerResources",
-            ", undefined, { enabled: boolean; }>; security?: ",
-            "RouteSecurity",
-            " | undefined; }; \"GET /api/streams\": ",
-            {
-              "pluginId": "@kbn/server-route-repository-utils",
-              "scope": "common",
-              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-              "section": "def-common.ServerRoute",
-              "text": "ServerRoute"
-            },
-            "<\"GET /api/streams\", Zod.ZodObject<{}, \"strip\", Zod.ZodTypeAny, {}, {}>, ",
-            "StreamsRouteHandlerResources",
-            ", { streams: ({ name: string; stream: { ingest: { routing: { name: string; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; } | { name: string; stream: { ingest: { routing: { name: string; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[]; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; })[]; }, undefined>; \"DELETE /api/streams/{id}\": ",
-            {
-              "pluginId": "@kbn/server-route-repository-utils",
-              "scope": "common",
-              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-              "section": "def-common.ServerRoute",
-              "text": "ServerRoute"
-            },
-            "<\"DELETE /api/streams/{id}\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; }, { path: { id: string; }; }>, ",
-            "StreamsRouteHandlerResources",
-            ", { acknowledged: true; }, undefined>; \"PUT /api/streams/{id}\": ",
-            {
-              "pluginId": "@kbn/server-route-repository-utils",
-              "scope": "common",
-              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-              "section": "def-common.ServerRoute",
-              "text": "ServerRoute"
-            },
-            "<\"PUT /api/streams/{id}\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; body: Zod.ZodUnion<[Zod.ZodObject<{ ingest: Zod.ZodObject<{ processing: Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ condition: Zod.ZodOptional<Zod.ZodType<",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            ", Zod.ZodTypeDef, ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            ">>; config: Zod.ZodUnion<[Zod.ZodObject<{ grok: Zod.ZodObject<{ field: Zod.ZodString; patterns: Zod.ZodArray<Zod.ZodString, \"many\">; pattern_definitions: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodString>>; ignore_failure: Zod.ZodOptional<Zod.ZodBoolean>; ignore_missing: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }, { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; }, { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; }>, Zod.ZodObject<{ dissect: Zod.ZodObject<{ field: Zod.ZodString; pattern: Zod.ZodString; append_separator: Zod.ZodOptional<Zod.ZodString>; ignore_failure: Zod.ZodOptional<Zod.ZodBoolean>; ignore_missing: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }, { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }, { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }>]>; }, \"strip\", Zod.ZodTypeAny, { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }, { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }>, \"many\">>; wired: Zod.ZodObject<{ fields: Zod.ZodDefault<Zod.ZodRecord<Zod.ZodString, Zod.ZodObject<{ type: Zod.ZodEnum<[\"keyword\", \"match_only_text\", \"long\", \"double\", \"date\", \"boolean\", \"ip\"]>; format: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>>>; }, \"strip\", Zod.ZodTypeAny, { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }, { fields?: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }> | undefined; }>; routing: Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; condition: Zod.ZodOptional<Zod.ZodType<",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            ", Zod.ZodTypeDef, ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            ">>; }, \"strip\", Zod.ZodTypeAny, { name: string; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }, { name: string; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }>, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { routing: { name: string; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }, { wired: { fields?: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }> | undefined; }; routing?: { name: string; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[] | undefined; processing?: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[] | undefined; }>; }, \"strict\", Zod.ZodTypeAny, { ingest: { routing: { name: string; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }, { ingest: { wired: { fields?: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }> | undefined; }; routing?: { name: string; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[] | undefined; processing?: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[] | undefined; }; }>, Zod.ZodObject<{ ingest: Zod.ZodObject<{ processing: Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ condition: Zod.ZodOptional<Zod.ZodType<",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            ", Zod.ZodTypeDef, ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            ">>; config: Zod.ZodUnion<[Zod.ZodObject<{ grok: Zod.ZodObject<{ field: Zod.ZodString; patterns: Zod.ZodArray<Zod.ZodString, \"many\">; pattern_definitions: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodString>>; ignore_failure: Zod.ZodOptional<Zod.ZodBoolean>; ignore_missing: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }, { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; }, { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; }>, Zod.ZodObject<{ dissect: Zod.ZodObject<{ field: Zod.ZodString; pattern: Zod.ZodString; append_separator: Zod.ZodOptional<Zod.ZodString>; ignore_failure: Zod.ZodOptional<Zod.ZodBoolean>; ignore_missing: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }, { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }, { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }>]>; }, \"strip\", Zod.ZodTypeAny, { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }, { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }>, \"many\">>; routing: Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; condition: Zod.ZodOptional<Zod.ZodType<",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            ", Zod.ZodTypeDef, ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            ">>; }, \"strip\", Zod.ZodTypeAny, { name: string; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }, { name: string; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }>, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { routing: { name: string; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[]; }, { routing?: { name: string; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[] | undefined; processing?: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[] | undefined; }>; }, \"strict\", Zod.ZodTypeAny, { ingest: { routing: { name: string; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[]; }; }, { ingest: { routing?: { name: string; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[] | undefined; processing?: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[] | undefined; }; }>]>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { ingest: { routing: { name: string; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; } | { ingest: { routing: { name: string; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[]; }; }; }, { path: { id: string; }; body: { ingest: { wired: { fields?: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }> | undefined; }; routing?: { name: string; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[] | undefined; processing?: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[] | undefined; }; } | { ingest: { routing?: { name: string; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[] | undefined; processing?: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[] | undefined; }; }; }>, ",
-            "StreamsRouteHandlerResources",
-            ", { acknowledged: boolean; }, undefined>; \"GET /api/streams/{id}\": ",
-            {
-              "pluginId": "@kbn/server-route-repository-utils",
-              "scope": "common",
-              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-              "section": "def-common.ServerRoute",
-              "text": "ServerRoute"
-            },
-            "<\"GET /api/streams/{id}\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; }, { path: { id: string; }; }>, ",
-            "StreamsRouteHandlerResources",
-            ", { name: string; lifecycle: { type: \"dlm\"; data_retention?: string | undefined; } | { type: \"ilm\"; policy: string; }; stream: { ingest: { routing: { name: string; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }; inherited_fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; from: string; format?: string | undefined; }>; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; } | { name: string; lifecycle: { type: \"dlm\"; data_retention?: string | undefined; } | { type: \"ilm\"; policy: string; }; stream: { ingest: { routing: { name: string; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }[]; }; }; inherited_fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; from: string; format?: string | undefined; }>; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }, undefined>; \"POST /api/streams/{id}/_fork\": ",
-            {
-              "pluginId": "@kbn/server-route-repository-utils",
-              "scope": "common",
-              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-              "section": "def-common.ServerRoute",
-              "text": "ServerRoute"
-            },
-            "<\"POST /api/streams/{id}/_fork\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; body: Zod.ZodObject<{ stream: Zod.ZodObject<{ name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; }, { name: string; }>; condition: Zod.ZodType<",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            ", Zod.ZodTypeDef, ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            ">; }, \"strip\", Zod.ZodTypeAny, { stream: { name: string; }; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }, { stream: { name: string; }; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { stream: { name: string; }; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }; }, { path: { id: string; }; body: { stream: { name: string; }; condition?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; }; }>, ",
-            "StreamsRouteHandlerResources",
-            ", { acknowledged: true; }, undefined>; \"POST /api/streams/_resync\": ",
-            {
-              "pluginId": "@kbn/server-route-repository-utils",
-              "scope": "common",
-              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-              "section": "def-common.ServerRoute",
-              "text": "ServerRoute"
-            },
-            "<\"POST /api/streams/_resync\", Zod.ZodObject<{}, \"strip\", Zod.ZodTypeAny, {}, {}>, ",
-            "StreamsRouteHandlerResources",
-            ", { acknowledged: true; }, undefined>; \"POST /api/streams/_enable\": ",
-            {
-              "pluginId": "@kbn/server-route-repository-utils",
-              "scope": "common",
-              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-              "section": "def-common.ServerRoute",
-              "text": "ServerRoute"
-            },
-            "<\"POST /api/streams/_enable\", Zod.ZodObject<{}, \"strip\", Zod.ZodTypeAny, {}, {}>, ",
-            "StreamsRouteHandlerResources",
-            ", { acknowledged: true; message: string; }, undefined>; }, ",
+            ", undefined>; }, ",
             "StreamsRepositoryClientOptions",
             ">"
           ],
@@ -872,17 +880,7 @@
         "label": "StreamsRouteRepository",
         "description": [],
         "signature": [
-          "{ \"POST /api/streams/{id}/schema/fields_simulation\": ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"POST /api/streams/{id}/schema/fields_simulation\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; body: Zod.ZodObject<{ field_definitions: Zod.ZodArray<Zod.ZodObject<Zod.objectUtil.extendShape<{ type: Zod.ZodEnum<[\"keyword\", \"match_only_text\", \"long\", \"double\", \"date\", \"boolean\", \"ip\"]>; format: Zod.ZodOptional<Zod.ZodString>; }, { name: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { field_definitions: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }[]; }, { field_definitions: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }[]; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { field_definitions: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }[]; }; }, { path: { id: string; }; body: { field_definitions: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }[]; }; }>, ",
-          "StreamsRouteHandlerResources",
-          ", { status: \"unknown\" | \"success\" | \"failure\"; simulationError: string | null; documentsWithRuntimeFieldsApplied: unknown[] | null; }, undefined>; \"POST /api/streams/{id}/processing/_simulate\": ",
+          "{ \"POST /api/streams/{id}/processing/_simulate\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -956,7 +954,17 @@
           },
           "; }[]; }; }>, ",
           "StreamsRouteHandlerResources",
-          ", { documents: { value: Record<PropertyKey, unknown>; isMatch: boolean; }[]; success_rate: number; failure_rate: number; detected_fields: { name: string; type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\" | \"unmapped\"; }[]; }, undefined>; \"GET /api/streams/{id}/schema/unmapped_fields\": ",
+          ", { documents: { value: Record<PropertyKey, unknown>; isMatch: boolean; }[]; success_rate: number; failure_rate: number; detected_fields: { name: string; type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\" | \"unmapped\"; }[]; }, undefined>; \"POST /api/streams/{id}/schema/fields_simulation\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /api/streams/{id}/schema/fields_simulation\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; body: Zod.ZodObject<{ field_definitions: Zod.ZodArray<Zod.ZodObject<Zod.objectUtil.extendShape<{ type: Zod.ZodEnum<[\"keyword\", \"match_only_text\", \"long\", \"double\", \"date\", \"boolean\", \"ip\"]>; format: Zod.ZodOptional<Zod.ZodString>; }, { name: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { field_definitions: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }[]; }, { field_definitions: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }[]; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { field_definitions: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }[]; }; }, { path: { id: string; }; body: { field_definitions: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }[]; }; }>, ",
+          "StreamsRouteHandlerResources",
+          ", { status: \"unknown\" | \"success\" | \"failure\"; simulationError: string | null; documentsWithRuntimeFieldsApplied: unknown[] | null; }, undefined>; \"GET /api/streams/{id}/schema/unmapped_fields\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -966,19 +974,7 @@
           },
           "<\"GET /api/streams/{id}/schema/unmapped_fields\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; }, { path: { id: string; }; }>, ",
           "StreamsRouteHandlerResources",
-          ", { unmappedFields: string[]; }, undefined>; \"GET /api/streams/{id}/_details\": ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"GET /api/streams/{id}/_details\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; query: Zod.ZodObject<{ start: Zod.ZodString; end: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { start: string; end: string; }, { start: string; end: string; }>; }, \"strip\", Zod.ZodTypeAny, { query: { start: string; end: string; }; path: { id: string; }; }, { query: { start: string; end: string; }; path: { id: string; }; }>, ",
-          "StreamsRouteHandlerResources",
-          ", ",
-          "StreamDetailsResponse",
-          ", undefined>; \"POST /api/streams/{id}/_sample\": ",
+          ", { unmappedFields: string[]; }, undefined>; \"POST /api/streams/{id}/_sample\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -1036,7 +1032,543 @@
           },
           "; }; }>, ",
           "StreamsRouteHandlerResources",
-          ", { documents: unknown[]; }, undefined>; \"POST /api/streams/{id}/dashboards/_bulk\": ",
+          ", { documents: unknown[]; }, undefined>; \"GET /api/streams/_status\": { endpoint: \"GET /api/streams/_status\"; handler: ServerRouteHandler<",
+          "StreamsRouteHandlerResources",
+          ", undefined, { enabled: boolean; }>; security?: ",
+          "RouteSecurity",
+          " | undefined; }; \"POST /api/streams/_resync\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /api/streams/_resync\", Zod.ZodObject<{}, \"strip\", Zod.ZodTypeAny, {}, {}>, ",
+          "StreamsRouteHandlerResources",
+          ", ",
+          "ResyncStreamsResponse",
+          ", undefined>; \"POST /api/streams/{id}/_fork\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /api/streams/{id}/_fork\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; body: Zod.ZodObject<{ stream: Zod.ZodObject<{ name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; }, { name: string; }>; condition: Zod.ZodType<",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          ">; }, \"strip\", Zod.ZodTypeAny, { stream: { name: string; }; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }, { stream: { name: string; }; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { stream: { name: string; }; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }; }, { path: { id: string; }; body: { stream: { name: string; }; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }; }>, ",
+          "StreamsRouteHandlerResources",
+          ", { acknowledged: true; }, undefined>; \"POST /api/streams/_disable\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /api/streams/_disable\", Zod.ZodObject<{}, \"strip\", Zod.ZodTypeAny, {}, {}>, ",
+          "StreamsRouteHandlerResources",
+          ", ",
+          "DisableStreamsResponse",
+          ", undefined>; \"POST /api/streams/_enable\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /api/streams/_enable\", Zod.ZodObject<{}, \"strip\", Zod.ZodTypeAny, {}, {}>, ",
+          "StreamsRouteHandlerResources",
+          ", ",
+          "EnableStreamsResponse",
+          ", undefined>; \"DELETE /api/streams/{id}\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"DELETE /api/streams/{id}\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; }, { path: { id: string; }; }>, ",
+          "StreamsRouteHandlerResources",
+          ", { acknowledged: true; }, undefined>; \"PUT /api/streams/{id}\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"PUT /api/streams/{id}\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; body: Zod.ZodUnion<[Zod.ZodObject<{ ingest: Zod.ZodObject<{ processing: Zod.ZodArray<Zod.ZodObject<{ condition: Zod.ZodOptional<Zod.ZodType<",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          ">>; config: Zod.ZodUnion<[Zod.ZodObject<{ grok: Zod.ZodObject<{ field: Zod.ZodString; patterns: Zod.ZodArray<Zod.ZodString, \"many\">; pattern_definitions: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodString>>; ignore_failure: Zod.ZodOptional<Zod.ZodBoolean>; ignore_missing: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }, { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; }, { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; }>, Zod.ZodObject<{ dissect: Zod.ZodObject<{ field: Zod.ZodString; pattern: Zod.ZodString; append_separator: Zod.ZodOptional<Zod.ZodString>; ignore_failure: Zod.ZodOptional<Zod.ZodBoolean>; ignore_missing: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }, { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }, { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }>]>; }, \"strip\", Zod.ZodTypeAny, { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }, { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }>, \"many\">; wired: Zod.ZodObject<{ fields: Zod.ZodRecord<Zod.ZodString, Zod.ZodObject<{ type: Zod.ZodEnum<[\"keyword\", \"match_only_text\", \"long\", \"double\", \"date\", \"boolean\", \"ip\"]>; format: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }, { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }>; routing: Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; condition: Zod.ZodOptional<Zod.ZodType<",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          ">>; }, \"strip\", Zod.ZodTypeAny, { name: string; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }, { name: string; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { routing: { name: string; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }, { routing: { name: string; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }>; }, \"strict\", Zod.ZodTypeAny, { ingest: { routing: { name: string; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }, { ingest: { routing: { name: string; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }>, Zod.ZodObject<{ ingest: Zod.ZodObject<{ processing: Zod.ZodArray<Zod.ZodObject<{ condition: Zod.ZodOptional<Zod.ZodType<",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          ">>; config: Zod.ZodUnion<[Zod.ZodObject<{ grok: Zod.ZodObject<{ field: Zod.ZodString; patterns: Zod.ZodArray<Zod.ZodString, \"many\">; pattern_definitions: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodString>>; ignore_failure: Zod.ZodOptional<Zod.ZodBoolean>; ignore_missing: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }, { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; }, { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; }>, Zod.ZodObject<{ dissect: Zod.ZodObject<{ field: Zod.ZodString; pattern: Zod.ZodString; append_separator: Zod.ZodOptional<Zod.ZodString>; ignore_failure: Zod.ZodOptional<Zod.ZodBoolean>; ignore_missing: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }, { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }, { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }>]>; }, \"strip\", Zod.ZodTypeAny, { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }, { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }>, \"many\">; routing: Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; condition: Zod.ZodOptional<Zod.ZodType<",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          ">>; }, \"strip\", Zod.ZodTypeAny, { name: string; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }, { name: string; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { routing: { name: string; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; }, { routing: { name: string; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; }>; }, \"strict\", Zod.ZodTypeAny, { ingest: { routing: { name: string; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; }; }, { ingest: { routing: { name: string; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; }; }>]>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { ingest: { routing: { name: string; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; } | { ingest: { routing: { name: string; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; }; }; }, { path: { id: string; }; body: { ingest: { routing: { name: string; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; } | { ingest: { routing: { name: string; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; }; }; }>, ",
+          "StreamsRouteHandlerResources",
+          ", ",
+          "UpsertStreamResponse",
+          ", undefined>; \"GET /api/streams\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /api/streams\", Zod.ZodObject<{}, \"strip\", Zod.ZodTypeAny, {}, {}>, ",
+          "StreamsRouteHandlerResources",
+          ", { streams: ({ name: string; stream: { ingest: { routing: { name: string; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; } | { name: string; stream: { ingest: { routing: { name: string; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; })[]; }, undefined>; \"GET /api/streams/{id}/_details\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /api/streams/{id}/_details\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; query: Zod.ZodObject<{ start: Zod.ZodString; end: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { start: string; end: string; }, { start: string; end: string; }>; }, \"strip\", Zod.ZodTypeAny, { query: { start: string; end: string; }; path: { id: string; }; }, { query: { start: string; end: string; }; path: { id: string; }; }>, ",
+          "StreamsRouteHandlerResources",
+          ", ",
+          "StreamDetailsResponse",
+          ", undefined>; \"GET /api/streams/{id}\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /api/streams/{id}\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; }, { path: { id: string; }; }>, ",
+          "StreamsRouteHandlerResources",
+          ", { name: string; lifecycle: { type: \"dlm\"; data_retention?: string | undefined; } | { type: \"ilm\"; policy: string; }; stream: { ingest: { routing: { name: string; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }; inherited_fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; from: string; format?: string | undefined; }>; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; } | { name: string; lifecycle: { type: \"dlm\"; data_retention?: string | undefined; } | { type: \"ilm\"; policy: string; }; stream: { ingest: { routing: { name: string; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[]; }; }; inherited_fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; from: string; format?: string | undefined; }>; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }, undefined>; \"POST /api/streams/{id}/dashboards/_bulk\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -1096,17 +1628,7 @@
           "StreamsRouteHandlerResources",
           ", ",
           "ListDashboardsResponse",
-          ", undefined>; \"POST /api/streams/_disable\": ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"POST /api/streams/_disable\", Zod.ZodObject<{}, \"strip\", Zod.ZodTypeAny, {}, {}>, ",
-          "StreamsRouteHandlerResources",
-          ", { acknowledged: true; }, undefined>; \"POST /internal/streams/esql\": ",
+          ", undefined>; \"POST /internal/streams/esql\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -1118,513 +1640,7 @@
           "StreamsRouteHandlerResources",
           ", ",
           "UnparsedEsqlResponse",
-          ", undefined>; \"GET /api/streams/_status\": { endpoint: \"GET /api/streams/_status\"; handler: ServerRouteHandler<",
-          "StreamsRouteHandlerResources",
-          ", undefined, { enabled: boolean; }>; security?: ",
-          "RouteSecurity",
-          " | undefined; }; \"GET /api/streams\": ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"GET /api/streams\", Zod.ZodObject<{}, \"strip\", Zod.ZodTypeAny, {}, {}>, ",
-          "StreamsRouteHandlerResources",
-          ", { streams: ({ name: string; stream: { ingest: { routing: { name: string; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; } | { name: string; stream: { ingest: { routing: { name: string; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[]; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; })[]; }, undefined>; \"DELETE /api/streams/{id}\": ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"DELETE /api/streams/{id}\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; }, { path: { id: string; }; }>, ",
-          "StreamsRouteHandlerResources",
-          ", { acknowledged: true; }, undefined>; \"PUT /api/streams/{id}\": ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"PUT /api/streams/{id}\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; body: Zod.ZodUnion<[Zod.ZodObject<{ ingest: Zod.ZodObject<{ processing: Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ condition: Zod.ZodOptional<Zod.ZodType<",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ", Zod.ZodTypeDef, ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ">>; config: Zod.ZodUnion<[Zod.ZodObject<{ grok: Zod.ZodObject<{ field: Zod.ZodString; patterns: Zod.ZodArray<Zod.ZodString, \"many\">; pattern_definitions: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodString>>; ignore_failure: Zod.ZodOptional<Zod.ZodBoolean>; ignore_missing: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }, { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; }, { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; }>, Zod.ZodObject<{ dissect: Zod.ZodObject<{ field: Zod.ZodString; pattern: Zod.ZodString; append_separator: Zod.ZodOptional<Zod.ZodString>; ignore_failure: Zod.ZodOptional<Zod.ZodBoolean>; ignore_missing: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }, { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }, { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }>]>; }, \"strip\", Zod.ZodTypeAny, { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }, { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }>, \"many\">>; wired: Zod.ZodObject<{ fields: Zod.ZodDefault<Zod.ZodRecord<Zod.ZodString, Zod.ZodObject<{ type: Zod.ZodEnum<[\"keyword\", \"match_only_text\", \"long\", \"double\", \"date\", \"boolean\", \"ip\"]>; format: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>>>; }, \"strip\", Zod.ZodTypeAny, { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }, { fields?: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }> | undefined; }>; routing: Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; condition: Zod.ZodOptional<Zod.ZodType<",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ", Zod.ZodTypeDef, ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ">>; }, \"strip\", Zod.ZodTypeAny, { name: string; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }, { name: string; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }>, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { routing: { name: string; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }, { wired: { fields?: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }> | undefined; }; routing?: { name: string; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[] | undefined; processing?: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[] | undefined; }>; }, \"strict\", Zod.ZodTypeAny, { ingest: { routing: { name: string; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }, { ingest: { wired: { fields?: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }> | undefined; }; routing?: { name: string; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[] | undefined; processing?: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[] | undefined; }; }>, Zod.ZodObject<{ ingest: Zod.ZodObject<{ processing: Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ condition: Zod.ZodOptional<Zod.ZodType<",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ", Zod.ZodTypeDef, ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ">>; config: Zod.ZodUnion<[Zod.ZodObject<{ grok: Zod.ZodObject<{ field: Zod.ZodString; patterns: Zod.ZodArray<Zod.ZodString, \"many\">; pattern_definitions: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodString>>; ignore_failure: Zod.ZodOptional<Zod.ZodBoolean>; ignore_missing: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }, { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; }, { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; }>, Zod.ZodObject<{ dissect: Zod.ZodObject<{ field: Zod.ZodString; pattern: Zod.ZodString; append_separator: Zod.ZodOptional<Zod.ZodString>; ignore_failure: Zod.ZodOptional<Zod.ZodBoolean>; ignore_missing: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }, { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }, { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }>]>; }, \"strip\", Zod.ZodTypeAny, { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }, { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }>, \"many\">>; routing: Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; condition: Zod.ZodOptional<Zod.ZodType<",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ", Zod.ZodTypeDef, ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ">>; }, \"strip\", Zod.ZodTypeAny, { name: string; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }, { name: string; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }>, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { routing: { name: string; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[]; }, { routing?: { name: string; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[] | undefined; processing?: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[] | undefined; }>; }, \"strict\", Zod.ZodTypeAny, { ingest: { routing: { name: string; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[]; }; }, { ingest: { routing?: { name: string; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[] | undefined; processing?: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[] | undefined; }; }>]>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { ingest: { routing: { name: string; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; } | { ingest: { routing: { name: string; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[]; }; }; }, { path: { id: string; }; body: { ingest: { wired: { fields?: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }> | undefined; }; routing?: { name: string; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[] | undefined; processing?: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[] | undefined; }; } | { ingest: { routing?: { name: string; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[] | undefined; processing?: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[] | undefined; }; }; }>, ",
-          "StreamsRouteHandlerResources",
-          ", { acknowledged: boolean; }, undefined>; \"GET /api/streams/{id}\": ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"GET /api/streams/{id}\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; }, { path: { id: string; }; }>, ",
-          "StreamsRouteHandlerResources",
-          ", { name: string; lifecycle: { type: \"dlm\"; data_retention?: string | undefined; } | { type: \"ilm\"; policy: string; }; stream: { ingest: { routing: { name: string; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }; inherited_fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; from: string; format?: string | undefined; }>; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; } | { name: string; lifecycle: { type: \"dlm\"; data_retention?: string | undefined; } | { type: \"ilm\"; policy: string; }; stream: { ingest: { routing: { name: string; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[]; }; }; inherited_fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; from: string; format?: string | undefined; }>; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }, undefined>; \"POST /api/streams/{id}/_fork\": ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"POST /api/streams/{id}/_fork\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; body: Zod.ZodObject<{ stream: Zod.ZodObject<{ name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; }, { name: string; }>; condition: Zod.ZodType<",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ", Zod.ZodTypeDef, ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ">; }, \"strip\", Zod.ZodTypeAny, { stream: { name: string; }; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }, { stream: { name: string; }; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { stream: { name: string; }; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }; }, { path: { id: string; }; body: { stream: { name: string; }; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }; }>, ",
-          "StreamsRouteHandlerResources",
-          ", { acknowledged: true; }, undefined>; \"POST /api/streams/_resync\": ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"POST /api/streams/_resync\", Zod.ZodObject<{}, \"strip\", Zod.ZodTypeAny, {}, {}>, ",
-          "StreamsRouteHandlerResources",
-          ", { acknowledged: true; }, undefined>; \"POST /api/streams/_enable\": ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"POST /api/streams/_enable\", Zod.ZodObject<{}, \"strip\", Zod.ZodTypeAny, {}, {}>, ",
-          "StreamsRouteHandlerResources",
-          ", { acknowledged: true; message: string; }, undefined>; }"
+          ", undefined>; }"
         ],
         "path": "x-pack/solutions/observability/plugins/streams/server/routes/index.ts",
         "deprecated": false,
