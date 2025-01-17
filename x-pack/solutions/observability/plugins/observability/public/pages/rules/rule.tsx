@@ -8,16 +8,14 @@
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { RuleForm } from '@kbn/response-ops-rule-form';
-import { ChromeBreadcrumb, CoreStart, HttpSetup } from '@kbn/core/public';
+import { ChromeBreadcrumb, HttpSetup } from '@kbn/core/public';
 import { useLocation, useParams } from 'react-router-dom';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { useKibana } from '../../utils/kibana_react';
 import { OBSERVABILITY_BASE_PATH, paths } from '../../../common/locators/paths';
+import { observabilityRuleCreationValidConsumers } from '../../../common/constants';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-
-interface RuleFormServices extends CoreStart {
-  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
-}
 
 interface RulePageProps {
   ruleTypeId?: string;
@@ -67,7 +65,7 @@ export function RulePage() {
     ruleTypeRegistry,
     chrome,
     ...startServices
-  } = useKibana<RuleFormServices>().services;
+  } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const location = useLocation<{ returnApp?: string; returnPath?: string }>();
   const { returnApp, returnPath } = location.state || {};
@@ -131,6 +129,9 @@ export function RulePage() {
           actionTypeRegistry,
           ...startServices,
         }}
+        validConsumers={observabilityRuleCreationValidConsumers}
+        multiConsumerSelection={AlertConsumers.LOGS}
+        isServerless={!!serverless}
         onCancel={() => {
           if (returnApp && returnPath) {
             application.navigateToApp(returnApp, { path: returnPath });

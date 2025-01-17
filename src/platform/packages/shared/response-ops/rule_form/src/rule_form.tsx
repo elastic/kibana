@@ -10,6 +10,7 @@
 import React, { useMemo } from 'react';
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+import { type RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { useParams } from 'react-router-dom';
 import { CreateRuleForm } from './create_rule_form';
 import { EditRuleForm } from './edit_rule_form';
@@ -25,10 +26,20 @@ export interface RuleFormProps {
   plugins: RuleFormPlugins;
   onCancel?: () => void;
   onSubmit?: (ruleId: string) => void;
+  validConsumers?: RuleCreationValidConsumer[];
+  multiConsumerSelection?: RuleCreationValidConsumer | null;
+  isServerless?: boolean;
 }
 
 export const RuleForm = (props: RuleFormProps) => {
-  const { plugins: _plugins, onCancel, onSubmit } = props;
+  const {
+    plugins: _plugins,
+    onCancel,
+    onSubmit,
+    validConsumers,
+    multiConsumerSelection,
+    isServerless,
+  } = props;
   const { id, ruleTypeId } = useParams<{
     id?: string;
     ruleTypeId?: string;
@@ -78,6 +89,9 @@ export const RuleForm = (props: RuleFormProps) => {
           plugins={plugins}
           onCancel={onCancel}
           onSubmit={onSubmit}
+          validConsumers={validConsumers}
+          multiConsumerSelection={multiConsumerSelection}
+          isServerless={isServerless}
         />
       );
     }
