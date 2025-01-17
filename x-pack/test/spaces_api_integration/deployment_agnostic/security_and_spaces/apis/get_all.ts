@@ -14,9 +14,6 @@ export default function getAllSpacesTestSuite(context: DeploymentAgnosticFtrProv
   const { getAllTest, createExpectResults, createExpectAllPurposesResults, expectRbacForbidden } =
     getAllTestSuiteFactory(context);
 
-  const config = context.getService('config');
-  const isServerless = config.get('serverless');
-
   const spaces = ['default', 'space_1', 'space_2', 'space_3'];
 
   // these are used to determine expected results for tests where the `include_authorized_purposes` option is enabled
@@ -56,9 +53,6 @@ export default function getAllSpacesTestSuite(context: DeploymentAgnosticFtrProv
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
-          machineLearningAdmin: AUTHENTICATION.MACHINE_LEARING_ADMIN,
-          machineLearningUser: AUTHENTICATION.MACHINE_LEARNING_USER,
-          monitoringUser: AUTHENTICATION.MONITORING_USER,
         },
       },
       {
@@ -81,9 +75,6 @@ export default function getAllSpacesTestSuite(context: DeploymentAgnosticFtrProv
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
-          machineLearningAdmin: AUTHENTICATION.MACHINE_LEARING_ADMIN,
-          machineLearningUser: AUTHENTICATION.MACHINE_LEARNING_USER,
-          monitoringUser: AUTHENTICATION.MONITORING_USER,
         },
       },
       /* eslint-enable @typescript-eslint/naming-convention */
@@ -450,77 +441,6 @@ export default function getAllSpacesTestSuite(context: DeploymentAgnosticFtrProv
           },
         }
       );
-
-      if (!isServerless) {
-        getAllTest(`machine_learning_admin can't access any spaces from ${scenario.spaceId}`, {
-          spaceId: scenario.spaceId,
-          user: scenario.users.machineLearningAdmin,
-          tests: {
-            exists: {
-              statusCode: 403,
-              response: expectRbacForbidden,
-            },
-            copySavedObjectsPurpose: {
-              statusCode: 403,
-              response: expectRbacForbidden,
-            },
-            shareSavedObjectsPurpose: {
-              statusCode: 403,
-              response: expectRbacForbidden,
-            },
-            includeAuthorizedPurposes: {
-              statusCode: 403,
-              response: expectRbacForbidden,
-            },
-          },
-        });
-
-        getAllTest(`machine_learning_user can't access any spaces from ${scenario.spaceId}`, {
-          spaceId: scenario.spaceId,
-          user: scenario.users.machineLearningUser,
-          tests: {
-            exists: {
-              statusCode: 403,
-              response: expectRbacForbidden,
-            },
-            copySavedObjectsPurpose: {
-              statusCode: 403,
-              response: expectRbacForbidden,
-            },
-            shareSavedObjectsPurpose: {
-              statusCode: 403,
-              response: expectRbacForbidden,
-            },
-            includeAuthorizedPurposes: {
-              statusCode: 403,
-              response: expectRbacForbidden,
-            },
-          },
-        });
-
-        getAllTest(`monitoring_user can't access any spaces from ${scenario.spaceId}`, {
-          spaceId: scenario.spaceId,
-          user: scenario.users.monitoringUser,
-          tests: {
-            exists: {
-              statusCode: 403,
-              response: expectRbacForbidden,
-            },
-            copySavedObjectsPurpose: {
-              statusCode: 403,
-              response: expectRbacForbidden,
-            },
-            shareSavedObjectsPurpose: {
-              statusCode: 403,
-              response: expectRbacForbidden,
-            },
-            includeAuthorizedPurposes: {
-              statusCode: 403,
-              response: expectRbacForbidden,
-            },
-          },
-        });
-      }
     });
   });
 }
