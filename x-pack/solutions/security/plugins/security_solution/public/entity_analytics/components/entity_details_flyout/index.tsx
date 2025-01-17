@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
+import type { CloudPostureEntityIdentifier } from '../../../cloud_security_posture/components/entity_insight';
 import type { EntityType } from '../../../../common/search_strategy';
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { PREFIX } from '../../../flyout/shared/test_ids';
@@ -39,7 +39,7 @@ export const getInsightsInputTab = ({
   fieldName,
 }: {
   name: string;
-  fieldName: EntityIdentifierFields;
+  fieldName: CloudPostureEntityIdentifier;
 }) => {
   return {
     id: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
