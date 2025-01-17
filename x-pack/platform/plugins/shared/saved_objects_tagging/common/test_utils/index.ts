@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { SavedObject, SavedObjectReference } from '@kbn/core/types';
+import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
+import { AssignableObject } from '@kbn/saved-objects-tagging-oss-plugin/common';
 import type { Tag, TagAttributes } from '../types';
 import type { TagsCapabilities } from '../capabilities';
-import type { AssignableObject } from '../assignments';
 
 export const createReference = (type: string, id: string): SavedObjectReference => ({
   type,

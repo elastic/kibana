@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { AssignableObject } from '../../../../common/assignments';
+import { AssignableObject, getKey } from '@kbn/saved-objects-tagging-oss-plugin/common';
 import { AssignmentStatusMap, AssignmentOverrideMap } from '../types';
-import { getAssignmentAction, getKey } from '../utils';
+import { getAssignmentAction } from '../utils';
 
 /**
  * Compute the list of objects that need to be added or removed from the

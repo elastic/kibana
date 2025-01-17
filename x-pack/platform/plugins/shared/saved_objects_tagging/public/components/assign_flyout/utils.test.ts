@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { getKey } from '@kbn/saved-objects-tagging-oss-plugin/common';
 import { createAssignableObject } from '../../../common/test_utils';
-import { sortByStatusAndTitle, getAssignmentAction, getOverriddenStatus, getKey } from './utils';
+import { sortByStatusAndTitle, getAssignmentAction, getOverriddenStatus } from './utils';
 import { AssignmentStatusMap } from './types';
 
 describe('getOverriddenStatus', () => {

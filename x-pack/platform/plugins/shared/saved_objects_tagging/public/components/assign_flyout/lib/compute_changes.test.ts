@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { getKey } from '@kbn/saved-objects-tagging-oss-plugin/common';
 import { createAssignableObject } from '../../../../common/test_utils';
-import { getKey } from '../../../../common/assignments';
 import { computeRequiredChanges } from './compute_changes';
 import { AssignmentOverrideMap, AssignmentStatusMap } from '../types';
 

@@ -7,14 +7,15 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { SavedObject, SavedObjectReference } from '@kbn/core/public';
+import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
 import {
   SavedObjectsTaggingApiUi,
   SavedObjectsTaggingApiUiComponent,
   GetTableColumnDefinitionOptions,
 } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { getTagsFromReferences } from '../../common';
 import { ITagsCache } from '../services';
-import { getTagsFromReferences, byNameTagSorter } from '../utils';
+import { byNameTagSorter } from '../utils';
 
 export interface BuildGetTableColumnDefinitionOptions {
   components: SavedObjectsTaggingApiUiComponent;

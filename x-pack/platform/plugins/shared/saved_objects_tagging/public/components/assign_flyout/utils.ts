@@ -6,15 +6,13 @@
  */
 
 import { sortBy } from 'lodash';
-import { AssignableObject, getKey } from '../../../common/assignments';
+import { AssignableObject, getKey } from '@kbn/saved-objects-tagging-oss-plugin/common';
 import {
   AssignmentOverride,
   AssignmentStatus,
   AssignmentAction,
   AssignmentStatusMap,
 } from './types';
-
-export { getKey } from '../../../common/assignments';
 
 /**
  * Return the assignment status resulting from applying
