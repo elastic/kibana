@@ -193,6 +193,12 @@ export const installTranslated = async ({
     prebuiltRulesToInstall = await prebuiltRuleBatches.next();
   }
 
+  let installTimelinesError: string | undefined;
+  if (installedCount > 0) {
+    const { error } = await performTimelinesInstallation(securitySolutionContext);
+    installTimelinesError = error;
+  }
+
   // Install rules with custom translation
   const customRuleBatches = ruleMigrationsClient.data.rules.searchBatches(migrationId, {
     filters: { ids, installable: true, prebuilt: false },
@@ -210,13 +216,10 @@ export const installTranslated = async ({
     customRulesToInstall = await customRuleBatches.next();
   }
 
-  const { error: installTimelinesError } = await performTimelinesInstallation(
-    securitySolutionContext
-  );
+  // Throw an error if needed
   if (installTimelinesError) {
     throw new Error(`Error installing prepackaged timelines: ${installTimelinesError}`);
   }
-
   if (installationErrors.length) {
     throw new Error(installationErrors.map((err) => err.message).join());
   }
