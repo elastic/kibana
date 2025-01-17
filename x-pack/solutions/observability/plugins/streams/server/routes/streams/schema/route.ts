@@ -44,14 +44,15 @@ export const unmappedFieldsRoute = createServerRoute({
         size: UNMAPPED_SAMPLE_SIZE,
       };
 
-      const [streamDefinition, ancestors, results] = await Promise.all([
+      const [streamDefinition, results] = await Promise.all([
         streamsClient.getStream(params.path.id),
-        streamsClient.getAncestors(params.path.id),
         scopedClusterClient.asCurrentUser.search({
           index: params.path.id,
           ...searchBody,
         }),
       ]);
+
+      const ancestors = await streamsClient.getAncestors(streamDefinition);
 
       const sourceFields = new Set<string>();
 
@@ -71,7 +72,11 @@ export const unmappedFieldsRoute = createServerRoute({
       }
 
       for (const ancestor of ancestors) {
-        Object.keys(ancestor.stream.ingest.wired.fields).forEach((name) => mappedFields.add(name));
+        if (isWiredStream(ancestor)) {
+          Object.keys(ancestor.stream.ingest.wired.fields).forEach((name) =>
+            mappedFields.add(name)
+          );
+        }
       }
 
       const unmappedFields = Array.from(sourceFields)

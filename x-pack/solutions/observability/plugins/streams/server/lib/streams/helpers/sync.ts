@@ -10,8 +10,6 @@ import {
   IngestStreamDefinition,
   StreamDefinition,
   WiredStreamDefinition,
-  isDSNS,
-  isWiredStream,
 } from '@kbn/streams-schema';
 import { isResponseError } from '@kbn/es-errors';
 import {
@@ -23,10 +21,7 @@ import { set } from '@kbn/safer-lodash-set';
 import { generateLayer } from '../component_templates/generate_layer';
 import { upsertComponent } from '../component_templates/manage_component_templates';
 import { upsertIngestPipeline } from '../ingest_pipelines/manage_ingest_pipelines';
-import {
-  generateClassicIngestPipelineBody,
-  generateIngestPipeline,
-} from '../ingest_pipelines/generate_ingest_pipeline';
+import { generateIngestPipeline } from '../ingest_pipelines/generate_ingest_pipeline';
 import { generateReroutePipeline } from '../ingest_pipelines/generate_reroute_pipeline';
 import { upsertTemplate } from '../index_templates/manage_index_templates';
 import { generateIndexTemplate } from '../index_templates/generate_index_template';
@@ -35,8 +30,7 @@ import {
   upsertDataStream,
 } from '../data_streams/manage_data_streams';
 import { getUnmanagedElasticsearchAssets } from '../stream_crud';
-import { getProcessingPipelineName } from '../ingest_pipelines/name';
-import { StreamsStorageClient } from '../service';
+import { getProcessingPipelineName, getReroutePipelineName } from '../ingest_pipelines/name';
 
 interface SyncStreamParamsBase {
   scopedClusterClient: IScopedClusterClient;
@@ -47,48 +41,11 @@ export async function syncWiredStreamDefinitionObjects({
   definition,
   scopedClusterClient,
   logger,
-  storageClient,
+  unwiredRoot,
 }: SyncStreamParamsBase & {
   definition: WiredStreamDefinition;
-  storageClient: StreamsStorageClient;
+  unwiredRoot?: StreamDefinition;
 }) {
-  let classicRoot: StreamDefinition | undefined;
-  if (isDSNS(definition.name)) {
-    // if the stream is a DSNS but wired, it doesn't inherit from logs, but from a classic stream
-    // we need to find that classic stream to be able to build the component stack properly
-    // we can do this by iteratively searching for a .streams doc which has the current definitions id as child
-    // until we hit a classic one
-    let current = definition;
-    while (current) {
-      // do a search request for
-      const response = await storageClient.search({
-        track_total_hits: false,
-        size: 10000,
-        query: {
-          bool: {
-            filter: {
-              term: {
-                'children.id': current.name,
-              },
-            },
-          },
-        },
-      });
-      if (response.hits.hits.length === 0) {
-        break;
-      }
-      const parent = response.hits.hits[0]._source as StreamDefinition;
-      if (!parent) {
-        break;
-      }
-      if (!isWiredStream(parent)) {
-        classicRoot = parent;
-        break;
-      }
-      current = parent;
-    }
-  }
-
   const componentTemplate = generateLayer(definition.name, definition);
   await upsertComponent({
     esClient: scopedClusterClient.asCurrentUser,
@@ -114,7 +71,7 @@ export async function syncWiredStreamDefinitionObjects({
   await upsertTemplate({
     esClient: scopedClusterClient.asCurrentUser,
     logger,
-    template: generateIndexTemplate(definition, classicRoot),
+    template: generateIndexTemplate(definition, unwiredRoot),
   });
 
   await upsertDataStream({
@@ -235,9 +192,6 @@ export async function syncIngestStreamDefinitionObjects({
   dataStream: IndicesDataStream;
   definition: IngestStreamDefinition;
 }) {
-  if (definition.stream.ingest.routing.length) {
-    throw new Error('Unmanaged streams cannot have managed children, coming soon');
-  }
   const unmanagedAssets = await getUnmanagedElasticsearchAssets({
     dataStream,
     scopedClusterClient,
@@ -258,22 +212,43 @@ export async function syncIngestStreamDefinitionObjects({
     executionPlan
   );
 
-  if (definition.stream.ingest.processing.length) {
+  if (definition.stream.ingest.processing.length || definition.stream.ingest.routing.length) {
     // if the stream has processing, we need to create or update the stream managed pipeline
+    const { id: processingPipelineId, ...processingPipeline } = generateIngestPipeline(
+      definition.name,
+      definition
+    );
     executionPlan.push({
       method: 'PUT',
-      path: `/_ingest/pipeline/${streamManagedPipelineName}`,
-      body: generateClassicIngestPipelineBody(definition),
+      path: `/_ingest/pipeline/${processingPipelineId}`,
+      body: processingPipeline,
+    });
+    const { id: routingPipelineId, ...routingPipeline } = generateReroutePipeline({ definition });
+    executionPlan.push({
+      method: 'PUT',
+      path: `/_ingest/pipeline/${routingPipelineId}`,
+      body: routingPipeline,
     });
   } else {
-    const pipelineExists = Boolean(
+    const processingPipelineExists = Boolean(
       await tryGettingPipeline({ scopedClusterClient, id: streamManagedPipelineName })
     );
     // no processing, just delete the pipeline if it exists. The reference to the pipeline won't break anything
-    if (pipelineExists) {
+    if (processingPipelineExists) {
       executionPlan.push({
         method: 'DELETE',
         path: `/_ingest/pipeline/${streamManagedPipelineName}`,
+      });
+    }
+    const reroutePipelineName = getReroutePipelineName(definition.name);
+    const reroutePipelineExists = Boolean(
+      await tryGettingPipeline({ scopedClusterClient, id: reroutePipelineName })
+    );
+    // no processing, just delete the pipeline if it exists. The reference to the pipeline won't break anything
+    if (reroutePipelineExists) {
+      executionPlan.push({
+        method: 'DELETE',
+        path: `/_ingest/pipeline/${reroutePipelineName}`,
       });
     }
   }

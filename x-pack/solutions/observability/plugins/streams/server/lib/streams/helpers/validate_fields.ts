@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-import { FieldDefinition, WiredStreamDefinition, isWiredStream } from '@kbn/streams-schema';
+import {
+  FieldDefinition,
+  StreamDefinition,
+  WiredStreamDefinition,
+  isWiredStream,
+} from '@kbn/streams-schema';
 import { MalformedFields } from '../errors/malformed_fields';
 
 export function validateAncestorFields({
   ancestors,
   fields,
 }: {
-  ancestors: WiredStreamDefinition[];
+  ancestors: StreamDefinition[];
   fields: FieldDefinition;
 }) {
   for (const ancestor of ancestors) {

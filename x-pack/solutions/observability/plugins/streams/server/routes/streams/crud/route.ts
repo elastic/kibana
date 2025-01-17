@@ -51,16 +51,17 @@ export const readStreamRoute = createServerRoute({
 
       const name = params.path.id;
 
-      const [streamDefinition, dashboards, ancestors, dataStream] = await Promise.all([
+      const [streamDefinition, dashboards, dataStream] = await Promise.all([
         streamsClient.getStream(name),
         assetClient.getAssetIds({
           entityId: name,
           entityType: 'stream',
           assetType: 'dashboard',
         }),
-        streamsClient.getAncestors(name),
         streamsClient.getDataStream(name),
       ]);
+
+      const ancestors = await streamsClient.getAncestors(streamDefinition);
 
       const lifecycle = getDataStreamLifecycle(dataStream);
 
@@ -78,6 +79,9 @@ export const readStreamRoute = createServerRoute({
         dashboards,
         lifecycle,
         inherited_fields: ancestors.reduce((acc, def) => {
+          if (!isWiredStream(def)) {
+            return acc;
+          }
           Object.entries(def.stream.ingest.wired.fields).forEach(([key, fieldDef]) => {
             acc[key] = { ...fieldDef, from: def.name };
           });

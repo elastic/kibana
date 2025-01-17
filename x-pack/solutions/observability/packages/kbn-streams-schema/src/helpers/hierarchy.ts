@@ -34,6 +34,21 @@ export function isChildOf(parent: string, child: string) {
 }
 
 export function getParentId(id: string) {
+  if (isDSNS(id)) {
+    // if the id is not managed,
+    // the parent id is the same as id, but one dot suffix
+    // removed from the dataset part
+    // DSNS is logs-<dataset>-<namespace>
+    const parts = id.split('-');
+    if (parts.length !== 3) {
+      return undefined;
+    }
+    const datasetParts = parts[1].split('.');
+    if (datasetParts.length === 1) {
+      return undefined;
+    }
+    return `${parts[0]}-${datasetParts.slice(0, datasetParts.length - 1).join('.')}-${parts[2]}`;
+  }
   const parts = id.split('.');
   if (parts.length === 1) {
     return undefined;
@@ -45,7 +60,22 @@ export function isRoot(id: string) {
   return id.split('.').length === 1;
 }
 
-export function getAncestors(id: string) {
+export function getAncestors(id: string, unwiredRootId?: string) {
+  if (unwiredRootId && isDSNS(id)) {
+    const [prefix, dataset, suffix] = id.split('-');
+    const unwiredRootDataset = unwiredRootId.split('-')[1];
+    const datasetParts = dataset.split('.');
+    const unwiredRootParts = unwiredRootDataset.split('.');
+    const ancestors = [];
+
+    for (let i = datasetParts.length - 1; i >= unwiredRootParts.length - 1; i--) {
+      const ancestorDataset = datasetParts.slice(0, i + 1).join('.');
+      ancestors.push(`${prefix}-${ancestorDataset}-${suffix}`);
+    }
+
+    return ancestors;
+  }
+
   const parts = id.split('.');
   return parts.slice(0, parts.length - 1).map((_, index) => parts.slice(0, index + 1).join('.'));
 }

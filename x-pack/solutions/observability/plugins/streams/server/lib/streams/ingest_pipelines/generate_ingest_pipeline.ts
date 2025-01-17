@@ -31,14 +31,3 @@ export function generateIngestPipeline(id: string, definition: StreamDefinition)
     version: ASSET_VERSION,
   };
 }
-
-export function generateClassicIngestPipelineBody(definition: StreamDefinition) {
-  return {
-    processors: formatToIngestProcessors(definition.stream.ingest.processing),
-    _meta: {
-      description: `Stream-managed pipeline for the ${definition.name} stream`,
-      managed: true,
-    },
-    version: ASSET_VERSION,
-  };
-}
