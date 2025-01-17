@@ -18,6 +18,7 @@ import {
   EuiCommentList,
   EuiText,
   useEuiTheme,
+  EuiSpacer,
 } from '@elastic/eui';
 import type { Comment } from '@kbn/securitysolution-io-ts-list-types';
 import { MAX_COMMENT_LENGTH } from '../../../../../common/constants';
@@ -119,6 +120,7 @@ export const ExceptionItemComments = memo(function ExceptionItemComments({
         onToggle={(isOpen) => handleTriggerOnClick(isOpen)}
       >
         <EuiCommentList comments={formattedComments} />
+        <EuiSpacer />
         <EuiFlexGroup gutterSize={'none'}>
           <EuiFlexItem grow={false}>
             <EuiAvatar
