@@ -58,7 +58,7 @@ export const contentReferencesStoreFactory: () => ContentReferencesStore = () =>
  * @param contentReferencesStore The ContentReferencesStore contain the contentReferences.
  * @returns a new record only containing the ContentReferences that are referenced to by the content.
  */
-export const prunedContentReferences = (
+export const pruneContentReferences = (
   content: string,
   contentReferencesStore: ContentReferencesStore
 ): ContentReferences | undefined => {

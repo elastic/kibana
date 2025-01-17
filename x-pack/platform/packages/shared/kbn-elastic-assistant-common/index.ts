@@ -32,7 +32,7 @@ export {
   contentReferenceString,
   contentReferenceBlock,
   removeContentReferences,
-  prunedContentReferences,
+  pruneContentReferences,
 } from './impl/content_references';
 
 export type {

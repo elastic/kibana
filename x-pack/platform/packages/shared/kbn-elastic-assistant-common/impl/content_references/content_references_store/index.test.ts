@@ -1,5 +1,6 @@
-import { contentReferencesStoreFactory } from "."
+import { contentReferencesStoreFactory, pruneContentReferences } from "."
 import { alertsPageReferenceFactory } from "../references"
+import { contentReferenceBlock, contentReferenceString } from "../references/utils"
 import { ContentReferencesStore } from "../types"
 
 describe('contentReferencesStoreFactory', () => {
@@ -36,5 +37,27 @@ describe('contentReferencesStoreFactory', () => {
 
         expect(referenceIds.size).toEqual(numberOfReferencesToCreate)
         expect(keys.length).toEqual(numberOfReferencesToCreate)
+    })
+})
+
+
+describe('pruneContentReferences', () => {
+    let contentReferencesStore: ContentReferencesStore
+    beforeEach(() => {
+        contentReferencesStore = contentReferencesStoreFactory()
+    })
+
+    it("prunes content references correctly", async () => {
+
+        const alertsPageReference1 = contentReferencesStore.add(p => alertsPageReferenceFactory(p.id))
+        const alertsPageReference2 = contentReferencesStore.add(p => alertsPageReferenceFactory(p.id))
+        contentReferencesStore.add(p => alertsPageReferenceFactory(p.id))
+
+        const content = `Example ${contentReferenceBlock(alertsPageReference1)} example ${contentReferenceBlock(alertsPageReference2)}`
+
+        const prunedContentReferences = pruneContentReferences(content, contentReferencesStore)
+
+        const keys = Object.keys(prunedContentReferences!)
+        expect(keys.sort()).toEqual([alertsPageReference1.id, alertsPageReference2.id].sort())
     })
 })

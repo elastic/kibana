@@ -16,7 +16,7 @@ import {
   ExecuteConnectorRequestBody,
   Message,
   Replacements,
-  prunedContentReferences,
+  pruneContentReferences,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
@@ -119,7 +119,7 @@ export const postActionsConnectorExecuteRoute = (
             isError = false
           ): Promise<void> => {
             if (conversationsDataClient && conversationId) {
-              const contentReferences = prunedContentReferences(content, contentReferencesStore);
+              const contentReferences = pruneContentReferences(content, contentReferencesStore);
 
               await appendAssistantMessageToConversation({
                 conversationId,

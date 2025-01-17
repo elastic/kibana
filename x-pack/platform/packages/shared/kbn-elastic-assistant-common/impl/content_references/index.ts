@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { contentReferencesStoreFactory, prunedContentReferences } from './content_references_store';
+export { contentReferencesStoreFactory, pruneContentReferences } from './content_references_store';
 export {
   alertReferenceFactory,
   knowledgeBaseReferenceFactory,
