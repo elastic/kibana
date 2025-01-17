@@ -53,7 +53,7 @@ export async function generateScoutTestFailureArtifacts({
       const htmlFilePath = Path.join(dirPath, htmlReportFilename);
       const failureHTML = fs.readFileSync(htmlFilePath, 'utf-8');
 
-      const hash = createHash('md5').update(name).digest('hex'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+      const hash = createHash('md5').update(name).digest('hex');
       const filenameBase = `${
         process.env.BUILDKITE_JOB_ID ? process.env.BUILDKITE_JOB_ID + '_' : ''
       }${hash}`;
