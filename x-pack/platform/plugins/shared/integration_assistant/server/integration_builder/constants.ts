@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { InputType } from '../../common';
+
 export const CEL_EXISTING_AUTH_CONFIG_FIELDS = [
   'oauth_id',
   'oauth_secret',
@@ -27,6 +29,18 @@ export const DEFAULT_CEL_PROGRAM = `# // Fetch the agent's public IP every minut
 # })`;
 
 export const DEFAULT_URL = 'https://server.example.com:8089/api';
+
+export const INPUTS_INCLUDE_SSL_CONFIG: readonly InputType[] = [
+  'aws-cloudwatch',
+  'aws-s3',
+  'azure-blob-storage',
+  'azure-eventhub',
+  'gcp-pubsub',
+  'gcs',
+  'http_endpoint',
+  'kafka',
+  'tcp',
+];
 
 // The version of the package specification format used by this package https://github.com/elastic/package-spec/blob/main/spec/changelog.yml
 export const FORMAT_VERSION = '3.1.4';
