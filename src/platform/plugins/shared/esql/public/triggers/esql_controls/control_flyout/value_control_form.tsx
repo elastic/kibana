@@ -382,45 +382,44 @@ export function ValueControlForm({
                 })}
                 fullWidth
               >
-                <EuiPanel
-                  paddingSize="s"
-                  hasBorder
-                  css={css`
-                    white-space: wrap;
-                    overflow-y: auto;
-                    max-height: 200px;
-                  `}
-                  data-test-subj="esqlValuesPreview"
-                >
-                  {queryColumns.length === 1 ? (
-                    selectedValues.map((value) => value.label).join(', ')
-                  ) : (
-                    <EuiCallOut
-                      title={i18n.translate('esql.flyout.displayMultipleColsCallout.title', {
-                        defaultMessage: 'Your query must return a single column',
-                      })}
-                      iconType="warning"
-                      data-test-subj="esqlMoreThanOneColumnCallout"
-                    >
-                      <p>
-                        <FormattedMessage
-                          id="esql.flyout.displayMultipleColsCallout.description"
-                          defaultMessage="Your query is currently returning {totalColumns} columns. Choose column {chooseColumnPopover} or use {boldText}."
-                          values={{
-                            totalColumns: queryColumns.length,
-                            boldText: <strong>STATS BY</strong>,
-                            chooseColumnPopover: (
-                              <ChooseColumnPopover
-                                columns={queryColumns}
-                                updateQuery={updateQuery}
-                              />
-                            ),
-                          }}
-                        />
-                      </p>
-                    </EuiCallOut>
-                  )}
-                </EuiPanel>
+                {queryColumns.length === 1 ? (
+                  <EuiPanel
+                    paddingSize="s"
+                    color="primary"
+                    css={css`
+                      white-space: wrap;
+                      overflow-y: auto;
+                      max-height: 200px;
+                    `}
+                    data-test-subj="esqlValuesPreview"
+                  >
+                    {selectedValues.map((value) => value.label).join(', ')}
+                  </EuiPanel>
+                ) : (
+                  <EuiCallOut
+                    title={i18n.translate('esql.flyout.displayMultipleColsCallout.title', {
+                      defaultMessage: 'Your query must return a single column',
+                    })}
+                    color="warning"
+                    iconType="warning"
+                    size="s"
+                    data-test-subj="esqlMoreThanOneColumnCallout"
+                  >
+                    <p>
+                      <FormattedMessage
+                        id="esql.flyout.displayMultipleColsCallout.description"
+                        defaultMessage="Your query is currently returning {totalColumns} columns. Choose column {chooseColumnPopover} or use {boldText}."
+                        values={{
+                          totalColumns: queryColumns.length,
+                          boldText: <strong>STATS BY</strong>,
+                          chooseColumnPopover: (
+                            <ChooseColumnPopover columns={queryColumns} updateQuery={updateQuery} />
+                          ),
+                        }}
+                      />
+                    </p>
+                  </EuiCallOut>
+                )}
               </EuiFormRow>
             )}
           </>

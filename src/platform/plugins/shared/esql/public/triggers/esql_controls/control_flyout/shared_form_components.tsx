@@ -28,6 +28,8 @@ import {
   EuiTitle,
   EuiBetaBadge,
   EuiToolTip,
+  EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
 import { esqlVariablesService } from '@kbn/esql-variables/common';
 import { EsqlControlType } from '../types';
@@ -217,9 +219,15 @@ export function ControlLabel({
       label={i18n.translate('esql.flyout.label.label', {
         defaultMessage: 'Label',
       })}
-      labelAppend={i18n.translate('esql.flyout.label.extraLabel', {
-        defaultMessage: 'Optional',
-      })}
+      labelAppend={
+        <EuiText size="xs">
+          <EuiTextColor color="subdued">
+            {i18n.translate('esql.flyout.label.extraLabel', {
+              defaultMessage: 'Optional',
+            })}
+          </EuiTextColor>
+        </EuiText>
+      }
       fullWidth
     >
       <EuiFieldText
@@ -288,9 +296,9 @@ export function ControlWidth({
 export function Header({ isInEditMode }: { isInEditMode: boolean }) {
   return (
     <EuiFlyoutHeader hasBorder>
-      <EuiFlexGroup alignItems="center" responsive={false}>
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiTitle size="m">
+          <EuiTitle size="xs">
             <h2>
               {isInEditMode
                 ? i18n.translate('esql.flyout.editTitle', {
