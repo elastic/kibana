@@ -125,6 +125,8 @@ export async function updateDataStreamsLifecycle({
       );
     }
 
+    // if we transition from ilm to dlm or vice versa, the rolled over backing indices
+    // need to be updated or they'll retain their historical lifecycle configuration
     const dataStreams = await esClient.indices.getDataStream({ name: names });
     for (const dataStream of dataStreams.data_streams) {
       logger.info(`updating settings for data stream ${dataStream.name} backing indices`);
