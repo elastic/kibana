@@ -8,7 +8,7 @@
 import type { EsqlContentReference } from '@kbn/elastic-assistant-common';
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
-import { ContentReferenceNode } from '../content_reference_parser';
+import type { ContentReferenceNode } from '../content_reference_parser';
 import { PopoverReference } from './popover_reference';
 
 interface Props {

@@ -6,6 +6,7 @@
  */
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import {
   alertReferenceFactory,
   getAnonymizedValue,
@@ -14,7 +15,6 @@ import {
   sizeIsOutOfRange,
   transformRawData,
   contentReferenceBlock,
-  Replacements
 } from '@kbn/elastic-assistant-common';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';

@@ -217,23 +217,27 @@ export const getStructuredToolForIndexEntry = ({
         const result = await esClient.search(params);
 
         const kbDocs = result.hits.hits.map((hit) => {
-
-          const esqlQuery = `FROM ${hit._index} ${hit._id ? `METADATA _id\n | WHERE _id == "${hit._id}"` : ''}`
+          const esqlQuery = `FROM ${hit._index} ${
+            hit._id ? `METADATA _id\n | WHERE _id == "${hit._id}"` : ''
+          }`;
 
           const esqlQueryReference = contentReferencesStore.add((p) =>
             esqlQueryReferenceFactory(p.id, esqlQuery, hit._index)
           );
 
           if (indexEntry.outputFields && indexEntry.outputFields.length > 0) {
-            return indexEntry.outputFields.reduce((prev, field) => {
-              // @ts-expect-error
-              return { ...prev, [field]: hit._source[field] };
-            }, { citation: contentReferenceBlock(esqlQueryReference) });
+            return indexEntry.outputFields.reduce(
+              (prev, field) => {
+                // @ts-expect-error
+                return { ...prev, [field]: hit._source[field] };
+              },
+              { citation: contentReferenceBlock(esqlQueryReference) }
+            );
           }
 
           return {
             text: hit.highlight?.[indexEntry.field].join('\n --- \n'),
-            citation: contentReferenceBlock(esqlQueryReference)
+            citation: contentReferenceBlock(esqlQueryReference),
           };
         });
 
