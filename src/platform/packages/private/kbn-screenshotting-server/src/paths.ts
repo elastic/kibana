@@ -17,25 +17,20 @@ export interface PackageInfo {
   binaryChecksum: string;
   binaryRelativePath: string;
   isPreInstalled: boolean;
-  location: 'custom' | 'common' | 'CfT';
+  location: 'custom' | 'CfT';
   revision: number;
 }
 
 enum BaseUrl {
-  // see https://www.chromium.org/getting-involved/download-chromium
-  common = 'https://commondatastorage.googleapis.com/chromium-browser-snapshots',
   // A GCS bucket under the Kibana team
   custom = 'https://storage.googleapis.com/headless_shell',
+  // GCS bucket for headless chrome provided by the chrome team, see
   // https://github.com/GoogleChromeLabs/chrome-for-testing#json-api-endpoints
   CfT = 'https://storage.googleapis.com/chrome-for-testing-public',
 }
 
 interface CustomPackageInfo extends PackageInfo {
   location: 'custom';
-}
-interface CommonPackageInfo extends PackageInfo {
-  location: 'common';
-  archivePath: string;
 }
 
 interface ChromeForTestingPackageInfo extends PackageInfo {
@@ -44,18 +39,12 @@ interface ChromeForTestingPackageInfo extends PackageInfo {
   archivePath: string;
 }
 
-function isCommonPackage(p: PackageInfo): p is CommonPackageInfo {
-  return p.location === 'common';
-}
-
 function isChromeForTestingPackage(p: PackageInfo): p is ChromeForTestingPackageInfo {
   return p.location === 'CfT';
 }
 
 export class ChromiumArchivePaths {
-  public readonly packages: Array<
-    CustomPackageInfo | CommonPackageInfo | ChromeForTestingPackageInfo
-  > = [
+  public readonly packages: Array<CustomPackageInfo | ChromeForTestingPackageInfo> = [
     {
       platform: 'darwin',
       architecture: 'x64',
@@ -140,15 +129,11 @@ export class ChromiumArchivePaths {
   }
 
   public getDownloadUrl(p: PackageInfo) {
-    if (isCommonPackage(p)) {
-      const { common } = BaseUrl;
-      const { archivePath, revision, archiveFilename } = p;
-      return `${common}/${archivePath}/${revision}/${archiveFilename}`;
-    }
-
     if (isChromeForTestingPackage(p)) {
       const { CfT } = BaseUrl;
       const { archivePath, version, archiveFilename } = p;
+      // returned string matches download value found at the following endpoint;
+      // https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json
       return `${CfT}/${version}/${archivePath}/${archiveFilename}`;
     }
 
