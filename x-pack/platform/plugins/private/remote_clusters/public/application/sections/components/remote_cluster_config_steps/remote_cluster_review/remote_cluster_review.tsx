@@ -52,7 +52,7 @@ export const RemoteClusterReview = ({
 
   const onPremSteps: EuiStepsProps['steps'] = [
     {
-      title: i18n.translate('xpack.remoteClusterForm.onPrem.step1.title', {
+      title: i18n.translate('xpack.remoteClusters.remoteClusterForm.onPrem.step1.title', {
         defaultMessage: 'Review the prerequisites',
       }),
       status: 'incomplete',
@@ -87,7 +87,7 @@ export const RemoteClusterReview = ({
       ),
     },
     {
-      title: i18n.translate('xpack.remoteClusterForm.onPrem.step2.title', {
+      title: i18n.translate('xpack.remoteClusters.remoteClusterForm.onPrem.step2.title', {
         defaultMessage: 'Establish trust with a remote cluster',
       }),
       status: 'incomplete',
@@ -121,7 +121,7 @@ export const RemoteClusterReview = ({
 
   const cloudSteps: EuiStepsProps['steps'] = [
     {
-      title: i18n.translate('xpack.remoteClusterForm.cloud.api.step1.title', {
+      title: i18n.translate('xpack.remoteClusters.remoteClusterForm.cloud.api.step1.title', {
         defaultMessage: 'Create a cross-cluster API key on the remote deployment',
       }),
       status: 'incomplete',
@@ -167,7 +167,7 @@ export const RemoteClusterReview = ({
       ),
     },
     {
-      title: i18n.translate('xpack.remoteClusterForm.cloud.api.step2.title', {
+      title: i18n.translate('xpack.remoteClusters.remoteClusterForm.cloud.api.step2.title', {
         defaultMessage: 'Configure your local deployment',
       }),
       status: 'incomplete',
