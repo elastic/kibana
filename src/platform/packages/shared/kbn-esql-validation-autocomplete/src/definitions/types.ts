@@ -179,6 +179,7 @@ export interface FunctionDefinition {
   signatures: Signature[];
   examples?: string[];
   validate?: (fnDef: ESQLFunction) => ESQLMessage[];
+  operator?: string;
 }
 
 export interface CommandBaseDefinition<CommandName extends string> {
