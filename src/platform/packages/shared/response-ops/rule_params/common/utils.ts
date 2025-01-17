@@ -11,7 +11,6 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { buildEsQuery as kbnBuildEsQuery } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 
 export const jobsSelectionSchema = schema.object(
   {
