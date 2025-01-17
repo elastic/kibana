@@ -294,7 +294,7 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
                             </EuiFlexGroup>
                             <EuiTitle size="xxxs">
                               <h5>{integrationSettings?.apiSpecFileName}</h5>
-                            </EuiTitle>{' '}
+                            </EuiTitle>
                             <EuiText size="xs">{integrationSettings?.celPath}</EuiText>
                             <EuiFlexGroup>
                               <EuiFlexItem grow={false}>

@@ -70,12 +70,23 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
     const { http, notifications } = useKibana().services;
     const { reportCelGenerationComplete } = useTelemetry();
 
-    const [selectedPath, setSelectedPath] = useState<string>();
+    const [selectedPath, setSelectedPath] = useState<string>(() =>
+      suggestedPaths ? suggestedPaths[0] : ''
+    );
     const [selectedOtherPath, setSelectedOtherPath] = useState<string | undefined>();
     const [useOtherPath, setUseOtherPath] = useState<boolean>(false);
     const coalescedSelectedPath = !useOtherPath ? selectedPath : selectedOtherPath;
 
-    const [selectedAuth, setSelectedAuth] = useState<string | undefined>();
+    const [selectedAuth, setSelectedAuth] = useState<string | undefined>(() => {
+      const recommendedPath = suggestedPaths ? suggestedPaths[0] : '';
+      if (recommendedPath) {
+        const specifiedAuth = getSpecifiedAuthForPath(
+          integrationSettings?.apiSpec,
+          recommendedPath
+        );
+        return translateAuthTypeToDisplay(specifiedAuth[0]);
+      }
+    });
 
     const [specifiedAuthForPath, setSpecifiedAuthForPath] = useState<string[]>([]);
     const [unspecifiedAuth, setUnspecifiedAuth] = useState<boolean>(false);
@@ -96,21 +107,6 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
       generatedPair.path === coalescedSelectedPath &&
       generatedPair.auth ===
         (selectedAuth && translateDisplayAuthToType(selectedAuth).toLowerCase());
-
-    // sets the recommended options on load
-    useEffect(() => {
-      if (!selectedPath) {
-        const recommendedPath = suggestedPaths ? suggestedPaths[0] : '';
-        setSelectedPath(recommendedPath);
-        if (recommendedPath) {
-          const specifiedAuth = getSpecifiedAuthForPath(
-            integrationSettings?.apiSpec,
-            recommendedPath
-          );
-          setSelectedAuth(translateAuthTypeToDisplay(specifiedAuth[0]));
-        }
-      }
-    }, [integrationSettings?.apiSpec, selectedPath, suggestedPaths]);
 
     // updates the specified auth methods when the selected path is modified
     useEffect(() => {
