@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { orderBy } from 'lodash';
 import { z } from '@kbn/zod';
 import { badRequest, internal, notFound } from '@hapi/boom';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
@@ -62,21 +63,29 @@ export const readStreamRoute = createServerRoute({
         streamsClient.getDataStream(name),
       ]);
 
-      const lifecycle = getDataStreamLifecycle(dataStream);
-
       if (!isWiredStream(streamDefinition)) {
+        const effectiveLifecycle = getDataStreamLifecycle(dataStream);
         return {
           ...streamDefinition,
-          lifecycle,
+          effectiveLifecycle,
           dashboards,
           inherited_fields: {},
         };
       }
 
+      const lifecycleOriginDefinition = orderBy(
+        [...ancestors, streamDefinition],
+        ({ name }) => name.split('.').length,
+        'asc'
+      ).findLast((definition) => definition.stream.ingest.lifecycle)!;
+
       const body: WiredReadStreamDefinition = {
         ...streamDefinition,
         dashboards,
-        lifecycle,
+        effectiveLifecycle: {
+          from: lifecycleOriginDefinition.name,
+          ...lifecycleOriginDefinition.stream.ingest.lifecycle!,
+        },
         inherited_fields: ancestors.reduce((acc, def) => {
           Object.entries(def.stream.ingest.wired.fields).forEach(([key, fieldDef]) => {
             acc[key] = { ...fieldDef, from: def.name };
