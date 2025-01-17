@@ -244,6 +244,7 @@ export class MapsPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
             'The Maps V1 privilege has been deprecated and replaced with a Maps V2 privilege in order to improve saved query management. See {link} for more details.',
           values: { link: 'https://github.com/elastic/kibana/pull/202863' },
         }),
+        replacedBy: ['maps_v2'],
       },
       id: APP_ID,
       order: 400,
