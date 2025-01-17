@@ -67,11 +67,13 @@ For Elastic Security solution release information, refer to {security-guide}/rel
 Deprecated endpoints will fail with a 404 status code starting from version 9.0.0
 
 *Action* +
+--
 * Remove references to `GET /api/endpoint/policy/summaries` endpoint.
 * Remove references to `POST /api/endpoint/suggestions/{suggestion_type}` endpoint.
 * Remove references to `GET /api/endpoint/action_log/{agent_id}` endpoint.
 * Remove references to `GET /api/endpoint/metadata/transforms` endpoint.
 * Replace references to deprecated endpoints with the replacements listed in the breaking change details.
+--
 ====
 
 [discrete]
