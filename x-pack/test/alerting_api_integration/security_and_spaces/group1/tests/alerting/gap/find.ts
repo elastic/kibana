@@ -156,8 +156,8 @@ export default function findGapsTests({ getService }: FtrProviderContext) {
                   expect(data[0].in_progress_intervals).to.eql([]);
                   expect(data[0].unfilled_intervals).to.eql([
                     {
-                      start: gap2Start,
-                      end: gap2End,
+                      gte: gap2Start,
+                      lte: gap2End,
                     },
                   ]);
                   expect(data[0].status).to.eql('unfilled');
@@ -263,7 +263,7 @@ export default function findGapsTests({ getService }: FtrProviderContext) {
               {
                 body: {},
                 expectedError:
-                  'Failed to find gaps: Error validating get data - [id]: expected value of type [string] but got [undefined]',
+                  '[request body.rule_id]: expected value of type [string] but got [undefined]',
               },
               {
                 body: {
