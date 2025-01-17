@@ -103,15 +103,20 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
       return (
         <RuleMigrationDataInputWrapper onFlyoutClosed={refetchData}>
           <>
-            <RuleMigrationsUploadMissingPanel migrationStats={migrationStats} topSpacerSize="s" />
-            <EuiSpacer size="m" />
             {migrationStats.status === SiemMigrationTaskStatus.FINISHED && (
-              <MigrationRulesTable
-                migrationId={migrationId}
-                refetchData={refetchData}
-                integrations={integrations}
-                isIntegrationsLoading={isIntegrationsLoading}
-              />
+              <>
+                <RuleMigrationsUploadMissingPanel
+                  migrationStats={migrationStats}
+                  topSpacerSize="s"
+                />
+                <EuiSpacer size="m" />
+                <MigrationRulesTable
+                  migrationId={migrationId}
+                  refetchData={refetchData}
+                  integrations={integrations}
+                  isIntegrationsLoading={isIntegrationsLoading}
+                />
+              </>
             )}
             {migrationStats.status === SiemMigrationTaskStatus.READY && (
               <MigrationReadyPanel migrationStats={migrationStats} />
