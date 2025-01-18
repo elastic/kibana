@@ -121,9 +121,7 @@ import {
   CONTENT_ID,
   VisualizationSavedObjectAttributes,
 } from '../common/content_management';
-
 import type { VisualizeSerializedState } from './embeddable/types';
-import { getVisualizeEmbeddableFactoryLazy } from './embeddable';
 import { registerActions } from './actions/register_actions';
 
 /**
@@ -404,7 +402,7 @@ export class VisualizationsPlugin
         plugins: { embeddable: embeddableStart, embeddableEnhanced: embeddableEnhancedStart },
       } = start();
 
-      const getVisualizeEmbeddableFactory = await getVisualizeEmbeddableFactoryLazy();
+      const { getVisualizeEmbeddableFactory } = await import('./embeddable/visualize_embeddable');
       return getVisualizeEmbeddableFactory({ embeddableStart, embeddableEnhancedStart });
     });
     embeddable.registerAddFromLibraryType<VisualizationSavedObjectAttributes>({
