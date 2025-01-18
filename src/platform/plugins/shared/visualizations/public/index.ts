@@ -23,6 +23,8 @@ export { apiHasVisualizeConfig } from './embeddable/interfaces/has_visualize_con
 export { COMMON_VISUALIZATION_GROUPING } from './legacy/embeddable/constants';
 export { VisualizationContainer } from './components';
 export { getVisSchemas } from './vis_schemas';
+export { prepareLogTable } from '../common/utils/prepare_log_table';
+export { XYCurveTypes } from '../common/convert_to_lens/constants';
 
 export function getFullPath(id: string) {
   return `/app/visualize#/edit/${id}`;
@@ -78,7 +80,6 @@ export {
   VISUALIZE_EMBEDDABLE_TYPE,
 } from '../common/constants';
 export type { SavedVisState, VisParams, Dimension } from '../common';
-export { prepareLogTable, XYCurveTypes } from '../common';
 export type { ExpressionValueVisDimension } from '../common/expression_functions/vis_dimension';
 export type {
   ExpressionValueXYDimension,
