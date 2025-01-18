@@ -156,6 +156,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await discover.toggleChartVisibility();
         });
       });
+
       it(`should send a request for chart data when toggling the chart visibility after a time range change`, async () => {
         // hide chart
         await discover.toggleChartVisibility();

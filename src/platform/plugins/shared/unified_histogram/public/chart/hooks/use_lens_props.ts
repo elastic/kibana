@@ -10,7 +10,7 @@
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { EmbeddableComponentProps, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useCallback, useEffect, useState } from 'react';
 import type { Observable } from 'rxjs';
 import type {
@@ -19,6 +19,18 @@ import type {
   UnifiedHistogramVisContext,
 } from '../../types';
 import { useStableCallback } from '../../hooks/use_stable_callback';
+
+export type LensProps = Pick<
+  EmbeddableComponentProps,
+  | 'id'
+  | 'viewMode'
+  | 'timeRange'
+  | 'attributes'
+  | 'noPadding'
+  | 'searchSessionId'
+  | 'executionContext'
+  | 'onLoad'
+>;
 
 export const useLensProps = ({
   request,
@@ -30,11 +42,16 @@ export const useLensProps = ({
   request?: UnifiedHistogramRequestContext;
   getTimeRange: () => TimeRange;
   fetch$: Observable<UnifiedHistogramInputMessage>;
-  visContext: UnifiedHistogramVisContext;
+  visContext?: UnifiedHistogramVisContext;
   onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
 }) => {
   const buildLensProps = useCallback(() => {
+    if (!visContext) {
+      return;
+    }
+
     const { attributes, requestData } = visContext;
+
     return {
       requestData: JSON.stringify(requestData),
       lensProps: getLensProps({
@@ -68,7 +85,7 @@ export const getLensProps = ({
   getTimeRange: () => TimeRange;
   attributes: TypedLensByValueInput['attributes'];
   onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
-}) => ({
+}): LensProps => ({
   id: 'unifiedHistogramLensComponent',
   viewMode: ViewMode.VIEW,
   timeRange: getTimeRange(),
