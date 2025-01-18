@@ -7,5 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createGetAppMenu } from './get_app_menu';
-export { getDefaultAdHocDataViews } from './get_default_ad_hoc_data_views';
+import { RootProfileProvider } from '../../..';
+
+export interface ObservabilityRootProfileContext {
+  allLogsIndexPattern: string | undefined;
+}
+
+export type ObservabilityRootProfileProvider = RootProfileProvider<ObservabilityRootProfileContext>;

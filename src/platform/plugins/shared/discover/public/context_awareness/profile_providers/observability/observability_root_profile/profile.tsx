@@ -7,30 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RootProfileProvider, SolutionType } from '../../../profiles';
-import { ProfileProviderServices } from '../../profile_provider_services';
+import { SolutionType } from '../../../profiles';
+import type { ProfileProviderServices } from '../../profile_provider_services';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
-import { createGetAppMenu } from './accessors';
+import { createGetAppMenu, getDefaultAdHocDataViews } from './accessors';
+import type { ObservabilityRootProfileProvider } from './types';
 
 export const createObservabilityRootProfileProvider = (
   services: ProfileProviderServices
-): RootProfileProvider => ({
+): ObservabilityRootProfileProvider => ({
   profileId: OBSERVABILITY_ROOT_PROFILE_ID,
   profile: {
     getAppMenu: createGetAppMenu(services),
-    getDefaultAdHocDataViews: (prev) => () => {
-      return prev().concat({
-        id: 'all-logs-ad-hoc-data-view',
-        name: 'All logs',
-        title: 'logs-*',
-      });
-    },
+    getDefaultAdHocDataViews,
   },
-  resolve: (params) => {
-    if (params.solutionNavId === SolutionType.Observability) {
-      return { isMatch: true, context: { solutionType: SolutionType.Observability } };
+  resolve: async (params) => {
+    if (params.solutionNavId !== SolutionType.Observability) {
+      return { isMatch: false };
     }
 
-    return { isMatch: false };
+    const logsSources = await services.logsDataAccess?.services.logSourcesService.getLogSources();
+    const allLogsIndexPattern = logsSources
+      ?.map(({ indexPattern }) => indexPattern)
+      .flatMap((pattern) => [pattern, `*:${pattern}`])
+      .join(',');
+
+    return {
+      isMatch: true,
+      context: { solutionType: SolutionType.Observability, allLogsIndexPattern },
+    };
   },
 });
