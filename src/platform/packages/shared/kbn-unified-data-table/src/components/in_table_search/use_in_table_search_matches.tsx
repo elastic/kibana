@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useState, ReactNode, useRef } from 'react';
+import React, { useCallback, useEffect, useState, ReactNode, useRef, useContext } from 'react';
 import { createPortal } from 'react-dom';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import { UnifiedDataTableContext, DataTableContext } from '../../table_context';
+import { UnifiedDataTableContext } from '../../table_context';
 import { InTableSearchHighlightsWrapperProps } from './in_table_search_highlights_wrapper';
 
 let latestTimeoutTimer: NodeJS.Timeout | null = null;
@@ -26,7 +26,6 @@ export interface UseInTableSearchMatchesProps {
   visibleColumns: string[];
   rows: DataTableRecord[];
   inTableSearchTerm: string | undefined;
-  tableContext: Omit<DataTableContext, 'inTableSearchTerm' | 'pageIndex' | 'pageSize'>;
   renderCellValue: (
     props: EuiDataGridCellValueElementProps &
       Pick<InTableSearchHighlightsWrapperProps, 'onHighlightsCountFound'>
@@ -67,14 +66,7 @@ const INITIAL_STATE: UseInTableSearchMatchesState = {
 export const useInTableSearchMatches = (
   props: UseInTableSearchMatchesProps
 ): UseInTableSearchMatchesReturn => {
-  const {
-    visibleColumns,
-    rows,
-    inTableSearchTerm,
-    tableContext,
-    renderCellValue,
-    scrollToActiveMatch,
-  } = props;
+  const { visibleColumns, rows, inTableSearchTerm, renderCellValue, scrollToActiveMatch } = props;
   const [state, setState] = useState<UseInTableSearchMatchesState>(INITIAL_STATE);
   const { matchesList, matchesCount, activeMatchPosition, isProcessing, cellsShadowPortal } = state;
   const numberOfRunsRef = useRef<number>(0);
@@ -200,7 +192,6 @@ export const useInTableSearchMatches = (
         <AllCellsHighlightsCounter
           key={numberOfRuns}
           inTableSearchTerm={inTableSearchTerm}
-          tableContext={tableContext}
           renderCellValue={renderCellValue}
           rows={rows}
           visibleColumns={visibleColumns}
@@ -225,15 +216,7 @@ export const useInTableSearchMatches = (
         />
       ),
     }));
-  }, [
-    setState,
-    renderCellValue,
-    scrollToMatch,
-    visibleColumns,
-    rows,
-    inTableSearchTerm,
-    tableContext,
-  ]);
+  }, [setState, renderCellValue, scrollToMatch, visibleColumns, rows, inTableSearchTerm]);
 
   const resetState = useCallback(() => {
     stopTimer(latestTimeoutTimer);
@@ -253,7 +236,7 @@ export const useInTableSearchMatches = (
 
 type AllCellsProps = Pick<
   UseInTableSearchMatchesProps,
-  'inTableSearchTerm' | 'tableContext' | 'renderCellValue' | 'rows' | 'visibleColumns'
+  'inTableSearchTerm' | 'renderCellValue' | 'rows' | 'visibleColumns'
 >;
 
 function AllCellsHighlightsCounter(
@@ -341,17 +324,17 @@ function AllCells({
   rows,
   visibleColumns,
   renderCellValue,
-  tableContext,
   onHighlightsCountFound,
 }: AllCellsProps & {
   onHighlightsCountFound: (rowIndex: number, fieldName: string, count: number) => void;
 }) {
   const UnifiedDataTableRenderCellValue = renderCellValue;
+  const ctx = useContext(UnifiedDataTableContext);
 
   return (
     <UnifiedDataTableContext.Provider
       value={{
-        ...tableContext,
+        ...ctx,
         inTableSearchTerm,
         pageIndex: 0,
         pageSize: rows?.length ?? 0,

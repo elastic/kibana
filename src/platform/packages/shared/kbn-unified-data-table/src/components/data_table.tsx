@@ -95,7 +95,7 @@ import {
   getAdditionalRowControlColumns,
 } from './custom_control_columns';
 import { useSorting } from '../hooks/use_sorting';
-import { InTableSearchControl, UseInTableSearchMatchesProps } from './in_table_search';
+import { InTableSearchControl } from './in_table_search';
 
 const CONTROL_COLUMN_IDS_DEFAULT = [SELECT_ROW, OPEN_DETAILS];
 const THEME_DEFAULT = { darkMode: false };
@@ -672,46 +672,35 @@ export const UnifiedDataTable = ({
   const [inTableSearchTerm, setInTableSearchTerm] = useState<string>('');
   const [inTableSearchTermCss, setInTableSearchTermCss] = useState<SerializedStyles>();
 
-  const inTableSearchContextValue = useMemo<UseInTableSearchMatchesProps['tableContext']>(
+  const unifiedDataTableContextValue = useMemo<DataTableContext>(
     () => ({
+      expanded: expandedDoc,
+      setExpanded: setExpandedDoc,
       getRowByIndex: (index: number) => displayedRows[index],
+      onFilter,
       dataView,
       isDarkMode: darkMode,
       selectedDocsState,
       valueToStringConverter,
       componentsTourSteps,
       isPlainRecord,
+      pageIndex: isPaginationEnabled ? paginationObj?.pageIndex : 0,
+      pageSize: isPaginationEnabled ? paginationObj?.pageSize : displayedRows.length,
+      inTableSearchTerm,
     }),
     [
       componentsTourSteps,
       darkMode,
       dataView,
       isPlainRecord,
-      displayedRows,
-      selectedDocsState,
-      valueToStringConverter,
-    ]
-  );
-
-  const unifiedDataTableContextValue = useMemo<DataTableContext>(
-    () => ({
-      ...inTableSearchContextValue,
-      expanded: expandedDoc,
-      setExpanded: setExpandedDoc,
-      onFilter,
-      pageIndex: isPaginationEnabled ? paginationObj?.pageIndex : 0,
-      pageSize: isPaginationEnabled ? paginationObj?.pageSize : displayedRows.length,
-      inTableSearchTerm,
-    }),
-    [
-      inTableSearchContextValue,
       isPaginationEnabled,
       displayedRows,
       expandedDoc,
-      setExpandedDoc,
       onFilter,
-      paginationObj?.pageIndex,
-      paginationObj?.pageSize,
+      setExpandedDoc,
+      selectedDocsState,
+      paginationObj,
+      valueToStringConverter,
       inTableSearchTerm,
     ]
   );
@@ -773,7 +762,6 @@ export const UnifiedDataTable = ({
     return (
       <InTableSearchControl
         inTableSearchTerm={inTableSearchTerm}
-        tableContext={inTableSearchContextValue}
         visibleColumns={visibleColumns}
         rows={displayedRows}
         renderCellValue={renderCellValue}
@@ -806,7 +794,6 @@ export const UnifiedDataTable = ({
     currentPageSize,
     changeCurrentPageIndex,
     isPaginationEnabled,
-    inTableSearchContextValue,
   ]);
 
   const renderCustomPopover = useMemo(
