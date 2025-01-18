@@ -21,8 +21,7 @@ import { apiCanAddNewPanel, CanAddNewPanel } from '@kbn/presentation-containers'
 import { VisGroups } from '../vis_types/vis_groups_enum';
 import type { TypesStart } from '../vis_types/types_service';
 import { showNewVisModal } from '../wizard/show_new_vis';
-
-export const ADD_AGG_VIS_ACTION_ID = 'ADD_AGG_VIS';
+import { ADD_AGG_VIS_ACTION_ID } from './constants';
 
 export type AddAggVisualizationPanelActionApi = HasType & CanAddNewPanel & HasAppContext;
 
