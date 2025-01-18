@@ -73,7 +73,14 @@ export type {
   FakeParams,
   HistogramParams,
 } from '../common/expression_functions/xy_dimension';
-export { urlFor, getFullPath } from './utils/saved_visualize_utils';
+
+export function getFullPath(id: string) {
+  return `/app/visualize#/edit/${id}`;
+}
+
+export function urlFor(id: string) {
+  return `#/edit/${encodeURIComponent(id)}`;
+}
 
 export type { IEditorController, EditorRenderProps } from './visualize_app/types';
 
