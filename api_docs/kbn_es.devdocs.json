@@ -81,7 +81,7 @@
             "signature": [
               "(options: ",
               "InstallSourceOptions",
-              ") => Promise<{ installPath: string; }>"
+              ") => Promise<{ installPath: string; disableEsTmpDir: boolean; }>"
             ],
             "path": "packages/kbn-es/src/cluster.ts",
             "deprecated": false,
@@ -153,7 +153,7 @@
             "signature": [
               "(options: ",
               "InstallSnapshotOptions",
-              ") => Promise<{ installPath: string; }>"
+              ") => Promise<{ installPath: string; disableEsTmpDir: boolean; }>"
             ],
             "path": "packages/kbn-es/src/cluster.ts",
             "deprecated": false,
@@ -189,7 +189,7 @@
             "signature": [
               "(archivePath: string, options?: ",
               "InstallArchiveOptions",
-              " | undefined) => Promise<{ installPath: string; }>"
+              " | undefined) => Promise<{ installPath: string; disableEsTmpDir: boolean; }>"
             ],
             "path": "packages/kbn-es/src/cluster.ts",
             "deprecated": false,
@@ -705,6 +705,39 @@
       },
       {
         "parentPluginId": "@kbn/es",
+        "id": "def-common.readRolesDescriptorsFromResource",
+        "type": "Function",
+        "tags": [],
+        "label": "readRolesDescriptorsFromResource",
+        "description": [],
+        "signature": [
+          "(resourcePath: string) => object"
+        ],
+        "path": "packages/kbn-es/src/utils/read_roles_from_resource.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.readRolesDescriptorsFromResource.$1",
+            "type": "string",
+            "tags": [],
+            "label": "resourcePath",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-es/src/utils/read_roles_from_resource.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
         "id": "def-common.readRolesFromResource",
         "type": "Function",
         "tags": [],
@@ -905,6 +938,18 @@
           "\"security\" | \"es\" | \"oblt\""
         ],
         "path": "packages/kbn-es/src/utils/docker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.STATEFUL_ROLES_ROOT_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "STATEFUL_ROLES_ROOT_PATH",
+        "description": [],
+        "path": "packages/kbn-es/src/paths.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

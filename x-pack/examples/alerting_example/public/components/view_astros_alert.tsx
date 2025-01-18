@@ -72,16 +72,16 @@ export const ViewPeopleInSpaceAlertPage = withRouter(({ http, id }: Props) => {
       {isEmpty(alertState.alerts) ? (
         <EuiCallOut title="No Alerts!" color="warning" iconType="help">
           <p>
-            The people in {alert.params.craft} at the moment <b>are not</b> {alert.params.op}{' '}
-            {alert.params.outerSpaceCapacity}
+            The people in {alert.params.craft as string} at the moment <b>are not</b>{' '}
+            {alert.params.op as string} {alert.params.outerSpaceCapacity as string}
           </p>
         </EuiCallOut>
       ) : (
         <Fragment>
           <EuiCallOut title="Active State" color="success" iconType="user">
             <p>
-              The rule has been triggered because the people in {alert.params.craft} at the moment{' '}
-              {alert.params.op} {alert.params.outerSpaceCapacity}
+              The rule has been triggered because the people in {alert.params.craft as string} at
+              the moment {alert.params.op as string} {alert.params.outerSpaceCapacity as string}
             </p>
           </EuiCallOut>
           <EuiSpacer size="l" />

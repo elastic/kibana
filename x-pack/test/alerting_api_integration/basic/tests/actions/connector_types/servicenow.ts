@@ -49,13 +49,13 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
       );
     });
 
-    it('should return 403 when creating a servicenow action', async () => {
+    it('should return 403 when creating a servicenow connector', async () => {
       await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'A servicenow action',
-          actionTypeId: '.servicenow',
+          name: 'A servicenow connector',
+          connector_type_id: '.servicenow',
           config: {
             apiUrl: servicenowSimulatorURL,
           },

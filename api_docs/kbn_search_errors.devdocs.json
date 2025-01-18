@@ -35,7 +35,7 @@
           },
           " extends Error"
         ],
-        "path": "packages/kbn-search-errors/src/es_error.tsx",
+        "path": "src/platform/packages/shared/kbn-search-errors/src/es_error.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,9 +47,16 @@
             "label": "attributes",
             "description": [],
             "signature": [
-              "IEsErrorAttributes | undefined"
+              {
+                "pluginId": "@kbn/search-types",
+                "scope": "common",
+                "docId": "kibKbnSearchTypesPluginApi",
+                "section": "def-common.IEsErrorAttributes",
+                "text": "IEsErrorAttributes"
+              },
+              " | undefined"
             ],
-            "path": "packages/kbn-search-errors/src/es_error.tsx",
+            "path": "src/platform/packages/shared/kbn-search-errors/src/es_error.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -63,7 +70,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-search-errors/src/es_error.tsx",
+            "path": "src/platform/packages/shared/kbn-search-errors/src/es_error.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -83,7 +90,7 @@
                     "text": "IEsError"
                   }
                 ],
-                "path": "packages/kbn-search-errors/src/es_error.tsx",
+                "path": "src/platform/packages/shared/kbn-search-errors/src/es_error.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -98,7 +105,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-search-errors/src/es_error.tsx",
+                "path": "src/platform/packages/shared/kbn-search-errors/src/es_error.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -113,7 +120,7 @@
                 "signature": [
                   "() => void"
                 ],
-                "path": "packages/kbn-search-errors/src/es_error.tsx",
+                "path": "src/platform/packages/shared/kbn-search-errors/src/es_error.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -129,9 +136,9 @@
             "label": "getErrorMessage",
             "description": [],
             "signature": [
-              "() => JSX.Element"
+              "() => React.JSX.Element"
             ],
-            "path": "packages/kbn-search-errors/src/es_error.tsx",
+            "path": "src/platform/packages/shared/kbn-search-errors/src/es_error.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -145,9 +152,9 @@
             "label": "getActions",
             "description": [],
             "signature": [
-              "() => JSX.Element[]"
+              "() => React.JSX.Element[]"
             ],
-            "path": "packages/kbn-search-errors/src/es_error.tsx",
+            "path": "src/platform/packages/shared/kbn-search-errors/src/es_error.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -181,8 +188,8 @@
             "pluginId": "dataViews",
             "scope": "common",
             "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
+            "section": "def-common.AbstractDataView",
+            "text": "AbstractDataView"
           },
           " | undefined) => ",
           {
@@ -193,7 +200,7 @@
             "text": "EsError"
           }
         ],
-        "path": "packages/kbn-search-errors/src/create_es_error.ts",
+        "path": "src/platform/packages/shared/kbn-search-errors/src/create_es_error.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -213,7 +220,7 @@
                 "text": "IEsError"
               }
             ],
-            "path": "packages/kbn-search-errors/src/create_es_error.ts",
+            "path": "src/platform/packages/shared/kbn-search-errors/src/create_es_error.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -228,7 +235,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/kbn-search-errors/src/create_es_error.ts",
+            "path": "src/platform/packages/shared/kbn-search-errors/src/create_es_error.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -243,7 +250,7 @@
             "signature": [
               "Services"
             ],
-            "path": "packages/kbn-search-errors/src/create_es_error.ts",
+            "path": "src/platform/packages/shared/kbn-search-errors/src/create_es_error.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -260,12 +267,12 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
+                "section": "def-common.AbstractDataView",
+                "text": "AbstractDataView"
               },
               " | undefined"
             ],
-            "path": "packages/kbn-search-errors/src/create_es_error.ts",
+            "path": "src/platform/packages/shared/kbn-search-errors/src/create_es_error.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -286,7 +293,7 @@
         "signature": [
           "(e: any) => boolean"
         ],
-        "path": "packages/kbn-search-errors/src/es_error.tsx",
+        "path": "src/platform/packages/shared/kbn-search-errors/src/es_error.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -300,7 +307,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-search-errors/src/es_error.tsx",
+            "path": "src/platform/packages/shared/kbn-search-errors/src/es_error.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -319,7 +326,7 @@
         "signature": [
           "(error: Error) => { title: string; body: React.ReactNode; actions?: React.ReactNode[] | undefined; } | undefined"
         ],
-        "path": "packages/kbn-search-errors/src/render_search_error.ts",
+        "path": "src/platform/packages/shared/kbn-search-errors/src/render_search_error.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -333,7 +340,7 @@
             "signature": [
               "Error"
             ],
-            "path": "packages/kbn-search-errors/src/render_search_error.ts",
+            "path": "src/platform/packages/shared/kbn-search-errors/src/render_search_error.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -361,9 +368,17 @@
             "section": "def-common.KibanaServerError",
             "text": "KibanaServerError"
           },
-          "<IEsErrorAttributes>"
+          "<",
+          {
+            "pluginId": "@kbn/search-types",
+            "scope": "common",
+            "docId": "kibKbnSearchTypesPluginApi",
+            "section": "def-common.IEsErrorAttributes",
+            "text": "IEsErrorAttributes"
+          },
+          ">"
         ],
-        "path": "packages/kbn-search-errors/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-search-errors/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -24,17 +24,3 @@ export const getDataTestSubjectSelectorStartWith = (dataTestSubjectValue: string
  * @param className the value passed to class property of the DOM element
  */
 export const getClassSelector = (className: string) => `.${className}`;
-
-export const getLocalstorageEntryAsObject = (storage: Cypress.StorageByOrigin, field: string) => {
-  // baseUrl value from x-pack/plugins/security_solution/cypress/cypress.config.ts
-  const envLocalstorage = storage?.[Cypress.config('baseUrl') as string];
-  let result;
-  if (envLocalstorage && envLocalstorage[field]) {
-    try {
-      result = JSON.parse(envLocalstorage[field] as string);
-    } catch {
-      result = undefined;
-    }
-  }
-  return result;
-};

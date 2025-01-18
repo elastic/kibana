@@ -1,0 +1,401 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DurationFormatEditor should not render show suffix on dynamic output 1`] = `
+<Fragment>
+  <EuiFormRow
+    isInvalid={false}
+    label={
+      <Memo(MemoizedFormattedMessage)
+        defaultMessage="Input format"
+        id="indexPatternFieldEditor.duration.inputFormatLabel"
+      />
+    }
+  >
+    <EuiSelect
+      data-test-subj="durationEditorInputFormat"
+      isInvalid={false}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "Seconds",
+            "value": "seconds",
+          },
+        ]
+      }
+      value=""
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    isInvalid={false}
+    label={
+      <Memo(MemoizedFormattedMessage)
+        defaultMessage="Output format"
+        id="indexPatternFieldEditor.duration.outputFormatLabel"
+      />
+    }
+  >
+    <EuiSelect
+      data-test-subj="durationEditorOutputFormat"
+      isInvalid={false}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "Human Readable",
+            "value": "humanize",
+          },
+          Object {
+            "text": "Minutes",
+            "value": "asMinutes",
+          },
+        ]
+      }
+      value="dynamic"
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    error={null}
+    isInvalid={false}
+    label={
+      <Memo(MemoizedFormattedMessage)
+        defaultMessage="Decimal places"
+        id="indexPatternFieldEditor.duration.decimalPlacesLabel"
+      />
+    }
+  >
+    <EuiFieldNumber
+      isInvalid={false}
+      max={20}
+      min={0}
+      onChange={[Function]}
+      value={2}
+    />
+  </EuiFormRow>
+  <EuiFormRow>
+    <EuiSwitch
+      checked={false}
+      disabled={false}
+      label={
+        <Memo(MemoizedFormattedMessage)
+          defaultMessage="Use short suffix"
+          id="indexPatternFieldEditor.duration.showSuffixLabel.short"
+        />
+      }
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiFormRow>
+    <EuiSwitch
+      checked={true}
+      disabled={false}
+      label={
+        <Memo(MemoizedFormattedMessage)
+          defaultMessage="Include space between suffix and value"
+          id="indexPatternFieldEditor.duration.includeSpace"
+        />
+      }
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <FormatEditorSamples
+    sampleType="text"
+    samples={
+      Array [
+        Object {
+          "input": -123,
+          "output": "converted duration for -123",
+        },
+        Object {
+          "input": 1,
+          "output": "converted duration for 1",
+        },
+        Object {
+          "input": 12,
+          "output": "converted duration for 12",
+        },
+        Object {
+          "input": 123,
+          "output": "converted duration for 123",
+        },
+        Object {
+          "input": 658,
+          "output": "converted duration for 658",
+        },
+        Object {
+          "input": 1988,
+          "output": "converted duration for 1988",
+        },
+        Object {
+          "input": 3857,
+          "output": "converted duration for 3857",
+        },
+        Object {
+          "input": 123292,
+          "output": "converted duration for 123292",
+        },
+        Object {
+          "input": 923528271,
+          "output": "converted duration for 923528271",
+        },
+      ]
+    }
+  />
+</Fragment>
+`;
+
+exports[`DurationFormatEditor should render human readable output normally 1`] = `
+<Fragment>
+  <EuiFormRow
+    isInvalid={false}
+    label={
+      <Memo(MemoizedFormattedMessage)
+        defaultMessage="Input format"
+        id="indexPatternFieldEditor.duration.inputFormatLabel"
+      />
+    }
+  >
+    <EuiSelect
+      data-test-subj="durationEditorInputFormat"
+      isInvalid={false}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "Seconds",
+            "value": "seconds",
+          },
+        ]
+      }
+      value=""
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    isInvalid={false}
+    label={
+      <Memo(MemoizedFormattedMessage)
+        defaultMessage="Output format"
+        id="indexPatternFieldEditor.duration.outputFormatLabel"
+      />
+    }
+  >
+    <EuiSelect
+      data-test-subj="durationEditorOutputFormat"
+      isInvalid={false}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "Human Readable",
+            "value": "humanize",
+          },
+          Object {
+            "text": "Minutes",
+            "value": "asMinutes",
+          },
+        ]
+      }
+      value=""
+    />
+  </EuiFormRow>
+  <FormatEditorSamples
+    sampleType="text"
+    samples={
+      Array [
+        Object {
+          "input": -123,
+          "output": "converted duration for -123",
+        },
+        Object {
+          "input": 1,
+          "output": "converted duration for 1",
+        },
+        Object {
+          "input": 12,
+          "output": "converted duration for 12",
+        },
+        Object {
+          "input": 123,
+          "output": "converted duration for 123",
+        },
+        Object {
+          "input": 658,
+          "output": "converted duration for 658",
+        },
+        Object {
+          "input": 1988,
+          "output": "converted duration for 1988",
+        },
+        Object {
+          "input": 3857,
+          "output": "converted duration for 3857",
+        },
+        Object {
+          "input": 123292,
+          "output": "converted duration for 123292",
+        },
+        Object {
+          "input": 923528271,
+          "output": "converted duration for 923528271",
+        },
+      ]
+    }
+  />
+</Fragment>
+`;
+
+exports[`DurationFormatEditor should render non-human readable output normally 1`] = `
+<Fragment>
+  <EuiFormRow
+    isInvalid={false}
+    label={
+      <Memo(MemoizedFormattedMessage)
+        defaultMessage="Input format"
+        id="indexPatternFieldEditor.duration.inputFormatLabel"
+      />
+    }
+  >
+    <EuiSelect
+      data-test-subj="durationEditorInputFormat"
+      isInvalid={false}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "Seconds",
+            "value": "seconds",
+          },
+        ]
+      }
+      value=""
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    isInvalid={false}
+    label={
+      <Memo(MemoizedFormattedMessage)
+        defaultMessage="Output format"
+        id="indexPatternFieldEditor.duration.outputFormatLabel"
+      />
+    }
+  >
+    <EuiSelect
+      data-test-subj="durationEditorOutputFormat"
+      isInvalid={false}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "Human Readable",
+            "value": "humanize",
+          },
+          Object {
+            "text": "Minutes",
+            "value": "asMinutes",
+          },
+        ]
+      }
+      value=""
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    error={null}
+    isInvalid={false}
+    label={
+      <Memo(MemoizedFormattedMessage)
+        defaultMessage="Decimal places"
+        id="indexPatternFieldEditor.duration.decimalPlacesLabel"
+      />
+    }
+  >
+    <EuiFieldNumber
+      isInvalid={false}
+      max={20}
+      min={0}
+      onChange={[Function]}
+      value={2}
+    />
+  </EuiFormRow>
+  <EuiFormRow>
+    <EuiSwitch
+      checked={false}
+      label={
+        <Memo(MemoizedFormattedMessage)
+          defaultMessage="Show suffix"
+          id="indexPatternFieldEditor.duration.showSuffixLabel"
+        />
+      }
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiFormRow>
+    <EuiSwitch
+      checked={false}
+      disabled={true}
+      label={
+        <Memo(MemoizedFormattedMessage)
+          defaultMessage="Use short suffix"
+          id="indexPatternFieldEditor.duration.showSuffixLabel.short"
+        />
+      }
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiFormRow>
+    <EuiSwitch
+      checked={true}
+      disabled={true}
+      label={
+        <Memo(MemoizedFormattedMessage)
+          defaultMessage="Include space between suffix and value"
+          id="indexPatternFieldEditor.duration.includeSpace"
+        />
+      }
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <FormatEditorSamples
+    sampleType="text"
+    samples={
+      Array [
+        Object {
+          "input": -123,
+          "output": "converted duration for -123",
+        },
+        Object {
+          "input": 1,
+          "output": "converted duration for 1",
+        },
+        Object {
+          "input": 12,
+          "output": "converted duration for 12",
+        },
+        Object {
+          "input": 123,
+          "output": "converted duration for 123",
+        },
+        Object {
+          "input": 658,
+          "output": "converted duration for 658",
+        },
+        Object {
+          "input": 1988,
+          "output": "converted duration for 1988",
+        },
+        Object {
+          "input": 3857,
+          "output": "converted duration for 3857",
+        },
+        Object {
+          "input": 123292,
+          "output": "converted duration for 123292",
+        },
+        Object {
+          "input": 923528271,
+          "output": "converted duration for 923528271",
+        },
+      ]
+    }
+  />
+</Fragment>
+`;

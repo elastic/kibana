@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { parse as parseCookie, Cookie } from 'tough-cookie';
+import type { Cookie } from 'tough-cookie';
+import { parse as parseCookie } from 'tough-cookie';
+
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 

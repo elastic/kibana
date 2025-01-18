@@ -29,7 +29,7 @@
           "\nDocument count chart with draggable brushes to select time ranges\nby default use `Baseline` and `Deviation` for the badge names\n"
         ],
         "signature": [
-          "(props: React.PropsWithChildren<",
+          "(props: ",
           {
             "pluginId": "@kbn/aiops-components",
             "scope": "common",
@@ -37,33 +37,31 @@
             "section": "def-common.DocumentCountChartProps",
             "text": "DocumentCountChartProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
-        "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+        "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/aiops-components",
             "id": "def-common.DocumentCountChart.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [
               "DocumentCountChart component props"
             ],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/aiops-components",
                 "scope": "common",
                 "docId": "kibKbnAiopsComponentsPluginApi",
                 "section": "def-common.DocumentCountChartProps",
                 "text": "DocumentCountChartProps"
-              },
-              ">"
+              }
             ],
-            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -71,6 +69,58 @@
         ],
         "returnComment": [
           "The DocumentCountChart component."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-components",
+        "id": "def-common.DocumentCountChartRedux",
+        "type": "Function",
+        "tags": [],
+        "label": "DocumentCountChartRedux",
+        "description": [
+          "\nFunctional component that renders a `DocumentCountChart` with additional properties\nmanaged by the log rate analysis state. It leverages the `LogRateAnalysisReduxProvider`\nto acquire state variables like `initialAnalysisStart` and functions such as\n`setAutoRunAnalysis`. These values are then passed as props to the `DocumentCountChart`.\nThis wrapper component is necessary since the `DocumentCountChart` component is\nalso used for log pattern analysis which doesn't use redux.\n"
+        ],
+        "signature": [
+          "React.FunctionComponent<DocumentCountChartReduxProps>"
+        ],
+        "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart_redux.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [
+          "The DocumentCountChart component enhanced with automatic analysis start capabilities."
+        ],
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-components",
+            "id": "def-common.DocumentCountChartRedux.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [
+              "- The properties passed to the DocumentCountChart component."
+            ],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-components",
+            "id": "def-common.DocumentCountChartRedux.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
         ],
         "initialIsOpen": false
       },
@@ -84,25 +134,25 @@
           "\nDualBrush React Component\nDual brush component that overlays the document count chart\n"
         ],
         "signature": [
-          "(props: React.PropsWithChildren<DualBrushProps>) => JSX.Element"
+          "(props: DualBrushProps) => React.JSX.Element"
         ],
-        "path": "x-pack/packages/ml/aiops_components/src/dual_brush/dual_brush.tsx",
+        "path": "x-pack/platform/packages/private/ml/aiops_components/src/dual_brush/dual_brush.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/aiops-components",
             "id": "def-common.DualBrush.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [
               "DualBrushProps component props"
             ],
             "signature": [
-              "React.PropsWithChildren<DualBrushProps>"
+              "DualBrushProps"
             ],
-            "path": "x-pack/packages/ml/aiops_components/src/dual_brush/dual_brush.tsx",
+            "path": "x-pack/platform/packages/private/ml/aiops_components/src/dual_brush/dual_brush.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -123,25 +173,25 @@
           "\nDualBrushAnnotation React Component\nDual brush annotation component that overlays the document count chart\n"
         ],
         "signature": [
-          "(props: React.PropsWithChildren<BrushAnnotationProps>) => JSX.Element"
+          "(props: BrushAnnotationProps) => React.JSX.Element"
         ],
-        "path": "x-pack/packages/ml/aiops_components/src/dual_brush/dual_brush_annotation.tsx",
+        "path": "x-pack/platform/packages/private/ml/aiops_components/src/dual_brush/dual_brush_annotation.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/aiops-components",
             "id": "def-common.DualBrushAnnotation.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [
               "BrushAnnotationProps component props"
             ],
             "signature": [
-              "React.PropsWithChildren<BrushAnnotationProps>"
+              "BrushAnnotationProps"
             ],
-            "path": "x-pack/packages/ml/aiops_components/src/dual_brush/dual_brush_annotation.tsx",
+            "path": "x-pack/platform/packages/private/ml/aiops_components/src/dual_brush/dual_brush_annotation.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -159,12 +209,12 @@
         "tags": [],
         "label": "ProgressControls",
         "description": [
-          "\nProgressControls React Component\nComponent with ability to Run & cancel analysis\nby default uses `Baseline` and `Deviation` for the badge name\n"
+          "\nProgressControls React Component\nComponent with ability to run & cancel analysis\nby default uses `Baseline` and `Deviation` for the badge name\n"
         ],
         "signature": [
-          "(props: React.PropsWithChildren<ProgressControlProps>) => JSX.Element"
+          "(props: React.PropsWithChildren<ProgressControlProps>) => React.JSX.Element"
         ],
-        "path": "x-pack/packages/ml/aiops_components/src/progress_controls/progress_controls.tsx",
+        "path": "x-pack/platform/packages/private/ml/aiops_components/src/progress_controls/progress_controls.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -180,7 +230,7 @@
             "signature": [
               "React.PropsWithChildren<ProgressControlProps>"
             ],
-            "path": "x-pack/packages/ml/aiops_components/src/progress_controls/progress_controls.tsx",
+            "path": "x-pack/platform/packages/private/ml/aiops_components/src/progress_controls/progress_controls.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -202,7 +252,7 @@
         "description": [
           "\nBrush settings"
         ],
-        "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+        "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -218,7 +268,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -237,7 +287,7 @@
               "RectAnnotationStyle",
               "> | undefined"
             ],
-            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -253,7 +303,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -269,7 +319,7 @@
         "description": [
           "\nProps for document count chart"
         ],
-        "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+        "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -308,16 +358,10 @@
                 "text": "FieldFormatsStart"
               },
               "; uiSettings: ",
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              },
+              "IUiSettingsClient",
               "; }"
             ],
-            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -331,16 +375,9 @@
               "Optional callback for handling brush selection updates"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/aiops-components",
-                "scope": "common",
-                "docId": "kibKbnAiopsComponentsPluginApi",
-                "section": "def-common.BrushSelectionUpdateHandler",
-                "text": "BrushSelectionUpdateHandler"
-              },
-              " | undefined"
+              "BrushSelectionUpdateHandler | undefined"
             ],
-            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -356,7 +393,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -372,7 +409,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -387,15 +424,15 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/aiops-utils",
+                "pluginId": "@kbn/aiops-log-rate-analysis",
                 "scope": "common",
-                "docId": "kibKbnAiopsUtilsPluginApi",
+                "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
                 "section": "def-common.LogRateHistogramItem",
                 "text": "LogRateHistogramItem"
               },
               "[]"
             ],
-            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -410,15 +447,15 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/aiops-utils",
+                "pluginId": "@kbn/aiops-log-rate-analysis",
                 "scope": "common",
-                "docId": "kibKbnAiopsUtilsPluginApi",
+                "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
                 "section": "def-common.LogRateHistogramItem",
                 "text": "LogRateHistogramItem"
               },
               "[] | undefined"
             ],
-            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -431,7 +468,7 @@
             "description": [
               "Start time range for the chart"
             ],
-            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -444,7 +481,7 @@
             "description": [
               "Ending time range for the chart"
             ],
-            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -457,7 +494,7 @@
             "description": [
               "Time interval for the document count buckets"
             ],
-            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -470,7 +507,7 @@
             "description": [
               "Label to name the adjustedChartPointsSplit histogram"
             ],
-            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -483,7 +520,23 @@
             "description": [
               "Whether or not brush has been reset"
             ],
-            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-components",
+            "id": "def-common.DocumentCountChartProps.setAutoRunAnalysisFn",
+            "type": "Function",
+            "tags": [],
+            "label": "setAutoRunAnalysisFn",
+            "description": [
+              "Callback to set the autoRunAnalysis flag"
+            ],
+            "signature": [
+              "SetAutoRunAnalysisFn | undefined"
+            ],
+            "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -499,15 +552,15 @@
             "signature": [
               "number | ",
               {
-                "pluginId": "@kbn/aiops-utils",
+                "pluginId": "@kbn/aiops-log-rate-analysis",
                 "scope": "common",
-                "docId": "kibKbnAiopsUtilsPluginApi",
+                "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
                 "section": "def-common.WindowParameters",
                 "text": "WindowParameters"
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -524,7 +577,7 @@
               "BarStyleAccessor",
               " | undefined"
             ],
-            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -540,7 +593,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -556,7 +609,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -579,7 +632,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -602,7 +655,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -618,7 +671,46 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-components",
+            "id": "def-common.DocumentCountChartProps.changePoint",
+            "type": "Object",
+            "tags": [],
+            "label": "changePoint",
+            "description": [
+              "Optional change point metadata"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/aiops-log-rate-analysis",
+                "scope": "common",
+                "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
+                "section": "def-common.DocumentCountStatsChangePoint",
+                "text": "DocumentCountStatsChangePoint"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-components",
+            "id": "def-common.DocumentCountChartProps.nonInteractive",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "nonInteractive",
+            "description": [
+              "Whether the brush should be non-interactive"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -627,95 +719,7 @@
       }
     ],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "@kbn/aiops-components",
-        "id": "def-common.BrushSelectionUpdateHandler",
-        "type": "Type",
-        "tags": [],
-        "label": "BrushSelectionUpdateHandler",
-        "description": [
-          "\nCallback function which gets called when the brush selection has changed\n"
-        ],
-        "signature": [
-          "(windowParameters: ",
-          {
-            "pluginId": "@kbn/aiops-utils",
-            "scope": "common",
-            "docId": "kibKbnAiopsUtilsPluginApi",
-            "section": "def-common.WindowParameters",
-            "text": "WindowParameters"
-          },
-          ", force: boolean, logRateAnalysisType: ",
-          {
-            "pluginId": "@kbn/aiops-utils",
-            "scope": "common",
-            "docId": "kibKbnAiopsUtilsPluginApi",
-            "section": "def-common.LogRateAnalysisType",
-            "text": "LogRateAnalysisType"
-          },
-          ") => void"
-        ],
-        "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "@kbn/aiops-components",
-            "id": "def-common.BrushSelectionUpdateHandler.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "windowParameters",
-            "description": [
-              "Baseline and deviation time ranges."
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/aiops-utils",
-                "scope": "common",
-                "docId": "kibKbnAiopsUtilsPluginApi",
-                "section": "def-common.WindowParameters",
-                "text": "WindowParameters"
-              }
-            ],
-            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/aiops-components",
-            "id": "def-common.BrushSelectionUpdateHandler.$2",
-            "type": "boolean",
-            "tags": [],
-            "label": "force",
-            "description": [
-              "Force update"
-            ],
-            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/aiops-components",
-            "id": "def-common.BrushSelectionUpdateHandler.$3",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "logRateAnalysisType",
-            "description": [
-              "`spike` or `dip` based on median log rate bucket size"
-            ],
-            "signature": [
-              "\"spike\" | \"dip\""
-            ],
-            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": []
   }
 }

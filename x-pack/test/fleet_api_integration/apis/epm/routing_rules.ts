@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupFleetAndAgents } from '../agents/services';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 const TEST_WRITE_INDEX = 'logs-routing_rules.test-test';
@@ -21,34 +20,29 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   describe('routing rules for fleet managed datastreams', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-    });
-    setupFleetAndAgents(providerContext);
-
-    before(async () => {
+      await fleetAndAgents.setup();
       await supertest
         .post(`/api/fleet/epm/packages/${ROUTING_RULES_PKG_NAME}/${ROUTING_RULES_PKG_VERSION}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
     });
+
     after(async () => {
       await supertest
         .delete(`/api/fleet/epm/packages/${ROUTING_RULES_PKG_NAME}/${ROUTING_RULES_PKG_VERSION}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
-    });
 
-    after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-    });
 
-    after(async () => {
       const res = await es.search({
         index: TEST_REROUTE_INDEX,
         ignore_unavailable: true,
@@ -56,7 +50,7 @@ export default function (providerContext: FtrProviderContext) {
 
       for (const hit of res.hits.hits) {
         await es.delete({
-          id: hit._id,
+          id: hit._id!,
           index: hit._index,
         });
       }

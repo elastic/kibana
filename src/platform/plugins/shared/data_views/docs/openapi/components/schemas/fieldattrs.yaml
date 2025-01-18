@@ -1,0 +1,13 @@
+type: object
+description: A map of field attributes by field name.
+properties:
+  count:
+    type: integer
+    description: Popularity count for the field.
+  customDescription:
+    type: string
+    description: Custom description for the field.
+    maxLength: 300
+  customLabel:
+    type: string
+    description: Custom label for the field.

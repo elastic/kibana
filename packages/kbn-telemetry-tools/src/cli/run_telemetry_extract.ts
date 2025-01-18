@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Listr from 'listr';
+import { Listr } from 'listr2';
 import { run } from '@kbn/dev-cli-runner';
 
 import {
@@ -25,19 +26,21 @@ export function runTelemetryExtract() {
         [
           {
             title: 'Parsing .telemetryrc.json files',
-            task: () => new Listr(parseConfigsTask(), { exitOnError: true }),
+            task: (context, task) => task.newListr(parseConfigsTask(), { exitOnError: true }),
           },
           {
             title: 'Extracting Telemetry Collectors',
-            task: (context) => new Listr(extractCollectorsTask(context), { exitOnError: true }),
+            task: (context, task) =>
+              task.newListr(extractCollectorsTask(context), { exitOnError: true }),
           },
           {
             title: 'Generating Schema files',
-            task: (context) => new Listr(generateSchemasTask(context), { exitOnError: true }),
+            task: (context, task) =>
+              task.newListr(generateSchemasTask(context), { exitOnError: true }),
           },
           {
             title: 'Writing to file',
-            task: (context) => new Listr(writeToFileTask(context), { exitOnError: true }),
+            task: (context, task) => task.newListr(writeToFileTask(context), { exitOnError: true }),
           },
         ],
         {

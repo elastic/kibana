@@ -8,6 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route } from '@kbn/shared-ux-router';
 
 import { EuiPage, EuiText } from '@elastic/eui';
@@ -42,7 +43,12 @@ export const renderApp = (
   deps: any,
   { appBasePath, element }: AppMountParameters
 ) => {
-  ReactDOM.render(<AlertingExampleApp basename={appBasePath} {...deps} />, element);
+  ReactDOM.render(
+    <KibanaRenderContextProvider {...core}>
+      <AlertingExampleApp basename={appBasePath} {...deps} />
+    </KibanaRenderContextProvider>,
+    element
+  );
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };

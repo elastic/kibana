@@ -20,6 +20,7 @@ export default function ({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./policy_secrets')); // ~40s
 
     loadTestFile(require.resolve('./enrollment_api_keys/crud')); // ~ 20s
+    loadTestFile(require.resolve('./enrollment_api_keys/privileges')); // ~ 20s
 
     // Data Streams
     loadTestFile(require.resolve('./data_streams')); // ~ 20s
@@ -50,5 +51,9 @@ export default function ({ loadTestFile, getService }) {
 
     // Uninstall tokens
     loadTestFile(require.resolve('./uninstall_token/get')); // ~ 20s
+    loadTestFile(require.resolve('./uninstall_token/privileges')); // ~ 20s
+
+    // Uninstall tokens
+    loadTestFile(require.resolve('./fleet_settings_privileges')); // ~ 1m
   });
 }

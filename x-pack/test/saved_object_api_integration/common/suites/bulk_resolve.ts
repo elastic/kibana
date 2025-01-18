@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest } from 'supertest';
+import { Agent as SuperTestAgent } from 'supertest';
 import { TEST_CASES } from './resolve';
 import { SPACES } from '../lib/spaces';
 import {
@@ -29,7 +29,7 @@ export interface BulkResolveTestCase extends TestCase {
 
 export { TEST_CASES }; // re-export the (non-bulk) resolve test cases
 
-export function bulkResolveTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+export function bulkResolveTestSuiteFactory(esArchiver: any, supertest: SuperTestAgent) {
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_get');
   const expectResponseBody =
     (
@@ -119,7 +119,7 @@ export function bulkResolveTestSuiteFactory(esArchiver: any, supertest: SuperTes
           it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
             await supertest
               .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_resolve`)
-              .auth(user?.username, user?.password)
+              .auth(user?.username!, user?.password!)
               .send(test.request)
               .expect(test.responseStatusCode)
               .then(test.responseBody);

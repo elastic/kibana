@@ -2,7 +2,10 @@ steps:
   - label: ':male-mechanic::skin-tone-2: Pre-Build'
     command: .buildkite/scripts/lifecycle/pre_build.sh
     agents:
-      queue: kibana-default
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
     timeout_in_minutes: 10
 
   - wait
@@ -23,5 +26,8 @@ steps:
   - label: ':male_superhero::skin-tone-2: Post-Build'
     command: .buildkite/scripts/lifecycle/post_build.sh
     agents:
-      queue: kibana-default
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
     timeout_in_minutes: 10

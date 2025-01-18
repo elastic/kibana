@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -13,6 +14,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { makeMatcher } from '@kbn/picomatcher';
 import { type Package, findPackageForPath, getRepoRelsSync } from '@kbn/repo-packages';
 import { createFailError } from '@kbn/dev-cli-errors';
+import { readPackageJson } from '@kbn/repo-packages';
 
 import { readTsConfig, parseTsConfig, TsConfig } from './ts_configfile';
 
@@ -150,6 +152,8 @@ export class TsProject {
   public readonly directory: string;
   /** the package this tsconfig file is within, if any */
   public readonly pkg?: Package;
+  /** the package is esm or not */
+  public readonly isEsm?: boolean;
   /**
    * if this project is within a package then this will
    * be set to the import request that maps to the root of this project
@@ -186,6 +190,7 @@ export class TsProject {
       : undefined;
 
     this._disableTypeCheck = !!opts?.disableTypeCheck;
+    this.isEsm = readPackageJson(`${this.dir}/package.json`)?.type === 'module';
   }
 
   private _name: string | undefined;

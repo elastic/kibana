@@ -1,0 +1,9 @@
+disabled:
+  # Base config files, only necessary to inform config finding script
+
+  # Serverless deployment-agnostic default config for api-integration tests
+  - x-pack/test/api_integration/deployment_agnostic/default_configs/serverless.config.base.ts
+  # Serverless base config files
+  - x-pack/test_serverless/api_integration/config.base.ts
+  - x-pack/test_serverless/functional/config.base.ts
+  - x-pack/test_serverless/shared/config.base.ts

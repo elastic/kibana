@@ -254,11 +254,7 @@ export default function createUnsnoozeRuleTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage(
-                  'unsnooze',
-                  'test.restricted-noop',
-                  'alertsRestrictedFixture'
-                ),
+                message: getUnauthorizedErrorMessage('unsnooze', 'test.restricted-noop', 'alerts'),
                 statusCode: 403,
               });
               break;

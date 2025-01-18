@@ -1,0 +1,14 @@
+title: KQL query for all events
+description: The KQL query used to define all events.
+oneOf:
+  - description: the KQL query to filter the documents with.
+    type: string
+    example: 'field.environment : "production" and service.name : "my-service"'
+  - type: object
+    properties:
+      kqlQuery:
+        type: string
+      filters:
+        type: array
+        items:
+          $ref: "filter.yaml"

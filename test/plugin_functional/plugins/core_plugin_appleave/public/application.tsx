@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -16,8 +17,8 @@ import {
   EuiPageHeaderSection,
   EuiTitle,
 } from '@elastic/eui';
-
-import { AppMountParameters } from '@kbn/core/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 
 const App = ({ appName }: { appName: string }) => (
   <EuiPage>
@@ -41,7 +42,12 @@ const App = ({ appName }: { appName: string }) => (
   </EuiPage>
 );
 
-export const renderApp = (appName: string, { element }: AppMountParameters) => {
-  render(<App appName={appName} />, element);
+export const renderApp = (appName: string, { element }: AppMountParameters, core: CoreStart) => {
+  render(
+    <KibanaRenderContextProvider {...core}>
+      <App appName={appName} />
+    </KibanaRenderContextProvider>,
+    element
+  );
   return () => unmountComponentAtNode(element);
 };

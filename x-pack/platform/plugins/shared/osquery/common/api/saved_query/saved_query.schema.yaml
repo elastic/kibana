@@ -1,0 +1,111 @@
+openapi: 3.0.0
+info:
+  title: Saved Queries Schema
+  version: '2023-10-31'
+paths:
+  /api/osquery/saved_queries:
+    get:
+      summary: Get saved queries
+      description: Get a list of all saved queries.
+      operationId: OsqueryFindSavedQueries
+      x-codegen-enabled: true
+      x-labels: [serverless, ess]
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            $ref: './find_saved_query.schema.yaml#/components/schemas/FindSavedQueryRequestQuery'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
+    post:
+      summary: Create a saved query
+      description: Create and run a saved query.
+      operationId: OsqueryCreateSavedQuery
+      x-codegen-enabled: true
+      x-labels: [serverless, ess]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './create_saved_query.schema.yaml#/components/schemas/CreateSavedQueryRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
+  /api/osquery/saved_queries/{id}:
+    get:
+      summary: Get saved query details
+      description: Get the details of a saved query using the query ID.
+      operationId: OsqueryGetSavedQueryDetails
+      x-codegen-enabled: true
+      x-labels: [serverless, ess]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SavedQueryId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
+    delete:
+      summary: Delete a saved query
+      description: Delete a saved query using the query ID.
+      operationId: OsqueryDeleteSavedQuery
+      x-codegen-enabled: true
+      x-labels: [serverless, ess]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SavedQueryId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
+    put:
+      summary: Update a saved query
+      description: |
+        Update a saved query using the query ID.
+        > info
+        > You cannot update a prebuilt saved query.
+      operationId: OsqueryUpdateSavedQuery
+      x-codegen-enabled: true
+      x-labels: [serverless, ess]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SavedQueryId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './update_saved_query.schema.yaml#/components/schemas/UpdateSavedQueryRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FtrService } from '../ftr_provider_context';
@@ -30,7 +31,7 @@ export class HomePageObject extends FtrService {
 
   async openSampleDataAccordion() {
     const accordionButton = await this.testSubjects.find('showSampleDataButton');
-    let expandedAttribute = await accordionButton.getAttribute('aria-expanded');
+    let expandedAttribute = (await accordionButton.getAttribute('aria-expanded')) ?? '';
     let expanded = expandedAttribute.toLocaleLowerCase().includes('true');
     this.log.debug(`Sample data accordion expanded: ${expanded}`);
 
@@ -38,7 +39,7 @@ export class HomePageObject extends FtrService {
       await this.retry.waitFor('sample data according to be expanded', async () => {
         this.log.debug(`Opening sample data accordion`);
         await accordionButton.click();
-        expandedAttribute = await accordionButton.getAttribute('aria-expanded');
+        expandedAttribute = (await accordionButton.getAttribute('aria-expanded')) ?? '';
         expanded = expandedAttribute.toLocaleLowerCase().includes('true');
         return expanded;
       });
@@ -57,9 +58,14 @@ export class HomePageObject extends FtrService {
   }
 
   async isWelcomeInterstitialDisplayed() {
-    // give the interstitial enough time to fade in
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    return await this.testSubjects.isDisplayed('homeWelcomeInterstitial', 2000);
+    // This element inherits style defined {@link https://github.com/elastic/kibana/blob/v8.14.3/src/core/public/styles/core_app/_mixins.scss#L72|here}
+    // with an animation duration set to $euiAnimSpeedExtraSlow {@see https://eui.elastic.co/#/theming/more-tokens#animation},
+    // hence we setup a delay so the interstitial has enough time to fade in
+    const animSpeedExtraSlow = 500;
+    await new Promise((resolve) => setTimeout(resolve, animSpeedExtraSlow));
+    return this.retry.try(async () => {
+      return await this.testSubjects.isDisplayed('homeWelcomeInterstitial', animSpeedExtraSlow * 4);
+    });
   }
 
   async isGuidedOnboardingLandingDisplayed() {
@@ -75,7 +81,7 @@ export class HomePageObject extends FtrService {
     const panelAttributes = await Promise.all(
       solutionPanels.map((panel) => panel.getAttribute('data-test-subj'))
     );
-    return panelAttributes.map((attributeValue) => attributeValue.split('homSolutionPanel_')[1]);
+    return panelAttributes.map((attributeValue) => attributeValue?.split('homSolutionPanel_')[1]);
   }
 
   async goToSampleDataPage() {
@@ -85,40 +91,46 @@ export class HomePageObject extends FtrService {
 
   async addSampleDataSet(id: string) {
     await this.openSampleDataAccordion();
-    const isInstalled = await this.isSampleDataSetInstalled(id);
-    if (!isInstalled) {
+    await this.retry.waitFor('sample data to be installed', async () => {
+      // count for the edge case where some how installation completes just before the retry occurs
+      if (await this.isSampleDataSetInstalled(id)) {
+        return true;
+      }
+
       this.log.debug(`Attempting to add sample data: ${id}`);
-      await this.retry.waitFor('sample data to be installed', async () => {
-        // Echoing the adjustments made to 'removeSampleDataSet', as we are seeing flaky test cases here as well
-        // https://github.com/elastic/kibana/issues/52714
-        await this.testSubjects.waitForEnabled(`addSampleDataSet${id}`);
-        await this.common.sleep(1010);
-        await this.testSubjects.click(`addSampleDataSet${id}`);
-        await this.common.sleep(1010);
-        await this._waitForSampleDataLoadingAction(id);
-        return await this.isSampleDataSetInstalled(id);
-      });
-    }
+
+      // Echoing the adjustments made to 'removeSampleDataSet', as we are seeing flaky test cases here as well
+      // https://github.com/elastic/kibana/issues/52714
+      await this.testSubjects.waitForEnabled(`addSampleDataSet${id}`);
+      await this.common.sleep(1010);
+      await this.testSubjects.click(`addSampleDataSet${id}`);
+      await this.common.sleep(1010);
+      await this._waitForSampleDataLoadingAction(id);
+      return await this.isSampleDataSetInstalled(id);
+    });
   }
 
   async removeSampleDataSet(id: string) {
     await this.openSampleDataAccordion();
-    const isInstalled = await this.isSampleDataSetInstalled(id);
-    if (isInstalled) {
+    await this.retry.waitFor('sample data to be removed', async () => {
+      // account for the edge case where some how data is uninstalled just before the retry occurs
+      if (!(await this.isSampleDataSetInstalled(id))) {
+        return true;
+      }
+
       this.log.debug(`Attempting to remove sample data: ${id}`);
-      await this.retry.waitFor('sample data to be removed', async () => {
-        // looks like overkill but we're hitting flaky cases where we click but it doesn't remove
-        await this.testSubjects.waitForEnabled(`removeSampleDataSet${id}`);
-        // https://github.com/elastic/kibana/issues/65949
-        // Even after waiting for the "Remove" button to be enabled we still have failures
-        // where it appears the click just didn't work.
-        await this.common.sleep(1010);
-        await this.testSubjects.click(`removeSampleDataSet${id}`);
-        await this.common.sleep(1010);
-        await this._waitForSampleDataLoadingAction(id);
-        return !(await this.isSampleDataSetInstalled(id));
-      });
-    }
+
+      // looks like overkill but we're hitting flaky cases where we click but it doesn't remove
+      await this.testSubjects.waitForEnabled(`removeSampleDataSet${id}`);
+      // https://github.com/elastic/kibana/issues/65949
+      // Even after waiting for the "Remove" button to be enabled we still have failures
+      // where it appears the click just didn't work.
+      await this.common.sleep(1010);
+      await this.testSubjects.click(`removeSampleDataSet${id}`);
+      await this.common.sleep(1010);
+      await this._waitForSampleDataLoadingAction(id);
+      return !(await this.isSampleDataSetInstalled(id));
+    });
   }
 
   // loading action is either uninstall and install

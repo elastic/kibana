@@ -5,40 +5,60 @@
  * 2.0.
  */
 
-import { UsageStatsPayload } from '@kbn/telemetry-collection-manager-plugin/server';
+import type { UsageStatsPayload } from '@kbn/telemetry-collection-manager-plugin/server';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export interface UsageStatsPayloadTestFriendly extends UsageStatsPayload {
   // Overwriting the `object` type to a more test-friendly type
   stack_stats: Record<string, any>;
 }
 
+export interface GetTelemetryStatsOpts {
+  authHeader: Record<string, string>;
+}
+
 export function UsageAPIProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  async function getTelemetryStats(payload: {
-    unencrypted: true;
-    refreshCache?: boolean;
-  }): Promise<Array<{ clusterUuid: string; stats: UsageStatsPayloadTestFriendly }>>;
-  async function getTelemetryStats(payload: {
-    unencrypted: false;
-    refreshCache?: boolean;
-  }): Promise<Array<{ clusterUuid: string; stats: string }>>;
-  async function getTelemetryStats(payload: {
-    unencrypted?: boolean;
-    refreshCache?: boolean;
-  }): Promise<Array<{ clusterUuid: string; stats: UsageStatsPayloadTestFriendly | string }>> {
-    const { body } = await supertest
+  async function getTelemetryStats(
+    payload: {
+      unencrypted: true;
+      refreshCache?: boolean;
+    },
+    opts?: GetTelemetryStatsOpts
+  ): Promise<Array<{ clusterUuid: string; stats: UsageStatsPayloadTestFriendly }>>;
+  async function getTelemetryStats(
+    payload: {
+      unencrypted: false;
+      refreshCache?: boolean;
+    },
+    opts?: GetTelemetryStatsOpts
+  ): Promise<Array<{ clusterUuid: string; stats: string }>>;
+  async function getTelemetryStats(
+    payload: {
+      unencrypted?: boolean;
+      refreshCache?: boolean;
+    },
+    opts?: GetTelemetryStatsOpts
+  ): Promise<Array<{ clusterUuid: string; stats: UsageStatsPayloadTestFriendly | string }>> {
+    const client = opts?.authHeader ? supertestWithoutAuth : supertest;
+
+    const request = client
       .post('/internal/telemetry/clusters/_stats')
       .set('kbn-xsrf', 'xxx')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send({ refreshCache: true, ...payload })
-      .expect(200);
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+
+    if (opts?.authHeader) {
+      void request.set(opts.authHeader);
+    }
+
+    const { body } = await request.send({ refreshCache: true, ...payload }).expect(200);
     return body;
   }
 

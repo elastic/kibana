@@ -27,7 +27,7 @@
         "tags": [],
         "label": "UserContentCommonSchema",
         "description": [],
-        "path": "packages/content-management/table_list_view_common/index.ts",
+        "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,7 +38,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -49,7 +49,49 @@
             "tags": [],
             "label": "updatedAt",
             "description": [],
-            "path": "packages/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list-view-common",
+            "id": "def-common.UserContentCommonSchema.updatedBy",
+            "type": "string",
+            "tags": [],
+            "label": "updatedBy",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list-view-common",
+            "id": "def-common.UserContentCommonSchema.createdAt",
+            "type": "string",
+            "tags": [],
+            "label": "createdAt",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list-view-common",
+            "id": "def-common.UserContentCommonSchema.createdBy",
+            "type": "string",
+            "tags": [],
+            "label": "createdBy",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -63,7 +105,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -77,14 +119,14 @@
             "signature": [
               {
                 "pluginId": "@kbn/content-management-content-editor",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnContentManagementContentEditorPluginApi",
-                "section": "def-common.SavedObjectsReference",
+                "section": "def-public.SavedObjectsReference",
                 "text": "SavedObjectsReference"
               },
               "[]"
             ],
-            "path": "packages/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -95,7 +137,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "packages/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -109,7 +151,7 @@
             "signature": [
               "{ title: string; description?: string | undefined; }"
             ],
-            "path": "packages/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }

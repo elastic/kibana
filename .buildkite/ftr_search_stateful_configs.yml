@@ -1,0 +1,9 @@
+disabled:
+  # Base config files, only necessary to inform config finding script
+  - x-pack/test/functional_enterprise_search/base_config.ts
+
+  # Cypress configs, for now these are still run manually
+  - x-pack/test/functional_enterprise_search/cypress.config.ts
+  - x-pack/test/functional_enterprise_search/visual_config.ts
+  - x-pack/test/functional_enterprise_search/cli_config.ts
+  - x-pack/test/functional/apps/search_playground/config.ts

@@ -204,6 +204,45 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
+        "id": "def-common.startTSWorker",
+        "type": "Function",
+        "tags": [],
+        "label": "startTSWorker",
+        "description": [
+          "\nProvide a TS file as the src of a NodeJS Worker with some built-in handling\nof std streams and debugging."
+        ],
+        "signature": [
+          "({\n  log,\n  src,\n  cwd = REPO_ROOT,\n  execArgv = [],\n  stdio = ['ignore', 'pipe', 'pipe', 'ipc'],\n  ...forkOptions\n}: StartTSWorkerArgs) => { msg$: ",
+          "Observable",
+          "<Message>; proc: ",
+          "ChildProcess",
+          "; }"
+        ],
+        "path": "packages/kbn-dev-utils/src/worker/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-common.startTSWorker.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  log,\n  src,\n  cwd = REPO_ROOT,\n  execArgv = [],\n  stdio = ['ignore', 'pipe', 'pipe', 'ipc'],\n  ...forkOptions\n}",
+            "description": [],
+            "signature": [
+              "StartTSWorkerArgs"
+            ],
+            "path": "packages/kbn-dev-utils/src/worker/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
         "id": "def-common.transformFileStream",
         "type": "Function",
         "tags": [],

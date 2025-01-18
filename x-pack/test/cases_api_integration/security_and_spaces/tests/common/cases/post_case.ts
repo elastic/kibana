@@ -192,6 +192,13 @@ export default ({ getService }: FtrProviderContext): void => {
                   defaultValue: false,
                   required: true,
                 },
+                {
+                  key: 'valid_key_3',
+                  label: 'number',
+                  type: CustomFieldTypes.NUMBER,
+                  defaultValue: 123,
+                  required: true,
+                },
               ],
             },
           })
@@ -211,6 +218,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 type: CustomFieldTypes.TOGGLE,
                 value: true,
               },
+              {
+                key: 'valid_key_3',
+                type: CustomFieldTypes.NUMBER,
+                value: 123456,
+              },
             ],
           })
         );
@@ -225,6 +237,11 @@ export default ({ getService }: FtrProviderContext): void => {
             key: 'valid_key_2',
             type: CustomFieldTypes.TOGGLE,
             value: true,
+          },
+          {
+            key: 'valid_key_3',
+            type: CustomFieldTypes.NUMBER,
+            value: 123456,
           },
         ]);
       });
@@ -248,6 +265,13 @@ export default ({ getService }: FtrProviderContext): void => {
                   defaultValue: false,
                   required: true,
                 },
+                {
+                  key: 'valid_key_3',
+                  label: 'number',
+                  type: CustomFieldTypes.NUMBER,
+                  defaultValue: 123,
+                  required: false,
+                },
               ],
             },
           })
@@ -269,6 +293,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(res.customFields).to.eql([
           { key: 'valid_key_2', type: 'toggle', value: true },
           { key: 'valid_key_1', type: 'text', value: null },
+          { key: 'valid_key_3', type: 'number', value: 123 },
         ]);
       });
 
@@ -278,14 +303,21 @@ export default ({ getService }: FtrProviderContext): void => {
             key: 'text_custom_field',
             label: 'text',
             type: CustomFieldTypes.TEXT,
-            required: true,
             defaultValue: 'default value',
+            required: true,
           },
           {
             key: 'toggle_custom_field',
             label: 'toggle',
             type: CustomFieldTypes.TOGGLE,
             defaultValue: false,
+            required: true,
+          },
+          {
+            key: 'number_custom_field',
+            label: 'number',
+            type: CustomFieldTypes.NUMBER,
+            defaultValue: 123,
             required: true,
           },
         ];
@@ -315,6 +347,11 @@ export default ({ getService }: FtrProviderContext): void => {
             key: customFieldsConfiguration[1].key,
             type: customFieldsConfiguration[1].type,
             value: false,
+          },
+          {
+            key: customFieldsConfiguration[2].key,
+            type: customFieldsConfiguration[2].type,
+            value: 123,
           },
         ]);
       });
@@ -335,6 +372,13 @@ export default ({ getService }: FtrProviderContext): void => {
             defaultValue: false,
             required: false,
           },
+          {
+            key: 'number_custom_field',
+            label: 'number',
+            type: CustomFieldTypes.NUMBER,
+            defaultValue: 123,
+            required: false,
+          },
         ];
 
         await createConfiguration(
@@ -362,6 +406,11 @@ export default ({ getService }: FtrProviderContext): void => {
             key: customFieldsConfiguration[1].key,
             type: customFieldsConfiguration[1].type,
             value: false,
+          },
+          {
+            key: customFieldsConfiguration[2].key,
+            type: customFieldsConfiguration[2].type,
+            value: 123,
           },
         ]);
       });
@@ -467,7 +516,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await createCase(supertest, getPostCaseRequest({ description: longDescription }), 400);
       });
 
-      describe('tags', async () => {
+      describe('tags', () => {
         it('400s if the a tag is a whitespace', async () => {
           const tags = ['test', ' '];
 
@@ -493,7 +542,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('categories', async () => {
+      describe('categories', () => {
         it('400s when the category is too long', async () => {
           await createCase(
             supertest,
@@ -525,7 +574,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('customFields', async () => {
+      describe('customFields', () => {
         it('400s when trying to patch with duplicated custom field keys', async () => {
           await createCase(
             supertest,
@@ -594,6 +643,13 @@ export default ({ getService }: FtrProviderContext): void => {
               defaultValue: false,
               required: true,
             },
+            {
+              key: 'number_custom_field',
+              label: 'number',
+              type: CustomFieldTypes.NUMBER,
+              defaultValue: 123,
+              required: true,
+            },
           ];
 
           await createConfiguration(
@@ -619,6 +675,11 @@ export default ({ getService }: FtrProviderContext): void => {
                   type: CustomFieldTypes.TOGGLE,
                   value: null,
                 },
+                {
+                  key: 'number_custom_field',
+                  type: CustomFieldTypes.NUMBER,
+                  value: null,
+                },
               ],
             }),
             400
@@ -642,6 +703,7 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             })
           );
+
           await createCase(
             supertest,
             getPostCaseRequest({

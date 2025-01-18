@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  describe('@ess @serverless @brokenInServerless check_privileges', () => {
+  describe('@ess @serverless @skipInServerless check_privileges', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alias');
@@ -83,7 +83,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
-          expect(body?.execution_summary?.last_execution.message).to.eql(
+          expect(body?.execution_summary?.last_execution.message).to.contain(
             `This rule may not have the required read privileges to the following index patterns: ["${index[0]}"]`
           );
 

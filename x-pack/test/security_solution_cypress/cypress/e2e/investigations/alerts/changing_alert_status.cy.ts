@@ -26,7 +26,7 @@ import {
   goToOpenedAlerts,
   openAlerts,
   openFirstAlert,
-  selectCountTable,
+  selectAlertsCountTable,
   waitForPageFilters,
   sumAlertCountFromAlertCountTable,
   parseAlertsCountToInt,
@@ -39,8 +39,7 @@ import { visit } from '../../../tasks/navigation';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 
-// Iusse tracked in: https://github.com/elastic/kibana/issues/167809
-describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () => {
+describe('Changing alert status', () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
   });
@@ -49,7 +48,7 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
     cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
   });
 
-  context('Opening alerts', () => {
+  context('Opening alerts', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
       login();
       createRule(getNewRule());
@@ -60,10 +59,10 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
       closeAlerts();
       waitForAlerts();
       waitForPageFilters();
-      selectCountTable();
+      selectAlertsCountTable();
     });
 
-    it.skip('Open one alert when more than one closed alerts are selected', () => {
+    it('Open one alert when more than one closed alerts are selected', () => {
       waitForAlertsToPopulate();
       cy.get(ALERTS_COUNT)
         .invoke('text')
@@ -102,7 +101,7 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
               goToOpenedAlerts();
               waitForAlerts();
 
-              selectCountTable();
+              selectAlertsCountTable();
 
               cy.get(ALERTS_COUNT).should(
                 'have.text',
@@ -118,14 +117,14 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
         });
     });
   });
-  context('Marking alerts as acknowledged', () => {
+  context('Marking alerts as acknowledged', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
       login();
       deleteAlertsAndRules();
       createRule(getNewRule());
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
-      selectCountTable();
+      selectAlertsCountTable();
     });
     it('Mark one alert as acknowledged when more than one open alerts are selected', () => {
       cy.get(ALERTS_COUNT)
@@ -158,17 +157,16 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
         });
     });
   });
-  // FLAKY: https://github.com/elastic/kibana/issues/173597
-  context.skip('Closing alerts', () => {
+  context('Closing alerts', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
       login();
       deleteAlertsAndRules();
       createRule(getNewRule({ rule_id: '1', max_signals: 100 }));
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
-      selectCountTable();
+      selectAlertsCountTable();
     });
-    it.skip('Closes and opens alerts', () => {
+    it('Closes and opens alerts', () => {
       const numberOfAlertsToBeClosed = 3;
       cy.get(ALERTS_COUNT)
         .invoke('text')
@@ -310,15 +308,14 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
         });
     });
   });
-
-  context('Changing alert status with read only role', () => {
+  context.only('Changing alert status with read only role', { tags: ['@ess'] }, () => {
     beforeEach(() => {
-      login(ROLES.t2_analyst);
       deleteAlertsAndRules();
       createRule(getNewRule());
+      login(ROLES.reader);
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
-      selectCountTable();
+      selectAlertsCountTable();
     });
 
     it('Mark one alert as acknowledged when more than one open alerts are selected', () => {
@@ -333,6 +330,7 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
           cy.get(TAKE_ACTION_POPOVER_BTN).should('exist');
 
           markAcknowledgedFirstAlert();
+          waitForAlerts();
           cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlerts} alerts`); // user with read only role cannot mark alerts as acknowledged
 
           sumAlertCountFromAlertCountTable((sumAlerts) => {
@@ -361,10 +359,10 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
           closeAlerts();
           waitForAlerts();
 
-          cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlerts} alerts`); // user with read only role cannot mark alerts as acknowledged
+          cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlertsToBeClosed} alerts`); // user with read only role cannot mark alerts as acknowledged
 
           sumAlertCountFromAlertCountTable((sumAlerts) => {
-            expect(sumAlerts).to.eq(parseAlertsCountToInt(numberOfAlerts));
+            expect(sumAlerts).to.eq(parseAlertsCountToInt(numberOfAlertsToBeClosed));
           });
         });
     });

@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'security']);
   const testSubjects = getService('testSubjects');
-  const aceEditor = getService('aceEditor');
+  const monacoEditor = getService('monacoEditor');
   const a11y = getService('a11y');
   const esArchiver = getService('esArchiver');
 
@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
     });
 
-    it('input the JSON in the aceeditor', async () => {
+    it('input the JSON in the editor', async () => {
       const input = {
         query: {
           bool: {
@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         },
       };
 
-      await aceEditor.setValue('searchProfilerEditor', JSON.stringify(input));
+      await monacoEditor.setCodeEditorValue(JSON.stringify(input), 0);
       await a11y.testAppSnapshot();
     });
 

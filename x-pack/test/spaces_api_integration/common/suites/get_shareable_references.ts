@@ -5,24 +5,26 @@
  * 2.0.
  */
 
+import type { Agent as SuperTestAgent } from 'supertest';
+
+import type {
+  SavedObjectReferenceWithContext,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
+} from '@kbn/core/server';
 import expect from '@kbn/expect';
 import { deepFreeze } from '@kbn/std';
-import { SuperTest } from 'supertest';
-import {
-  SavedObjectsCollectMultiNamespaceReferencesResponse,
-  SavedObjectReferenceWithContext,
-} from '@kbn/core/server';
-import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
-import { SPACES } from '../lib/spaces';
+
 import {
   expectResponses,
   getUrlPrefix,
 } from '../../../saved_object_api_integration/common/lib/saved_object_test_utils';
-import {
+import type {
   ExpectResponseBody,
   TestDefinition,
   TestSuite,
 } from '../../../saved_object_api_integration/common/lib/types';
+import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
+import { SPACES } from '../lib/spaces';
 
 export interface GetShareableReferencesTestDefinition extends TestDefinition {
   request: {
@@ -192,7 +194,7 @@ const getRedactedSpaces = (authorizedSpace: string | undefined, spaces: string[]
   return redactedSpaces.sort((a, b) => (a === '?' ? 1 : b === '?' ? -1 : 0)); // unknown spaces are always at the end of the array
 };
 
-export function getShareableReferencesTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+export function getShareableReferencesTestSuiteFactory(esArchiver: any, supertest: SuperTestAgent) {
   const expectForbidden = expectResponses.forbiddenTypes('share_to_space');
   const expectResponseBody =
     (
@@ -274,7 +276,7 @@ export function getShareableReferencesTestSuiteFactory(esArchiver: any, supertes
             const requestBody = test.request;
             await supertest
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_get_shareable_references`)
-              .auth(user?.username, user?.password)
+              .auth(user?.username!, user?.password!)
               .send(requestBody)
               .expect(test.responseStatusCode)
               .then(test.responseBody);

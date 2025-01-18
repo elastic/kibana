@@ -1,0 +1,393 @@
+[
+  {
+    "hits" : {
+      "hits": [
+        {
+          "_index": ".ds-metrics-logstash.node-default-2024.06.03-000001",
+          "_id": "0NAH348BglF7bSquK97A",
+          "_source": {
+            "logstash": {
+              "node": {
+                "stats": {
+                  "logstash": {
+                    "pipeline": {
+                      "batch_delay": 50,
+                      "batch_size": 125,
+                      "workers": 10
+                    },
+                    "pipelines": [
+                      "another_test",
+                      "test"
+                    ],
+                    "http_address": "127.0.0.1:9600",
+                    "host": "Mashhurs-MacBook-Pro.local",
+                    "name": "Mashhurs-MacBook-Pro.local",
+                    "ephemeral_id": "224e3687-15b2-4e91-84bb-dbb785742c73",
+                    "uuid": "a755552f-9ef8-4f01-abae-394a59352f2d",
+                    "version": "8.15.0",
+                    "status": "green"
+                  }
+                }
+              },
+              "elasticsearch": {
+                "cluster": {
+                  "id": [
+                    "1n1p"
+                  ]
+                }
+              }
+            },
+            "input": {
+              "type": "cel"
+            },
+            "agent": {
+              "name": "Mashhurs.local",
+              "id": "ef37141b-605e-4b6e-a69f-ec525f8dcdd4",
+              "ephemeral_id": "893247f4-d8da-4d3d-a9bf-5c7e2831a47b",
+              "type": "filebeat",
+              "version": "8.13.4"
+            },
+            "@timestamp": "2024-06-03T16:55:30.213Z",
+            "ecs": {
+              "version": "8.0.0"
+            },
+            "data_stream": {
+              "namespace": "default",
+              "type": "metrics",
+              "dataset": "logstash.node"
+            },
+            "elastic_agent": {
+              "id": "ef37141b-605e-4b6e-a69f-ec525f8dcdd4",
+              "version": "8.13.4",
+              "snapshot": false
+            },
+            "host": {
+              "id": "cf37c6fa-2f1a-41e2-9a89-36b420a8b9a5"
+            }
+          }
+        },
+        {
+          "_index": ".ds-metrics-logstash.node-default-2024.06.03-000001",
+          "_id": "1NAH348BglF7bSquK97A",
+          "_source": {
+            "logstash": {
+              "node": {
+                "stats": {
+                  "logstash": {
+                    "pipeline": {
+                      "batch_delay": 50,
+                      "batch_size": 125,
+                      "workers": 10
+                    },
+                    "pipelines": [
+                      "another_test",
+                      "test"
+                    ],
+                    "http_address": "127.0.0.1:9600",
+                    "host": "Mashhurs-MacBook-Pro.local",
+                    "name": "Mashhurs-MacBook-Pro.local",
+                    "ephemeral_id": "224e3687-15b2-4e91-84bb-dbb785742c73",
+                    "uuid": "a755552f-9ef8-4f01-abae-394a59352f2d",
+                    "version": "8.15.0",
+                    "status": "green"
+                  }
+                }
+              },
+              "elasticsearch": {
+                "cluster": {
+                  "id": [
+                    "1nmp"
+                  ]
+                }
+              }
+            },
+            "input": {
+              "type": "cel"
+            },
+            "agent": {
+              "name": "Mashhurs.local",
+              "id": "ef37141b-605e-4b6e-a69f-ec525f8dcdd4",
+              "ephemeral_id": "893247f4-d8da-4d3d-a9bf-5c7e2831a47b",
+              "type": "filebeat",
+              "version": "8.13.4"
+            },
+            "@timestamp": "2024-06-03T16:55:30.213Z",
+            "ecs": {
+              "version": "8.0.0"
+            },
+            "data_stream": {
+              "namespace": "default",
+              "type": "metrics",
+              "dataset": "logstash.node"
+            },
+            "elastic_agent": {
+              "id": "ef37141b-605e-4b6e-a69f-ec525f8dcdd4",
+              "version": "8.13.4",
+              "snapshot": false
+            },
+            "host": {
+              "id": "47a70feb-3cb5-4618-8670-2c0bada61acd"
+            }
+          }
+        },
+        {
+          "_index": ".ds-metrics-logstash.node-default-2024.06.03-000001",
+          "_id": "2NAH348BglF7bSquK97A",
+          "_source": {
+            "logstash": {
+              "node": {
+                "stats": {
+                  "logstash": {
+                    "pipeline": {
+                      "batch_delay": 50,
+                      "batch_size": 125,
+                      "workers": 10
+                    },
+                    "pipelines": [
+                      "another_test",
+                      "test"
+                    ],
+                    "http_address": "127.0.0.1:9600",
+                    "host": "Mashhurs-MacBook-Pro.local",
+                    "name": "Mashhurs-MacBook-Pro.local",
+                    "ephemeral_id": "224e3687-15b2-4e91-84bb-dbb785742c73",
+                    "uuid": "a755552f-9ef8-4f01-abae-394a59352f2d",
+                    "version": "8.15.0",
+                    "status": "green"
+                  }
+                }
+              },
+              "elasticsearch": {
+                "cluster": {
+                  "id": [
+                    "1nmp"
+                  ]
+                }
+              }
+            },
+            "input": {
+              "type": "cel"
+            },
+            "agent": {
+              "name": "Mashhurs.local",
+              "id": "ef37141b-605e-4b6e-a69f-ec525f8dcdd4",
+              "ephemeral_id": "893247f4-d8da-4d3d-a9bf-5c7e2831a47b",
+              "type": "filebeat",
+              "version": "8.13.4"
+            },
+            "@timestamp": "2024-06-03T16:55:30.213Z",
+            "ecs": {
+              "version": "8.0.0"
+            },
+            "data_stream": {
+              "namespace": "default",
+              "type": "metrics",
+              "dataset": "logstash.node"
+            },
+            "elastic_agent": {
+              "id": "ef37141b-605e-4b6e-a69f-ec525f8dcdd4",
+              "version": "8.13.4",
+              "snapshot": false
+            },
+            "host": {
+              "id": "5a65d966-0330-4bd7-82f2-ee81040c13cf"
+            }
+          }
+        },
+        {
+          "_index": ".ds-metrics-logstash.node-default-2024.06.03-000001",
+          "_id": "3NAH348BglF7bSquK97A",
+          "_source": {
+            "logstash": {
+              "node": {
+                "stats": {
+                  "logstash": {
+                    "pipeline": {
+                      "batch_delay": 50,
+                      "batch_size": 125,
+                      "workers": 10
+                    },
+                    "pipelines": [
+                      "another_test",
+                      "test"
+                    ],
+                    "http_address": "127.0.0.1:9600",
+                    "host": "Mashhurs-MacBook-Pro.local",
+                    "name": "Mashhurs-MacBook-Pro.local",
+                    "ephemeral_id": "224e3687-15b2-4e91-84bb-dbb785742c73",
+                    "uuid": "a755552f-9ef8-4f01-abae-394a59352f2d",
+                    "version": "8.15.0",
+                    "status": "green"
+                  }
+                }
+              },
+              "elasticsearch": {
+                "cluster": {
+                  "id": [
+                    "mnmp"
+                  ]
+                }
+              }
+            },
+            "input": {
+              "type": "cel"
+            },
+            "agent": {
+              "name": "Mashhurs.local",
+              "id": "ef37141b-605e-4b6e-a69f-ec525f8dcdd4",
+              "ephemeral_id": "893247f4-d8da-4d3d-a9bf-5c7e2831a47b",
+              "type": "filebeat",
+              "version": "8.13.4"
+            },
+            "@timestamp": "2024-06-03T16:55:30.213Z",
+            "ecs": {
+              "version": "8.0.0"
+            },
+            "data_stream": {
+              "namespace": "default",
+              "type": "metrics",
+              "dataset": "logstash.node"
+            },
+            "elastic_agent": {
+              "id": "ef37141b-605e-4b6e-a69f-ec525f8dcdd4",
+              "version": "8.13.4",
+              "snapshot": false
+            },
+            "host": {
+              "id": "2fcd4161-e08f-4eea-818b-703ea3ec6389"
+            }
+          }
+        },
+        {
+          "_index": ".ds-metrics-logstash.node-default-2024.06.03-000001",
+          "_id": "4NAH348BglF7bSquK97A",
+          "_source": {
+            "logstash": {
+              "node": {
+                "stats": {
+                  "logstash": {
+                    "pipeline": {
+                      "batch_delay": 50,
+                      "batch_size": 125,
+                      "workers": 10
+                    },
+                    "pipelines": [
+                      "another_test",
+                      "test"
+                    ],
+                    "http_address": "127.0.0.1:9600",
+                    "host": "Mashhurs-MacBook-Pro.local",
+                    "name": "Mashhurs-MacBook-Pro.local",
+                    "ephemeral_id": "224e3687-15b2-4e91-84bb-dbb785742c73",
+                    "uuid": "a755552f-9ef8-4f01-abae-394a59352f2d",
+                    "version": "8.15.0",
+                    "status": "green"
+                  }
+                }
+              },
+              "elasticsearch": {
+                "cluster": {
+                  "id": [
+                    "mnmp"
+                  ]
+                }
+              }
+            },
+            "input": {
+              "type": "cel"
+            },
+            "agent": {
+              "name": "Mashhurs.local",
+              "id": "ef37141b-605e-4b6e-a69f-ec525f8dcdd4",
+              "ephemeral_id": "893247f4-d8da-4d3d-a9bf-5c7e2831a47b",
+              "type": "filebeat",
+              "version": "8.13.4"
+            },
+            "@timestamp": "2024-06-03T16:55:30.213Z",
+            "ecs": {
+              "version": "8.0.0"
+            },
+            "data_stream": {
+              "namespace": "default",
+              "type": "metrics",
+              "dataset": "logstash.node"
+            },
+            "elastic_agent": {
+              "id": "ef37141b-605e-4b6e-a69f-ec525f8dcdd4",
+              "version": "8.13.4",
+              "snapshot": false
+            },
+            "host": {
+              "id": "c6785d63-6e5f-42c2-839d-5edf139b7c19"
+            }
+          }
+        },
+        {
+          "_index": ".ds-metrics-logstash.node-default-2024.06.03-000001",
+          "_id": "5NAH348BglF7bSquK97A",
+          "_source": {
+            "logstash": {
+              "node": {
+                "stats": {
+                  "logstash": {
+                    "pipeline": {
+                      "batch_delay": 50,
+                      "batch_size": 125,
+                      "workers": 10
+                    },
+                    "pipelines": [
+                      "another_test",
+                      "test"
+                    ],
+                    "http_address": "127.0.0.1:9600",
+                    "host": "Mashhurs-MacBook-Pro.local",
+                    "name": "Mashhurs-MacBook-Pro.local",
+                    "ephemeral_id": "224e3687-15b2-4e91-84bb-dbb785742c73",
+                    "uuid": "a755552f-9ef8-4f01-abae-394a59352f2d",
+                    "version": "8.15.0",
+                    "status": "green"
+                  }
+                }
+              },
+              "elasticsearch": {
+                "cluster": {
+                  "id": [
+                    "mnmp"
+                  ]
+                }
+              }
+            },
+            "input": {
+              "type": "cel"
+            },
+            "agent": {
+              "name": "Mashhurs.local",
+              "id": "ef37141b-605e-4b6e-a69f-ec525f8dcdd4",
+              "ephemeral_id": "893247f4-d8da-4d3d-a9bf-5c7e2831a47b",
+              "type": "filebeat",
+              "version": "8.13.4"
+            },
+            "@timestamp": "2024-06-03T16:55:30.213Z",
+            "ecs": {
+              "version": "8.0.0"
+            },
+            "data_stream": {
+              "namespace": "default",
+              "type": "metrics",
+              "dataset": "logstash.node"
+            },
+            "elastic_agent": {
+              "id": "ef37141b-605e-4b6e-a69f-ec525f8dcdd4",
+              "version": "8.13.4",
+              "snapshot": false
+            },
+            "host": {
+              "id": "bc6ef6f2-ecce-4328-96a2-002de41a144d"
+            }
+          }
+        }
+      ]
+    }
+  }
+]
+

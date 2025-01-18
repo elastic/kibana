@@ -2,10 +2,16 @@ steps:
   - command: .buildkite/scripts/steps/test/kbn_handlebars.sh
     label: 'Check @kbn/handlebars for upstream differences'
     agents:
-      queue: n2-2-spot
+      machineType: n2-standard-2
+      preemptible: true
     depends_on:
       - build
       - quick_checks
+      - checks
+      - linting
+      - linting_with_types
+      - check_types
+      - check_oas_snapshot
     timeout_in_minutes: 5
     retry:
       automatic:

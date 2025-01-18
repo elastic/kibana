@@ -41,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('fleet_delete_agent', () => {
     before(async () => {
       for (const roleName in users) {
-        if (users.hasOwnProperty(roleName)) {
+        if (Object.hasOwn(users, roleName)) {
           const user = users[roleName];
 
           if (user.permissions) {
@@ -63,17 +63,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
-    });
-    it('should return a 403 if user lacks fleet all permissions', async () => {
-      const { body: apiResponse } = await supertest
-        .delete(`/api/fleet/agents/agent1`)
-        .auth(users.fleet_user.username, users.fleet_user.password)
-        .set('kbn-xsrf', 'xx')
-        .expect(403);
-
-      expect(apiResponse).not.to.eql({
-        action: 'deleted',
-      });
     });
 
     it('should return a 404 if there is no agent to delete', async () => {

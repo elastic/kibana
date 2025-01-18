@@ -991,6 +991,44 @@
               },
               {
                 "parentPluginId": "@kbn/kibana-manifest-schema",
+                "id": "def-common.MANIFEST_V2.properties.group",
+                "type": "Object",
+                "tags": [],
+                "label": "group",
+                "description": [],
+                "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/kibana-manifest-schema",
+                    "id": "def-common.MANIFEST_V2.properties.group.enum",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "enum",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/kibana-manifest-schema",
+                    "id": "def-common.MANIFEST_V2.properties.group.description",
+                    "type": "string",
+                    "tags": [],
+                    "label": "description",
+                    "description": [],
+                    "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/kibana-manifest-schema",
                 "id": "def-common.MANIFEST_V2.properties.devOnly",
                 "type": "Object",
                 "tags": [],
@@ -1299,6 +1337,20 @@
                 ]
               }
             ]
+          },
+          {
+            "parentPluginId": "@kbn/kibana-manifest-schema",
+            "id": "def-common.MANIFEST_V2.allOf",
+            "type": "Array",
+            "tags": [],
+            "label": "allOf",
+            "description": [],
+            "signature": [
+              "{ if: { properties: { group: { const: string; }; }; }; then: { properties: { visibility: { enum: string[]; description: string; default: string; }; }; required: string[]; }; else: { properties: { visibility: { const: string; description: string; default: string; }; }; required: string[]; }; }[]"
+            ],
+            "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/kibana-manifest-schema",

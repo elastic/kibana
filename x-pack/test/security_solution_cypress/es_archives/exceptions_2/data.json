@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "_aZE5nwBOpWiDweSth_E",
-    "index": "exceptions-0002",
+    "index": "auditbeat-exceptions-0002",
     "source": {
       "@timestamp": "2019-09-02T00:45:06.527Z",
       "agent": {
@@ -29,7 +29,7 @@
   "type": "doc",
   "value": {
     "id": "_aZE5nwBOpWiDweSth_F",
-    "index": "exceptions-0002",
+    "index": "auditbeat-exceptions-0002",
     "source": {
       "@timestamp": "2019-09-02T00:46:06.527Z",
       "agent": {

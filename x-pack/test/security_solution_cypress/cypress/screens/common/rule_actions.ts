@@ -9,12 +9,20 @@ export const EMAIL_ACTION_BTN = '[data-test-subj=".email-siem-ActionTypeSelectOp
 
 export const WEBHOOK_ACTION_BTN = '[data-test-subj=".webhook-siem-ActionTypeSelectOption"]';
 
+export const SERVER_LOG_ACTION_BTN = '[data-test-subj=".server-log-siem-ActionTypeSelectOption"]';
+
+export const XMATTERS_ACTION_BTN = '[data-test-subj=".xmatters-siem-ActionTypeSelectOption"]';
+
+export const CASES_SYSTEM_ACTION_BTN = '[data-test-subj=".cases-siem-ActionTypeSelectOption"]';
+
 /**
  * all rule actions buttons, elements which data-test-subj attribute ends with  '-siem-ActionTypeSelectOption'
  */
 export const ACTION_BTN = '[data-test-subj$="-siem-ActionTypeSelectOption"]';
 
 export const CREATE_ACTION_CONNECTOR_BTN = '[data-test-subj="createActionConnectorButton-0"]';
+
+export const CREATE_NEW_EMAIL_CONNECTOR = '[data-test-subj="addNewActionConnectorButton-.email"]';
 
 export const SAVE_ACTION_CONNECTOR_BTN = '[data-test-subj="saveActionButtonModal"]';
 

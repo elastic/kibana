@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FtrService } from '../ftr_provider_context';
@@ -50,9 +51,7 @@ export class SelectableService extends FtrService {
         `selectableBodyTestSubjectId: ${selectableBodyTestSubjectId}, textsToSelect: ${textsToSelect}`
     );
 
-    // Open the selectable
-    await this.testSubjects.click(buttonTestSubjectId);
-    await this.common.sleep(500);
+    await this.ensureOpened(buttonTestSubjectId, selectableBodyTestSubjectId);
 
     const selectableBodyContainer = await this.testSubjects.find(selectableBodyTestSubjectId);
     const listContainer = await selectableBodyContainer.findByClassName('euiSelectableList');
@@ -64,7 +63,7 @@ export class SelectableService extends FtrService {
       const textWrapper = await option.findByClassName('euiSelectableListItem__text');
 
       // Use innerText as getVisibleText doesn't return deeply nested text
-      const innerText = await textWrapper.getAttribute('innerText');
+      const innerText = (await textWrapper.getAttribute('innerText')) ?? '';
 
       // Replace screen reader and other Eui related text
       const visibleText = innerText
@@ -85,6 +84,39 @@ export class SelectableService extends FtrService {
 
   public async clearSelection(buttonTestSubjectId: string, selectableBodyTestSubjectId: string) {
     return this.selectOnlyOptionsWithText(buttonTestSubjectId, selectableBodyTestSubjectId, []);
+  }
+
+  public async searchAndSelectOption(
+    buttonTestSubjectId: string,
+    selectableBodyTestSubjectId: string,
+    searchInputTestSubjectId: string,
+    searchText: string,
+    optionText: string
+  ) {
+    await this.ensureOpened(buttonTestSubjectId, selectableBodyTestSubjectId);
+
+    // Clear and set search text
+    await this.testSubjects.setValue(searchInputTestSubjectId, searchText, {
+      clearWithKeyboard: true,
+      typeCharByChar: true,
+    });
+    await this.common.sleep(500);
+
+    // Select options
+    return this.selectOnlyOptionsWithText(buttonTestSubjectId, selectableBodyTestSubjectId, [
+      optionText,
+    ]);
+  }
+
+  private async ensureOpened(buttonTestSubjectId: string, selectableBodyTestSubjectId: string) {
+    // Open the selectable if `selectableBodyTestSubjectId` doesn't exist
+    const isSelectableOpen = await this.testSubjects.exists(selectableBodyTestSubjectId);
+
+    if (!isSelectableOpen) {
+      await this.testSubjects.click(buttonTestSubjectId);
+    }
+
+    await this.testSubjects.existOrFail(selectableBodyTestSubjectId);
   }
 }
 

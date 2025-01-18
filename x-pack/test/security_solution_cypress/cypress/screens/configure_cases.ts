@@ -16,6 +16,16 @@ export const CONNECTOR_NAME = '[data-test-subj="nameInput"]';
 
 export const CONNECTORS_DROPDOWN = '[data-test-subj="dropdown-connectors"]';
 
+export const JIRA_CONNECTOR_CARD = '[data-test-subj=".jira-card"]';
+
+export const JIRA_API_TOKEN = '[data-test-subj="secrets.apiToken-input"';
+
+export const JIRA_EMAIL = '[data-test-subj="secrets.email-input"]';
+
+export const JIRA_PROJECT_KEY = '[data-test-subj="config.projectKey-input"]';
+
+export const JIRA_URL = '[data-test-subj="config.apiUrl-input"]';
+
 export const PASSWORD = '[data-test-subj="connector-servicenow-password-form-input"]';
 
 export const SAVE_BTN = '[data-test-subj="create-connector-flyout-save-btn"]';
@@ -28,4 +38,4 @@ export const URL = '[data-test-subj="credentialsApiUrlFromInput"]';
 
 export const USERNAME = '[data-test-subj="connector-servicenow-username-form-input"]';
 
-export const SERVICE_NOW_MAPPING = 'code[data-test-subj="field-mapping-target"]';
+export const MAPPING = 'code[data-test-subj="field-mapping-target"]';

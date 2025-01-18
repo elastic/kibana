@@ -6,26 +6,10 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-doc-links-browser-mocks",
-        "id": "def-common.docLinksServiceMock",
+        "id": "def-public.docLinksServiceMock",
         "type": "Object",
         "tags": [],
         "label": "docLinksServiceMock",
@@ -36,7 +20,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-doc-links-browser-mocks",
-            "id": "def-common.docLinksServiceMock.create",
+            "id": "def-public.docLinksServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -52,7 +36,7 @@
           },
           {
             "parentPluginId": "@kbn/core-doc-links-browser-mocks",
-            "id": "def-common.docLinksServiceMock.createSetupContract",
+            "id": "def-public.docLinksServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
@@ -68,20 +52,14 @@
           },
           {
             "parentPluginId": "@kbn/core-doc-links-browser-mocks",
-            "id": "def-common.docLinksServiceMock.createStartContract",
+            "id": "def-public.docLinksServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-doc-links-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreDocLinksBrowserPluginApi",
-                "section": "def-common.DocLinksStart",
-                "text": "DocLinksStart"
-              }
+              "DocLinksStart"
             ],
             "path": "packages/core/doc-links/core-doc-links-browser-mocks/src/doc_links_service.mock.ts",
             "deprecated": false,
@@ -93,5 +71,21 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

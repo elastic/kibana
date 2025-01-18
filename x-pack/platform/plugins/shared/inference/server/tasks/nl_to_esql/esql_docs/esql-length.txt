@@ -1,0 +1,28 @@
+# LENGTH
+
+The LENGTH function calculates the character length of a given string.
+
+## Syntax
+
+`LENGTH(string)`
+
+### Parameters
+
+#### string
+
+The string expression for which the length is to be calculated.
+
+## Examples
+
+The following example calculates the character length of the `first_name` field:
+
+```esql
+FROM employees
+| KEEP first_name, last_name
+| EVAL fn_length = LENGTH(first_name)
+```
+
+```esql
+ROW message = "Hello, World!"
+| EVAL message_length = LENGTH(message)
+```

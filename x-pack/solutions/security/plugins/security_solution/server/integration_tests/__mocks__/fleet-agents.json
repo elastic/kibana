@@ -1,0 +1,132 @@
+[
+  {
+    "policy_coordinator_idx": 1,
+    "outputs": {
+      "default": {
+        "api_key": "",
+        "permissions_hash": "123",
+        "type": "elasticsearch",
+        "to_retire_api_key_ids": [
+          {
+            "retired_at": "2022-11-10T17:22:38Z",
+            "id": "123"
+          }
+        ],
+        "api_key_id": ""
+      }
+    },
+    "default_api_key": null,
+    "agent": {
+      "id": "123",
+      "version": "8.0.0"
+    },
+    "enrolled_at": "2022-06-02T18:49:23Z",
+    "policy_id": "policy-elastic-agent-on-cloud",
+    "last_checkin_status": "online",
+    "active": false,
+    "default_api_key_history": null,
+    "local_metadata": {
+      "os": {
+        "kernel": "4.15.0-1027-aws",
+        "name": "Ubuntu",
+        "family": "debian",
+        "version": "20.04.3 LTS (Focal Fossa)",
+        "platform": "ubuntu",
+        "full": "Ubuntu focal(20.04.3 LTS (Focal Fossa))"
+      },
+      "elastic": {
+        "agent": {
+          "build.original": "8.0.0 (build: 2ab3a7334016f570e0bfc7e9a577a35a22e02df5 at 2022-02-03 22:52:29 +0000 UTC)",
+          "upgradeable": false,
+          "log_level": "info",
+          "id": "123",
+          "version": "8.0.0",
+          "snapshot": false
+        }
+      },
+      "host": {
+        "hostname": "123",
+        "ip": ["127.0.0.1/8", "172.17.0.85/16"],
+        "name": "123",
+        "id": "",
+        "mac": ["02:42:ac:11:00:55"],
+        "architecture": "x86_64"
+      }
+    },
+    "unenrolled_reason": "timeout",
+    "type": "PERMANENT",
+    "last_checkin": "2022-06-06T20:08:36Z",
+    "access_api_key_id": "123",
+    "default_api_key_id": null,
+    "unenrolled_at": "2022-06-07T20:09:32Z",
+    "updated_at": "2022-06-07T20:09:32Z",
+    "policy_revision_idx": 3,
+    "policy_output_permissions_hash": null,
+    "action_seq_no": [-1]
+  },
+  {
+    "policy_coordinator_idx": 1,
+    "outputs": {
+      "default": {
+        "api_key": "",
+        "permissions_hash": "123",
+        "type": "elasticsearch",
+        "to_retire_api_key_ids": [
+          {
+            "retired_at": "2022-11-10T17:22:38Z",
+            "id": "123"
+          }
+        ],
+        "api_key_id": ""
+      }
+    },
+    "default_api_key": null,
+    "agent": {
+      "id": "123",
+      "version": "8.1.2"
+    },
+    "enrolled_at": "2022-06-06T20:08:27Z",
+    "policy_id": "policy-elastic-agent-on-cloud",
+    "last_checkin_status": "online",
+    "active": false,
+    "default_api_key_history": null,
+    "local_metadata": {
+      "os": {
+        "kernel": "5.4.0-1032-aws",
+        "name": "Ubuntu",
+        "family": "debian",
+        "version": "20.04.4 LTS (Focal Fossa)",
+        "platform": "ubuntu",
+        "full": "Ubuntu focal(20.04.4 LTS (Focal Fossa))"
+      },
+      "elastic": {
+        "agent": {
+          "build.original": "8.1.2 (build: 6118f25235a52a7f0c4937a0a309e380c92d8119 at 2022-03-30 00:39:00 +0000 UTC)",
+          "upgradeable": false,
+          "log_level": "info",
+          "id": "123",
+          "version": "8.1.2",
+          "snapshot": false
+        }
+      },
+      "host": {
+        "hostname": "123",
+        "ip": ["127.0.0.1/8", "172.17.0.69/16"],
+        "name": "123",
+        "id": "",
+        "mac": ["02:42:ac:11:00:45"],
+        "architecture": "x86_64"
+      }
+    },
+    "unenrolled_reason": "timeout",
+    "type": "PERMANENT",
+    "last_checkin": "2022-06-14T18:37:15Z",
+    "access_api_key_id": "123",
+    "default_api_key_id": null,
+    "unenrolled_at": "2022-06-15T18:38:08Z",
+    "updated_at": "2022-06-15T18:38:08Z",
+    "policy_revision_idx": 4,
+    "policy_output_permissions_hash": null,
+    "action_seq_no": [-1]
+  }
+]

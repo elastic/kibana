@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
-import type { LogRateAnalysisType } from '@kbn/aiops-utils';
+import type { LogRateAnalysisType } from '@kbn/aiops-log-rate-analysis';
 import type { Datafeed, Job } from '@kbn/ml-plugin/server/shared';
 
 import { isDefaultSearchQuery } from '@kbn/aiops-plugin/public/application/url_state/common';
@@ -98,7 +98,7 @@ const testData: TestData[] = [
           fieldValue: 'AAL',
           impact: 'High',
           logRate: 'Chart type:bar chart',
-          pValue: '8.96e-49',
+          pValue: '',
         },
       ],
     },
@@ -156,7 +156,7 @@ export default function ({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const ml = getService('ml');
 
-  describe('anomaly table with link to log rate analysis', async function () {
+  describe('anomaly table with link to log rate analysis', function () {
     this.tags(['ml']);
 
     before(async () => {
@@ -176,7 +176,7 @@ export default function ({ getService }: FtrProviderContext) {
           entitySelectionValue,
           expected,
         } = td;
-        describe(`via ${page} for job ${jobConfig.job_id}`, async function () {
+        describe(`via ${page} for job ${jobConfig.job_id}`, function () {
           before(async () => {
             await ml.api.createAndRunAnomalyDetectionLookbackJob(jobConfig, datafeedConfig);
 

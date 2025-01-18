@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import Chance from 'chance';
 import { asyncForEach } from '@kbn/std';
-import { CspBenchmarkRule } from '@kbn/cloud-security-posture-plugin/common/types/latest';
+import { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '@kbn/cloud-security-posture-plugin/common/constants';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
@@ -53,6 +53,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         },
         type: 'process',
       },
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
     {
       '@timestamp': new Date().toISOString(),
@@ -74,6 +77,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           version: 'v1.0.0',
         },
         type: 'process',
+      },
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
       },
     },
     {
@@ -97,6 +103,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         },
         type: 'process',
       },
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
     {
       '@timestamp': new Date().toISOString(),
@@ -118,6 +127,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           version: 'v2.0.0',
         },
         type: 'process',
+      },
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
       },
     },
   ];
@@ -158,6 +170,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      await findings.navigateToLatestFindingsPage();
+      await pageObjects.header.waitUntilLoadingHasFinished();
       const groupSelector = await findings.groupSelector();
       await groupSelector.openDropDown();
       await groupSelector.setValue('None');
@@ -168,7 +182,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('groups findings by resource and sort by compliance score desc', async () => {
         const groupSelector = await findings.groupSelector();
         await groupSelector.openDropDown();
-        await groupSelector.setValue('Resource');
+        await groupSelector.setValue('Resource ID');
 
         const grouping = await findings.findingsGrouping();
 
@@ -400,10 +414,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await groupSelector.openDropDown();
         await groupSelector.setValue('None');
         await groupSelector.openDropDown();
-        await groupSelector.setValue('Resource');
+        await groupSelector.setValue('Resource ID');
 
         // Filter bar uses the field's customLabel in the DataView
-        await filterBar.addFilter({ field: 'Rule Name', operation: 'is', value: ruleName1 });
+        await filterBar.addFilter({ field: 'rule.name', operation: 'is', value: ruleName1 });
         expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(true);
 
         const grouping = await findings.findingsGrouping();
@@ -501,12 +515,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const groupSelector = await findings.groupSelector();
         await groupSelector.openDropDown();
-        await groupSelector.setValue('Resource');
+        await groupSelector.setValue('Resource ID');
 
         const grouping = await findings.findingsGrouping();
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be(`${resourceGroupCount + 1} resources`);
+        expect(groupCount).to.be(`${resourceGroupCount} resources`);
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be(`${findingsCount + 1} findings`);

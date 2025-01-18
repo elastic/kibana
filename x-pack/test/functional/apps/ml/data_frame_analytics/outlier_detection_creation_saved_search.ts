@@ -83,7 +83,14 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 section: 'state',
                 // Don't include the 'Create time' value entry as it's not stable.
-                expectedEntries: ['STOPPED', 'Create time', 'Model memory limit', '1mb', 'Version'],
+                expectedEntries: [
+                  'Status',
+                  'stopped',
+                  'Create time',
+                  'Model memory limit',
+                  '1mb',
+                  'Version',
+                ],
               },
               {
                 section: 'stats',
@@ -114,10 +121,10 @@ export default function ({ getService }: FtrProviderContext) {
                   timing_stats: '{"elapsed_time":15}',
                   n_neighbors: '0',
                   method: 'ensemble',
-                  compute_feature_influence: 'true',
+                  compute_feature_influence: true,
                   feature_influence_threshold: '0.1',
                   outlier_fraction: '0.05',
-                  standardization_enabled: 'true',
+                  standardization_enabled: true,
                 },
               },
             ],
@@ -160,7 +167,14 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 section: 'state',
                 // Don't include the 'Create time' value entry as it's not stable.
-                expectedEntries: ['STOPPED', 'Create time', 'Model memory limit', '1mb', 'Version'],
+                expectedEntries: [
+                  'Status',
+                  'stopped',
+                  'Create time',
+                  'Model memory limit',
+                  '1mb',
+                  'Version',
+                ],
               },
               {
                 section: 'stats',
@@ -191,10 +205,10 @@ export default function ({ getService }: FtrProviderContext) {
                   timing_stats: '{"elapsed_time":12}',
                   n_neighbors: '0',
                   method: 'ensemble',
-                  compute_feature_influence: 'true',
+                  compute_feature_influence: true,
                   feature_influence_threshold: '0.1',
                   outlier_fraction: '0.05',
-                  standardization_enabled: 'true',
+                  standardization_enabled: true,
                 },
               },
             ],
@@ -237,7 +251,14 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 section: 'state',
                 // Don't include the 'Create time' value entry as it's not stable.
-                expectedEntries: ['STOPPED', 'Create time', 'Model memory limit', '1mb', 'Version'],
+                expectedEntries: [
+                  'Status',
+                  'stopped',
+                  'Create time',
+                  'Model memory limit',
+                  '1mb',
+                  'Version',
+                ],
               },
               {
                 section: 'stats',
@@ -268,10 +289,10 @@ export default function ({ getService }: FtrProviderContext) {
                   timing_stats: '{"elapsed_time":12}',
                   n_neighbors: '0',
                   method: 'ensemble',
-                  compute_feature_influence: 'true',
+                  compute_feature_influence: true,
                   feature_influence_threshold: '0.1',
                   outlier_fraction: '0.05',
-                  standardization_enabled: 'true',
+                  standardization_enabled: true,
                 },
               },
             ],
@@ -315,7 +336,14 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 section: 'state',
                 // Don't include the 'Create time' value entry as it's not stable.
-                expectedEntries: ['STOPPED', 'Create time', 'Model memory limit', '1mb', 'Version'],
+                expectedEntries: [
+                  'Status',
+                  'stopped',
+                  'Create time',
+                  'Model memory limit',
+                  '1mb',
+                  'Version',
+                ],
               },
               {
                 section: 'stats',
@@ -346,10 +374,10 @@ export default function ({ getService }: FtrProviderContext) {
                   timing_stats: '{"elapsed_time":12}',
                   n_neighbors: '0',
                   method: 'ensemble',
-                  compute_feature_influence: 'true',
+                  compute_feature_influence: true,
                   feature_influence_threshold: '0.1',
                   outlier_fraction: '0.05',
-                  standardization_enabled: 'true',
+                  standardization_enabled: true,
                 },
               },
             ],

@@ -13,7 +13,7 @@ import {
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 export const getCoverageOverview = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   filter?: CoverageOverviewFilter
 ): Promise<CoverageOverviewResponse> => {
   const response = await supertest

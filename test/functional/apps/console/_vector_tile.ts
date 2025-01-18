@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -24,15 +25,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.home.addSampleDataSet('logs');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.common.navigateToApp('console');
-      await PageObjects.console.closeHelpIfExists();
-      await PageObjects.console.clearTextArea();
+      await PageObjects.console.skipTourIfExists();
+      await PageObjects.console.clearEditorText();
     });
 
     it('should validate response', async () => {
       await PageObjects.console.enterText(`GET kibana_sample_data_logs/_mvt/geo.coordinates/0/0/0`);
       await PageObjects.console.clickPlay();
       await retry.try(async () => {
-        const actualResponse = await PageObjects.console.getResponse();
+        const actualResponse = await PageObjects.console.getOutputText();
         expect(actualResponse).to.contain('"meta": [');
       });
     });

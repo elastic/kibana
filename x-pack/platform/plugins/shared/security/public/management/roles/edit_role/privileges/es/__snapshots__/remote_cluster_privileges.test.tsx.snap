@@ -1,0 +1,54 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`it renders without crashing 1`] = `
+<RemoteClusterPrivileges
+  availableRemoteClusterPrivileges={
+    Array [
+      "monitor_enrich",
+    ]
+  }
+  editable={true}
+  license={
+    Object {
+      "features$": Observable {
+        "_subscribe": [Function],
+      },
+      "getFeatures": [MockFunction],
+      "getLicenseType": [MockFunction],
+      "getUnavailableReason": [MockFunction],
+      "hasAtLeast": [MockFunction],
+      "isEnabled": [MockFunction],
+      "isLicenseAvailable": [MockFunction],
+    }
+  }
+  onChange={[MockFunction]}
+  role={
+    Object {
+      "elasticsearch": Object {
+        "cluster": Array [],
+        "indices": Array [],
+        "remote_cluster": Array [
+          Object {
+            "clusters": Array [
+              "cluster1",
+              "cluster2",
+            ],
+            "privileges": Array [
+              "monitor_enrich",
+            ],
+          },
+        ],
+        "run_as": Array [],
+      },
+      "kibana": Array [],
+      "name": "",
+    }
+  }
+  validator={
+    RoleValidator {
+      "buildFlavor": undefined,
+      "shouldValidate": undefined,
+    }
+  }
+/>
+`;

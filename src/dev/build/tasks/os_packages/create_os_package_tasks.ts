@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Task } from '../../lib';
@@ -28,6 +29,8 @@ export const CreateDebPackage: Task = {
       'amd64',
       '--deb-priority',
       'optional',
+      '--depends',
+      ' adduser',
     ]);
 
     await runFpm(config, log, build, 'deb', 'arm64', [
@@ -35,6 +38,8 @@ export const CreateDebPackage: Task = {
       'arm64',
       '--deb-priority',
       'optional',
+      '--depends',
+      ' adduser',
     ]);
   },
 };
@@ -80,13 +85,34 @@ export const CreateDockerUbuntu: Task = {
   },
 };
 
+export const CreateDockerWolfi: Task = {
+  description: 'Creating Docker Wolfi image',
+
+  async run(config, log, build) {
+    await runDockerGenerator(config, log, build, {
+      architecture: 'x64',
+      baseImage: 'wolfi',
+      context: false,
+      image: true,
+      dockerBuildDate,
+    });
+    await runDockerGenerator(config, log, build, {
+      architecture: 'aarch64',
+      baseImage: 'wolfi',
+      context: false,
+      image: true,
+      dockerBuildDate,
+    });
+  },
+};
+
 export const CreateDockerServerless: Task = {
   description: 'Creating Docker Serverless image',
 
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
       architecture: 'x64',
-      baseImage: 'ubuntu',
+      baseImage: 'wolfi',
       context: false,
       serverless: true,
       image: true,
@@ -94,7 +120,7 @@ export const CreateDockerServerless: Task = {
     });
     await runDockerGenerator(config, log, build, {
       architecture: 'aarch64',
-      baseImage: 'ubuntu',
+      baseImage: 'wolfi',
       context: false,
       serverless: true,
       image: true,
@@ -122,14 +148,14 @@ export const CreateDockerCloud: Task = {
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
       architecture: 'x64',
-      baseImage: 'ubuntu',
+      baseImage: 'wolfi',
       context: false,
       cloud: true,
       image: true,
     });
     await runDockerGenerator(config, log, build, {
       architecture: 'aarch64',
-      baseImage: 'ubuntu',
+      baseImage: 'wolfi',
       context: false,
       cloud: true,
       image: true,
@@ -162,6 +188,12 @@ export const CreateDockerContexts: Task = {
       dockerBuildDate,
     });
     await runDockerGenerator(config, log, build, {
+      baseImage: 'wolfi',
+      context: true,
+      image: false,
+      dockerBuildDate,
+    });
+    await runDockerGenerator(config, log, build, {
       baseImage: 'ubi',
       context: true,
       image: false,
@@ -173,13 +205,13 @@ export const CreateDockerContexts: Task = {
       image: false,
     });
     await runDockerGenerator(config, log, build, {
-      baseImage: 'ubuntu',
+      baseImage: 'wolfi',
       cloud: true,
       context: true,
       image: false,
     });
     await runDockerGenerator(config, log, build, {
-      baseImage: 'ubuntu',
+      baseImage: 'wolfi',
       serverless: true,
       context: true,
       image: false,

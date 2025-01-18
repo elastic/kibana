@@ -1,0 +1,47 @@
+---
+id: kibCloudExperimentsPlugin
+slug: /kibana-dev-docs/key-concepts/cloud-experiments-plugin
+title: Cloud Experiments service
+description: The Cloud Experiments Service provides the necessary APIs to implement A/B testing scenarios, fetching the variations in configuration and reporting back metrics to track conversion rates of the experiments.
+date: 2022-09-07
+tags: ['kibana', 'dev', 'contributor', 'api docs', 'cloud', 'a/b testing', 'experiments']
+---
+
+# Kibana Cloud Experiments Service
+
+> [!NOTE]  
+> This plugin no-longer exposes any evaluation APIs. Refer to <DocLink id="kibFeatureFlagsService" /> for more information about how to interact with feature flags.
+
+This plugin takes care of instrumenting the LaunchDarkly feature flags provider, and registering it in the <DocLink id="kibFeatureFlagsService" />.
+It also instantiates the most basic evaluation context that our segmentation rules can rely on.  
+
+The `cloudExperiments` plugin is disabled by default and only enabled on Elastic Cloud deployments.
+
+## Evaluation Context
+
+The fields populated by this plugin in the evaluation context are shown in the JSON snippet below.
+It reports the context split in 2 levels: `kibana` and `organization`. This should help providing a consistent behavior
+for all users in a deployment/project, or for all the deployments in an organization.
+
+```JSON
+{
+  "kind": "multi",
+  "kibana": {
+    "key": "deployment/project ID",
+    "offering": "traditional/serverless",
+    "version": "8.16.0",
+    "build_num": 1234,
+    "build_sha": "cdadaasdasdjsljhl",
+    "build_sha_short": "cdada",
+    "project_type": "Serverless project type",
+    "orchestrator_target": "canary/non-canary",
+    "has_data": true
+  },
+  "organization": {
+    "key": "Cloud Organization ID",
+    "is_elastic_staff": false,
+    "in_trial": false,
+    "trial_end_date": "2024-01-01T01:00:00.000Z"
+  }
+}
+```

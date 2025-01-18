@@ -12,7 +12,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
   describe('ML app', function () {
-    this.tags(['ml', 'skipFirefox']);
+    this.tags(['ml']);
 
     before(async () => {
       await ml.securityCommon.createMlRoles();

@@ -1,0 +1,41 @@
+patch:
+  summary: Update case settings
+  operationId: updateCaseConfigurationDefaultSpace
+  description: >
+    Updates setting details such as the closure type, custom fields, templates, and the default connector for cases.
+    Connectors are used to interface with external systems.
+    You must create a connector before you can use it in your cases.
+    You must have `all` privileges for the **Cases** feature in the
+    **Management**, **Observability**, or **Security** section of the Kibana
+    feature privileges, depending on where the case was created.
+  tags:
+    - cases
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+    - $ref: ../components/parameters/configuration_id.yaml
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/update_case_configuration_request.yaml'
+        examples:
+          updateCaseConfigurationRequest:
+            $ref: '../components/examples/update_case_configuration_request.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              $ref: '../components/schemas/case_configure_response_properties.yaml'
+          examples:
+            updateCaseConfigurationResponse:
+              $ref: '../components/examples/update_case_configuration_response.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/4xx_response.yaml'

@@ -9,7 +9,7 @@ import type { TestCaseWithoutTimeline } from '../../../objects/case';
 import { ALL_CASES_CREATE_NEW_CASE_BTN, ALL_CASES_NAME } from '../../../screens/all_cases';
 
 import { goToCreateNewCase } from '../../../tasks/all_cases';
-import { deleteAllCasesItems } from '../../../tasks/api_calls/common';
+import { deleteCases } from '../../../tasks/api_calls/cases';
 
 import {
   backToCases,
@@ -54,7 +54,7 @@ describe('Cases privileges', { tags: ['@ess'] }, () => {
     deleteUsersAndRoles(usersToCreate, rolesToCreate);
     createUsersAndRoles(usersToCreate, rolesToCreate);
     login();
-    deleteAllCasesItems();
+    deleteCases();
   });
 
   for (const user of [secAllUser, secReadCasesAllUser, secAllCasesNoDeleteUser]) {

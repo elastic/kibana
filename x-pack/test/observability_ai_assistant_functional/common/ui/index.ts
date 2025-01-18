@@ -6,17 +6,16 @@
  */
 
 import type { PathsOf, TypeAsArgs, TypeOf } from '@kbn/typed-react-router-config';
+import { kbnTestConfig } from '@kbn/test';
 import type { ObservabilityAIAssistantRoutes } from '@kbn/observability-ai-assistant-app-plugin/public/routes/config';
 import qs from 'query-string';
-import type { Role } from '@kbn/security-plugin-types-common';
-import { OBSERVABILITY_AI_ASSISTANT_FEATURE_ID } from '@kbn/observability-ai-assistant-plugin/common/feature';
-import { APM_SERVER_FEATURE_ID } from '@kbn/apm-plugin/server';
+import { User } from '../../../observability_ai_assistant_api_integration/common/users/users';
 import type { InheritedFtrProviderContext } from '../../ftr_provider_context';
 
 export interface ObservabilityAIAssistantUIService {
   pages: typeof pages;
   auth: {
-    login: () => Promise<void>;
+    login: (username: User['username']) => Promise<void>;
     logout: () => Promise<void>;
   };
   router: {
@@ -28,11 +27,19 @@ export interface ObservabilityAIAssistantUIService {
 }
 
 const pages = {
+  kbManagementTab: {
+    table: 'knowledgeBaseTable',
+    tableTitleCell: 'knowledgeBaseTableTitleCell',
+    tableAuthorCell: 'knowledgeBaseTableAuthorCell',
+  },
   conversations: {
     setupGenAiConnectorsButtonSelector: `observabilityAiAssistantInitialSetupPanelSetUpGenerativeAiConnectorButton`,
     chatInput: 'observabilityAiAssistantChatPromptEditorTextArea',
     retryButton: 'observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton',
     conversationLink: 'observabilityAiAssistantConversationsLink',
+    positiveFeedbackButton: 'observabilityAiAssistantFeedbackButtonsPositiveButton',
+    connectorsErrorMsg: 'observabilityAiAssistantConnectorsError',
+    conversationsPage: 'observabilityAiAssistantConversationsPage',
   },
   createConnectorFlyout: {
     flyout: 'create-connector-flyout',
@@ -43,52 +50,44 @@ const pages = {
     apiKeyInput: 'secrets.apiKey-input',
     saveButton: 'create-connector-flyout-save-btn',
   },
+  contextualInsights: {
+    container: 'obsAiAssistantInsightContainer',
+    button: 'obsAiAssistantInsightButton',
+    text: 'obsAiAssistantInsightResponse',
+  },
+  links: {
+    solutionMenuLink: 'observability-nav-observabilityAIAssistant-ai_assistant',
+    globalHeaderButton: 'observabilityAiAssistantAppNavControlButton',
+  },
+  settings: {
+    settingsPage: 'aiAssistantSettingsPage',
+    managementLink: 'aiAssistantManagementSelection',
+    logsIndexPatternInput: 'management-settings-editField-observability:logSources',
+    searchConnectorIndexPatternInput:
+      'management-settings-editField-observability:aiAssistantSearchConnectorIndexPattern',
+    saveButton: 'observabilityAiAssistantManagementBottomBarActionsButton',
+    aiAssistantCard: 'aiAssistantSelectionPageObservabilityCard',
+  },
 };
 
 export async function ObservabilityAIAssistantUIProvider({
   getPageObjects,
   getService,
 }: InheritedFtrProviderContext): Promise<ObservabilityAIAssistantUIService> {
-  const browser = getService('browser');
-  const deployment = getService('deployment');
-  const security = getService('security');
-  const pageObjects = getPageObjects(['common']);
-
-  const roleName = 'observability-ai-assistant-functional-test-role';
+  const pageObjects = getPageObjects(['common', 'security']);
 
   return {
     pages,
     auth: {
-      login: async () => {
-        await browser.navigateTo(deployment.getHostPort());
+      login: async (username: string) => {
+        const { password } = kbnTestConfig.getUrlParts();
 
-        const roleDefinition: Role = {
-          name: roleName,
-          elasticsearch: {
-            cluster: [],
-            indices: [],
-            run_as: [],
-          },
-          kibana: [
-            {
-              spaces: ['*'],
-              base: [],
-              feature: {
-                actions: ['all'],
-                [APM_SERVER_FEATURE_ID]: ['all'],
-                [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID]: ['all'],
-              },
-            },
-          ],
-        };
-
-        await security.role.create(roleName, roleDefinition);
-
-        await security.testUser.setRoles([roleName, 'apm_user']); // performs a page reload
+        await pageObjects.security.login(username, password, {
+          expectSpaceSelector: false,
+        });
       },
       logout: async () => {
-        await security.role.delete(roleName);
-        await security.testUser.restoreDefaults();
+        await pageObjects.security.forceLogout();
       },
     },
     router: {

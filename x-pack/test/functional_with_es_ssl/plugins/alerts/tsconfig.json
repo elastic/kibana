@@ -16,5 +16,6 @@
     "@kbn/alerting-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/shared-ux-router",
+    "@kbn/react-kibana-context-render",
   ]
 }

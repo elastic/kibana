@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { EuiButton } from '@elastic/eui';
+
+import { EuiButton, EuiProvider } from '@elastic/eui';
 
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
@@ -74,23 +76,27 @@ export class ErrorBoundaryExamplePlugin implements Plugin<void, void, SetupDeps>
       id: 'errorBoundaryExample',
       title: 'Error Boundary Example',
       async mount({ element }: AppMountParameters) {
+        // Using the "EuiProvider" here rather than KibanaRenderContextProvider, because KibanaRenderContextProvider
+        // wraps KibanaErrorBoundaryProvider and KibanaErrorBoundary and we want to test it directly, not a wrapper.
         ReactDOM.render(
-          <KibanaErrorBoundaryProvider analytics={core.analytics}>
-            <KibanaErrorBoundary>
-              <KibanaPageTemplate>
-                <KibanaPageTemplate.Header
-                  pageTitle="KibanaErrorBoundary example"
-                  data-test-subj="errorBoundaryExampleHeader"
-                />
-                <KibanaPageTemplate.Section grow={false}>
-                  <FatalComponent />
-                </KibanaPageTemplate.Section>
-                <KibanaPageTemplate.Section>
-                  <RecoverableComponent />
-                </KibanaPageTemplate.Section>
-              </KibanaPageTemplate>
-            </KibanaErrorBoundary>
-          </KibanaErrorBoundaryProvider>,
+          <EuiProvider>
+            <KibanaErrorBoundaryProvider analytics={core.analytics}>
+              <KibanaErrorBoundary>
+                <KibanaPageTemplate>
+                  <KibanaPageTemplate.Header
+                    pageTitle="KibanaErrorBoundary example"
+                    data-test-subj="errorBoundaryExampleHeader"
+                  />
+                  <KibanaPageTemplate.Section grow={false}>
+                    <FatalComponent />
+                  </KibanaPageTemplate.Section>
+                  <KibanaPageTemplate.Section>
+                    <RecoverableComponent />
+                  </KibanaPageTemplate.Section>
+                </KibanaPageTemplate>
+              </KibanaErrorBoundary>
+            </KibanaErrorBoundaryProvider>
+          </EuiProvider>,
           element
         );
         return () => ReactDOM.unmountComponentAtNode(element);

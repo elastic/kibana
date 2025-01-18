@@ -75,7 +75,7 @@
             "label": "homePage",
             "description": [],
             "signature": [
-              "\"dev_tools\""
+              "\"enterpriseSearch\""
             ],
             "path": "packages/solution-nav/es/definition.ts",
             "deprecated": false,
@@ -90,9 +90,23 @@
             "description": [],
             "signature": [
               "Observable",
-              "<{ body: { type: \"navGroup\"; id: string; title: string; icon: string; defaultIsCollapsed: false; isCollapsible: false; breadcrumbStatus: \"hidden\"; children: { id: string; title: string; link: \"dev_tools:console\"; getIsActive: ({ pathNameSerialized, prepend }: { pathNameSerialized: string; location: ",
-              "Location",
-              "<unknown>; prepend: (path: string) => string; }) => boolean; spaceBefore: \"m\"; }[]; }[]; }>"
+              "<",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.NavigationTreeDefinition",
+                "text": "NavigationTreeDefinition"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.AppDeepLinkId",
+                "text": "AppDeepLinkId"
+              },
+              ", string, string>>"
             ],
             "path": "packages/solution-nav/es/definition.ts",
             "deprecated": false,

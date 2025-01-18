@@ -1,0 +1,100 @@
+openapi: 3.0.0
+info:
+  title: Find Rules API endpoint
+  version: '2023-10-31'
+paths:
+  /api/detection_engine/rules/_find:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: FindRules
+      summary: List all detection rules
+      description: Retrieve a paginated list of detection rules. By default, the first page is returned, with 20 results per page.
+      tags:
+        - Rules API
+      parameters:
+        - name: 'fields'
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: 'filter'
+          in: query
+          description: Search query
+          required: false
+          schema:
+            type: string
+        - name: 'sort_field'
+          in: query
+          description: Field to sort by
+          required: false
+          schema:
+            $ref: '#/components/schemas/FindRulesSortField'
+        - name: 'sort_order'
+          in: query
+          description: Sort order
+          required: false
+          schema:
+            $ref: '../../model/sorting.schema.yaml#/components/schemas/SortOrder'
+        - name: 'page'
+          in: query
+          description: Page number
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: 'per_page'
+          in: query
+          description: Rules per page
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 20
+
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: integer
+                  perPage:
+                    type: integer
+                  total:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: '../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
+                required:
+                  - page
+                  - perPage
+                  - total
+                  - data
+
+components:
+  schemas:
+    FindRulesSortField:
+      type: string
+      enum:
+        - 'created_at'
+        - 'createdAt' # Legacy notation, keeping for backwards compatibility
+        - 'enabled'
+        - 'execution_summary.last_execution.date'
+        - 'execution_summary.last_execution.metrics.execution_gap_duration_s'
+        - 'execution_summary.last_execution.metrics.total_indexing_duration_ms'
+        - 'execution_summary.last_execution.metrics.total_search_duration_ms'
+        - 'execution_summary.last_execution.status'
+        - 'name'
+        - 'risk_score'
+        - 'riskScore' # Legacy notation, keeping for backwards compatibility
+        - 'severity'
+        - 'updated_at'
+        - 'updatedAt' # Legacy notation, keeping for backwards compatibility

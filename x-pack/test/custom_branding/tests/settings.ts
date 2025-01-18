@@ -80,7 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await goToSettings();
       const img = await find.byCssSelector('img[alt="logo"]');
-      const imgSrc = await img.getAttribute('src');
+      const imgSrc = (await img.getAttribute('src')) ?? '';
       expect(imgSrc.startsWith('data:image/png')).to.be(true);
     });
 
@@ -91,9 +91,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         require.resolve('./acme_text.png')
       );
       await goToSettings();
-      const logo = await testSubjects.find('logo');
-      const img = await logo.findByCssSelector('.chrHeaderLogo__mark');
-      const imgSrc = await img.getAttribute('src');
+      const img = await testSubjects.find('logoMark');
+      const imgSrc = (await img.getAttribute('src')) ?? '';
       expect(imgSrc.startsWith('data:image/png')).to.be(true);
     });
   });

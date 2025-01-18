@@ -43,11 +43,9 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
-  // TODO: add a new service for pulling kibana username, similar to getService('es')
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless @skipInQA patch_rules', () => {
+  describe('@ess @serverless @skipInServerlessMKI patch_rules', () => {
     describe('patch rules', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);
@@ -69,7 +67,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ rule_id: 'rule-1', name: 'some other name' })
           .expect(200);
 
-        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
         outputRule.name = 'some other name';
         outputRule.revision = 1;
@@ -88,7 +86,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ rule_id: 'rule-1', machine_learning_job_id: 'some_job_id' })
           .expect(200);
 
-        const outputRule = updateUsername(getSimpleMlRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule = updateUsername(getSimpleMlRuleOutput(), await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
@@ -105,7 +103,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ rule_id: 'rule-1', name: 'some other name' })
           .expect(200);
 
-        const outputRule = updateUsername(getSimpleMlRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule = updateUsername(getSimpleMlRuleOutput(), await utils.getUsername());
 
         outputRule.name = 'some other name';
         outputRule.revision = 1;
@@ -128,7 +126,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = updateUsername(
           getSimpleRuleOutputWithoutRuleId(),
-          ELASTICSEARCH_USERNAME
+          await utils.getUsername()
         );
 
         outputRule.name = 'some other name';
@@ -147,7 +145,7 @@ export default ({ getService }: FtrProviderContext) => {
           .set('elastic-api-version', '2023-10-31')
           .send({ id: createdBody.id, name: 'some other name' })
           .expect(200);
-        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
         outputRule.name = 'some other name';
         outputRule.revision = 1;
@@ -166,7 +164,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ rule_id: 'rule-1', enabled: false })
           .expect(200);
 
-        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
         outputRule.enabled = false;
 
@@ -185,7 +183,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ rule_id: 'rule-1', severity: 'low', enabled: false })
           .expect(200);
 
-        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
         outputRule.enabled = false;
         outputRule.severity = 'low';
         outputRule.revision = 1;
@@ -213,7 +211,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ rule_id: 'rule-1', name: 'some other name' })
           .expect(200);
 
-        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
         outputRule.name = 'some other name';
         outputRule.timeline_title = 'some title';
         outputRule.timeline_id = 'some id';
@@ -422,7 +420,7 @@ export default ({ getService }: FtrProviderContext) => {
         describe('actions without frequencies', () => {
           [undefined, NOTIFICATION_THROTTLE_NO_ACTIONS, NOTIFICATION_THROTTLE_RULE].forEach(
             (throttle) => {
-              it(`@brokenInServerless it sets each action's frequency attribute to default value when 'throttle' is ${throttle}`, async () => {
+              it(`@skipInServerless it sets each action's frequency attribute to default value when 'throttle' is ${throttle}`, async () => {
                 const actionsWithoutFrequencies = await getActionsWithoutFrequencies(supertest);
 
                 // create simple rule
@@ -436,7 +434,7 @@ export default ({ getService }: FtrProviderContext) => {
                 );
                 const expectedRule = updateUsername(
                   getSimpleRuleOutputWithoutRuleId(),
-                  ELASTICSEARCH_USERNAME
+                  await utils.getUsername()
                 );
 
                 expectedRule.revision = 1;
@@ -452,7 +450,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           // Action throttle cannot be shorter than the schedule interval which is by default is 5m
           ['300s', '5m', '3h', '4d'].forEach((throttle) => {
-            it(`@brokenInServerless it correctly transforms 'throttle = ${throttle}' and sets it as a frequency of each action`, async () => {
+            it(`@skipInServerless it correctly transforms 'throttle = ${throttle}' and sets it as a frequency of each action`, async () => {
               const actionsWithoutFrequencies = await getActionsWithoutFrequencies(supertest);
 
               // create simple rule
@@ -466,7 +464,7 @@ export default ({ getService }: FtrProviderContext) => {
               );
               const expectedRule = updateUsername(
                 getSimpleRuleOutputWithoutRuleId(),
-                ELASTICSEARCH_USERNAME
+                await utils.getUsername()
               );
 
               expectedRule.revision = 1;
@@ -490,7 +488,7 @@ export default ({ getService }: FtrProviderContext) => {
             '10h',
             '2d',
           ].forEach((throttle) => {
-            it(`@brokenInServerless it does not change actions frequency attributes when 'throttle' is '${throttle}'`, async () => {
+            it(`@skipInServerless it does not change actions frequency attributes when 'throttle' is '${throttle}'`, async () => {
               const actionsWithFrequencies = await getActionsWithFrequencies(supertest);
 
               // create simple rule
@@ -505,7 +503,7 @@ export default ({ getService }: FtrProviderContext) => {
 
               const expectedRule = updateUsername(
                 getSimpleRuleOutputWithoutRuleId(),
-                ELASTICSEARCH_USERNAME
+                await utils.getUsername()
               );
 
               expectedRule.revision = 1;
@@ -516,7 +514,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        describe('@brokenInServerless some actions with frequencies', () => {
+        describe('@skipInServerless some actions with frequencies', () => {
           [undefined, NOTIFICATION_THROTTLE_NO_ACTIONS, NOTIFICATION_THROTTLE_RULE].forEach(
             (throttle) => {
               it(`it overrides each action's frequency attribute to default value when 'throttle' is ${throttle}`, async () => {
@@ -533,7 +531,7 @@ export default ({ getService }: FtrProviderContext) => {
                 );
                 const expectedRule = updateUsername(
                   getSimpleRuleOutputWithoutRuleId(),
-                  ELASTICSEARCH_USERNAME
+                  await utils.getUsername()
                 );
 
                 expectedRule.revision = 1;
@@ -564,7 +562,7 @@ export default ({ getService }: FtrProviderContext) => {
 
               const expectedRule = updateUsername(
                 getSimpleRuleOutputWithoutRuleId(),
-                ELASTICSEARCH_USERNAME
+                await utils.getUsername()
               );
               expectedRule.revision = 1;
               expectedRule.actions = someActionsWithFrequencies.map((action) => ({

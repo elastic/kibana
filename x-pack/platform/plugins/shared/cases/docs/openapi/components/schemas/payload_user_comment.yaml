@@ -1,0 +1,13 @@
+type: object
+properties:
+  comment:
+    type: object
+    properties:
+      comment:
+        type: string
+      owner:
+        $ref: 'owner.yaml'
+      type:
+        type: string
+        enum:
+          - user

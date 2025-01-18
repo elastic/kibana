@@ -1,0 +1,12 @@
+//14. Low Frequency AWS EC2 Admin Password Retrieval Attempts from Unusual ARNs
+//Helpful when answering questions on extracting fields with the dissect command and aggregations. Also an example for hunting for cloud threats
+from logs-*
+| where event.provider == "ec2.amazonaws.com" and event.action == "GetPasswordData"
+and aws.cloudtrail.error_code == "Client.UnauthorizedOperation" and aws.cloudtrail.user_identity.type == "AssumedRole"
+| dissect aws.cloudtrail.request_parameters "{%{key}=%{instance_id}}"
+| dissect aws.cloudtrail.user_identity.session_context.session_issuer.arn "%{?keyword1}:%{?keyword2}:%{?keyword3}::%{account_id}:%{keyword4}/%{arn_name}"
+| dissect user.id "%{principal_id}:%{session_name}"
+| keep aws.cloudtrail.user_identity.session_context.session_issuer.principal_id, instance_id, account_id, arn_name, source.ip, principal_id, session_name, user.name
+| stats instance_counts = count_distinct(arn_name) by instance_id, user.name, source.ip, session_name
+| where instance_counts < 5
+| sort instance_counts desc

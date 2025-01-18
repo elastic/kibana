@@ -7,12 +7,21 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const svlUserManager = getService('svlUserManager');
+  let roleAuthc: RoleCredentials;
   const svlCommonApi = getService('svlCommonApi');
 
   describe('GET /api/console/api_server', () => {
+    before(async () => {
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+    });
+    after(async () => {
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+    });
     it('returns autocomplete definitions', async () => {
       const { body } = await supertest
         .get('/api/console/api_server')

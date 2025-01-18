@@ -6,26 +6,10 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-chrome-browser-mocks",
-        "id": "def-common.chromeServiceMock",
+        "id": "def-public.chromeServiceMock",
         "type": "Object",
         "tags": [],
         "label": "chromeServiceMock",
@@ -36,7 +20,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-browser-mocks",
-            "id": "def-common.chromeServiceMock.create",
+            "id": "def-public.chromeServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -52,7 +36,7 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser-mocks",
-            "id": "def-common.chromeServiceMock.createStartContract",
+            "id": "def-public.chromeServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
@@ -80,5 +64,21 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

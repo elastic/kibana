@@ -1,0 +1,44 @@
+- name: cloud
+  title: Cloud
+  group: 2
+  description: Fields related to the cloud or infrastructure the events are coming from.
+  footnote: 'Examples: If Metricbeat is running on an EC2 host and fetches data from its host, the cloud info contains the data about this machine. If Metricbeat runs on a remote machine outside the cloud and fetches data from a service running in the cloud, the field contains cloud data from the machine the service is running on.'
+  type: group
+  fields:
+    - name: image.id
+      type: keyword
+      description: Image ID for the cloud instance.
+- name: container
+  title: Container
+  group: 2
+  description: 'Container fields are used for meta information about the specific container that is the source of information.
+    These fields help correlate data based containers from any runtime.'
+  type: group
+  fields:
+    - name: labels
+      level: extended
+      type: object
+      object_type: keyword
+      description: Image labels.
+- name: host
+  title: Host
+  group: 2
+  description: 'A host is defined as a general computing instance.
+    ECS host.* fields should be populated with details about the host on which the event happened, or from which the measurement was taken. Host types include hardware, virtual machines, Docker containers, and Kubernetes nodes.'
+  type: group
+  fields:
+    - name: containerized
+      type: boolean
+      description: >
+        If the host is a container.
+    - name: os.build
+      type: keyword
+      example: "18D109"
+      description: >
+        OS build information.
+    - name: os.codename
+      type: keyword
+      example: "stretch"
+      description: >
+        OS codename, if any.
+

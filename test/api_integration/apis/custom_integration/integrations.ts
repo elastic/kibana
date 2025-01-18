@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -18,11 +20,12 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .get(`/internal/customIntegrations/appendCustomIntegrations`)
           .set('kbn-xsrf', 'kibana')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200);
 
         expect(resp.body).to.be.an('array');
 
-        expect(resp.body.length).to.be(49);
+        expect(resp.body.length).to.be(21);
 
         // Test for sample data card
         expect(resp.body.findIndex((c: { id: string }) => c.id === 'sample_data_all')).to.be.above(
@@ -36,11 +39,12 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .get(`/internal/customIntegrations/replacementCustomIntegrations`)
           .set('kbn-xsrf', 'kibana')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200);
 
         expect(resp.body).to.be.an('array');
 
-        expect(resp.body.length).to.be(109); // the beats
+        expect(resp.body.length).to.be(107); // the beats
       });
     });
   });

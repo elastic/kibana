@@ -34,7 +34,9 @@ Authentication::
 The authentication type: none, basic, or SSL.
 If you choose basic authentication, you must provide a user name and password.
 If you choose SSL authentication, you must provide SSL server certificate authentication data in a CRT and key file format or a PFX file format. You can also optionally provide a passphrase if the files are password-protected.
-HTTP headers::   A set of key-value pairs sent as headers with the request.
+HTTP headers::
+A set of key-value pairs sent as headers with the request.
+For example, set `Content-Type` to the appropriate media type for your requests.
 Certificate authority::
 A certificate authority (CA) that the connector can trust, for example to sign and validate server certificates.
 This option is available for all authentication types.
@@ -53,8 +55,7 @@ Controls the certificate verification.
 [[webhook-action-configuration]]
 === Test connectors
 
-You can test connectors with the <<execute-connector-api,run connector API>> or
-as you're creating or editing the connector in {kib}. For example:
+You can test connectors as you're creating or editing the connector in {kib}. For example:
 
 [role="screenshot"]
 image::management/connectors/images/webhook-params-test.png[Webhook params test]

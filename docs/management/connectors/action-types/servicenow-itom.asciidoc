@@ -61,8 +61,7 @@ The username for HTTP basic authentication.
 [[servicenow-itom-action-configuration]]
 === Test connectors
 
-You can test connectors with the <<execute-connector-api,run connector API>> or
-as you're creating or editing the connector in {kib}. For example:
+You can test connectors as you're creating or editing the connector in {kib}. For example:
 
 [role="screenshot"]
 image::management/connectors/images/servicenow-itom-params-test.png[{sn-itom} params test]

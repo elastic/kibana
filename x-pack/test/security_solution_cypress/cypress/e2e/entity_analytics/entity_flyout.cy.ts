@@ -8,7 +8,7 @@
 import {
   ENTRA_ID_PACKAGE_NAME,
   OKTA_PACKAGE_NAME,
-} from '@kbn/security-solution-plugin/public/timelines/components/side_panel/new_user_detail/constants';
+} from '@kbn/security-solution-plugin/public/flyout/entity_details/shared/constants';
 import {
   expandFirstAlertHostFlyout,
   expandFirstAlertUserFlyout,
@@ -32,7 +32,7 @@ import {
   ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_SELECTOR,
 } from '../../screens/asset_criticality/flyouts';
 import { deleteCriticality } from '../../tasks/api_calls/entity_analytics';
-import { mockFleetInstalledIntegrations } from '../../tasks/fleet_integrations';
+import { mockFleetIntegrations } from '../../tasks/fleet_integrations';
 import {
   expandManagedDataEntraPanel,
   expandManagedDataOktaPanel,
@@ -42,7 +42,6 @@ import {
   ENTRA_DOCUMENT_TAB,
   OKTA_DOCUMENT_TAB,
 } from '../../screens/users/flyout_asset_panel';
-import { enableAssetCriticality } from '../../tasks/api_calls/kibana_advanced_settings';
 
 const USER_NAME = 'user1';
 const SIEM_KIBANA_HOST_NAME = 'Host-fwarau82er';
@@ -66,7 +65,6 @@ describe(
       cy.task('esArchiverLoad', { archiveName: 'risk_scores_new_complete_data' });
       cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
       cy.task('esArchiverLoad', { archiveName: 'user_managed_data' });
-      enableAssetCriticality();
       mockRiskEngineEnabled();
       login();
       visitWithTimeRange(ALERTS_URL);
@@ -129,22 +127,39 @@ describe(
             .contains('High Impact')
             .should('be.visible');
         });
+        it('should unassign asset criticality state', () => {
+          cy.log('asset criticality update');
+          expandFirstAlertUserFlyout();
+          selectAssetCriticalityLevel('High Impact');
+          cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL)
+            .contains('High Impact')
+            .should('be.visible');
+          selectAssetCriticalityLevel('Unassigned');
+          cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL)
+            .contains('Unassigned')
+            .should('be.visible');
+        });
       });
 
-      describe('Managed data section', () => {
+      // https://github.com/elastic/kibana/issues/179248
+      describe('Managed data section', { tags: ['@skipInServerlessMKI'] }, () => {
         beforeEach(() => {
-          mockFleetInstalledIntegrations([
+          mockFleetIntegrations([
             {
               package_name: ENTRA_ID_PACKAGE_NAME,
-              is_enabled: true,
               package_title: 'azure entra',
-              package_version: 'test_package_version',
+              latest_package_version: 'test_package_version',
+              installed_package_version: 'test_package_version',
+              is_installed: true,
+              is_enabled: true,
             },
             {
               package_name: OKTA_PACKAGE_NAME,
-              is_enabled: true,
               package_title: 'okta',
-              package_version: 'test_package_version',
+              latest_package_version: 'test_package_version',
+              installed_package_version: 'test_package_version',
+              is_installed: true,
+              is_enabled: true,
             },
           ]);
         });

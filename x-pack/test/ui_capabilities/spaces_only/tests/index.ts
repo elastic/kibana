@@ -14,6 +14,7 @@ export default function uiCapabilitesTests({ loadTestFile, getService }: FtrProv
   const featuresService: FeaturesService = getService('features');
 
   describe('ui capabilities', function () {
+    this.tags('skipFIPS');
     before(async () => {
       // we're using a basic license, so if we want to disable all features, we have to ignore the valid licenses
       const features = await featuresService.get({ ignoreValidLicenses: true });

@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
 
-const NUMBER_OF_CAPABILITIES = 42;
+const NUMBER_OF_CAPABILITIES = 44;
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
@@ -61,6 +61,7 @@ export default ({ getService }: FtrProviderContext) => {
           canResetJob: false,
           canUpdateJob: false,
           canForecastJob: false,
+          canDeleteForecast: false,
           canCreateDatafeed: false,
           canDeleteDatafeed: false,
           canStartStopDatafeed: false,
@@ -91,6 +92,7 @@ export default ({ getService }: FtrProviderContext) => {
           canGetTrainedModels: true,
           canTestTrainedModels: true,
           canCreateTrainedModels: false,
+          canCreateInferenceEndpoint: false,
           canDeleteTrainedModels: false,
           canStartStopTrainedModels: false,
           isADEnabled: true,
@@ -110,6 +112,7 @@ export default ({ getService }: FtrProviderContext) => {
           canResetJob: true,
           canUpdateJob: true,
           canForecastJob: true,
+          canDeleteForecast: true,
           canCreateDatafeed: true,
           canDeleteDatafeed: true,
           canStartStopDatafeed: true,
@@ -140,6 +143,7 @@ export default ({ getService }: FtrProviderContext) => {
           canGetTrainedModels: true,
           canTestTrainedModels: true,
           canCreateTrainedModels: true,
+          canCreateInferenceEndpoint: true,
           canDeleteTrainedModels: true,
           canStartStopTrainedModels: true,
           isADEnabled: true,

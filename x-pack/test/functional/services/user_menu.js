@@ -29,6 +29,10 @@ export function UserMenuProvider({ getService }) {
       return await testSubjects.exists('userMenu > logoutLink');
     }
 
+    async openMenu() {
+      await this._ensureMenuOpen();
+    }
+
     async closeMenu() {
       if (!(await testSubjects.exists('userMenu'))) {
         return;

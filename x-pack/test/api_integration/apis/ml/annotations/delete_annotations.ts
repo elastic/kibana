@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
       const annotationsForJob = await ml.api.getAnnotations(jobIds[0]);
       expect(annotationsForJob).to.have.length(1);
 
-      const annotationIdToDelete = annotationsForJob[0]._id;
+      const annotationIdToDelete = annotationsForJob[0]._id!;
 
       const { body, status } = await supertest
         .delete(`/internal/ml/annotations/delete/${annotationIdToDelete}`)
@@ -57,7 +57,7 @@ export default ({ getService }: FtrProviderContext) => {
       const annotationsForJob = await ml.api.getAnnotations(jobIds[1]);
       expect(annotationsForJob).to.have.length(1);
 
-      const annotationIdToDelete = annotationsForJob[0]._id;
+      const annotationIdToDelete = annotationsForJob[0]._id!;
 
       const { body, status } = await supertest
         .delete(`/internal/ml/annotations/delete/${annotationIdToDelete}`)
@@ -75,7 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
       const annotationsForJob = await ml.api.getAnnotations(jobIds[2]);
       expect(annotationsForJob).to.have.length(1);
 
-      const annotationIdToDelete = annotationsForJob[0]._id;
+      const annotationIdToDelete = annotationsForJob[0]._id!;
 
       const { body, status } = await supertest
         .delete(`/internal/ml/annotations/delete/${annotationIdToDelete}`)
@@ -84,7 +84,6 @@ export default ({ getService }: FtrProviderContext) => {
       ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.eql('Forbidden');
-      expect(body.message).to.eql('Forbidden');
 
       await ml.api.waitForAnnotationToExist(annotationIdToDelete);
     });

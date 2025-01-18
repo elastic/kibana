@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 // Run Jest tests
@@ -78,6 +79,11 @@ export function runJest(configName = 'jest.config.js') {
 
   if (!argv.config) {
     testFiles = argv._.map((p) => resolve(cwd, p.toString()));
+
+    if (argv.testPathPattern) {
+      testFiles.push(argv.testPathPattern);
+    }
+
     const commonTestFiles = commonBasePath(testFiles);
     const testFilesProvided = testFiles.length > 0;
 
@@ -122,7 +128,7 @@ export function runJest(configName = 'jest.config.js') {
         );
       } else {
         log.error(
-          `we no longer ship a root config file so you either need to pass a path to a test file, a folder where tests can be found, or a --config argument pointing to one of the many ${configName} files in the repository`
+          `we no longer ship a root config file so you either need to pass a path to a test file, a folder where tests can be found, a --testPathPattern argument pointing to a file/directory or a --config argument pointing to one of the many ${configName} files in the repository`
         );
       }
 

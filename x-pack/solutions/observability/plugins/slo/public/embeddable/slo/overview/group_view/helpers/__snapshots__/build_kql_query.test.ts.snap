@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildCombinedKqlQuery should generate correct es query for no selected groups, no kql 1`] = `""`;
+
+exports[`buildCombinedKqlQuery should generate correct es query for no selected groups, with kql 1`] = `"status:\\"VIOLATED\\""`;
+
+exports[`buildCombinedKqlQuery should generate correct es query for selected groups, no kql 1`] = `"(slo.tags:\\"production\\" or slo.tags:\\"dev\\")"`;
+
+exports[`buildCombinedKqlQuery should generate correct es query for selected groups, with kql 1`] = `"(slo.tags:\\"production\\" or slo.tags:\\"dev\\") and status:\\"VIOLATED\\""`;

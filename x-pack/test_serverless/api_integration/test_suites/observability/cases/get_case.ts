@@ -6,29 +6,63 @@
  */
 
 import expect from '@kbn/expect';
-
+import type { RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const svlCases = getService('svlCases');
+  const svlUserManager = getService('svlUserManager');
 
   describe('get_case', () => {
+    let roleAuthc: RoleCredentials;
+
+    before(async () => {
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+    });
+
+    after(async () => {
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+    });
+
     afterEach(async () => {
       await svlCases.api.deleteCases();
     });
 
     it('should return a case', async () => {
       const postedCase = await svlCases.api.createCase(
-        svlCases.api.getPostCaseRequest('observability')
+        svlCases.api.getPostCaseRequest('observability'),
+        roleAuthc
       );
-      const theCase = await svlCases.api.getCase({
-        caseId: postedCase.id,
-        includeComments: true,
-      });
+      const theCase = await svlCases.api.getCase(
+        {
+          caseId: postedCase.id,
+          expectedHttpCode: 200,
+        },
+        roleAuthc
+      );
 
-      const data = svlCases.omit.removeServerGeneratedPropertiesFromCase(theCase);
-      expect(data).to.eql(svlCases.api.postCaseResp('observability'));
-      expect(data.comments?.length).to.eql(0);
+      const { created_by: createdBy, ...data } =
+        svlCases.omit.removeServerGeneratedPropertiesFromCase(theCase);
+      const { created_by: _, ...expectedData } = svlCases.api.postCaseResp('observability');
+
+      expect(data).to.eql(expectedData);
+      expect(createdBy).to.have.keys('full_name', 'email', 'username');
+    });
+
+    it('should throw a 400 if the query param includeComments is being used', async () => {
+      const postedCase = await svlCases.api.createCase(
+        svlCases.api.getPostCaseRequest('observability'),
+        roleAuthc
+      );
+
+      await svlCases.api.getCase(
+        {
+          caseId: postedCase.id,
+          includeComments: true,
+          expectedHttpCode: 400,
+        },
+        roleAuthc
+      );
     });
   });
 };

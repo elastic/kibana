@@ -12,6 +12,8 @@ import {
   HOST_GEO_COUNTRY_NAME_CHECKBOX,
   INSPECT_QUERY,
   SERVER_SIDE_EVENT_COUNT,
+  EVENTS_LOADING_TRUE,
+  EVENTS_LOADING_FALSE,
 } from '../../screens/hosts/events';
 
 export const addsHostGeoCityNameToHeader = () => {
@@ -35,4 +37,9 @@ export const opensInspectQueryModal = () => {
 
 export const waitsForEventsToBeLoaded = () => {
   cy.get(SERVER_SIDE_EVENT_COUNT).should('not.have.text', '0');
+};
+
+export const waitForEventsDataGridToBeLoaded = () => {
+  cy.get(EVENTS_LOADING_TRUE).should('not.exist');
+  cy.get(EVENTS_LOADING_FALSE).should('exist');
 };

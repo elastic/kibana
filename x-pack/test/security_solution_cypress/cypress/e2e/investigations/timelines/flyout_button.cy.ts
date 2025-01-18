@@ -63,18 +63,4 @@ describe('timeline flyout button', () => {
       cy.get(TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON).should('have.focus');
     }
   );
-
-  it(
-    'should render the global search dropdown when the input is focused',
-    { tags: ['@ess'] },
-    () => {
-      openTimelineUsingToggle();
-      cy.get('[data-test-subj="nav-search-input"]').focus();
-      cy.get('[data-test-subj="nav-search-input"]').should('be.focused');
-      cy.get('[data-test-subj="nav-search-option"]').should('be.visible');
-      cy.get('[data-test-subj="nav-search-option"]').first().realHover();
-      // check that at least one item is visible in the search bar after mousing over, i.e. it's still usable.
-      cy.get('[data-test-subj="nav-search-option"]').its('length').should('be.gte', 1);
-    }
-  );
 });

@@ -1,0 +1,28 @@
+{
+  "type": "plugin",
+  "id": "@kbn/presentation-panel-plugin",
+  "owner": [
+    "@elastic/kibana-presentation"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "description": "Adds a standardized Presentation panel which allows any forward ref component to interface with various Kibana systems.",
+  "plugin": {
+    "id": "presentationPanel",
+    "browser": true,
+    "server": false,
+    "requiredPlugins": [
+      "data",
+      "inspector",
+      "uiActions",
+      "usageCollection",
+      "contentManagement",
+      "savedObjectsManagement",
+      "savedObjectsTaggingOss"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "unifiedSearch"
+    ]
+  }
+}

@@ -1,4 +1,4 @@
-openapi: 3.1.0
+openapi: 3.0.3
 info:
   title: Saved objects
   description: OpenAPI schema for saved object endpoints
@@ -10,16 +10,24 @@ info:
     url: https://www.elastic.co/licensing/elastic-license
 servers:
   - url: /
-security:
-  - basicAuth: []
-  - apiKeyAuth: []
 tags:
   - name: saved objects
-    description: Manage Kibana saved objects, including dashboards, visualizations, and more.
+    x-displayName: Saved objects
+    description: |
+      Export sets of saved objects that you want to import into Kibana, resolve import errors, and rotate an encryption key for encrypted saved objects with the saved objects APIs.
+
+      To manage a specific type of saved object, use the corresponding APIs.
+      For example, use:
+
+      * [Data views](../group/endpoint-data-views)
+      * [Spaces](https://www.elastic.co/guide/en/kibana/current/spaces-api.html)
+      * [Short URLs](https://www.elastic.co/guide/en/kibana/current/short-urls-api.html)
+
+      Warning: Do not write documents directly to the `.kibana` index. When you write directly to the `.kibana` index, the data becomes corrupted and permanently breaks future Kibana versions.
 paths:
   /api/encrypted_saved_objects/_rotate_key:
     post:
-      summary: Rotate the encryption key for encrypted saved objects.
+      summary: Rotate a key for encrypted saved objects
       operationId: rotateEncryptionKey
       description: |
         Superuser role required.
@@ -84,7 +92,7 @@ paths:
                 type: object
   /api/saved_objects/_bulk_create:
     post:
-      summary: Create multiple Kibana saved objects.
+      summary: Create saved objects
       operationId: bulkCreateSavedObjects
       deprecated: true
       tags:
@@ -119,7 +127,7 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /api/saved_objects/_bulk_delete:
     post:
-      summary: Remove multiple Kibana saved objects.
+      summary: Delete saved objects
       operationId: bulkDeleteSavedObjects
       description: |
         WARNING: When you delete a saved object, it cannot be recovered.
@@ -158,7 +166,7 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /api/saved_objects/_bulk_get:
     post:
-      summary: Retrieve multiple Kibana saved objects by identifier.
+      summary: Get saved objects
       operationId: bulkGetSavedObjects
       deprecated: true
       tags:
@@ -188,11 +196,11 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /api/saved_objects/_bulk_resolve:
     post:
-      summary: Retrieve multiple Kibana saved objects by identifier using any legacy URL aliases if they exist.
+      summary: Resolve saved objects
       operationId: bulkResolveSavedObjects
       deprecated: true
       description: |
-        Under certain circumstances when Kibana is upgraded, saved object migrations may necessitate regenerating some object IDs to enable new features. When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID. In such a scenario, that object can be retrieved by the bulk resolve API using either its new ID or its old ID.
+        Retrieve multiple Kibana saved objects by identifier using any legacy URL aliases if they exist. Under certain circumstances when Kibana is upgraded, saved object migrations may necessitate regenerating some object IDs to enable new features. When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID. In such a scenario, that object can be retrieved by the bulk resolve API using either its new ID or its old ID.
       tags:
         - saved objects
       parameters:
@@ -221,8 +229,9 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /api/saved_objects/_bulk_update:
     post:
-      summary: Update the attributes for multiple Kibana saved objects.
+      summary: Update saved objects
       operationId: bulkUpdateSavedObjects
+      description: Update the attributes for multiple Kibana saved objects.
       deprecated: true
       tags:
         - saved objects
@@ -252,15 +261,15 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /api/saved_objects/_export:
     post:
-      summary: Retrieve sets of saved objects that you want to import into Kibana.
-      operationId: exportSavedObjects
+      summary: Export saved objects
+      operationId: exportSavedObjectsDefault
       description: |
-
+        Retrieve sets of saved objects that you want to import into Kibana.
         You must include `type` or `objects` in the request body.
 
-        NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.
+        Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
 
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+        NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.
       tags:
         - saved objects
       parameters:
@@ -313,8 +322,9 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /api/saved_objects/_find:
     get:
-      summary: Retrieve a paginated set of Kibana saved objects.
+      summary: Search for saved objects
       operationId: findSavedObjects
+      description: Retrieve a paginated set of Kibana saved objects.
       deprecated: true
       tags:
         - saved objects
@@ -414,12 +424,11 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /api/saved_objects/_import:
     post:
-      summary: Create sets of Kibana saved objects from a file created by the export API.
-      operationId: importSavedObjects
+      summary: Import saved objects
+      operationId: importSavedObjectsDefault
       description: |
+        Create sets of Kibana saved objects from a file created by the export API.
         Saved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
-
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       tags:
         - saved objects
       parameters:
@@ -498,18 +507,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+      x-codeSamples:
+        - lang: cURL
+          label: Import with createNewCopies
+          source: |
+            curl \
+              -X POST api/saved_objects/_import?createNewCopies=true
+              -H "kbn-xsrf: true"
+              --form file=@file.ndjson
   /api/saved_objects/_resolve_import_errors:
     post:
-      summary: Resolve errors from the Import objects API.
+      summary: Resolve import errors
       operationId: resolveImportErrors
       description: |
-        To resolve errors, you can:
+        To resolve errors from the Import objects API, you can:
 
         * Retry certain saved objects
         * Overwrite specific saved objects
         * Change references to different saved objects
-
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       tags:
         - saved objects
       parameters:
@@ -623,8 +638,9 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /api/saved_objects/{type}:
     post:
-      summary: Create Kibana saved objects with randomly generated identifiers.
+      summary: Create a saved object
       operationId: createSavedObject
+      description: Create a Kibana saved object with a randomly generated identifier.
       deprecated: true
       tags:
         - saved objects
@@ -666,8 +682,9 @@ paths:
                 type: object
   /api/saved_objects/{type}/{id}:
     get:
-      summary: Retrieve a single Kibana saved object by identifier.
+      summary: Get a saved object
       operationId: getSavedObject
+      description: Retrieve a single Kibana saved object by identifier.
       deprecated: true
       tags:
         - saved objects
@@ -688,8 +705,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/400_response'
     post:
-      summary: Create Kibana saved objects.
+      summary: Create a saved object
       operationId: createSavedObjectId
+      description: Create a Kibana saved object and specify its identifier instead of using a randomly generated ID.
       deprecated: true
       tags:
         - saved objects
@@ -731,8 +749,9 @@ paths:
               schema:
                 type: object
     put:
-      summary: Update the attributes for Kibana saved objects.
+      summary: Update a saved object
       operationId: updateSavedObject
+      description: Update the attributes for Kibana saved objects.
       deprecated: true
       tags:
         - saved objects
@@ -767,10 +786,10 @@ paths:
                 type: object
   /api/saved_objects/resolve/{type}/{id}:
     get:
-      summary: Retrieve a single Kibana saved object by identifier using any legacy URL alias if it exists.
+      summary: Resolve a saved object
       operationId: resolveSavedObject
       description: |
-        Under certain circumstances, when Kibana is upgraded, saved object migrations may necessitate regenerating some object IDs to enable new features. When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID. In such a scenario, that object can be retrieved using either its new ID or its old ID.
+        Retrieve a single Kibana saved object by identifier using any legacy URL alias if it exists. Under certain circumstances, when Kibana is upgraded, saved object migrations may necessitate regenerating some object IDs to enable new features. When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID. In such a scenario, that object can be retrieved using either its new ID or its old ID.
       deprecated: true
       tags:
         - saved objects
@@ -791,15 +810,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/400_response'
 components:
-  securitySchemes:
-    basicAuth:
-      type: http
-      scheme: basic
-    apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
   examples:
     key_rotation_response:
       summary: Encryption key rotation using default parameters.

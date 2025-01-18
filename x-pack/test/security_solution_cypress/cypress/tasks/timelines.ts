@@ -14,6 +14,8 @@ import {
   TIMELINE,
   TIMELINE_NAME,
   TIMELINE_ITEM_ACTION_BTN,
+  TIMELINES_OVERVIEW_SEARCH,
+  TIMELINES_OVERVIEW_ONLY_FAVORITES,
 } from '../screens/timelines';
 import { SELECT_ALL_CHECKBOX } from '../screens/shared';
 
@@ -42,4 +44,25 @@ export const exportSelectedTimelines = () => {
   cy.get(BULK_ACTIONS).click();
   cy.get(EXPORT_TIMELINE_ACTION).should('not.be.disabled');
   cy.get(EXPORT_TIMELINE_ACTION).click();
+};
+/**
+ * Toggle on/off to filter for favorite timelines
+ */
+export const toggleFavoriteFilter = () => {
+  cy.get(TIMELINES_OVERVIEW_ONLY_FAVORITES).click();
+};
+
+/**
+ * Enter a value in the search bar and press enter to filter the timelines table
+ */
+export const searchForTimeline = (filter: string) => {
+  cy.get(TIMELINES_OVERVIEW_SEARCH).type(filter);
+  cy.get(TIMELINES_OVERVIEW_SEARCH).trigger('search');
+};
+
+/**
+ * Clear the search bar
+ */
+export const clearSearchBar = () => {
+  cy.get(TIMELINES_OVERVIEW_SEARCH).clear();
 };

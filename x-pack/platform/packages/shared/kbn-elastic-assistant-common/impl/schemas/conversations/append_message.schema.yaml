@@ -1,0 +1,47 @@
+openapi: 3.0.0
+info:
+  title: Append Conversation API endpoint
+  version: '1'
+paths:
+  /internal/elastic_assistant/current_user/conversations/{id}/messages:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: AppendConversationMessage
+      description: Append a message to the conversation
+      summary: Append a message to the conversation
+      tags:
+        - Conversation API
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The conversation's `id` value.
+          schema:
+            $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './common_attributes.schema.yaml#/components/schemas/ConversationMessageCreateProps'
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: './common_attributes.schema.yaml#/components/schemas/ConversationResponse'
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string

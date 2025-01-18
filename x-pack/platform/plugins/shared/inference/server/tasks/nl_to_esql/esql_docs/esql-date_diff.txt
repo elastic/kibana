@@ -1,0 +1,41 @@
+# DATE_DIFF
+
+The DATE_DIFF function calculates the difference between two timestamps and returns the difference in multiples of the specified `unit`.
+
+## Syntax
+
+`DATE_DIFF(unit, startTimestamp, endTimestamp)`
+
+### Parameters
+
+#### unit
+
+The unit of time in which the difference will be calculated.
+
+#### startTimestamp
+
+The starting timestamp for the calculation.
+
+#### endTimestamp
+
+The ending timestamp for the calculation.
+
+## Examples
+
+The following example demonstrates how to use the DATE_DIFF function to calculate the difference between two timestamps in microseconds:
+
+```esql
+ROW date1 = TO_DATETIME("2023-12-02T11:00:00.000Z"), date2 = TO_DATETIME("2023-12-02T11:00:00.001Z")
+| EVAL dd_ms = DATE_DIFF("microseconds", date1, date2)
+```
+
+```esql
+ROW date1 = TO_DATETIME("2023-01-01T00:00:00.000Z"), date2 = TO_DATETIME("2023-12-31T23:59:59.999Z")
+| EVAL dd_days = DATE_DIFF("days", date1, date2)
+```
+
+## Notes
+
+- If the `startTimestamp` is later than the `endTimestamp`, the function will return a negative value.
+
+- It's important to note that while there is some overlap between the units supported by this function and ESQL's time span literals, these sets are not interchangeable. Also, the abbreviations supported by this function are shared with other established products and may not align with the date-time nomenclature used by Elasticsearch.

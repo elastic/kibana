@@ -1,0 +1,51 @@
+openapi: 3.0.0
+info:
+  title: Bootstrap Prebuilt Rules API endpoint
+  version: '1'
+paths:
+  /internal/detection_engine/prebuilt_rules/_bootstrap:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: BootstrapPrebuiltRules
+      summary: Bootstrap Prebuilt Rules
+      description: Ensures that the packages needed for prebuilt detection rules to work are installed and up to date
+      tags:
+        - Prebuilt Rules API
+      responses:
+        200:
+          description: Indicates a successful call
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  packages:
+                    type: array
+                    description: The list of packages that were installed or upgraded
+                    items:
+                      $ref: '#/components/schemas/PackageInstallStatus'
+                required:
+                  - packages
+
+components:
+  schemas:
+    PackageInstallStatus:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the package
+        version:
+          type: string
+          description: The version of the package
+        status:
+          type: string
+          description: The status of the package installation
+          enum:
+            - installed
+            - already_installed
+      required:
+        - name
+        - version
+        - status

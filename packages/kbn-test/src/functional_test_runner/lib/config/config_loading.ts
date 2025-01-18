@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -15,7 +16,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { FtrConfigProvider, GenericFtrProviderContext } from '../../public_types';
 import { Config } from './config';
 import { EsVersion } from '../es_version';
-import { FTR_CONFIGS_MANIFEST_REL, FTR_CONFIGS_MANIFEST_PATHS } from './ftr_configs_manifest';
+import { getAllFtrConfigsAndManifests } from './ftr_configs_manifest';
 
 interface LoadSettingsOptions {
   path: string;
@@ -60,14 +61,16 @@ async function getConfigModule({
     throw error;
   }
 
+  const { allFtrConfigs, manifestPaths } = getAllFtrConfigsAndManifests();
+
   if (
     primary &&
-    !FTR_CONFIGS_MANIFEST_PATHS.includes(resolvedPath) &&
+    !allFtrConfigs.includes(resolvedPath) &&
     !resolvedPath.includes(`${Path.sep}__fixtures__${Path.sep}`)
   ) {
     const rel = Path.relative(REPO_ROOT, resolvedPath);
     throw createFlagError(
-      `Refusing to load FTR Config at [${rel}] which is not listed in [${FTR_CONFIGS_MANIFEST_REL}]. All FTR Config files must be listed there, use the "enabled" key if the FTR Config should be run on automatically on PR CI, or the "disabled" key if it is run manually or by a special job.`
+      `Refusing to load FTR Config at [${rel}] which is not listed in [${manifestPaths.all}]. All FTR Config files must be listed in one of manifest files, use the "enabled" key if the FTR Config should be run on automatically on PR CI, or the "disabled" key if it is run manually or by a special job.`
     );
   }
 

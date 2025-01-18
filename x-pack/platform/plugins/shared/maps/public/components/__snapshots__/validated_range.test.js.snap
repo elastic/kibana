@@ -1,0 +1,45 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Should display error message when value is outside of range 1`] = `
+<div>
+  <EuiRangeClass
+    max={10}
+    min={0}
+    onChange={[Function]}
+    value="11"
+  />
+  <EuiFormErrorText>
+    <MemoizedFormattedMessage
+      defaultMessage="Must be between {min} and {max}"
+      id="xpack.maps.validatedRange.rangeErrorMessage"
+      values={
+        Object {
+          "max": 10,
+          "min": 0,
+        }
+      }
+    />
+  </EuiFormErrorText>
+</div>
+`;
+
+exports[`Should pass slider props to slider 1`] = `
+<EuiRangeClass
+  max={10}
+  min={0}
+  onChange={[Function]}
+  showInput={true}
+  showLabels={true}
+  showRange={true}
+  value="3"
+/>
+`;
+
+exports[`Should render slider 1`] = `
+<EuiRangeClass
+  max={10}
+  min={0}
+  onChange={[Function]}
+  value="3"
+/>
+`;

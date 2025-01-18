@@ -7,11 +7,12 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { testEmbeddedConsole } from '../../dev_tools/embedded_console';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'settings', 'security']);
+  const PageObjects = getPageObjects(['common', 'settings', 'security', 'embeddedConsole']);
   const appsMenu = getService('appsMenu');
   const managementMenu = getService('managementMenu');
 
@@ -38,10 +39,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(links.map((link) => link.text)).to.contain('Stack Management');
       });
 
-      it('should not render the "Ingest" section', async () => {
-        await PageObjects.common.navigateToApp('management');
-        const sections = (await managementMenu.getSections()).map((section) => section.sectionId);
-        expect(sections).to.eql(['insightsAndAlerting', 'kibana']);
+      describe('"Ingest" section', function () {
+        this.tags('skipFIPS');
+        it('should not render', async () => {
+          await PageObjects.common.navigateToApp('management');
+          const sections = await managementMenu.getSections();
+
+          const sectionIds = sections.map((section) => section.sectionId);
+          expect(sectionIds).to.eql(['data', 'insightsAndAlerting', 'kibana']);
+
+          const dataSection = sections.find((section) => section.sectionId === 'data');
+          expect(dataSection?.sectionLinks).to.eql(['data_quality']);
+        });
       });
     });
 
@@ -57,16 +66,33 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(links.map((link) => link.text)).to.contain('Stack Management');
       });
 
-      it('should render the "Ingest" section with ingest pipelines', async () => {
-        await PageObjects.common.navigateToApp('management');
-        const sections = await managementMenu.getSections();
-        // We gave the ingest pipelines user access to advanced settings to allow them to use ingest pipelines.
-        // See https://github.com/elastic/kibana/pull/102409/
-        expect(sections).to.have.length(2);
-        expect(sections[0]).to.eql({
-          sectionId: 'ingest',
-          sectionLinks: ['ingest_pipelines'],
+      describe('"Ingest" section with ingest pipelines', function () {
+        this.tags('skipFIPS');
+        it('should render', async () => {
+          await PageObjects.common.navigateToApp('management');
+          const sections = await managementMenu.getSections();
+          // We gave the ingest pipelines user access to advanced settings to allow them to use ingest pipelines.
+          // See https://github.com/elastic/kibana/pull/102409/
+          expect(sections).to.have.length(2);
+          expect(sections[0]).to.eql({
+            sectionId: 'ingest',
+            sectionLinks: ['ingest_pipelines'],
+          });
         });
+      });
+    });
+
+    describe('ingest user with dev tools', () => {
+      before(async () => {
+        await security.testUser.setRoles(['global_devtools_read', 'ingest_pipelines_user']);
+      });
+      after(async () => {
+        await security.testUser.restoreDefaults();
+      });
+
+      it('should have the embedded console', async () => {
+        await PageObjects.common.navigateToApp('ingestPipelines');
+        await testEmbeddedConsole(PageObjects);
       });
     });
   });

@@ -46,7 +46,7 @@ Understanding `LensXYConfig` in detail
 ### `emphasizeFitting`
 
 - **Type:** `boolean`
-- **Description:** When set to true, emphasizes the fitting of lines to the data points in line charts, making trends and patterns more apparent.
+- **Description:** When set to true a straight line will be used between isolated points in a line chart, a dashed line will be used otherwise.
 
 ### `fittingFunction`
 
@@ -166,7 +166,7 @@ const xyConfig: LensConfig = {
     showYAxisTitle: true,
   },
 };
-const configBuilder = new LensConfigBuilder(lensFormulaAPI, dataViewsAPI);
+const configBuilder = new LensConfigBuilder(dataViewsAPI, lensFormulaAPI);
 const lensConfig = configBuilder.build(xyConfig, {
   timeRange: { from: 'now-1y', to: 'now', type: 'relative' },
   embeddable: true,

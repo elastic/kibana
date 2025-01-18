@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
-
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import {
   TimeRangeType,
   TIME_RANGE_TYPE,
@@ -40,6 +40,12 @@ export interface OtherUrlConfig {
   url: string;
 }
 
+export enum QuickFilterButtonTypes {
+  Opened = 'Opened',
+  Closed = 'Closed',
+  Started = 'Started',
+  Stopped = 'Stopped',
+}
 export function MachineLearningJobTableProvider(
   { getPageObject, getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI,
@@ -49,8 +55,40 @@ export function MachineLearningJobTableProvider(
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
-  return new (class MlJobTable {
-    public async parseJobTable(
+  return {
+    async selectAllJobs(): Promise<void> {
+      await testSubjects.click('checkboxSelectAll');
+    },
+
+    async assertJobsInTable(expectedJobIds: string[]) {
+      const sortedExpectedIds = expectedJobIds.sort();
+      const sortedActualJobIds = (await this.parseJobTable()).map((row) => row.id).sort();
+      expect(sortedActualJobIds).to.eql(
+        sortedExpectedIds,
+        `Expected jobs in table to be [${sortedExpectedIds}], got [${sortedActualJobIds}]`
+      );
+    },
+
+    async filterByState(quickFilterButton: QuickFilterButtonTypes): Promise<void> {
+      const searchBar: WebElementWrapper = await testSubjects.find('mlJobListSearchBar');
+      const quickFilter: WebElementWrapper = await searchBar.findByCssSelector(
+        `span[data-text="${quickFilterButton}"]`
+      );
+      await quickFilter.click();
+
+      const searchBarButtons = await searchBar.findAllByTagName('button');
+      let pressedBttnText: string = '';
+      for await (const button of searchBarButtons)
+        if ((await button.getAttribute('aria-pressed')) === 'true')
+          pressedBttnText = await button.getVisibleText();
+
+      expect(pressedBttnText).to.eql(
+        quickFilterButton,
+        `Expected visible text of pressed quick filter button to equal [${quickFilterButton}], but got [${pressedBttnText}]`
+      );
+    },
+
+    async parseJobTable(
       tableEnvironment: 'mlAnomalyDetection' | 'stackMgmtJobList' = 'mlAnomalyDetection'
     ) {
       const table = await testSubjects.find('~mlJobListTable');
@@ -140,9 +178,10 @@ export function MachineLearningJobTableProvider(
       }
 
       return rows;
-    }
+    },
 
-    public async parseJobCounts(jobId: string) {
+    // TODO: Mv this fn over too
+    async parseJobCounts(jobId: string) {
       return await this.withDetailsOpen(jobId, async () => {
         // click counts tab
         await testSubjects.click(this.detailsSelector(jobId, 'mlJobListTab-counts'));
@@ -173,59 +212,51 @@ export function MachineLearningJobTableProvider(
           modelSizeStats: await parseTable(modelSizeStatsTable),
         };
       });
-    }
+    },
 
-    public rowSelector(jobId: string, subSelector?: string) {
+    rowSelector(jobId: string, subSelector?: string) {
       const row = `~mlJobListTable > ~row-${jobId}`;
       return !subSelector ? row : `${row} > ${subSelector}`;
-    }
+    },
 
-    public detailsSelector(jobId: string, subSelector?: string) {
+    detailsSelector(jobId: string, subSelector?: string) {
       const row = `~mlJobListTable > ~details-${jobId}`;
       return !subSelector ? row : `${row} > ${subSelector}`;
-    }
+    },
 
-    public async withDetailsOpen<T>(jobId: string, block: () => Promise<T>): Promise<T> {
+    async withDetailsOpen<T>(jobId: string, block: () => Promise<T>): Promise<T> {
       await this.ensureDetailsOpen(jobId);
       try {
         return await block();
       } finally {
         await this.ensureDetailsClosed(jobId);
       }
-    }
+    },
 
-    public async ensureDetailsOpen(jobId: string) {
+    async ensureDetailsOpen(jobId: string) {
       await retry.tryForTime(10000, async () => {
         if (!(await testSubjects.exists(this.detailsSelector(jobId)))) {
           await testSubjects.click(this.rowSelector(jobId, 'mlJobListRowDetailsToggle'));
           await testSubjects.existOrFail(this.detailsSelector(jobId), { timeout: 1000 });
         }
       });
-    }
+    },
 
-    public async ensureDetailsClosed(jobId: string) {
+    async ensureDetailsClosed(jobId: string) {
       await retry.tryForTime(10000, async () => {
         if (await testSubjects.exists(this.detailsSelector(jobId))) {
           await testSubjects.click(this.rowSelector(jobId, 'mlJobListRowDetailsToggle'));
           await testSubjects.missingOrFail(this.detailsSelector(jobId), { timeout: 1000 });
         }
       });
-    }
+    },
 
-    public async openAnnotationsTab<T>(jobId: string) {
-      await retry.tryForTime(10000, async () => {
-        await this.ensureDetailsOpen(jobId);
-        await testSubjects.click(this.detailsSelector(jobId, 'mlJobListTab-annotations'));
-        await testSubjects.existOrFail('mlAnnotationsTable');
-      });
-    }
-
-    public async waitForRefreshButtonLoaded(buttonTestSubj: string) {
+    async waitForRefreshButtonLoaded(buttonTestSubj: string) {
       await testSubjects.existOrFail(`~${buttonTestSubj}`, { timeout: 10 * 1000 });
       await testSubjects.existOrFail(`${buttonTestSubj} loaded`, { timeout: 30 * 1000 });
-    }
+    },
 
-    public async refreshJobList(
+    async refreshJobList(
       tableEnvironment: 'mlAnomalyDetection' | 'stackMgmtJobList' = 'mlAnomalyDetection'
     ) {
       const testSubjStr =
@@ -237,14 +268,14 @@ export function MachineLearningJobTableProvider(
       await testSubjects.click(`~${testSubjStr}`);
       await this.waitForRefreshButtonLoaded(testSubjStr);
       await this.waitForJobsToLoad();
-    }
+    },
 
-    public async waitForJobsToLoad() {
+    async waitForJobsToLoad() {
       await testSubjects.existOrFail('~mlJobListTable', { timeout: 60 * 1000 });
       await testSubjects.existOrFail('mlJobListTable loaded', { timeout: 30 * 1000 });
-    }
+    },
 
-    public async filterWithSearchString(
+    async filterWithSearchString(
       filter: string,
       expectedRowCount: number = 1,
       tableEnvironment: 'mlAnomalyDetection' | 'stackMgmtJobList' = 'mlAnomalyDetection'
@@ -264,9 +295,9 @@ export function MachineLearningJobTableProvider(
           filteredRows
         )}')`
       );
-    }
+    },
 
-    public async assertJobRowFields(jobId: string, expectedRow: object) {
+    async assertJobRowFields(jobId: string, expectedRow: object) {
       await retry.tryForTime(5000, async () => {
         await this.refreshJobList();
         const rows = await this.parseJobTable();
@@ -278,46 +309,18 @@ export function MachineLearningJobTableProvider(
           )}')`
         );
       });
-    }
+    },
 
-    public async assertJobRowJobId(jobId: string) {
+    async assertJobRowJobId(jobId: string) {
       await retry.tryForTime(5000, async () => {
         await this.refreshJobList();
         const rows = await this.parseJobTable();
         const jobRowMatch = rows.find((row) => row.id === jobId);
         expect(jobRowMatch).to.not.eql(undefined, `Expected row with job ID ${jobId} to exist`);
       });
-    }
+    },
 
-    public async assertJobRowDetailsCounts(
-      jobId: string,
-      expectedCounts: object,
-      expectedModelSizeStats: object
-    ) {
-      const { counts, modelSizeStats } = await this.parseJobCounts(jobId);
-
-      // Only check for expected keys / values, ignore additional properties
-      // This way the tests stay stable when new properties are added on the ES side
-      for (const [key, value] of Object.entries(expectedCounts)) {
-        expect(counts)
-          .to.have.property(key)
-          .eql(value, `Expected counts property '${key}' to exist with value '${value}'`);
-      }
-
-      for (const [key, value] of Object.entries(expectedModelSizeStats)) {
-        expect(modelSizeStats)
-          .to.have.property(key)
-          .eql(
-            value,
-            `Expected model size stats property '${key}' to exist with value '${value}')`
-          );
-      }
-    }
-
-    public async assertJobActionSingleMetricViewerButtonEnabled(
-      jobId: string,
-      expectedValue: boolean
-    ) {
+    async assertJobActionSingleMetricViewerButtonEnabled(jobId: string, expectedValue: boolean) {
       const isEnabled = await testSubjects.isEnabled(
         this.rowSelector(jobId, 'mlOpenJobsInSingleMetricViewerButton')
       );
@@ -327,12 +330,9 @@ export function MachineLearningJobTableProvider(
           expectedValue ? 'enabled' : 'disabled'
         }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
-    }
+    },
 
-    public async assertJobActionAnomalyExplorerButtonEnabled(
-      jobId: string,
-      expectedValue: boolean
-    ) {
+    async assertJobActionAnomalyExplorerButtonEnabled(jobId: string, expectedValue: boolean) {
       const isEnabled = await testSubjects.isEnabled(
         this.rowSelector(jobId, 'mlOpenJobsInAnomalyExplorerButton')
       );
@@ -342,9 +342,9 @@ export function MachineLearningJobTableProvider(
           expectedValue ? 'enabled' : 'disabled'
         }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
-    }
+    },
 
-    public async assertJobActionsMenuButtonEnabled(jobId: string, expectedValue: boolean) {
+    async assertJobActionsMenuButtonEnabled(jobId: string, expectedValue: boolean) {
       const isEnabled = await testSubjects.isEnabled(
         this.rowSelector(jobId, 'euiCollapsedItemActionsButton')
       );
@@ -354,9 +354,9 @@ export function MachineLearningJobTableProvider(
           expectedValue ? 'enabled' : 'disabled'
         }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
-    }
+    },
 
-    public async assertJobActionStartDatafeedButtonEnabled(jobId: string, expectedValue: boolean) {
+    async assertJobActionStartDatafeedButtonEnabled(jobId: string, expectedValue: boolean) {
       await this.ensureJobActionsMenuOpen(jobId);
       const isEnabled = await testSubjects.isEnabled('mlActionButtonStartDatafeed');
       expect(isEnabled).to.eql(
@@ -365,9 +365,9 @@ export function MachineLearningJobTableProvider(
           expectedValue ? 'enabled' : 'disabled'
         }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
-    }
+    },
 
-    public async assertJobActionResetJobButtonEnabled(jobId: string, expectedValue: boolean) {
+    async assertJobActionResetJobButtonEnabled(jobId: string, expectedValue: boolean) {
       await this.ensureJobActionsMenuOpen(jobId);
       const isEnabled = await testSubjects.isEnabled('mlActionButtonResetJob');
       expect(isEnabled).to.eql(
@@ -376,9 +376,9 @@ export function MachineLearningJobTableProvider(
           expectedValue ? 'enabled' : 'disabled'
         }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
-    }
+    },
 
-    public async assertJobActionCloneJobButtonEnabled(jobId: string, expectedValue: boolean) {
+    async assertJobActionCloneJobButtonEnabled(jobId: string, expectedValue: boolean) {
       await this.ensureJobActionsMenuOpen(jobId);
       const isEnabled = await testSubjects.isEnabled('mlActionButtonCloneJob');
       expect(isEnabled).to.eql(
@@ -387,12 +387,9 @@ export function MachineLearningJobTableProvider(
           expectedValue ? 'enabled' : 'disabled'
         }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
-    }
+    },
 
-    public async assertJobActionViewDatafeedCountsButtonEnabled(
-      jobId: string,
-      expectedValue: boolean
-    ) {
+    async assertJobActionViewDatafeedCountsButtonEnabled(jobId: string, expectedValue: boolean) {
       await this.ensureJobActionsMenuOpen(jobId);
       const isEnabled = await testSubjects.isEnabled('mlActionButtonViewDatafeedChart');
       expect(isEnabled).to.eql(
@@ -401,9 +398,9 @@ export function MachineLearningJobTableProvider(
           expectedValue ? 'enabled' : 'disabled'
         }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
-    }
+    },
 
-    public async assertJobActionEditJobButtonEnabled(jobId: string, expectedValue: boolean) {
+    async assertJobActionEditJobButtonEnabled(jobId: string, expectedValue: boolean) {
       await this.ensureJobActionsMenuOpen(jobId);
       const isEnabled = await testSubjects.isEnabled('mlActionButtonEditJob');
       expect(isEnabled).to.eql(
@@ -412,9 +409,9 @@ export function MachineLearningJobTableProvider(
           expectedValue ? 'enabled' : 'disabled'
         }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
-    }
+    },
 
-    public async assertJobActionDeleteJobButtonEnabled(jobId: string, expectedValue: boolean) {
+    async assertJobActionDeleteJobButtonEnabled(jobId: string, expectedValue: boolean) {
       await this.ensureJobActionsMenuOpen(jobId);
       const isEnabled = await testSubjects.isEnabled('mlActionButtonDeleteJob');
       expect(isEnabled).to.eql(
@@ -423,51 +420,51 @@ export function MachineLearningJobTableProvider(
           expectedValue ? 'enabled' : 'disabled'
         }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
-    }
+    },
 
-    public async ensureJobActionsMenuOpen(jobId: string) {
+    async ensureJobActionsMenuOpen(jobId: string) {
       await retry.tryForTime(30 * 1000, async () => {
         if (!(await testSubjects.exists('mlActionButtonDeleteJob'))) {
           await testSubjects.click(this.rowSelector(jobId, 'euiCollapsedItemActionsButton'));
           await testSubjects.existOrFail('mlActionButtonDeleteJob', { timeout: 5000 });
         }
       });
-    }
+    },
 
-    public async clickCloneJobAction(jobId: string) {
+    async clickCloneJobAction(jobId: string) {
       await this.ensureJobActionsMenuOpen(jobId);
       await testSubjects.click('mlActionButtonCloneJob');
       await testSubjects.existOrFail('~mlPageJobWizard');
-    }
+    },
 
-    public async clickCloneJobActionWhenNoDataViewExists(jobId: string) {
+    async clickCloneJobActionWhenNoDataViewExists(jobId: string) {
       await this.ensureJobActionsMenuOpen(jobId);
       await testSubjects.click('mlActionButtonCloneJob');
       await this.assertNoDataViewForCloneJobWarningToastExist();
-    }
+    },
 
-    public async assertNoDataViewForCloneJobWarningToastExist() {
+    async assertNoDataViewForCloneJobWarningToastExist() {
       await testSubjects.existOrFail('mlCloneJobNoDataViewExistsWarningToast', { timeout: 5000 });
-    }
+    },
 
-    public async clickEditJobAction(jobId: string) {
+    async clickEditJobAction(jobId: string) {
       await this.ensureJobActionsMenuOpen(jobId);
       await testSubjects.click('mlActionButtonEditJob');
       await testSubjects.existOrFail('mlJobEditFlyout');
-    }
+    },
 
-    public async clickDeleteJobAction(jobId: string) {
+    async clickDeleteJobAction(jobId: string) {
       await this.ensureJobActionsMenuOpen(jobId);
       await testSubjects.click('mlActionButtonDeleteJob');
       await testSubjects.existOrFail('mlDeleteJobConfirmModal');
-    }
+    },
 
-    public async confirmDeleteJobModal() {
+    async confirmDeleteJobModal() {
       await testSubjects.click('mlDeleteJobConfirmModal > mlDeleteJobConfirmModalButton');
       await testSubjects.missingOrFail('mlDeleteJobConfirmModal', { timeout: 30 * 1000 });
-    }
+    },
 
-    public async clickDeleteAnnotationsInDeleteJobModal(checked: boolean) {
+    async clickDeleteAnnotationsInDeleteJobModal(checked: boolean) {
       await testSubjects.setEuiSwitch(
         'mlDeleteJobConfirmModal > mlDeleteJobConfirmModalDeleteAnnotationsSwitch',
         checked ? 'check' : 'uncheck'
@@ -477,23 +474,23 @@ export function MachineLearningJobTableProvider(
       );
 
       expect(isChecked).to.eql(checked, `Expected delete annotations switch to be ${checked}`);
-    }
+    },
 
-    public async clickOpenJobInSingleMetricViewerButton(jobId: string) {
+    async clickOpenJobInSingleMetricViewerButton(jobId: string) {
       await testSubjects.click(this.rowSelector(jobId, 'mlOpenJobsInSingleMetricViewerButton'));
       await testSubjects.existOrFail('~mlPageSingleMetricViewer');
-    }
+    },
 
-    public async clickOpenJobInAnomalyExplorerButton(jobId: string) {
+    async clickOpenJobInAnomalyExplorerButton(jobId: string) {
       await testSubjects.click(this.rowSelector(jobId, 'mlOpenJobsInAnomalyExplorerButton'));
       await testSubjects.existOrFail('~mlPageAnomalyExplorer');
-    }
+    },
 
-    public async isJobRowSelected(jobId: string): Promise<boolean> {
+    async isJobRowSelected(jobId: string): Promise<boolean> {
       return await testSubjects.isChecked(this.rowSelector(jobId, `checkboxSelectRow-${jobId}`));
-    }
+    },
 
-    public async assertJobRowSelected(jobId: string, expectedValue: boolean) {
+    async assertJobRowSelected(jobId: string, expectedValue: boolean) {
       const isSelected = await this.isJobRowSelected(jobId);
       expect(isSelected).to.eql(
         expectedValue,
@@ -501,37 +498,37 @@ export function MachineLearningJobTableProvider(
           expectedValue ? 'selected' : 'deselected'
         }' (got '${isSelected ? 'selected' : 'deselected'}')`
       );
-    }
+    },
 
-    public async selectJobRow(jobId: string) {
+    async selectJobRow(jobId: string) {
       if ((await this.isJobRowSelected(jobId)) === false) {
         await testSubjects.click(this.rowSelector(jobId, `checkboxSelectRow-${jobId}`));
       }
 
       await this.assertJobRowSelected(jobId, true);
       await this.assertMultiSelectActionsAreaActive();
-    }
+    },
 
-    public async deselectJobRow(jobId: string) {
+    async deselectJobRow(jobId: string) {
       if ((await this.isJobRowSelected(jobId)) === true) {
         await testSubjects.click(this.rowSelector(jobId, `checkboxSelectRow-${jobId}`));
       }
 
       await this.assertJobRowSelected(jobId, false);
       await this.assertMultiSelectActionsAreaInactive();
-    }
+    },
 
-    public async assertMultiSelectActionsAreaActive() {
+    async assertMultiSelectActionsAreaActive() {
       await testSubjects.existOrFail('mlADJobListMultiSelectActionsArea active');
-    }
+    },
 
-    public async assertMultiSelectActionsAreaInactive() {
+    async assertMultiSelectActionsAreaInactive() {
       await testSubjects.existOrFail('mlADJobListMultiSelectActionsArea inactive', {
         allowHidden: true,
       });
-    }
+    },
 
-    public async assertMultiSelectActionSingleMetricViewerButtonEnabled(expectedValue: boolean) {
+    async assertMultiSelectActionSingleMetricViewerButtonEnabled(expectedValue: boolean) {
       const isEnabled = await testSubjects.isEnabled(
         '~mlADJobListMultiSelectActionsArea > mlOpenJobsInSingleMetricViewerButton'
       );
@@ -541,9 +538,9 @@ export function MachineLearningJobTableProvider(
           expectedValue ? 'enabled' : 'disabled'
         }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
-    }
+    },
 
-    public async assertMultiSelectActionAnomalyExplorerButtonEnabled(expectedValue: boolean) {
+    async assertMultiSelectActionAnomalyExplorerButtonEnabled(expectedValue: boolean) {
       const isEnabled = await testSubjects.isEnabled(
         '~mlADJobListMultiSelectActionsArea > mlOpenJobsInAnomalyExplorerButton'
       );
@@ -553,9 +550,9 @@ export function MachineLearningJobTableProvider(
           expectedValue ? 'enabled' : 'disabled'
         }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
-    }
+    },
 
-    public async assertMultiSelectActionEditJobGroupsButtonEnabled(expectedValue: boolean) {
+    async assertMultiSelectActionEditJobGroupsButtonEnabled(expectedValue: boolean) {
       const isEnabled = await testSubjects.isEnabled(
         '~mlADJobListMultiSelectActionsArea > mlADJobListMultiSelectEditJobGroupsButton'
       );
@@ -565,9 +562,9 @@ export function MachineLearningJobTableProvider(
           expectedValue ? 'enabled' : 'disabled'
         }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
-    }
+    },
 
-    public async assertMultiSelectManagementActionsButtonEnabled(expectedValue: boolean) {
+    async assertMultiSelectManagementActionsButtonEnabled(expectedValue: boolean) {
       const isEnabled = await testSubjects.isEnabled(
         '~mlADJobListMultiSelectActionsArea > mlADJobListMultiSelectManagementActionsButton'
       );
@@ -577,9 +574,9 @@ export function MachineLearningJobTableProvider(
           expectedValue ? 'enabled' : 'disabled'
         }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
-    }
+    },
 
-    public async assertMultiSelectStartDatafeedActionButtonEnabled(expectedValue: boolean) {
+    async assertMultiSelectStartDatafeedActionButtonEnabled(expectedValue: boolean) {
       await this.ensureMultiSelectManagementActionsMenuOpen();
       const isEnabled = await testSubjects.isEnabled(
         'mlADJobListMultiSelectStartDatafeedActionButton'
@@ -590,9 +587,9 @@ export function MachineLearningJobTableProvider(
           expectedValue ? 'enabled' : 'disabled'
         }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
-    }
+    },
 
-    public async assertMultiSelectDeleteJobActionButtonEnabled(expectedValue: boolean) {
+    async assertMultiSelectDeleteJobActionButtonEnabled(expectedValue: boolean) {
       await this.ensureMultiSelectManagementActionsMenuOpen();
       const isEnabled = await testSubjects.isEnabled('mlADJobListMultiSelectDeleteJobActionButton');
       expect(isEnabled).to.eql(
@@ -601,9 +598,9 @@ export function MachineLearningJobTableProvider(
           expectedValue ? 'enabled' : 'disabled'
         }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
-    }
+    },
 
-    public async ensureMultiSelectManagementActionsMenuOpen() {
+    async ensureMultiSelectManagementActionsMenuOpen() {
       await retry.tryForTime(30 * 1000, async () => {
         if (!(await testSubjects.exists('mlADJobListMultiSelectDeleteJobActionButton'))) {
           await testSubjects.click('mlADJobListMultiSelectManagementActionsButton');
@@ -612,48 +609,44 @@ export function MachineLearningJobTableProvider(
           });
         }
       });
-    }
+    },
 
-    public async openEditCustomUrlsForJobTab(jobId: string) {
+    async openEditCustomUrlsForJobTab(jobId: string) {
       await this.clickEditJobAction(jobId);
       // click Custom URLs tab
       await testSubjects.click('mlEditJobFlyout-customUrls');
       await this.ensureEditCustomUrlTabOpen();
       await headerPage.waitUntilLoadingHasFinished();
-    }
+    },
 
-    public async ensureEditCustomUrlTabOpen() {
+    async ensureEditCustomUrlTabOpen() {
       await testSubjects.existOrFail('mlJobOpenCustomUrlFormButton', { timeout: 5000 });
-    }
+    },
 
-    public async closeEditJobFlyout() {
+    async closeEditJobFlyout() {
       if (await testSubjects.exists('mlEditJobFlyoutCloseButton')) {
         await testSubjects.click('mlEditJobFlyoutCloseButton');
         await testSubjects.missingOrFail('mlJobEditFlyout');
       }
-    }
+    },
 
-    public async saveEditJobFlyoutChanges() {
+    async saveEditJobFlyoutChanges() {
       await testSubjects.click('mlEditJobFlyoutSaveButton');
       await testSubjects.missingOrFail('mlJobEditFlyout', { timeout: 5000 });
-    }
+    },
 
-    public async clickOpenCustomUrlEditor() {
+    async clickOpenCustomUrlEditor() {
       await this.ensureEditCustomUrlTabOpen();
       await testSubjects.click('mlJobOpenCustomUrlFormButton');
       await testSubjects.existOrFail('mlJobCustomUrlForm');
-    }
+    },
 
-    public async getExistingCustomUrlCount(): Promise<number> {
+    async getExistingCustomUrlCount(): Promise<number> {
       const existingCustomUrls = await testSubjects.findAll('mlJobEditCustomUrlItemLabel');
       return existingCustomUrls.length;
-    }
+    },
 
-    public async saveCustomUrl(
-      expectedLabel: string,
-      expectedIndex: number,
-      expectedValue?: string
-    ) {
+    async saveCustomUrl(expectedLabel: string, expectedIndex: number, expectedValue?: string) {
       await retry.tryForTime(5000, async () => {
         await testSubjects.click('mlJobAddCustomUrl');
         await customUrls.assertCustomUrlLabel(expectedIndex, expectedLabel);
@@ -662,9 +655,9 @@ export function MachineLearningJobTableProvider(
       if (expectedValue !== undefined) {
         await customUrls.assertCustomUrlUrlValue(expectedIndex, expectedValue);
       }
-    }
+    },
 
-    public async fillInDiscoverUrlForm(customUrl: DiscoverUrlConfig) {
+    async fillInDiscoverUrlForm(customUrl: DiscoverUrlConfig) {
       await this.clickOpenCustomUrlEditor();
       await customUrls.setCustomUrlLabel(customUrl.label);
       await mlCommonUI.selectRadioGroupValue(
@@ -683,9 +676,9 @@ export function MachineLearningJobTableProvider(
       if (customUrl.timeRange === TIME_RANGE_TYPE.INTERVAL) {
         await customUrls.setCustomUrlTimeRangeInterval(customUrl.timeRangeInterval!);
       }
-    }
+    },
 
-    public async fillInDashboardUrlForm(customUrl: DashboardUrlConfig) {
+    async fillInDashboardUrlForm(customUrl: DashboardUrlConfig) {
       await this.clickOpenCustomUrlEditor();
       await customUrls.setCustomUrlLabel(customUrl.label);
       await mlCommonUI.selectRadioGroupValue(
@@ -704,16 +697,16 @@ export function MachineLearningJobTableProvider(
       if (customUrl.timeRange === TIME_RANGE_TYPE.INTERVAL) {
         await customUrls.setCustomUrlTimeRangeInterval(customUrl.timeRangeInterval!);
       }
-    }
+    },
 
-    public async fillInOtherUrlForm(customUrl: OtherUrlConfig) {
+    async fillInOtherUrlForm(customUrl: OtherUrlConfig) {
       await this.clickOpenCustomUrlEditor();
       await customUrls.setCustomUrlLabel(customUrl.label);
       await mlCommonUI.selectRadioGroupValue(`mlJobCustomUrlLinkToTypeInput`, URL_TYPE.OTHER);
       await customUrls.setCustomUrlOtherTypeUrl(customUrl.url);
-    }
+    },
 
-    public async addDiscoverCustomUrl(jobId: string, customUrl: DiscoverUrlConfig) {
+    async addDiscoverCustomUrl(jobId: string, customUrl: DiscoverUrlConfig) {
       await retry.tryForTime(30 * 1000, async () => {
         await this.closeEditJobFlyout();
         await this.openEditCustomUrlsForJobTab(jobId);
@@ -725,9 +718,9 @@ export function MachineLearningJobTableProvider(
 
       // Save the job
       await this.saveEditJobFlyoutChanges();
-    }
+    },
 
-    public async addDashboardCustomUrl(
+    async addDashboardCustomUrl(
       jobId: string,
       customUrl: DashboardUrlConfig,
       expectedResult: { index: number; url: string }
@@ -741,9 +734,9 @@ export function MachineLearningJobTableProvider(
 
       // Save the job
       await this.saveEditJobFlyoutChanges();
-    }
+    },
 
-    public async addOtherTypeCustomUrl(jobId: string, customUrl: OtherUrlConfig) {
+    async addOtherTypeCustomUrl(jobId: string, customUrl: OtherUrlConfig) {
       await retry.tryForTime(30 * 1000, async () => {
         await this.closeEditJobFlyout();
         await this.openEditCustomUrlsForJobTab(jobId);
@@ -755,9 +748,9 @@ export function MachineLearningJobTableProvider(
 
       // Save the job
       await this.saveEditJobFlyoutChanges();
-    }
+    },
 
-    public async editCustomUrl(
+    async editCustomUrl(
       jobId: string,
       indexInList: number,
       customUrl: { label: string; url: string }
@@ -768,9 +761,9 @@ export function MachineLearningJobTableProvider(
 
       // Save the edit
       await this.saveEditJobFlyoutChanges();
-    }
+    },
 
-    public async deleteCustomUrl(jobId: string, indexInList: number) {
+    async deleteCustomUrl(jobId: string, indexInList: number) {
       await this.openEditCustomUrlsForJobTab(jobId);
       const beforeCustomUrls = await testSubjects.findAll('mlJobEditCustomUrlItemLabel');
       await customUrls.deleteCustomUrl(indexInList);
@@ -780,30 +773,31 @@ export function MachineLearningJobTableProvider(
       await this.openEditCustomUrlsForJobTab(jobId);
       await customUrls.assertCustomUrlsLength(beforeCustomUrls.length - 1);
       await this.closeEditJobFlyout();
-    }
+    },
 
-    public async openTestCustomUrl(jobId: string, indexInList: number) {
+    async openTestCustomUrl(jobId: string, indexInList: number) {
       await this.openEditCustomUrlsForJobTab(jobId);
       await customUrls.clickTestCustomUrl(indexInList);
-    }
+    },
 
-    public async testDiscoverCustomUrlAction(expectedHitCountFormatted: string) {
+    async testDiscoverCustomUrlAction(expectedHitCountFormatted: string) {
       await customUrls.assertDiscoverCustomUrlAction(expectedHitCountFormatted);
-    }
+    },
 
-    public async testDashboardCustomUrlAction(expectedPanelCount: number) {
+    async testDashboardCustomUrlAction(expectedPanelCount: number) {
       await customUrls.assertDashboardCustomUrlAction(expectedPanelCount);
-    }
+    },
 
-    public async testOtherTypeCustomUrlAction(
-      jobId: string,
-      indexInList: number,
-      expectedUrl: string
-    ) {
+    async testOtherTypeCustomUrlAction(jobId: string, indexInList: number, expectedUrl: string) {
       // Can't test the contents of the external page, so just check the expected URL.
       await this.openEditCustomUrlsForJobTab(jobId);
       await customUrls.assertCustomUrlUrlValue(indexInList, expectedUrl);
       await this.closeEditJobFlyout();
-    }
-  })();
+    },
+
+    async assertJobListMultiSelectionText(expectedMsg: string): Promise<void> {
+      const visibleText = await testSubjects.getVisibleText('~mlADJobListMultiSelectActionsArea');
+      expect(visibleText).to.be(expectedMsg);
+    },
+  };
 }

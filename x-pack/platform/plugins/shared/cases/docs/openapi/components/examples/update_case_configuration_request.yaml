@@ -1,0 +1,19 @@
+summary: Update the case settings.
+value:
+  version: WzExOSw0XQ==
+  connector:
+    id: 5e656730-e1ca-11ec-be9b-9b1838238ee6
+    name: my-jira-connector
+    type: .jira
+    fields: null
+  closure_type: close-by-user
+  customFields:
+    - key: d312efda-ec2b-42ec-9e2c-84981795c581
+      label: my-text-field
+      required: true
+      type: text
+      defaultValue: "A new default value."
+    - key: fcc6840d-eb14-42df-8aaf-232201a705ec
+      label: my-toggle
+      required: false
+      type: toggle

@@ -19,6 +19,9 @@ Vagrant.configure("2") do |config|
       vb.cpus = 2
     end
     rpm.vm.box = 'almalinux/9'
+    # `rpm -i` is broken in 9.4 when installing from a shared folder
+    # alternative workaround is to copy /packages/kibana.tar.gz to the cwd
+    rpm.vm.box_version = '9.3.20231118'
     rpm.vm.provision "ansible" do |ansible|
       ansible.playbook = "rpm.yml"
     end

@@ -1,35 +1,38 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { OpenAPIV3 } from 'openapi-types';
-import { NormalizedReferenceObject } from '../openapi_types';
-import { traverseObject } from './traverse_object';
+import { URL } from 'node:url';
+import { traverseObject } from './helpers/traverse_object';
+import { hasRef } from './helpers/has_ref';
 
-/**
- * Check if an object has a $ref property
- *
- * @param obj Any object
- * @returns True if the object has a $ref property
- */
-const hasRef = (obj: unknown): obj is NormalizedReferenceObject => {
-  return typeof obj === 'object' && obj !== null && '$ref' in obj;
-};
+function isUrl(maybeUrl: string): boolean {
+  return URL.canParse(maybeUrl);
+}
 
-export function normalizeSchema(schema: OpenAPIV3.Document) {
+export function normalizeSchema(schema: OpenAPIV3.Document): OpenAPIV3.Document {
   traverseObject(schema, (element) => {
-    if (hasRef(element)) {
-      const referenceName = element.$ref.split('/').pop();
-      if (!referenceName) {
-        throw new Error(`Cannot parse reference name: ${element.$ref}`);
-      }
-
-      element.referenceName = referenceName;
+    if (!hasRef(element)) {
+      return;
     }
+
+    if (isUrl(element.$ref)) {
+      throw new Error(`URL references are not supported: ${element.$ref}`);
+    }
+
+    const referenceName = element.$ref.split('/').pop();
+
+    if (!referenceName) {
+      throw new Error(`Cannot parse reference name: ${element.$ref}`);
+    }
+
+    element.referenceName = referenceName;
   });
 
   return schema;

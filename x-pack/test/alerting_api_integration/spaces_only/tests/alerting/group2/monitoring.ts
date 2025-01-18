@@ -13,9 +13,20 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function monitoringAlertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const retry = getService('retry');
 
   describe('monitoring', () => {
     const objectRemover = new ObjectRemover(supertest);
+
+    const run = async (id: string) => {
+      await retry.try(async () => {
+        // Sometimes the rule may already be running, which returns a 200. Try until it isn't
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${id}/_run_soon`)
+          .set('kbn-xsrf', 'foo');
+        expect(response.status).to.eql(204);
+      });
+    };
 
     after(async () => await objectRemover.removeAll());
 
@@ -23,7 +34,7 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
       const createResponse = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestRuleData({ schedule: { interval: '3s' } }));
+        .send(getTestRuleData({ schedule: { interval: '1h' } }));
       expect(createResponse.status).to.eql(200);
       objectRemover.add(Spaces.space1.id, createResponse.body.id, 'rule', 'alerting');
 
@@ -44,15 +55,21 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
       const createResponse = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestRuleData({ schedule: { interval: '3s' } }));
+        .send(getTestRuleData({ schedule: { interval: '1h' } }));
       expect(createResponse.status).to.eql(200);
-      objectRemover.add(Spaces.space1.id, createResponse.body.id, 'rule', 'alerting');
 
+      const ruleId = createResponse.body.id;
+      objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
+
+      for (let i = 1; i < 3; i++) {
+        await waitForExecutionCount(i, ruleId);
+        await run(ruleId);
+      }
       // Allow at least three executions
-      await waitForExecutionCount(3, createResponse.body.id);
+      await waitForExecutionCount(3, ruleId);
 
       const getResponse = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createResponse.body.id}`
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}`
       );
       expect(getResponse.status).to.eql(200);
 
@@ -71,20 +88,26 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
         .send(
           getTestRuleData({
             rule_type_id: 'test.patternSuccessOrFailure',
-            schedule: { interval: '3s' },
+            schedule: { interval: '1h' },
             params: {
               pattern,
             },
           })
         );
       expect(createResponse.status).to.eql(200);
-      objectRemover.add(Spaces.space1.id, createResponse.body.id, 'rule', 'alerting');
 
-      // Allow at least three executions
-      await waitForExecutionCount(5, createResponse.body.id);
+      const ruleId = createResponse.body.id;
+      objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
+
+      for (let i = 1; i < 5; i++) {
+        await waitForExecutionCount(i, ruleId);
+        await run(ruleId);
+      }
+      // Allow at least five executions
+      await waitForExecutionCount(5, ruleId);
 
       const getResponse = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createResponse.body.id}`
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}`
       );
       expect(getResponse.status).to.eql(200);
 

@@ -9,11 +9,10 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visualize, visEditor, lens, timePicker, header } = getPageObjects([
+  const { visualize, visEditor, lens, header } = getPageObjects([
     'visualize',
     'lens',
     'visEditor',
-    'timePicker',
     'header',
   ]);
 
@@ -21,17 +20,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   describe('Pie', function describeIndexTests() {
-    const isNewChartsLibraryEnabled = true;
-
     before(async () => {
-      await visualize.initTests(isNewChartsLibraryEnabled);
+      await visualize.initTests();
     });
 
     beforeEach(async () => {
       await visualize.navigateToNewAggBasedVisualization();
       await visualize.clickPieChart();
       await visualize.clickNewSearch();
-      await timePicker.setDefaultAbsoluteRange();
     });
 
     it('should hide the "Edit Visualization in Lens" menu item if no split slices were defined', async () => {
@@ -60,7 +56,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.selectAggregation('Terms');
       await visEditor.selectField('machine.os.raw');
       await header.waitUntilLoadingHasFinished();
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo();
 
       expect(await visualize.hasNavigateToLensButton()).to.eql(true);
     });
@@ -94,7 +90,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickBucket('Split slices');
       await visEditor.selectAggregation('Terms');
       await visEditor.selectField('machine.os.raw');
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisualization();
@@ -108,7 +104,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(sliceByText).to.be('machine.os.raw: Descending');
       expect(sizeByText).to.be('Count');
 
-      await pieChart.expectPieChartLabels(expectedTableData, isNewChartsLibraryEnabled);
+      await pieChart.expectPieChartLabels(expectedTableData);
     });
 
     it('should convert types correctly', async () => {
@@ -116,7 +112,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.selectAggregation('Terms');
       await visEditor.selectField('machine.os.raw');
 
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisualization();
@@ -124,7 +120,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       let chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
       let type = await chartSwitcher.getVisibleText();
-      expect(type).to.be('Donut');
+      expect(type).to.be('Pie');
+      expect(await lens.getDonutHoleSize()).to.equal('Small');
 
       const goBackBtn = await testSubjects.find('lnsApp_goBackToAppButton');
       await goBackBtn.click();
@@ -132,7 +129,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickOptionsTab();
       const isDonutButton = await testSubjects.find('visTypePieIsDonut');
       await isDonutButton.click();
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisualization();
@@ -141,6 +138,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
       type = await chartSwitcher.getVisibleText();
       expect(type).to.be('Pie');
+      expect(await lens.getDonutHoleSize()).to.equal('None');
     });
   });
 }

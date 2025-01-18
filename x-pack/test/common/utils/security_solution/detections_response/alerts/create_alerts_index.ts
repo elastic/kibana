@@ -17,7 +17,7 @@ import { countDownTest } from '../count_down_test';
  * @param supertest The supertest client library
  */
 export const createAlertsIndex = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog
 ): Promise<void> => {
   await countDownTest(

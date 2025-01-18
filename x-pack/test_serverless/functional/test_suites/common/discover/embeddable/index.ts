@@ -9,6 +9,8 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('discover/embeddable', function () {
+    this.tags(['esGate']);
+
     loadTestFile(require.resolve('./_saved_search_embeddable'));
   });
 }

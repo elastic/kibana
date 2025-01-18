@@ -8,16 +8,18 @@
 import expect from '@kbn/expect';
 
 import { registerHelpers } from './rollup.test_helpers';
-import { API_BASE_PATH } from './constants';
+import { API_BASE_PATH, INDEX_TO_ROLLUP_MAPPINGS } from './constants';
 import { getRandomString } from './lib';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  const { createIndexWithMappings, getJobPayload, createJob, cleanUp } =
+  const { createIndexWithMappings, createMockRollupIndex, getJobPayload, createJob, cleanUp } =
     registerHelpers(getService);
 
   describe('search', () => {
+    after(() => cleanUp());
+
     const URI = `${API_BASE_PATH}/search`;
 
     it('return a 404 if the rollup index does not exist', async () => {
@@ -31,8 +33,12 @@ export default function ({ getService }) {
     });
 
     it('should return a 200 when searching on existing rollup index', async () => {
+      // From 8.15, Es only allows creating a new rollup job when there is existing rollup usage in the cluster
+      // We will simulate rollup usage by creating a mock-up rollup index
+      await createMockRollupIndex();
+
       // Create a Rollup job on an index with the INDEX_TO_ROLLUP_MAPPINGS
-      const indexName = await createIndexWithMappings();
+      const indexName = await createIndexWithMappings(undefined, INDEX_TO_ROLLUP_MAPPINGS);
       const rollupIndex = getRandomString();
       await createJob(getJobPayload(indexName, undefined, rollupIndex));
 

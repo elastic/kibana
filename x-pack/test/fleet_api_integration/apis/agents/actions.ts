@@ -26,7 +26,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('POST /agents/{agentId}/actions', () => {
-      it('should return a 200 if this a valid SETTINGS action request', async () => {
+      it('should return a 200 if this a SETTINGS action request with a valid log level', async () => {
         const { body: apiResponse } = await supertest
           .post(`/api/fleet/agents/agent1/actions`)
           .set('kbn-xsrf', 'xx')
@@ -42,7 +42,23 @@ export default function (providerContext: FtrProviderContext) {
         expect(apiResponse.item.data).to.eql({ log_level: 'debug' });
       });
 
-      it('should return a 400 if this a invalid SETTINGS action request', async () => {
+      it('should return a 200 if this a SETTINGS action request with null log level', async () => {
+        const { body: apiResponse } = await supertest
+          .post(`/api/fleet/agents/agent1/actions`)
+          .set('kbn-xsrf', 'xx')
+          .send({
+            action: {
+              type: 'SETTINGS',
+              data: { log_level: null },
+            },
+          })
+          .expect(200);
+
+        expect(apiResponse.item.type).to.eql('SETTINGS');
+        expect(apiResponse.item.data).to.eql({ log_level: null });
+      });
+
+      it('should return a 400 if this a SETTINGS action request with an invalid log level', async () => {
         const { body: apiResponse } = await supertest
           .post(`/api/fleet/agents/agent1/actions`)
           .set('kbn-xsrf', 'xx')

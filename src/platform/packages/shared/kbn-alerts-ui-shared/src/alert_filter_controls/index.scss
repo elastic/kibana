@@ -1,0 +1,11 @@
+[class*=options_list_popover_footer--OptionsListPopoverFooter] {
+  display: none;
+}
+
+[data-test-subj=optionsListControl__sortingOptionsButton] {
+  display: none
+}
+
+[id^=control-popover] .euiPopoverTitle {
+  display: none
+}

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { modifyUrl } from '@kbn/std';
@@ -12,6 +13,7 @@ import { Key, Origin, type WebDriver } from 'selenium-webdriver';
 import { Driver as ChromiumWebDriver } from 'selenium-webdriver/chrome';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import Url from 'url';
+import { Protocol } from 'devtools-protocol';
 
 import { NoSuchSessionError } from 'selenium-webdriver/lib/error';
 import sharp from 'sharp';
@@ -25,7 +27,12 @@ import {
 import { FtrService, type FtrProviderContext } from './ftr_provider_context';
 
 export type Browser = BrowserService;
-
+export interface InterceptResponseFactory {
+  fail: () => ['Fetch.failRequest', Protocol.Fetch.FailRequestRequest];
+  fulfill: (
+    responseOptions: Omit<Protocol.Fetch.FulfillRequestRequest, 'requestId'>
+  ) => ['Fetch.fulfillRequest', Protocol.Fetch.FulfillRequestRequest];
+}
 class BrowserService extends FtrService {
   /**
    * Keyboard events
@@ -53,7 +60,10 @@ class BrowserService extends FtrService {
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebDriver.html#actions
    */
   public getActions() {
-    return this.driver.actions();
+    return this.driver.actions({
+      async: undefined,
+      bridge: undefined,
+    });
   }
 
   /**
@@ -588,6 +598,27 @@ class BrowserService extends FtrService {
   }
 
   /**
+   * Adds a value in session storage for the focused window/frame.
+   *
+   * @return {Promise<void>}
+   */
+  public async getSessionStorageItem(key: string): Promise<string | null> {
+    return await this.driver.executeScript<string>(
+      `return window.sessionStorage.getItem("${key}");`
+    );
+  }
+
+  /**
+   * Removes a value in session storage for the focused window/frame.
+   *
+   * @param {string} key
+   * @return {Promise<void>}
+   */
+  public async removeSessionStorageItem(key: string): Promise<void> {
+    await this.driver.executeScript('return window.sessionStorage.removeItem(arguments[0]);', key);
+  }
+
+  /**
    * Clears session storage for the focused window/frame.
    *
    * @return {Promise<void>}
@@ -811,6 +842,59 @@ class BrowserService extends FtrService {
       this.log.error(message);
       throw new Error(message);
     }
+  }
+
+  /**
+   * Intercept network requests using the Chrome DevTools Protocol (CDP).
+   * @param pattern - URL pattern to match intercepted requests.
+   * @param onIntercept - Callback defining how to handle intercepted requests.
+   * @param cb - Callback to trigger actions that make requests.
+   */
+
+  public async interceptRequest(
+    pattern: string,
+    onIntercept: (responseFactory: InterceptResponseFactory) => [string, Record<string, any>],
+    cb: () => Promise<void>
+  ): Promise<void> {
+    const connection = await this.driver.createCDPConnection('page');
+
+    return new Promise<void>((resolve, reject) => {
+      connection._wsConnection.on('message', async (data: Buffer) => {
+        try {
+          const parsed = JSON.parse(data.toString());
+          this.log.debug(`CDP Event: ${parsed.method} ${parsed.params?.request?.url}`);
+
+          if (parsed.method === 'Fetch.requestPaused') {
+            const requestId = parsed.params.requestId;
+
+            const [method, params] = onIntercept({
+              fail: () => ['Fetch.failRequest', { requestId, errorReason: 'Failed' }],
+              fulfill: (responseOptions) => [
+                'Fetch.fulfillRequest',
+                { requestId, ...responseOptions },
+              ],
+            });
+
+            connection.execute(method, params, () => {
+              this.log.debug(`Executed command: ${method}`);
+            });
+          }
+        } catch (error) {
+          this.log.error(`Error in Fetch.requestPaused handler: ${error.message}`);
+        }
+      });
+
+      connection.execute('Fetch.enable', { patterns: [{ urlPattern: pattern }] }, (result: any) => {
+        this.log.debug('Fetch.enable result:', result);
+
+        cb()
+          .then(resolve)
+          .catch((error) => {
+            this.log.error(`Error in callback: ${error.message}`);
+            reject(error);
+          });
+      });
+    });
   }
 }
 

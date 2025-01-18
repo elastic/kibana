@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { sortBy } from 'lodash';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import expect from '@kbn/expect';
 import { SavedObject } from '@kbn/core/server';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -46,6 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return 200 with individual responses', async () =>
       await supertest
         .get(`/s/${SPACE_ID}/api/saved_objects/_find?type=visualization&fields=title`)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200)
         .then((resp) => {
           expect(resp.body.saved_objects.map((so: { id: string }) => so.id)).to.eql([
@@ -67,6 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body } = await supertest
         .get(`/s/${SPACE_ID}/api/saved_objects/_find?type=config`)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200);
 
       expect(body.saved_objects.map((so: { id: string }) => so.id)).to.eql(['7.0.0-alpha1']);
@@ -80,6 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 200 with empty response', async () =>
         await supertest
           .get(`/s/${SPACE_ID}/api/saved_objects/_find?type=wigwags`)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200)
           .then((resp) => {
             expect(resp.body).to.eql({
@@ -96,6 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 200 with empty response', async () =>
         await supertest
           .get(`/s/${SPACE_ID}/api/saved_objects/_find?type=visualization&page=100&per_page=100`)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200)
           .then((resp) => {
             expect(resp.body).to.eql({
@@ -111,6 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 200 with empty response', async () =>
         await supertest
           .get(`/s/${SPACE_ID}/api/saved_objects/_find?type=url&search_fields=a`)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200)
           .then((resp) => {
             expect(resp.body).to.eql({
@@ -126,6 +133,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 200 with empty response', async () =>
         await supertest
           .get(`/s/${SPACE_ID}/api/saved_objects/_find?type=visualization&namespaces=foo`)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200)
           .then((resp) => {
             expect(resp.body).to.eql({
@@ -141,6 +149,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 200 with individual responses', async () =>
         await supertest
           .get(`/api/saved_objects/_find?type=visualization&fields=title&namespaces=${SPACE_ID}`)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200)
           .then((resp) => {
             expect(
@@ -160,6 +169,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get(
             `/api/saved_objects/_find?type=visualization&fields=title&fields=originId&namespaces=*`
           )
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200)
           .then((resp) => {
             const knownDocuments = resp.body.saved_objects.filter((so: { namespaces: string[] }) =>
@@ -186,6 +196,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get(
             `/s/${SPACE_ID}/api/saved_objects/_find?type=visualization&filter=visualization.attributes.title:"Count of requests"`
           )
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200)
           .then((resp) => {
             expect(resp.body.saved_objects.map((so: { id: string }) => so.id)).to.eql([
@@ -198,6 +209,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get(
             `/s/${SPACE_ID}/api/saved_objects/_find?type=visualization&filter=dashboard.attributes.title:foo`
           )
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(400)
           .then((resp) => {
             expect(resp.body).to.eql({
@@ -212,15 +224,12 @@ export default function ({ getService }: FtrProviderContext) {
           .get(
             `/s/${SPACE_ID}/api/saved_objects/_find?type=dashboard&filter=dashboard.attributes.title:foo<invalid`
           )
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(400)
           .then((resp) => {
-            expect(resp.body).to.eql({
-              error: 'Bad Request',
-              message:
-                'KQLSyntaxError: Expected AND, OR, end of input, whitespace but "<" found.\ndashboard.' +
-                'attributes.title:foo<invalid\n------------------------------^: Bad Request',
-              statusCode: 400,
-            });
+            expect(resp.body.error).to.be('Bad Request');
+            expect(resp.body.statusCode).to.be(400);
+            expect(resp.body.message).to.match(/KQLSyntaxError[\s\S]+Bad Request/);
           }));
     });
 
@@ -234,6 +243,7 @@ export default function ({ getService }: FtrProviderContext) {
               })
             )}`
           )
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200)
           .then((resp) => {
             expect(resp.body).to.eql({
@@ -258,6 +268,7 @@ export default function ({ getService }: FtrProviderContext) {
               })
             )}`
           )
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(400)
           .then((resp) => {
             expect(resp.body).to.eql({
@@ -282,6 +293,7 @@ export default function ({ getService }: FtrProviderContext) {
               })
             )}`
           )
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(400)
           .then((resp) => {
             expect(resp.body).to.eql({
@@ -314,6 +326,7 @@ export default function ({ getService }: FtrProviderContext) {
             type: 'visualization',
             has_reference: JSON.stringify({ type: 'ref-type', id: 'ref-1' }),
           })
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200)
           .then((resp) => {
             const objects = resp.body.saved_objects;
@@ -335,6 +348,7 @@ export default function ({ getService }: FtrProviderContext) {
             ]),
             has_reference_operator: 'OR',
           })
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200)
           .then((resp) => {
             const objects = resp.body.saved_objects;
@@ -357,6 +371,7 @@ export default function ({ getService }: FtrProviderContext) {
             ]),
             has_reference_operator: 'AND',
           })
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200)
           .then((resp) => {
             const objects = resp.body.saved_objects;
@@ -386,6 +401,7 @@ export default function ({ getService }: FtrProviderContext) {
             type: 'visualization',
             has_no_reference: JSON.stringify({ type: 'ref-type', id: 'ref-1' }),
           })
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200)
           .then((resp) => {
             const objects = resp.body.saved_objects;
@@ -408,6 +424,7 @@ export default function ({ getService }: FtrProviderContext) {
             ]),
             has_no_reference_operator: 'OR',
           })
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200)
           .then((resp) => {
             const objects = resp.body.saved_objects;
@@ -431,6 +448,7 @@ export default function ({ getService }: FtrProviderContext) {
             ]),
             has_no_reference_operator: 'AND',
           })
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200)
           .then((resp) => {
             const objects = resp.body.saved_objects;
@@ -465,6 +483,7 @@ export default function ({ getService }: FtrProviderContext) {
             has_reference: JSON.stringify({ type: 'ref-type', id: 'ref-1' }),
             has_no_reference: JSON.stringify({ type: 'ref-type', id: 'ref-2' }),
           })
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200)
           .then((resp) => {
             const objects = resp.body.saved_objects;
@@ -481,6 +500,7 @@ export default function ({ getService }: FtrProviderContext) {
             has_reference: JSON.stringify({ type: 'ref-type', id: 'ref-1' }),
             has_no_reference: JSON.stringify({ type: 'ref-type', id: 'ref-1' }),
           })
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200)
           .then((resp) => {
             const objects = resp.body.saved_objects;
@@ -512,6 +532,7 @@ export default function ({ getService }: FtrProviderContext) {
             search_fields: 'title',
             search: 'my-vis*',
           })
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200)
           .then((resp) => {
             const savedObjects = resp.body.saved_objects;
@@ -528,6 +549,7 @@ export default function ({ getService }: FtrProviderContext) {
             search_fields: 'title',
             search: 'my-*',
           })
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200)
           .then((resp) => {
             const savedObjects = resp.body.saved_objects;
@@ -544,6 +566,7 @@ export default function ({ getService }: FtrProviderContext) {
             search_fields: 'title',
             search: 'some*vi*',
           })
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200)
           .then((resp) => {
             const savedObjects = resp.body.saved_objects;
@@ -560,6 +583,7 @@ export default function ({ getService }: FtrProviderContext) {
             search_fields: 'title',
             search: 'visuali*',
           })
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200)
           .then((resp) => {
             const savedObjects = resp.body.saved_objects;

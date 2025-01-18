@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import type { Client } from '@elastic/elasticsearch';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { without, uniq } from 'lodash';
-import { SuperTest } from 'supertest';
-import {
-  SavedObjectsErrorHelpers,
-  SavedObjectsUpdateObjectsSpacesResponse,
-} from '@kbn/core/server';
+import { uniq, without } from 'lodash';
+import type { Agent as SuperTestAgent } from 'supertest';
+
+import type { SavedObjectsUpdateObjectsSpacesResponse } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
-import { SPACES } from '../lib/spaces';
+import expect from '@kbn/expect';
+
 import {
   expectResponses,
   getUrlPrefix,
 } from '../../../saved_object_api_integration/common/lib/saved_object_test_utils';
-import {
+import type {
   ExpectResponseBody,
   TestDefinition,
   TestSuite,
 } from '../../../saved_object_api_integration/common/lib/types';
+import { SPACES } from '../lib/spaces';
 
 export interface UpdateObjectsSpacesTestDefinition extends TestDefinition {
   request: {
@@ -61,7 +61,7 @@ const getTestTitle = ({ objects, spacesToAdd, spacesToRemove }: UpdateObjectsSpa
 export function updateObjectsSpacesTestSuiteFactory(
   es: Client,
   esArchiver: any,
-  supertest: SuperTest<any>
+  supertest: SuperTestAgent
 ) {
   const expectForbidden = expectResponses.forbiddenTypes('share_to_space');
   const expectResponseBody =
@@ -162,7 +162,7 @@ export function updateObjectsSpacesTestSuiteFactory(
             const requestBody = test.request;
             await supertest
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_update_objects_spaces`)
-              .auth(user?.username, user?.password)
+              .auth(user?.username!, user?.password!)
               .send(requestBody)
               .expect(test.responseStatusCode)
               .then(test.responseBody);

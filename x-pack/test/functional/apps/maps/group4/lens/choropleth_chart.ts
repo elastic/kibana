@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'maps']);
+  const { visualize, lens, maps } = getPageObjects(['visualize', 'lens', 'maps']);
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
 
@@ -17,43 +17,41 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // Do not skip test if failure is "Test requires access to Elastic Maps Service (EMS). EMS is not available"
   describe('choropleth chart', () => {
     before('', async () => {
-      await PageObjects.maps.expectEmsToBeAvailable();
+      await maps.expectEmsToBeAvailable();
     });
 
     it('should allow creation of choropleth chart', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
+      await lens.goToTimeRange();
 
-      await PageObjects.lens.switchToVisualization('lnsChoropleth', 'Region map');
+      await lens.switchToVisualization('lnsChoropleth', 'Region map');
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsChoropleth_regionKeyDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'geo.dest',
       });
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsChoropleth_valueDimensionPanel > lns-empty-dimension',
         operation: 'average',
         field: 'bytes',
       });
 
-      await PageObjects.maps.openLegend();
-      await PageObjects.maps.waitForLayersToLoad();
+      await maps.openLegend();
+      await maps.waitForLayersToLoad();
 
-      expect(await PageObjects.maps.getNumberOfLayers()).to.eql(2);
-      expect(await PageObjects.maps.doesLayerExist('World Countries by Average of bytes')).to.be(
-        true
-      );
+      expect(await maps.getNumberOfLayers()).to.eql(2);
+      expect(await maps.doesLayerExist('World Countries by Average of bytes')).to.be(true);
     });
 
     it('should create choropleth chart from suggestion', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
+      await lens.goToTimeRange();
 
-      await PageObjects.lens.dragFieldToWorkspace('geo.dest', 'xyVisChart');
+      await lens.dragFieldToWorkspace('geo.dest', 'xyVisChart');
 
       // add filter to force data fetch to set activeData
       await filterBar.addFilter({
@@ -64,13 +62,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.click('lnsSuggestion-worldCountriesByCountOfRecords > lnsSuggestion');
 
-      await PageObjects.maps.openLegend();
-      await PageObjects.maps.waitForLayersToLoad();
+      await maps.openLegend();
+      await maps.waitForLayersToLoad();
 
-      expect(await PageObjects.maps.getNumberOfLayers()).to.eql(2);
-      expect(await PageObjects.maps.doesLayerExist('World Countries by Count of records')).to.be(
-        true
-      );
+      expect(await maps.getNumberOfLayers()).to.eql(2);
+      expect(await maps.doesLayerExist('World Countries by Count of records')).to.be(true);
     });
   });
 }

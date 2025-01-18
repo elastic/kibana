@@ -1,0 +1,25 @@
+# TO_RADIANS
+
+The TO_RADIANS function converts a numerical value from degrees to radians.
+
+## Syntax
+
+`TO_RADIANS(number)`
+
+### Parameters
+
+#### number
+
+This is the input value. It can be a single or multi-valued column or an expression.
+
+## Examples
+
+```esql
+ROW deg = [90.0, 180.0, 270.0]
+| EVAL rad = TO_RADIANS(deg)
+```
+
+```esql
+ROW angle_deg = 45.0
+| EVAL angle_rad = TO_RADIANS(angle_deg)
+```

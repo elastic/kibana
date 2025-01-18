@@ -13,6 +13,7 @@ import {
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
+  ALERT_SEVERITY_IMPROVING,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
@@ -37,18 +38,22 @@ import {
   TAGS,
   VERSION,
   ALERT_CONSECUTIVE_MATCHES,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_PREVIOUS_ACTION_GROUP,
 } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { createEsQueryRule } from './helpers/alerting_api_helper';
-import { waitForAlertInIndex, waitForNumRuleRuns } from './helpers/alerting_wait_for_helpers';
 import { ObjectRemover } from '../../../../shared/lib';
+import { RoleCredentials } from '../../../../shared/services';
 
 const OPEN_OR_ACTIVE = new Set(['open', 'active']);
 
 export default function ({ getService }: FtrProviderContext) {
+  const svlUserManager = getService('svlUserManager');
+  let roleAdmin: RoleCredentials;
   const supertest = getService('supertest');
   const esClient = getService('es');
   const objectRemover = new ObjectRemover(supertest);
+  const alertingApi = getService('alertingApi');
 
   describe('Alert documents', function () {
     // Timeout of 360000ms exceeded
@@ -57,13 +62,21 @@ export default function ({ getService }: FtrProviderContext) {
     const ALERT_INDEX = '.alerts-stack.alerts-default';
     let ruleId: string;
 
+    before(async () => {
+      roleAdmin = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+    });
+
     afterEach(async () => {
-      objectRemover.removeAll();
+      await objectRemover.removeAll();
+    });
+
+    after(async () => {
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAdmin);
     });
 
     it('should generate an alert document for an active alert', async () => {
-      const createdRule = await createEsQueryRule({
-        supertest,
+      const createdRule = await alertingApi.helpers.createEsQueryRule({
+        roleAuthc: roleAdmin,
         consumer: 'alerts',
         name: 'always fire',
         ruleTypeId: RULE_TYPE_ID,
@@ -83,15 +96,15 @@ export default function ({ getService }: FtrProviderContext) {
 
       // get the first alert document written
       const testStart1 = new Date();
-      await waitForNumRuleRuns({
-        supertest,
+      await alertingApi.helpers.waitForNumRuleRuns({
+        roleAuthc: roleAdmin,
         numOfRuns: 1,
         ruleId,
         esClient,
         testStart: testStart1,
       });
 
-      const alResp1 = await waitForAlertInIndex({
+      const alResp1 = await alertingApi.helpers.waitForAlertInIndex({
         esClient,
         filter: testStart1,
         indexName: ALERT_INDEX,
@@ -108,6 +121,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(hits1[ALERT_MAINTENANCE_WINDOW_IDS]).to.be.an(Array);
       expect(typeof hits1[ALERT_REASON]).to.be('string');
       expect(typeof hits1[ALERT_RULE_EXECUTION_UUID]).to.be('string');
+      expect(typeof hits1[ALERT_RULE_EXECUTION_TIMESTAMP]).to.be('string');
       expect(typeof hits1[ALERT_DURATION]).to.be('number');
       expect(new Date(hits1[ALERT_START])).to.be.a(Date);
       expect(typeof hits1[ALERT_TIME_RANGE]).to.be('object');
@@ -115,6 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof hits1[ALERT_URL]).to.be('string');
       expect(typeof hits1[VERSION]).to.be('string');
       expect(typeof hits1[ALERT_CONSECUTIVE_MATCHES]).to.be('number');
+      expect(hits1[ALERT_RULE_EXECUTION_TIMESTAMP]).to.eql(hits1['@timestamp']);
 
       // remove fields we aren't going to compare directly
       const fields = [
@@ -125,6 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
         'kibana.alert.maintenance_window_ids',
         'kibana.alert.reason',
         'kibana.alert.rule.execution.uuid',
+        'kibana.alert.rule.execution.timestamp',
         'kibana.alert.rule.duration',
         'kibana.alert.start',
         'kibana.alert.time_range',
@@ -132,6 +148,8 @@ export default function ({ getService }: FtrProviderContext) {
         'kibana.alert.url',
         'kibana.version',
         'kibana.alert.consecutive_matches',
+        'kibana.alert.severity_improving',
+        'kibana.alert.previous_action_group',
       ];
 
       for (const field of fields) {
@@ -179,8 +197,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should update an alert document for an ongoing alert', async () => {
-      const createdRule = await createEsQueryRule({
-        supertest,
+      const createdRule = await alertingApi.helpers.createEsQueryRule({
+        roleAuthc: roleAdmin,
         consumer: 'alerts',
         name: 'always fire',
         ruleTypeId: RULE_TYPE_ID,
@@ -200,15 +218,15 @@ export default function ({ getService }: FtrProviderContext) {
 
       // get the first alert document written
       const testStart1 = new Date();
-      await waitForNumRuleRuns({
-        supertest,
+      await alertingApi.helpers.waitForNumRuleRuns({
+        roleAuthc: roleAdmin,
         numOfRuns: 1,
         ruleId,
         esClient,
         testStart: testStart1,
       });
 
-      const alResp1 = await waitForAlertInIndex({
+      const alResp1 = await alertingApi.helpers.waitForAlertInIndex({
         esClient,
         filter: testStart1,
         indexName: ALERT_INDEX,
@@ -218,15 +236,15 @@ export default function ({ getService }: FtrProviderContext) {
 
       // wait for another run, get the updated alert document
       const testStart2 = new Date();
-      await waitForNumRuleRuns({
-        supertest,
+      await alertingApi.helpers.waitForNumRuleRuns({
+        roleAuthc: roleAdmin,
         numOfRuns: 1,
         ruleId,
         esClient,
         testStart: testStart2,
       });
 
-      const alResp2 = await waitForAlertInIndex({
+      const alResp2 = await alertingApi.helpers.waitForAlertInIndex({
         esClient,
         filter: testStart2,
         indexName: ALERT_INDEX,
@@ -243,7 +261,10 @@ export default function ({ getService }: FtrProviderContext) {
       expect(hits2[EVENT_ACTION]).to.be('active');
       expect(hits1[ALERT_DURATION]).to.not.be.lessThan(0);
       expect(hits2[ALERT_DURATION]).not.to.be(0);
+      expect(hits2[ALERT_RULE_EXECUTION_TIMESTAMP]).to.eql(hits2['@timestamp']);
       expect(hits2[ALERT_CONSECUTIVE_MATCHES]).to.be.greaterThan(hits1[ALERT_CONSECUTIVE_MATCHES]);
+      expect(hits2[ALERT_PREVIOUS_ACTION_GROUP]).to.be('query matched');
+      expect(hits2[ALERT_SEVERITY_IMPROVING]).to.be(undefined);
 
       // remove fields we know will be different
       const fields = [
@@ -253,7 +274,10 @@ export default function ({ getService }: FtrProviderContext) {
         'kibana.alert.flapping_history',
         'kibana.alert.reason',
         'kibana.alert.rule.execution.uuid',
+        'kibana.alert.rule.execution.timestamp',
         'kibana.alert.consecutive_matches',
+        'kibana.alert.severity_improving',
+        'kibana.alert.previous_action_group',
       ];
 
       for (const field of fields) {

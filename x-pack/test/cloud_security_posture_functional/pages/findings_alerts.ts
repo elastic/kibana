@@ -40,6 +40,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         type: 'process',
       },
       cluster_id: 'Upper case cluster id',
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
     {
       '@timestamp': new Date(Date.now() - 60 * 60 * 1000).toISOString(),
@@ -62,6 +65,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         type: 'process',
       },
       cluster_id: 'Another Upper case cluster id',
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
     {
       '@timestamp': new Date(Date.now() - 60 * 60 * 1000).toISOString(),
@@ -84,6 +90,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         type: 'process',
       },
       cluster_id: 'lower case cluster id',
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
     {
       '@timestamp': new Date(Date.now() - 60 * 60 * 1000).toISOString(),
@@ -106,12 +115,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         type: 'process',
       },
       cluster_id: 'another lower case cluster id',
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
   ];
 
   const ruleName1 = data[0].rule.name;
 
-  describe('Findings Page - Alerts', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/168991
+  describe.skip('Findings Page - Alerts', function () {
     this.tags(['cloud_security_posture_findings_alerts']);
     let findings: typeof pageObjects.findings;
     let latestFindingsTable: typeof findings.latestFindingsTable;
@@ -140,7 +153,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'Findings table to be loaded',
         async () => (await latestFindingsTable.getRowsCount()) === data.length
       );
-      pageObjects.header.waitUntilLoadingHasFinished();
+      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     describe('Create detection rule', () => {
@@ -166,6 +179,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await testSubjects.click('csp:toast-success-link');
 
+        await pageObjects.header.waitUntilLoadingHasFinished();
         const rulePageTitle = await testSubjects.find('header-page-title');
         expect(await rulePageTitle.getVisibleText()).to.be(ruleName1);
       });
@@ -192,9 +206,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await toastMessageTitle.getVisibleText()).to.be(ruleName1);
 
         await testSubjects.click('csp:toast-success-link');
-
+        await pageObjects.header.waitUntilLoadingHasFinished();
         const rulePageTitle = await testSubjects.find('header-page-title');
-        expect(await rulePageTitle.getVisibleText()).to.be(ruleName1);
+        // Rule page title is not immediately available, so we need to retry until it is
+        await retry.try(async () => {
+          expect(await rulePageTitle.getVisibleText()).to.be(ruleName1);
+        });
       });
     });
     describe('Rule details', () => {
@@ -203,7 +220,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await misconfigurationsFlyout.clickTakeActionCreateRuleButton();
 
         await testSubjects.click('csp:toast-success-link');
-
+        await pageObjects.header.waitUntilLoadingHasFinished();
         const rulePageDescription = await testSubjects.find(
           'stepAboutRuleDetailsToggleDescriptionText'
         );
@@ -222,7 +239,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await misconfigurationsFlyout.clickTakeActionCreateRuleButton();
         const flyout = await misconfigurationsFlyout.getElement();
         await (await flyout.findByTestSubject('csp:findings-flyout-detection-rule-count')).click();
-
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect(await (await testSubjects.find('ruleName')).getVisibleText()).to.be(ruleName1);
       });
       it('Clicking on count of Alerts should navigate to the alerts page', async () => {
@@ -230,7 +247,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await misconfigurationsFlyout.clickTakeActionCreateRuleButton();
         const flyout = await misconfigurationsFlyout.getElement();
         await (await flyout.findByTestSubject('csp:findings-flyout-alert-count')).click();
-
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect(await (await testSubjects.find('header-page-title')).getVisibleText()).to.be(
           'Alerts'
         );

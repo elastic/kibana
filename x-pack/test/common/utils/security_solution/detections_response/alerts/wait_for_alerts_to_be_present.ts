@@ -18,7 +18,7 @@ import { waitFor } from '../wait_for';
  * @param numberOfAlerts The number of alerts to wait for, default is 1
  */
 export const waitForAlertsToBePresent = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   numberOfAlerts = 1,
   alertIds: string[],

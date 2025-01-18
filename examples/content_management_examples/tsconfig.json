@@ -21,7 +21,6 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/content-management-table-list-view",
     "@kbn/content-management-table-list-view-table",
-    "@kbn/kibana-react-plugin",
     "@kbn/i18n-react",
     "@kbn/saved-objects-tagging-oss-plugin",
     "@kbn/core-saved-objects-api-browser",
@@ -30,5 +29,6 @@
     "@kbn/shared-ux-router",
     "@kbn/saved-objects-finder-plugin",
     "@kbn/content-management-table-list-view-common",
+    "@kbn/react-kibana-context-render",
   ]
 }

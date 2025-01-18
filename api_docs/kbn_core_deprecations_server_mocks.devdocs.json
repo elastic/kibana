@@ -14,18 +14,10 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-deprecations-server-mocks",
-        "id": "def-common.deprecationsServiceMock",
+        "id": "def-server.deprecationsServiceMock",
         "type": "Object",
         "tags": [],
         "label": "deprecationsServiceMock",
@@ -36,7 +28,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-deprecations-server-mocks",
-            "id": "def-common.deprecationsServiceMock.create",
+            "id": "def-server.deprecationsServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -52,20 +44,14 @@
           },
           {
             "parentPluginId": "@kbn/core-deprecations-server-mocks",
-            "id": "def-common.deprecationsServiceMock.createInternalSetupContract",
+            "id": "def-server.deprecationsServiceMock.createInternalSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalSetupContract",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-deprecations-server",
-                "scope": "common",
-                "docId": "kibKbnCoreDeprecationsServerPluginApi",
-                "section": "def-common.DeprecationRegistryProvider",
-                "text": "DeprecationRegistryProvider"
-              },
+              "DeprecationRegistryProvider",
               ">"
             ],
             "path": "packages/core/deprecations/core-deprecations-server-mocks/src/deprecations_service.mock.ts",
@@ -76,20 +62,14 @@
           },
           {
             "parentPluginId": "@kbn/core-deprecations-server-mocks",
-            "id": "def-common.deprecationsServiceMock.createSetupContract",
+            "id": "def-server.deprecationsServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-deprecations-server",
-                "scope": "common",
-                "docId": "kibKbnCoreDeprecationsServerPluginApi",
-                "section": "def-common.DeprecationsServiceSetup",
-                "text": "DeprecationsServiceSetup"
-              },
+              "DeprecationsServiceSetup",
               ">"
             ],
             "path": "packages/core/deprecations/core-deprecations-server-mocks/src/deprecations_service.mock.ts",
@@ -100,20 +80,14 @@
           },
           {
             "parentPluginId": "@kbn/core-deprecations-server-mocks",
-            "id": "def-common.deprecationsServiceMock.createInternalStartContract",
+            "id": "def-server.deprecationsServiceMock.createInternalStartContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalStartContract",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-deprecations-server-internal",
-                "scope": "common",
-                "docId": "kibKbnCoreDeprecationsServerInternalPluginApi",
-                "section": "def-common.InternalDeprecationsServiceStart",
-                "text": "InternalDeprecationsServiceStart"
-              },
+              "InternalDeprecationsServiceStart",
               ">"
             ],
             "path": "packages/core/deprecations/core-deprecations-server-mocks/src/deprecations_service.mock.ts",
@@ -124,20 +98,14 @@
           },
           {
             "parentPluginId": "@kbn/core-deprecations-server-mocks",
-            "id": "def-common.deprecationsServiceMock.createClient",
+            "id": "def-server.deprecationsServiceMock.createClient",
             "type": "Function",
             "tags": [],
             "label": "createClient",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-deprecations-server",
-                "scope": "common",
-                "docId": "kibKbnCoreDeprecationsServerPluginApi",
-                "section": "def-common.DeprecationsClient",
-                "text": "DeprecationsClient"
-              },
+              "DeprecationsClient",
               ">"
             ],
             "path": "packages/core/deprecations/core-deprecations-server-mocks/src/deprecations_service.mock.ts",
@@ -150,5 +118,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

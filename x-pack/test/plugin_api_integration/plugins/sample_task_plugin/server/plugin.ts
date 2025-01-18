@@ -15,10 +15,9 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
   ConcreteTaskInstance,
-  EphemeralTask,
 } from '@kbn/task-manager-plugin/server';
 import { DEFAULT_MAX_WORKERS } from '@kbn/task-manager-plugin/server/config';
-import { TaskPriority } from '@kbn/task-manager-plugin/server/task';
+import { getDeleteTaskRunResult, TaskPriority } from '@kbn/task-manager-plugin/server/task';
 import { initRoutes } from './init_routes';
 
 // this plugin's dependendencies
@@ -39,8 +38,6 @@ export class SampleTaskManagerFixturePlugin
   public setup(core: CoreSetup, { taskManager }: SampleTaskManagerFixtureSetupDeps) {
     const taskTestingEvents = new EventEmitter();
     taskTestingEvents.setMaxListeners(DEFAULT_MAX_WORKERS * 2);
-
-    const tmStart = this.taskManagerStart;
 
     const defaultSampleTaskConfig = {
       timeout: '1m',
@@ -164,6 +161,45 @@ export class SampleTaskManagerFixturePlugin
         createTaskRunner: () => ({
           async run() {
             return await new Promise((resolve) => {});
+          },
+        }),
+      },
+      sampleRecurringTaskThatDeletesItself: {
+        title: 'Sample Recurring Task that Times Out',
+        description: 'A sample task that requests deletion.',
+        stateSchemaByVersion: {
+          1: {
+            up: (state: Record<string, unknown>) => ({ count: state.count }),
+            schema: schema.object({
+              count: schema.maybe(schema.number()),
+            }),
+          },
+        },
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+          async run() {
+            const { state } = taskInstance;
+            const prevState = state || { count: 0 };
+
+            const count = (prevState.count || 0) + 1;
+
+            const [{ elasticsearch }] = await core.getStartServices();
+            await elasticsearch.client.asInternalUser.index({
+              index: '.kibana_task_manager_test_result',
+              body: {
+                type: 'task',
+                taskId: taskInstance.id,
+                state: JSON.stringify(state),
+                ranAt: new Date(),
+              },
+              refresh: true,
+            });
+
+            if (count === 5) {
+              return getDeleteTaskRunResult();
+            }
+            return {
+              state: { count },
+            };
           },
         }),
       },
@@ -305,37 +341,6 @@ export class SampleTaskManagerFixturePlugin
         description:
           'A task that can only have two concurrent instance and tracks its execution timing.',
         ...taskWithTiming,
-      },
-      taskWhichExecutesOtherTasksEphemerally: {
-        title: 'Task Which Executes Other Tasks Ephemerally',
-        description: 'A sample task used to validate how ephemeral tasks are executed.',
-        maxAttempts: 1,
-        timeout: '60s',
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
-          async run() {
-            const {
-              params: { tasks = [] },
-            } = taskInstance;
-
-            const tm = await tmStart;
-            const executions = await Promise.all(
-              (tasks as EphemeralTask[]).map(async (task) => {
-                return tm
-                  .ephemeralRunNow(task)
-                  .then((result) => ({
-                    result,
-                  }))
-                  .catch((error) => ({
-                    error,
-                  }));
-              })
-            );
-
-            return {
-              state: { executions },
-            };
-          },
-        }),
       },
     });
 

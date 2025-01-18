@@ -1,0 +1,66 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`reporting management app Listing of Reports Displays types of report jobs 1`] = `
+Array [
+  Object {
+    "actions": "",
+    "createdAt": "2021-07-19 @ 10:29 PM",
+    "report": "report jobtype: csv",
+    "status": "Done, warnings detected",
+  },
+  Object {
+    "actions": "",
+    "createdAt": "2021-07-19 @ 06:47 PM",
+    "report": "report jobtype: csv_searchsource",
+    "status": "Done",
+  },
+  Object {
+    "actions": "",
+    "createdAt": "2021-07-19 @ 06:46 PM",
+    "report": "Discover search [2021-07-19T11:46:00.132-07:00]",
+    "status": "Done, warnings detected",
+  },
+  Object {
+    "actions": "",
+    "createdAt": "2021-07-19 @ 06:44 PM",
+    "report": "Discover search [2021-07-19T11:44:48.670-07:00]",
+    "status": "Done, warnings detected",
+  },
+  Object {
+    "actions": "",
+    "createdAt": "2021-07-19 @ 06:41 PM",
+    "report": "[Flights] Global Flight Dashboard",
+    "status": "Pending",
+  },
+  Object {
+    "actions": "",
+    "createdAt": "2021-07-19 @ 06:41 PM",
+    "report": "[Flights] Global Flight Dashboard",
+    "status": "Failed",
+  },
+  Object {
+    "actions": "",
+    "createdAt": "2021-07-19 @ 06:41 PM",
+    "report": "[Flights] Global Flight Dashboard",
+    "status": "Done, warnings detected",
+  },
+  Object {
+    "actions": "",
+    "createdAt": "2021-07-19 @ 06:38 PM",
+    "report": "[Flights] Global Flight Dashboard",
+    "status": "Done, warnings detected",
+  },
+  Object {
+    "actions": "",
+    "createdAt": "2021-07-19 @ 06:38 PM",
+    "report": "[Flights] Global Flight Dashboard",
+    "status": "Done",
+  },
+  Object {
+    "actions": "",
+    "createdAt": "2021-07-19 @ 06:38 PM",
+    "report": "[Flights] Global Flight Dashboard",
+    "status": "Done",
+  },
+]
+`;

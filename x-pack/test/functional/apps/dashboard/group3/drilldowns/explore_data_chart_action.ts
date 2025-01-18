@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('action is a link <a> element', async () => {
         const actionElement = await testSubjects.find(ACTION_TEST_SUBJ);
         const tag = await actionElement.getTagName();
-        const href = await actionElement.getAttribute('href');
+        const href = (await actionElement.getAttribute('href')) ?? '';
 
         expect(tag.toLowerCase()).to.be('a');
         expect(typeof href).to.be('string');

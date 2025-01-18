@@ -14,18 +14,10 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-node-server-mocks",
-        "id": "def-common.nodeServiceMock",
+        "id": "def-server.nodeServiceMock",
         "type": "Object",
         "tags": [],
         "label": "nodeServiceMock",
@@ -36,7 +28,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-node-server-mocks",
-            "id": "def-common.nodeServiceMock.create",
+            "id": "def-server.nodeServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -52,7 +44,7 @@
           },
           {
             "parentPluginId": "@kbn/core-node-server-mocks",
-            "id": "def-common.nodeServiceMock.createInternalPrebootContract",
+            "id": "def-server.nodeServiceMock.createInternalPrebootContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalPrebootContract",
@@ -70,20 +62,14 @@
           },
           {
             "parentPluginId": "@kbn/core-node-server-mocks",
-            "id": "def-common.nodeServiceMock.createInternalStartContract",
+            "id": "def-server.nodeServiceMock.createInternalStartContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalStartContract",
             "description": [],
             "signature": [
               "({ ui, backgroundTasks, migrator, }?: { ui: boolean; backgroundTasks: boolean; migrator: boolean; }) => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-node-server-internal",
-                "scope": "common",
-                "docId": "kibKbnCoreNodeServerInternalPluginApi",
-                "section": "def-common.InternalNodeServiceStart",
-                "text": "InternalNodeServiceStart"
-              },
+              "InternalNodeServiceStart",
               ">"
             ],
             "path": "packages/core/node/core-node-server-mocks/src/node_service.mock.ts",
@@ -93,7 +79,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-node-server-mocks",
-                "id": "def-common.nodeServiceMock.createInternalStartContract.$1",
+                "id": "def-server.nodeServiceMock.createInternalStartContract.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "__0",
@@ -111,5 +97,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

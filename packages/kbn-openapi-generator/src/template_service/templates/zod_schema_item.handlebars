@@ -6,7 +6,11 @@
 {{~/if~}}
 
 {{~#if $ref~}}
-  {{referenceName}}
+  {{~#if (isCircularRef $ref)~}}
+    z.lazy(() => {{referenceName}})
+  {{~else~}}
+    {{referenceName}}
+  {{~/if~}}
   {{~#if nullable}}.nullable(){{/if~}}
   {{~#if (eq requiredBool false)}}.optional(){{/if~}}
   {{~#if (defined default)}}.default({{{toJSON default}}}){{/if~}}
@@ -64,7 +68,6 @@ z.unknown()
 
 {{~#*inline "type_boolean"~}}
   z.boolean()
-  {{~#if nullable}}.nullable(){{/if~}}
 {{~/inline~}}
 
 {{~#*inline "type_integer"~}}
@@ -87,11 +90,7 @@ z.unknown()
       * {{{description}}} 
       */
       {{/if}}
-      {{#if (startsWithSpecialChar @key)}}
-        '{{@key}}': {{> zod_schema_item requiredBool=(includes ../required @key)}},
-      {{else}}
-        {{@key}}: {{> zod_schema_item requiredBool=(includes ../required @key)}},
-      {{/if}}
+      '{{@key}}':{{~> zod_schema_item requiredBool=(includes ../required @key)~}},
     {{/each}}
   })
   {{~#if (eq additionalProperties false)}}.strict(){{/if~}}
@@ -125,6 +124,8 @@ z.unknown()
   {{~#if (eq format 'date-math')}}.superRefine(isValidDateMath){{/if~}}
   {{~#if (eq format 'uuid')}}.uuid(){{/if~}}
   {{~#if pattern}}.regex(/{{pattern}}/){{/if~}}
+  {{~#if (eq format 'trim')}}.trim(){{/if~}}
+  {{~#if (eq format 'nonempty')}}.superRefine(isNonEmptyString){{/if~}}
+
   {{~/if~}}
 {{~/inline~}}
-

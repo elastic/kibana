@@ -1,0 +1,11 @@
+type:  object
+title: Unsuccessful cases API response
+properties:
+  error:
+    type: string
+    example: Unauthorized
+  message:
+    type: string 
+  statusCode:
+    type: integer
+    example: 401

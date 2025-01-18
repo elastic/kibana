@@ -10,28 +10,18 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlDashboardJobSelectionTable } from './dashboard_job_selection_table';
 
 export function MachineLearningDashboardEmbeddablesProvider(
-  { getService, getPageObjects }: FtrProviderContext,
+  { getService }: FtrProviderContext,
   mlDashboardJobSelectionTable: MlDashboardJobSelectionTable
 ) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
-  // const ml = getService('ml');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const PageObjects = getPageObjects(['discover']);
 
   return {
     async assertAnomalyChartsEmbeddableInitializerExists() {
       await retry.tryForTime(10 * 1000, async () => {
         await testSubjects.existOrFail('mlAnomalyChartsEmbeddableInitializer', { timeout: 1000 });
-      });
-    },
-
-    async assertSingleMetricViewerEmbeddableInitializerExists() {
-      await retry.tryForTime(10 * 1000, async () => {
-        await testSubjects.existOrFail('mlSingleMetricViewerEmbeddableInitializer', {
-          timeout: 1000,
-        });
       });
     },
 
@@ -124,27 +114,29 @@ export function MachineLearningDashboardEmbeddablesProvider(
       });
     },
 
-    async openAnomalyJobSelectionFlyout(
-      mlEmbeddableType: 'ml_anomaly_swimlane' | 'ml_anomaly_charts' | 'ml_single_metric_viewer'
-    ) {
+    async assertMlSectionExists(expectExist = true) {
       await retry.tryForTime(60 * 1000, async () => {
         await dashboardAddPanel.clickEditorMenuButton();
-        await testSubjects.existOrFail('dashboardEditorContextMenu', { timeout: 2000 });
-
-        await dashboardAddPanel.clickEmbeddableFactoryGroupButton('ml');
-        await dashboardAddPanel.clickAddNewEmbeddableLink(mlEmbeddableType);
-
-        await mlDashboardJobSelectionTable.assertJobSelectionTableExists();
+        await dashboardAddPanel.verifyEmbeddableFactoryGroupExists('ml', expectExist);
       });
     },
 
-    async selectDiscoverIndexPattern(indexPattern: string) {
-      await retry.tryForTime(2 * 1000, async () => {
-        await PageObjects.discover.selectIndexPattern(indexPattern);
-        const indexPatternTitle = await testSubjects.getVisibleText(
-          'discover-dataView-switch-link'
-        );
-        expect(indexPatternTitle).to.be(indexPattern);
+    async openAnomalyJobSelectionFlyout(
+      mlEmbeddableType: 'ml_anomaly_swimlane' | 'ml_anomaly_charts' | 'ml_single_metric_viewer'
+    ) {
+      const name = {
+        ml_anomaly_swimlane: 'Anomaly swim lane',
+        ml_single_metric_viewer: 'Single metric viewer',
+        ml_anomaly_charts: 'Anomaly chart',
+      };
+      await retry.tryForTime(60 * 1000, async () => {
+        await dashboardAddPanel.clickEditorMenuButton();
+        await testSubjects.existOrFail('dashboardPanelSelectionFlyout', { timeout: 2000 });
+
+        await dashboardAddPanel.verifyEmbeddableFactoryGroupExists('ml');
+
+        await dashboardAddPanel.clickAddNewPanelFromUIActionLink(name[mlEmbeddableType]);
+        await testSubjects.existOrFail('mlAnomalyJobSelectionControls', { timeout: 2000 });
       });
     },
   };

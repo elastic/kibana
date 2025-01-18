@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`OverviewPageFooter render 1`] = `
+<_EuiPageSection
+  className="kbnOverviewPageFooter"
+  component="footer"
+>
+  <EuiFlexGroup
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <div>
+        <EuiButtonEmpty
+          className="kbnOverviewPageFooter__button"
+          flush="both"
+          iconType="home"
+          onClick={[Function]}
+          size="s"
+        >
+          <MemoizedFormattedMessage
+            defaultMessage="Make this my landing page"
+            id="kibana-react.pageFooter.makeDefaultRouteLink"
+          />
+        </EuiButtonEmpty>
+      </div>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</_EuiPageSection>
+`;

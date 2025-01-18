@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import mockFs from 'mock-fs';
 
 import Fsp from 'fs/promises';
@@ -15,6 +17,7 @@ import {
   detectRunningNodes,
   maybeCreateDockerNetwork,
   maybePullDockerImage,
+  printESImageInfo,
   resolveDockerCmd,
   resolveDockerImage,
   resolveEsArgs,
@@ -103,12 +106,13 @@ const serverlessResources = SERVERLESS_RESOURCES_PATHS.reduce<string[]>((acc, pa
 }, []);
 
 const volumeCmdTest = async (volumeCmd: string[]) => {
-  expect(volumeCmd).toHaveLength(20);
+  expect(volumeCmd).toHaveLength(22);
   expect(volumeCmd).toEqual(
     expect.arrayContaining([
       ...getESp12Volume(),
       ...serverlessResources,
       `${baseEsPath}:/objectstore:z`,
+      `stateless.object_store.bucket=${serverlessDir}`,
       `${SERVERLESS_SECRETS_PATH}:${SERVERLESS_CONFIG_PATH}secrets/secrets.json:z`,
       `${SERVERLESS_JWKS_PATH}:${SERVERLESS_CONFIG_PATH}secrets/jwks.json:z`,
     ])
@@ -437,7 +441,6 @@ describe('resolveEsArgs()', () => {
       kibanaUrl: 'https://localhost:5601/',
     });
 
-    expect(esArgs).toHaveLength(26);
     expect(esArgs).toMatchInlineSnapshot(`
       Array [
         "--env",
@@ -446,6 +449,8 @@ describe('resolveEsArgs()', () => {
         "xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12",
         "--env",
         "xpack.security.http.ssl.verification_mode=certificate",
+        "--env",
+        "xpack.security.authc.native_role_mappings.enabled=true",
         "--env",
         "xpack.security.authc.realms.saml.cloud-saml-kibana.order=0",
         "--env",
@@ -476,7 +481,6 @@ describe('resolveEsArgs()', () => {
       kibanaUrl: 'https://localhost:5601/',
     });
 
-    expect(esArgs).toHaveLength(8);
     expect(esArgs).toMatchInlineSnapshot(`
       Array [
         "--env",
@@ -564,7 +568,7 @@ describe('setupServerlessVolumes()', () => {
     const pathsNotIncludedInCmd = requiredPaths.filter(
       (path) => !volumeCmd.some((cmd) => cmd.includes(path))
     );
-    expect(volumeCmd).toHaveLength(22);
+    expect(volumeCmd).toHaveLength(24);
     expect(pathsNotIncludedInCmd).toEqual([]);
   });
 
@@ -597,6 +601,25 @@ describe('setupServerlessVolumes()', () => {
       'Unsupported ES serverless --resources value(s):\n  /absolute/path/invalid\n\n' +
         'Valid resources: operator_users.yml | role_mapping.yml | service_tokens | users | users_roles | roles.yml'
     );
+  });
+
+  test('should override data path when passed', async () => {
+    const dataPath = 'stateless-cluster-ftr';
+
+    mockFs({
+      [baseEsPath]: {},
+    });
+
+    const volumeCmd = await setupServerlessVolumes(log, {
+      projectType,
+      basePath: baseEsPath,
+      dataPath,
+    });
+
+    expect(volumeCmd).toEqual(
+      expect.arrayContaining([`stateless.object_store.bucket=${dataPath}`])
+    );
+    await expect(Fsp.access(`${baseEsPath}/${dataPath}`)).resolves.not.toThrow();
   });
 });
 
@@ -640,8 +663,15 @@ describe('runServerlessCluster()', () => {
 
     await runServerlessCluster(log, { projectType, basePath: baseEsPath });
 
-    // setupDocker execa calls then run three nodes and attach logger
-    expect(execa.mock.calls).toHaveLength(8);
+    // docker version (1)
+    // docker ps (1)
+    // docker container rm (3)
+    // docker network create (1)
+    // docker pull (1)
+    // docker inspect (1)
+    // docker run (3)
+    // docker logs (1)
+    expect(execa.mock.calls).toHaveLength(12);
   });
 
   test(`should wait for serverless nodes to return 'green' status`, async () => {
@@ -775,7 +805,64 @@ describe('runDockerContainer()', () => {
   test('should resolve', async () => {
     execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
     await expect(runDockerContainer(log, {})).resolves.toBeUndefined();
-    // setupDocker execa calls then run container
-    expect(execa.mock.calls).toHaveLength(5);
+    // docker version (1)
+    // docker ps (1)
+    // docker container rm (3)
+    // docker network create (1)
+    // docker pull (1)
+    // docker inspect (1)
+    // docker run (1)
+    expect(execa.mock.calls).toHaveLength(9);
+  });
+});
+
+describe('printESImageInfo', () => {
+  beforeEach(() => {
+    logWriter.messages.length = 0;
+  });
+
+  test('should print ES Serverless image info', async () => {
+    execa.mockImplementation(() =>
+      Promise.resolve({
+        stdout: JSON.stringify({
+          'org.opencontainers.image.revision': 'deadbeef12345678',
+          'org.opencontainers.image.source': 'https://github.com/elastic/elasticsearch-serverless',
+        }),
+      })
+    );
+
+    await printESImageInfo(
+      log,
+      'docker.elastic.co/elasticsearch-ci/elasticsearch-serverless:latest'
+    );
+
+    expect(execa.mock.calls).toHaveLength(1);
+    expect(logWriter.messages[0]).toContain(
+      `docker.elastic.co/elasticsearch-ci/elasticsearch-serverless:git-deadbeef1234`
+    );
+    expect(logWriter.messages[0]).toContain(
+      `https://github.com/elastic/elasticsearch-serverless/commit/deadbeef12345678`
+    );
+  });
+
+  test('should print ES image info', async () => {
+    execa.mockImplementation(() =>
+      Promise.resolve({
+        stdout: JSON.stringify({
+          'org.opencontainers.image.revision': 'deadbeef12345678',
+          'org.opencontainers.image.source': 'https://github.com/elastic/elasticsearch',
+        }),
+      })
+    );
+
+    await printESImageInfo(log, 'docker.elastic.co/elasticsearch/elasticsearch:8.15-SNAPSHOT');
+
+    expect(execa.mock.calls).toHaveLength(1);
+    expect(logWriter.messages[0]).toContain(
+      `docker.elastic.co/elasticsearch/elasticsearch:8.15-SNAPSHOT`
+    );
+    expect(logWriter.messages[0]).toContain(
+      `https://github.com/elastic/elasticsearch/commit/deadbeef12345678`
+    );
   });
 });

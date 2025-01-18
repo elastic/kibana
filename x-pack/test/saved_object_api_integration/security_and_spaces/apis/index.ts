@@ -11,8 +11,14 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');
+  const config = getService('config');
+  const basic = config.get('esTestCluster.license') === 'basic';
 
   describe('saved objects security and spaces enabled', function () {
+    if (basic) {
+      this.tags('skipFIPS');
+    }
+
     before(async () => {
       await createUsersAndRoles(es, supertest);
     });

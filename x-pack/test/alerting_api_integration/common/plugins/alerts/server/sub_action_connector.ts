@@ -11,6 +11,7 @@ import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server/plugin';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
 const TestConfigSchema = schema.object({ url: schema.string() });
 const TestSecretsSchema = schema.object({
@@ -69,7 +70,11 @@ export const getTestSubActionConnector = (
       return `Message: ${error.response?.data.errorMessage}. Code: ${error.response?.data.errorCode}`;
     }
 
-    public async subActionWithParams({ id }: { id: string }) {
+    public async subActionWithParams(
+      { id }: { id: string },
+      connectorUsageCollector: ConnectorUsageCollector
+    ) {
+      connectorUsageCollector.addRequestBodyBytes(undefined, { id });
       return { id };
     }
 

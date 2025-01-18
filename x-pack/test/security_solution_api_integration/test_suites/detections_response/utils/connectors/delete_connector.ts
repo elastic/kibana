@@ -7,9 +7,6 @@
 
 import type SuperTest from 'supertest';
 
-export function deleteConnector(
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
-  connectorId: string
-): SuperTest.Test {
+export function deleteConnector(supertest: SuperTest.Agent, connectorId: string): SuperTest.Test {
   return supertest.delete(`/api/actions/connector/${connectorId}`).set('kbn-xsrf', 'foo');
 }

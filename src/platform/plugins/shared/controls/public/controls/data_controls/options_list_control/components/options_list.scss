@@ -1,0 +1,90 @@
+.optionsList__inputButtonOverride {
+  max-inline-size: 100% !important;
+
+  .euiButtonEmpty {
+    border-end-start-radius: 0 !important;
+    border-start-start-radius: 0 !important;
+  }
+}
+
+.optionsList--filterBtn {
+  font-weight: $euiFontWeightRegular !important;
+  color: $euiTextSubduedColor !important;
+
+  .optionsList--selectionText {
+    flex-grow: 1;
+    text-align: left;
+  }
+
+  .optionsList__selections {
+    overflow: hidden !important;
+  }
+
+  .optionsList__filter {
+    color: $euiTextColor;
+    font-weight: $euiFontWeightMedium;
+  }
+
+  .optionsList__filterInvalid {
+    color: $euiColorWarningText;
+  }
+
+  .optionsList__negateLabel {
+    font-weight: $euiFontWeightSemiBold;
+    font-size: $euiSizeM;
+    color: $euiColorDanger;
+  }
+}
+
+.optionsList--sortPopover {
+  width: $euiSizeXL * 7;
+}
+
+.optionsList__existsFilter {
+  font-style: italic;
+  font-weight: $euiFontWeightMedium;
+}
+
+.optionsList__popover {
+  .optionsList__actions {
+    padding: 0 $euiSizeS;
+    border-bottom: $euiBorderThin;
+    border-color: darken($euiColorLightestShade, 2%);
+
+    .optionsList__searchRow {
+      padding-top: $euiSizeS
+    }
+
+    .optionsList__actionsRow {
+      margin: calc($euiSizeS / 2) 0 !important;
+
+      .optionsList__actionBarDivider {
+        height: $euiSize;
+        border-right: $euiBorderThin;
+      }
+    }
+  }
+
+  .optionsList-control-ignored-selection-title {
+    padding-left: $euiSizeM;
+  }
+
+  .optionsList__selectionInvalid {
+    color: $euiColorWarningText;
+  }
+
+  .optionslist--loadingMoreGroupLabel {
+    text-align: center;
+    padding: $euiSizeM;
+    font-style: italic;
+    height:  $euiSizeXXL !important;
+  }
+
+  .optionslist--endOfOptionsGroupLabel {
+    text-align: center;
+    font-size: $euiSizeM;
+    height:  auto !important;
+    color: $euiTextSubduedColor;
+    padding: $euiSizeM;
+  }
+}

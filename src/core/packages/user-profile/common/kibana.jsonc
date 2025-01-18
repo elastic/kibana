@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/core-user-profile-common",
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

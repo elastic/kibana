@@ -7,6 +7,7 @@
 
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { AlertsFilter } from '@kbn/alerting-plugin/common/rule';
+import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { Space, User } from '../types';
 import { ObjectRemover } from './object_remover';
 import { getUrlPrefix } from './space_test_utils';
@@ -15,7 +16,7 @@ import { getTestRuleData } from './get_test_rule_data';
 export interface AlertUtilsOpts {
   user?: User;
   space: Space;
-  supertestWithoutAuth: any;
+  supertestWithoutAuth: SupertestWithoutAuthProviderType;
   indexRecordActionId?: string;
   objectRemover?: ObjectRemover;
 }
@@ -57,7 +58,7 @@ export class AlertUtils {
   private referenceCounter = 1;
   private readonly user?: User;
   private readonly space: Space;
-  private readonly supertestWithoutAuth: any;
+  private readonly supertestWithoutAuth: SupertestWithoutAuthProviderType;
   private readonly indexRecordActionId?: string;
   private readonly objectRemover?: ObjectRemover;
 
@@ -351,6 +352,36 @@ export class AlertUtils {
     if (response.statusCode === 200) {
       objRemover.add(this.space.id, response.body.id, 'rule', 'alerting');
     }
+    return response;
+  }
+
+  public async createAlwaysFiringSystemAction({
+    objectRemover,
+    overwrites = {},
+    reference,
+  }: CreateAlertWithActionOpts) {
+    const objRemover = objectRemover || this.objectRemover;
+
+    if (!objRemover) {
+      throw new Error('objectRemover is required');
+    }
+
+    let request = this.supertestWithoutAuth
+      .post(`${getUrlPrefix(this.space.id)}/api/alerting/rule`)
+      .set('kbn-xsrf', 'foo');
+
+    if (this.user) {
+      request = request.auth(this.user.username, this.user.password);
+    }
+
+    const rule = getAlwaysFiringRuleWithSystemAction(reference);
+
+    const response = await request.send({ ...rule, ...overwrites });
+
+    if (response.statusCode === 200) {
+      objRemover.add(this.space.id, response.body.id, 'rule', 'alerting');
+    }
+
     return response;
   }
 
@@ -654,6 +685,35 @@ function getPatternFiringRuleWithSummaryAction(
           throttle,
         },
         ...(alertsFilter && { alerts_filter: alertsFilter }),
+      },
+    ],
+  };
+}
+
+function getAlwaysFiringRuleWithSystemAction(reference: string) {
+  return {
+    enabled: true,
+    name: 'abc',
+    schedule: { interval: '1m' },
+    tags: ['tag-A', 'tag-B'],
+    rule_type_id: 'test.always-firing-alert-as-data',
+    consumer: 'alertsFixture',
+    params: {
+      index: ES_TEST_INDEX_NAME,
+      reference,
+    },
+    actions: [
+      {
+        id: 'system-connector-test.system-action-connector-adapter',
+        /**
+         * The injected param required by the action will be set by the corresponding
+         * connector adapter. Setting it here it will lead to a 400 error by the
+         * rules API as only the connector adapter can set the injected property.
+         *
+         * Adapter: x-pack/test/alerting_api_integration/common/plugins/alerts/server/connector_adapters.ts
+         * Connector type: x-pack/test/alerting_api_integration/common/plugins/alerts/server/action_types.ts
+         */
+        params: { myParam: 'param from rule action', index: ES_TEST_INDEX_NAME, reference },
       },
     ],
   };

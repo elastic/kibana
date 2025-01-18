@@ -1,5 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/analytics-shippers-fullstory",
-  "owner": "@elastic/kibana-core"
-}

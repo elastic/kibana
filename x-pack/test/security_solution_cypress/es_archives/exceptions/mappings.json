@@ -11,7 +11,7 @@
         "refresh_interval": "5s"
       }
     },
-    "index": "exceptions-0001",
+    "index": "auditbeat-exceptions-0001",
     "mappings": {
       "properties": {
         "@timestamp": {
@@ -36,6 +36,10 @@
         "user": {
           "type": "nested",
           "properties": {
+            "name": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
             "first": {
               "type": "keyword"
             },

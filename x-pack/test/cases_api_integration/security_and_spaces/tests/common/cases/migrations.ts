@@ -128,6 +128,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           totalComment: 1,
           updated_at: null,
           updated_by: null,
+          observables: [],
         });
       });
     });
@@ -569,7 +570,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           const casesFromES = await getCaseSavedObjectsFromES({ es });
 
           for (const hit of casesFromES.body.hits.hits) {
-            const caseID = hit._id;
+            const caseID = hit._id!;
             expect(expectedSeverityValues[caseID]).not.to.be(undefined);
             expect(hit._source?.cases.severity).to.eql(expectedSeverityValues[caseID]);
           }
@@ -588,7 +589,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           const casesFromES = await getCaseSavedObjectsFromES({ es });
 
           for (const hit of casesFromES.body.hits.hits) {
-            const caseID = hit._id;
+            const caseID = hit._id!;
             expect(expectedStatusValues[caseID]).not.to.be(undefined);
             expect(hit._source?.cases.status).to.eql(expectedStatusValues[caseID]);
           }

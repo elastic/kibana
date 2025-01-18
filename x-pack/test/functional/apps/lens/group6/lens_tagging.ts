@@ -16,14 +16,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const PageObjects = getPageObjects([
-    'common',
+  const { tagManagement, header, dashboard, visualize, lens } = getPageObjects([
     'tagManagement',
     'header',
     'dashboard',
     'visualize',
     'lens',
-    'timePicker',
   ]);
 
   const lensTag = 'extreme-lens-tag';
@@ -32,50 +30,44 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('lens tagging', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.preserveCrossAppState();
-      await PageObjects.dashboard.clickNewDashboard();
-    });
-
-    after(async () => {
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await dashboard.navigateToApp();
+      await dashboard.preserveCrossAppState();
+      await dashboard.clickNewDashboard();
     });
 
     it('adds a new tag to a Lens visualization', async () => {
       // create lens
       await dashboardAddPanel.clickCreateNewLink();
-      await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
       });
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'average',
         field: 'bytes',
       });
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'ip',
       });
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await testSubjects.click('lnsApp_saveButton');
 
-      await PageObjects.visualize.setSaveModalValues(lensTitle, {
+      await visualize.setSaveModalValues(lensTitle, {
         saveAsNew: false,
         redirectToOrigin: true,
       });
       await testSubjects.click('savedObjectTagSelector');
       await testSubjects.click(`tagSelectorOption-action__create`);
 
-      expect(await PageObjects.tagManagement.tagModal.isOpened()).to.be(true);
+      expect(await tagManagement.tagModal.isOpened()).to.be(true);
 
-      await PageObjects.tagManagement.tagModal.fillForm(
+      await tagManagement.tagModal.fillForm(
         {
           name: lensTag,
           color: '#FFCC33',
@@ -87,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         }
       );
 
-      expect(await PageObjects.tagManagement.tagModal.isOpened()).to.be(false);
+      expect(await tagManagement.tagModal.isOpened()).to.be(false);
       await testSubjects.click('confirmSaveSavedObjectButton');
       await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
         testSubjects
@@ -98,12 +90,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('retains its saved object tags after save and return', async () => {
-      await dashboardPanelActions.openContextMenu();
-      await dashboardPanelActions.clickEdit();
-      await PageObjects.lens.saveAndReturn();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await dashboardPanelActions.navigateToEditorFromFlyout();
+      await lens.saveAndReturn();
+      await header.waitUntilLoadingHasFinished();
 
-      await PageObjects.visualize.gotoVisualizationLandingPage();
+      await visualize.gotoVisualizationLandingPage();
       await listingTable.waitUntilTableIsLoaded();
 
       // open the filter dropdown
@@ -111,9 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '.euiFilterGroup .euiPopover:nth-child(2) .euiFilterButton'
       );
       await filterButton.click();
-      await testSubjects.click(
-        `tag-searchbar-option-${PageObjects.tagManagement.testSubjFriendly(lensTag)}`
-      );
+      await testSubjects.click(`tag-searchbar-option-${tagManagement.testSubjFriendly(lensTag)}`);
       // click elsewhere to close the filter dropdown
       const searchFilter = await find.byCssSelector('.euiPageTemplate .euiFieldSearch');
       await searchFilter.click();

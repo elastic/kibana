@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { LIST_PRIVILEGES_URL } from '@kbn/securitysolution-list-constants';
 import { getReadPrivilegeMock } from '@kbn/lists-plugin/server/routes/list_privileges/read_list_privileges_route.mock';
-import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
+import type { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
 export default ({ getService }: FtrProviderContextWithSpaces) => {
   const supertest = getService('supertest');

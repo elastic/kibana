@@ -82,11 +82,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           '../alerting_api_integration/common/plugins/actions_simulators'
         )}`,
         `--xpack.trigger_actions_ui.enableExperimental=${JSON.stringify([
-          'globalAlertsPage',
+          'stackAlertsPage',
           'ruleTagFilter',
           'ruleStatusFilter',
         ])}`,
-        `--xpack.alerting.rules.minimumScheduleInterval.value="2s"`,
+        `--xpack.alerting.rules.minimumScheduleInterval.value="5s"`,
         `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
         `--xpack.actions.preconfiguredAlertHistoryEsIndex=false`,
         `--xpack.actions.preconfigured=${JSON.stringify({
@@ -126,6 +126,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
               spaces: ['*'],
             },
           ],
+          elasticsearch: {
+            indices: [
+              {
+                names: ['.alerts-*'],
+                privileges: ['read'],
+              },
+            ],
+          },
         },
         only_actions_role: {
           kibana: [

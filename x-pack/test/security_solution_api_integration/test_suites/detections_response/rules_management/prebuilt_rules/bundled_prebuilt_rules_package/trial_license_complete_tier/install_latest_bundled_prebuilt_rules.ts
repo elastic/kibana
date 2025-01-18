@@ -29,7 +29,9 @@ export default ({ getService }: FtrProviderContext): void => {
   /* attempt to install it from the local file system. The API response from EPM provides
   /* us with the information of whether the package was installed from the registry or
   /* from a package that was bundled with Kibana */
-  describe('@ess @serverless @skipInQA install_bundled_prebuilt_rules', () => {
+  //
+  // FLAKY: https://github.com/elastic/kibana/issues/180087
+  describe.skip('@ess @serverless @skipInServerlessMKI install_bundled_prebuilt_rules', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);

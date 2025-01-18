@@ -1,0 +1,12 @@
+= Manage dashboards
+
+[float]
+include::find-dashboards.asciidoc[leveloffset=+1]
+
+[float]
+include::mark-favorite-dashboards.asciidoc[leveloffset=+1]
+
+[float]
+include::view-dashboard-usage.asciidoc[leveloffset=+1]
+
+

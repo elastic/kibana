@@ -1,0 +1,49 @@
+openapi: 3.0.0
+info:
+  title: Elastic Security - Timeline - Patch Timeline API
+  version: '2023-10-31'
+paths:
+  /api/timeline:
+    patch:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: PatchTimeline
+      summary: Update a Timeline
+      description: Update an existing Timeline. You can update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing Timeline.
+      tags:
+        - access:securitySolution
+      requestBody:
+        description: The Timeline updates, along with the Timeline ID and version.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [timelineId, version, timeline]
+              properties:
+                timelineId:
+                  type: string
+                  nullable: true
+                version:
+                  type: string
+                  nullable: true
+                timeline:
+                  $ref: '../model/components.schema.yaml#/components/schemas/SavedTimeline'
+      responses:
+        '200':
+          description: Indicates that the draft Timeline was successfully created. In the event the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
+          content:
+            application/json:
+              schema:
+                $ref: '../model/components.schema.yaml#/components/schemas/PersistTimelineResponse'
+        '405':
+          description: Indicates that the user does not have the required access to create a draft Timeline.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: string
+                  statusCode:
+                    type: number

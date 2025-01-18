@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import supertest from 'supertest';
@@ -17,6 +18,7 @@ import {
   config as httpConfig,
   cspConfig,
   externalUrlConfig,
+  permissionsPolicyConfig,
 } from '@kbn/core-http-server-internal';
 import { isServerTLS, flattenCertificateChain, fetchPeerCertificate } from './tls_utils';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
@@ -24,6 +26,7 @@ import type { Logger } from '@kbn/logging';
 
 const CSP_CONFIG = cspConfig.schema.validate({});
 const EXTERNAL_URL_CONFIG = externalUrlConfig.schema.validate({});
+const PERMISSIONS_POLICY_CONFIG = permissionsPolicyConfig.schema.validate({});
 const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
 describe('HttpServer - TLS config', () => {
@@ -54,7 +57,12 @@ describe('HttpServer - TLS config', () => {
       },
       shutdownTimeout: '1s',
     });
-    const firstConfig = new HttpConfig(rawHttpConfig, CSP_CONFIG, EXTERNAL_URL_CONFIG);
+    const firstConfig = new HttpConfig(
+      rawHttpConfig,
+      CSP_CONFIG,
+      EXTERNAL_URL_CONFIG,
+      PERMISSIONS_POLICY_CONFIG
+    );
 
     const config$ = new BehaviorSubject(firstConfig);
 
@@ -109,7 +117,12 @@ describe('HttpServer - TLS config', () => {
       shutdownTimeout: '1s',
     });
 
-    const secondConfig = new HttpConfig(secondRawConfig, CSP_CONFIG, EXTERNAL_URL_CONFIG);
+    const secondConfig = new HttpConfig(
+      secondRawConfig,
+      CSP_CONFIG,
+      EXTERNAL_URL_CONFIG,
+      PERMISSIONS_POLICY_CONFIG
+    );
     config$.next(secondConfig);
 
     const secondCertificate = await fetchPeerCertificate(firstConfig.host, firstConfig.port);

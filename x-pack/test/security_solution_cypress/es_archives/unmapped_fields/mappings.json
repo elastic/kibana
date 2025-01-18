@@ -3,7 +3,7 @@
   "value": {
     "aliases": {
     },
-    "index": "unmapped-7.12.0-2021.03.10-000001",
+    "index": "auditbeat-unmapped-7.12.0-2021.03.10-000001",
     "mappings": {
       "dynamic": false,
       "properties":{

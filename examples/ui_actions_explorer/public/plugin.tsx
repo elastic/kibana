@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
@@ -51,7 +52,7 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
     );
     deps.uiActions.addTriggerAction(
       USER_TRIGGER,
-      createEditUserAction(async () => (await startServices)[0].overlays.openModal)
+      createEditUserAction(async () => (await startServices)[0])
     );
 
     deps.uiActions.addTriggerAction(COUNTRY_TRIGGER, viewInMapsAction);
@@ -68,10 +69,7 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./app');
-        return renderApp(
-          { uiActionsStartService: depsStart.uiActions, openModal: coreStart.overlays.openModal },
-          params
-        );
+        return renderApp({ uiActionsStartService: depsStart.uiActions, core: coreStart }, params);
       },
     });
 

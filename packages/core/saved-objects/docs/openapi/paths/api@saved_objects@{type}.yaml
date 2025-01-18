@@ -1,6 +1,7 @@
 post:
-  summary: Create Kibana saved objects with randomly generated identifiers.
+  summary: Create a saved object
   operationId: createSavedObject
+  description: Create a Kibana saved object with a randomly generated identifier.
   deprecated: true
   tags:
     - saved objects

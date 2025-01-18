@@ -243,6 +243,26 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
             warning: null,
           },
           next_run: response.body.next_run,
+          monitoring: {
+            run: {
+              history: [],
+              calculated_metrics: {
+                success_ratio: 0,
+              },
+              last_run: {
+                timestamp: response.body.monitoring.run.last_run.timestamp,
+                metrics: {
+                  duration: 0,
+                  total_search_duration_ms: null,
+                  total_indexing_duration_ms: null,
+                  total_alerts_detected: null,
+                  total_alerts_created: null,
+                  gap_duration_s: null,
+                },
+              },
+            },
+          },
+          snooze_schedule: [],
         });
 
         // Ensure AAD isn't broken
@@ -306,6 +326,26 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
             warning: null,
           },
           next_run: response.body.next_run,
+          monitoring: {
+            run: {
+              history: [],
+              calculated_metrics: {
+                success_ratio: 0,
+              },
+              last_run: {
+                timestamp: response.body.monitoring.run.last_run.timestamp,
+                metrics: {
+                  duration: 0,
+                  total_search_duration_ms: null,
+                  total_indexing_duration_ms: null,
+                  total_alerts_detected: null,
+                  total_alerts_created: null,
+                  gap_duration_s: null,
+                },
+              },
+            },
+          },
+          snooze_schedule: [],
         });
 
         // Ensure AAD isn't broken
@@ -491,7 +531,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
           .send({ ids: [ruleId] });
         expect(response.status).to.eql(200);
         expect(response.body.rules[0].enabled).to.eql(true);
-        expect(response.body.rules[0].apiKeyCreatedByUser).to.eql(true);
+        expect(response.body.rules[0].api_key_created_by_user).to.eql(true);
 
         // Ensure AAD isn't broken
         await checkAAD({
@@ -514,7 +554,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
           .send({ ids: [ruleId] });
         expect(response.status).to.eql(200);
         expect(response.body.rules[0].enabled).to.eql(true);
-        expect(response.body.rules[0].apiKeyCreatedByUser).to.eql(false);
+        expect(response.body.rules[0].api_key_created_by_user).to.eql(false);
 
         // Ensure AAD isn't broken
         await checkAAD({
@@ -592,7 +632,8 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
     const generatedApiKeyName = generateAPIKeyName(ruleTypeId, ruleName);
 
     const { body: allApiKeys } = await supertest
-      .get(`/internal/security/api_key?isAdmin=true`)
+      .post(`/internal/security/api_key/_query`)
+      .send({ query: { match: { name: generatedApiKeyName } } })
       .set('kbn-xsrf', 'foo')
       .expect(200);
 

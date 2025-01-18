@@ -41,46 +41,43 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should not allow converting if dot size aggregation is defined', async () => {
-      const visPanel = await panelActions.getPanelHeading('XY - Dot size metric');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(false);
+      expect(await panelActions.canConvertToLensByTitle('XY - Dot size metric')).to.eql(false);
     });
 
     it('should not allow converting if split chart is defined', async () => {
-      const visPanel = await panelActions.getPanelHeading('XY - Split chart');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(false);
+      expect(await panelActions.canConvertToLensByTitle('XY - Split chart')).to.eql(false);
     });
 
     it('should not allow converting if more than one axis left/right/top/bottom are defined', async () => {
-      const visPanel = await panelActions.getPanelHeading('XY - Multiple Y Axes');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(false);
+      expect(await panelActions.canConvertToLensByTitle('XY - Multiple Y Axes')).to.eql(false);
     });
 
     it('should not allow converting if several split series are defined', async () => {
-      const visPanel = await panelActions.getPanelHeading('XY - Multiple Split Series');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(false);
+      expect(await panelActions.canConvertToLensByTitle('XY - Multiple Split Series')).to.eql(
+        false
+      );
     });
 
     it('should not allow converting if sibling pipeline agg and split series are defined', async () => {
-      const visPanel = await panelActions.getPanelHeading('XY - Sibling pipeline agg w/ split');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(false);
+      expect(
+        await panelActions.canConvertToLensByTitle('XY - Sibling pipeline agg w/ split')
+      ).to.eql(false);
     });
 
     it('should not allow converting of unsupported aggregation', async () => {
-      const visPanel = await panelActions.getPanelHeading('XY - Unsupported Agg');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(false);
+      expect(await panelActions.canConvertToLensByTitle('XY - Unsupported Agg')).to.eql(false);
     });
 
     it('should convert in different layers if metrics have different chart types', async () => {
-      const visPanel = await panelActions.getPanelHeading('XY - Differing Layers');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('XY - Differing Layers');
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
         expect(await lens.getLayerCount()).to.be(2);
-        const layersSettings = await testSubjects.findAll('lns_layer_settings');
-        expect(layersSettings.length).to.be(2);
-        expect(await layersSettings[0].getVisibleText()).to.be('Area');
-        expect(await layersSettings[1].getVisibleText()).to.be('Bar vertical');
+        const layerChartSwitches = await testSubjects.findAll('lnsChartSwitchPopover');
+        expect(layerChartSwitches.length).to.be(2);
+        expect(await layerChartSwitches[0].getVisibleText()).to.be('Area');
+        expect(await layerChartSwitches[1].getVisibleText()).to.be('Bar');
         const yDimensionText1 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
         const yDimensionText2 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 1);
         expect(yDimensionText1).to.be('Count');
@@ -89,15 +86,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert in one layer if metrics have the same chart type', async () => {
-      const visPanel = await panelActions.getPanelHeading('XY - Similar Layers');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('XY - Similar Layers');
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
         expect(await lens.getLayerCount()).to.be(1);
-        const layersSettings = await testSubjects.findAll('lns_layer_settings');
-        expect(layersSettings.length).to.be(1);
-        expect(await layersSettings[0].getVisibleText()).to.be('Bar vertical');
+        const layerChartSwitches = await testSubjects.findAll('lnsChartSwitchPopover');
+        expect(layerChartSwitches.length).to.be(1);
+        expect(await layerChartSwitches[0].getVisibleText()).to.be('Bar');
         const yDimensionText1 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
         const yDimensionText2 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 1);
         expect(yDimensionText1).to.be('Count');
@@ -106,8 +102,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert parent pipeline aggregation', async () => {
-      const visPanel = await panelActions.getPanelHeading('XY - Parent pipeline agg');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('XY - Parent pipeline agg');
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
@@ -120,8 +115,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert sibling pipeline aggregation', async () => {
-      const visPanel = await panelActions.getPanelHeading('XY - Sibling pipeline agg');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('XY - Sibling pipeline agg');
       await lens.waitForVisualization('xyVisChart');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -138,8 +132,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should draw a reference line', async () => {
-      const visPanel = await panelActions.getPanelHeading('XY - Reference line');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('XY - Reference line');
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
@@ -156,47 +149,44 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert line stacked to area stacked chart', async () => {
-      const visPanel = await panelActions.getPanelHeading('XY - Stacked lines');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('XY - Stacked lines');
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
         expect(await lens.getLayerCount()).to.be(1);
-        const layersSettings = await testSubjects.findAll('lns_layer_settings');
-        expect(layersSettings.length).to.be(1);
-        expect(await layersSettings[0].getVisibleText()).to.be('Area stacked');
+        const layerChartSwitches = await testSubjects.findAll('lnsChartSwitchPopover');
+        expect(layerChartSwitches.length).to.be(1);
+        expect(await layerChartSwitches[0].getVisibleText()).to.be('Area');
       });
     });
 
     it('should convert percentage charts', async () => {
-      const visPanel = await panelActions.getPanelHeading('XY - Percentage chart');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('XY - Percentage chart');
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
         expect(await lens.getLayerCount()).to.be(1);
-        const layersSettings = await testSubjects.findAll('lns_layer_settings');
-        expect(layersSettings.length).to.be(1);
-        expect(await layersSettings[0].getVisibleText()).to.be('Area percentage');
+        const layerChartSwitches = await testSubjects.findAll('lnsChartSwitchPopover');
+        expect(layerChartSwitches.length).to.be(1);
+        expect(await layerChartSwitches[0].getVisibleText()).to.be('Area');
       });
     });
 
     it('should convert horizontal bar', async () => {
-      const visPanel = await panelActions.getPanelHeading('XY - Horizontal Bar');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('XY - Horizontal Bar');
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
         expect(await lens.getLayerCount()).to.be(1);
-        const layersSettings = await testSubjects.findAll('lns_layer_settings');
-        expect(layersSettings.length).to.be(1);
-        expect(await layersSettings[0].getVisibleText()).to.be('Bar horizontal');
+        const layerChartSwitches = await testSubjects.findAll('lnsChartSwitchPopover');
+        expect(layerChartSwitches.length).to.be(1);
+        expect(await layerChartSwitches[0].getVisibleText()).to.be('Bar');
+        expect(await lens.getSelectedBarOrientationSetting()).to.be('Horizontal');
       });
     });
 
     it('should convert y-axis positions', async () => {
-      const visPanel = await panelActions.getPanelHeading('XY - Axis positions');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('XY - Axis positions');
       await lens.waitForVisualization('xyVisChart');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -217,8 +207,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert split series', async () => {
-      const visPanel = await panelActions.getPanelHeading('XY - Split Series');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('XY - Split Series');
       await lens.waitForVisualization('xyVisChart');
 
       const expectedData = ['win 8', 'win xp', 'win 7', 'ios', 'osx'];
@@ -237,8 +226,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert x-axis', async () => {
-      const visPanel = await panelActions.getPanelHeading('XY - X Axis');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('XY - X Axis');
       await lens.waitForVisualization('xyVisChart');
 
       const expectedData = ['Count'];

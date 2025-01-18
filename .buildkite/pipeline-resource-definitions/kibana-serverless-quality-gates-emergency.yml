@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: kibana-tests-emergency-pipeline
+  description: Definition of the kibana pipeline
+  links:
+    - title: Pipeline
+      url: https://buildkite.com/elastic/kibana-tests-emergency
+spec:
+  type: buildkite-pipeline
+  owner: group:kibana-tech-leads
+  system: buildkite
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana-tests-emergency
+      description: Pipeline that tests the service integration in various environments
+    spec:
+      repository: elastic/kibana
+      pipeline_file: ./.buildkite/pipelines/quality-gates/emergency/pipeline.emergency.kibana-tests.yaml
+      provider_settings:
+        trigger_mode: none
+      teams:
+        kibana-operations:
+          access_level: MANAGE_BUILD_AND_READ
+        kibana-release-operators:
+          access_level: BUILD_AND_READ
+        cloud-tooling:
+          access_level: BUILD_AND_READ
+        everyone:
+          access_level: READ_ONLY
+      tags:
+        - kibana
+        - kibana-serverless-release

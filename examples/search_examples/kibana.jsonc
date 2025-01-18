@@ -16,8 +16,6 @@
       "share",
       "unifiedSearch"
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "requiredBundles": []
   }
 }

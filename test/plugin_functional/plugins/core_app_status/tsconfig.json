@@ -14,5 +14,6 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/react-kibana-context-render",
   ],
 }

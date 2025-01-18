@@ -1,9 +1,0 @@
-type: string
-enum:
-  - add
-  - create
-  - delete
-  - push_to_service
-  - update
-examples:
-  - create

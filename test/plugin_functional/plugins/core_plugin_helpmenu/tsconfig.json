@@ -13,6 +13,11 @@
     "target/**/*",
   ],
   "kbn_references": [
-    "@kbn/core"
+    "@kbn/core",
+    "@kbn/core-analytics-browser",
+    "@kbn/core-i18n-browser",
+    "@kbn/core-theme-browser",
+    "@kbn/react-kibana-context-render",
+    "@kbn/core-user-profile-browser"
   ]
 }

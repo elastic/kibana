@@ -8,19 +8,13 @@
 import { getNewThreatIndicatorRule } from '../../../../objects/rule';
 
 import {
-  ALERT_SUPPRESSION_FIELDS_INPUT,
-  ALERT_SUPPRESSION_FIELDS,
-} from '../../../../screens/create_new_rule';
-import {
   SUPPRESS_FOR_DETAILS,
-  DETAILS_TITLE,
   SUPPRESS_BY_DETAILS,
   SUPPRESS_MISSING_FIELD,
   DEFINITION_DETAILS,
   ALERT_SUPPRESSION_INSUFFICIENT_LICENSING_ICON,
 } from '../../../../screens/rule_details';
 
-import { selectIndicatorMatchType } from '../../../../tasks/create_new_rule';
 import { startBasicLicense } from '../../../../tasks/api_calls/licensing';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { login } from '../../../../tasks/login';
@@ -47,16 +41,6 @@ describe(
         startBasicLicense();
       });
 
-      it('can not create rule with rule execution suppression on basic license', () => {
-        selectIndicatorMatchType();
-
-        cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.disabled');
-        cy.get(ALERT_SUPPRESSION_FIELDS).trigger('mouseover');
-
-        // Platinum license is required, tooltip on disabled alert suppression checkbox should tell this
-        cy.get(TOOLTIP).contains('Platinum license');
-      });
-
       it('shows upselling message on rule details with suppression on basic license', () => {
         const rule = getNewThreatIndicatorRule();
 
@@ -77,9 +61,6 @@ describe(
               'have.text',
               'Do not suppress alerts for events with missing fields'
             );
-
-            // suppression functionality should be under Tech Preview
-            cy.contains(DETAILS_TITLE, SUPPRESS_FOR_DETAILS).contains('Technical Preview');
           });
 
           // Platinum license is required for configuration to apply

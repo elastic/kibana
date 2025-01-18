@@ -97,17 +97,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('can open job selection flyout', async () => {
           await PageObjects.dashboard.clickCreateDashboardPrompt();
           await ml.dashboardEmbeddables.assertDashboardIsEmpty();
+          // FIXME remove sleep when https://github.com/elastic/kibana/issues/187587 if fixed
+          await PageObjects.common.sleep(3000);
           await ml.dashboardEmbeddables.openAnomalyJobSelectionFlyout('ml_anomaly_charts');
           await a11y.testAppSnapshot();
         });
 
         it('can select jobs', async () => {
-          await ml.dashboardJobSelectionTable.setRowCheckboxState(testData.jobConfig.job_id, true);
-          await ml.dashboardJobSelectionTable.applyJobSelection();
-          await ml.dashboardEmbeddables.assertAnomalyChartsEmbeddableInitializerExists();
-          await a11y.testAppSnapshot();
+          await ml.alerting.selectJobs([testData.jobConfig.job_id]);
+          await ml.alerting.assertJobSelection([testData.jobConfig.job_id]);
         });
 
+        it('populates with default default info', async () => {
+          await ml.dashboardEmbeddables.assertAnomalyChartsEmbeddableInitializerExists();
+          await ml.dashboardEmbeddables.assertSelectMaxSeriesToPlotValue(6);
+          await a11y.testAppSnapshot();
+        });
         it('create new anomaly charts panel', async () => {
           await ml.dashboardEmbeddables.clickInitializerConfirmButtonEnabled();
           await ml.dashboardEmbeddables.assertDashboardPanelExists(testData.panelTitle);

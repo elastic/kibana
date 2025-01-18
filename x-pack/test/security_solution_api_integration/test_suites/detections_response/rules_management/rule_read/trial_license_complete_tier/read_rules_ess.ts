@@ -35,9 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
-  // TODO: add a new service for pulling kibana username, similar to getService('es')
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
 
   describe('@ess read_rules - ESS specific logic', () => {
     describe('reading rules', () => {
@@ -58,7 +56,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('should be able to a read a scheduled action correctly', async () => {
           // create an action
           const { body: hookAction } = await supertest
-            .post('/api/actions/action')
+            .post('/api/actions/connector')
             .set('kbn-xsrf', 'true')
             .send(getWebHookAction())
             .expect(200);
@@ -82,7 +80,7 @@ export default ({ getService }: FtrProviderContext) => {
                     message:
                       'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                   },
-                  actionTypeId: hookAction.actionTypeId,
+                  actionTypeId: hookAction.connector_type_id,
                 },
               ],
             })
@@ -97,7 +95,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           const bodyToCompare = removeServerGeneratedProperties(body);
-          const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+          const expectedRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
           const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
             ...expectedRule,
@@ -109,7 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
-                action_type_id: hookAction.actionTypeId,
+                action_type_id: hookAction.connector_type_id,
                 frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ],

@@ -65,10 +65,12 @@ the `elastic` user or other built-in users, run the
 . [[kibana-roles]]Create roles and users to grant access to {kib}.
 +
 --
-To manage privileges in {kib}, open the main menu, then click *Stack Management > Roles*. The built-in `kibana_admin` role will grant
+To manage privileges in {kib}, go to the *Roles* management page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>. The built-in `kibana_admin` role will grant
 access to {kib} with administrator privileges. Alternatively, you can create additional roles that grant limited access to {kib}.
 
-If you're using the default native realm with Basic Authentication, open the main menu, then click *Stack Management > Users* to create
+If you're using the default native realm with Basic Authentication, go to the *Users* management page using the navigation menu or the 
+<<kibana-navigation-search,global search field>> to create
 users and assign roles, or use the {es} {ref}/security-api.html#security-user-apis[user management APIs]. For example, the following creates
 a user named `jacknich` and assigns it the `kibana_admin` role:
 

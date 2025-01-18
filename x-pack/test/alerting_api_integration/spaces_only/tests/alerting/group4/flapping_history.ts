@@ -22,7 +22,8 @@ export default function createFlappingHistoryTests({ getService }: FtrProviderCo
   const ACTIVE_PATH = 'alertInstances.instance.meta.flappingHistory';
   const RECOVERED_PATH = 'alertRecoveredInstances.instance.meta.flappingHistory';
 
-  describe('Flapping History', () => {
+  describe('Flapping History', function () {
+    this.tags('skipFIPS');
     let actionId: string;
     const objectRemover = new ObjectRemover(supertestWithoutAuth);
 

@@ -1,0 +1,5 @@
+title: Certificate authority
+type: string
+description: >
+  A base64 encoded version of the certificate authority file that the connector can trust to sign and validate certificates.
+  This option is available for all authentication types.

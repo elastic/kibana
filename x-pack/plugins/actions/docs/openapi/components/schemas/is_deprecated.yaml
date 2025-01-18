@@ -1,4 +1,0 @@
-type: boolean
-description: Indicates whether the connector type is deprecated.
-examples:
-  - false

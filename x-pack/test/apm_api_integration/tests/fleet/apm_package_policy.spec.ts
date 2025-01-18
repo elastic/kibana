@@ -142,7 +142,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
       });
 
       it('has api key that provides access to source maps only', async () => {
-        const [id, apiKey] = get(apmPackagePolicy, SOURCE_MAP_API_KEY_PATH).split(':');
+        const [id, apiKey] = get(apmPackagePolicy, SOURCE_MAP_API_KEY_PATH, '').split(':');
         expect(id).to.not.be.empty();
         expect(apiKey).to.not.be.empty();
 
@@ -152,7 +152,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
       });
 
       it('has api api key that provides access to the agent configurations index', async () => {
-        const [id, apiKey] = get(apmPackagePolicy, AGENT_CONFIG_API_KEY_PATH).split(':');
+        const [id, apiKey] = get(apmPackagePolicy, AGENT_CONFIG_API_KEY_PATH, '').split(':');
         expect(id).to.not.be.empty();
         expect(apiKey).to.not.be.empty();
 
@@ -165,7 +165,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
       });
 
       it('throws when querying agent config index with source map api key', async () => {
-        const [id, apiKey] = get(apmPackagePolicy, SOURCE_MAP_API_KEY_PATH).split(':');
+        const [id, apiKey] = get(apmPackagePolicy, SOURCE_MAP_API_KEY_PATH, '').split(':');
         expect(id).to.not.be.empty();
         expect(apiKey).to.not.be.empty();
 
@@ -189,7 +189,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
         });
 
         it('sets the expected agent configs on the new package policy object', async () => {
-          const agentConfigs = get(packagePolicyWithAgentConfig, AGENT_CONFIG_PATH);
+          const agentConfigs = get(packagePolicyWithAgentConfig, AGENT_CONFIG_PATH)!;
           const { service, config } = agentConfigs[0];
           expect(service).to.eql({});
           expect(config).to.eql({ transaction_sample_rate: '0.55' });

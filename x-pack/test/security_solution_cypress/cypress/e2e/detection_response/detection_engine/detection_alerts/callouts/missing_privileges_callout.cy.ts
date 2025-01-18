@@ -44,10 +44,10 @@ const waitForPageTitleToBeShown = () => {
   cy.get(PAGE_TITLE).should('be.visible');
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/178176
+// FLAKY: https://github.com/elastic/kibana/issues/198628
 describe.skip(
   'Detections > Callouts',
-  { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] },
+  { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
     before(() => {
       // First, we have to open the app on behalf of a privileged user in order to initialize it.
@@ -63,17 +63,13 @@ describe.skip(
           loadPageAsReadOnlyUser(ALERTS_URL);
         });
 
-        it('We show one primary callout', () => {
+        it('dismisses callout and persists its state', () => {
           waitForCallOutToBeShown(MISSING_PRIVILEGES_CALLOUT, 'primary');
-        });
 
-        context('When a user clicks Dismiss on the callout', () => {
-          it('We hide it and persist the dismissal', () => {
-            waitForCallOutToBeShown(MISSING_PRIVILEGES_CALLOUT, 'primary');
-            dismissCallOut(MISSING_PRIVILEGES_CALLOUT);
-            reloadPage();
-            getCallOut(MISSING_PRIVILEGES_CALLOUT).should('not.exist');
-          });
+          dismissCallOut(MISSING_PRIVILEGES_CALLOUT);
+          reloadPage();
+
+          getCallOut(MISSING_PRIVILEGES_CALLOUT).should('not.exist');
         });
       });
 
@@ -90,19 +86,13 @@ describe.skip(
           deleteCustomRule();
         });
 
-        it('We show one primary callout', () => {
+        it('dismisses callout and persists its state', () => {
           waitForCallOutToBeShown(MISSING_PRIVILEGES_CALLOUT, 'primary');
-        });
 
-        context('When a user clicks Dismiss on the callouts', () => {
-          it('We hide them and persist the dismissal', () => {
-            waitForCallOutToBeShown(MISSING_PRIVILEGES_CALLOUT, 'primary');
+          dismissCallOut(MISSING_PRIVILEGES_CALLOUT);
+          reloadPage();
 
-            dismissCallOut(MISSING_PRIVILEGES_CALLOUT);
-            reloadPage();
-
-            getCallOut(MISSING_PRIVILEGES_CALLOUT).should('not.exist');
-          });
+          getCallOut(MISSING_PRIVILEGES_CALLOUT).should('not.exist');
         });
       });
     });

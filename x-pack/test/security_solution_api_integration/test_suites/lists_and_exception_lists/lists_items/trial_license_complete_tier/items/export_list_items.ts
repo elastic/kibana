@@ -12,15 +12,22 @@ import { getCreateMinimalListItemSchemaMock } from '@kbn/lists-plugin/common/sch
 import { getCreateMinimalListSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_list_schema.mock';
 import { LIST_ID, NAME } from '@kbn/lists-plugin/common/constants.mock';
 
+import TestAgent from 'supertest/lib/agent';
 import { createListsIndex, deleteListsIndex, binaryToString } from '../../../utils';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
   const log = getService('log');
+  const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless export_list_items', () => {
+  describe('@ess @serverless @serverlessQA export_list_items', () => {
+    let supertest: TestAgent;
+
+    before(async () => {
+      supertest = await utils.createSuperTest();
+    });
+
     describe('exporting lists', () => {
       beforeEach(async () => {
         await createListsIndex(supertest, log);

@@ -1,0 +1,179 @@
+- input: aws-s3
+  template_path: aws-s3.yml.hbs
+  title: |
+    {{ data_stream_title }}
+  description: |
+    {{ data_stream_description }}
+  vars:
+    - name: bucket_arn
+      type: text
+      title: Bucket ARN
+      multi: false
+      required: false
+      show_user: true
+      description: ARN of the AWS S3 bucket that will be polled for list operation. (Required when `queue_url` and `non_aws_bucket_name` are not set).
+    - name: queue_url
+      type: text
+      title: Queue URL
+      multi: false
+      required: false
+      show_user: true
+      description: URL of the AWS SQS queue that messages will be received from.
+    - name: number_of_workers
+      type: integer
+      title: Number of Workers
+      multi: false
+      required: false
+      default: 1
+      show_user: true
+      description: Number of workers that will process the S3 objects listed. (Required when `bucket_arn` is set).
+    - name: parsers
+      type: yaml
+      title: Parsers
+      description: >-
+        This option expects a list of parsers that the payload has to go through. For more information see [Parsers](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-aws-s3.html#input-aws-s3-parsers)
+      required: false
+      show_user: true
+      multi: false
+      default: |
+        #- multiline:
+        #    pattern: "^<Event"
+        #    negate:  true
+        #    match:   after
+    - name: api_timeout
+      type: text
+      title: API Timeout
+      multi: false
+      required: false
+      show_user: false
+      description: The maximum duration of AWS API can take. The maximum is half of the visibility timeout value.
+    - name: bucket_list_interval
+      type: text
+      title: Bucket List Interval
+      multi: false
+      required: false
+      show_user: false
+      default: 120s
+      description: Time interval for polling listing of the S3 bucket.
+    - name: bucket_list_prefix
+      type: text
+      title: Bucket List Prefix
+      multi: false
+      required: false
+      show_user: false
+      description: Prefix to apply for the list request to the S3 bucket.
+    - name: buffer_size
+      type: text
+      title: Buffer Size
+      multi: false
+      required: false
+      show_user: false
+      description: The size in bytes of the buffer that each harvester uses when fetching a file. This only applies to non-JSON logs.
+    - name: content_type
+      type: text
+      title: Content Type
+      multi: false
+      required: false
+      show_user: false
+      description: >-
+        A standard MIME type describing the format of the object data. This can be set to override the MIME type that was given to the object when it was uploaded. For example application/json.
+    - name: encoding
+      type: text
+      title: Encoding
+      multi: false
+      required: false
+      show_user: false
+      description: The file encoding to use for reading data that contains international characters. This only applies to non-JSON logs.
+    - name: expand_event_list_from_field
+      type: text
+      title: Expand Event List from Field
+      multi: false
+      required: false
+      show_user: false
+      description: >-
+        If the fileset using this input expects to receive multiple messages bundled under a specific field then the config option expand_event_list_from_field value can be assigned the name of the field. This setting will be able to split the messages under the group value into separate events. For example, CloudTrail logs are in JSON format and events are found under the JSON object "Records".
+    - name: file_selectors
+      type: yaml
+      title: File Selectors
+      multi: true
+      required: false
+      show_user: false
+      description: >-
+        If the SQS queue will have events that correspond to files that this integration shouldn’t process file_selectors can be used to limit the files that are downloaded. This is a list of selectors which are made up of regex and expand_event_list_from_field options. The regex should match the S3 object key in the SQS message, and the optional expand_event_list_from_field is the same as the global setting. If file_selectors is given, then any global expand_event_list_from_field value is ignored in favor of the ones specified in the file_selectors. Regex syntax is the same as the Go language. Files that don’t match one of the regexes won’t be processed. content_type, parsers, include_s3_metadata,max_bytes, buffer_size, and encoding may also be set for each file selector.
+    - name: fips_enabled
+      type: bool
+      title: Enable S3 FIPS
+      default: false
+      multi: false
+      required: false
+      show_user: false
+      description: Enabling this option changes the service name from `s3` to `s3-fips` for connecting to the correct service endpoint.
+    - name: include_s3_metadata
+      type: text
+      title: Include S3 Metadata
+      multi: true
+      required: false
+      show_user: false
+      description: >-
+        This input can include S3 object metadata in the generated events for use in follow-on processing. You must specify the list of keys to include. By default none are included. If the key exists in the S3 response then it will be included in the event as aws.s3.metadata.<key> where the key name as been normalized to all lowercase.
+    - name: max_bytes
+      type: text
+      title: Max Bytes
+      default: 10MiB
+      multi: false
+      required: false
+      show_user: false
+      description: The maximum number of bytes that a single log message can have. All bytes after max_bytes are discarded and not sent. This setting is especially useful for multiline log messages, which can get large. This only applies to non-JSON logs.
+    - name: max_number_of_messages
+      type: integer
+      title: Maximum Concurrent SQS Messages
+      description: The maximum number of SQS messages that can be inflight at any time.
+      default: 5
+      required: false
+      show_user: false
+    - name: non_aws_bucket_name
+      type: text
+      title: Non AWS Bucket Name
+      multi: false
+      required: false
+      show_user: false
+      description: Name of the S3 bucket that will be polled for list operation. Required for 3rd party S3 compatible services. (Required when queue_url and bucket_arn are not set).
+    - name: path_style
+      type: text
+      title: Path Style
+      multi: false
+      required: false
+      show_user: false
+      description: >-
+        Enabling this option sets the bucket name as a path in the API call instead of a subdomain. When enabled https://<bucket-name>.s3.<region>.<provider>.com becomes https://s3.<region>.<provider>.com/<bucket-name>. This is only supported with 3rd party S3 providers.  AWS does not support path style.
+    - name: provider
+      type: text
+      title: Provider Name
+      multi: false
+      required: false
+      show_user: false
+      description: Name of the 3rd party S3 bucket provider like backblaze or GCP.
+    - name: sqs.max_receive_count
+      type: integer
+      title: SQS Message Maximum Receive Count
+      multi: false
+      required: false
+      show_user: false
+      default: 5
+      description: The maximum number of times a SQS message should be received (retried) before deleting it. This feature prevents poison-pill messages (messages that can be received but can’t be processed) from consuming resources.
+    - name: sqs.wait_time
+      type: text
+      title: SQS Maximum Wait Time
+      multi: false
+      required: false
+      show_user: false
+      default: 20s
+      description: >-
+        The maximum duration that an SQS `ReceiveMessage` call should wait for a message to arrive in the queue before returning. The maximum value is `20s`.
+    - name: visibility_timeout
+      type: text
+      title: Visibility Timeout
+      multi: false
+      required: false
+      show_user: false
+      description: The duration that the received messages are hidden from subsequent retrieve requests after being retrieved by a ReceiveMessage request.  The maximum is 12 hours.

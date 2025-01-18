@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createSerializer } from '@emotion/jest';
@@ -25,6 +26,15 @@ console.error = (message, ...rest) => {
     typeof message === 'string' &&
     message.includes('The pseudo class') &&
     message.includes('is potentially unsafe when doing server-side rendering. Try changing it to')
+  ) {
+    return;
+  }
+  // @see https://github.com/jsdom/jsdom/issues/2177
+  // JSDOM doesn't yet know how to parse @container CSS queries -
+  // all we can do is silence its errors for now
+  if (
+    typeof message === 'object' &&
+    message?.message?.startsWith('Could not parse CSS stylesheet')
   ) {
     return;
   }

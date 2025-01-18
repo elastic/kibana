@@ -46,6 +46,7 @@ import {
   TIMELINE_TEMPLATE_DETAILS,
   DATA_VIEW_DETAILS,
   EDIT_RULE_SETTINGS_LINK,
+  INTERVAL_ABBR_VALUE,
 } from '../../../../screens/rule_details';
 import { GLOBAL_SEARCH_BAR_FILTER_ITEM } from '../../../../screens/search_bar';
 
@@ -77,7 +78,8 @@ import { fillAddFilterForm } from '../../../../tasks/search_bar';
 
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 
-describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
+// Skipping in MKI due to flake
+describe('Custom query rules', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   describe('Custom detection rules creation with data views', () => {
     const rule = getDataViewRule();
     const expectedUrls = rule.references?.join('');
@@ -143,12 +145,16 @@ describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
       });
       cy.get(DEFINITION_DETAILS).should('not.contain', INDEX_PATTERNS_DETAILS);
       cy.get(SCHEDULE_DETAILS).within(() => {
-        getDetails(RUNS_EVERY_DETAILS).should('have.text', `${rule.interval}`);
+        getDetails(RUNS_EVERY_DETAILS)
+          .find(INTERVAL_ABBR_VALUE)
+          .should('have.text', `${rule.interval}`);
         const humanizedDuration = getHumanizedDuration(
           rule.from ?? 'now-6m',
           rule.interval ?? '5m'
         );
-        getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should('have.text', `${humanizedDuration}`);
+        getDetails(ADDITIONAL_LOOK_BACK_DETAILS)
+          .find(INTERVAL_ABBR_VALUE)
+          .should('have.text', `${humanizedDuration}`);
       });
 
       waitForTheRuleToBeExecuted();

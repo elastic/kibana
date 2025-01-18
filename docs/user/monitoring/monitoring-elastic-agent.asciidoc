@@ -27,7 +27,7 @@ in the {ref}/monitoring-production.html[{es} monitoring documentation].
 To collect {kib} monitoring data, add a {kib} integration to an {agent} and
 deploy it to the host where {kib} is running.
 
-. Go to the {kib} home page and click **Add integrations**.
+. Go to the **Integrations** page.
 +
 NOTE: If you're using a monitoring cluster, use the {kib} instance connected to
 the monitoring cluster.

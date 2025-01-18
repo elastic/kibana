@@ -11,6 +11,7 @@ import {
   EncryptedSyntheticsSavedMonitor,
   ProjectMonitorsRequest,
 } from '@kbn/synthetics-plugin/common/runtime_types';
+import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
@@ -62,6 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
+      await kibanaServer.savedObjects.clean({ types: [syntheticsMonitorType] });
       await supertest
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
         .set('kbn-xsrf', 'true')
@@ -135,17 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(apiResponse.body).toEqual({
           locations: [
             {
-              count: 20,
-              label: 'eu-west-01',
-              value: 'eu-west-01',
-            },
-            {
-              count: 20,
-              label: 'eu-west-02',
-              value: 'eu-west-02',
-            },
-            {
-              count: 2,
+              count: 22,
               label: 'Dev Service',
               value: 'dev',
             },
@@ -162,6 +154,18 @@ export default function ({ getService }: FtrProviderContext) {
               value: expect.any(String),
             })),
           ]),
+          monitorTypes: [
+            {
+              count: 20,
+              label: 'http',
+              value: 'http',
+            },
+            {
+              count: 2,
+              label: 'icmp',
+              value: 'icmp',
+            },
+          ],
           projects: [
             {
               count: 2,
@@ -238,6 +242,13 @@ export default function ({ getService }: FtrProviderContext) {
               value: expect.any(String),
             }))
           ),
+          monitorTypes: [
+            {
+              count: 2,
+              label: 'icmp',
+              value: 'icmp',
+            },
+          ],
           projects: [
             {
               count: 2,

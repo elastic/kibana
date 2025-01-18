@@ -16,11 +16,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   // FLAKY: https://github.com/elastic/kibana/issues/168037
   describe.skip('landing page', function () {
     before(async () => {
-      await svlCommonPage.login();
-    });
-
-    after(async () => {
-      await svlCommonPage.forceLogout();
+      await svlCommonPage.loginWithPrivilegedRole();
     });
 
     it('has quickstart badge', async () => {

@@ -18,7 +18,7 @@ import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common
  * @param rule The rule to create
  */
 export const fetchRule = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   idOrRuleId: { id: string; ruleId?: never } | { id?: never; ruleId: string }
 ): Promise<RuleResponse> =>
   (

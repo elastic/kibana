@@ -89,6 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('job creation navigates through the single metric wizard and sets all needed fields', async () => {
       await ml.testExecution.logTestStep('job creation displays the time range step');
       await ml.jobWizardCommon.assertTimeRangeSectionExists();
+      await ml.commonUI.assertDatePickerDataTierOptionsVisible(true);
 
       await ml.testExecution.logTestStep('job creation sets the time range');
       await ml.jobWizardCommon.clickUseFullDataButton(
@@ -142,7 +143,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
       await ml.jobTable.assertJobRowFields(jobId, getExpectedRow(jobId));
 
-      await ml.jobTable.assertJobRowDetailsCounts(
+      await ml.jobExpandedDetails.assertJobRowDetailsCounts(
         jobId,
         getExpectedCounts(jobId),
         getExpectedModelSizeStats(jobId)

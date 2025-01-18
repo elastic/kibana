@@ -54,7 +54,7 @@
             }
           },
           {
-            "expression": "filters\n| essql query=\"SELECT extension,bytes FROM \\\"ftr-remote:logstash*\\\" LIMIT 10\"\n| table\n| render \n  containerStyle={containerStyle padding=\"4px\" opacity=\"0.7\" backgroundColor=\"#4cbce4\"}",
+            "expression": "kibana\n| selectFilter\n| essql query=\"SELECT extension,bytes FROM \\\"ftr-remote:logstash*\\\" LIMIT 10\"\n| table\n| render \n  containerStyle={containerStyle padding=\"4px\" opacity=\"0.7\" backgroundColor=\"#4cbce4\"}",
             "id": "element-d3bf91e2-7e8c-4884-942e-d4e9006aef09",
             "position": {
               "angle": 0,
@@ -76,7 +76,7 @@
             }
           },
           {
-            "expression": "filters\n| timelion query=\".es(index=ftr-remote:logstash*,q=extension:jpg)\" interval=\"1M\" from=\"2017-01-01\" to=\"2017-12-31\"\n| table perPage=200\n| render containerStyle={containerStyle backgroundColor=\"#fd986f\" opacity=\"0.7\"}",
+            "expression": "kibana\n| selectFilter\n| timelion query=\".es(index=ftr-remote:logstash*,q=extension:jpg)\" interval=\"1M\" from=\"2017-01-01\" to=\"2017-12-31\"\n| table perPage=200\n| render containerStyle={containerStyle backgroundColor=\"#fd986f\" opacity=\"0.7\"}",
             "id": "element-3c905696-8258-4e9c-ab58-89018681f79f",
             "position": {
               "angle": 0,

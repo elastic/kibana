@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -16,7 +17,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');
   const queryBar = getService('queryBar');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'unifiedFieldList']);
+  const dataViews = getService('dataViews');
+  const { common, discover, timePicker, unifiedFieldList } = getPageObjects([
+    'common',
+    'discover',
+    'timePicker',
+    'unifiedFieldList',
+  ]);
 
   describe('Field list new fields in background handling', function () {
     before(async () => {
@@ -24,8 +31,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
 
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setCommonlyUsedTime('This_week');
+      await common.navigateToApp('discover');
+      await timePicker.setCommonlyUsedTime('This_week');
     });
 
     after(async () => {
@@ -52,15 +59,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         },
       });
 
-      await PageObjects.discover.createAdHocDataView(initialPattern, true);
-
-      await retry.waitFor('current data view to get updated', async () => {
-        return (await PageObjects.discover.getCurrentlySelectedDataView()) === `${initialPattern}*`;
+      await dataViews.createFromSearchBar({
+        name: initialPattern,
+        adHoc: true,
+        hasTimeField: true,
       });
-      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+      await dataViews.waitForSwitcherToBe(`${initialPattern}*`);
+      await discover.waitUntilSearchingHasFinished();
+      await unifiedFieldList.waitUntilSidebarHasLoaded();
 
-      expect(await PageObjects.discover.getHitCountInt()).to.be(1);
-      expect(await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('available')).to.eql([
+      expect(await discover.getHitCountInt()).to.be(1);
+      expect(await unifiedFieldList.getSidebarSectionFieldNames('available')).to.eql([
         '@timestamp',
         'a',
       ]);
@@ -76,11 +85,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.waitFor('the new record was found', async () => {
         await queryBar.submitQuery();
-        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-        return (await PageObjects.discover.getHitCountInt()) === 2;
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
+        return (await discover.getHitCountInt()) === 2;
       });
 
-      expect(await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('available')).to.eql([
+      expect(await unifiedFieldList.getSidebarSectionFieldNames('available')).to.eql([
         '@timestamp',
         'a',
         'b',
@@ -98,15 +107,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         },
       });
 
-      await PageObjects.discover.createAdHocDataView(initialPattern, true);
-
-      await retry.waitFor('current data view to get updated', async () => {
-        return (await PageObjects.discover.getCurrentlySelectedDataView()) === `${initialPattern}*`;
+      await dataViews.createFromSearchBar({
+        name: initialPattern,
+        adHoc: true,
+        hasTimeField: true,
       });
-      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+      await dataViews.waitForSwitcherToBe(`${initialPattern}*`);
+      await discover.waitUntilSearchingHasFinished();
+      await unifiedFieldList.waitUntilSidebarHasLoaded();
 
-      expect(await PageObjects.discover.getHitCountInt()).to.be(1);
-      expect(await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('available')).to.eql([
+      expect(await discover.getHitCountInt()).to.be(1);
+      expect(await unifiedFieldList.getSidebarSectionFieldNames('available')).to.eql([
         '@timestamp',
         'a',
       ]);
@@ -135,11 +146,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.waitFor('the new record was found', async () => {
         await queryBar.submitQuery();
-        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-        return (await PageObjects.discover.getHitCountInt()) === 2;
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
+        return (await discover.getHitCountInt()) === 2;
       });
 
-      expect(await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('available')).to.eql([
+      expect(await unifiedFieldList.getSidebarSectionFieldNames('available')).to.eql([
         '@timestamp',
         'a',
       ]);

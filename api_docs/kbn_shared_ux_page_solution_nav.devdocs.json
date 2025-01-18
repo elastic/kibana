@@ -29,7 +29,7 @@
           "\nA wrapper around `EuiSideNav` that includes the appropriate title with optional solution logo."
         ],
         "signature": [
-          "({ children, headingProps, icon, isOpenOnDesktop, items, mobileBreakpoints, closeFlyoutButtonPosition, name, onCollapse, canBeCollapsed, ...rest }: React.PropsWithChildren<",
+          "({ children, headingProps, icon, isOpenOnDesktop, items, mobileBreakpoints, closeFlyoutButtonPosition, name, onCollapse, canBeCollapsed, ...rest }: ",
           {
             "pluginId": "@kbn/shared-ux-page-solution-nav",
             "scope": "common",
@@ -37,9 +37,9 @@
             "section": "def-common.SolutionNavProps",
             "text": "SolutionNavProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/page/solution_nav/src/solution_nav.tsx",
+        "path": "src/platform/packages/shared/shared-ux/page/solution_nav/src/solution_nav.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -51,17 +51,15 @@
             "label": "{\n  children,\n  headingProps,\n  icon,\n  isOpenOnDesktop = false,\n  items,\n  mobileBreakpoints = ['xs', 's'],\n  closeFlyoutButtonPosition = 'outside',\n  name,\n  onCollapse,\n  canBeCollapsed = true,\n  ...rest\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/shared-ux-page-solution-nav",
                 "scope": "common",
                 "docId": "kibKbnSharedUxPageSolutionNavPluginApi",
                 "section": "def-common.SolutionNavProps",
                 "text": "SolutionNavProps"
-              },
-              ">"
+              }
             ],
-            "path": "packages/shared-ux/page/solution_nav/src/solution_nav.tsx",
+            "path": "src/platform/packages/shared/shared-ux/page/solution_nav/src/solution_nav.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -80,9 +78,9 @@
         "signature": [
           "<P extends ",
           "TemplateProps",
-          ">(WrappedComponent: React.ComponentType<P>) => { (props: Props<P>): JSX.Element; displayName: string; }"
+          ">(WrappedComponent: React.ComponentType<P>) => { (props: Props<P>): React.JSX.Element; displayName: string; }"
         ],
-        "path": "packages/shared-ux/page/solution_nav/src/with_solution_nav.tsx",
+        "path": "src/platform/packages/shared/shared-ux/page/solution_nav/src/with_solution_nav.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -96,7 +94,7 @@
             "signature": [
               "React.ComponentType<P>"
             ],
-            "path": "packages/shared-ux/page/solution_nav/src/with_solution_nav.tsx",
+            "path": "src/platform/packages/shared/shared-ux/page/solution_nav/src/with_solution_nav.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -125,9 +123,9 @@
           "IconType",
           " | undefined; items?: ",
           "EuiSideNavItemType",
-          "<{}>[] | undefined; children?: React.ReactNode; closeFlyoutButtonPosition?: \"outside\" | \"inside\" | undefined; isOpenOnDesktop?: boolean | undefined; onCollapse?: (() => void) | undefined; canBeCollapsed?: boolean | undefined; }"
+          "<{}>[] | undefined; children?: React.ReactNode; closeFlyoutButtonPosition?: \"inside\" | \"outside\" | undefined; isOpenOnDesktop?: boolean | undefined; onCollapse?: (() => void) | undefined; canBeCollapsed?: boolean | undefined; }"
         ],
-        "path": "packages/shared-ux/page/solution_nav/src/solution_nav.tsx",
+        "path": "src/platform/packages/shared/shared-ux/page/solution_nav/src/solution_nav.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

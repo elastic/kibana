@@ -16,6 +16,6 @@
     "@kbn/core",
     "@kbn/ui-actions-plugin",
     "@kbn/embeddable-plugin",
-    "@kbn/kibana-react-plugin",
+    "@kbn/react-kibana-mount",
   ]
 }

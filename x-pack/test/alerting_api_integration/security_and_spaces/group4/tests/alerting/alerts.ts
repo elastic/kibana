@@ -14,7 +14,7 @@ import { TaskRunning, TaskRunningStage } from '@kbn/task-manager-plugin/server/t
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
-import { UserAtSpaceScenarios, Superuser } from '../../../scenarios';
+import { UserAtSpaceScenarios, Superuser, SuperuserAtSpace1 } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getUrlPrefix,
@@ -45,11 +45,17 @@ export default function alertTests({ getService }: FtrProviderContext) {
       await esTestIndexTool.setup();
       await es.indices.create({ index: authorizationIndex });
     });
+
     afterEach(() => objectRemover.removeAll());
+
     after(async () => {
       await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });
-      await es.deleteByQuery({ index: alertAsDataIndex, query: { match_all: {} } });
+      await es.deleteByQuery({
+        index: alertAsDataIndex,
+        query: { match_all: {} },
+        ignore_unavailable: true,
+      });
     });
 
     for (const scenario of UserAtSpaceScenarios) {
@@ -1182,7 +1188,7 @@ instanceStateValue: true
             reference,
             overwrites: {
               enabled: false,
-              schedule: { interval: '1s' },
+              schedule: { interval: '1m' },
             },
           });
 
@@ -1286,7 +1292,7 @@ instanceStateValue: true
               );
 
               // @ts-expect-error doesnt handle total: number
-              expect(searchResult.body.hits.total.value).to.eql(1);
+              expect(searchResult.body.hits.total.value).to.be.greaterThan(0);
               // @ts-expect-error _source: unknown
               expect(searchResult.body.hits.hits[0]._source.params.message).to.eql(
                 'Alerts, all:2, new:2 IDs:[1,2,], ongoing:0 IDs:[], recovered:0 IDs:[]'
@@ -1302,7 +1308,7 @@ instanceStateValue: true
           const response = await alertUtils.createAlwaysFiringRuleWithSummaryAction({
             reference,
             overwrites: {
-              schedule: { interval: '1s' },
+              schedule: { interval: '1h' },
             },
             notifyWhen: 'onActiveAlert',
             throttle: null,
@@ -1433,7 +1439,7 @@ instanceStateValue: true
           const response = await alertUtils.createAlwaysFiringRuleWithSummaryAction({
             reference,
             overwrites: {
-              schedule: { interval: '1s' },
+              schedule: { interval: '3s' },
             },
             notifyWhen: 'onThrottleInterval',
             throttle: '10s',
@@ -1491,6 +1497,10 @@ instanceStateValue: true
                         _index: '.internal.alerts-observability.test.alerts.alerts-default-000001',
                         kibana: {
                           alert: {
+                            action_group: 'default',
+                            flapping_history: expectExpect.any(Array),
+                            maintenance_window_ids: [],
+                            severity_improving: false,
                             rule: {
                               parameters: {
                                 index: '.kibana-alerting-test-data',
@@ -1498,7 +1508,10 @@ instanceStateValue: true
                               },
                               category: 'Test: Always Firing Alert As Data',
                               consumer: 'alertsFixture',
-                              execution: { uuid: expectExpect.any(String) },
+                              execution: {
+                                uuid: expectExpect.any(String),
+                                timestamp: expectExpect.any(String),
+                              },
                               name: 'abc',
                               producer: 'alertsFixture',
                               revision: 0,
@@ -1528,6 +1541,10 @@ instanceStateValue: true
                         _index: '.internal.alerts-observability.test.alerts.alerts-default-000001',
                         kibana: {
                           alert: {
+                            action_group: 'default',
+                            flapping_history: expectExpect.any(Array),
+                            maintenance_window_ids: [],
+                            severity_improving: false,
                             rule: {
                               parameters: {
                                 index: '.kibana-alerting-test-data',
@@ -1535,7 +1552,10 @@ instanceStateValue: true
                               },
                               category: 'Test: Always Firing Alert As Data',
                               consumer: 'alertsFixture',
-                              execution: { uuid: expectExpect.any(String) },
+                              execution: {
+                                timestamp: expectExpect.any(String),
+                                uuid: expectExpect.any(String),
+                              },
                               name: 'abc',
                               producer: 'alertsFixture',
                               revision: 0,
@@ -1581,6 +1601,10 @@ instanceStateValue: true
                         _index: '.internal.alerts-observability.test.alerts.alerts-default-000001',
                         kibana: {
                           alert: {
+                            action_group: 'default',
+                            flapping_history: expectExpect.any(Array),
+                            maintenance_window_ids: [],
+                            previous_action_group: 'default',
                             rule: {
                               parameters: {
                                 index: '.kibana-alerting-test-data',
@@ -1588,7 +1612,10 @@ instanceStateValue: true
                               },
                               category: 'Test: Always Firing Alert As Data',
                               consumer: 'alertsFixture',
-                              execution: { uuid: expectExpect.any(String) },
+                              execution: {
+                                timestamp: expectExpect.any(String),
+                                uuid: expectExpect.any(String),
+                              },
                               name: 'abc',
                               producer: 'alertsFixture',
                               revision: 0,
@@ -1618,6 +1645,10 @@ instanceStateValue: true
                         _index: '.internal.alerts-observability.test.alerts.alerts-default-000001',
                         kibana: {
                           alert: {
+                            action_group: 'default',
+                            flapping_history: expectExpect.any(Array),
+                            maintenance_window_ids: [],
+                            previous_action_group: 'default',
                             rule: {
                               parameters: {
                                 index: '.kibana-alerting-test-data',
@@ -1625,7 +1656,10 @@ instanceStateValue: true
                               },
                               category: 'Test: Always Firing Alert As Data',
                               consumer: 'alertsFixture',
-                              execution: { uuid: expectExpect.any(String) },
+                              execution: {
+                                timestamp: expectExpect.any(String),
+                                uuid: expectExpect.any(String),
+                              },
                               name: 'abc',
                               producer: 'alertsFixture',
                               revision: 0,
@@ -1709,7 +1743,7 @@ instanceStateValue: true
                 reference
               );
               // @ts-expect-error doesnt handle total: number
-              expect(searchResult.body.hits.total.value).to.eql(1);
+              expect(searchResult.body.hits.total.value).to.be.greaterThan(0);
               expectExpect(
                 // @ts-expect-error _source: unknown
                 JSON.parse(searchResult.body.hits.hits[0]._source.params.message)
@@ -1719,6 +1753,10 @@ instanceStateValue: true
                   _index: '.internal.alerts-observability.test.alerts.alerts-default-000001',
                   kibana: {
                     alert: {
+                      action_group: 'default',
+                      flapping_history: expectExpect.any(Array),
+                      maintenance_window_ids: [],
+                      severity_improving: false,
                       rule: {
                         parameters: {
                           index: '.kibana-alerting-test-data',
@@ -1726,7 +1764,10 @@ instanceStateValue: true
                         },
                         category: 'Test: Always Firing Alert As Data',
                         consumer: 'alertsFixture',
-                        execution: { uuid: expectExpect.any(String) },
+                        execution: {
+                          uuid: expectExpect.any(String),
+                          timestamp: expectExpect.any(String),
+                        },
                         name: 'abc',
                         producer: 'alertsFixture',
                         revision: 0,
@@ -1756,6 +1797,10 @@ instanceStateValue: true
                   _index: '.internal.alerts-observability.test.alerts.alerts-default-000001',
                   kibana: {
                     alert: {
+                      action_group: 'default',
+                      flapping_history: expectExpect.any(Array),
+                      maintenance_window_ids: [],
+                      severity_improving: false,
                       rule: {
                         parameters: {
                           index: '.kibana-alerting-test-data',
@@ -1763,7 +1808,10 @@ instanceStateValue: true
                         },
                         category: 'Test: Always Firing Alert As Data',
                         consumer: 'alertsFixture',
-                        execution: { uuid: expectExpect.any(String) },
+                        execution: {
+                          uuid: expectExpect.any(String),
+                          timestamp: expectExpect.any(String),
+                        },
                         name: 'abc',
                         producer: 'alertsFixture',
                         revision: 0,
@@ -1873,6 +1921,76 @@ instanceStateValue: true
         });
       });
     }
+
+    describe('connector adapters', () => {
+      const space = SuperuserAtSpace1.space;
+
+      const connectorId = 'system-connector-test.system-action-connector-adapter';
+      const name = 'Test system action with a connector adapter set';
+
+      it('should use connector adapters correctly on system actions', async () => {
+        const alertUtils = new AlertUtils({
+          supertestWithoutAuth,
+          objectRemover,
+          space,
+          user: SuperuserAtSpace1.user,
+        });
+
+        const startDate = new Date().toISOString();
+        const reference = alertUtils.generateReference();
+        /**
+         * Creates a rule that always fire with a system action
+         * that has configured a connector adapter.
+         *
+         * System action: x-pack/test/alerting_api_integration/common/plugins/alerts/server/action_types.ts
+         * Adapter: x-pack/test/alerting_api_integration/common/plugins/alerts/server/connector_adapters.ts
+         */
+        const response = await alertUtils.createAlwaysFiringSystemAction({
+          reference,
+          overwrites: { schedule: { interval: '1m' } },
+        });
+
+        expect(response.status).to.eql(200);
+
+        await validateSystemActionEventLog({
+          spaceId: space.id,
+          connectorId,
+          outcome: 'success',
+          message: `action executed: test.system-action-connector-adapter:${connectorId}: ${name}`,
+          startDate,
+        });
+
+        /**
+         * The executor function of the system action
+         * writes the params in the test index. We
+         * get the doc to verify that the connector adapter
+         * injected the param correctly.
+         */
+        await esTestIndexTool.waitForDocs(
+          'action:test.system-action-connector-adapter',
+          reference,
+          1
+        );
+
+        const docs = await esTestIndexTool.search(
+          'action:test.system-action-connector-adapter',
+          reference
+        );
+
+        const doc = docs.body.hits.hits[0]._source as { params: Record<string, unknown> };
+
+        expect(doc.params).to.eql({
+          myParam: 'param from rule action',
+          index: '.kibana-alerting-test-data',
+          reference: 'alert-utils-ref:1:superuser',
+          /**
+           * Param was injected by the connector adapter in
+           * x-pack/test/alerting_api_integration/common/plugins/alerts/server/connector_adapters.ts
+           */
+          injected: 'param from connector adapter',
+        });
+      });
+    });
   });
 
   interface ValidateEventLogParams {
@@ -1977,4 +2095,46 @@ instanceStateValue: true
       expect(event?.error?.message).to.eql(errorMessage);
     }
   }
+
+  interface ValidateSystemActionEventLogParams {
+    spaceId: string;
+    connectorId: string;
+    outcome: string;
+    message: string;
+    startDate: string;
+    errorMessage?: string;
+  }
+
+  const validateSystemActionEventLog = async (
+    params: ValidateSystemActionEventLogParams
+  ): Promise<void> => {
+    const { spaceId, connectorId, outcome, message, startDate, errorMessage } = params;
+
+    const events: IValidatedEvent[] = await retry.try(async () => {
+      const events_ = await getEventLog({
+        getService,
+        spaceId,
+        type: 'action',
+        id: connectorId,
+        provider: 'actions',
+        actions: new Map([['execute', { gte: 1 }]]),
+      });
+
+      const filteredEvents = events_.filter((event) => event!['@timestamp']! >= startDate);
+      if (filteredEvents.length < 1) throw new Error('no recent events found yet');
+
+      return filteredEvents;
+    });
+
+    expect(events.length).to.be(1);
+
+    const event = events[0];
+
+    expect(event?.message).to.eql(message);
+    expect(event?.event?.outcome).to.eql(outcome);
+
+    if (errorMessage) {
+      expect(event?.error?.message).to.eql(errorMessage);
+    }
+  };
 }

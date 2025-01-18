@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['searchSessionsManagement']);
+  const { searchSessionsManagement } = getPageObjects(['searchSessionsManagement']);
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Search sessions Accessibility', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/data/search_sessions');
-      await PageObjects.searchSessionsManagement.goTo();
+      await searchSessionsManagement.goTo();
     });
 
     after(async () => {

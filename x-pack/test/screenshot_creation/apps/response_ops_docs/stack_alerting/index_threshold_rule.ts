@@ -23,27 +23,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.header.waitUntilLoadingHasFinished();
       await rules.common.clickCreateAlertButton();
-      await testSubjects.setValue('ruleNameInput', ruleName);
-      await testSubjects.click('tagsComboBox');
-      await testSubjects.setValue('tagsComboBox', 'sample-data');
-      await testSubjects.click('solutionsFilterButton');
-      await testSubjects.click('solutionstackAlertsFilterOption');
-      await testSubjects.setValue('solutionsFilterButton', 'solutionstackAlertsFilterOption');
-      await commonScreenshots.takeScreenshot(
-        'rule-types-index-threshold-select',
-        screenshotDirectories,
-        1400,
-        1024
-      );
-
       await testSubjects.click('.index-threshold-SelectOption');
+      await pageObjects.header.waitUntilLoadingHasFinished();
       await commonScreenshots.takeScreenshot(
         'rule-types-index-threshold-conditions',
         screenshotDirectories,
         1400,
         1300
       );
-
+      await testSubjects.setValue('ruleNameInput', ruleName);
+      await testSubjects.click('tagsComboBox');
+      await testSubjects.setValue('tagsComboBox', 'sample-data');
       await testSubjects.scrollIntoView('selectIndexExpression');
       await testSubjects.click('selectIndexExpression');
       await comboBox.set('thresholdIndexesComboBox', 'kibana_sample_data_logs ');
@@ -70,10 +60,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1300
       );
       await ofComboBox.type('bytes');
-      const ofOptionsString = await comboBox.getOptionsList('availablefieldsOptionsComboBox');
+      const ofOptionsString = await comboBox.getOptionsList('availableFieldsOptionsComboBox');
       const ofOptions = ofOptionsString.trim().split('\n');
       expect(ofOptions.length > 0).to.be(true);
-      await comboBox.set('availablefieldsOptionsComboBox', ofOptions[0]);
+      await comboBox.set('availableFieldsOptionsComboBox', ofOptions[0]);
 
       await testSubjects.click('groupByExpression');
       await testSubjects.click('overExpressionSelect');
@@ -91,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await nameInput1.click();
 
       await testSubjects.click('thresholdPopover');
-      await testSubjects.setValue('alertThresholdInput', '420000');
+      await testSubjects.setValue('alertThresholdInput0', '420000');
       await testSubjects.click('forLastExpression');
       await testSubjects.setValue('timeWindowSizeNumber', '24');
       await testSubjects.setValue('timeWindowUnitSelect', 'hours');

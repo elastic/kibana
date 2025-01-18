@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { format } from 'util';
@@ -25,7 +26,7 @@ const MSG_PREFIXES = {
   error: `${red('ERROR')} `,
 };
 
-const has = <T extends object>(obj: T, key: any): key is keyof T => obj.hasOwnProperty(key);
+const has = <T extends object>(obj: T, key: any): key is keyof T => Object.hasOwn(obj, key);
 
 export interface ToolingLogTextWriterConfig {
   /**
@@ -103,7 +104,8 @@ export class ToolingLogTextWriter implements Writer {
       }
     }
 
-    const prefix = has(MSG_PREFIXES, msg.type) ? MSG_PREFIXES[msg.type] : '';
+    let prefix = has(MSG_PREFIXES, msg.type) ? MSG_PREFIXES[msg.type] : '';
+    prefix = msg.context ? prefix + `[${msg.context}] ` : prefix;
     ToolingLogTextWriter.write(this.writeTo, prefix, msg);
     return true;
   }
