@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type HasType, apiIsOfType } from '@kbn/presentation-publishing';
+import type { HasType } from '@kbn/presentation-publishing';
 import { VisParams } from '../../types';
 import Vis from '../../vis';
 
@@ -18,7 +18,7 @@ export type HasVisualizeConfig = HasType<'visualization'> & {
 export const apiHasVisualizeConfig = (api: unknown): api is HasVisualizeConfig => {
   return Boolean(
     api &&
-      apiIsOfType(api, 'visualization') &&
+      (api as HasType)?.type === 'visualization' &&
       typeof (api as HasVisualizeConfig).getVis === 'function'
   );
 };

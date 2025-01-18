@@ -7,13 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataPublicPluginStart } from "@kbn/data-plugin/public";
-import { CONTEXT_MENU_TRIGGER } from "@kbn/embeddable-plugin/public";
-import { ADD_PANEL_TRIGGER, type UiActionsStart } from "@kbn/ui-actions-plugin/public";
-import { ACTION_EDIT_IN_LENS, ADD_AGG_VIS_ACTION_ID } from "./constants";
-import { TypesStart } from "../vis_types/types_service";
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { ADD_PANEL_TRIGGER, type UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ACTION_EDIT_IN_LENS, ADD_AGG_VIS_ACTION_ID } from './constants';
+import { TypesStart } from '../vis_types/types_service';
 
-export function registerActions(uiActions: UiActionsStart, data: DataPublicPluginStart, types: TypesStart) {
+export function registerActions(
+  uiActions: UiActionsStart,
+  data: DataPublicPluginStart,
+  types: TypesStart
+) {
   uiActions.addTriggerActionAsync(CONTEXT_MENU_TRIGGER, ACTION_EDIT_IN_LENS, async () => {
     const { EditInLensAction } = await import('./actions_module');
     return new EditInLensAction(data.query.timefilter.timefilter);
