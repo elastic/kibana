@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { updateOldState } from '@kbn/visualizations-plugin/public';
+import { updateOldState } from '@kbn/visualizations-plugin/public/legacy/vis_update_state';
 
 /**
  * The reason we add this test is to ensure that `convertNumIdsToStringsForTSVB` of the updateOldState runs correctly
@@ -18,7 +18,7 @@ import { updateOldState } from '@kbn/visualizations-plugin/public';
  * See https://github.com/elastic/kibana/issues/113601.
  */
 describe('TimeseriesVisState', () => {
-  test('should format the TSVB visState correctly', async () => {
+  test('should format the TSVB visState correctly', () => {
     const visState = {
       title: 'test',
       type: 'metrics',
@@ -71,7 +71,7 @@ describe('TimeseriesVisState', () => {
         },
       },
     };
-    const newVisState = await updateOldState(visState);
+    const newVisState = updateOldState(visState);
     expect(newVisState).toEqual({
       aggs: [],
       params: {

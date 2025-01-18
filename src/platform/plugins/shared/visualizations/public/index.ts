@@ -34,11 +34,6 @@ export function urlFor(id: string) {
   return `#/edit/${encodeURIComponent(id)}`;
 }
 
-export async function updateOldState(oldState: unknown) {
-  const { updateOldState } = await import('./legacy/vis_update_state');
-  return updateOldState(oldState);
-}
-
 /** @public types */
 export type { VisualizationsSetup, VisualizationsStart };
 export { VisGroups } from './vis_types/vis_groups_enum';
