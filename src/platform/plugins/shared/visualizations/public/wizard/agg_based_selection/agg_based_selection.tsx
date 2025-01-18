@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { orderBy } from 'lodash';
-import React, { ChangeEvent } from 'react';
+import React, { ChangeEvent, useCallback, useMemo, useState } from 'react';
 
 import {
   EuiFieldSearch,
@@ -23,17 +23,13 @@ import {
   EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiSkeletonRectangle,
 } from '@elastic/eui';
 
-import { memoizeLast } from '../../legacy/memoize';
 import { VisGroups } from '../../vis_types/vis_groups_enum';
 import type { BaseVisType, TypesStart } from '../../vis_types';
 import { DialogNavigation } from '../dialog_navigation';
-
-interface VisTypeListEntry {
-  type: BaseVisType;
-  highlighted: boolean;
-}
+import { useVisTypes } from '../../vis_types/use_vis_types';
 
 interface AggBasedSelectionProps {
   openedAsRoot?: boolean;
@@ -41,92 +37,41 @@ interface AggBasedSelectionProps {
   visTypesRegistry: TypesStart;
   showMainDialog: (flag: boolean) => void;
 }
-interface AggBasedSelectionState {
-  query: string;
-}
 
-class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBasedSelectionState> {
-  public state: AggBasedSelectionState = {
-    query: '',
-  };
+export function AggBasedSelection(props: AggBasedSelectionProps) {
+  const [query, setQuery] = useState('');
+  const onQueryChange = useCallback((ev: ChangeEvent<HTMLInputElement>) => {
+    setQuery(ev.target.value);
+  }, []);
 
-  private readonly getFilteredVisTypes = memoizeLast(this.filteredVisTypes);
+  const { isLoading, visTypes } = useVisTypes(props.visTypesRegistry);
 
-  public render() {
-    const { query } = this.state;
-    const visTypes = this.getFilteredVisTypes(this.props.visTypesRegistry, query);
-    return (
-      <>
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>
-            <FormattedMessage
-              id="visualizations.newAggVisWizard.title"
-              defaultMessage="New aggregation based visualization"
-            />
-          </EuiModalHeaderTitle>
-        </EuiModalHeader>
-        <EuiModalBody>
-          {this.props.openedAsRoot ? null : (
-            <DialogNavigation goBack={() => this.props.showMainDialog(true)} />
-          )}
-          <EuiFieldSearch
-            placeholder="Filter"
-            value={query}
-            onChange={this.onQueryChange}
-            fullWidth
-            data-test-subj="filterVisType"
-            aria-label={i18n.translate('visualizations.newVisWizard.filterVisTypeAriaLabel', {
-              defaultMessage: 'Filter for a visualization type',
-            })}
-          />
-          <EuiSpacer />
-          <EuiScreenReaderOnly>
-            <span aria-live="polite">
-              {query && (
-                <FormattedMessage
-                  id="visualizations.newVisWizard.resultsFound"
-                  defaultMessage="{resultCount, plural, one {type} other {types}} found"
-                  values={{
-                    resultCount: visTypes.filter((type) => type.highlighted).length,
-                  }}
-                />
-              )}
-            </span>
-          </EuiScreenReaderOnly>
-          <EuiFlexGrid columns={3} data-test-subj="visNewDialogTypes">
-            {visTypes.map(this.renderVisType)}
-          </EuiFlexGrid>
-        </EuiModalBody>
-      </>
-    );
-  }
-
-  private filteredVisTypes(visTypes: TypesStart, query: string): VisTypeListEntry[] {
-    const types = visTypes.getByGroup(VisGroups.AGGBASED).filter((type) => {
+  const visTypesWithHighlight = useMemo(() => {
+    const aggVisTypes = visTypes.filter((type) => {
       // Filter out hidden visualizations and visualizations that are only aggregations based
-      return !type.disableCreate;
+      return type.group === VisGroups.AGGBASED && !type.disableCreate;
     });
 
-    let entries: VisTypeListEntry[];
-    if (!query) {
-      entries = types.map((type) => ({ type, highlighted: false }));
-    } else {
-      const q = query.toLowerCase();
-      entries = types.map((type) => {
+    const q = query.toLowerCase();
+    const entries = !query
+      ? aggVisTypes.map((type: any) => ({ type, highlighted: false }))
+      : aggVisTypes.map((type) => {
         const matchesQuery =
           type.name.toLowerCase().includes(q) ||
           type.title.toLowerCase().includes(q) ||
           (typeof type.description === 'string' && type.description.toLowerCase().includes(q));
         return { type, highlighted: matchesQuery };
       });
-    }
 
     return orderBy(entries, ['highlighted', 'type.title'], ['desc', 'asc']);
-  }
-
-  private renderVisType = (visType: VisTypeListEntry) => {
-    const isDisabled = this.state.query !== '' && !visType.highlighted;
-    const onClick = () => this.props.onVisTypeSelected(visType.type);
+  }, [query, visTypes]);  
+  
+  function renderVisType(visType: {
+    type: BaseVisType;
+    highlighted: boolean;
+  }) {
+    const isDisabled = query !== '' && !visType.highlighted;
+    const onClick = () => props.onVisTypeSelected(visType.type);
 
     return (
       <EuiFlexItem key={visType.type.name}>
@@ -147,12 +92,53 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
       </EuiFlexItem>
     );
   };
-
-  private onQueryChange = (ev: ChangeEvent<HTMLInputElement>) => {
-    this.setState({
-      query: ev.target.value,
-    });
-  };
+  
+  return (
+    <>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          <FormattedMessage
+            id="visualizations.newAggVisWizard.title"
+            defaultMessage="New aggregation based visualization"
+          />
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        {props.openedAsRoot ? null : (
+          <DialogNavigation goBack={() => props.showMainDialog(true)} />
+        )}
+        <EuiFieldSearch
+          placeholder="Filter"
+          value={query}
+          onChange={onQueryChange}
+          fullWidth
+          data-test-subj="filterVisType"
+          aria-label={i18n.translate('visualizations.newVisWizard.filterVisTypeAriaLabel', {
+            defaultMessage: 'Filter for a visualization type',
+          })}
+        />
+        <EuiSpacer />
+        <EuiSkeletonRectangle isLoading={isLoading}>
+          <>
+            <EuiScreenReaderOnly>
+              <span aria-live="polite">
+                {query && (
+                  <FormattedMessage
+                    id="visualizations.newVisWizard.resultsFound"
+                    defaultMessage="{resultCount, plural, one {type} other {types}} found"
+                    values={{
+                      resultCount: visTypesWithHighlight.filter((type) => type.highlighted).length,
+                    }}
+                  />
+                )}
+              </span>
+            </EuiScreenReaderOnly>
+            <EuiFlexGrid columns={3} data-test-subj="visNewDialogTypes">
+              {visTypesWithHighlight.map(renderVisType)}
+            </EuiFlexGrid>
+          </>
+        </EuiSkeletonRectangle>
+      </EuiModalBody>
+    </>
+  );
 }
-
-export { AggBasedSelection };

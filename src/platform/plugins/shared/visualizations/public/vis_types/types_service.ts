@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { asyncMap } from '@kbn/std';
 import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
 import { BaseVisType } from './base_vis_type';
 import { VisTypeDefinition } from './types';
@@ -19,28 +20,38 @@ import { VisParams } from '../../common';
  * @internal
  */
 export class TypesService {
-  private types: Record<string, BaseVisType<any>> = {};
+  private types: Record<string, () => Promise<BaseVisType<any>>> = {};
 
-  private registerVisualization<TVisParam extends VisParams>(
-    visDefinition: BaseVisType<TVisParam>
+  private registerVisualization<TVisParams extends VisParams>(
+    name: string,
+    getVisDefinition: () => Promise<VisTypeDefinition<TVisParams>>
   ) {
-    if (this.types[visDefinition.name]) {
+    if (this.types[name]) {
       throw new Error('type already exists!');
     }
-    this.types[visDefinition.name] = visDefinition;
+    this.types[name] = async () => {
+      const config = await getVisDefinition();
+      return new BaseVisType(config);
+    };
+  }
+
+  private async getAll() {
+    return await asyncMap(Object.values(this.types), async (getVisType) => {
+      return getVisType()
+    });
   }
 
   public setup() {
     return {
       /**
        * registers a visualization type
-       * @param config - visualization type definition
+       * @param getVisDefinition - async visualization type definition loader
        */
       createBaseVisualization: <TVisParams extends VisParams>(
-        config: VisTypeDefinition<TVisParams>
+        name: string,
+        getVisDefinition: () => Promise<VisTypeDefinition<TVisParams>>
       ): void => {
-        const vis = new BaseVisType(config);
-        this.registerVisualization(vis);
+        this.registerVisualization(name, getVisDefinition);
       },
       /**
        * registers a visualization alias
@@ -57,17 +68,15 @@ export class TypesService {
        * returns specific visualization or undefined if not found
        * @param {string} visualization - id of visualization to return
        */
-      get: <TVisParams extends VisParams>(
+      get: async <TVisParams extends VisParams>(
         visualization: string
-      ): BaseVisType<TVisParams> | undefined => {
-        return this.types[visualization];
+      ): Promise<BaseVisType<TVisParams> | undefined> => {
+        return await this.types[visualization]?.();
       },
       /**
        * returns all registered visualization types
        */
-      all: (): BaseVisType[] => {
-        return [...Object.values(this.types)];
-      },
+      all: this.getAll,
       /**
        * returns all registered aliases
        */
@@ -82,8 +91,8 @@ export class TypesService {
        * returns all visualizations of specific group
        * @param {VisGroups} group - group type (aggbased | other | tools)
        */
-      getByGroup: (group: VisGroups) => {
-        return Object.values(this.types).filter((type) => {
+      getByGroup: async (group: VisGroups) => {
+        return (await this.getAll()).filter((type) => {
           return type.group === group;
         });
       },

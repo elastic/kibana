@@ -14,7 +14,7 @@ import { ApplicationStart, DocLinksStart } from '@kbn/core/public';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { VisParams } from '../../common';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
 
@@ -65,13 +65,19 @@ describe('NewVisModal', () => {
     },
   ] as BaseVisType[];
   const visTypes: TypesStart = {
-    get<T extends VisParams>(id: string): BaseVisType<T> {
+    get: async function<T extends VisParams>(id: string) {
       return _visTypes.find((vis) => vis.name === id) as unknown as BaseVisType<T>;
     },
-    all: () => _visTypes,
+    all: async () => {
+      return _visTypes as unknown as BaseVisType[];
+    },
     getAliases: () => [],
     unRegisterAlias: () => [],
-    getByGroup: (group: VisGroups) => _visTypes.filter((type) => type.group === group),
+    getByGroup: async (group: VisGroups) => {
+      return _visTypes.filter((type) => {
+        return type.group === group;
+      }) as unknown as BaseVisType[];
+    },
   };
   const addBasePath = (url: string) => `testbasepath${url}`;
   const settingsGet = jest.fn();
@@ -118,33 +124,41 @@ describe('NewVisModal', () => {
 
   it('should show the aggbased group but not the visualization assigned to this group', async () => {
     renderNewVisModal();
-    expect(screen.queryByText('Aggregation-based')).not.toBeInTheDocument();
-    expect(screen.queryByText('Vis with search')).not.toBeInTheDocument();
-    await userEvent.click(screen.getByRole('tab', { name: /Legacy/i }));
-    expect(screen.queryByText('Aggregation-based')).toBeInTheDocument();
-    expect(screen.queryByText('Vis with search')).not.toBeInTheDocument();
+    waitFor(async () => {
+      expect(screen.queryByText('Aggregation-based')).not.toBeInTheDocument();
+      expect(screen.queryByText('Vis with search')).not.toBeInTheDocument();
+      await userEvent.click(screen.getByRole('tab', { name: /Legacy/i }));
+      expect(screen.queryByText('Aggregation-based')).toBeInTheDocument();
+      expect(screen.queryByText('Vis with search')).not.toBeInTheDocument();
+    });
   });
 
   it('should display the visualizations of the other group', () => {
     renderNewVisModal();
-    expect(screen.queryByText('Vis Type 2')).toBeInTheDocument();
+    waitFor(async () => {
+      expect(screen.queryByText('Vis Type 2')).toBeInTheDocument();
+    });
   });
 
   describe('open editor', () => {
     it('should open the editor for visualizations without search', async () => {
       renderNewVisModal();
-      await userEvent.click(screen.getByText('Vis Type 1'));
-      expect(window.location.assign).toBeCalledWith('testbasepath/app/visualize#/create?type=vis');
+      waitFor(async () => {
+        await userEvent.click(screen.getByText('Vis Type 1'));
+        expect(window.location.assign).toBeCalledWith('testbasepath/app/visualize#/create?type=vis');
+      });
     });
 
     it('passes through editor params to the editor URL', async () => {
       renderNewVisModal({
         editorParams: ['foo=true', 'bar=42'],
       });
-      await userEvent.click(screen.getByText('Vis Type 1'));
-      expect(window.location.assign).toBeCalledWith(
-        'testbasepath/app/visualize#/create?type=vis&foo=true&bar=42'
-      );
+      waitFor(async () => {
+        await userEvent.click(screen.getByText('Vis Type 1'));
+        expect(window.location.assign).toBeCalledWith(
+          'testbasepath/app/visualize#/create?type=vis&foo=true&bar=42'
+        );
+      });
     });
 
     it('closes and redirects properly if visualization with alias.path and originatingApp in props', async () => {
@@ -158,12 +172,14 @@ describe('NewVisModal', () => {
         originatingApp: 'coolJestTestApp',
         stateTransfer,
       });
-      await userEvent.click(screen.getByText('Vis with alias Url'));
-      expect(stateTransfer.navigateToEditor).toBeCalledWith('otherApp', {
-        path: '#/aliasUrl',
-        state: { originatingApp: 'coolJestTestApp' },
+      waitFor(async () => {
+        await userEvent.click(screen.getByText('Vis with alias Url'));
+        expect(stateTransfer.navigateToEditor).toBeCalledWith('otherApp', {
+          path: '#/aliasUrl',
+          state: { originatingApp: 'coolJestTestApp' },
+        });
+        expect(onClose).toHaveBeenCalled();
       });
-      expect(onClose).toHaveBeenCalled();
     });
 
     it('closes and redirects properly if visualization with aliasApp and without originatingApp in props', async () => {
@@ -175,19 +191,23 @@ describe('NewVisModal', () => {
         onClose,
         application: { navigateToApp } as unknown as ApplicationStart,
       });
-      await userEvent.click(screen.getByText('Vis with alias Url'));
-      expect(navigateToApp).toBeCalledWith('otherApp', { path: '#/aliasUrl' });
-      expect(onClose).toHaveBeenCalled();
+      waitFor(async () => {
+        await userEvent.click(screen.getByText('Vis with alias Url'));
+        expect(navigateToApp).toBeCalledWith('otherApp', { path: '#/aliasUrl' });
+        expect(onClose).toHaveBeenCalled();
+      });
     });
   });
 
   describe('aggBased visualizations', () => {
     it('should render as expected', async () => {
       renderNewVisModal();
-      await userEvent.click(screen.getByRole('tab', { name: /Legacy/i }));
-      expect(screen.queryByText('Aggregation-based')).toBeInTheDocument();
-      await userEvent.click(screen.getByText('Aggregation-based'));
-      expect(screen.queryByText('Vis with search')).toBeInTheDocument();
+      waitFor(async () => {
+        await userEvent.click(screen.getByRole('tab', { name: /Legacy/i }));
+        expect(screen.queryByText('Aggregation-based')).toBeInTheDocument();
+        await userEvent.click(screen.getByText('Aggregation-based'));
+        expect(screen.queryByText('Vis with search')).toBeInTheDocument();
+      });
     });
   });
 });

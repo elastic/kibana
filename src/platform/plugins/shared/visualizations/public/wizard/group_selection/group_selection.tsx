@@ -8,7 +8,7 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { ReactNode, useCallback, useMemo } from 'react';
+import React, { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { orderBy } from 'lodash';
 import {
   EuiFlexGroup,
@@ -82,13 +82,6 @@ const tabs: Array<{ id: 'recommended' | 'legacy'; label: ReactNode; dataTestSubj
   },
 ];
 
-const getVisTypesFromGroup = (
-  visTypesRegistry: TypesStart,
-  group: VisGroups
-): Array<BaseVisType | VisTypeAlias> => {
-  return visTypesRegistry.getByGroup(group).filter(({ disableCreate }) => !disableCreate);
-};
-
 function GroupSelection({
   tab = 'recommended',
   setTab,
@@ -96,25 +89,50 @@ function GroupSelection({
   ...props
 }: GroupSelectionProps) {
   const visualizeGuideLink = props.docLinks.links.visualize.guide;
+
+  const [ visTypes, setVisTypes ] = useState<BaseVisType[]>([]);
+  useEffect(() => {
+    let canceled = false;
+    visTypesRegistry.all()
+      .then(types => {
+        if (!canceled) setVisTypes(types);
+      })
+      .catch(error => {
+      });
+
+    return () => {
+      canceled = true;
+    }
+  }, [visTypesRegistry]);
+
   const promotedVisGroups = useMemo(
     () =>
       orderBy(
         [
           ...visTypesRegistry.getAliases(),
-          ...visTypesRegistry.getByGroup(VisGroups.PROMOTED),
+          ...visTypes.filter(visType => visType.group === VisGroups.PROMOTED),
         ].filter((visDefinition) => {
           return !visDefinition.disableCreate;
         }),
         ['promotion', 'title'],
         ['asc', 'asc']
       ),
-    [visTypesRegistry]
+    [visTypes, visTypesRegistry]
   );
 
-  const aggBasedTypes = getVisTypesFromGroup(visTypesRegistry, VisGroups.AGGBASED);
-  const legacyTypes = getVisTypesFromGroup(visTypesRegistry, VisGroups.LEGACY);
-
-  const shouldDisplayLegacyTab = legacyTypes.length + aggBasedTypes.length;
+  const { legacyTypes, shouldDisplayLegacyTab } = useMemo(() => {
+    const getVisTypesFromGroup = (
+      group: VisGroups
+    ): Array<BaseVisType | VisTypeAlias> => {
+      return visTypes.filter(visType => visType.group === group && !visType.disableCreate);
+    };
+    const aggBasedTypes = getVisTypesFromGroup(VisGroups.AGGBASED);
+    const legacyTypes = getVisTypesFromGroup(VisGroups.LEGACY);
+    return {
+      legacyTypes,
+      shouldDisplayLegacyTab: Boolean(legacyTypes.length || aggBasedTypes.length)
+    }
+  }, [visTypes]);
 
   const [tsvbProps] = legacyTypes.map((visType) => ({
     visType: {
