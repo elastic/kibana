@@ -104,7 +104,7 @@ export function initializeCrossPanelActions({
   }
 
   // debounce to fix timing issue for dashboard with multiple maps with synchronized movement and filter by map extent enabled
-  const setMapExtentFilter = _.debounce(() => {
+  const setMapExtentFilter = _.debounce(async () => {
     const mapExtent = getMapExtent(savedMap.getStore().getState());
     const geoFieldNames = mapEmbeddablesSingleton.getGeoFieldNames();
 
@@ -126,21 +126,21 @@ export function initializeCrossPanelActions({
       filters: [mapExtentFilter],
       controlledBy,
     };
-    const action = getUiActions().getAction(ACTION_GLOBAL_APPLY_FILTER);
+    const action = await getUiActions().getAction(ACTION_GLOBAL_APPLY_FILTER);
     if (!action) {
       throw new Error('Unable to apply map extent filter, could not locate action');
     }
     action.execute(executeContext);
   }, 100);
 
-  function clearMapExtentFilter() {
+  async function clearMapExtentFilter() {
     prevMapExtent = undefined;
     const executeContext = {
       ...getActionContext(),
       filters: [],
       controlledBy,
     };
-    const action = getUiActions().getAction(ACTION_GLOBAL_APPLY_FILTER);
+    const action = await getUiActions().getAction(ACTION_GLOBAL_APPLY_FILTER);
     if (!action) {
       throw new Error('Unable to apply map extent filter, could not locate action');
     }

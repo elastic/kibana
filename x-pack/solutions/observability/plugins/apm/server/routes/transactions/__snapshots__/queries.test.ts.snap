@@ -29,6 +29,11 @@ Object {
       "transaction.type",
       "processor.name",
       "service.language.name",
+      "url.full",
+      "transaction.page.url",
+      "http.response.status_code",
+      "http.request.method",
+      "user_agent.name",
     ],
     "query": Object {
       "bool": Object {
