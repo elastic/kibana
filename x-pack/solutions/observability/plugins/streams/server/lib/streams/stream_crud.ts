@@ -27,7 +27,7 @@ interface DeleteStreamParams extends BaseParams {
   logger: Logger;
 }
 
-export function getDataStreamLifecycle(dataStream: IndicesDataStream): StreamLifecycle {
+export function getDataStreamLifecycle(dataStream: IndicesDataStream): StreamLifecycle | undefined {
   if (
     dataStream.ilm_policy &&
     (!dataStream.lifecycle || typeof dataStream.prefer_ilm === 'undefined' || dataStream.prefer_ilm)
@@ -37,12 +37,17 @@ export function getDataStreamLifecycle(dataStream: IndicesDataStream): StreamLif
       policy: dataStream.ilm_policy,
     };
   }
-  return {
-    type: 'dlm',
-    data_retention: dataStream.lifecycle?.data_retention
-      ? String(dataStream.lifecycle.data_retention)
-      : undefined,
-  };
+
+  if (dataStream.lifecycle) {
+    return {
+      type: 'dlm',
+      data_retention: dataStream.lifecycle.data_retention
+        ? String(dataStream.lifecycle.data_retention)
+        : undefined,
+    };
+  }
+
+  return undefined;
 }
 
 export async function deleteUnmanagedStreamObjects({

@@ -77,12 +77,12 @@ export const readStreamRoute = createServerRoute({
         [...ancestors, streamDefinition],
         ({ name }) => name.split('.').length,
         'asc'
-      ).findLast((definition) => definition.stream.ingest.lifecycle)!;
+      ).findLast((definition) => definition.stream.ingest.lifecycle);
 
       const body: WiredReadStreamDefinition = {
         ...streamDefinition,
         dashboards,
-        effectiveLifecycle: {
+        effectiveLifecycle: lifecycleOriginDefinition && {
           from: lifecycleOriginDefinition.name,
           ...lifecycleOriginDefinition.stream.ingest.lifecycle!,
         },

@@ -114,7 +114,7 @@ export function EntityDetailViewWithoutParams({
                       </EuiBadge>
                     </>
                   ) : null}
-                  {definition && <LifecycleBadge lifecycle={definition.lifecycle} />}
+                  {definition && <LifecycleBadge lifecycle={definition.effectiveLifecycle} />}
                 </EuiFlexGroup>
               }
             />
@@ -137,14 +137,15 @@ export function EntityDetailViewWithoutParams({
   );
 }
 
-function LifecycleBadge({ lifecycle }: { lifecycle: StreamLifecycle }) {
+function LifecycleBadge({ lifecycle }: { lifecycle?: StreamLifecycle }) {
   const {
     dependencies: {
       start: { share },
     },
   } = useKibana();
   const ilmLocator = share.url.locators.get<IlmLocatorParams>(ILM_LOCATOR_ID);
-  if (lifecycle.type === 'ilm') {
+
+  if (lifecycle?.type === 'ilm') {
     return (
       <EuiBadge color="hollow">
         <EuiLink
@@ -164,7 +165,7 @@ function LifecycleBadge({ lifecycle }: { lifecycle: StreamLifecycle }) {
     <EuiBadge color="hollow">
       {i18n.translate('xpack.streams.entityDetailViewWithoutParams.dlmBadgeLabel', {
         defaultMessage: 'Retention: {retention}',
-        values: { retention: lifecycle.data_retention || '∞' },
+        values: { retention: lifecycle ? lifecycle.data_retention || '∞' : 'Disabled' },
       })}
     </EuiBadge>
   );
