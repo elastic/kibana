@@ -34,6 +34,7 @@ import type { BaseVisType, TypesStart } from '../../vis_types';
 import { VisGroups } from '../../vis_types/vis_groups_enum';
 import type { VisTypeAlias } from '../../vis_types/vis_type_alias_registry';
 import './group_selection.scss';
+import { useVisTypes } from '../../vis_types/use_vis_types';
 
 export interface GroupSelectionProps {
   onVisTypeSelected: (visType: BaseVisType | VisTypeAlias) => void;
@@ -90,20 +91,7 @@ function GroupSelection({
 }: GroupSelectionProps) {
   const visualizeGuideLink = props.docLinks.links.visualize.guide;
 
-  const [ visTypes, setVisTypes ] = useState<BaseVisType[]>([]);
-  useEffect(() => {
-    let canceled = false;
-    visTypesRegistry.all()
-      .then(types => {
-        if (!canceled) setVisTypes(types);
-      })
-      .catch(error => {
-      });
-
-    return () => {
-      canceled = true;
-    }
-  }, [visTypesRegistry]);
+  const { isLoading, visTypes } = useVisTypes(visTypesRegistry);
 
   const promotedVisGroups = useMemo(
     () =>
