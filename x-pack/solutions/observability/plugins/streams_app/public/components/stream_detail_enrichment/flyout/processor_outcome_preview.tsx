@@ -35,107 +35,45 @@ import { useController, useFieldArray } from 'react-hook-form';
 import { css } from '@emotion/react';
 import { flattenObject } from '@kbn/object-utils';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
 import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../../streams_app_search_bar';
 import { PreviewTable } from '../../preview_table';
-import { convertFormStateToProcessing, isCompleteProcessingDefinition } from '../utils';
+import { convertFormStateToProcessing } from '../utils';
 import { DetectedField, ProcessorFormState } from '../types';
+import { UseProcessingSimulatorReturnType } from '../hooks/use_processing_simulator';
 
 interface ProcessorOutcomePreviewProps {
   definition: ReadStreamDefinition;
   formFields: ProcessorFormState;
+  isLoading: UseProcessingSimulatorReturnType['isLoading'];
+  simulation: UseProcessingSimulatorReturnType['simulation'];
+  samples: UseProcessingSimulatorReturnType['samples'];
+  onRefreshSamples: UseProcessingSimulatorReturnType['refreshSamples'];
+  onSimulate: UseProcessingSimulatorReturnType['simulate'];
+  simulationError: UseProcessingSimulatorReturnType['error'];
 }
 
 export const ProcessorOutcomePreview = ({
   definition,
   formFields,
+  isLoading,
+  simulation,
+  samples,
+  onRefreshSamples,
+  onSimulate,
+  simulationError,
 }: ProcessorOutcomePreviewProps) => {
   const { dependencies } = useKibana();
-  const {
-    data,
-    streams: { streamsRepositoryClient },
-  } = dependencies.start;
+  const { data } = dependencies.start;
 
-  const {
-    timeRange,
-    absoluteTimeRange: { start, end },
-    setTimeRange,
-  } = useDateRange({ data });
+  const { timeRange, setTimeRange } = useDateRange({ data });
 
   const [selectedDocsFilter, setSelectedDocsFilter] =
     useState<DocsFilterOption>('outcome_filter_all');
 
-  const {
-    value: samples,
-    loading: isLoadingSamples,
-    refresh: refreshSamples,
-  } = useStreamsAppFetch(
-    ({ signal }) => {
-      if (!definition || !formFields.field) {
-        return { documents: [] };
-      }
-
-      return streamsRepositoryClient.fetch('POST /api/streams/{id}/_sample', {
-        signal,
-        params: {
-          path: { id: definition.name },
-          body: {
-            condition: { field: formFields.field, operator: 'exists' },
-            start: start?.valueOf(),
-            end: end?.valueOf(),
-            number: 100,
-          },
-        },
-      });
-    },
-    [definition, formFields.field, streamsRepositoryClient, start, end],
-    { disableToastOnError: true }
-  );
-
-  const {
-    value: simulation,
-    loading: isLoadingSimulation,
-    error,
-    refresh: refreshSimulation,
-  } = useStreamsAppFetch(
-    async ({ signal }) => {
-      if (!definition || !samples || isEmpty(samples.documents)) {
-        return Promise.resolve(null);
-      }
-
-      const processingDefinition = convertFormStateToProcessing(formFields);
-
-      if (!isCompleteProcessingDefinition(processingDefinition)) {
-        return Promise.resolve(null);
-      }
-
-      const simulationResult = await streamsRepositoryClient.fetch(
-        'POST /api/streams/{id}/processing/_simulate',
-        {
-          signal,
-          params: {
-            path: { id: definition.name },
-            body: {
-              documents: samples.documents as Array<Record<PropertyKey, unknown>>,
-              processing: [processingDefinition],
-            },
-          },
-        }
-      );
-
-      return simulationResult;
-    },
-    [definition, samples, streamsRepositoryClient],
-    { disableToastOnError: true }
-  );
-
-  const simulationError = error as IHttpFetchError<ResponseErrorBody> | undefined;
-
   const simulationDocuments = useMemo(() => {
     if (!simulation?.documents) {
-      const docs = (samples?.documents ?? []) as Array<Record<PropertyKey, unknown>>;
-      return docs.map((doc) => flattenObject(doc));
+      return samples.map((doc) => flattenObject(doc));
     }
 
     const filterDocuments = (filter: DocsFilterOption) => {
@@ -151,11 +89,24 @@ export const ProcessorOutcomePreview = ({
     };
 
     return filterDocuments(selectedDocsFilter).map((doc) => doc.value);
-  }, [samples?.documents, simulation?.documents, selectedDocsFilter]);
+  }, [samples, simulation?.documents, selectedDocsFilter]);
 
-  const detectedFieldsColumns = simulation?.detected_fields
-    ? simulation.detected_fields.map((field) => field.name)
-    : [];
+  const detectedFieldsColumns = useMemo(
+    () =>
+      simulation?.detected_fields ? simulation.detected_fields.map((field) => field.name) : [],
+    [simulation?.detected_fields]
+  );
+
+  const tableColumns = useMemo(() => {
+    switch (selectedDocsFilter) {
+      case 'outcome_filter_unmatched':
+        return [formFields.field];
+      case 'outcome_filter_matched':
+      case 'outcome_filter_all':
+      default:
+        return [formFields.field, ...detectedFieldsColumns];
+    }
+  }, [formFields.field, detectedFieldsColumns, selectedDocsFilter]);
 
   const detectedFieldsEnabled =
     isWiredReadStream(definition) && simulation && !isEmpty(simulation.detected_fields);
@@ -175,8 +126,8 @@ export const ProcessorOutcomePreview = ({
           iconType="play"
           color="accentSecondary"
           size="s"
-          onClick={refreshSimulation}
-          isLoading={isLoadingSimulation}
+          onClick={() => onSimulate(convertFormStateToProcessing(formFields))}
+          isLoading={isLoading}
         >
           {i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.runSimulation',
@@ -191,16 +142,16 @@ export const ProcessorOutcomePreview = ({
         onDocsFilterChange={setSelectedDocsFilter}
         timeRange={timeRange}
         onTimeRangeChange={setTimeRange}
-        onTimeRangeRefresh={refreshSamples}
+        onTimeRangeRefresh={onRefreshSamples}
         simulationFailureRate={simulation?.failure_rate}
         simulationSuccessRate={simulation?.success_rate}
       />
       <EuiSpacer size="m" />
       <OutcomePreviewTable
         documents={simulationDocuments}
-        columns={[formFields.field, ...detectedFieldsColumns]}
+        columns={tableColumns}
         error={simulationError}
-        isLoading={isLoadingSamples || isLoadingSimulation}
+        isLoading={isLoading}
       />
     </EuiPanel>
   );

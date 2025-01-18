@@ -99,6 +99,7 @@ export async function getRelevantFieldNames({
       const chunkResponse$ = (
         await chat('get_relevant_dataset_names', {
           signal,
+          stream: true,
           messages: [
             {
               '@timestamp': new Date().toISOString(),
