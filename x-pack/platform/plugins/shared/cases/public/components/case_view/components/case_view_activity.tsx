@@ -178,18 +178,13 @@ export const CaseViewActivity = ({
 
   const handleUserActionsActivityChanged = useCallback(
     (params: UserActivityParams) => {
-      setUserActivityQueryParams((oldParams) => {
-        if (oldParams.sortOrder !== params.sortOrder) {
-          setSortOrder(params.sortOrder);
-        }
-
-        return {
-          ...oldParams,
-          page: 1,
-          type: params.type,
-          sortOrder: params.sortOrder,
-        };
-      });
+      setSortOrder(params.sortOrder);
+      setUserActivityQueryParams((oldParams) => ({
+        ...oldParams,
+        page: 1,
+        type: params.type,
+        sortOrder: params.sortOrder,
+      }));
     },
     [setSortOrder, setUserActivityQueryParams]
   );
