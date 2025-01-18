@@ -17,8 +17,8 @@ import { updateOldState } from '@kbn/visualizations-plugin/public';
  * by adding an x prefix. Number ids are never been generated from the editor, only programmatically.
  * See https://github.com/elastic/kibana/issues/113601.
  */
-describe('TimeseriesVisState', () => {
-  test('should format the TSVB visState correctly', () => {
+describe('TimeseriesVisState', async () => {
+  test('should format the TSVB visState correctly', async () => {
     const visState = {
       title: 'test',
       type: 'metrics',
@@ -71,7 +71,7 @@ describe('TimeseriesVisState', () => {
         },
       },
     };
-    const newVisState = updateOldState(visState);
+    const newVisState = await updateOldState(visState);
     expect(newVisState).toEqual({
       aggs: [],
       params: {

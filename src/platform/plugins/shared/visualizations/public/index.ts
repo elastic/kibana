@@ -19,10 +19,23 @@ export function plugin(initializerContext: PluginInitializerContext) {
 /** @public static code */
 export { TypesService } from './vis_types/types_service';
 export { VIS_EVENT_TO_TRIGGER } from './embeddable';
-// export { apiHasVisualizeConfig } from './embeddable/interfaces/has_visualize_config';
+export { apiHasVisualizeConfig } from './embeddable/interfaces/has_visualize_config';
 export { COMMON_VISUALIZATION_GROUPING } from './legacy/embeddable/constants';
 export { VisualizationContainer } from './components';
 export { getVisSchemas } from './vis_schemas';
+
+export function getFullPath(id: string) {
+  return `/app/visualize#/edit/${id}`;
+}
+
+export function urlFor(id: string) {
+  return `#/edit/${encodeURIComponent(id)}`;
+}
+
+export async function updateOldState(oldState: unknown) {
+  const { updateOldState } = await import('./legacy/vis_update_state');
+  return updateOldState(oldState);
+}
 
 /** @public types */
 export type { VisualizationsSetup, VisualizationsStart };
@@ -40,7 +53,7 @@ export type { VisualizeEditorInput } from './embeddable/types';
 export type { Vis, SerializedVis, SerializedVisData, VisData } from './vis';
 export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;
 export type { SchemaConfig } from '../common/types';
-export { updateOldState } from './legacy/vis_update_state';
+
 export type { VisualizeInput, VisualizeEmbeddable } from './legacy/embeddable';
 export type { HasVisualizeConfig } from './embeddable/interfaces/has_visualize_config';
 export type { PersistedState } from './persisted_state';
@@ -73,14 +86,6 @@ export type {
   FakeParams,
   HistogramParams,
 } from '../common/expression_functions/xy_dimension';
-
-export function getFullPath(id: string) {
-  return `/app/visualize#/edit/${id}`;
-}
-
-export function urlFor(id: string) {
-  return `#/edit/${encodeURIComponent(id)}`;
-}
 
 export type { IEditorController, EditorRenderProps } from './visualize_app/types';
 
