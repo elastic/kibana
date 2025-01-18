@@ -21,6 +21,7 @@ import {
   getSLOSummaryTransformId,
   getSLOTransformId,
   SLO_DESTINATION_INDEX_PATTERN,
+  SLO_RESOURCES_VERSION,
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../common/constants';
 import { SLODefinition } from '../domain/models';
@@ -68,7 +69,7 @@ describe('UpdateSLO', () => {
     );
   });
 
-  describe('when the update payload does not change the original SLO', () => {
+  describe('when the update does not change the original SLO', () => {
     function expectNoCallsToAnyMocks() {
       expect(mockEsClient.security.hasPrivileges).not.toBeCalled();
 
@@ -85,6 +86,10 @@ describe('UpdateSLO', () => {
       expect(mockEsClient.deleteByQuery).not.toBeCalled();
       expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline).not.toBeCalled();
     }
+
+    beforeEach(() => {
+      mockSummaryTransformManager.getVersion.mockResolvedValue(SLO_RESOURCES_VERSION);
+    });
 
     it('returns early with a fully identical SLO payload', async () => {
       const slo = createSLO();
@@ -194,11 +199,67 @@ describe('UpdateSLO', () => {
     });
   });
 
-  describe('handles breaking changes', () => {
+  describe('without breaking changes update', () => {
     beforeEach(() => {
       mockEsClient.security.hasPrivileges.mockResolvedValue({
         has_all_requested: true,
       } as SecurityHasPrivilegesResponse);
+    });
+
+    describe('when resources are up-to-date', () => {
+      beforeEach(() => {
+        mockSummaryTransformManager.getVersion.mockResolvedValue(SLO_RESOURCES_VERSION);
+      });
+      it('updates the summary pipeline with the new non-breaking changes', async () => {
+        const slo = createSLO();
+        mockRepository.findById.mockResolvedValueOnce(slo);
+        await updateSLO.execute(slo.id, { name: 'updated name' });
+
+        expectNonBreakingChangeUpdatedResources();
+      });
+
+      function expectNonBreakingChangeUpdatedResources() {
+        expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline).toHaveBeenCalled();
+
+        expect(mockTransformManager.install).not.toHaveBeenCalled();
+        expect(mockTransformManager.start).not.toHaveBeenCalled();
+        expect(mockSummaryTransformManager.install).not.toHaveBeenCalled();
+        expect(mockSummaryTransformManager.start).not.toHaveBeenCalled();
+
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      }
+    });
+
+    describe('when resources are running on an older version', () => {
+      beforeEach(() => {
+        mockSummaryTransformManager.getVersion.mockResolvedValue(SLO_RESOURCES_VERSION - 2);
+      });
+
+      it('consideres the non-breaking changes as breaking', async () => {
+        const slo = createSLO();
+        mockRepository.findById.mockResolvedValueOnce(slo);
+        await updateSLO.execute(slo.id, { name: 'updated name' });
+
+        expect(mockRepository.update).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ...slo,
+            name: 'updated name',
+            revision: 2,
+            updatedAt: expect.anything(),
+          })
+        );
+        expectInstallationOfUpdatedSLOResources();
+        expectDeletionOfOriginalSLOResources(slo);
+      });
+    });
+  });
+
+  describe('with breaking changes update', () => {
+    beforeEach(() => {
+      mockEsClient.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: true,
+      } as SecurityHasPrivilegesResponse);
+      mockSummaryTransformManager.getVersion.mockResolvedValue(SLO_RESOURCES_VERSION);
     });
 
     it('consideres a settings change as a breaking change', async () => {
@@ -315,6 +376,7 @@ describe('UpdateSLO', () => {
       mockEsClient.security.hasPrivileges.mockResolvedValue({
         has_all_requested: true,
       } as SecurityHasPrivilegesResponse);
+      mockSummaryTransformManager.getVersion.mockResolvedValue(SLO_RESOURCES_VERSION);
     });
 
     it('throws a SecurityException error when the user does not have the required privileges on the source index', async () => {

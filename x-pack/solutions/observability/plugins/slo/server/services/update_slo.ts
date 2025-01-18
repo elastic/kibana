@@ -11,6 +11,7 @@ import { asyncForEach } from '@kbn/std';
 import { isEqual, pick } from 'lodash';
 import {
   SLO_DESTINATION_INDEX_PATTERN,
+  SLO_RESOURCES_VERSION,
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
   SLO_SUMMARY_TEMP_INDEX_NAME,
   getSLOPipelineId,
@@ -53,15 +54,7 @@ export class UpdateSLO {
       return this.toResponse(originalSlo);
     }
 
-    const fields = [
-      'indicator',
-      'groupBy',
-      'timeWindow',
-      'objective',
-      'budgetingMethod',
-      'settings',
-    ];
-    const requireRevisionBump = !isEqual(pick(originalSlo, fields), pick(updatedSlo, fields));
+    const requireRevisionBump = await this.isRevisionBumpRequired(originalSlo, updatedSlo);
 
     updatedSlo = Object.assign(updatedSlo, {
       updatedAt: new Date(),
@@ -77,23 +70,8 @@ export class UpdateSLO {
     rollbackOperations.push(() => this.repository.update(originalSlo));
 
     if (!requireRevisionBump) {
-      // At this point, we still need to update the sli and summary pipeline to include the changes (id and revision in the rollup index) and (name, desc, tags, ...) in the summary index
-
+      // we only have to update the summary pipeline to include the non-breaking changes (name, desc, tags, ...) in the summary index
       try {
-        await retryTransientEsErrors(
-          () =>
-            this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(
-              getSLOPipelineTemplate(updatedSlo)
-            ),
-          { logger: this.logger }
-        );
-        rollbackOperations.push(() =>
-          this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-            { id: getSLOPipelineId(updatedSlo.id, updatedSlo.revision) },
-            { ignore: [404] }
-          )
-        );
-
         await retryTransientEsErrors(
           () =>
             this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(
@@ -203,6 +181,26 @@ export class UpdateSLO {
     await this.deleteOriginalSLO(originalSlo);
 
     return this.toResponse(updatedSlo);
+  }
+
+  private async isRevisionBumpRequired(originalSlo: SLODefinition, updatedSlo: SLODefinition) {
+    const fields = [
+      'indicator',
+      'groupBy',
+      'timeWindow',
+      'objective',
+      'budgetingMethod',
+      'settings',
+    ];
+    const hasBreakingChanges = !isEqual(pick(originalSlo, fields), pick(updatedSlo, fields));
+    const currentResourcesVersion = await this.summaryTransformManager.getVersion(
+      getSLOSummaryTransformId(originalSlo.id, originalSlo.revision)
+    );
+
+    const hasOutdatedVersion =
+      currentResourcesVersion === undefined || currentResourcesVersion < SLO_RESOURCES_VERSION;
+
+    return hasBreakingChanges || hasOutdatedVersion;
   }
 
   private async deleteOriginalSLO(originalSlo: SLODefinition) {
