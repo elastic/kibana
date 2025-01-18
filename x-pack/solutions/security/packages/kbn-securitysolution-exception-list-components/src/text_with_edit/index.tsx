@@ -25,13 +25,13 @@ const TextWithEditComponent: FC<TextWithEditProps> = ({
   textCss,
 }) => {
   return (
-    <EuiFlexGroup css={textWithEditContainerCss}>
-      <EuiFlexItem grow={10}>
+    <EuiFlexGroup css={textWithEditContainerCss} component="span">
+      <EuiFlexItem grow={10} component="span">
         <span css={textCss} data-test-subj={`${dataTestSubj || ''}Text`}>
           {text}
         </span>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} css={editIconCss}>
+      <EuiFlexItem grow={false} css={editIconCss} component="span">
         {isReadonly ? null : (
           <EuiButtonIcon
             data-test-subj={`${dataTestSubj || ''}EditIcon`}
