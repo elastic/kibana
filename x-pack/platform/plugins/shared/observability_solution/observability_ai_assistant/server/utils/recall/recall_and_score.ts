@@ -24,7 +24,6 @@ export async function recallAndScore({
   context,
   messages,
   logger,
-  signal,
 }: {
   recall: ObservabilityAIAssistantClient['recall'];
   chat: FunctionCallChatFunction;
@@ -33,7 +32,6 @@ export async function recallAndScore({
   context: string;
   messages: Message[];
   logger: Logger;
-  signal: AbortSignal;
 }): Promise<{
   relevantDocuments?: RecalledSuggestion[];
   scores?: Array<{ id: string; score: number }>;
@@ -63,7 +61,6 @@ export async function recallAndScore({
       messages,
       userPrompt,
       context,
-      signal,
       chat,
     });
 

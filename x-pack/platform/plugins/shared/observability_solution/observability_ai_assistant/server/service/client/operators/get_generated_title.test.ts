@@ -12,7 +12,6 @@ import {
   StreamingChatResponseEventType,
 } from '../../../../common';
 import { ChatEvent } from '../../../../common/conversation_complete';
-import { LangTracer } from '../instrumentation/lang_tracer';
 import { TITLE_CONVERSATION_FUNCTION_NAME, getGeneratedTitle } from './get_generated_title';
 
 describe('getGeneratedTitle', () => {
@@ -51,9 +50,6 @@ describe('getGeneratedTitle', () => {
         error: jest.fn(),
       },
       messages,
-      tracer: {
-        startActiveSpan: jest.fn(),
-      } as unknown as LangTracer,
       ...options,
     });
 
@@ -185,9 +181,6 @@ describe('getGeneratedTitle', () => {
       chat: chatSpy,
       logger,
       messages,
-      tracer: {
-        startActiveSpan: jest.fn(),
-      } as unknown as LangTracer,
     });
 
     const title = await lastValueFrom(title$);

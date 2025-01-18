@@ -98,7 +98,6 @@ export async function getRelevantFieldNames({
     chunk(fieldNamesToAnalyze, FIELD_NAMES_PER_CHUNK).map(async (fieldsInChunk) => {
       const chunkResponse$ = (
         await chat('get_relevant_dataset_names', {
-          signal,
           messages: [
             {
               '@timestamp': new Date().toISOString(),
