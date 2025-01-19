@@ -46,7 +46,9 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
   );
 
   const getGroupPanelTitle = (aggregationField?: string) => {
-    const aggregationFieldValue = aggregationField ? [aggregationField]?.buckets?.[0]?.key : null;
+    const aggregationFieldValue = aggregationField
+      ? bucket[aggregationField]?.buckets?.[0]?.key
+      : null;
 
     if (aggregationFieldValue) {
       return (
@@ -115,7 +117,7 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
       );
     case FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID:
       return nullGroupMessage ? (
-        renderNullGroup(NULL_GROUPING_MESSAGES.CLOUD_ACCOUNT_ID)
+        renderNullGroup(NULL_GROUPING_MESSAGES.CLOUD_ACCOUNT_NAME)
       ) : (
         <EuiFlexGroup alignItems="center" gutterSize="m">
           {benchmarkId && (
