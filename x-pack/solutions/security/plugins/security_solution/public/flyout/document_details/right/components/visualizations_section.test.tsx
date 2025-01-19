@@ -62,15 +62,6 @@ jest.mock('../../../../common/hooks/use_experimental_features', () => ({
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 const mockUseUiSetting = jest.fn().mockReturnValue([false]);
-const telemetryMock: TelemetryServiceStart = {
-  reportEvent: jest.fn(),
-};
-
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => {
-    return { services: { telemetry: telemetryMock } };
-  },
-}));
 
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');
@@ -88,6 +79,16 @@ jest.mock('@kbn/cloud-security-posture-graph/src/hooks', () => ({
 }));
 
 const mockUseFetchGraphData = useFetchGraphData as jest.Mock;
+
+const mockTelemetry: TelemetryServiceStart = {
+  reportEvent: jest.fn(),
+};
+
+jest.mock('../../../../common/lib/kibana', () => ({
+  useKibana: () => {
+    return { services: { telemetry: mockTelemetry } };
+  },
+}));
 
 const panelContextValue = {
   ...mockContextValue,
@@ -169,8 +170,9 @@ describe('<VisualizationsSection />', () => {
     const { getByTestId } = renderVisualizationsSection();
 
     expect(getByTestId(`${GRAPH_PREVIEW_TEST_ID}LeftSection`)).toBeInTheDocument();
-    expect(telemetryMock.reportEvent).toHaveBeenCalledWith(
-      DocumentEventTypes.DetailsGraphPreviewVisible
+    expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
+      DocumentEventTypes.DetailsGraphPreviewVisible,
+      { location: 'scopeId' }
     );
   });
 

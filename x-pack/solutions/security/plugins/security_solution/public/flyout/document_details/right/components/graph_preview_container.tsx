@@ -18,11 +18,14 @@ import { GraphPreview } from './graph_preview';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { useNavigateToGraphVisualization } from '../../shared/hooks/use_navigate_to_graph_visualization';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { useKibana } from '../../../../common/lib/kibana';
+import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 
 /**
  * Graph preview under Overview, Visualizations. It shows a graph representation of entities.
  */
 export const GraphPreviewContainer: React.FC = () => {
+  const { telemetry } = useKibana().services;
   const {
     dataAsNestedObject,
     getFieldsData,
@@ -71,6 +74,12 @@ export const GraphPreviewContainer: React.FC = () => {
       refetchOnWindowFocus: false,
     },
   });
+
+  if (hasGraphRepresentation) {
+    telemetry.reportEvent(DocumentEventTypes.DetailsGraphPreviewVisible, {
+      location: scopeId,
+    });
+  }
 
   return (
     <ExpandablePanel

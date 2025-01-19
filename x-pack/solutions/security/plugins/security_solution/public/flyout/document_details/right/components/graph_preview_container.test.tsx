@@ -22,6 +22,17 @@ import {
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../shared/components/test_ids';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { DocumentEventTypes, type TelemetryServiceStart } from '../../../../common/lib/telemetry';
+
+const mockTelemetry: TelemetryServiceStart = {
+  reportEvent: jest.fn(),
+};
+
+jest.mock('../../../../common/lib/kibana', () => ({
+  useKibana: () => {
+    return { services: { telemetry: mockTelemetry } };
+  },
+}));
 
 const mockUseUiSetting = jest.fn().mockReturnValue([true]);
 jest.mock('@kbn/kibana-react-plugin/public', () => {
@@ -173,6 +184,12 @@ describe('<GraphPreviewContainer />', () => {
         refetchOnWindowFocus: false,
       },
     });
+    expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
+      DocumentEventTypes.DetailsGraphPreviewVisible,
+      {
+        location: 'scopeId',
+      }
+    );
   });
 
   it('should render component for event', async () => {
@@ -224,6 +241,12 @@ describe('<GraphPreviewContainer />', () => {
         refetchOnWindowFocus: false,
       },
     });
+    expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
+      DocumentEventTypes.DetailsGraphPreviewVisible,
+      {
+        location: 'scopeId',
+      }
+    );
   });
 
   it('should render component and without link in header in preview panel', async () => {
@@ -437,5 +460,7 @@ describe('<GraphPreviewContainer />', () => {
         refetchOnWindowFocus: false,
       },
     });
+
+    expect(mockTelemetry.reportEvent).not.toHaveBeenCalled();
   });
 });

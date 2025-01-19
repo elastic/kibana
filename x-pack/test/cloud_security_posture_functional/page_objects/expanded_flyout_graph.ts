@@ -6,11 +6,14 @@
  */
 
 import expect from '@kbn/expect';
+import { GenericFtrService } from '@kbn/test';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FilterBarService } from '@kbn/test-suites-src/functional/services/filter_bar';
-import { FtrService } from '../../functional/ftr_provider_context';
 import type { QueryBarProvider } from '../services/query_bar_provider';
+import type { SecurityTelemetryFtrProviderContext } from '../config';
 
+const GRAPH_PREVIEW_EVENT = 'Details Graph Preview Visible';
+const GRAPH_INVESTIGATION_EVENT = 'Details Graph Investigation Viewed';
 const GRAPH_PREVIEW_TITLE_LINK_TEST_ID = 'securitySolutionFlyoutGraphPreviewTitleLink';
 const NODE_EXPAND_BUTTON_TEST_ID = 'cloudSecurityGraphNodeExpandButton';
 const GRAPH_INVESTIGATION_TEST_ID = 'cloudSecurityGraphGraphInvestigation';
@@ -24,10 +27,11 @@ const GRAPH_ACTIONS_TOGGLE_SEARCH_ID = `${GRAPH_INVESTIGATION_TEST_ID}ToggleSear
 const GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID = `${GRAPH_INVESTIGATION_TEST_ID}InvestigateInTimeline`;
 type Filter = Parameters<FilterBarService['addFilter']>[0];
 
-export class ExpandedFlyoutGraph extends FtrService {
+export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrProviderContext> {
   private readonly pageObjects = this.ctx.getPageObjects(['common', 'header']);
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly filterBar = this.ctx.getService('filterBar');
+  private readonly ebtUIHelper = this.ctx.getService('kibana_ebt_ui');
 
   async expandGraph(): Promise<void> {
     await this.testSubjects.click(GRAPH_PREVIEW_TITLE_LINK_TEST_ID);
@@ -154,12 +158,25 @@ export class ExpandedFlyoutGraph extends FtrService {
   }
 
   async setKqlQuery(kql: string): Promise<void> {
-    // @ts-expect-error queryBarProvider is not a public service
     const queryBarProvider: QueryBarProvider = this.ctx.getService('queryBarProvider');
 
     const queryBar = queryBarProvider.getQueryBar(GRAPH_INVESTIGATION_TEST_ID);
     await queryBar.setQuery(kql);
     await queryBar.submitQuery();
     await this.pageObjects.header.waitUntilLoadingHasFinished();
+  }
+
+  async getTelemetryPreviewEventCount(expected: number): Promise<number> {
+    return await this.ebtUIHelper.getEventCount({
+      eventTypes: [GRAPH_PREVIEW_EVENT],
+      withTimeoutMs: 500,
+    });
+  }
+
+  async getTelemetryGraphInvestigationEventCount(expected: number): Promise<number> {
+    return await this.ebtUIHelper.getEventCount({
+      eventTypes: [GRAPH_INVESTIGATION_EVENT],
+      withTimeoutMs: 500,
+    });
   }
 }
