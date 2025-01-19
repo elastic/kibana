@@ -356,7 +356,6 @@ export class TaskManagerPlugin
         taskStore,
         usageCounter: this.usageCounter,
         middleware: this.middleware,
-        elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
         ...managedConfiguration,
         taskPartitioner,
       });

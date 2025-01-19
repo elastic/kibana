@@ -57,7 +57,6 @@ export type TaskPollingLifecycleOpts = {
   taskStore: TaskStore;
   config: TaskManagerConfig;
   middleware: Middleware;
-  elasticsearchAndSOAvailability$: Observable<boolean>;
   executionContext: ExecutionContextStart;
   usageCounter?: UsageCounter;
   taskPartitioner: TaskPartitioner;
@@ -107,8 +106,6 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     middleware,
     capacityConfiguration$,
     pollIntervalConfiguration$,
-    // Elasticsearch and SavedObjects availability status
-    elasticsearchAndSOAvailability$,
     config,
     taskStore,
     definitions,
@@ -193,18 +190,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
     this.subscribeToPoller(this.poller.events$);
 
-    elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {
-      if (areESAndSOAvailable) {
-        // start polling for work
-        this.poller.start();
-      } else if (!areESAndSOAvailable) {
-        this.logger.info(
-          `Stopping the task poller because Elasticsearch and/or saved-objects service became unavailable`
-        );
-        this.poller.stop();
-        this.pool.cancelRunningTasks();
-      }
-    });
+    this.poller.start();
   }
 
   public get events(): Observable<TaskLifecycleEvent> {
