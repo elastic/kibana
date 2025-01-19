@@ -55,7 +55,35 @@ export const DocumentDetailsTabClickedEvent: DocumentDetailsTelemetryEvent = {
   },
 };
 
+export const DocumentDetailsGraphPreviewVisibleEvent: DocumentDetailsTelemetryEvent = {
+  eventType: DocumentEventTypes.DetailsGraphPreviewVisible,
+  schema: {
+    location: {
+      type: 'text',
+      _meta: {
+        description: 'Table ID',
+        optional: false,
+      },
+    },
+  },
+};
+
+export const DocumentDetailsGraphInvestigationVisibleEvent: DocumentDetailsTelemetryEvent = {
+  eventType: DocumentEventTypes.DetailsGraphInvestigationViewed,
+  schema: {
+    location: {
+      type: 'text',
+      _meta: {
+        description: 'Table ID',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const documentTelemetryEvents = [
   DocumentDetailsFlyoutOpenedEvent,
   DocumentDetailsTabClickedEvent,
+  DocumentDetailsGraphPreviewVisibleEvent,
+  DocumentDetailsGraphInvestigationVisibleEvent,
 ];

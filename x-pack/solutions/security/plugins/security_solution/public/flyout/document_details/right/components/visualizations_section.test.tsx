@@ -28,6 +28,7 @@ import { useInvestigateInTimeline } from '../../../../detections/components/aler
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { DocumentEventTypes, type TelemetryServiceStart } from '../../../../common/lib/telemetry';
 
 jest.mock('../hooks/use_expand_section');
 jest.mock('../../shared/hooks/use_alert_prevalence_from_process_tree', () => ({
@@ -61,6 +62,16 @@ jest.mock('../../../../common/hooks/use_experimental_features', () => ({
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 const mockUseUiSetting = jest.fn().mockReturnValue([false]);
+const telemetryMock: TelemetryServiceStart = {
+  reportEvent: jest.fn(),
+};
+
+jest.mock('../../../../common/lib/kibana', () => ({
+  useKibana: () => {
+    return { services: { telemetry: telemetryMock } };
+  },
+}));
+
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
@@ -158,6 +169,9 @@ describe('<VisualizationsSection />', () => {
     const { getByTestId } = renderVisualizationsSection();
 
     expect(getByTestId(`${GRAPH_PREVIEW_TEST_ID}LeftSection`)).toBeInTheDocument();
+    expect(telemetryMock.reportEvent).toHaveBeenCalledWith(
+      DocumentEventTypes.DetailsGraphPreviewVisible
+    );
   });
 
   it('should not render the graph preview component if the experimental feature is disabled', () => {

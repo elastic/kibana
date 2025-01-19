@@ -32,6 +32,8 @@ import { useStartTransaction } from '../../../../common/lib/apm/use_start_transa
 import { GRAPH_ID, GraphVisualization } from '../components/graph_visualization';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { GRAPH_VISUALIZATION_IN_FLYOUT_ENABLED_EXPERIMENTAL_FEATURE } from '../../shared/constants/experimental_features';
+import { useKibana } from '../../../../common/lib/kibana';
+import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 
 const visualizeButtons: EuiButtonGroupOptionProps[] = [
   {
@@ -88,6 +90,7 @@ const graphVisualizationButton: EuiButtonGroupOptionProps = {
  * Visualize view displayed in the document details expandable flyout left section
  */
 export const VisualizeTab = memo(() => {
+  const { telemetry } = useKibana().services;
   const { scopeId, getFieldsData, dataAsNestedObject, dataFormattedForFieldBrowser } =
     useDocumentDetailsContext();
   const { openPreviewPanel } = useExpandableFlyoutApi();
@@ -135,6 +138,12 @@ export const VisualizeTab = memo(() => {
 
   if (hasGraphRepresentation && isGraphFeatureEnabled) {
     options.push(graphVisualizationButton);
+
+    if (activeVisualizationId === GRAPH_ID) {
+      telemetry.reportEvent(DocumentEventTypes.DetailsGraphInvestigationViewed, {
+        location: scopeId,
+      });
+    }
   }
 
   return (

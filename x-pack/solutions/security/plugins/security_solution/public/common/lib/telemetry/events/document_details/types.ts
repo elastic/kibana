@@ -10,6 +10,8 @@ import type { RootSchema } from '@kbn/core/public';
 export enum DocumentEventTypes {
   DetailsFlyoutOpened = 'Details Flyout Opened',
   DetailsFlyoutTabClicked = 'Details Flyout Tabs Clicked',
+  DetailsGraphPreviewVisible = 'Details Graph Preview Visible',
+  DetailsGraphInvestigationViewed = 'Details Graph Investigation Viewed',
 }
 
 interface ReportDetailsFlyoutOpenedParams {
@@ -23,9 +25,19 @@ interface ReportDetailsFlyoutTabClickedParams {
   tabId: string;
 }
 
+interface ReportDetailsGraphPreviewVisibleParams {
+  location: string;
+}
+
+interface ReportDetailsGraphInvestigationVisibleParams {
+  location: string;
+}
+
 export interface DocumentDetailsTelemetryEventsMap {
   [DocumentEventTypes.DetailsFlyoutOpened]: ReportDetailsFlyoutOpenedParams;
   [DocumentEventTypes.DetailsFlyoutTabClicked]: ReportDetailsFlyoutTabClickedParams;
+  [DocumentEventTypes.DetailsGraphPreviewVisible]: ReportDetailsGraphPreviewVisibleParams;
+  [DocumentEventTypes.DetailsGraphInvestigationViewed]: ReportDetailsGraphInvestigationVisibleParams;
 }
 
 export interface DocumentDetailsTelemetryEvent {

@@ -20,6 +20,8 @@ import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/constants';
 import { GRAPH_VISUALIZATION_IN_FLYOUT_ENABLED_EXPERIMENTAL_FEATURE } from '../../shared/constants/experimental_features';
+import { useKibana } from '../../../../common/lib/kibana';
+import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 
 const KEY = 'visualizations';
 
@@ -27,8 +29,9 @@ const KEY = 'visualizations';
  * Visualizations section in overview. It contains analyzer preview and session view preview.
  */
 export const VisualizationsSection = memo(() => {
+  const { telemetry } = useKibana().services;
   const expanded = useExpandSection({ title: KEY, defaultValue: false });
-  const { dataAsNestedObject, getFieldsData, dataFormattedForFieldBrowser } =
+  const { dataAsNestedObject, getFieldsData, dataFormattedForFieldBrowser, scopeId } =
     useDocumentDetailsContext();
 
   const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
@@ -48,6 +51,12 @@ export const VisualizationsSection = memo(() => {
 
   const shouldShowGraphPreview =
     visualizationInFlyoutEnabled && isGraphFeatureEnabled && hasGraphRepresentation;
+
+  if (shouldShowGraphPreview) {
+    telemetry.reportEvent(DocumentEventTypes.DetailsGraphPreviewVisible, {
+      location: scopeId,
+    });
+  }
 
   return (
     <ExpandableSection
