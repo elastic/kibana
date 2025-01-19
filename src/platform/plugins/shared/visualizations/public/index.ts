@@ -25,14 +25,7 @@ export { VisualizationContainer } from './components';
 export { getVisSchemas } from './vis_schemas';
 export { prepareLogTable } from '../common/utils/prepare_log_table';
 export { XYCurveTypes } from '../common/convert_to_lens/constants';
-
-export function getFullPath(id: string) {
-  return `/app/visualize#/edit/${id}`;
-}
-
-export function urlFor(id: string) {
-  return `#/edit/${encodeURIComponent(id)}`;
-}
+export { urlFor, getFullPath } from './utils/url_utils';
 
 /** @public types */
 export type { VisualizationsSetup, VisualizationsStart };

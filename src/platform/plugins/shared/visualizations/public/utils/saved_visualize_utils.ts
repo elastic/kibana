@@ -36,7 +36,7 @@ import { injectReferences, extractReferences } from './saved_visualization_refer
 import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from './saved_objects_utils/constants';
 import { visualizationsClient } from '../content_management';
 import { VisualizationSavedObjectAttributes } from '../../common';
-import { urlFor } from '..';
+import { urlFor } from './url_utils';
 
 export const SAVED_VIS_TYPE = 'visualization';
 
