@@ -28,7 +28,7 @@ const KEY = 'visualizations';
  */
 export const VisualizationsSection = memo(() => {
   const expanded = useExpandSection({ title: KEY, defaultValue: false });
-  const { dataAsNestedObject, getFieldsData, dataFormattedForFieldBrowser, scopeId } =
+  const { dataAsNestedObject, getFieldsData, dataFormattedForFieldBrowser } =
     useDocumentDetailsContext();
 
   const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
