@@ -70,7 +70,7 @@ export const AccountsEvaluatedWidget = ({
 
   const navToFindingsByCisBenchmark = (cisBenchmark: string) => {
     navToFindings({ 'rule.benchmark.id': cisBenchmark }, [
-      FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME,
+      FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_ID,
     ]);
   };
 

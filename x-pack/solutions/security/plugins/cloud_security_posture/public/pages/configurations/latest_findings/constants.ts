@@ -40,7 +40,7 @@ export const MISCONFIGURATIONS_GROUPS_UNIT = (
         values: { groupCount },
         defaultMessage: `{groupCount} {groupCount, plural, =1 {cloud account} other {cloud accounts}}`,
       });
-    case FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME:
+    case FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_ID:
       return i18n.translate('xpack.csp.findings.groupUnit.kubernetes', {
         values: { groupCount },
         defaultMessage: `{groupCount} {groupCount, plural, =1 {kubernetes cluster} other {kubernetes clusters}}`,
@@ -67,10 +67,9 @@ export const NULL_GROUPING_MESSAGES = {
   CLOUD_ACCOUNT_NAME: i18n.translate('xpack.csp.findings.grouping.cloudAccount.nullGroupTitle', {
     defaultMessage: 'No cloud account',
   }),
-  ORCHESTRATOR_CLUSTER_NAME: i18n.translate(
-    'xpack.csp.findings.grouping.kubernetes.nullGroupTitle',
-    { defaultMessage: 'No Kubernetes cluster' }
-  ),
+  ORCHESTRATOR_CLUSTER_ID: i18n.translate('xpack.csp.findings.grouping.kubernetes.nullGroupTitle', {
+    defaultMessage: 'No Kubernetes cluster',
+  }),
   DEFAULT: i18n.translate('xpack.csp.findings.grouping.default.nullGroupTitle', {
     defaultMessage: 'No grouping',
   }),
@@ -97,9 +96,9 @@ export const defaultGroupingOptions: GroupOption[] = [
   },
   {
     label: i18n.translate('xpack.csp.findings.latestFindings.groupByKubernetesCluster', {
-      defaultMessage: 'Kubernetes cluster',
+      defaultMessage: 'Kubernetes cluster ID',
     }),
-    key: FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME,
+    key: FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_ID,
   },
 ];
 
