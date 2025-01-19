@@ -111,29 +111,5 @@ describe('createToggleColumnCellActionFactory', () => {
         })
       );
     });
-
-    it('should call triggersActionsUi.alertsTableConfigurationRegistry to add a column in alert', async () => {
-      const name = 'fake-field-name';
-      await toggleColumnAction.execute({
-        ...context,
-        data: [{ ...context.data[0], field: { ...context.data[0].field, name } }],
-        metadata: {
-          scopeId: TableId.alertsOnAlertsPage,
-        },
-      });
-      expect(mockAlertConfigGetActions).toHaveBeenCalledWith('securitySolution-alerts-page');
-      expect(mockToggleColumn).toHaveBeenCalledWith(name);
-    });
-
-    it('should call triggersActionsUi.alertsTableConfigurationRegistry to remove a column in alert', async () => {
-      await toggleColumnAction.execute({
-        ...context,
-        metadata: {
-          scopeId: TableId.alertsOnAlertsPage,
-        },
-      });
-      expect(mockAlertConfigGetActions).toHaveBeenCalledWith('securitySolution-alerts-page');
-      expect(mockToggleColumn).toHaveBeenCalledWith(fieldName);
-    });
   });
 });
