@@ -85,7 +85,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             'objects',
             'aiAssistantManagementSelection',
             'tags',
-            'search_sessions',
             'spaces',
             'settings',
           ],
