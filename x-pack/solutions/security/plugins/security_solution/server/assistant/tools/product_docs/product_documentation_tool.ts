@@ -14,8 +14,8 @@ import {
   productDocumentationReferenceFactory,
 } from '@kbn/elastic-assistant-common';
 import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
-import type { RetrievedDocument } from '@kbn/llm-tasks-plugin/server/tasks/retrieve_documentation/types';
 import { APP_UI_ID } from '../../../../common';
+import { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/server';
 
 const toolDetails = {
   description:
@@ -88,12 +88,12 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
   },
 };
 
-type EnrichedDocument = RetrievedDocument & {
+type EnrichedDocument = RetrieveDocumentationResultDoc & {
   citation: string;
 };
 
 function enrichDocument(contentReferencesStore: ContentReferencesStore) {
-  return (document: RetrievedDocument): EnrichedDocument => {
+  return (document: RetrieveDocumentationResultDoc): EnrichedDocument => {
     const productDocumentationReference = contentReferencesStore.add((p) =>
       productDocumentationReferenceFactory(p.id, document.title, document.url)
     );
