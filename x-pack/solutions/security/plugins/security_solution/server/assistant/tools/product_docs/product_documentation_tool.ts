@@ -14,8 +14,8 @@ import {
   productDocumentationReferenceFactory,
 } from '@kbn/elastic-assistant-common';
 import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
+import type { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/server';
 import { APP_UI_ID } from '../../../../common';
-import { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/server';
 
 const toolDetails = {
   description:
