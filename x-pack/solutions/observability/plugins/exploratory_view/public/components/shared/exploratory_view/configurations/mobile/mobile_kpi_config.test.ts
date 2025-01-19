@@ -13,6 +13,7 @@ import { testMobileKPIAttr } from '../test_data/mobile_test_attribute';
 import { getLayerConfigs } from '../../hooks/use_lens_attributes';
 import { DataViewState } from '../../hooks/use_app_data_view';
 import { ReportTypes } from '../../../../..';
+import { EuiThemeComputed } from '@elastic/eui';
 
 describe('Mobile kpi config test', function () {
   mockAppDataView();
@@ -31,7 +32,22 @@ describe('Mobile kpi config test', function () {
       },
     ],
     ReportTypes.KPI,
-    {} as any,
+    {
+      colors: {
+        vis: {
+          euiColorVis0: '#54B399',
+          euiColorVis1: '#54B399',
+          euiColorVis2: '#54B399',
+          euiColorVis3: '#54B399',
+          euiColorVis4: '#54B399',
+          euiColorVis5: '#54B399',
+          euiColorVis6: '#54B399',
+          euiColorVis7: '#54B399',
+          euiColorVis8: '#54B399',
+          euiColorVis9: '#54B399',
+        },
+      },
+    } as unknown as EuiThemeComputed,
     { mobile: mockDataView } as DataViewState,
     obsvReportConfigMap
   );

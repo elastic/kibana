@@ -5,15 +5,33 @@
  * 2.0.
  */
 
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { PackageService } from '@kbn/fleet-plugin/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { InferenceClient } from '@kbn/inference-plugin/server';
 import type {
-  RuleMigration,
-  RuleMigrationResource,
+  UpdateRuleMigrationData,
+  RuleMigrationTranslationResult,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
+import {
+  type RuleMigration,
+  type RuleMigrationResource,
+} from '../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleVersions } from './data/rule_migrations_data_prebuilt_rules_client';
 
 export type Stored<T extends object> = T & { id: string };
 
 export type StoredRuleMigration = Stored<RuleMigration>;
 export type StoredRuleMigrationResource = Stored<RuleMigrationResource>;
+
+export interface SiemRuleMigrationsClientDependencies {
+  inferenceClient: InferenceClient;
+  rulesClient: RulesClient;
+  actionsClient: ActionsClient;
+  savedObjectsClient: SavedObjectsClientContract;
+  packageService?: PackageService;
+}
 
 export interface RuleMigrationIntegration {
   id: string;
@@ -25,9 +43,14 @@ export interface RuleMigrationIntegration {
 
 export interface RuleMigrationPrebuiltRule {
   rule_id: string;
-  installed_rule_id?: string;
   name: string;
   description: string;
   elser_embedding: string;
   mitre_attack_ids?: string[];
 }
+
+export type RuleSemanticSearchResult = RuleMigrationPrebuiltRule & RuleVersions;
+
+export type InternalUpdateRuleMigrationData = UpdateRuleMigrationData & {
+  translation_result?: RuleMigrationTranslationResult;
+};
