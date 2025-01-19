@@ -10,6 +10,7 @@ import React, { useMemo, memo } from 'react';
 import { find, getOr } from 'lodash/fp';
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { tableDefaults, dataTableSelectors } from '@kbn/securitysolution-data-table';
+import { isEmpty } from 'lodash';
 import { useLicense } from '../../../common/hooks/use_license';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
@@ -44,7 +45,7 @@ export const CellValue: GetSecurityAlertsTableProp<'renderCellValue'> = memo(
       tableId,
       tableType,
       header,
-      legacyAlert,
+      data: legacyAlert,
       ecsAlert,
       linkValues,
       rowRenderers,
@@ -93,6 +94,9 @@ export const CellValue: GetSecurityAlertsTableProp<'renderCellValue'> = memo(
      */
 
     const finalData = useMemo(() => {
+      if (isEmpty(legacyAlert)) {
+        return [];
+      }
       return (legacyAlert as TimelineNonEcsData[]).map((field) => {
         if (['_id', '_index'].includes(field.field)) {
           const newValue = field.value ?? '';
