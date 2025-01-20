@@ -6,7 +6,7 @@
  */
 import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
-import pRetry from 'p-retry';
+import { retryForSuccess } from '@kbn/ftr-common-functional-services';
 import { APM_ALERTS_INDEX } from '../../../../api_integration/deployment_agnostic/apis/observability/apm/alerts/helpers/alerting_helper';
 
 export async function getActiveApmAlerts({
@@ -58,8 +58,10 @@ export function waitForActiveApmAlert({
   log: ToolingLog;
 }): Promise<Record<string, any>> {
   log.debug(`Wait for the rule ${ruleId} to be active`);
-  return pRetry(
-    async () => {
+  return retryForSuccess(log, {
+    timeout: 20_000,
+    methodName: 'waitForActiveApmAlert',
+    block: async () => {
       const activeApmAlerts = await getActiveApmAlerts({ ruleId, esClient });
 
       if (activeApmAlerts.length === 0) {
@@ -70,12 +72,7 @@ export function waitForActiveApmAlert({
 
       return activeApmAlerts[0];
     },
-    {
-      retries: RETRIES_COUNT,
-      factor: 1.5,
-      onFailedAttempt: (error) => {
-        log.info(`Attempt ${error.attemptNumber}/${RETRIES_COUNT}: Waiting for active alert`);
-      },
-    }
-  );
+    retryCount: RETRIES_COUNT,
+    retryDelay: 500,
+  });
 }
