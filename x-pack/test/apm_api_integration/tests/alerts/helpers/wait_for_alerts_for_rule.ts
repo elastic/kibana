@@ -6,10 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type {
-  AggregationsAggregate,
-  SearchResponse,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ToolingLog } from '@kbn/tooling-log';
 import { retryForSuccess } from '@kbn/ftr-common-functional-services';
 import {
