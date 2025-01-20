@@ -465,7 +465,9 @@ describe('reindexService', () => {
           path: `_create_from/myIndex/myIndex-reindex-0`,
           body: {
             settings_override: {
-              // Reindexing optimizations
+              'index.blocks.read_only': null,
+              'index.blocks.read_only_allow_delete': null,
+              'index.blocks.write': null,
               'index.number_of_replicas': 0,
               'index.refresh_interval': -1,
             },
