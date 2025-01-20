@@ -22,8 +22,6 @@ export const SIEM_RULE_MIGRATION_TRANSLATION_STATS_PATH =
   `${SIEM_RULE_MIGRATION_PATH}/translation_stats` as const;
 export const SIEM_RULE_MIGRATION_STOP_PATH = `${SIEM_RULE_MIGRATION_PATH}/stop` as const;
 export const SIEM_RULE_MIGRATION_INSTALL_PATH = `${SIEM_RULE_MIGRATION_PATH}/install` as const;
-export const SIEM_RULE_MIGRATION_INSTALL_TRANSLATED_PATH =
-  `${SIEM_RULE_MIGRATION_PATH}/install_translated` as const;
 export const SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH =
   `${SIEM_RULE_MIGRATION_PATH}/prebuilt_rules` as const;
 
@@ -64,16 +62,3 @@ export const DEFAULT_TRANSLATION_FIELDS = {
   to: 'now',
   interval: '5m',
 } as const;
-
-export enum AuthorFilter {
-  ELASTIC = 'elastic',
-  CUSTOM = 'custom',
-}
-
-export enum StatusFilter {
-  INSTALLED = 'installed',
-  TRANSLATED = 'translated',
-  PARTIALLY_TRANSLATED = 'partially_translated',
-  UNTRANSLATABLE = 'untranslatable',
-  FAILED = 'failed',
-}
