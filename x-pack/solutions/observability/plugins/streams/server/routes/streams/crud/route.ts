@@ -75,7 +75,7 @@ export const readStreamRoute = createServerRoute({
 
       const lifecycleOriginDefinition = orderBy(
         [...ancestors, streamDefinition],
-        ({ name }) => name.split('.').length,
+        (parent) => parent.name.split('.').length,
         'asc'
       ).findLast((definition) => definition.stream.ingest.lifecycle);
 
