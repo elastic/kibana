@@ -11,6 +11,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { Router } from '../router';
 import { CoreVersionedRouter } from '.';
 import { createRouter } from './mocks';
+import { createTestEnv } from '@kbn/config-mocks';
 
 const pluginId = Symbol('test');
 describe('Versioned router', () => {
@@ -21,6 +22,7 @@ describe('Versioned router', () => {
     versionedRouter = CoreVersionedRouter.from({
       router,
       log: loggingSystemMock.createLogger(),
+      env: createTestEnv(),
     });
   });
 
