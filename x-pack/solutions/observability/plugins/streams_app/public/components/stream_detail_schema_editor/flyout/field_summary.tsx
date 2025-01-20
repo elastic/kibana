@@ -23,6 +23,7 @@ import { FieldFormFormat, typeSupportsFormat } from './field_form_format';
 import { FieldFormType } from './field_form_type';
 import { SchemaEditorFlyoutProps } from '.';
 import { FieldType } from '../field_type';
+import { EcsRecommendation } from './ecs_recommendation';
 
 const EMPTY_CONTENT = '-----';
 
@@ -159,13 +160,20 @@ export const FieldSummary = (props: SchemaEditorFlyoutProps) => {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
-          {isEditing ? (
-            <FieldFormType nextFieldType={nextFieldType} setNextFieldType={setNextFieldType} />
-          ) : selectedField.type ? (
-            <FieldType type={selectedField.type} />
-          ) : (
-            `${EMPTY_CONTENT}`
-          )}
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem>
+              {isEditing ? (
+                <FieldFormType nextFieldType={nextFieldType} setNextFieldType={setNextFieldType} />
+              ) : selectedField.type ? (
+                <FieldType type={selectedField.type} />
+              ) : (
+                `${EMPTY_CONTENT}`
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EcsRecommendation field={selectedField.name} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
 
