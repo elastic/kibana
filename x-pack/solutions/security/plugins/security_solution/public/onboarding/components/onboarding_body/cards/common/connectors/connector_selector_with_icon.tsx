@@ -30,9 +30,9 @@ interface Props {
  */
 export const ConnectorSelectorWithIcon = React.memo<Props>(
   ({ isDisabled = false, selectedConnectorId, connectors, onConnectorSelected }) => {
-    const { actionTypeRegistry, http, assistantAvailability, toasts } = useAssistantContext();
+    const { actionTypeRegistry, assistantAvailability } = useAssistantContext();
 
-    const actionTypes = useFilteredActionTypes(http, toasts);
+    const actionTypes = useFilteredActionTypes();
 
     const selectedConnector = useMemo(
       () => connectors.find((connector) => connector.id === selectedConnectorId),

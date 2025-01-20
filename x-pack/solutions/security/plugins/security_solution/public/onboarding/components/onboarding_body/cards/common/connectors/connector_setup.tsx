@@ -31,9 +31,7 @@ export const ConnectorSetup = React.memo<ConnectorSetupProps>(({ onConnectorSave
   const [selectedActionType, setSelectedActionType] = useState<ActionType | null>(null);
 
   const {
-    http,
     triggersActionsUi: { actionTypeRegistry },
-    notifications: { toasts },
   } = useKibana().services;
 
   const onModalClose = useCallback(() => {
@@ -42,7 +40,7 @@ export const ConnectorSetup = React.memo<ConnectorSetupProps>(({ onConnectorSave
     onClose?.();
   }, [onClose]);
 
-  const actionTypes = useFilteredActionTypes(http, toasts);
+  const actionTypes = useFilteredActionTypes();
 
   if (!actionTypes) {
     return <EuiLoadingSpinner />;
