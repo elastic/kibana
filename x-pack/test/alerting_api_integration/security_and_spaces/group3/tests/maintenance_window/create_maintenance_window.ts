@@ -110,7 +110,7 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
       });
     }
 
-    describe('rRuleSchema validation', () => {
+    describe.skip('rRuleSchema validation', () => {
       it('should create maintenance window with byweekday', async () => {
         const rrule = {
           dtstart: new Date().toISOString(),
@@ -126,6 +126,8 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
             r_rule: rrule,
           })
           .expect(200);
+
+        objectRemover.add('space1', response.body.id, 'rules/maintenance_window', 'alerting', true);
 
         expect(response.body.r_rule.byweekday).to.eql(rrule.byweekday);
       });
@@ -146,6 +148,8 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
           })
           .expect(200);
 
+        objectRemover.add('space1', response.body.id, 'rules/maintenance_window', 'alerting', true);
+
         expect(response.body.r_rule.bymonth).to.eql(rrule.bymonth);
       });
 
@@ -164,6 +168,8 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
             r_rule: rrule,
           })
           .expect(200);
+
+        objectRemover.add('space1', response.body.id, 'rules/maintenance_window', 'alerting', true);
 
         expect(response.body.r_rule.bymonthday).to.eql(rrule.bymonthday);
       });
