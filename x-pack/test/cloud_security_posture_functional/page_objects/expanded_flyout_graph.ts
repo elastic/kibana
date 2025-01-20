@@ -31,7 +31,9 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   private readonly pageObjects = this.ctx.getPageObjects(['common', 'header']);
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly filterBar = this.ctx.getService('filterBar');
-  private readonly ebtUIHelper = this.ctx.getService('kibana_ebt_ui');
+  private readonly ebtUIHelper = this.ctx.hasService('kibana_ebt_ui')
+    ? this.ctx.getService('kibana_ebt_ui')
+    : undefined;
 
   async expandGraph(): Promise<void> {
     await this.testSubjects.click(GRAPH_PREVIEW_TITLE_LINK_TEST_ID);
@@ -167,16 +169,22 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   }
 
   async getTelemetryPreviewEventCount(): Promise<number> {
-    return await this.ebtUIHelper.getEventCount({
-      eventTypes: [GRAPH_PREVIEW_EVENT],
-      withTimeoutMs: 500,
-    });
+    expect(this.ebtUIHelper).not.to.be(undefined);
+    return (
+      (await this.ebtUIHelper?.getEventCount({
+        eventTypes: [GRAPH_PREVIEW_EVENT],
+        withTimeoutMs: 500,
+      })) ?? Promise.resolve(0)
+    );
   }
 
   async getTelemetryGraphInvestigationEventCount(): Promise<number> {
-    return await this.ebtUIHelper.getEventCount({
-      eventTypes: [GRAPH_INVESTIGATION_EVENT],
-      withTimeoutMs: 500,
-    });
+    expect(this.ebtUIHelper).not.to.be(undefined);
+    return (
+      (await this.ebtUIHelper?.getEventCount({
+        eventTypes: [GRAPH_INVESTIGATION_EVENT],
+        withTimeoutMs: 500,
+      })) ?? Promise.resolve(0)
+    );
   }
 }
