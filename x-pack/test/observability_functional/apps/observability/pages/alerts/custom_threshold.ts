@@ -20,7 +20,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const toasts = getService('toasts');
   const PageObjects = getPageObjects(['header']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/196766
   describe('Custom threshold rule', function () {
     this.tags('includeFirefox');
 
@@ -66,7 +65,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     it('can add name and tags', async () => {
-      await testSubjects.setValue('ruleDetailsNameInput', 'test custom threshold rule');
+      await testSubjects.setValue('ruleDetailsNameInput', 'test custom threshold rule', {
+        clearWithKeyboard: true,
+      });
       await testSubjects.setValue('ruleDetailsTagsInput', 'tag1');
     });
 
@@ -215,13 +216,13 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     it('saved the rule correctly', async () => {
-      const resp = await supertest
+      const { body: rules } = await supertest
         .post('/internal/alerting/rules/_find')
         .set('kbn-xsrf', 'kibana')
         .send({});
 
-      expect(resp.body.data.length).toEqual(1);
-      expect(resp.body.data[0]).toEqual(
+      expect(rules.data.length).toEqual(1);
+      expect(rules.body.data[0]).toEqual(
         expect.objectContaining({
           name: 'test custom threshold rule',
           tags: ['tag1'],
