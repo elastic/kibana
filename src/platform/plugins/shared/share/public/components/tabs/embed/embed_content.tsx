@@ -37,6 +37,7 @@ type EmbedProps = Pick<
   | 'embedUrlParamExtensions'
   | 'objectType'
   | 'isDirty'
+  | 'anonymousAccess'
 > & {
   objectConfig?: ShareContextObjectTypeConfig;
 };
@@ -59,6 +60,7 @@ export const EmbedContent = ({
   objectType,
   objectConfig = {},
   isDirty,
+  anonymousAccess,
 }: EmbedProps) => {
   const isMounted = useMountedState();
   const [urlParams, setUrlParams] = useState<UrlParams | undefined>(undefined);
@@ -66,8 +68,37 @@ export const EmbedContent = ({
   const [exportUrlAs] = useState<ExportUrlAsType>(ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT);
   const [url, setUrl] = useState<string>('');
   const [shortUrlCache, setShortUrlCache] = useState<string | undefined>(undefined);
-  const [anonymousAccessParameters] = useState<AnonymousAccessState['accessURLParameters']>(null);
-  const [usePublicUrl] = useState<boolean>(false);
+  const [anonymousAccessParameters, setAnonymousAccessParameters] =
+    useState<AnonymousAccessState['accessURLParameters']>(null);
+  const [usePublicUrl, setUsePublicUrl] = useState<boolean>(false);
+  const [showPublicUrlSwitch, setShowPublicUrlSwitch] = useState(false);
+
+  const { draftModeCallOut: DraftModeCallout, computeAnonymousCapabilities } = objectConfig;
+
+  useEffect(() => {
+    if (computeAnonymousCapabilities && anonymousAccess) {
+      const resolveAnonymousAccessClaims = async () => {
+        try {
+          const [state, capabilities] = await Promise.all([
+            anonymousAccess.getState(),
+            anonymousAccess.getCapabilities(),
+          ]);
+
+          if (state?.isEnabled) {
+            setAnonymousAccessParameters(state?.accessURLParameters);
+
+            if (capabilities) {
+              setShowPublicUrlSwitch(computeAnonymousCapabilities?.(capabilities));
+            }
+          }
+        } catch {
+          //
+        }
+      };
+
+      resolveAnonymousAccessClaims();
+    }
+  }, [anonymousAccess, computeAnonymousCapabilities]);
 
   const makeUrlEmbeddable = useCallback((tempUrl: string): string => {
     const embedParam = '?embed=true';
@@ -252,9 +283,7 @@ export const EmbedContent = ({
               />
             }
             checked={usePublicUrl}
-            onChange={(e: EuiSwitchEvent) => {
-              setUrlHelper();
-            }}
+            onChange={(e: EuiSwitchEvent) => setUsePublicUrl(e.target.checked)}
             data-test-subj="embedPublicUrlOptionsSwitch"
           />
         </EuiFlexItem>
@@ -263,7 +292,7 @@ export const EmbedContent = ({
             content={
               <FormattedMessage
                 id="share.embed.publicUrlOptionsSwitch.tooltip"
-                defaultMessage="Uses multiple pages, showing at most 2 visualizations per page "
+                defaultMessage="Enabling public access generates a sharable URL that allows anonymous access without a login prompt."
               />
             }
           >
@@ -288,8 +317,6 @@ export const EmbedContent = ({
       />
     );
 
-  const { draftModeCallOut: DraftModeCallout } = objectConfig;
-
   return (
     <>
       <EuiForm>
@@ -305,7 +332,9 @@ export const EmbedContent = ({
         <EuiSpacer />
       </EuiForm>
       <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-        <React.Fragment>{renderPublicUrlOptionsSwitch()}</React.Fragment>
+        <React.Fragment>
+          {showPublicUrlSwitch ? renderPublicUrlOptionsSwitch() : null}
+        </React.Fragment>
         <EuiFlexItem grow={false}>
           <EuiCopy textToCopy={url}>
             {(copy) => (

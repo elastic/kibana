@@ -23,6 +23,7 @@ const EmbedTabContent: NonNullable<IEmbedTab['content']> = ({ state, dispatch })
     objectType,
     objectTypeMeta,
     isDirty,
+    anonymousAccess,
   } = useShareTabsContext()!;
 
   return (
@@ -34,6 +35,7 @@ const EmbedTabContent: NonNullable<IEmbedTab['content']> = ({ state, dispatch })
         objectType,
         objectConfig: objectTypeMeta?.config?.embed,
         isDirty,
+        anonymousAccess,
       }}
     />
   );
