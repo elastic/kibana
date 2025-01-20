@@ -161,7 +161,6 @@ describe('useDiscoverHistogram', () => {
       const { hook } = await renderUseDiscoverHistogram();
       const params = hook.result.current.getCreationOptions();
       expect(params?.localStorageKeyPrefix).toBe('discover');
-      expect(params?.disableAutoFetching).toBe(true);
       expect(Object.keys(params?.initialState ?? {})).toEqual([
         'chartHidden',
         'timeInterval',
@@ -379,10 +378,27 @@ describe('useDiscoverHistogram', () => {
       });
       expect(hook.result.current.isChartLoading).toBe(true);
     });
+
+    it('should use timerange + timeRangeRelative + query given by the internalState container', async () => {
+      const fetch$ = new Subject<void>();
+      const stateContainer = getStateContainer();
+      const timeRangeAbs = { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
+      const timeRangeRel = { from: 'now-15m', to: 'now' };
+      stateContainer.internalState.transitions.setDataRequestParams({
+        timeRangeAbsolute: timeRangeAbs,
+        timeRangeRelative: timeRangeRel,
+      });
+      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      act(() => {
+        fetch$.next();
+      });
+      expect(hook.result.current.timeRange).toBe(timeRangeAbs);
+      expect(hook.result.current.relativeTimeRange).toBe(timeRangeRel);
+    });
   });
 
-  describe('refetching', () => {
-    it('should call refetch when savedSearchFetch$ is triggered', async () => {
+  describe('fetching', () => {
+    it('should call fetch when savedSearchFetch$ is triggered', async () => {
       const savedSearchFetch$ = new Subject<void>();
       const stateContainer = getStateContainer();
       stateContainer.dataState.fetchChart$ = savedSearchFetch$;
@@ -391,33 +407,11 @@ describe('useDiscoverHistogram', () => {
       act(() => {
         hook.result.current.ref(api);
       });
-      expect(api.refetch).toHaveBeenCalled();
+      expect(api.fetch).toHaveBeenCalled();
       act(() => {
         savedSearchFetch$.next();
       });
-      expect(api.refetch).toHaveBeenCalledTimes(2);
-    });
-
-    it('should skip the next refetch when hideChart changes from true to false', async () => {
-      const savedSearchFetch$ = new Subject<void>();
-      const stateContainer = getStateContainer();
-      stateContainer.dataState.fetchChart$ = savedSearchFetch$;
-      const { hook, initialProps } = await renderUseDiscoverHistogram({ stateContainer });
-      const api = createMockUnifiedHistogramApi();
-      act(() => {
-        hook.result.current.ref(api);
-      });
-      expect(api.refetch).toHaveBeenCalled();
-      act(() => {
-        hook.rerender({ ...initialProps, hideChart: true });
-      });
-      act(() => {
-        hook.rerender({ ...initialProps, hideChart: false });
-      });
-      act(() => {
-        savedSearchFetch$.next();
-      });
-      expect(api.refetch).toHaveBeenCalledTimes(1);
+      expect(api.fetch).toHaveBeenCalledTimes(2);
     });
   });
 
