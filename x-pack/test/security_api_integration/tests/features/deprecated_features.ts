@@ -186,8 +186,8 @@ export default function ({ getService }: FtrProviderContext) {
           "maps",
           "observabilityCases",
           "securitySolutionCases",
-          "visualize",
           "siem",
+          "visualize",
         ]
       `);
     });
