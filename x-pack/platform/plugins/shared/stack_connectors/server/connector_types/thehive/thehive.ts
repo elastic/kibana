@@ -157,11 +157,15 @@ export class TheHiveConnector extends CaseConnector<
     alert: ExecutorSubActionCreateAlertParams,
     connectorUsageCollector: ConnectorUsageCollector
   ) {
+    const { body, template, ...restOfAlert } = alert;
+    const bodyJson = JSON.parse(body ?? '{}');
+    const mergedAlertBody = { ...restOfAlert, ...bodyJson };
+
     await this.request(
       {
         method: 'post',
         url: `${this.url}/api/${API_VERSION}/alert`,
-        data: alert,
+        data: mergedAlertBody,
         headers: this.getAuthHeaders(),
         responseSchema: TheHiveCreateAlertResponseSchema,
       },

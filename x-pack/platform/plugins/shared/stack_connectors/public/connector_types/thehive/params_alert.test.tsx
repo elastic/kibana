@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { TheHiveParamsAlertFields } from './params_alert';
 import { SUB_ACTION } from '../../../common/thehive/constants';
 import { ExecutorParams, ExecutorSubActionCreateAlertParams } from '../../../common/thehive/types';
+import { bodyOptions } from './constants';
 
 describe('TheHiveParamsFields renders', () => {
   const subActionParams: ExecutorSubActionCreateAlertParams = {
@@ -22,6 +23,8 @@ describe('TheHiveParamsFields renders', () => {
     source: 'source test',
     type: 'sourceType test',
     sourceRef: 'sourceRef test',
+    template: 0,
+    body: null,
   };
   const actionParams: ExecutorParams = {
     subAction: SUB_ACTION.CREATE_ALERT,
@@ -63,8 +66,31 @@ describe('TheHiveParamsFields renders', () => {
     expect(getByTestId('typeInput')).toBeInTheDocument();
     expect(getByTestId('sourceInput')).toBeInTheDocument();
     expect(getByTestId('sourceRefInput')).toBeInTheDocument();
+    expect(getByTestId('templateSelectInput')).toBeInTheDocument();
 
     expect(getByTestId('severitySelectInput')).toHaveValue('2');
     expect(getByTestId('tlpSelectInput')).toHaveValue('2');
+    expect(getByTestId('templateSelectInput')).toHaveValue('0');
+  });
+
+  it('changes the content of json editor when template is changed', () => {
+    const { getByTestId } = render(<TheHiveParamsAlertFields {...defaultProps} />);
+    const templateSelectEl = getByTestId('templateSelectInput');
+
+    fireEvent.change(templateSelectEl, { target: { value: 1 } });
+    expect(editAction).toHaveBeenNthCalledWith(
+      1,
+      'subActionParams',
+      { ...subActionParams, body: bodyOptions[1], template: 1 },
+      0
+    );
+
+    fireEvent.change(templateSelectEl, { target: { value: 2 } });
+    expect(editAction).toHaveBeenNthCalledWith(
+      2,
+      'subActionParams',
+      { ...subActionParams, body: bodyOptions[2], template: 2 },
+      0
+    );
   });
 });

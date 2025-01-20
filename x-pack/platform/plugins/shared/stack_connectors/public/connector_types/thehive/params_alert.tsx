@@ -10,10 +10,18 @@ import {
   TextFieldWithMessageVariables,
   TextAreaWithMessageVariables,
   ActionParamsProps,
+  JsonEditorWithMessageVariables,
+  ActionConnectorMode,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiFormRow, EuiSelect, EuiComboBox } from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiComboBox, EuiIconTip } from '@elastic/eui';
 import { ExecutorParams, ExecutorSubActionCreateAlertParams } from '../../../common/thehive/types';
-import { severityOptions, tlpOptions } from './constants';
+import {
+  bodyOptions,
+  severityOptions,
+  templateOptions,
+  testBodyOptions,
+  tlpOptions,
+} from './constants';
 import * as translations from './translations';
 
 export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams>> = ({
@@ -22,6 +30,7 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
   index,
   errors,
   messageVariables,
+  executionMode,
 }) => {
   const alert = useMemo(
     () =>
@@ -30,9 +39,12 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
         tlp: 2,
         severity: 2,
         tags: [],
+        template: 0,
+        body: '{}',
       } as unknown as ExecutorSubActionCreateAlertParams),
     [actionParams.subActionParams]
   );
+  const isTest = useMemo(() => executionMode === ActionConnectorMode.Test, [executionMode]);
 
   const [severity, setSeverity] = useState(alert.severity ?? severityOptions[1].value);
   const [tlp, setTlp] = useState(alert.tlp ?? tlpOptions[2].value);
@@ -187,6 +199,57 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
           noSuggestions
         />
       </EuiFormRow>
+      <EuiFormRow fullWidth label={translations.TEMPLATE_LABEL}>
+        <EuiSelect
+          fullWidth
+          data-test-subj="templateSelectInput"
+          value={alert.template}
+          options={templateOptions}
+          onChange={(e) => {
+            editAction(
+              'subActionParams',
+              {
+                ...alert,
+                body: isTest
+                  ? testBodyOptions[parseInt(e.target.value, 10)]
+                  : bodyOptions[parseInt(e.target.value, 10)],
+                template: parseInt(e.target.value, 10),
+              },
+              index
+            );
+          }}
+        />
+      </EuiFormRow>
+      <JsonEditorWithMessageVariables
+        messageVariables={messageVariables}
+        paramsProperty={'body'}
+        inputTargetValue={alert.body}
+        label={
+          <>
+            {translations.BODY_LABEL}
+            <EuiIconTip
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignTop"
+              data-test-subj="otherFieldsHelpTooltip"
+              aria-label={translations.BODY_HELP_LABEL}
+              content={translations.BODY_HELP_TEXT}
+            />
+          </>
+        }
+        ariaLabel={translations.BODY_DESCRIPTION}
+        errors={errors.body as string[]}
+        onDocumentsChange={(json: string) =>
+          editAction('subActionParams', { ...alert, body: json }, index)
+        }
+        dataTestSubj="thehive-body"
+        onBlur={() => {
+          if (!alert.body) {
+            editAction('subActionParams', { ...alert, body: '{}' }, index);
+          }
+        }}
+      />
     </>
   );
 };

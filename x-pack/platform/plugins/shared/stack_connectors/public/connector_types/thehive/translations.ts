@@ -102,6 +102,42 @@ export const SOURCE_REF_LABEL = i18n.translate(
   }
 );
 
+export const TEMPLATE_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.thehive.templateFieldLabel',
+  {
+    defaultMessage: 'Template',
+  }
+);
+
+export const BODY_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.thehive.bodyFieldLabel',
+  {
+    defaultMessage: 'Body',
+  }
+);
+
+export const BODY_DESCRIPTION = i18n.translate(
+  'xpack.stackConnectors.components.thehive.bodyFieldLabel',
+  {
+    defaultMessage: 'Code Editor',
+  }
+);
+
+export const BODY_HELP_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.thehive.bodyFieldHelpText',
+  {
+    defaultMessage: 'Body Help',
+  }
+);
+
+export const BODY_HELP_TEXT = i18n.translate(
+  'xpack.stackConnectors.components.thehive.bodyFieldHelpText',
+  {
+    defaultMessage:
+      'Additional body parameters such as observables, procedures (TTPs), and custom fields to include in the API request.',
+  }
+);
+
 export const TITLE_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.thehive.requiredTitleText',
   {
