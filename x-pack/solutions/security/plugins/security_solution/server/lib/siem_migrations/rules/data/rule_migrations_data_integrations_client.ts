@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import type { PackageService } from '@kbn/fleet-plugin/server';
-import type { AuthenticatedUser, IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { PackageList } from '@kbn/fleet-plugin/common';
 import type { RuleMigrationIntegration } from '../types';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 
 /* This will be removed once the package registry changes is performed */
 import integrationsFile from './integrations_temp.json';
-import type { IndexNameProvider } from './rule_migrations_data_client';
 
 /* The minimum score required for a integration to be considered correct, might need to change this later */
 const MIN_SCORE = 40 as const;
@@ -26,18 +23,8 @@ const INTEGRATIONS = integrationsFile as RuleMigrationIntegration[];
  * The 500 number was chosen as a reasonable number to avoid large payloads. It can be adjusted if needed.
  */
 export class RuleMigrationsDataIntegrationsClient extends RuleMigrationsDataBaseClient {
-  constructor(
-    getIndexName: IndexNameProvider,
-    currentUser: AuthenticatedUser,
-    esScopedClient: IScopedClusterClient,
-    logger: Logger,
-    private packageService?: PackageService
-  ) {
-    super(getIndexName, currentUser, esScopedClient, logger);
-  }
-
   async getIntegrationPackages(): Promise<PackageList | undefined> {
-    return this.packageService?.asInternalUser.getPackages();
+    return this.dependencies.packageService?.asInternalUser.getPackages();
   }
 
   /** Indexes an array of integrations to be used with ELSER semantic search queries */
