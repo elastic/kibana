@@ -13,6 +13,7 @@ import { KibanaServices } from '../../../../common/lib/kibana';
 import type { SecurityAppStore } from '../../../../common/store/types';
 import { addProvider } from '../../../../timelines/store/actions';
 import type { DataProvider } from '../../../../../common/types';
+import { extractTimelineCapabilities } from '../../../../common/utils/timeline_capabilities';
 import { EXISTS_OPERATOR, TimelineId } from '../../../../../common/types';
 import { fieldHasCellActions, isInSecurityApp } from '../../utils';
 import {
@@ -75,6 +76,7 @@ export const createAddToTimelineLensAction = ({
   applicationService.currentAppId$.subscribe((appId) => {
     currentAppId = appId;
   });
+  const timelineCapabilities = extractTimelineCapabilities(applicationService.capabilities);
 
   return createAction<CellValueContext>({
     id: ACTION_ID,
@@ -83,6 +85,7 @@ export const createAddToTimelineLensAction = ({
     getIconType: () => ADD_TO_TIMELINE_ICON,
     getDisplayName: () => ADD_TO_TIMELINE,
     isCompatible: async ({ embeddable, data }) =>
+      timelineCapabilities.read &&
       !hasBlockingError(embeddable) &&
       isLensApi(embeddable) &&
       apiPublishesUnifiedSearch(embeddable) &&

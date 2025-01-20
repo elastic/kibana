@@ -22,7 +22,7 @@ xpack.features.overrides:
     category: "security"
     order: 1101
   ### Security's feature privileges are fine-tuned to grant access to Discover, Dashboard, Maps, and Visualize apps.
-  siem:
+  siemV2:
     privileges:
       ### Security's `All` feature privilege should implicitly grant `All` access to Discover, Dashboard, Maps, and
       ### Visualize features.
