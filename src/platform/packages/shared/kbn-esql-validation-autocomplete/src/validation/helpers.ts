@@ -11,9 +11,11 @@ import type {
   ESQLAst,
   ESQLAstItem,
   ESQLAstMetricsCommand,
+  ESQLAstQueryExpression,
   ESQLMessage,
   ESQLSingleAstItem,
 } from '@kbn/esql-ast';
+import { mutate } from '@kbn/esql-ast';
 import { FunctionDefinition } from '../definitions/types';
 import { getAllArrayTypes, getAllArrayValues } from '../shared/helpers';
 import { getMessageFromId } from './errors';
@@ -22,11 +24,33 @@ import type { ESQLPolicy, ReferenceMaps } from './types';
 export function buildQueryForFieldsFromSource(queryString: string, ast: ESQLAst) {
   const firstCommand = ast[0];
   if (!firstCommand) return '';
+
+  let query = '';
+
   if (firstCommand.name === 'metrics') {
     const metrics = firstCommand as ESQLAstMetricsCommand;
-    return `FROM ${metrics.sources.map((source) => source.name).join(', ')}`;
+    query = `FROM ${metrics.sources.map((source) => source.name).join(', ')}`;
+  } else {
+    query = queryString.substring(0, firstCommand.location.max + 1);
   }
-  return queryString.substring(0, firstCommand.location.max + 1);
+
+  const joinSummary = mutate.commands.join.summarize({
+    type: 'query',
+    commands: ast,
+  } as ESQLAstQueryExpression);
+  const joinIndices = joinSummary.map(
+    ({
+      target: {
+        index: { name },
+      },
+    }) => name
+  );
+
+  if (joinIndices.length > 0) {
+    query += `, ${joinIndices.join(', ')}`;
+  }
+
+  return query;
 }
 
 export function buildQueryForFieldsInPolicies(policies: ESQLPolicy[]) {
