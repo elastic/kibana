@@ -1,0 +1,79 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ElasticsearchClient, IKibanaResponse, Logger } from '@kbn/core/server';
+import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
+import { SIEM_RULE_MIGRATION_PRIVILEGES_PATH } from '../../../../../../common/siem_migrations/constants';
+import type { SecuritySolutionPluginRouter } from '../../../../../types';
+
+export const registerSiemRuleMigrationsGetPrivilegesRoute = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger
+) => {
+  router.versioned
+    .get({
+      path: SIEM_RULE_MIGRATION_PRIVILEGES_PATH,
+      access: 'internal',
+      security: { authz: { requiredPrivileges: ['securitySolution'] } },
+    })
+    .addVersion(
+      { version: '1', validate: false },
+      async (context, request, response): Promise<IKibanaResponse<object>> => {
+        try {
+          const core = await context.core;
+          const securitySolution = await context.securitySolution;
+          const siemClient = securitySolution?.getAppClient();
+          const esClient = core.elasticsearch.client.asCurrentUser;
+
+          if (!siemClient) {
+            return response.notFound();
+          }
+
+          // const spaceId = securitySolution.getSpaceId();
+          const clusterPrivileges = await readPrivileges(esClient, `lookup_*`);
+
+          const privileges = {
+            ...(clusterPrivileges as object),
+            is_authenticated: request.auth.isAuthenticated ?? false,
+          };
+
+          return response.ok({ body: privileges });
+        } catch (err) {
+          logger.error(err);
+          return response.badRequest({ body: err.message });
+        }
+      }
+    );
+};
+
+const readPrivileges = async (
+  esClient: ElasticsearchClient,
+  index: string
+): Promise<SecurityHasPrivilegesResponse> => {
+  const response = await esClient.security.hasPrivileges(
+    {
+      body: {
+        index: [
+          {
+            names: [index],
+            privileges: [
+              'read',
+              'write',
+              'view_index_metadata',
+              'manage',
+              'create_doc',
+              'create_index',
+              'index',
+            ],
+          },
+        ],
+      },
+    },
+    { meta: true }
+  );
+  return response.body;
+};
