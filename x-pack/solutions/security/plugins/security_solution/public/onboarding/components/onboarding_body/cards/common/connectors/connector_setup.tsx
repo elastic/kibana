@@ -8,13 +8,11 @@
 import React, { useCallback, useState } from 'react';
 import { type ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import {
-  useEuiTheme,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
   EuiLoadingSpinner,
-  EuiLink,
   EuiButton,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -24,18 +22,6 @@ import * as i18n from './translations';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { useFilteredActionTypes } from './hooks/use_load_action_types';
 
-const usePanelCss = () => {
-  const { euiTheme } = useEuiTheme();
-  return css`
-    .connectorSelectorPanel {
-      height: 160px;
-      &.euiPanel:hover {
-        background-color: ${euiTheme.colors.backgroundBaseSubdued};
-      }
-    }
-  `;
-};
-
 interface ConnectorSetupProps {
   onConnectorSaved?: (savedAction: ActionConnector) => void;
   onClose?: () => void;
@@ -44,7 +30,6 @@ export const ConnectorSetup = React.memo<ConnectorSetupProps>(({ onConnectorSave
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [selectedActionType, setSelectedActionType] = useState<ActionType | null>(null);
 
-  const panelCss = usePanelCss();
   const {
     http,
     triggersActionsUi: { actionTypeRegistry },
@@ -77,30 +62,23 @@ export const ConnectorSetup = React.memo<ConnectorSetupProps>(({ onConnectorSave
             <EuiFlexGroup direction="row" justifyContent="center">
               {actionTypes.map((actionType: ActionType) => (
                 <EuiFlexItem grow={false} key={actionType.id}>
-                  <EuiLink
-                    color="text"
-                    onClick={() => setSelectedActionType(actionType)}
-                    data-test-subj={`actionType-${actionType.id}`}
-                    className={panelCss}
+                  <EuiFlexGroup
+                    direction="column"
+                    alignItems="center"
+                    justifyContent="center"
+                    gutterSize="s"
+                    className={css`
+                      height: 100%;
+                    `}
                   >
-                    <EuiFlexGroup
-                      direction="column"
-                      alignItems="center"
-                      justifyContent="center"
-                      gutterSize="s"
-                      className={css`
-                        height: 100%;
-                      `}
-                    >
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon
-                          size="xxl"
-                          color="text"
-                          type={actionTypeRegistry.get(actionType.id).iconClass}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiLink>
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon
+                        size="xxl"
+                        color="text"
+                        type={actionTypeRegistry.get(actionType.id).iconClass}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>

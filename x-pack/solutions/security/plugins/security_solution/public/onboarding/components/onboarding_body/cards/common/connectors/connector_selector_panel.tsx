@@ -7,30 +7,25 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { ConnectorSelectorWithIcon } from './connector_selector_with_icon';
 import * as i18n from './translations';
 import type { AIConnector } from './types';
 
-interface ConnectorActivePanelProps {
+interface ConnectorSelectorPanelProps {
   connectors: AIConnector[];
   selectedConnectorId?: string;
-  onConnectorSaved?: () => void;
   onConnectorSelected: (connector: AIConnector) => void;
-  onRefetchConnectors: () => void;
 }
 
-export const ConnectorActivePanel = React.memo<ConnectorActivePanelProps>(
-  ({
-    connectors,
-    onConnectorSaved,
-    selectedConnectorId,
-    onConnectorSelected,
-    onRefetchConnectors,
-  }) => {
+export const ConnectorSelectorPanel = React.memo<ConnectorSelectorPanelProps>(
+  ({ connectors, selectedConnectorId, onConnectorSelected }) => {
     return (
       <EuiPanel hasShadow={false} hasBorder>
         <EuiFlexGroup
-          style={{ height: '100%' }}
+          css={css`
+            height: 100%;
+          `}
           alignItems="center"
           justifyContent="center"
           direction="column"
@@ -41,11 +36,9 @@ export const ConnectorActivePanel = React.memo<ConnectorActivePanelProps>(
           </EuiFlexItem>
           <EuiFlexItem justifyContent="center">
             <ConnectorSelectorWithIcon
-              onRefetchConnectors={onRefetchConnectors}
               selectedConnectorId={selectedConnectorId}
               connectors={connectors}
               onConnectorSelected={onConnectorSelected}
-              onConnectorSaved={onConnectorSaved}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -54,4 +47,4 @@ export const ConnectorActivePanel = React.memo<ConnectorActivePanelProps>(
   }
 );
 
-ConnectorActivePanel.displayName = 'ConnectorActivePanel';
+ConnectorSelectorPanel.displayName = 'ConnectorSelectorPanel';

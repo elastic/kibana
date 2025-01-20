@@ -27,7 +27,6 @@ import { CardSubduedText } from '../common/card_subdued_text';
 import type { AssistantCardMetadata } from './types';
 import { MissingPrivilegesCallOut } from '../common/connectors/missing_privileges';
 import type { AIConnector } from '../common/connectors/types';
-export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 
 export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
   isCardComplete,
@@ -109,9 +108,6 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
   const onConnectorSelected = useCallback(
     async (connector: AIConnector) => {
       const connectorId = connector.id;
-      if (connectorId === ADD_NEW_CONNECTOR) {
-        return;
-      }
 
       const config = getGenAiConfig(connector);
       const apiProvider = config?.apiProvider;
@@ -184,7 +180,7 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
               <ConnectorCards
                 canCreateConnectors={canCreateConnectors}
                 connectors={connectors}
-                onConnectorSaved={checkComplete}
+                onNewConnectorSaved={checkComplete}
                 selectedConnectorId={selectedConnectorId}
                 onConnectorSelected={onConnectorSelected}
               />

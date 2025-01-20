@@ -7,20 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const LOAD_CONNECTORS_ERROR_MESSAGE = i18n.translate(
-  'securitySolutionPackages.connectors.useLoadConnectors.errorMessage',
-  {
-    defaultMessage: 'An error occurred loading the Kibana Connectors. ',
-  }
-);
-
-export const PRECONFIGURED_CONNECTOR = i18n.translate(
-  'securitySolutionPackages.connectors.preconfiguredTitle',
-  {
-    defaultMessage: 'Preconfigured',
-  }
-);
-
 export const CONNECTOR_SELECTOR_TITLE = i18n.translate(
   'securitySolutionPackages.connectors.connectorSelector.ariaLabel',
   {

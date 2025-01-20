@@ -5,13 +5,26 @@
  * 2.0.
  */
 
-import { css } from '@emotion/css';
+import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 
-export const useConnectorSelectorWithIconStyles = () => {
+export const useConnectorSelectorStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
   return {
-    inputContainerClassName: css`
-      height: 32px;
-
+    placeholder: css`
+      color: ${euiTheme.colors.primary};
+      margin-right: ${euiTheme.size.xs};
+    `,
+    optionDisplay: css`
+      margin-right: 8px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    `,
+    offset: css`
+      width: 24px;
+    `,
+    inputContainer: css`
       .euiSuperSelectControl {
         border: none;
         box-shadow: none;
@@ -23,11 +36,6 @@ export const useConnectorSelectorWithIconStyles = () => {
         right: 14px;
         top: 2px;
       }
-    `,
-    inputDisplayClassName: css`
-      margin-right: 8px;
-      overflow: hidden;
-      text-overflow: ellipsis;
     `,
   };
 };
