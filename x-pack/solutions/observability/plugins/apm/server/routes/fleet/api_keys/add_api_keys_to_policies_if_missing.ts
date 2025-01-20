@@ -10,7 +10,7 @@ import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { filter, take } from 'rxjs';
+import { filter, lastValueFrom, take } from 'rxjs';
 
 import { getInternalSavedObjectsClientForSpaceId } from '../../../lib/helpers/get_internal_saved_objects_client';
 import type { APMPluginStartDependencies } from '../../../types';
@@ -37,15 +37,15 @@ export async function addApiKeysToEveryPackagePolicyIfMissing({
 
   // We need to wait for the licence feature to be available,
   // to have our internal saved object client with encrypted saved object working properly
-  await licensing.license$
-    .pipe(
+  await lastValueFrom(
+    licensing.license$.pipe(
       filter(
         (licence) =>
           licence.getFeature('security').isEnabled && licence.getFeature('security').isAvailable
       ),
       take(1)
     )
-    .toPromise();
+  );
 
   const apmFleetPolicies = await getApmPackagePolicies({
     coreStart,
