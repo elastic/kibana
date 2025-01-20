@@ -63,13 +63,13 @@ ProviderBadgeStyled.displayName = 'ProviderBadgeStyled';
 
 const ProviderFieldBadge = styled.div`
   display: block;
-  color: #fff;
-  padding: 6px 8px;
+  padding: ${({ theme }) => `${theme.eui.euiSizeXS} ${theme.eui.euiSizeS}`};
   font-size: 0.6em;
 `;
 
 const StyledTemplateFieldBadge = styled(ProviderFieldBadge)`
-  background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
+  background: ${({ theme }) => theme.eui.euiPanelBackgroundColorModifiers.accent};
+  color: ${({ theme }) => theme.eui.euiColorAccentText};
   text-transform: uppercase;
 `;
 

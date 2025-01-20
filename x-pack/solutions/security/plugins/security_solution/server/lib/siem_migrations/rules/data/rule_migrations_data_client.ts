@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { RuleMigrationsDataIntegrationsClient } from './rule_migrations_data_integrations_client';
 import { RuleMigrationsDataPrebuiltRulesClient } from './rule_migrations_data_prebuilt_rules_client';
 import { RuleMigrationsDataResourcesClient } from './rule_migrations_data_resources_client';
 import { RuleMigrationsDataRulesClient } from './rule_migrations_data_rules_client';
+import { RuleMigrationsDataLookupsClient } from './rule_migrations_data_lookups_client';
+import type { SiemRuleMigrationsClientDependencies } from '../types';
 import type { AdapterId } from './rule_migrations_data_service';
 
 export type IndexNameProvider = () => Promise<string>;
@@ -20,36 +22,43 @@ export class RuleMigrationsDataClient {
   public readonly resources: RuleMigrationsDataResourcesClient;
   public readonly integrations: RuleMigrationsDataIntegrationsClient;
   public readonly prebuiltRules: RuleMigrationsDataPrebuiltRulesClient;
+  public readonly lookups: RuleMigrationsDataLookupsClient;
 
   constructor(
     indexNameProviders: IndexNameProviders,
-    username: string,
-    esClient: ElasticsearchClient,
-    logger: Logger
+    currentUser: AuthenticatedUser,
+    esScopedClient: IScopedClusterClient,
+    logger: Logger,
+    dependencies: SiemRuleMigrationsClientDependencies
   ) {
     this.rules = new RuleMigrationsDataRulesClient(
       indexNameProviders.rules,
-      username,
-      esClient,
-      logger
+      currentUser,
+      esScopedClient,
+      logger,
+      dependencies
     );
     this.resources = new RuleMigrationsDataResourcesClient(
       indexNameProviders.resources,
-      username,
-      esClient,
-      logger
+      currentUser,
+      esScopedClient,
+      logger,
+      dependencies
     );
     this.integrations = new RuleMigrationsDataIntegrationsClient(
       indexNameProviders.integrations,
-      username,
-      esClient,
-      logger
+      currentUser,
+      esScopedClient,
+      logger,
+      dependencies
     );
     this.prebuiltRules = new RuleMigrationsDataPrebuiltRulesClient(
       indexNameProviders.prebuiltrules,
-      username,
-      esClient,
-      logger
+      currentUser,
+      esScopedClient,
+      logger,
+      dependencies
     );
+    this.lookups = new RuleMigrationsDataLookupsClient(currentUser, esScopedClient, logger);
   }
 }

@@ -22,11 +22,15 @@ import {
   UPDATED_RELATIVE_PATHS,
 } from '../constants';
 
-export const createModuleTable = (entries: string[][]) => {
+export const createModuleTable = (
+  entries: string[][],
+  head: string[] = ['Id', 'Target folder']
+) => {
   const table = new Table({
-    head: ['Id', 'Target folder'],
-    colAligns: ['left', 'left'],
+    head,
+    colAligns: head.map(() => 'left'),
     style: {
+      compact: true,
       'padding-left': 2,
       'padding-right': 2,
     },
@@ -37,12 +41,12 @@ export const createModuleTable = (entries: string[][]) => {
 };
 
 export const relocatePlan = (modules: Package[], log: ToolingLog) => {
-  const plugins = modules.filter((module) => module.manifest.type === 'plugin');
-  const packages = modules.filter((module) => module.manifest.type !== 'plugin');
-
   const target = (module: Package) => calculateModuleTargetFolder(module).replace(BASE_FOLDER, '');
   writeFileSync(DESCRIPTION, GLOBAL_DESCRIPTION);
 
+  const plugins = modules.filter(
+    (module) => module.group && module.group !== 'common' && module.manifest.type === 'plugin'
+  );
   if (plugins.length) {
     const pluginList = dedent`
     \n\n#### ${plugins.length} plugin(s) are going to be relocated:\n
@@ -56,6 +60,10 @@ export const relocatePlan = (modules: Package[], log: ToolingLog) => {
     log.info(`${plugins.length} plugin(s) are going to be relocated:\n${plgTable.toString()}`);
   }
 
+  const packages = modules.filter(
+    (module) => module.group && module.group !== 'common' && module.manifest.type !== 'plugin'
+  );
+
   if (packages.length) {
     const packageList = dedent`
     \n\n#### ${packages.length} packages(s) are going to be relocated:\n
@@ -67,6 +75,20 @@ export const relocatePlan = (modules: Package[], log: ToolingLog) => {
     appendFileSync(DESCRIPTION, packageList);
     const pkgTable = createModuleTable(packages.map((pkg) => [pkg.id, target(pkg)]));
     log.info(`${packages.length} packages(s) are going to be relocated:\n${pkgTable.toString()}`);
+  }
+
+  const uncategorised = modules.filter((module) => !module.group || module.group === 'common');
+  if (uncategorised.length) {
+    const uncategorisedTable = createModuleTable(
+      uncategorised.map(({ id, directory }) => [id, directory.replace(BASE_FOLDER, '')]),
+      ['Id', 'Current folder']
+    );
+
+    log.warning(
+      `${
+        uncategorised.length
+      } module(s) are missing "group" and/or "visibility" in the manifest, and cannot be relocated:\n${uncategorisedTable.toString()}`
+    );
   }
 };
 
