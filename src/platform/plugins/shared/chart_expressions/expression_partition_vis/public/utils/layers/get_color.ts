@@ -144,13 +144,30 @@ const createSeriesLayers = (
   isSplitChart: boolean,
   formatters: Record<string, FieldFormat | undefined>,
   formatter: FieldFormatsStart,
-  column: Partial<BucketColumns>
+  column: Partial<BucketColumns>,
+  chartType: ChartTypes
 ): SeriesLayer[] => {
   const seriesLayers: SeriesLayer[] = [];
   let tempParent: typeof arrayNode | (typeof arrayNode)['parent'] = arrayNode;
+  const groupsRemainingAsOther = Boolean(
+    tempParent?.parent?.children?.find((child) => child[0] === '__other__')
+  );
+
   while (tempParent.parent && tempParent.depth > 0) {
     const nodeKey = tempParent.parent.children[tempParent.sortIndex][0];
     const seriesName = String(nodeKey);
+
+    let sortIndex = tempParent.sortIndex;
+
+    if (chartType === ChartTypes.MOSAIC && groupsRemainingAsOther) {
+      const newIndex = tempParent.sortIndex + 1;
+      if (newIndex > tempParent.parent?.children?.length - 1) {
+        sortIndex = 0;
+      } else {
+        sortIndex = newIndex;
+      }
+    }
+
     /**
      * FIXME this is a bad implementation: The `parentSeries` is an array of both `string` and `RangeKey` even if its type
      * is marked as `string[]` in `DistinctSeries`. Here instead we are checking if a stringified `RangeKey` is included into this array that
@@ -166,7 +183,7 @@ const createSeriesLayers = (
       rankAtDepth: isSplitParentLayer
         ? // FIXME as described above this will not work correctly if the `nodeKey` is a `RangeKey`
           parentSeries.findIndex((name) => name === seriesName)
-        : tempParent.sortIndex,
+        : sortIndex,
       totalSeriesAtDepth: isSplitParentLayer
         ? parentSeries.length
         : tempParent.parent.children.length,
@@ -244,7 +261,8 @@ export const getColor = (
     isSplitChart,
     formatters,
     formatter,
-    column
+    column,
+    chartType
   );
 
   const overriddenColor = overrideColors(seriesLayers, overwriteColors, name);
