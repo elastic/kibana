@@ -31,11 +31,11 @@ export function generateIndexTemplate(
 
   if (streamName.type === 'dsns') {
     if (!classicRoot) {
-      throw new Error(`DSNS stream ${name} does not have a classic root`);
+      classicRoot = definition;
     }
     const classicRootStreamName = parseStreamName(classicRoot.name);
     if (classicRootStreamName.type !== 'dsns') {
-      throw new Error(`Classic root ${classicRoot.name} is not a DSNS stream`);
+      throw new Error(`Classic root ${classicRoot?.name} is not a DSNS stream`);
     }
     // if the stream is wired and has a classic root, we need to:
     // * find the dataset of the classic root

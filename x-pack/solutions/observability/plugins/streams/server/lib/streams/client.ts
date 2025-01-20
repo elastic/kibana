@@ -812,16 +812,34 @@ export class StreamsClient {
   }
 
   async getAncestors(definition: StreamDefinition): Promise<StreamDefinition[]> {
-    const unwiredRoot = await this.getUnwiredRootForStream(definition as WiredStreamDefinition);
+    const unwiredRoot = isWiredStream(definition)
+      ? await this.getUnwiredRootForStream(definition)
+      : undefined;
     const ancestorIds = getAncestors(definition.name, unwiredRoot?.name);
 
-    return await this.getStreamDefinitions({
+    const ancestors = await this.getStreamDefinitions({
       query: {
         bool: {
           filter: [{ terms: { name: ancestorIds } }],
         },
       },
     });
+    if (unwiredRoot && ancestors.length === 0) {
+      // We have an unwired root, but no definitions.
+      // This can happen if the classic stream for the unwired root hasn't been created yet.
+      return [
+        {
+          name: unwiredRoot.name,
+          stream: {
+            ingest: {
+              processing: [],
+              routing: [],
+            },
+          },
+        },
+      ];
+    }
+    return ancestors;
   }
 
   async getDescendants(name: string): Promise<WiredStreamDefinition[]> {
