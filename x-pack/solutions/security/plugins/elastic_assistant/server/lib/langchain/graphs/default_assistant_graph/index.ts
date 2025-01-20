@@ -23,7 +23,7 @@ import { GraphInputs } from './types';
 import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
-import { MessageMetadata, pruneContentReferences } from '@kbn/elastic-assistant-common';
+import { pruneContentReferences, MessageMetadata } from '@kbn/elastic-assistant-common';
 
 export const callAssistantGraph: AgentExecutor<true | false> = async ({
   abortSignal,
@@ -221,6 +221,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   };
 
   const isMetadataPopulated = contentReferences !== undefined;
+
 
   return {
     body: {
