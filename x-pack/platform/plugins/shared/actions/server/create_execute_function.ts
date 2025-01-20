@@ -6,7 +6,11 @@
  */
 
 import { SavedObjectsBulkResponse, SavedObjectsClientContract, Logger } from '@kbn/core/server';
-import { RunNowResult, TaskPriority, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import {
+  RunNowResult,
+  TaskPriority,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import {
   RawAction,
   ActionTypeRegistryContract,
