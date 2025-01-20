@@ -42,7 +42,9 @@ export function generateIndexTemplate(
     // * for every part (separated by dots) added after that, add the @stream.layer component template
     let commonParts = 0;
     while (
-      classicRootStreamName.datasetSegments[commonParts] === streamName.datasetSegments[commonParts]
+      classicRootStreamName.datasetSegments[commonParts] ===
+        streamName.datasetSegments[commonParts] &&
+      commonParts < classicRootStreamName.datasetSegments.length
     ) {
       commonParts++;
     }

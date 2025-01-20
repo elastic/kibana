@@ -14,6 +14,7 @@ import {
 import {
   disableStreams,
   enableStreams,
+  fetchDocument,
   /* fetchDocument,*/ indexDocument,
 } from './helpers/requests';
 
@@ -44,7 +45,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const response = await indexDocument(esClient, TEST_STREAM_NAME, doc);
       expect(response.result).to.eql('created');
 
-      const { status } = await apiClient.fetch('POST /api/streams/{id}/_fork', {
+      const resp = await apiClient.fetch('POST /api/streams/{id}/_fork', {
         params: {
           path: {
             id: TEST_STREAM_NAME,
@@ -59,16 +60,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       });
 
-      expect(status).to.eql(200);
+      expect(resp.status).to.eql(200);
 
       const {
         body: { streams },
       } = await apiClient.fetch('GET /api/streams');
-      
-      const classicStream = streams.find((stream) => stream.name === TEST_STREAM_NAME);
+
+      const classicStream = streams.find(
+        (stream) => stream.name === 'logs-test.nested.myfork-default'
+      );
 
       expect(classicStream).to.eql({
-        name: 'logs-test.myfork-default',
+        name: 'logs-test.nested.myfork-default',
         stream: {
           ingest: {
             processing: [],
@@ -81,7 +84,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    // it('Allows sending data to the forked stream', async () => {});
+    it('Allows sending data to the forked stream', async () => {
+      const doc = {
+        message: 'hello world',
+        '@timestamp': '2024-01-01T00:00:10.000Z',
+        abc: 'test',
+      };
+      const response = await indexDocument(esClient, 'logs-test.nested-default', doc);
+      expect(response.result).to.eql('created');
+
+      const result = await fetchDocument(esClient, 'logs-test.nested.myfork-default', response._id);
+      expect(result._source).to.eql({
+        '@timestamp': '2024-01-01T00:00:10.000Z',
+        message: 'hello world',
+        abc: 'test',
+      });
+    });
 
     // it('Allows forking a wired stream from an unwired root', async () => {});
 

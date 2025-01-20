@@ -10,6 +10,7 @@ import {
   StreamDefinition,
   WiredStreamDefinition,
   isDSNS,
+  isRootStream,
   isWiredStream,
 } from '@kbn/streams-schema';
 import { difference, isEqual } from 'lodash';
@@ -89,4 +90,23 @@ export function validateStreamChildrenChanges(
   if (removedChildren.length) {
     throw new MalformedChildren('Cannot remove children from a stream via updates');
   }
+}
+
+export function validateAncestorChain(ancestors: StreamDefinition[], stream: StreamDefinition) {
+  if (!isWiredStream(stream)) {
+    // Ingest streams do not have ancestors
+    return;
+  }
+  if (ancestors.length === 0 && !isRootStream(stream)) {
+    throw new MalformedStream(
+      `Root for stream ${(stream as StreamDefinition).name} could not be found`
+    );
+  }
+  ancestors.slice(1).forEach((ancestor, index) => {
+    if (!isWiredStream(ancestor)) {
+      throw new MalformedStream(
+        `Stream ${ancestors[index].name} is not a wired stream and cannot be an ancestor`
+      );
+    }
+  });
 }
