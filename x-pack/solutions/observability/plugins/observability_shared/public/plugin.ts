@@ -49,6 +49,10 @@ import {
   EntitiesInventoryLocatorDefinition,
 } from '../common';
 import { updateGlobalNavigation } from './services/update_global_navigation';
+import {
+  SpanDetailsBySpanIdAndTraceIdLocator,
+  SpanDetailsBySpanIdAndTraceIdLocatorDefinition,
+} from '../common/locators/apm/span_details_by_span_id_locator';
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
 }
@@ -82,6 +86,7 @@ interface ObservabilitySharedLocators {
     serviceOverview: ServiceOverviewLocator;
     transactionDetailsByName: TransactionDetailsByNameLocator;
     transactionDetailsByTraceId: TransactionDetailsByTraceIdLocator;
+    spanDetailsBySpanIdAndTraceIdLocator: SpanDetailsBySpanIdAndTraceIdLocator;
     serviceEntity: ServiceEntityLocator;
   };
   entitiesInventory: EntitiesInventoryLocator;
@@ -159,6 +164,9 @@ export class ObservabilitySharedPlugin implements Plugin {
         ),
         transactionDetailsByTraceId: urlService.locators.create(
           new TransactionDetailsByTraceIdLocatorDefinition()
+        ),
+        spanDetailsBySpanIdAndTraceIdLocator: urlService.locators.create(
+          new SpanDetailsBySpanIdAndTraceIdLocatorDefinition()
         ),
         serviceEntity: urlService.locators.create(new ServiceEntityLocatorDefinition()),
       },

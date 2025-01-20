@@ -189,6 +189,8 @@ export type {
   ServiceEntityLocatorParams,
   TransactionDetailsByTraceIdLocator,
   TransactionDetailsByTraceIdLocatorParams,
+  SpanDetailsBySpanIdAndTraceIdLocator,
+  SpanDetailsBySpanIdAndTraceIdLocatorParams,
   EntitiesInventoryLocator,
 } from './locators';
 
@@ -214,6 +216,8 @@ export {
   SERVICE_ENTITY_LOCATOR,
   TransactionDetailsByTraceIdLocatorDefinition,
   TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR,
+  SpanDetailsBySpanIdAndTraceIdLocatorDefinition,
+  SPAN_DETAILS_BY_SPAN_ID_AND_TRACE_ID_LOCATOR,
   EntitiesInventoryLocatorDefinition,
   ENTITIES_INVENTORY_LOCATOR_ID,
 } from './locators';

@@ -15,4 +15,15 @@ export interface TransactionDetailsByTraceIdLocatorParams extends SerializableRe
   rangeFrom?: string;
   rangeTo?: string;
   traceId: string;
+  spanId?: string;
+}
+
+export const SPAN_DETAILS_BY_SPAN_ID_AND_TRACE_ID_LOCATOR =
+  'SPAN_DETAILS_BY_SPAN_ID_AND_TRACE_ID_LOCATOR';
+
+export interface SpanDetailsBySpanIdAndTraceIdLocatorParams extends SerializableRecord {
+  rangeFrom?: string;
+  rangeTo?: string;
+  traceId: string;
+  spanId: string;
 }
