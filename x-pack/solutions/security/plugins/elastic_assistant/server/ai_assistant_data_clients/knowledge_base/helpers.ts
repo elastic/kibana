@@ -221,7 +221,7 @@ export const getStructuredToolForIndexEntry = ({
             hit._id ? `METADATA _id\n | WHERE _id == "${hit._id}"` : ''
           }`;
 
-          const esqlQueryReference = contentReferencesStore.add((p) =>
+          const reference = contentReferencesStore.add((p) =>
             esqlQueryReference(p.id, esqlQuery, hit._index)
           );
 
@@ -231,13 +231,13 @@ export const getStructuredToolForIndexEntry = ({
                 // @ts-expect-error
                 return { ...prev, [field]: hit._source[field] };
               },
-              { citation: contentReferenceBlock(esqlQueryReference) }
+              { citation: contentReferenceBlock(reference) }
             );
           }
 
           return {
             text: hit.highlight?.[indexEntry.field].join('\n --- \n'),
-            citation: contentReferenceBlock(esqlQueryReference),
+            citation: contentReferenceBlock(reference),
           };
         });
 

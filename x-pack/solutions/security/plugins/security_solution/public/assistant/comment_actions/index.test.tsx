@@ -14,7 +14,7 @@ import { CommentActions } from '.';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
-  EuiCopy: jest.fn(() => null),
+  EuiCopy: jest.fn(),
 }));
 
 const Wrapper: React.FC<React.PropsWithChildren> = ({ children }) => {
@@ -24,14 +24,19 @@ const Wrapper: React.FC<React.PropsWithChildren> = ({ children }) => {
 };
 
 describe('CommentActions', () => {
+  beforeEach(()=>{
+    (EuiCopy as unknown as jest.Mock).mockClear()
+  })
+
   it.each([
     [`Only this should be copied!{reference(exampleReferenceId)}`, 'Only this should be copied!'],
     [
       `Only this.{reference(exampleReferenceId)} should be copied!{reference(exampleReferenceId)}`,
-      'Only this should be copied!',
+      'Only this. should be copied!',
     ],
     [`{reference(exampleReferenceId)}`, ''],
   ])("textToCopy is correct when input is '%s'", async (input, expected) => {
+    (EuiCopy as unknown as jest.Mock).mockReturnValue(null)
     const message: ClientMessage = {
       content: input,
       role: 'assistant',

@@ -72,13 +72,13 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
           functionCalling: 'native',
         });
 
-        const documentsWithCitations = response.documents.map(
+        const enrichedDocuments = response.documents.map(
           enrichDocument(params.contentReferencesStore)
         );
 
         return {
           content: {
-            documents: documentsWithCitations,
+            documents: enrichedDocuments,
           },
         };
       },
@@ -94,12 +94,12 @@ type EnrichedDocument = RetrieveDocumentationResultDoc & {
 
 function enrichDocument(contentReferencesStore: ContentReferencesStore) {
   return (document: RetrieveDocumentationResultDoc): EnrichedDocument => {
-    const productDocumentationReference = contentReferencesStore.add((p) =>
+    const reference = contentReferencesStore.add((p) =>
       productDocumentationReference(p.id, document.title, document.url)
     );
     return {
       ...document,
-      citation: contentReferenceBlock(productDocumentationReference),
+      citation: contentReferenceBlock(reference),
     };
   };
 }

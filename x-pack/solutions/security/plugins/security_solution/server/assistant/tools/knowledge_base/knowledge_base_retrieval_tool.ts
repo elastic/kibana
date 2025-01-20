@@ -73,14 +73,14 @@ function enrichDocument(contentReferencesStore: ContentReferencesStore) {
       return document;
     }
     const documentId = document.id;
-    const knowledgeBaseReference = contentReferencesStore.add((p) =>
+    const reference = contentReferencesStore.add((p) =>
       knowledgeBaseReference(p.id, document.metadata.name, documentId)
     );
     return new Document({
       ...document,
       metadata: {
         ...document.metadata,
-        citation: contentReferenceBlock(knowledgeBaseReference),
+        citation: contentReferenceBlock(reference),
       },
     });
   };

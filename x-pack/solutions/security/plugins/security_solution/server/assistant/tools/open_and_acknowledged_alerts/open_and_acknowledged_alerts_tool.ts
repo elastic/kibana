@@ -92,13 +92,9 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
             });
             const hitId = x._id;
             const alertReferenceString =
-              hitId != null
-                ? `\nReference,${contentReferenceBlock(
-                    params.contentReferencesStore.add((p) => securityAlertReference(p.id, hitId))
-                  )}`
-                : '';
+              hitId && `\nCitation,${contentReferenceBlock(params.contentReferencesStore.add((p) => securityAlertReference(p.id, hitId)))}`
 
-            return `${transformed}${alertReferenceString}`;
+            return `${transformed}${alertReferenceString ?? ''}`;
           })
         );
       },

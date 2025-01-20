@@ -11,6 +11,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { ContentReferenceNode } from '../content_reference_parser';
 
+const testContentReferenceNode = { contentReferenceId: '1' } as ContentReferenceNode
+
 describe('contentReferenceComponentFactory', () => {
   it.each([
     [
@@ -23,7 +25,7 @@ describe('contentReferenceComponentFactory', () => {
           label: '',
         },
       } as ContentReferences,
-      { contentReferenceId: '1' } as ContentReferenceNode,
+      testContentReferenceNode
     ],
     [
       'KnowledgeBaseEntryReference',
@@ -35,7 +37,7 @@ describe('contentReferenceComponentFactory', () => {
           knowledgeBaseEntryName: '',
         },
       } as ContentReferences,
-      { contentReferenceId: '1' } as ContentReferenceNode,
+      testContentReferenceNode
     ],
     [
       'ProductDocumentationReference',
@@ -47,7 +49,7 @@ describe('contentReferenceComponentFactory', () => {
           url: '',
         },
       } as ContentReferences,
-      { contentReferenceId: '1' } as ContentReferenceNode,
+      testContentReferenceNode
     ],
     [
       'SecurityAlertReference',
@@ -58,7 +60,7 @@ describe('contentReferenceComponentFactory', () => {
           alertId: '',
         },
       } as ContentReferences,
-      { contentReferenceId: '1' } as ContentReferenceNode,
+      testContentReferenceNode
     ],
     [
       'SecurityAlertsPageReference',
@@ -68,7 +70,7 @@ describe('contentReferenceComponentFactory', () => {
           type: 'SecurityAlertsPage',
         },
       } as ContentReferences,
-      { contentReferenceId: '1' } as ContentReferenceNode,
+      testContentReferenceNode
     ],
   ])(
     "Renders component: '%s'",
@@ -88,7 +90,7 @@ describe('contentReferenceComponentFactory', () => {
     }
   );
 
-  it('renders nothing when content reference is not found', async () => {
+  it('renders nothing when specific contentReference is undefined', async () => {
     const Component = contentReferenceComponentFactory({
       contentReferences: {},
       contentReferencesVisible: true,
@@ -104,7 +106,7 @@ describe('contentReferenceComponentFactory', () => {
     expect(screen.queryByText('[1]')).not.toBeInTheDocument();
   });
 
-  it('renders placeholder if contentReferences do not exist', async () => {
+  it('renders placeholder if contentReferences are undefined', async () => {
     const Component = contentReferenceComponentFactory({
       contentReferences: undefined,
       contentReferencesVisible: true,

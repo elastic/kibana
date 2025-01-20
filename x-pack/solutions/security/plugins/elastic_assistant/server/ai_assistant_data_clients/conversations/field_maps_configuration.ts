@@ -97,11 +97,6 @@ export const conversationsFieldMap: FieldMap = {
     array: false,
     required: false,
   },
-  'messages.metadata.random': {
-    type: 'flattened',
-    array: false,
-    required: false,
-  },
   'messages.trace_data.transaction_id': {
     type: 'keyword',
     array: false,
