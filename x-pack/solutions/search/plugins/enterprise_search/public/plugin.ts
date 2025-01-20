@@ -58,8 +58,8 @@ import { hasEnterpriseLicense } from '../common/utils/licensing';
 
 import { SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';
 import { CONNECTORS_PATH, CRAWLERS_PATH } from './applications/enterprise_search_content/routes';
-
 import { docLinks } from './applications/shared/doc_links';
+import crawlerIcon from './assets/images/crawler.svg';
 import type { DynamicSideNavItems } from './navigation_tree';
 
 export interface ClientData extends InitialAppData {
@@ -114,6 +114,7 @@ const contentLinks: AppDeepLink[] = [
     }),
   },
   {
+    euiIconType: crawlerIcon,
     id: 'webCrawlers',
     path: `/${CRAWLERS_PATH}`,
     title: i18n.translate('xpack.enterpriseSearch.navigation.contentWebcrawlersLinkLabel', {
