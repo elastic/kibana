@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 
-import { getTermsAggregationFields } from '../../../../detection_engine/rule_creation_ui/components/step_define_rule/utils';
 import { useRuleFields } from '../../../../detection_engine/rule_management/logic/use_rule_fields';
 import { useMlCapabilities } from './use_ml_capabilities';
 import { useMlRuleValidations } from './use_ml_rule_validations';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
+import { useTermsAggregationFields } from '../../../hooks/use_terms_aggregation_fields';
 
 export interface UseMlRuleConfigReturn {
   hasMlAdminPermissions: boolean;
@@ -45,10 +44,7 @@ export const useMLRuleConfig = ({
   const { loading: mlFieldsLoading, fields: mlFields } = useRuleFields({
     machineLearningJobId,
   });
-  const mlSuppressionFields = useMemo(
-    () => getTermsAggregationFields(mlFields as FieldSpec[]),
-    [mlFields]
-  );
+  const mlSuppressionFields = useTermsAggregationFields(mlFields);
 
   return {
     hasMlAdminPermissions: hasMlAdminPermissions(mlCapabilities),

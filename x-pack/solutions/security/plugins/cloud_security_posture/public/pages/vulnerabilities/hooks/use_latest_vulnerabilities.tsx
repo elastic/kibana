@@ -13,7 +13,7 @@ import {
   SearchResponse,
   AggregationsMultiBucketAggregateBase,
   AggregationsStringRareTermsBucketKeys,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { EsHitRecord } from '@kbn/discover-utils/types';
 import {
@@ -118,7 +118,7 @@ export const useLatestVulnerabilities = (options: VulnerabilitiesQuery) => {
         rawResponse: { hits },
       } = await lastValueFrom(
         data.search.search<LatestFindingsRequest, LatestFindingsResponse>({
-          params: getVulnerabilitiesQuery(options, pageParam),
+          params: getVulnerabilitiesQuery(options, pageParam) as LatestFindingsRequest['params'],
         })
       );
 

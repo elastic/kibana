@@ -472,9 +472,9 @@ identifies this {kib} instance. *Default: `"your-hostname"`*
 {kib} is served by a back end server. This
 setting specifies the port to use. *Default: `5601`*
 
-`server.protocol`::
-experimental[] The http protocol to use, either `http1` or `http2`. Set to `http2` to enable `HTTP/2` support for the {kib} server.
-*Default: `http1`*
+[[server-protocol]] `server.protocol`::
+experimental[] The http protocol to use, either `http1` or `http2`. Set to `http1` to opt out of `HTTP/2` support when TLS is enabled. Use of `http1` may impact browser loading performance especially for dashboards with many panels.
+*Default*: `http2` if TLS is enabled, otherwise `http1`.
 +
 NOTE: By default, enabling `http2` requires a valid `h2c` configuration, meaning that TLS must be enabled via <<server-ssl-enabled, `server.ssl.enabled`>>
 and <<server-ssl-supportedProtocols, `server.ssl.supportedProtocols`>>, if specified, must contain at least `TLSv1.2` or `TLSv1.3`. Strict validation of
@@ -653,7 +653,7 @@ Set this value to change the {kib} interface language.
 Valid locales are: `en`, `zh-CN`, `ja-JP`, `fr-FR`. *Default: `en`*
 
 include::{kibana-root}/docs/settings/ai-assistant-settings.asciidoc[]
-include::{kibana-root}/docs/settings/alert-action-settings.asciidoc[leveloffset=+1]
+include::{kibana-root}/docs/settings/alert-action-settings.asciidoc[]
 include::{kibana-root}/docs/settings/apm-settings.asciidoc[]
 include::{kibana-root}/docs/settings/banners-settings.asciidoc[]
 include::{kibana-root}/docs/settings/cases-settings.asciidoc[leveloffset=+1]

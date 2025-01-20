@@ -127,11 +127,11 @@ export function createLiteralString(ctx: StringContext): ESQLLiteral {
 
   if (!isTripleQuoted) {
     valueUnquoted = valueUnquoted
-      .replace(/\\\\/g, '\\')
       .replace(/\\"/g, '"')
       .replace(/\\r/g, '\r')
       .replace(/\\n/g, '\n')
-      .replace(/\\t/g, '\t');
+      .replace(/\\t/g, '\t')
+      .replace(/\\\\/g, '\\');
   }
 
   return Builder.expression.literal.string(

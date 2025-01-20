@@ -12,7 +12,7 @@ import { SyntheticsPrivateLocations } from '@kbn/synthetics-plugin/common/runtim
 import { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
 import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
-export const INSTALLED_VERSION = '1.1.1';
+export const INSTALLED_VERSION = '1.2.4';
 
 export class PrivateLocationTestService {
   private supertestWithAuth: ReturnType<typeof KibanaSupertestProvider>;
@@ -23,23 +23,23 @@ export class PrivateLocationTestService {
     this.retry = getService('retry');
   }
 
-  async installSyntheticsPackage() {
+  async installSyntheticsPackage(
+    { version }: { version: string } = { version: INSTALLED_VERSION }
+  ) {
     await this.supertestWithAuth
       .post('/api/fleet/setup')
       .set('kbn-xsrf', 'true')
       .send()
       .expect(200);
-    const response = await this.supertestWithAuth
-      .get(`/api/fleet/epm/packages/synthetics/${INSTALLED_VERSION}`)
+    // attempt to delete any existing package so we can install specific version
+    await this.supertestWithAuth
+      .delete(`/api/fleet/epm/packages/synthetics`)
+      .set('kbn-xsrf', 'true');
+    await this.supertestWithAuth
+      .post(`/api/fleet/epm/packages/synthetics/${version}`)
       .set('kbn-xsrf', 'true')
+      .send({ force: true })
       .expect(200);
-    if (response.body.item.status !== 'installed') {
-      await this.supertestWithAuth
-        .post(`/api/fleet/epm/packages/synthetics/${INSTALLED_VERSION}`)
-        .set('kbn-xsrf', 'true')
-        .send({ force: true })
-        .expect(200);
-    }
   }
 
   async addTestPrivateLocation(spaceId?: string) {

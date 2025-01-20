@@ -12,13 +12,7 @@
         "description": [],
         "signature": [
           "(core: ",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ") => () => ",
           {
             "pluginId": "expressions",
@@ -37,7 +31,7 @@
           },
           ">"
         ],
-        "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx",
+        "path": "src/platform/plugins/shared/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -49,15 +43,9 @@
             "label": "core",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              }
+              "CoreStart"
             ],
-            "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx",
+            "path": "src/platform/plugins/shared/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -75,13 +63,7 @@
         "description": [],
         "signature": [
           "(core: ",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ") => () => ",
           {
             "pluginId": "expressions",
@@ -100,7 +82,7 @@
           },
           ">"
         ],
-        "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx",
+        "path": "src/platform/plugins/shared/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -112,15 +94,9 @@
             "label": "core",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              }
+              "CoreStart"
             ],
-            "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx",
+            "path": "src/platform/plugins/shared/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -144,7 +120,7 @@
       "signature": [
         "void"
       ],
-      "path": "src/plugins/expression_repeat_image/public/plugin.ts",
+      "path": "src/platform/plugins/shared/expression_repeat_image/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -168,7 +144,7 @@
       "signature": [
         "void"
       ],
-      "path": "src/plugins/expression_repeat_image/server/plugin.ts",
+      "path": "src/platform/plugins/shared/expression_repeat_image/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -188,7 +164,7 @@
         "signature": [
           "() => { name: \"repeatImage\"; aliases: never[]; type: \"render\"; inputTypes: \"number\"[]; help: string; args: { emptyImage: { types: (\"string\" | \"null\")[]; help: string; default: null; }; image: { types: (\"string\" | \"null\")[]; help: string; default: null; }; max: { types: (\"number\" | \"null\")[]; help: string; default: number; }; size: { types: \"number\"[]; default: number; help: string; }; }; fn: (count: number, args: Arguments) => Promise<{ type: \"render\"; as: string; value: { image: string | null; emptyImage: string | null; size: number; max: number | null; count: number; }; }>; }"
         ],
-        "path": "src/plugins/expression_repeat_image/common/expression_functions/repeat_image_function.ts",
+        "path": "src/platform/plugins/shared/expression_repeat_image/common/expression_functions/repeat_image_function.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -204,7 +180,7 @@
         "tags": [],
         "label": "NodeDimensions",
         "description": [],
-        "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
+        "path": "src/platform/plugins/shared/expression_repeat_image/common/types/expression_renderers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -215,7 +191,7 @@
             "tags": [],
             "label": "width",
             "description": [],
-            "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/expression_repeat_image/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -226,7 +202,7 @@
             "tags": [],
             "label": "height",
             "description": [],
-            "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/expression_repeat_image/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -240,7 +216,7 @@
         "tags": [],
         "label": "RepeatImageRendererConfig",
         "description": [],
-        "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
+        "path": "src/platform/plugins/shared/expression_repeat_image/common/types/expression_renderers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -251,7 +227,7 @@
             "tags": [],
             "label": "max",
             "description": [],
-            "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/expression_repeat_image/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -262,7 +238,7 @@
             "tags": [],
             "label": "count",
             "description": [],
-            "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/expression_repeat_image/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -273,7 +249,7 @@
             "tags": [],
             "label": "emptyImage",
             "description": [],
-            "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/expression_repeat_image/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -284,7 +260,7 @@
             "tags": [],
             "label": "image",
             "description": [],
-            "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/expression_repeat_image/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -295,7 +271,7 @@
             "tags": [],
             "label": "size",
             "description": [],
-            "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/expression_repeat_image/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -309,7 +285,7 @@
         "tags": [],
         "label": "Return",
         "description": [],
-        "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/expression_repeat_image/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -320,7 +296,7 @@
             "tags": [],
             "label": "count",
             "description": [],
-            "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/expression_repeat_image/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -331,7 +307,7 @@
             "tags": [],
             "label": "image",
             "description": [],
-            "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/expression_repeat_image/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -342,7 +318,7 @@
             "tags": [],
             "label": "size",
             "description": [],
-            "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/expression_repeat_image/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -353,7 +329,7 @@
             "tags": [],
             "label": "max",
             "description": [],
-            "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/expression_repeat_image/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -367,7 +343,7 @@
             "signature": [
               "string | null"
             ],
-            "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/expression_repeat_image/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -387,7 +363,7 @@
         "signature": [
           "\"`base64`\""
         ],
-        "path": "src/plugins/expression_repeat_image/common/constants.ts",
+        "path": "src/platform/plugins/shared/expression_repeat_image/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -402,7 +378,7 @@
         "signature": [
           "\"_context_\""
         ],
-        "path": "src/plugins/expression_repeat_image/common/constants.ts",
+        "path": "src/platform/plugins/shared/expression_repeat_image/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -449,7 +425,7 @@
           },
           ">>"
         ],
-        "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/expression_repeat_image/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -473,7 +449,7 @@
           },
           "[]"
         ],
-        "path": "src/plugins/expression_repeat_image/common/expression_functions/index.ts",
+        "path": "src/platform/plugins/shared/expression_repeat_image/common/expression_functions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -488,7 +464,7 @@
         "signature": [
           "\"right\" | \"top\" | \"bottom\" | \"left\""
         ],
-        "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
+        "path": "src/platform/plugins/shared/expression_repeat_image/common/types/expression_renderers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -503,7 +479,7 @@
         "signature": [
           "\"expressionRepeatImage\""
         ],
-        "path": "src/plugins/expression_repeat_image/common/constants.ts",
+        "path": "src/platform/plugins/shared/expression_repeat_image/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -518,7 +494,7 @@
         "signature": [
           "\"expressionRepeatImage\""
         ],
-        "path": "src/plugins/expression_repeat_image/common/constants.ts",
+        "path": "src/platform/plugins/shared/expression_repeat_image/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -533,7 +509,7 @@
         "signature": [
           "\"URL\""
         ],
-        "path": "src/plugins/expression_repeat_image/common/constants.ts",
+        "path": "src/platform/plugins/shared/expression_repeat_image/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
