@@ -30,7 +30,6 @@ export const KUBERNETES_COLLECTION_FIELDS: KubernetesCollectionMap = {
   containerImage: CONTAINER_IMAGE_NAME,
 };
 
-// TODO: update color scheme for Borealis
 export const KUBERNETES_COLLECTION_ICONS_PROPS: KubernetesCollectionMap<TreeViewIconProps> = {
   clusterId: { type: 'cluster', euiVarColor: 'euiColorVis0' },
   clusterName: { type: 'cluster', euiVarColor: 'euiColorVis0' },

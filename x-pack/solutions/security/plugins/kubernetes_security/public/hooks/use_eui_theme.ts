@@ -33,8 +33,8 @@ export const useEuiTheme = (...props: EuiThemeProps): EuiThemeReturn => {
 
     const extraEuiVars: ExtraEuiVars = {
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      euiColorVis6_asText: shade(themeVars.euiColorVis6, 0.335), // TODO: replace with proper color token usage and remove shade
-      buttonsBackgroundNormalDefaultPrimary: '#006DE4', // TODO: replace with color token
+      euiColorVis6_asText: shade(themeVars.euiColorVis6, 0.335),
+      buttonsBackgroundNormalDefaultPrimary: '#006DE4',
     };
 
     return {
