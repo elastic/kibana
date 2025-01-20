@@ -5,23 +5,47 @@
  * 2.0.
  */
 
-import type { ComponentProps } from 'react';
 import React from 'react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { TableId } from '@kbn/securitysolution-data-table';
+import type { LegacyField } from '@kbn/alerting-types';
 import type { CellValueElementProps } from '../../../../../common/types';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { CellValue } from '../../../../detections/configurations/security_solution_detections';
 
 export const PreviewRenderCellValue: React.FC<
   EuiDataGridCellValueElementProps & CellValueElementProps
-> = (props) => {
+> = ({
+  data,
+  ecsData,
+  setCellProps,
+  isExpandable,
+  isExpanded,
+  isDetails,
+  rowIndex,
+  colIndex,
+  columnId,
+  rowRenderers,
+  isDraggable,
+  truncate,
+}) => {
   return (
     <CellValue
-      {...(props as unknown as ComponentProps<typeof CellValue>)}
-      asPlainText={true}
-      scopeId={SourcererScopeName.detections}
       tableType={TableId.rulePreview}
+      scopeId={SourcererScopeName.detections}
+      legacyAlert={(data ?? []) as LegacyField[]}
+      ecsAlert={ecsData}
+      asPlainText={true}
+      setCellProps={setCellProps}
+      isExpandable={isExpandable}
+      isExpanded={isExpanded}
+      isDetails={isDetails}
+      rowIndex={rowIndex}
+      colIndex={colIndex}
+      columnId={columnId}
+      rowRenderers={rowRenderers}
+      isDraggable={isDraggable}
+      truncate={truncate}
     />
   );
 };

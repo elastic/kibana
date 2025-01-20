@@ -86,9 +86,9 @@ export type AlertTableContextMenuItem = EuiContextMenuPanelItemDescriptorEntry;
 
 export interface SecurityAlertsTableContext {
   tableType: TableId;
-  rowRenderers: RowRenderer[];
+  rowRenderers?: RowRenderer[];
   isDetails: boolean;
-  truncate: boolean;
+  truncate?: boolean;
   isDraggable: boolean;
   leadingControlColumn: ControlColumnProps;
   userProfiles: AlertsUserProfilesData;
