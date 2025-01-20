@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiScreenReaderOnly } from '@elastic/eui';
-import { ViewMode } from '@kbn/presentation-publishing';
+import { EuiScreenReaderOnly, transparentize, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import classNames from 'classnames';
+import { ViewMode } from '@kbn/presentation-publishing';
 import React, { useCallback } from 'react';
-import { placeholderTitle } from './presentation_panel_title';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
-import { PresentationPanelTitle } from './presentation_panel_title';
+import { PresentationPanelTitle, placeholderTitle } from './presentation_panel_title';
 import { usePresentationPanelHeaderActions } from './use_presentation_panel_header_actions';
 
 const getAriaLabelForTitle = (title?: string) => {
@@ -52,6 +51,8 @@ export const PresentationPanelHeader = <
   showBadges = true,
   showNotifications = true,
 }: PresentationPanelHeaderProps<ApiType>) => {
+  const { euiTheme } = useEuiTheme();
+
   const { notificationElements, badgeElements } = usePresentationPanelHeaderActions<ApiType>(
     showNotifications,
     showBadges,
@@ -79,21 +80,34 @@ export const PresentationPanelHeader = <
     </EuiScreenReaderOnly>
   );
 
-  const headerClasses = classNames('embPanel__header', {
-    'embPanel--dragHandle': viewMode === 'edit',
-    'embPanel__header--floater': !showPanelBar,
-  });
-
-  const titleClasses = classNames('embPanel__title', {
-    'embPanel--dragHandle': viewMode === 'edit',
-  });
-
   return (
     <figcaption
-      className={headerClasses}
       data-test-subj={`embeddablePanelHeading-${(panelTitle || '').replace(/\s/g, '')}`}
+      className={'embPanel__header'}
+      css={css`
+        &:hover {
+          cursor: move;
+          background-color: ${transparentize(euiTheme.colors.warning, 0.2)};
+        }
+      `}
     >
-      <h2 ref={memoizedSetDragHandle} data-test-subj="dashboardPanelTitle" className={titleClasses}>
+      <h2
+        className="embPanel__title"
+        ref={memoizedSetDragHandle}
+        data-test-subj="dashboardPanelTitle"
+        css={css`
+          height: ${euiTheme.size.l};
+          overflow: hidden;
+          line-height: ${euiTheme.size.l};
+          padding: 0px ${euiTheme.size.s};
+
+          display: flex;
+          flex-grow: 1;
+          flex-wrap: wrap;
+          column-gap: ${euiTheme.size.s};
+          align-items: center;
+        `}
+      >
         {ariaLabelElement}
         <PresentationPanelTitle
           api={api}

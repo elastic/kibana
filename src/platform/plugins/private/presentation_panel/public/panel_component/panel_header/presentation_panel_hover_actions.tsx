@@ -33,6 +33,7 @@ import {
 } from '@elastic/eui';
 import { ActionExecutionContext, buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
 
+import { css } from '@emotion/react';
 import {
   apiCanLockHoverActions,
   EmbeddableApiContext,
@@ -40,18 +41,17 @@ import {
   useBatchedOptionalPublishingSubjects,
   ViewMode,
 } from '@kbn/presentation-publishing';
-import { Subscription } from 'rxjs';
-import { css } from '@emotion/react';
 import { ActionWithContext } from '@kbn/ui-actions-plugin/public/context_menu/build_eui_context_menu_panels';
+import { Subscription } from 'rxjs';
 import { uiActions } from '../../kibana_services';
 import {
-  contextMenuTrigger,
   CONTEXT_MENU_TRIGGER,
-  panelNotificationTrigger,
+  contextMenuTrigger,
   PANEL_NOTIFICATION_TRIGGER,
+  panelNotificationTrigger,
 } from '../../panel_actions';
-import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 import { AnyApiAction } from '../../panel_actions/types';
+import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 import { useHoverActionStyles } from './use_hover_actions_styles';
 
 const getContextMenuAriaLabel = (title?: string, index?: number) => {
@@ -451,13 +451,18 @@ export const PresentationPanelHoverActions = ({
       css={css`
         --borderStyle: ${viewMode === 'edit' ? EDIT_MODE_OUTLINE : VIEW_MODE_OUTLINE};
 
-        .embPanel {
-          ${showBorder
-            ? `
-              outline: var(--borderStyle);
+        ${showBorder
+          ? css`
+              .embPanel {
+                outline: var(--borderStyle);
+              }
             `
-            : ''}
-        }
+          : css`
+              &:hover .embPanel {
+                outline: var(--borderStyle);
+                z-index: ${euiTheme.levels.menu};
+              }
+            `}
 
         ${containerStyles}
       `}
@@ -499,7 +504,6 @@ export const PresentationPanelHoverActions = ({
           )}
           {contextMenuPanels.length ? (
             <EuiPopover
-              className="rightAction"
               repositionOnScroll
               panelPaddingSize="none"
               anchorPosition="downRight"

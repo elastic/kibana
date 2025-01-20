@@ -166,7 +166,7 @@ describe('Presentation panel', () => {
       };
       await renderPresentationPanel({ api });
       await waitFor(() => {
-        expect(screen.getByTestId('embeddablePanelTitleInner')).toHaveTextContent('SUPER TITLE');
+        expect(screen.getByTestId('embeddablePanelTitleLink')).toHaveTextContent('SUPER TITLE');
       });
     });
 
@@ -177,7 +177,7 @@ describe('Presentation panel', () => {
       };
       await renderPresentationPanel({ api });
       await waitFor(() => {
-        expect(screen.getByTestId('embeddablePanelTitleInner')).toHaveTextContent('SO Title');
+        expect(screen.getByTestId('embeddablePanelTitleLink')).toHaveTextContent('SO Title');
       });
     });
 
@@ -248,7 +248,7 @@ describe('Presentation panel', () => {
       };
       await renderPresentationPanel({ api });
       await waitFor(() => {
-        expect(screen.getByTestId('embeddablePanelTitleInner')).toHaveTextContent('TITLE');
+        expect(screen.getByTestId('embeddablePanelTitleLink')).toHaveTextContent('TITLE');
       });
       expect(screen.queryByTestId('embeddablePanelTitleLink')).toBeInTheDocument();
       await userEvent.click(screen.getByTestId('embeddablePanelTitleLink'));
@@ -265,7 +265,7 @@ describe('Presentation panel', () => {
       };
       await renderPresentationPanel({ api });
       await waitFor(() => {
-        expect(screen.getByTestId('embeddablePanelTitleInner')).toHaveTextContent('SUPER TITLE');
+        expect(screen.getByTestId('embeddablePanelTitleLink')).toHaveTextContent('SUPER TITLE');
       });
       expect(screen.queryByTestId('embeddablePanelTitleLink')).not.toBeInTheDocument();
     });

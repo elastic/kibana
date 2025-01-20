@@ -7,23 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
-import classNames from 'classnames';
+import { EuiIcon, EuiLink, EuiToolTip, euiTextTruncate, useEuiTheme } from '@elastic/eui';
 import { once } from 'lodash';
-import React, { useMemo, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  type Observable,
+  defaultIfEmpty,
   fromEvent,
   map,
-  race,
   mergeMap,
-  takeUntil,
-  takeLast,
-  takeWhile,
-  defaultIfEmpty,
+  race,
   repeatWhen,
+  takeLast,
+  takeUntil,
+  takeWhile,
+  type Observable,
 } from 'rxjs';
 
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { ViewMode } from '@kbn/presentation-publishing';
 import {
@@ -94,23 +94,26 @@ export const PresentationPanelTitle = ({
   panelDescription?: string;
   viewMode?: ViewMode;
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   const [panelTitleElmRef, setPanelTitleElmRef] = useState<HTMLElement | null>(null);
   const panelTitleElement = useMemo(() => {
     if (hideTitle) return null;
-    const titleClassNames = classNames('embPanel__titleText', {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      embPanel__placeholderTitleText: !panelTitle,
-    });
+
+    const titleStyles = css`
+      ${euiTextTruncate()};
+      font-weight: ${euiTheme.font.weight.bold};
+    `;
 
     if (viewMode !== 'edit' || !isApiCompatibleWithCustomizePanelAction(api)) {
-      return <span className={titleClassNames}>{panelTitle}</span>;
+      return <span css={titleStyles}>{panelTitle}</span>;
     }
 
     return (
       <EuiLink
         color="text"
         ref={setPanelTitleElmRef}
-        className={titleClassNames}
+        css={titleStyles}
         aria-label={i18n.translate('presentationPanel.header.titleAriaLabel', {
           defaultMessage: 'Click to edit title: {title}',
           values: { title: panelTitle ?? placeholderTitle },
@@ -139,30 +142,34 @@ export const PresentationPanelTitle = ({
 
   const describedPanelTitleElement = useMemo(() => {
     if (hideTitle) return null;
+
     if (!panelDescription) {
-      return (
-        <span data-test-subj="embeddablePanelTitleInner" className="embPanel__titleInner">
-          {panelTitleElement}
-        </span>
-      );
+      return panelTitleElement;
     }
     return (
       <EuiToolTip
-        title={!hideTitle ? panelTitle || undefined : undefined}
+        title={panelTitle}
         content={panelDescription}
         delay="regular"
         position="top"
-        anchorClassName="embPanel__titleTooltipAnchor"
-        anchorProps={{ 'data-test-subj': 'embeddablePanelTooltipAnchor' }}
+        anchorProps={{
+          'data-test-subj': 'embeddablePanelTooltipAnchor',
+          css: css`
+            max-width: 100%;
+            display: flex;
+            flex-wrap: nowrap;
+            column-gap: ${euiTheme.size.xs};
+          `,
+        }}
       >
-        <span data-test-subj="embeddablePanelTitleInner" className="embPanel__titleInner">
-          {!hideTitle ? <>{panelTitleElement}&nbsp;</> : null}
+        <>
+          {panelTitleElement}{' '}
           <EuiIcon
             type="iInCircle"
             color="subdued"
             data-test-subj="embeddablePanelTitleDescriptionIcon"
           />
-        </span>
+        </>
       </EuiToolTip>
     );
   }, [hideTitle, panelDescription, panelTitle, panelTitleElement]);
