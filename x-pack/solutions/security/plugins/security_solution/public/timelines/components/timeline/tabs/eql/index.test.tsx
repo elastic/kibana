@@ -29,6 +29,8 @@ import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer'
 import { defaultRowRenderers } from '../../body/renderers';
 import { useDispatch } from 'react-redux';
 import { TimelineTabs } from '@kbn/securitysolution-data-table';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
+import { initialUserPrivilegesState } from '../../../../../common/components/user_privileges/user_privileges_context';
 
 const SPECIAL_TEST_TIMEOUT = 30000;
 
@@ -55,6 +57,8 @@ jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
 jest.mock('../../../../../common/lib/kibana');
+
+jest.mock('../../../../../common/components/user_privileges');
 
 let useTimelineEventsMock = jest.fn();
 
@@ -124,6 +128,11 @@ describe('EQL Tab', () => {
         return allowedExperimentalValues[feature];
       }
     );
+
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      ...initialUserPrivilegesState(),
+      notesPrivileges: { read: true },
+    });
 
     HTMLElement.prototype.getBoundingClientRect = jest.fn(() => {
       return {
