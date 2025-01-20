@@ -34,6 +34,7 @@ import { CodeBlockDetails } from '../assistant/use_conversation/helpers';
 import { PromptContextTemplate } from '../assistant/prompt_context/types';
 import { KnowledgeBaseConfig, TraceOptions } from '../assistant/types';
 import {
+  CONTENT_REFERENCES_VISIBLE_LOCAL_STORAGE_KEY,
   DEFAULT_ASSISTANT_NAMESPACE,
   DEFAULT_KNOWLEDGE_BASE_SETTINGS,
   KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,
@@ -116,7 +117,7 @@ export interface UseAssistantContext {
   registerPromptContext: RegisterPromptContext;
   selectedSettingsTab: SettingsTabs | null;
   contentReferencesVisible: boolean;
-  setContentReferencesVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setContentReferencesVisible: React.Dispatch<React.SetStateAction<boolean | undefined>>;
   setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean | undefined>>;
   setKnowledgeBase: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig | undefined>>;
   setLastConversationId: React.Dispatch<React.SetStateAction<string | undefined>>;
@@ -199,7 +200,14 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     true
   );
 
-  const [contentReferencesVisible, setContentReferencesVisible] = useState<boolean>(true);
+  /**
+   * Local storage for content references configuration, prefixed by assistant nameSpace
+   */
+  // can be undefined from localStorage, if not defined, default to true
+  const [contentReferencesVisible, setContentReferencesVisible] = useLocalStorage<boolean>(
+    `${nameSpace}.${CONTENT_REFERENCES_VISIBLE_LOCAL_STORAGE_KEY}`,
+    true
+  );
 
   /**
    * Prompt contexts are used to provide components a way to register and make their data available to the assistant.
@@ -277,7 +285,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   // Fetch assistant capabilities
   const { data: assistantFeatures } = useCapabilities({ http, toasts });
 
-  const value = useMemo(
+  const value: UseAssistantContext = useMemo(
     () => ({
       actionTypeRegistry,
       alertsIndexPattern,
@@ -306,7 +314,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       assistantStreamingEnabled: localStorageStreaming ?? true,
       setAssistantStreamingEnabled: setLocalStorageStreaming,
       setKnowledgeBase: setLocalStorageKnowledgeBase,
-      contentReferencesVisible,
+      contentReferencesVisible: contentReferencesVisible ?? true,
       setContentReferencesVisible,
       setSelectedSettingsTab,
       setShowAssistantOverlay,

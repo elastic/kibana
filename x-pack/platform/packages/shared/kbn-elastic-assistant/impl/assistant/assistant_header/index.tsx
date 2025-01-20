@@ -94,7 +94,7 @@ export const AssistantHeader: React.FC<Props> = ({
   );
 
   const toggleContentReferencesVisible = () => {
-    setContentReferencesVisible((prevState) => !prevState);
+    setContentReferencesVisible(!contentReferencesVisible);
   };
 
   const selectedConnectorId = useMemo(

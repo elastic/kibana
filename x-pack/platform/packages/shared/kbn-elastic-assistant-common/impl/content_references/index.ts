@@ -8,11 +8,11 @@
 export { contentReferencesStoreFactory } from './content_references_store/content_references_store_factory';
 export { pruneContentReferences } from './content_references_store/prune_content_references';
 export {
-  alertReferenceFactory,
-  knowledgeBaseReferenceFactory,
-  alertsPageReferenceFactory,
-  productDocumentationReferenceFactory,
-  esqlQueryReferenceFactory,
+  securityAlertReference,
+  knowledgeBaseReference,
+  securityAlertsPageReference,
+  productDocumentationReference,
+  esqlQueryReference,
 } from './references';
 export {
   contentReferenceString,

@@ -6,7 +6,7 @@
  */
 
 import { contentReferencesStoreFactory } from './content_references_store_factory';
-import { alertsPageReferenceFactory } from '../references';
+import { securityAlertsPageReference } from '../references';
 import { ContentReferencesStore } from '../types';
 
 describe('contentReferencesStoreFactory', () => {
@@ -17,13 +17,13 @@ describe('contentReferencesStoreFactory', () => {
 
   it('adds multiple content reference', async () => {
     const alertsPageReference1 = contentReferencesStore.add((p) =>
-      alertsPageReferenceFactory(p.id)
+      securityAlertsPageReference(p.id)
     );
     const alertsPageReference2 = contentReferencesStore.add((p) =>
-      alertsPageReferenceFactory(p.id)
+      securityAlertsPageReference(p.id)
     );
     const alertsPageReference3 = contentReferencesStore.add((p) =>
-      alertsPageReferenceFactory(p.id)
+      securityAlertsPageReference(p.id)
     );
 
     const store = contentReferencesStore.getStore();
@@ -41,7 +41,7 @@ describe('contentReferencesStoreFactory', () => {
 
     const referenceIds = new Set(
       [...new Array(numberOfReferencesToCreate)]
-        .map(() => contentReferencesStore.add((p) => alertsPageReferenceFactory(p.id)))
+        .map(() => contentReferencesStore.add((p) => securityAlertsPageReference(p.id)))
         .map((alertsPageReference) => alertsPageReference.id)
     );
 

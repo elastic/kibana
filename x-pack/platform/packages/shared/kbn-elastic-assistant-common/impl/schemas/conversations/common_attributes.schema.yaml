@@ -20,7 +20,7 @@ components:
 
     BaseContentReference:
       type: object
-      description: The base of a content reference
+      description: The basis of a content reference
       required:
         - 'id'
         - 'type'
@@ -131,7 +131,7 @@ components:
           additionalProperties: false
 
     ContentReferences:
-      description: Multiple content references
+      description: A union of all content reference types
       additionalProperties:
         oneOf:
           - $ref: '#/components/schemas/KnowledgeBaseEntryContentReference'

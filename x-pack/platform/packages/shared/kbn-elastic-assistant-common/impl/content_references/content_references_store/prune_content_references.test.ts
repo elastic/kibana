@@ -6,7 +6,7 @@
  */
 
 import { pruneContentReferences } from './prune_content_references';
-import { alertsPageReferenceFactory } from '../references';
+import { securityAlertsPageReference } from '../references';
 import { contentReferenceBlock } from '../references/utils';
 import { ContentReferencesStore } from '../types';
 import { contentReferencesStoreFactory } from './content_references_store_factory';
@@ -19,12 +19,12 @@ describe('pruneContentReferences', () => {
 
   it('prunes content references correctly', async () => {
     const alertsPageReference1 = contentReferencesStore.add((p) =>
-      alertsPageReferenceFactory(p.id)
+      securityAlertsPageReference(p.id)
     );
     const alertsPageReference2 = contentReferencesStore.add((p) =>
-      alertsPageReferenceFactory(p.id)
+      securityAlertsPageReference(p.id)
     );
-    contentReferencesStore.add((p) => alertsPageReferenceFactory(p.id)); // this one should get pruned
+    contentReferencesStore.add((p) => securityAlertsPageReference(p.id)); // this one should get pruned
 
     const content = `Example ${contentReferenceBlock(
       alertsPageReference1

@@ -10,7 +10,7 @@ import { DynamicStructuredTool } from '@langchain/core/tools';
 import { z } from '@kbn/zod';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import { contentReferenceString, alertsPageReferenceFactory } from '@kbn/elastic-assistant-common';
+import { contentReferenceString, securityAlertsPageReference } from '@kbn/elastic-assistant-common';
 import { getAlertsCountQuery } from './get_alert_counts_query';
 import { APP_UI_ID } from '../../../../common';
 
@@ -40,7 +40,7 @@ export const ALERT_COUNTS_TOOL: AssistantTool = {
         const query = getAlertsCountQuery(alertsIndexPattern);
         const result = await esClient.search<SearchResponse>(query);
         const alertsCountReference = params.contentReferencesStore.add((p) =>
-          alertsPageReferenceFactory(p.id)
+          securityAlertsPageReference(p.id)
         );
 
         return `${JSON.stringify(result)}\n${contentReferenceString(alertsCountReference)}`;

@@ -19,7 +19,7 @@ import { ContentReferenceId } from '../types';
  * @param id id of the contentReference
  * @returns AlertsCountReference
  */
-export const alertsPageReferenceFactory = (id: string): SecurityAlertsPageContentReference => {
+export const securityAlertsPageReference = (id: string): SecurityAlertsPageContentReference => {
   return {
     type: 'SecurityAlertsPage',
     id,
@@ -32,7 +32,7 @@ export const alertsPageReferenceFactory = (id: string): SecurityAlertsPageConten
  * @param alertId id of the alert that is referenced
  * @returns AlertReference
  */
-export const alertReferenceFactory = (
+export const securityAlertReference = (
   id: ContentReferenceId,
   alertId: string
 ): SecurityAlertContentReference => {
@@ -50,7 +50,7 @@ export const alertReferenceFactory = (
  * @param knowledgeBaseEntryId id of the knowledge base entry
  * @returns KnowledgeBaseReference
  */
-export const knowledgeBaseReferenceFactory = (
+export const knowledgeBaseReference = (
   id: ContentReferenceId,
   knowledgeBaseEntryName: string,
   knowledgeBaseEntryId: string
@@ -70,7 +70,7 @@ export const knowledgeBaseReferenceFactory = (
  * @param label content reference label
  * @returns KnowledgeBaseReference
  */
-export const esqlQueryReferenceFactory = (
+export const esqlQueryReference = (
   id: ContentReferenceId,
   query: string,
   label: string
@@ -88,7 +88,7 @@ export const esqlQueryReferenceFactory = (
  * @param id id of the contentReference
  * @returns AlertsCountReference
  */
-export const productDocumentationReferenceFactory = (
+export const productDocumentationReference = (
   id: ContentReferenceId,
   title: string,
   url: string

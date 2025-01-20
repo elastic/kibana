@@ -11,7 +11,7 @@ import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { SECURITY_LABS_RESOURCE } from '@kbn/elastic-assistant-plugin/server/routes/knowledge_base/constants';
 import {
-  knowledgeBaseReferenceFactory,
+  knowledgeBaseReference,
   contentReferenceString,
 } from '@kbn/elastic-assistant-common';
 import { APP_UI_ID } from '../../../../common';
@@ -52,7 +52,7 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
         });
 
         const knowledgeBaseReference = params.contentReferencesStore.add((p) =>
-          knowledgeBaseReferenceFactory(p.id, 'Elastic Security Labs content', 'securityLabsId')
+          knowledgeBaseReference(p.id, 'Elastic Security Labs content', 'securityLabsId')
         );
 
         // TODO: Token pruning

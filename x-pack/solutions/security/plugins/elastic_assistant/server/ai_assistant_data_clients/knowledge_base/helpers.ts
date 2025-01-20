@@ -13,7 +13,7 @@ import { AuthenticatedUser } from '@kbn/core-security-common';
 import {
   contentReferenceBlock,
   ContentReferencesStore,
-  esqlQueryReferenceFactory,
+  esqlQueryReference,
   IndexEntry,
 } from '@kbn/elastic-assistant-common';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
@@ -222,7 +222,7 @@ export const getStructuredToolForIndexEntry = ({
           }`;
 
           const esqlQueryReference = contentReferencesStore.add((p) =>
-            esqlQueryReferenceFactory(p.id, esqlQuery, hit._index)
+            esqlQueryReference(p.id, esqlQuery, hit._index)
           );
 
           if (indexEntry.outputFields && indexEntry.outputFields.length > 0) {

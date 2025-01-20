@@ -11,7 +11,7 @@ import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import {
   contentReferenceBlock,
-  productDocumentationReferenceFactory,
+  productDocumentationReference,
 } from '@kbn/elastic-assistant-common';
 import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import type { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/server';
@@ -95,7 +95,7 @@ type EnrichedDocument = RetrieveDocumentationResultDoc & {
 function enrichDocument(contentReferencesStore: ContentReferencesStore) {
   return (document: RetrieveDocumentationResultDoc): EnrichedDocument => {
     const productDocumentationReference = contentReferencesStore.add((p) =>
-      productDocumentationReferenceFactory(p.id, document.title, document.url)
+      productDocumentationReference(p.id, document.title, document.url)
     );
     return {
       ...document,

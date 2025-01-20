@@ -8,7 +8,7 @@
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import {
-  alertReferenceFactory,
+  securityAlertReference,
   getAnonymizedValue,
   getOpenAndAcknowledgedAlertsQuery,
   getRawDataOrDefault,
@@ -94,7 +94,7 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
             const alertReferenceString =
               hitId != null
                 ? `\nReference,${contentReferenceBlock(
-                    params.contentReferencesStore.add((p) => alertReferenceFactory(p.id, hitId))
+                    params.contentReferencesStore.add((p) => securityAlertReference(p.id, hitId))
                   )}`
                 : '';
 

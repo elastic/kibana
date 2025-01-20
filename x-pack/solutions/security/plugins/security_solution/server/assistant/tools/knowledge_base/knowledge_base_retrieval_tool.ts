@@ -12,7 +12,7 @@ import type { AIAssistantKnowledgeBaseDataClient } from '@kbn/elastic-assistant-
 import { Document } from 'langchain/document';
 import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import {
-  knowledgeBaseReferenceFactory,
+  knowledgeBaseReference,
   contentReferenceBlock,
 } from '@kbn/elastic-assistant-common';
 import { APP_UI_ID } from '../../../../common';
@@ -74,7 +74,7 @@ function enrichDocument(contentReferencesStore: ContentReferencesStore) {
     }
     const documentId = document.id;
     const knowledgeBaseReference = contentReferencesStore.add((p) =>
-      knowledgeBaseReferenceFactory(p.id, document.metadata.name, documentId)
+      knowledgeBaseReference(p.id, document.metadata.name, documentId)
     );
     return new Document({
       ...document,

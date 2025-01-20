@@ -24,11 +24,11 @@ export {
 
 export {
   contentReferencesStoreFactory,
-  alertReferenceFactory,
-  knowledgeBaseReferenceFactory,
-  alertsPageReferenceFactory,
-  productDocumentationReferenceFactory,
-  esqlQueryReferenceFactory,
+  securityAlertReference,
+  knowledgeBaseReference,
+  securityAlertsPageReference,
+  productDocumentationReference,
+  esqlQueryReference,
   contentReferenceString,
   contentReferenceBlock,
   removeContentReferences,
