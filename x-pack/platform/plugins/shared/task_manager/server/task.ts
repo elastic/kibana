@@ -7,6 +7,7 @@
 
 import { ObjectType, schema, TypeOf } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
+import moment from 'moment';
 import { isErr, tryAsResult } from './lib/result_type';
 import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
 import { DecoratedError } from './task_running';
@@ -239,6 +240,99 @@ export enum TaskLifecycleResult {
 }
 
 export type TaskLifecycle = TaskStatus | TaskLifecycleResult;
+
+const validateDate = (date: Date, field: string) => {
+  if (!moment(date).isValid()) {
+    return `Invalid ${field} date "${date}".`;
+  }
+};
+
+export const taskInstanceSchema = schema.object({
+  id: schema.maybe(schema.string()),
+  taskType: schema.string(),
+  scheduledAt: schema.maybe(
+    schema.any({
+      validate: (scheduledAt) => validateDate(scheduledAt, 'scheduledAt'),
+    })
+  ),
+  startedAt: schema.maybe(
+    schema.nullable(
+      schema.any({
+        validate: (startedAt) => validateDate(startedAt, 'startedAt'),
+      })
+    )
+  ),
+  retryAt: schema.maybe(
+    schema.nullable(
+      schema.any({
+        validate: (retryAt) => validateDate(retryAt, 'retryAt'),
+      })
+    )
+  ),
+  runAt: schema.maybe(
+    schema.any({
+      validate: (runAt) => validateDate(runAt, 'runAt'),
+    })
+  ),
+  schedule: schema.maybe(
+    schema.object({
+      interval: schema.string({
+        validate: (interval) => {
+          if (!isInterval(interval)) {
+            return `Invalid schedule interval "${interval}": interval must be of the form "{number}{cadance}" where number is an integer. Example: 5m.`;
+          }
+        },
+      }),
+    })
+  ),
+  params: schema.recordOf(schema.string(), schema.any()),
+  state: schema.recordOf(schema.string(), schema.any()),
+  stateVersion: schema.maybe(schema.number()),
+  traceparent: schema.maybe(schema.string()),
+  user: schema.maybe(schema.string()),
+  scope: schema.maybe(schema.arrayOf(schema.string())),
+  ownderId: schema.maybe(schema.nullable(schema.string())),
+  enabled: schema.maybe(schema.boolean()),
+  timeoutOverride: schema.maybe(schema.string()),
+  partition: schema.maybe(schema.number()),
+});
+
+export const concreteTaskInstanceSchema = taskInstanceSchema.extends({
+  id: schema.string(),
+  interval: schema.maybe(schema.string()),
+  numSkippedRuns: schema.maybe(schema.number()),
+  version: schema.maybe(schema.string()),
+  scheduledAt: schema.any({
+    validate: (scheduledAt) => validateDate(scheduledAt, 'scheduledAt'),
+  }),
+  attempts: schema.number(),
+  status: schema.oneOf([
+    schema.literal(TaskStatus.Idle),
+    schema.literal(TaskStatus.Claiming),
+    schema.literal(TaskStatus.Running),
+    schema.literal(TaskStatus.Failed),
+    schema.literal(TaskStatus.ShouldDelete),
+    schema.literal(TaskStatus.Unrecognized),
+    schema.literal(TaskStatus.DeadLetter),
+  ]),
+  runAt: schema.any({
+    validate: (runAt) => validateDate(runAt, 'runAt'),
+  }),
+  startedAt: schema.nullable(
+    schema.any({
+      validate: (startedAt) => validateDate(startedAt, 'startedAt'),
+    })
+  ),
+  retryAt: schema.nullable(
+    schema.any({
+      validate: (retryAt) => validateDate(retryAt, 'retryAt'),
+    })
+  ),
+  state: schema.recordOf(schema.string(), schema.any()),
+  ownerId: schema.nullable(schema.string()),
+  partition: schema.maybe(schema.number()),
+});
+
 export interface IntervalSchedule {
   /**
    * An interval in minutes (e.g. '5m'). If specified, this is a recurring task.
