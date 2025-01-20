@@ -11,19 +11,19 @@ import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 export const PLUGIN_ID = 'automaticImport';
 
 // Public App Routes
-export const INTEGRATION_ASSISTANT_APP_ROUTE = '/app/automatic_import';
+export const AUTOMATIC_IMPORT_APP_ROUTE = '/app/automatic_import';
 
 // Server API Routes
-export const INTEGRATION_ASSISTANT_BASE_PATH = '/internal/automatic_import';
+export const AUTOMATIC_IMPORT_BASE_PATH = '/internal/automatic_import';
 
-export const ECS_GRAPH_PATH = `${INTEGRATION_ASSISTANT_BASE_PATH}/ecs`;
-export const CATEGORIZATION_GRAPH_PATH = `${INTEGRATION_ASSISTANT_BASE_PATH}/categorization`;
-export const ANALYZE_LOGS_PATH = `${INTEGRATION_ASSISTANT_BASE_PATH}/analyzelogs`;
-export const RELATED_GRAPH_PATH = `${INTEGRATION_ASSISTANT_BASE_PATH}/related`;
-export const ANALYZE_API_PATH = `${INTEGRATION_ASSISTANT_BASE_PATH}/analyzeapi`;
-export const CEL_INPUT_GRAPH_PATH = `${INTEGRATION_ASSISTANT_BASE_PATH}/cel`;
-export const CHECK_PIPELINE_PATH = `${INTEGRATION_ASSISTANT_BASE_PATH}/pipeline`;
-export const INTEGRATION_BUILDER_PATH = `${INTEGRATION_ASSISTANT_BASE_PATH}/build`;
+export const ECS_GRAPH_PATH = `${AUTOMATIC_IMPORT_BASE_PATH}/ecs`;
+export const CATEGORIZATION_GRAPH_PATH = `${AUTOMATIC_IMPORT_BASE_PATH}/categorization`;
+export const ANALYZE_LOGS_PATH = `${AUTOMATIC_IMPORT_BASE_PATH}/analyzelogs`;
+export const RELATED_GRAPH_PATH = `${AUTOMATIC_IMPORT_BASE_PATH}/related`;
+export const ANALYZE_API_PATH = `${AUTOMATIC_IMPORT_BASE_PATH}/analyzeapi`;
+export const CEL_INPUT_GRAPH_PATH = `${AUTOMATIC_IMPORT_BASE_PATH}/cel`;
+export const CHECK_PIPELINE_PATH = `${AUTOMATIC_IMPORT_BASE_PATH}/pipeline`;
+export const INTEGRATION_BUILDER_PATH = `${AUTOMATIC_IMPORT_BASE_PATH}/build`;
 export const FLEET_PACKAGES_PATH = `/api/fleet/epm/packages`;
 
 // License

@@ -43,21 +43,21 @@ export const PACKAGE_UPLOAD_BUTTON = i18n.translate(
   }
 );
 
-export const ASSISTANT_TITLE = i18n.translate(
+export const AUTOMATIC_IMPORT_TITLE = i18n.translate(
   'xpack.automaticImport.createIntegrationLanding.assistant.title',
   {
     defaultMessage: 'Create custom integration',
   }
 );
 
-export const ASSISTANT_DESCRIPTION = i18n.translate(
+export const AUTOMATIC_IMPORT_DESCRIPTION = i18n.translate(
   'xpack.automaticImport.createIntegrationLanding.assistant.description',
   {
     defaultMessage: 'Use our AI-driven process to build your custom integration',
   }
 );
 
-export const ASSISTANT_BUTTON = i18n.translate(
+export const AUTOMATIC_IMPORT_BUTTON = i18n.translate(
   'xpack.automaticImport.createIntegrationLanding.assistant.button',
   {
     defaultMessage: 'Create Integration',

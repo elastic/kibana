@@ -41,7 +41,7 @@ export const AutomaticImportCard = React.memo(() => {
               <EuiFlexGroup direction="row" gutterSize="s">
                 <EuiFlexItem>
                   <EuiTitle size="xs">
-                    <h3>{i18n.ASSISTANT_TITLE}</h3>
+                    <h3>{i18n.AUTOMATIC_IMPORT_TITLE}</h3>
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -58,7 +58,7 @@ export const AutomaticImportCard = React.memo(() => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText size="s" color="subdued" textAlign="left">
-                {i18n.ASSISTANT_DESCRIPTION}
+                {i18n.AUTOMATIC_IMPORT_DESCRIPTION}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -66,11 +66,11 @@ export const AutomaticImportCard = React.memo(() => {
         <EuiFlexItem grow={false}>
           {canExecuteConnectors ? (
             <EuiButton onClick={() => navigate(Page.assistant)} data-test-subj="assistantButton">
-              {i18n.ASSISTANT_BUTTON}
+              {i18n.AUTOMATIC_IMPORT_BUTTON}
             </EuiButton>
           ) : (
             <MissingPrivilegesTooltip canExecuteConnectors>
-              <EuiButton disabled>{i18n.ASSISTANT_BUTTON}</EuiButton>
+              <EuiButton disabled>{i18n.AUTOMATIC_IMPORT_BUTTON}</EuiButton>
             </MissingPrivilegesTooltip>
           )}
         </EuiFlexItem>
