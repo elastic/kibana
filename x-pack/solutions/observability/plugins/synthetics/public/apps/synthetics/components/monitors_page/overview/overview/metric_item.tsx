@@ -43,19 +43,25 @@ const METRIC_ITEM_HEIGHT = 160;
 
 export const getColor = (euiTheme: EuiThemeComputed, isEnabled: boolean, status?: string) => {
   if (!isEnabled) {
-    return euiTheme.colors.lightestShade;
+    return euiTheme.colors.backgroundBaseDisabled;
   }
   const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
 
   switch (status) {
     case 'down':
-      return isAmsterdam ? euiPaletteColorBlindBehindText()[9] : euiTheme.colors.danger;
+      return isAmsterdam
+        ? euiPaletteColorBlindBehindText()[9]
+        : euiTheme.colors.backgroundBaseDanger;
     case 'up':
-      return isAmsterdam ? euiPaletteColorBlindBehindText()[0] : euiTheme.colors.success;
+      return isAmsterdam
+        ? euiPaletteColorBlindBehindText()[0]
+        : euiTheme.colors.backgroundBaseSuccess;
     case 'unknown':
-      return euiTheme.colors.ghost;
+      return euiTheme.colors.backgroundBasePlain;
     default:
-      return isAmsterdam ? euiPaletteColorBlindBehindText()[0] : euiTheme.colors.success;
+      return isAmsterdam
+        ? euiPaletteColorBlindBehindText()[0]
+        : euiTheme.colors.backgroundBaseSuccess;
   }
 };
 
