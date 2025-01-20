@@ -51,6 +51,7 @@ export interface ScoutReporterInfo {
 export interface ScoutFileInfo {
   path: string;
   owner: string | string[];
+  area: string | string[];
 }
 
 /**

@@ -25,10 +25,18 @@ import stripANSI from 'strip-ansi';
 import { REPO_ROOT } from '@kbn/repo-info';
 import {
   type CodeOwnersEntry,
+  type CodeOwnerArea,
   getCodeOwnersEntries,
   getOwningTeamsForPath,
+  findAreaForCodeOwner,
 } from '@kbn/code-owners';
-import { ScoutEventsReport, ScoutReportEventAction } from '../../report';
+import {
+  ScoutEventsReport,
+  ScoutFileInfo,
+  ScoutReportEventAction,
+  type ScoutTestRunInfo,
+  uploadScoutReportEvents,
+} from '../../report';
 import { environmentMetadata } from '../../../datasources';
 import type { ScoutPlaywrightReporterOptions } from '../scout_playwright_reporter';
 import { generateTestRunId, getTestIDForTitle } from '../../../helpers';
@@ -63,6 +71,22 @@ export class ScoutPlaywrightReporter implements Reporter {
     return getOwningTeamsForPath(filePath, this.codeOwnersEntries);
   }
 
+  private getOwnerAreas(owners: string[]): CodeOwnerArea[] {
+    return owners
+      .map((owner) => findAreaForCodeOwner(owner))
+      .filter((area) => area !== undefined) as CodeOwnerArea[];
+  }
+
+  private getScoutFileInfoForPath(filePath: string): ScoutFileInfo {
+    const fileOwners = this.getFileOwners(filePath);
+
+    return {
+      path: filePath,
+      owner: fileOwners,
+      area: this.getOwnerAreas(fileOwners),
+    };
+  }
+
   /**
    * Root path of this reporter's output
    */
@@ -82,10 +106,7 @@ export class ScoutPlaywrightReporter implements Reporter {
 
     if (config.configFile !== undefined) {
       configInfo = {
-        file: {
-          path: config.configFile,
-          owner: this.getFileOwners(config.configFile),
-        },
+        file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, config.configFile)),
       };
     }
 
@@ -127,10 +148,7 @@ export class ScoutPlaywrightReporter implements Reporter {
         tags: test.tags,
         annotations: test.annotations,
         expected_status: test.expectedStatus,
-        file: {
-          path: path.relative(REPO_ROOT, test.location.file),
-          owner: this.getFileOwners(path.relative(REPO_ROOT, test.location.file)),
-        },
+        file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, test.location.file)),
       },
       event: {
         action: ScoutReportEventAction.TEST_BEGIN,
@@ -161,10 +179,7 @@ export class ScoutPlaywrightReporter implements Reporter {
           title: step.titlePath().join(' '),
           category: step.category,
         },
-        file: {
-          path: path.relative(REPO_ROOT, test.location.file),
-          owner: this.getFileOwners(path.relative(REPO_ROOT, test.location.file)),
-        },
+        file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, test.location.file)),
       },
       event: {
         action: ScoutReportEventAction.TEST_STEP_BEGIN,
@@ -195,10 +210,7 @@ export class ScoutPlaywrightReporter implements Reporter {
           category: step.category,
           duration: step.duration,
         },
-        file: {
-          path: path.relative(REPO_ROOT, test.location.file),
-          owner: this.getFileOwners(path.relative(REPO_ROOT, test.location.file)),
-        },
+        file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, test.location.file)),
       },
       event: {
         action: ScoutReportEventAction.TEST_STEP_END,
@@ -230,10 +242,7 @@ export class ScoutPlaywrightReporter implements Reporter {
         expected_status: test.expectedStatus,
         status: result.status,
         duration: result.duration,
-        file: {
-          path: path.relative(REPO_ROOT, test.location.file),
-          owner: this.getFileOwners(path.relative(REPO_ROOT, test.location.file)),
-        },
+        file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, test.location.file)),
       },
       event: {
         action: ScoutReportEventAction.TEST_END,

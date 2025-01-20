@@ -30,5 +30,3 @@ export const scoutFailedTestsReporter = (
     ? ['@kbn/scout-reporting/src/reporting/playwright/failed_test', options]
     : ['null'];
 };
-
-export { generateTestRunId, getTestIDForTitle } from '../helpers';

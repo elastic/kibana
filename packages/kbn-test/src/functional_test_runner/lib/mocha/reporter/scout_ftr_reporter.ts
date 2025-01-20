@@ -12,18 +12,21 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
 import { REPO_ROOT } from '@kbn/repo-info';
 import {
-  generateTestRunId,
-  getTestIDForTitle,
   datasources,
   ScoutEventsReport,
   ScoutReportEventAction,
-  ScoutTestRunInfo,
+  type ScoutTestRunInfo,
+  generateTestRunId,
+  getTestIDForTitle,
   uploadScoutReportEvents,
+  ScoutFileInfo,
 } from '@kbn/scout-reporting';
 import {
+  type CodeOwnersEntry,
+  type CodeOwnerArea,
   getOwningTeamsForPath,
   getCodeOwnersEntries,
-  type CodeOwnersEntry,
+  findAreaForCodeOwner,
 } from '@kbn/code-owners';
 import { Runner, Test } from '../../../fake_mocha_types';
 import { Config as FTRConfig } from '../../config';
@@ -44,7 +47,7 @@ export class ScoutFTRReporter {
   readonly name: string;
   readonly runId: string;
   private report: ScoutEventsReport;
-  private baseTestRunInfo: ScoutTestRunInfo;
+  private readonly baseTestRunInfo: ScoutTestRunInfo;
   private readonly codeOwnersEntries: CodeOwnersEntry[];
 
   constructor(
@@ -65,7 +68,7 @@ export class ScoutFTRReporter {
     this.codeOwnersEntries = getCodeOwnersEntries();
     this.baseTestRunInfo = {
       id: this.runId,
-      config: { file: { path: config.path, owner: this.getFileOwners(config.path) } },
+      config: { file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, config.path)) },
     };
 
     // Register event listeners
@@ -81,6 +84,22 @@ export class ScoutFTRReporter {
 
   private getFileOwners(filePath: string): string[] {
     return getOwningTeamsForPath(filePath, this.codeOwnersEntries);
+  }
+
+  private getOwnerAreas(owners: string[]): CodeOwnerArea[] {
+    return owners
+      .map((owner) => findAreaForCodeOwner(owner))
+      .filter((area) => area !== undefined) as CodeOwnerArea[];
+  }
+
+  private getScoutFileInfoForPath(filePath: string): ScoutFileInfo {
+    const fileOwners = this.getFileOwners(filePath);
+
+    return {
+      path: filePath,
+      owner: fileOwners,
+      area: this.getOwnerAreas(fileOwners),
+    };
   }
 
   /**
@@ -127,10 +146,9 @@ export class ScoutFTRReporter {
         id: getTestIDForTitle(test.fullTitle()),
         title: test.title,
         tags: [],
-        file: {
-          path: test.file ? path.relative(REPO_ROOT, test.file) : 'unknown',
-          owner: test.file ? this.getFileOwners(path.relative(REPO_ROOT, test.file)) : 'unknown',
-        },
+        file: test.file
+          ? this.getScoutFileInfoForPath(path.relative(REPO_ROOT, test.file))
+          : undefined,
       },
       event: {
         action: ScoutReportEventAction.TEST_BEGIN,
@@ -157,10 +175,9 @@ export class ScoutFTRReporter {
         id: getTestIDForTitle(test.fullTitle()),
         title: test.title,
         tags: [],
-        file: {
-          path: test.file ? path.relative(REPO_ROOT, test.file) : 'unknown',
-          owner: test.file ? this.getFileOwners(path.relative(REPO_ROOT, test.file)) : 'unknown',
-        },
+        file: test.file
+          ? this.getScoutFileInfoForPath(path.relative(REPO_ROOT, test.file))
+          : undefined,
         status: test.isPending() ? 'skipped' : test.isPassed() ? 'passed' : 'failed',
         duration: test.duration,
       },
