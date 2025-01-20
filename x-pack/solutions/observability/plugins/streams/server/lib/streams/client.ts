@@ -52,6 +52,7 @@ import {
   getUnmanagedElasticsearchAssets,
 } from './stream_crud';
 import { updateDataStreamsLifecycle } from './data_streams/manage_data_streams';
+import { MalformedStream } from './errors/malformed_stream';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -83,6 +84,7 @@ export class StreamsClient {
       assetClient: AssetClient;
       storageClient: StreamsStorageClient;
       logger: Logger;
+      isServerless: boolean;
     }
   ) {}
 
@@ -294,6 +296,10 @@ export class StreamsClient {
     }
 
     if (isWiredStream(definition)) {
+      if (this.dependencies.isServerless && definition.stream.ingest.lifecycle?.type === 'ilm') {
+        throw new MalformedStream('ILM lifecycle is not supported in serverless environments');
+      }
+
       const validateWiredStreamResult = await this.validateWiredStreamAndCreateChildrenIfNeeded({
         existingDefinition: existingDefinition as WiredStreamDefinition,
         definition,
