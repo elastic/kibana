@@ -37,23 +37,17 @@ export const paths = {
     alertDetails: (alertId: string) =>
       `${OBSERVABILITY_BASE_PATH}${ALERTS_PATH}/${encodeURIComponent(alertId)}`,
     rules: `${OBSERVABILITY_BASE_PATH}${RULES_PATH}`,
-    ruleDetails: (ruleId: string) => {
-      return `${OBSERVABILITY_BASE_PATH}${RULES_PATH}/${encodeURIComponent(ruleId)}`;
-    },
-    createRule: (ruleTypeId: string) => {
-      return `${OBSERVABILITY_BASE_PATH}${RULES_PATH}/create/${encodeURIComponent(ruleTypeId)}`;
-    },
-    editRule: (id: string) => {
-      return `${OBSERVABILITY_BASE_PATH}${RULES_PATH}/edit/${encodeURIComponent(id)}`;
-    },
+    ruleDetails: (ruleId: string) =>
+      `${OBSERVABILITY_BASE_PATH}${RULES_PATH}/${encodeURIComponent(ruleId)}`,
+    createRule: (ruleTypeId: string) =>
+      `${OBSERVABILITY_BASE_PATH}${RULES_PATH}/create/${encodeURIComponent(ruleTypeId)}`,
+    editRule: (id: string) =>
+      `${OBSERVABILITY_BASE_PATH}${RULES_PATH}/edit/${encodeURIComponent(id)}`,
   },
 };
 
 export const relativePaths = {
   observability: {
     ruleDetails: (ruleId: string) => `${RULES_PATH}/${encodeURIComponent(ruleId)}`,
-    editRule: (id: string) => {
-      return `${RULES_PATH}/edit/${encodeURIComponent(id)}`;
-    },
   },
 };

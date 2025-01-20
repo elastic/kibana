@@ -244,11 +244,11 @@ export function RuleDetailsPage() {
           actionTypeRegistry={actionTypeRegistry}
           rule={rule}
           ruleTypeRegistry={ruleTypeRegistry}
-          useNewRuleForm={true}
           ruleEditBasePath={http.basePath.prepend(paths.observability.alerts)}
           onEditRule={async () => {
             refetch();
           }}
+          useNewRuleForm
         />
       </EuiFlexGroup>
 
