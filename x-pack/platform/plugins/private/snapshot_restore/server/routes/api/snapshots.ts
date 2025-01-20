@@ -45,7 +45,16 @@ export function registerSnapshotsRoutes({
 }: RouteDependencies) {
   // GET all snapshots
   router.get(
-    { path: addBasePath('snapshots'), validate: { query: snapshotListSchema } },
+    {
+      path: addBasePath('snapshots'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: { query: snapshotListSchema },
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
       const sortField =

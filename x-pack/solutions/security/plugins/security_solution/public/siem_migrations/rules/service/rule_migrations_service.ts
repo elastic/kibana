@@ -12,17 +12,19 @@ import {
   DEFAULT_ASSISTANT_NAMESPACE,
   TRACE_OPTIONS_SESSION_STORAGE_KEY,
 } from '@kbn/elastic-assistant/impl/assistant_context/constants';
+import type { RelatedIntegration } from '../../../../common/api/detection_engine';
 import type { LangSmithOptions } from '../../../../common/siem_migrations/model/common.gen';
 import type {
-  RuleMigrationResourceData,
+  RuleMigrationResourceBase,
   RuleMigrationTaskStats,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type {
   CreateRuleMigrationRequestBody,
-  GetAllStatsRuleMigrationResponse,
   GetRuleMigrationStatsResponse,
+  StartRuleMigrationResponse,
   UpsertRuleMigrationResourcesRequestBody,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import type { SiemMigrationRetryFilter } from '../../../../common/siem_migrations/constants';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import type { StartPluginsDependencies } from '../../../types';
 import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
@@ -35,6 +37,7 @@ import {
   type GetRuleMigrationsStatsAllParams,
   getMissingResources,
   upsertMigrationResources,
+  getIntegrations,
 } from '../api';
 import type { RuleMigrationStats } from '../types';
 import { getSuccessToast } from './success_notification';
@@ -119,7 +122,10 @@ export class SiemRulesMigrationsService {
     }
   }
 
-  public async startRuleMigration(migrationId: string): Promise<GetAllStatsRuleMigrationResponse> {
+  public async startRuleMigration(
+    migrationId: string,
+    retry?: SiemMigrationRetryFilter
+  ): Promise<StartRuleMigrationResponse> {
     const connectorId = this.connectorIdStorage.get();
     if (!connectorId) {
       throw new Error(i18n.MISSING_CONNECTOR_ERROR);
@@ -134,7 +140,7 @@ export class SiemRulesMigrationsService {
       };
     }
 
-    const result = await startRuleMigration({ migrationId, connectorId, langSmithOptions });
+    const result = await startRuleMigration({ migrationId, connectorId, retry, langSmithOptions });
     this.startPolling();
     return result;
   }
@@ -155,7 +161,7 @@ export class SiemRulesMigrationsService {
     return results;
   }
 
-  public async getMissingResources(migrationId: string): Promise<RuleMigrationResourceData[]> {
+  public async getMissingResources(migrationId: string): Promise<RuleMigrationResourceBase[]> {
     return getMissingResources({ migrationId });
   }
 
@@ -179,6 +185,10 @@ export class SiemRulesMigrationsService {
       }
       return this.getRuleMigrationsStatsWithRetry(params, nextSleepSecs);
     });
+  }
+
+  public async getIntegrations(): Promise<Record<string, RelatedIntegration>> {
+    return getIntegrations({});
   }
 
   private async startTaskStatsPolling(): Promise<void> {
@@ -213,7 +223,12 @@ export class SiemRulesMigrationsService {
         }
       }
 
-      await new Promise((resolve) => setTimeout(resolve, REQUEST_POLLING_INTERVAL_SECONDS * 1000));
+      // Do not wait if there are no more pending migrations
+      if (pendingMigrationIds.length > 0) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, REQUEST_POLLING_INTERVAL_SECONDS * 1000)
+        );
+      }
     } while (pendingMigrationIds.length > 0);
   }
 }

@@ -15,6 +15,8 @@ import { DEFAULT_CONVERSATION_TITLE } from '../../use_conversation/translations'
 import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { WELCOME_CONVERSATION } from '../../use_conversation/sample_conversations';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import { of } from 'rxjs';
 
 const BASE_CONVERSATION: Conversation = {
   ...WELCOME_CONVERSATION,
@@ -36,6 +38,13 @@ const mockUseAssistantContext = {
   setConversations: jest.fn(),
   setAllSystemPrompts: jest.fn(),
   allSystemPrompts: mockSystemPrompts,
+  chrome: {
+    getChromeStyle$: jest.fn(() => of('classic')),
+    navControls: chromeServiceMock.createStartContract().navControls,
+  },
+  assistantAvailability: {
+    hasAssistantPrivilege: true,
+  },
 };
 
 jest.mock('../../../assistant_context', () => {

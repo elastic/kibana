@@ -59,7 +59,8 @@
       "charts",
       "entityManager",
       "inference",
-      "discoverShared"
+      "discoverShared",
+      "productDocBase"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
@@ -87,7 +88,8 @@
       "usageCollection",
       "lists",
       "ml",
-      "unifiedSearch"
+      "unifiedSearch",
+      "esql"
     ],
     "extraPublicDirs": [
       "common"

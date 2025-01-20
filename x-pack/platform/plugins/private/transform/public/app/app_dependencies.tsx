@@ -18,6 +18,7 @@ import type {
   SavedObjectsStart,
   ScopedHistory,
   ThemeServiceStart,
+  UserProfileService,
 } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -57,6 +58,7 @@ export interface AppDependencies {
   storage: Storage;
   overlays: OverlayStart;
   theme: ThemeServiceStart;
+  userProfile: UserProfileService;
   history: ScopedHistory;
   share: SharePluginStart;
   spaces?: SpacesPluginStart;

@@ -18,6 +18,12 @@ export function registerStartBasicRoute({
   router.post(
     {
       path: addBasePath('/start_basic'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: { query: schema.object({ acknowledge: schema.string() }) },
     },
     async (ctx, req, res) => {

@@ -17,7 +17,7 @@ export const getPlatformEngineer: () => Omit<Role, 'name'> = () => {
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
-          siem: [
+          siemV2: [
             'minimal_all',
 
             'policy_management_all',
@@ -28,7 +28,11 @@ export const getPlatformEngineer: () => Omit<Role, 'name'> = () => {
             'blocklist_all',
 
             'actions_log_management_read',
+
+            'workflow_insights_all',
           ],
+          securitySolutionTimeline: ['all'],
+          securitySolutionNotes: ['all'],
         },
       },
     ],
