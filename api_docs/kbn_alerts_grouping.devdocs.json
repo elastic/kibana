@@ -31,7 +31,7 @@
           },
           "<T>) => React.JSX.Element"
         ],
-        "path": "packages/kbn-alerts-grouping/src/components/alerts_grouping.tsx",
+        "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/components/alerts_grouping.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -53,7 +53,7 @@
               },
               "<T>"
             ],
-            "path": "packages/kbn-alerts-grouping/src/components/alerts_grouping.tsx",
+            "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/components/alerts_grouping.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -74,7 +74,7 @@
           "GroupModel",
           "> | null) => void; }"
         ],
-        "path": "packages/kbn-alerts-grouping/src/contexts/alerts_grouping_context.tsx",
+        "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/contexts/alerts_grouping_context.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -88,7 +88,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-alerts-grouping/src/contexts/alerts_grouping_context.tsx",
+            "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/contexts/alerts_grouping_context.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -106,7 +106,7 @@
         "tags": [],
         "label": "AlertsGroupAggregationBucket",
         "description": [],
-        "path": "packages/kbn-alerts-grouping/src/types.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -117,7 +117,7 @@
             "tags": [],
             "label": "key",
             "description": [],
-            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -128,7 +128,7 @@
             "tags": [],
             "label": "doc_count",
             "description": [],
-            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -142,7 +142,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -156,7 +156,7 @@
             "signature": [
               "{ value: number; } | undefined"
             ],
-            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -180,7 +180,7 @@
           },
           "<T>"
         ],
-        "path": "packages/kbn-alerts-grouping/src/types.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -204,7 +204,7 @@
               },
               "[]) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
-            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -225,7 +225,7 @@
                   },
                   "[]"
                 ],
-                "path": "packages/kbn-alerts-grouping/src/types.ts",
+                "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -246,7 +246,7 @@
               "GroupPanelRenderer",
               "<T> | undefined"
             ],
-            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -263,7 +263,7 @@
               "GetGroupStats",
               "<T> | undefined"
             ],
-            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -286,7 +286,7 @@
               },
               "[] | undefined"
             ],
-            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -309,7 +309,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -333,7 +333,7 @@
               },
               "[], groupNumber: number) => JSX.Element[]) | undefined"
             ],
-            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -356,7 +356,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -372,7 +372,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -388,7 +388,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -401,7 +401,7 @@
             "description": [
               "\nTime filter start"
             ],
-            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -414,7 +414,7 @@
             "description": [
               "\nTime filter end"
             ],
-            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -430,7 +430,7 @@
             "signature": [
               "{ query: string | { [key: string]: any; }; language: string; }"
             ],
-            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -446,7 +446,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -459,7 +459,7 @@
             "description": [
               "\nID used to retrieve the current grouping configuration from the state"
             ],
-            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -483,7 +483,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -497,7 +497,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-alerts-grouping/src/types.ts",
+                "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -516,13 +516,7 @@
             ],
             "signature": [
               "{ notifications: ",
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.NotificationsStart",
-                "text": "NotificationsStart"
-              },
+              "NotificationsStart",
               "; dataViews: ",
               {
                 "pluginId": "dataViews",
@@ -532,16 +526,10 @@
                 "text": "DataViewsServicePublic"
               },
               "; http: ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              },
+              "HttpSetup",
               "; }"
             ],
-            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -555,7 +543,7 @@
         "tags": [],
         "label": "BaseAlertsGroupAggregations",
         "description": [],
-        "path": "packages/kbn-alerts-grouping/src/types.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -577,7 +565,7 @@
               },
               "[]; }"
             ],
-            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -591,7 +579,7 @@
             "signature": [
               "{ value: number; }"
             ],
-            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -605,7 +593,7 @@
             "signature": [
               "{ value: number; }"
             ],
-            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }

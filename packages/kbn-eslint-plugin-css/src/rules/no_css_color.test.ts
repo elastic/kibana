@@ -45,7 +45,7 @@ const invalid: RuleTester.InvalidTestCase[] = [
     filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
     code: `
     import React from 'react';
-    
+
     function TestComponent() {
       return (
         <EuiCode style={{ color: '#dd4040' }}>This is a test</EuiCode>
@@ -86,7 +86,7 @@ const invalid: RuleTester.InvalidTestCase[] = [
     filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
     code: `
     import React from 'react';
-    
+
     function TestComponent() {
       const baseStyle = { background: 'rgb(255, 255, 255)' };
 
@@ -116,7 +116,7 @@ const invalid: RuleTester.InvalidTestCase[] = [
     filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
     code: `
     import React from 'react';
-    
+
     function TestComponent() {
       return (
         <EuiCode style={{ background: '#dd4040' }}>This is a test</EuiCode>
@@ -129,7 +129,7 @@ const invalid: RuleTester.InvalidTestCase[] = [
     filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
     code: `
     import React from 'react';
-    
+
     function TestComponent() {
       return (
         <EuiCode css={{ color: '#dd4040' }}>This is a test</EuiCode>
@@ -153,7 +153,7 @@ const invalid: RuleTester.InvalidTestCase[] = [
     code: `
     import React from 'react';
     import { css } from '@emotion/css';
-    
+
     function TestComponent() {
       return (
         <EuiCode css={css\` color: #dd4040; \`}>This is a test</EuiCode>
@@ -171,7 +171,7 @@ const invalid: RuleTester.InvalidTestCase[] = [
     const codeCss = css({
       color: '#dd4040',
     })
-    
+
     function TestComponent() {
       return (
         <EuiCode css={codeCss}>This is a test</EuiCode>
@@ -187,7 +187,7 @@ const invalid: RuleTester.InvalidTestCase[] = [
     import { css } from '@emotion/css';
 
     const codeCss = css\` color: #dd4040; \`
-    
+
     function TestComponent() {
       return (
         <EuiCode css={codeCss}>This is a test</EuiCode>
@@ -200,7 +200,7 @@ const invalid: RuleTester.InvalidTestCase[] = [
     filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
     code: `
     import React from 'react';
-    
+
     function TestComponent() {
       return (
         <EuiCode css={() => ({ color: '#dd4040' })}>This is a test</EuiCode>
@@ -213,7 +213,7 @@ const invalid: RuleTester.InvalidTestCase[] = [
     filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
     code: `
     import React from 'react';
-    
+
     function TestComponent() {
       return (
         <EuiCode css={function () { return { color: '#dd4040' }; }}>This is a test</EuiCode>
@@ -227,7 +227,7 @@ const invalid: RuleTester.InvalidTestCase[] = [
     code: `
     import React from 'react';
     import { css } from '@emotion/css';
-    
+
     function TestComponent() {
       return (
         <EuiCode className={css\` color: #dd4040; \`}>This is a test</EuiCode>
@@ -237,7 +237,24 @@ const invalid: RuleTester.InvalidTestCase[] = [
   },
 ];
 
-const valid: RuleTester.ValidTestCase[] = [];
+const valid: RuleTester.ValidTestCase[] = [
+  {
+    name: 'Does not raise an error when a CSS color is not used in a JSX css prop attribute',
+    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
+    code: `
+    import React from 'react';
+    import { EuiCode } from '@elastic/eui';
+    import { css } from '@emotion/react';
+    function TestComponent() {
+      return (
+        <EuiCode css={css\`
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+          \`}>This is a test</EuiCode>
+      )
+    }`,
+  },
+];
 
 for (const [name, tester] of [tsTester, babelTester]) {
   describe(name, () => {

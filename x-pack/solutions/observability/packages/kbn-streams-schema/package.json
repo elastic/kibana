@@ -1,0 +1,7 @@
+{
+  "name": "@kbn/streams-schema",
+  "description": "Streams Zod schema definition and common models shared between public and server.",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Elastic License 2.0"
+}

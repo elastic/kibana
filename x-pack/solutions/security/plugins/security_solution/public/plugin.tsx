@@ -61,6 +61,7 @@ import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
+import { hasAccessToSecuritySolution } from './helpers_access';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -288,6 +289,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const { subPluginClasses } = await this.lazySubPlugins();
       this._subPlugins = {
         alerts: new subPluginClasses.Detections(),
+        assetInventory: new subPluginClasses.AssetInventory(),
         attackDiscovery: new subPluginClasses.AttackDiscovery(),
         rules: new subPluginClasses.Rules(),
         exceptions: new subPluginClasses.Exceptions(),
@@ -321,6 +323,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const alerts = await subPlugins.alerts.start(storage, plugins);
     return {
       alerts,
+      assetInventory: subPlugins.assetInventory.start(),
       attackDiscovery: subPlugins.attackDiscovery.start(),
       cases: subPlugins.cases.start(),
       cloudDefend: subPlugins.cloudDefend.start(),
@@ -436,7 +439,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const { upsellingService, isSolutionNavigationEnabled$ } = this.contract;
 
     // When the user does not have access to SIEM (main Security feature) nor Security Cases feature, the plugin must be inaccessible.
-    if (!capabilities.siem?.show && !capabilities.securitySolutionCasesV2?.read_cases) {
+    if (
+      !hasAccessToSecuritySolution(capabilities) &&
+      !capabilities.securitySolutionCasesV2?.read_cases
+    ) {
       this.appUpdater$.next(() => ({
         status: AppStatus.inaccessible,
         visibleIn: [],
