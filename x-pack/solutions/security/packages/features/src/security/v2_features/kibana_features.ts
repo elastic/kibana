@@ -19,15 +19,16 @@ import {
   SAVED_QUERY_RULE_TYPE_ID,
   THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
-import type { BaseKibanaFeatureConfig } from '../types';
 import {
   APP_ID,
-  SERVER_APP_ID,
+  SECURITY_FEATURE_ID_V2,
   LEGACY_NOTIFICATIONS_ID,
   CLOUD_POSTURE_APP_ID,
   CLOUD_DEFEND_APP_ID,
-} from '../constants';
-import type { SecurityFeatureParams } from './types';
+  SERVER_APP_ID,
+} from '../../constants';
+import type { SecurityFeatureParams } from '../types';
+import type { BaseKibanaFeatureConfig } from '../../types';
 
 const SECURITY_RULE_TYPES = [
   LEGACY_NOTIFICATIONS_ID,
@@ -46,10 +47,10 @@ const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
   consumers: [SERVER_APP_ID],
 }));
 
-export const getSecurityBaseKibanaFeature = ({
+export const getSecurityV2BaseKibanaFeature = ({
   savedObjects,
 }: SecurityFeatureParams): BaseKibanaFeatureConfig => ({
-  id: SERVER_APP_ID,
+  id: SECURITY_FEATURE_ID_V2,
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionTitle',
     {

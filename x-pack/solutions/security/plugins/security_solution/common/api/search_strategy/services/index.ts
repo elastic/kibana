@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const ACTION_INVESTIGATE_IN_TIMELINE = i18n.translate(
-  'xpack.securitySolution.threatIntelligence.investigateInTimelineTitle',
-  {
-    defaultMessage: 'Investigate in timeline',
-  }
-);
+export * from './observed_details';
