@@ -41737,7 +41737,7 @@ components:
         - connectorId
         - actionTypeId
     Security_AI_Assistant_API_BaseContentReference:
-      description: The base of a content reference
+      description: The basis of a content reference
       type: object
       properties:
         id:
@@ -41829,7 +41829,7 @@ components:
           - $ref: '#/components/schemas/Security_AI_Assistant_API_ProductDocumentationContentReference'
           - $ref: '#/components/schemas/Security_AI_Assistant_API_EsqlContentReference'
             additionalProperties: false
-      description: Multiple content references
+      description: A union of all content reference types
       type: object
     Security_AI_Assistant_API_ConversationCategory:
       description: The conversation category.
