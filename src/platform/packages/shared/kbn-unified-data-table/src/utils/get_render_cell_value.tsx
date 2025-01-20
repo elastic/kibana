@@ -27,6 +27,7 @@ import { DataTablePopoverCellValue } from '../components/data_table_cell_value';
 import {
   InTableSearchHighlightsWrapper,
   InTableSearchHighlightsWrapperProps,
+  InTableSearchContext,
 } from '../components/in_table_search';
 
 export const CELL_CLASS = 'unifiedDataTable__cellValue';
@@ -68,7 +69,7 @@ export const getRenderCellValueFn = ({
     const row = rows ? rows[rowIndex] : undefined;
     const field = dataView.fields.getByName(columnId);
     const ctx = useContext(UnifiedDataTableContext);
-    const { inTableSearchTerm } = ctx;
+    const { inTableSearchTerm } = useContext(InTableSearchContext);
 
     useEffect(() => {
       if (row?.isAnchor) {

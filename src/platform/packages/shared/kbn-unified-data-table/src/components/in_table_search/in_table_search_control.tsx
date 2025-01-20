@@ -29,16 +29,24 @@ import './in_table_search.scss';
 const BUTTON_TEST_SUBJ = 'startInTableSearchButton';
 
 const searchInputCss = css`
-  .euiFormControlLayout,
   input.euiFieldSearch {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-    border-right: 0;
+    /* to prevent the width from changing when entering the search term */
+    min-width: 210px;
   }
 
   .euiFormControlLayout__append {
     padding-inline-end: 0 !important;
     background: none;
+  }
+
+  /* override borders style only if it's under the custom grid toolbar */
+  .unifiedDataTableToolbarControlIconButton {
+    .euiFormControlLayout,
+    input.euiFieldSearch {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+      border-right: 0;
+    }
   }
 `;
 

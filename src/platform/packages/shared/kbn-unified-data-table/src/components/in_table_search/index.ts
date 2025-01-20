@@ -17,3 +17,4 @@ export {
   type UseInTableSearchMatchesProps,
   type UseInTableSearchMatchesReturn,
 } from './use_in_table_search_matches';
+export { InTableSearchContext, type InTableSearchContextValue } from './in_table_search_context';

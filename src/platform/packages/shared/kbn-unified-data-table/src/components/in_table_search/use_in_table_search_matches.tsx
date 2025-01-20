@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useState, ReactNode, useRef, useContext } from 'react';
+import React, { useCallback, useEffect, useState, ReactNode, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import { UnifiedDataTableContext } from '../../table_context';
+import { InTableSearchContext, InTableSearchContextValue } from './in_table_search_context';
 import { InTableSearchHighlightsWrapperProps } from './in_table_search_highlights_wrapper';
 
 let latestTimeoutTimer: NodeJS.Timeout | null = null;
@@ -25,7 +25,7 @@ interface RowMatches {
 export interface UseInTableSearchMatchesProps {
   visibleColumns: string[];
   rows: DataTableRecord[];
-  inTableSearchTerm: string | undefined;
+  inTableSearchTerm: string;
   renderCellValue: (
     props: EuiDataGridCellValueElementProps &
       Pick<InTableSearchHighlightsWrapperProps, 'onHighlightsCountFound'>
@@ -329,17 +329,13 @@ function AllCells({
   onHighlightsCountFound: (rowIndex: number, fieldName: string, count: number) => void;
 }) {
   const UnifiedDataTableRenderCellValue = renderCellValue;
-  const ctx = useContext(UnifiedDataTableContext);
+  const contextValue = useMemo<InTableSearchContextValue>(
+    () => ({ inTableSearchTerm }),
+    [inTableSearchTerm]
+  );
 
   return (
-    <UnifiedDataTableContext.Provider
-      value={{
-        ...ctx,
-        inTableSearchTerm,
-        pageIndex: 0,
-        pageSize: rows?.length ?? 0,
-      }}
-    >
+    <InTableSearchContext.Provider value={contextValue}>
       {(rows || []).flatMap((_, rowIndex) => {
         return visibleColumns.map((fieldName) => {
           return (
@@ -365,7 +361,7 @@ function AllCells({
           );
         });
       })}
-    </UnifiedDataTableContext.Provider>
+    </InTableSearchContext.Provider>
   );
 }
 
