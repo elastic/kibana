@@ -27,10 +27,7 @@ export const createObservabilityRootProfileProvider = (
     }
 
     const logsSources = await services.logsDataAccess?.services.logSourcesService.getLogSources();
-    const allLogsIndexPattern = logsSources
-      ?.map(({ indexPattern }) => indexPattern)
-      .flatMap((pattern) => [pattern, `*:${pattern}`])
-      .join(',');
+    const allLogsIndexPattern = logsSources?.map(({ indexPattern }) => indexPattern).join(',');
 
     return {
       isMatch: true,
