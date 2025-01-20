@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldType } from '@kbn/search-connectors/types';
+import { FieldType } from '@kbn/inference-endpoint-ui-common';
 import { InferenceProvider } from '../../types';
 
 export const mockProviders: InferenceProvider[] = [
