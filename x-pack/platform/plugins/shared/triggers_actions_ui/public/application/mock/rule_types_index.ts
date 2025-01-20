@@ -65,7 +65,7 @@ export const ruleTypesIndex = new Map([
           read: true,
           all: true,
         },
-        siemV2: {
+        siem: {
           read: true,
           all: true,
         },

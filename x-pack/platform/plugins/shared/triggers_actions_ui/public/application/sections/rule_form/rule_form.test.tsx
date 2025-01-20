@@ -595,7 +595,7 @@ describe('rule_form', () => {
               logs: { read: true, all: false },
               ml: { read: true, all: true },
               monitoring: { read: true, all: true },
-              siemV2: { read: true, all: true },
+              siem: { read: true, all: true },
               slo: { read: true, all: false },
               stackAlerts: { read: true, all: true },
               uptime: { read: true, all: true },

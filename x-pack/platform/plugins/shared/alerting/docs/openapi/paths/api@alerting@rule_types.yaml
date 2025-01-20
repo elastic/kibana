@@ -185,7 +185,7 @@ get:
                           type: boolean
                         read:
                           type: boolean
-                    siemV2:
+                    siem:
                       type: object
                       properties:
                         all:
