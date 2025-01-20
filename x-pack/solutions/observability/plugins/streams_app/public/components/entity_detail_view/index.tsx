@@ -114,7 +114,7 @@ export function EntityDetailViewWithoutParams({
                       </EuiBadge>
                     </>
                   ) : null}
-                  {definition && <LifecycleBadge lifecycle={definition.effectiveLifecycle} />}
+                  {definition && <LifecycleBadge lifecycle={definition.effective_lifecycle} />}
                 </EuiFlexGroup>
               }
             />
