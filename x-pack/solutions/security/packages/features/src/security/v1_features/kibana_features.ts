@@ -94,12 +94,15 @@ export const getSecurityBaseKibanaFeature = ({
         default: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
           { feature: NOTES_FEATURE_ID, privileges: ['all'] },
-          { feature: SECURITY_FEATURE_ID_V2, privileges: ['all'] },
+          { feature: SECURITY_FEATURE_ID_V2, privileges: ['all', 'endpoint_exceptions_all'] },
         ],
         minimal: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
           { feature: NOTES_FEATURE_ID, privileges: ['all'] },
-          { feature: SECURITY_FEATURE_ID_V2, privileges: ['minimal_all'] },
+          {
+            feature: SECURITY_FEATURE_ID_V2,
+            privileges: ['minimal_all', 'endpoint_exceptions_all'],
+          },
         ],
       },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
@@ -141,12 +144,15 @@ export const getSecurityBaseKibanaFeature = ({
         default: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['read'] },
           { feature: NOTES_FEATURE_ID, privileges: ['read'] },
-          { feature: SECURITY_FEATURE_ID_V2, privileges: ['read'] },
+          { feature: SECURITY_FEATURE_ID_V2, privileges: ['read', 'endpoint_exceptions_read'] },
         ],
         minimal: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['read'] },
           { feature: NOTES_FEATURE_ID, privileges: ['read'] },
-          { feature: SECURITY_FEATURE_ID_V2, privileges: ['minimal_read'] },
+          {
+            feature: SECURITY_FEATURE_ID_V2,
+            privileges: ['minimal_read', 'endpoint_exceptions_read'],
+          },
         ],
       },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],

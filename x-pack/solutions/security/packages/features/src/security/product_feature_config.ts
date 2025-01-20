@@ -66,6 +66,10 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
     },
   },
 
+  [ProductFeatureSecurityKey.endpointExceptions]: {
+    subFeatureIds: [SecuritySubFeatureId.endpointExceptions],
+  },
+
   [ProductFeatureSecurityKey.endpointHostManagement]: {
     subFeatureIds: [SecuritySubFeatureId.endpointList],
   },

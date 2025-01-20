@@ -13,7 +13,7 @@ import {
   securityDefaultProductFeaturesConfig,
   createEnabledProductFeaturesConfigMap,
 } from '@kbn/security-solution-features/config';
-import {
+import type {
   ProductFeatureSecurityKey,
   SecuritySubFeatureId,
 } from '@kbn/security-solution-features/keys';
@@ -45,7 +45,4 @@ const securityProductFeaturesConfig: Record<
   ProductFeatureKibanaConfig<SecuritySubFeatureId>
 > = {
   ...securityDefaultProductFeaturesConfig,
-  [ProductFeatureSecurityKey.endpointExceptions]: {
-    subFeatureIds: [SecuritySubFeatureId.endpointExceptions],
-  },
 };
