@@ -34,6 +34,7 @@ import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
+import type { CloudPostureEntityIdentifier } from '../entity_insight';
 
 type MisconfigurationSortFieldType =
   | MISCONFIGURATION.RESULT_EVALUATION
@@ -92,7 +93,7 @@ const getFindingsStats = (
  * Insights view displayed in the document details expandable flyout left section
  */
 export const MisconfigurationFindingsDetailsTable = memo(
-  ({ field, value }: { field: 'host.name' | 'user.name'; value: string }) => {
+  ({ field, value }: { field: CloudPostureEntityIdentifier; value: string }) => {
     useEffect(() => {
       uiMetricService.trackUiMetric(
         METRIC_TYPE.COUNT,
@@ -178,7 +179,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
       return getNavUrlParams({ 'rule.id': ruleId, 'resource.id': resourceId }, 'configurations');
     };
 
-    const getFindingsPageUrl = (name: string, queryField: 'host.name' | 'user.name') => {
+    const getFindingsPageUrl = (name: string, queryField: CloudPostureEntityIdentifier) => {
       return getNavUrlParams({ [queryField]: name }, 'configurations', ['rule.name']);
     };
 
