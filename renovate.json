@@ -3825,6 +3825,25 @@
       "enabled": true
     },
     {
+      "groupName": "oas",
+      "matchDepNames": [
+        "oas"
+      ],
+      "reviewers": [
+        "team:security-scalability"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Security-Scalability",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
       "groupName": "seedrandom",
       "matchDepNames": [
         "seedrandom",
