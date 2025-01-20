@@ -50,7 +50,7 @@ const i18nTexts = {
   securitySolnLogsDBCalloutTitle: i18n.translate(
     'xpack.upgradeAssistant.overview.securitySolutionLogsDBCalloutTitle',
     {
-      defaultMessage: 'Elastic Security and LogsDB index mode',
+      defaultMessage: 'Elastic Security and logsdb index mode',
     }
   ),
 };
