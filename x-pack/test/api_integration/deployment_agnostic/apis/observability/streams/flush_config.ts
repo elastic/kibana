@@ -9,8 +9,11 @@ import expect from '@kbn/expect';
 import { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
 import { ReadStreamDefinition, WiredReadStreamDefinition } from '@kbn/streams-schema';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { createStreamsRepositorySupertestClient } from './helpers/repository_client';
+import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import {
+  StreamsSupertestRepositoryClient,
+  createStreamsRepositoryAdminClient,
+} from './helpers/repository_client';
 import { disableStreams, enableStreams, indexDocument } from './helpers/requests';
 
 type StreamPutItem = ClientRequestParamsOf<
@@ -120,15 +123,16 @@ const streams: StreamPutItem[] = [
   },
 ];
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const roleScopedSupertest = getService('roleScopedSupertest');
   const esClient = getService('es');
 
-  const apiClient = createStreamsRepositorySupertestClient(supertest);
+  let apiClient: StreamsSupertestRepositoryClient;
 
   // An anticipated use case is that a user will want to flush a tree of streams from a config file
   describe('Flush from config file', () => {
     before(async () => {
+      apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
       await createStreams();
       await indexDocuments();

@@ -69,6 +69,8 @@ export class StreamsService {
 
     const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
 
+    const isServerless = coreStart.elasticsearch.getCapabilities().serverless;
+
     const storageAdapter = new StorageIndexAdapter(
       scopedClusterClient.asInternalUser,
       logger,
@@ -80,6 +82,7 @@ export class StreamsService {
       logger,
       scopedClusterClient,
       storageClient: storageAdapter.getClient(),
+      isServerless,
     });
   }
 }

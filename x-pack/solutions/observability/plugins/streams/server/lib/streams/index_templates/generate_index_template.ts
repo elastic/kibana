@@ -14,6 +14,7 @@ import { getIndexTemplateName } from './name';
 
 export function generateIndexTemplate(
   definition: StreamDefinition,
+  isServerless: boolean,
   classicRoot?: StreamDefinition
 ) {
   const name = definition.name;
@@ -79,7 +80,7 @@ export function generateIndexTemplate(
     },
     data_stream: {
       hidden: false,
-      failure_store: true,
+      failure_store: isServerless ? undefined : true, // TODO: Enable failure store for serverless once it is rolled out
     },
     template: {
       settings: {

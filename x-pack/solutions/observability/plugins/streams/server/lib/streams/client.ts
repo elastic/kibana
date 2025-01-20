@@ -84,6 +84,7 @@ export class StreamsClient {
       assetClient: AssetClient;
       storageClient: StreamsStorageClient;
       logger: Logger;
+      isServerless: boolean;
     }
   ) {}
 
@@ -182,6 +183,7 @@ export class StreamsClient {
         logger,
         scopedClusterClient,
         unwiredRoot: await this.getUnwiredRootForStream(definition),
+        isServerless: this.dependencies.isServerless,
       });
     } else if (isIngestStream(definition)) {
       const dataStream = await this.getDataStream(definition.name);
