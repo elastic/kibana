@@ -52,6 +52,7 @@ import {
 } from '../../panel_actions';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 import { AnyApiAction } from '../../panel_actions/types';
+import { useHoverActionStyles } from './use_hover_actions_styles';
 
 const getContextMenuAriaLabel = (title?: string, index?: number) => {
   if (title) {
@@ -416,7 +417,6 @@ export const PresentationPanelHoverActions = ({
     // memoize the drag handle to avoid calling `setDragHandle` unnecessarily
     () => (
       <button
-        className={'leftActions'}
         ref={(ref) => {
           dragHandleRef.current = ref;
           setDragHandle('hoverActions', ref);
@@ -440,12 +440,13 @@ export const PresentationPanelHoverActions = ({
   );
 
   const hasHoverActions = quickActionElements.length || contextMenuPanels.lastIndexOf.length;
+  const { containerStyles, hoverActionStyles } = useHoverActionStyles();
 
   return (
     <div
       ref={anchorRef}
       className={classNames('embPanel__hoverActionsAnchor', {
-        'embPanel__hoverActionsAnchor--lockHoverActions': hasLockedHoverActions,
+        'embPanel__hoverActionsAnchor--lockHoverActions': true,
       })}
       data-test-embeddable-id={api?.uuid}
       data-test-subj={`embeddablePanelHoverActions-${(title || defaultTitle || '').replace(
@@ -453,120 +454,44 @@ export const PresentationPanelHoverActions = ({
         ''
       )}`}
       css={css`
-        container: hoverActionsAnchor / size;
-        border-radius: ${euiTheme.border.radius.medium};
-        position: relative;
-        height: 100%;
+        --borderStyle: ${viewMode === 'edit' ? EDIT_MODE_OUTLINE : VIEW_MODE_OUTLINE};
 
         .embPanel {
           ${showBorder
             ? `
-              outline: ${viewMode === 'edit' ? EDIT_MODE_OUTLINE : VIEW_MODE_OUTLINE};
+              outline: var(--borderStyle);
             `
             : ''}
         }
+
+        ${containerStyles}
       `}
     >
       {children}
       {api && hasHoverActions && (
-        <div
-          className={classNames('embPanel__hoverActions', className)}
-          css={css`
-            & {
-              pointer-events: none; // Prevent hover actions wrapper from blocking interactions with other panels
-
-              & > * {
-                &:not(.breakpoint) {
-                  pointer-events: all; // Prevent hover actions wrapper from blocking interactions with other panels
-                }
-              }
-
-              height: ${euiTheme.size.xl};
-
-              padding: 0px ${euiTheme.size.m};
-              width: 100%;
-              display: grid;
-              grid-template-columns: max-content auto; // left actions + breakpoint
-              grid-auto-columns: max-content; // handle all right actions
-              grid-auto-flow: column;
-              position: absolute;
-              top: -${euiTheme.size.xl};
-              z-index: 10000;
-
-              --borderStyle: ${viewMode === 'edit' ? EDIT_MODE_OUTLINE : VIEW_MODE_OUTLINE};
-              --paddingAroundAction: calc(${euiTheme.size.xs} - 1px);
-
-              & > * {
-                &:not(.breakpoint) {
-                  border-top: var(--borderStyle);
-                  border-radius: 0px;
-                  background-color: ${euiTheme.colors.backgroundBasePlain};
-                  padding-top: var(--paddingAroundAction);
-                }
-              }
-
-              // left action
-              & > *:first-child {
-                border: var(--borderStyle);
-                border-bottom: 0px;
-                border-top-left-radius: ${euiTheme.border.radius.medium};
-                border-top-right-radius: ${euiTheme.border.radius.medium};
-                padding-left: var(--paddingAroundAction);
-                padding-right: var(--paddingAroundAction);
-              }
-
-              // start of right actions
-              & > *:nth-child(3) {
-                border-left: var(--borderStyle);
-                border-top-left-radius: ${euiTheme.border.radius.medium};
-                padding-left: var(--paddingAroundAction);
-              }
-
-              // end of right actions
-              & > *:last-child {
-                border-right: var(--borderStyle);
-                border-top-right-radius: ${euiTheme.border.radius.medium};
-                padding-right: var(--paddingAroundAction);
-              }
-
-              @container hoverActionsAnchor (width < 300px) {
-                width: fit-content;
-                top: -${euiTheme.size.l};
-                right: ${euiTheme.size.xs};
-
-                border-radius: ${euiTheme.border.radius.medium};
-                border: ${viewMode === 'edit' ? EDIT_MODE_OUTLINE : VIEW_MODE_OUTLINE};
-                background-color: ${euiTheme.colors.backgroundBasePlain};
-                grid-template-columns: max-content;
-
-                & > * {
-                  border: none !important;
-                }
-              }
-            }
-          `}
-        >
+        <div className={classNames('embPanel__hoverActions', className)} css={hoverActionStyles}>
           {viewMode === 'edit' && dragHandle}
           <div className="breakpoint" />
           {showNotifications && notificationElements}
           {showDescription && (
             <EuiIconTip
+              size="m"
               title={!hideTitle ? title || undefined : undefined}
               content={description}
               delay="regular"
               position="top"
-              anchorClassName="embPanel__descriptionTooltipAnchor"
               data-test-subj="embeddablePanelDescriptionTooltip"
               type="iInCircle"
+              iconProps={{
+                css: css`
+                  margin: ${euiTheme.size.xs};
+                `,
+              }}
             />
           )}
           {quickActionElements.map(
             ({ iconType, 'data-test-subj': dataTestSubj, onClick, name }, i) => (
-              <EuiToolTip
-                key={`main_action_${dataTestSubj}_${api?.uuid}`}
-                content={name}
-                anchorProps={{ className: 'rightAction' }}
-              >
+              <EuiToolTip key={`main_action_${dataTestSubj}_${api?.uuid}`} content={name}>
                 <EuiButtonIcon
                   iconType={iconType}
                   color="text"
