@@ -53,7 +53,7 @@ export const ServicePanelContent = ({
 
   return (
     <FlyoutBody>
-      {riskScoreState.hasEngineBeenInstalled && riskScoreState.data?.length !== 0 && (
+      {riskScoreState.isModuleEnabled && riskScoreState.data?.length !== 0 && (
         <>
           <FlyoutRiskSummary
             riskScoreData={riskScoreState}
