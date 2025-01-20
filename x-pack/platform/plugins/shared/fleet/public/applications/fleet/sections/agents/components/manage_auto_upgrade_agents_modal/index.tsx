@@ -221,7 +221,7 @@ const TargetVersionsRow: React.FunctionComponent<{
   };
 
   return (
-    <EuiFlexGroup direction="row" alignItems="center">
+    <EuiFlexGroup direction="row" alignItems="flexEnd">
       <EuiFlexItem>
         <EuiFormRow
           label={
@@ -242,7 +242,6 @@ const TargetVersionsRow: React.FunctionComponent<{
               />
             </>
           }
-          helpText=""
         >
           <EuiSuperSelect
             options={options}
@@ -257,12 +256,23 @@ const TargetVersionsRow: React.FunctionComponent<{
       <EuiFlexItem>
         <EuiFormRow
           label={
-            <FormattedMessage
-              id="xpack.fleet.manageAutoUpgradeAgents.percentageTitle"
-              defaultMessage="% of agents to upgrade"
-            />
+            <>
+              <FormattedMessage
+                id="xpack.fleet.manageAutoUpgradeAgents.percentageTitle"
+                defaultMessage="% of agents to upgrade"
+              />
+              <EuiIconTip
+                type="iInCircle"
+                content={
+                  <FormattedMessage
+                    data-test-subj="percentageTooltip"
+                    id="xpack.fleet.manageAutoUpgradeAgents.percentageTooltip"
+                    defaultMessage="Set 100 to upgrade all agents in the policy."
+                  />
+                }
+              />
+            </>
           }
-          helpText={percentage === 100 ? 'Upgrading all of agents in policy' : ''}
         >
           <EuiFieldNumber
             value={percentage}
