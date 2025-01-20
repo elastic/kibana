@@ -112,6 +112,7 @@ export async function scoreSuggestions({
       functions: [scoreFunction],
       functionCall: 'score',
       signal,
+      stream: true,
     }).pipe(concatenateChatCompletionChunks())
   );
 

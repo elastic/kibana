@@ -114,6 +114,19 @@ export enum ProductFeatureAttackDiscoveryKey {
   attackDiscovery = 'attack_discovery',
 }
 
+export enum ProductFeatureTimelineFeatureKey {
+  /**
+   * Enables Timeline
+   */
+  timeline = 'timeline',
+}
+
+export enum ProductFeatureNotesFeatureKey {
+  /**
+   * Enables Notes
+   */
+  notes = 'notes',
+}
 export enum ProductFeatureSiemMigrationsKey {
   /**
    * Enables the SIEM Migrations main feature
@@ -128,6 +141,8 @@ export const ProductFeatureKey = {
   ...ProductFeatureAssistantKey,
   ...ProductFeatureAttackDiscoveryKey,
   ...ProductFeatureSiemMigrationsKey,
+  ...ProductFeatureTimelineFeatureKey,
+  ...ProductFeatureNotesFeatureKey,
 };
 // We need to merge the value and the type and export both to replicate how enum works.
 export type ProductFeatureKeyType =
@@ -135,7 +150,9 @@ export type ProductFeatureKeyType =
   | ProductFeatureCasesKey
   | ProductFeatureAssistantKey
   | ProductFeatureAttackDiscoveryKey
-  | ProductFeatureSiemMigrationsKey;
+  | ProductFeatureSiemMigrationsKey
+  | ProductFeatureTimelineFeatureKey
+  | ProductFeatureNotesFeatureKey;
 
 export const ALL_PRODUCT_FEATURE_KEYS = Object.freeze(Object.values(ProductFeatureKey));
 

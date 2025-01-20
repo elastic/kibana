@@ -21,6 +21,8 @@ import type {
   CasesSubFeatureId,
   SecuritySubFeatureId,
   ProductFeatureSiemMigrationsKey,
+  ProductFeatureTimelineFeatureKey,
+  ProductFeatureNotesFeatureKey,
 } from './product_features_keys';
 
 export type { ProductFeatureKeyType };
@@ -58,6 +60,16 @@ export type ProductFeaturesAttackDiscoveryConfig = Map<
   ProductFeatureKibanaConfig
 >;
 
+export type ProductFeaturesTimelineConfig = Map<
+  ProductFeatureTimelineFeatureKey,
+  ProductFeatureKibanaConfig
+>;
+
+export type ProductFeaturesNotesConfig = Map<
+  ProductFeatureNotesFeatureKey,
+  ProductFeatureKibanaConfig
+>;
+
 export type ProductFeaturesSiemMigrationsConfig = Map<
   ProductFeatureSiemMigrationsKey,
   ProductFeatureKibanaConfig
@@ -76,5 +88,7 @@ export interface ProductFeaturesConfigurator {
   cases: () => ProductFeaturesConfig<CasesSubFeatureId>;
   securityAssistant: () => ProductFeaturesConfig<AssistantSubFeatureId>;
   attackDiscovery: () => ProductFeaturesConfig;
+  timeline: () => ProductFeaturesConfig;
+  notes: () => ProductFeaturesConfig;
   siemMigrations: () => ProductFeaturesConfig;
 }
