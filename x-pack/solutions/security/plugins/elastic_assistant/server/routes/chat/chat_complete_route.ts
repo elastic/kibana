@@ -17,6 +17,7 @@ import {
   getAnonymizedValue,
   ConversationResponse,
   contentReferencesStoreFactory,
+  pruneContentReferences,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
@@ -184,6 +185,8 @@ export const chatCompleteRoute = (
             isError = false
           ): Promise<void> => {
             if (newConversation?.id && conversationsDataClient) {
+              const contentReferences = pruneContentReferences(content, contentReferencesStore);
+              
               await appendAssistantMessageToConversation({
                 conversationId: newConversation?.id,
                 conversationsDataClient,
@@ -191,6 +194,7 @@ export const chatCompleteRoute = (
                 replacements: latestReplacements,
                 isError,
                 traceData,
+                contentReferences
               });
             }
           };
