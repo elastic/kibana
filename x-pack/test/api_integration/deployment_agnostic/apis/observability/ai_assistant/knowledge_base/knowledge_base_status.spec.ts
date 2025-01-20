@@ -21,9 +21,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   describe('/internal/observability_ai_assistant/kb/status', function () {
-    // Fails on MKI: https://github.com/elastic/kibana/issues/205677
-    this.tags(['failsOnMKI']);
-
     beforeEach(async () => {
       await createKnowledgeBaseModel(ml);
       const { status } = await observabilityAIAssistantAPIClient.admin({
