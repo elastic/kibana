@@ -30,6 +30,7 @@ import { AddAgentHelpPopover } from '../../../../../components';
 import { FLEET_SERVER_PACKAGE } from '../../../../../../../../common/constants';
 import { getRootIntegrations } from '../../../../../../../../common/services';
 import { ManageAutoUpgradeAgentsModal } from '../../../../agents/components/manage_auto_upgrade_agents_modal';
+import { AutoUpgradeAgentsTour } from '../../../components/auto_upgrade_agents_tour';
 
 export interface HeaderRightContentProps {
   isLoading: boolean;
@@ -219,7 +220,12 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
                         defaultMessage: 'Auto-upgrade agents',
                       }),
                       content: (
-                        <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd" alignItems="center">
+                        <EuiFlexGroup
+                          gutterSize="xs"
+                          justifyContent="flexEnd"
+                          alignItems="center"
+                          id="auto-upgrade-manage-button"
+                        >
                           <EuiFlexItem grow={false}>
                             <EuiLink
                               onClick={() => {
@@ -292,6 +298,7 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
           />
         </EuiPortal>
       )}
+      <AutoUpgradeAgentsTour anchor="#auto-upgrade-manage-button" />
     </>
   );
 };
