@@ -64,7 +64,7 @@ Cypress.Commands.add(
 
     cy.getByTestSubj(dataTestSubj).type(`: `);
     if (waitForSuggestion) {
-      cy.get(`[data-test-subj="autocompleteSuggestion-value-\\"${value}\\"-"]`, { timeout: 10000 })
+      cy.get(`[data-test-subj="autocompleteSuggestion-value-\\"${value}\\"-"]`)
         .should('be.visible')
         .click({ force: true });
     }
