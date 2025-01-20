@@ -14,7 +14,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { GroupPanelRenderer, GroupStatsItem, RawBucket } from '@kbn/grouping/src';
+import { GenericBuckets, GroupPanelRenderer, GroupStatsItem, RawBucket } from '@kbn/grouping/src';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
@@ -45,9 +45,9 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
     <NullGroup title={title} field={selectedGroup} unit={NULL_GROUPING_UNIT} />
   );
 
-  const getGroupPanelTitle = (aggregationField?: string) => {
+  const getGroupPanelTitle = (aggregationField?: keyof FindingsGroupingAggregation) => {
     const aggregationFieldValue = aggregationField
-      ? bucket[aggregationField]?.buckets?.[0]?.key
+      ? (bucket[aggregationField] as { buckets?: GenericBuckets[] })?.buckets?.[0]?.key
       : null;
 
     if (aggregationFieldValue) {
