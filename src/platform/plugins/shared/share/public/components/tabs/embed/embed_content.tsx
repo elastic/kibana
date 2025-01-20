@@ -16,6 +16,10 @@ import {
   EuiText,
   EuiFlexItem,
   EuiCopy,
+  EuiSwitch,
+  type EuiSwitchEvent,
+  EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -236,6 +240,40 @@ export const EmbedContent = ({
     );
   };
 
+  const renderPublicUrlOptionsSwitch = () => {
+    return (
+      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            label={
+              <FormattedMessage
+                id="share.embed.publicUrlOptionsSwitch.label"
+                defaultMessage="Allow public access"
+              />
+            }
+            checked={usePublicUrl}
+            onChange={(e: EuiSwitchEvent) => {
+              setUrlHelper();
+            }}
+            data-test-subj="embedPublicUrlOptionsSwitch"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={
+              <FormattedMessage
+                id="share.embed.publicUrlOptionsSwitch.tooltip"
+                defaultMessage="Uses multiple pages, showing at most 2 visualizations per page "
+              />
+            }
+          >
+            <EuiIcon type="questionInCircle" />
+          </EuiToolTip>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
+
   const helpText =
     objectType === 'dashboard' ? (
       <FormattedMessage
@@ -267,6 +305,7 @@ export const EmbedContent = ({
         <EuiSpacer />
       </EuiForm>
       <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+        <React.Fragment>{renderPublicUrlOptionsSwitch()}</React.Fragment>
         <EuiFlexItem grow={false}>
           <EuiCopy textToCopy={url}>
             {(copy) => (
