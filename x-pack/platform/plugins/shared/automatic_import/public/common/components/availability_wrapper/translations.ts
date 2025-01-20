@@ -8,33 +8,33 @@
 import { i18n } from '@kbn/i18n';
 
 export const ENTERPRISE_LICENSE_LABEL = i18n.translate(
-  'xpack.integrationAssistant.license.enterprise.label',
+  'xpack.automaticImport.license.enterprise.label',
   {
     defaultMessage: 'Enterprise',
   }
 );
 
 export const ENTERPRISE_LICENSE_TITLE = i18n.translate(
-  'xpack.integrationAssistant.license.enterprise.title',
+  'xpack.automaticImport.license.enterprise.title',
   {
     defaultMessage: 'Enterprise License Required',
   }
 );
 export const ENTERPRISE_LICENSE_UPGRADE_TITLE = i18n.translate(
-  'xpack.integrationAssistant.license.enterprise.upgradeTitle',
+  'xpack.automaticImport.license.enterprise.upgradeTitle',
   {
     defaultMessage: 'Upgrade to Elastic Enterprise',
   }
 );
 export const ENTERPRISE_LICENSE_UPGRADE_DESCRIPTION = i18n.translate(
-  'xpack.integrationAssistant.license.enterprise.upgradeDescription',
+  'xpack.automaticImport.license.enterprise.upgradeDescription',
   {
     defaultMessage:
       'To turn on this feature, you must upgrade your license to Enterprise or start a free 30-day trial',
   }
 );
 export const ENTERPRISE_LICENSE_UPGRADE_BUTTON = i18n.translate(
-  'xpack.integrationAssistant.license.enterprise.upgradeButton',
+  'xpack.automaticImport.license.enterprise.upgradeButton',
   {
     defaultMessage: 'Upgrade license',
   }

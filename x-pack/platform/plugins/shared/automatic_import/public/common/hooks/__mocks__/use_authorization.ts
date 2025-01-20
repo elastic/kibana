@@ -17,7 +17,7 @@ export const useAuthorization = jest.fn(
 
 export const useRoutesAuthorization = jest.fn(
   (): RoutesAuthorization => ({
-    canUseIntegrationAssistant: true,
+    canUseAutomaticImport: true,
     canUseIntegrationUpload: true,
   })
 );

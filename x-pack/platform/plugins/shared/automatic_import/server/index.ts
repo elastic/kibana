@@ -10,8 +10,8 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 export { config } from './config';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { IntegrationAssistantPlugin } = await import('./plugin');
-  return new IntegrationAssistantPlugin(initializerContext);
+  const { AutomaticImportPlugin: AutomaticImportPlugin } = await import('./plugin');
+  return new AutomaticImportPlugin(initializerContext);
 }
 
-export type { IntegrationAssistantPluginSetup, IntegrationAssistantPluginStart } from './types';
+export type { AutomaticImportPluginSetup, AutomaticImportPluginStart } from './types';

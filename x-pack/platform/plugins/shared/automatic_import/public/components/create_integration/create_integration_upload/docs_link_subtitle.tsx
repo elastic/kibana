@@ -15,13 +15,13 @@ export const DocsLinkSubtitle = React.memo(() => {
   return (
     <EuiText size="s" color="subdued">
       <FormattedMessage
-        id="xpack.integrationAssistant.createIntegrationUpload.uploadHelpText"
+        id="xpack.automaticImport.createIntegrationUpload.uploadHelpText"
         defaultMessage="For more information, refer to {link}"
         values={{
           link: (
             <EuiLink href={docLinks?.links.integrationDeveloper.upload} target="_blank">
               <FormattedMessage
-                id="xpack.integrationAssistant.createIntegrationUpload.documentation"
+                id="xpack.automaticImport.createIntegrationUpload.documentation"
                 defaultMessage="Upload an Integration"
               />
             </EuiLink>

@@ -6,7 +6,7 @@
  */
 
 import { RequestHandler, RouteMethod } from '@kbn/core/server';
-import { IntegrationAssistantRouteHandlerContext } from '../plugin';
+import { AutomaticImportRouteHandlerContext } from '../plugin';
 
 /**
  * Wraps a request handler with a check for whether the API route is available.
@@ -19,10 +19,10 @@ export const withAvailability = <
   B = unknown,
   Method extends RouteMethod = never
 >(
-  handler: RequestHandler<P, Q, B, IntegrationAssistantRouteHandlerContext, Method>
-): RequestHandler<P, Q, B, IntegrationAssistantRouteHandlerContext, Method> => {
+  handler: RequestHandler<P, Q, B, AutomaticImportRouteHandlerContext, Method>
+): RequestHandler<P, Q, B, AutomaticImportRouteHandlerContext, Method> => {
   return async (context, req, res) => {
-    const { isAvailable } = await context.integrationAssistant;
+    const { isAvailable } = await context.automaticImport;
     if (!isAvailable()) {
       return res.notFound({
         body: { message: 'This API route is not available using your current license/tier.' },

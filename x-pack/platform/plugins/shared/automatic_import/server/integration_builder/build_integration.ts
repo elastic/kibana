@@ -42,7 +42,7 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
     );
   }
 
-  const workingDir = joinPath(getDataPath(), `integration-assistant-${generateUniqueId()}`);
+  const workingDir = joinPath(getDataPath(), `automatic-import-${generateUniqueId()}`);
   const packageDirectoryName = `${integration.name}-${initialVersion}`;
   const packageDir = createDirectories(workingDir, integration, packageDirectoryName);
 

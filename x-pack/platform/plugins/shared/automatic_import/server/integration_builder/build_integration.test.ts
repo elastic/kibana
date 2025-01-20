@@ -49,7 +49,7 @@ jest.mock('adm-zip', () => {
 });
 
 describe('buildPackage', () => {
-  const packagePath = `${mockedDataPath}/integration-assistant-${mockedId}`;
+  const packagePath = `${mockedDataPath}/automatic-import-${mockedId}`;
   const integrationPath = `${packagePath}/integration-1.0.0`;
 
   const firstDatastreamName = 'datastream_one';

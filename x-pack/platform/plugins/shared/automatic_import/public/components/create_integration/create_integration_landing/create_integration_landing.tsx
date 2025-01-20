@@ -15,7 +15,7 @@ import { IntegrationImageHeader } from '../../../common/components/integration_i
 import { ButtonsFooter } from '../../../common/components/buttons_footer';
 import { SectionWrapper } from '../../../common/components/section_wrapper';
 import { useNavigate, Page } from '../../../common/hooks/use_navigate';
-import { IntegrationAssistantCard } from './integration_assistant_card';
+import { AutomaticImportCard } from './automatic_import_card';
 import * as i18n from './translations';
 
 export const CreateIntegrationLanding = React.memo(() => {
@@ -35,7 +35,7 @@ export const CreateIntegrationLanding = React.memo(() => {
               >
                 <EuiFlexItem>
                   <EuiSpacer size="l" />
-                  <IntegrationAssistantCard />
+                  <AutomaticImportCard />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFlexGroup
@@ -50,7 +50,7 @@ export const CreateIntegrationLanding = React.memo(() => {
                     <EuiFlexItem>
                       <EuiText size="s" color="subdued">
                         <FormattedMessage
-                          id="xpack.integrationAssistant.createIntegrationLanding.uploadPackageDescription"
+                          id="xpack.automaticImport.createIntegrationLanding.uploadPackageDescription"
                           defaultMessage="If you have an existing integration package, {link}"
                           values={{
                             link: (
@@ -59,7 +59,7 @@ export const CreateIntegrationLanding = React.memo(() => {
                                 data-test-subj="uploadPackageLink"
                               >
                                 <FormattedMessage
-                                  id="xpack.integrationAssistant.createIntegrationLanding.uploadPackageLink"
+                                  id="xpack.automaticImport.createIntegrationLanding.uploadPackageLink"
                                   defaultMessage="upload it as a .zip"
                                 />
                               </EuiLink>

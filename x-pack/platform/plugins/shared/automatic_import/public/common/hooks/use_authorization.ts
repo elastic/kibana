@@ -23,13 +23,13 @@ export const useAuthorization = (): Authorization => {
 };
 
 export interface RoutesAuthorization {
-  canUseIntegrationAssistant: boolean;
+  canUseAutomaticImport: boolean;
   canUseIntegrationUpload: boolean;
 }
 export const useRoutesAuthorization = (): RoutesAuthorization => {
   const { canCreateIntegrations, canExecuteConnectors } = useAuthorization();
   return {
-    canUseIntegrationAssistant: canCreateIntegrations && canExecuteConnectors,
+    canUseAutomaticImport: canCreateIntegrations && canExecuteConnectors,
     canUseIntegrationUpload: canCreateIntegrations,
   };
 };

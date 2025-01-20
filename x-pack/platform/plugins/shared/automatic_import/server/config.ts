@@ -14,11 +14,11 @@ export const configSchema = schema.object({
    * For internal use. A list of string values (comma delimited) that will enable experimental
    * type of functionality that is not yet released. Valid values for this settings need to
    * be defined in:
-   * `x-pack/platform/plugins/shared/integration_assistant/common/experimental_features.ts`
+   * `x-pack/platform/plugins/shared/automatic_import/common/experimental_features.ts`
    * under the `allowedExperimentalValues` object
    *
    * @example
-   * xpack.integration_assistant.enableExperimental:
+   * xpack.automatic_import.enableExperimental:
    *   - someCrazyFeature
    *   - someEvenCrazierFeature
    */
@@ -26,9 +26,9 @@ export const configSchema = schema.object({
     defaultValue: () => [],
   }),
 });
-export type IntegrationAssistantConfigType = TypeOf<typeof configSchema>;
+export type AutomaticImportConfigType = TypeOf<typeof configSchema>;
 
-export const config: PluginConfigDescriptor<IntegrationAssistantConfigType> = {
+export const config: PluginConfigDescriptor<AutomaticImportConfigType> = {
   exposeToBrowser: {
     enableExperimental: true,
   },

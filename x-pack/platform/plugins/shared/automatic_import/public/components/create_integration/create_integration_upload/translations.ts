@@ -8,35 +8,35 @@
 import { i18n } from '@kbn/i18n';
 
 export const UPLOAD_TITLE = i18n.translate(
-  'xpack.integrationAssistant.createIntegrationUpload.title',
+  'xpack.automaticImport.createIntegrationUpload.title',
   {
     defaultMessage: 'Upload integration package',
   }
 );
 
 export const UPLOAD_INPUT_TEXT = i18n.translate(
-  'xpack.integrationAssistant.createIntegrationUpload.inputText',
+  'xpack.automaticImport.createIntegrationUpload.inputText',
   {
     defaultMessage: 'Drag and drop a .zip file or Browse files',
   }
 );
 
 export const INSTALL_BUTTON = i18n.translate(
-  'xpack.integrationAssistant.createIntegrationUpload.install',
+  'xpack.automaticImport.createIntegrationUpload.install',
   {
     defaultMessage: 'Add to Elastic',
   }
 );
 
 export const CLOSE_BUTTON = i18n.translate(
-  'xpack.integrationAssistant.createIntegrationUpload.close',
+  'xpack.automaticImport.createIntegrationUpload.close',
   {
     defaultMessage: 'Close',
   }
 );
 
 export const UPLOAD_ERROR = i18n.translate(
-  'xpack.integrationAssistant.createIntegrationUpload.error',
+  'xpack.automaticImport.createIntegrationUpload.error',
   {
     defaultMessage: 'Error installing package',
   }

@@ -61,7 +61,7 @@ const actions = {
 const coreSetupMock = coreMock.createSetup();
 const createRequestContextMock = (clients: MockClients = createMockClients()) => {
   return {
-    integrationAssistant: {
+    automaticImport: {
       getStartServices: (coreSetupMock.getStartServices as jest.Mock).mockImplementation(
         async () => {
           return [

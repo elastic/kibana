@@ -4060,6 +4060,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/automatic-import-plugin@link:x-pack/platform/plugins/shared/automatic_import":
+  version "0.0.0"
+  uid ""
+
 "@kbn/avc-banner@link:src/platform/packages/shared/kbn-avc-banner":
   version "0.0.0"
   uid ""
@@ -6017,10 +6021,6 @@
   uid ""
 
 "@kbn/inspector-plugin@link:src/platform/plugins/shared/inspector":
-  version "0.0.0"
-  uid ""
-
-"@kbn/integration-assistant-plugin@link:x-pack/platform/plugins/shared/integration_assistant":
   version "0.0.0"
   uid ""
 

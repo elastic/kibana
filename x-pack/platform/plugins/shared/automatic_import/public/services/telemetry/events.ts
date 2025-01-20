@@ -33,7 +33,7 @@ export const telemetryEventsSchemas: TelemetryEventsSchemas = {
     },
   },
 
-  [TelemetryEventType.IntegrationAssistantOpen]: {
+  [TelemetryEventType.AutomaticImportOpen]: {
     sessionId: {
       type: 'keyword',
       _meta: {
@@ -43,7 +43,7 @@ export const telemetryEventsSchemas: TelemetryEventsSchemas = {
     },
   },
 
-  [TelemetryEventType.IntegrationAssistantStepComplete]: {
+  [TelemetryEventType.AutomaticImportStepComplete]: {
     sessionId: {
       type: 'keyword',
       _meta: {
@@ -81,7 +81,7 @@ export const telemetryEventsSchemas: TelemetryEventsSchemas = {
     },
   },
 
-  [TelemetryEventType.IntegrationAssistantGenerationComplete]: {
+  [TelemetryEventType.AutomaticImportGenerationComplete]: {
     sessionId: {
       type: 'keyword',
       _meta: {
@@ -133,7 +133,7 @@ export const telemetryEventsSchemas: TelemetryEventsSchemas = {
     },
   },
 
-  [TelemetryEventType.IntegrationAssistantCelGenerationComplete]: {
+  [TelemetryEventType.AutomaticImportCelGenerationComplete]: {
     sessionId: {
       type: 'keyword',
       _meta: {
@@ -178,7 +178,7 @@ export const telemetryEventsSchemas: TelemetryEventsSchemas = {
     },
   },
 
-  [TelemetryEventType.IntegrationAssistantComplete]: {
+  [TelemetryEventType.AutomaticImportComplete]: {
     sessionId: {
       type: 'keyword',
       _meta: {

@@ -8,56 +8,56 @@
 import { i18n } from '@kbn/i18n';
 
 export const SUCCESS_TITLE = i18n.translate(
-  'xpack.integrationAssistant.createIntegrationSuccess.title',
+  'xpack.automaticImport.createIntegrationSuccess.title',
   {
     defaultMessage: 'Success',
   }
 );
 
 export const SUCCESS_DESCRIPTION = i18n.translate(
-  'xpack.integrationAssistant.createIntegrationSuccess.description',
+  'xpack.automaticImport.createIntegrationSuccess.description',
   {
     defaultMessage: 'Your integration is successfully created.',
   }
 );
 
 export const ADD_TO_AGENT_TITLE = i18n.translate(
-  'xpack.integrationAssistant.createIntegrationSuccess.addToAgent.title',
+  'xpack.automaticImport.createIntegrationSuccess.addToAgent.title',
   {
     defaultMessage: 'Add to an agent',
   }
 );
 
 export const ADD_TO_AGENT_DESCRIPTION = i18n.translate(
-  'xpack.integrationAssistant.createIntegrationSuccess.addToAgent.description',
+  'xpack.automaticImport.createIntegrationSuccess.addToAgent.description',
   {
     defaultMessage: 'Add your new integration to an agent to start collecting data',
   }
 );
 
 export const ADD_TO_AGENT_BUTTON = i18n.translate(
-  'xpack.integrationAssistant.createIntegrationSuccess.addToAgent.button',
+  'xpack.automaticImport.createIntegrationSuccess.addToAgent.button',
   {
     defaultMessage: 'Add to an agent',
   }
 );
 
 export const VIEW_INTEGRATION_TITLE = i18n.translate(
-  'xpack.integrationAssistant.createIntegrationSuccess.viewIntegration.title',
+  'xpack.automaticImport.createIntegrationSuccess.viewIntegration.title',
   {
     defaultMessage: 'View integration',
   }
 );
 
 export const VIEW_INTEGRATION_DESCRIPTION = i18n.translate(
-  'xpack.integrationAssistant.createIntegrationSuccess.viewIntegration.description',
+  'xpack.automaticImport.createIntegrationSuccess.viewIntegration.description',
   {
     defaultMessage: 'See detailed information about your new custom integration',
   }
 );
 
 export const VIEW_INTEGRATION_BUTTON = i18n.translate(
-  'xpack.integrationAssistant.createIntegrationSuccess.viewIntegration.button',
+  'xpack.automaticImport.createIntegrationSuccess.viewIntegration.button',
   {
     defaultMessage: 'View Integration',
   }

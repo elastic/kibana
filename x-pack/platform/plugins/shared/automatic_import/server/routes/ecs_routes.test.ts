@@ -73,9 +73,9 @@ describe('registerEcsRoute', () => {
     expect(response.status).toEqual(400);
   });
 
-  describe('when the integration assistant is not available', () => {
+  describe('when the automatic import is not available', () => {
     beforeEach(() => {
-      context.integrationAssistant.isAvailable.mockReturnValue(false);
+      context.automaticImport.isAvailable.mockReturnValue(false);
     });
 
     it('returns a 404', async () => {

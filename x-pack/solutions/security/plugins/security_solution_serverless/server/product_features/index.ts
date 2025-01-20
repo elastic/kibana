@@ -52,7 +52,7 @@ export const registerProductFeatures = (
     productFeatureKeys: enabledProductFeatureKeys,
   });
 
-  // set availability for the integration assistant plugin based on the product features
+  // set availability for the automatic import plugin based on the product features
   pluginsSetup.integrationAssistant?.setIsAvailable(
     enabledProductFeatureKeys.includes(ProductFeatureKey.integrationAssistant)
   );

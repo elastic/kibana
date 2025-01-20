@@ -21,11 +21,11 @@ import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 
 import type { ServerlessPluginSetup } from '@kbn/serverless/server';
-import type { IntegrationAssistantPluginSetup } from '@kbn/integration-assistant-plugin/server';
 import type { ProductTier } from '../common/product';
 
 import type { ServerlessSecurityConfig } from './config';
 import type { UsageReportingService } from './common/services/usage_reporting_service';
+import type { AutomaticImportPluginSetup } from '@kbn/automatic-import-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SecuritySolutionServerlessPluginSetup {}
@@ -41,7 +41,7 @@ export interface SecuritySolutionServerlessPluginSetupDeps {
   taskManager: TaskManagerSetupContract;
   cloud: CloudSetup;
   actions: ActionsPluginSetupContract;
-  integrationAssistant?: IntegrationAssistantPluginSetup;
+  automaticImport?: AutomaticImportPluginSetup;
 }
 
 export interface SecuritySolutionServerlessPluginStartDeps {

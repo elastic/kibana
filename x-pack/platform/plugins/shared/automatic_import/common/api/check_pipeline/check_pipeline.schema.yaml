@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Integration Assistatnt Check Pipeline API endpoint
+  title: Automatic Import Check Pipeline API endpoint
   version: "1"
 paths:
   /internal/automatic_import/pipeline:

@@ -66,7 +66,7 @@ export const ButtonsFooter = React.memo<ButtonsFooterProps>(
                   >
                     {cancelButtonText || (
                       <FormattedMessage
-                        id="xpack.integrationAssistant.footer.cancel"
+                        id="xpack.automaticImport.footer.cancel"
                         defaultMessage="Cancel"
                       />
                     )}
@@ -89,7 +89,7 @@ export const ButtonsFooter = React.memo<ButtonsFooterProps>(
                       >
                         {backButtonText || (
                           <FormattedMessage
-                            id="xpack.integrationAssistant.footer.back"
+                            id="xpack.automaticImport.footer.back"
                             defaultMessage="Back"
                           />
                         )}
@@ -107,7 +107,7 @@ export const ButtonsFooter = React.memo<ButtonsFooterProps>(
                       >
                         {nextButtonText || (
                           <FormattedMessage
-                            id="xpack.integrationAssistant.footer.next"
+                            id="xpack.automaticImport.footer.next"
                             defaultMessage="Next"
                           />
                         )}

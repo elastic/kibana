@@ -13,7 +13,7 @@ import type {
   AIConnector,
   ConfiguredAIConnectorType,
   IntegrationSettings,
-} from './create_integration_assistant/types';
+} from './create_automatic_import/types';
 
 type ReportUploadZipIntegrationComplete = (params: {
   integrationName?: string;
@@ -78,14 +78,14 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
     const sessionId = uuidV4();
     sessionData.current = { sessionId, startedAt: Date.now() };
     stepsData.current = { startedAt: Date.now() };
-    telemetry.reportEvent(TelemetryEventType.IntegrationAssistantOpen, {
+    telemetry.reportEvent(TelemetryEventType.AutomaticImportOpen, {
       sessionId,
     });
   }, [telemetry]);
 
   const reportAssistantStepComplete = useCallback<ReportAssistantStepComplete>(
     ({ step, stepName }) => {
-      telemetry.reportEvent(TelemetryEventType.IntegrationAssistantStepComplete, {
+      telemetry.reportEvent(TelemetryEventType.AutomaticImportStepComplete, {
         sessionId: sessionData.current.sessionId,
         step,
         stepName,
@@ -99,7 +99,7 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
 
   const reportGenerationComplete = useCallback<ReportGenerationComplete>(
     ({ connector, integrationSettings, durationMs, error }) => {
-      telemetry.reportEvent(TelemetryEventType.IntegrationAssistantGenerationComplete, {
+      telemetry.reportEvent(TelemetryEventType.AutomaticImportGenerationComplete, {
         sessionId: sessionData.current.sessionId,
         sampleRows: integrationSettings?.logSamples?.length ?? 0,
         actionTypeId: connector.actionTypeId,
@@ -114,7 +114,7 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
 
   const reportCelGenerationComplete = useCallback<ReportGenerationComplete>(
     ({ connector, integrationSettings, durationMs, error }) => {
-      telemetry.reportEvent(TelemetryEventType.IntegrationAssistantCelGenerationComplete, {
+      telemetry.reportEvent(TelemetryEventType.AutomaticImportCelGenerationComplete, {
         sessionId: sessionData.current.sessionId,
         actionTypeId: connector.actionTypeId,
         model: getConnectorModel(connector),
@@ -128,7 +128,7 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
 
   const reportAssistantComplete = useCallback<ReportAssistantComplete>(
     ({ integrationName, integrationSettings, connector, error }) => {
-      telemetry.reportEvent(TelemetryEventType.IntegrationAssistantComplete, {
+      telemetry.reportEvent(TelemetryEventType.AutomaticImportComplete, {
         sessionId: sessionData.current.sessionId,
         integrationName,
         integrationDescription: integrationSettings?.description ?? 'unknown',

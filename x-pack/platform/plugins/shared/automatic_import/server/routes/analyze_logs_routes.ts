@@ -17,7 +17,7 @@ import {
   ROUTE_HANDLER_TIMEOUT,
 } from '../constants';
 import { getLogFormatDetectionGraph } from '../graphs/log_type_detection/graph';
-import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
+import type { AutomaticImportRouteHandlerContext } from '../plugin';
 import { getLLMClass, getLLMType } from '../util/llm';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
@@ -27,7 +27,7 @@ import { GenerationErrorCode } from '../../common/constants';
 import { CefError } from '../lib/errors/cef_error';
 
 export function registerAnalyzeLogsRoutes(
-  router: IRouter<IntegrationAssistantRouteHandlerContext>
+  router: IRouter<AutomaticImportRouteHandlerContext>
 ) {
   router.versioned
     .post({
@@ -68,7 +68,7 @@ export function registerAnalyzeLogsRoutes(
         } = req.body;
         const services = await context.resolve(['core']);
         const { client } = services.core.elasticsearch;
-        const { getStartServices, logger } = await context.integrationAssistant;
+        const { getStartServices, logger } = await context.automaticImport;
         const [, { actions: actionsPlugin }] = await getStartServices();
         try {
           const actionsClient = await actionsPlugin.getActionsClientWithRequest(req);

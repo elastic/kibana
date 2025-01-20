@@ -17,13 +17,13 @@ import {
   ROUTE_HANDLER_TIMEOUT,
 } from '../constants';
 import { getCelGraph } from '../graphs/cel';
-import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
+import type { AutomaticImportRouteHandlerContext } from '../plugin';
 import { getLLMClass, getLLMType } from '../util/llm';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
 
-export function registerCelInputRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
+export function registerCelInputRoutes(router: IRouter<AutomaticImportRouteHandlerContext>) {
   router.versioned
     .post({
       path: CEL_INPUT_GRAPH_PATH,
@@ -54,7 +54,7 @@ export function registerCelInputRoutes(router: IRouter<IntegrationAssistantRoute
       },
       withAvailability(async (context, req, res): Promise<IKibanaResponse<CelInputResponse>> => {
         const { dataStreamTitle, celDetails, langSmithOptions } = req.body;
-        const { getStartServices, logger } = await context.integrationAssistant;
+        const { getStartServices, logger } = await context.automaticImport;
         const [, { actions: actionsPlugin }] = await getStartServices();
 
         try {

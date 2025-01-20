@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Integration Assistatnt ECS Mapping API endpoint
+  title: Automatic Import ECS Mapping API endpoint
   version: "1"
 paths:
   /internal/automatic_import/ecs:

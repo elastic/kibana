@@ -17,7 +17,7 @@ import {
   ROUTE_HANDLER_TIMEOUT,
 } from '../constants';
 import { getEcsGraph } from '../graphs/ecs';
-import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
+import type { AutomaticImportRouteHandlerContext } from '../plugin';
 import { getLLMClass, getLLMType } from '../util/llm';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
@@ -25,7 +25,7 @@ import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
 import { handleCustomErrors } from './routes_util';
 import { GenerationErrorCode } from '../../common/constants';
 
-export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
+export function registerEcsRoutes(router: IRouter<AutomaticImportRouteHandlerContext>) {
   router.versioned
     .post({
       path: ECS_GRAPH_PATH,
@@ -64,7 +64,7 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
           mapping,
           langSmithOptions,
         } = req.body;
-        const { getStartServices, logger } = await context.integrationAssistant;
+        const { getStartServices, logger } = await context.automaticImport;
 
         const [, { actions: actionsPlugin }] = await getStartServices();
         try {

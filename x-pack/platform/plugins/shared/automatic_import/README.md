@@ -1,4 +1,4 @@
-# Integration Assistant
+# Automatic Import
 
 ## Overview
 
@@ -86,5 +86,5 @@ All mocks/fixtures are placed in the top `./__jest__` directory of the plugin. I
 Tests can be run with:
 
 ```bash
-node scripts/jest x-pack/platform/plugins/shared/integration_assistant/ --coverage
+node scripts/jest x-pack/platform/plugins/shared/automatic_import/ --coverage
 ```

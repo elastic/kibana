@@ -8,10 +8,10 @@
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 
 // Plugin information
-export const PLUGIN_ID = 'integrationAssistant';
+export const PLUGIN_ID = 'automaticImport';
 
 // Public App Routes
-export const INTEGRATION_ASSISTANT_APP_ROUTE = '/app/integration_assistant';
+export const INTEGRATION_ASSISTANT_APP_ROUTE = '/app/automatic_import';
 
 // Server API Routes
 export const INTEGRATION_ASSISTANT_BASE_PATH = '/internal/automatic_import';

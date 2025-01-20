@@ -17,7 +17,7 @@ import {
   ROUTE_HANDLER_TIMEOUT,
 } from '../constants';
 import { getRelatedGraph } from '../graphs/related';
-import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
+import type { AutomaticImportRouteHandlerContext } from '../plugin';
 import { getLLMClass, getLLMType } from '../util/llm';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
@@ -25,7 +25,7 @@ import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
 import { handleCustomErrors } from './routes_util';
 import { GenerationErrorCode } from '../../common/constants';
 
-export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
+export function registerRelatedRoutes(router: IRouter<AutomaticImportRouteHandlerContext>) {
   router.versioned
     .post({
       path: RELATED_GRAPH_PATH,
@@ -65,7 +65,7 @@ export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteH
         } = req.body;
         const services = await context.resolve(['core']);
         const { client } = services.core.elasticsearch;
-        const { getStartServices, logger } = await context.integrationAssistant;
+        const { getStartServices, logger } = await context.automaticImport;
         const [, { actions: actionsPlugin }] = await getStartServices();
         try {
           const actionsClient = await actionsPlugin.getActionsClientWithRequest(req);

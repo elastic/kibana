@@ -8,15 +8,15 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/platform/plugins/shared/integration_assistant'],
+  roots: ['<rootDir>/x-pack/platform/plugins/shared/automatic_import'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/integration_assistant',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/automatic_import',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/platform/plugins/shared/integration_assistant/{common,server,public}/**/*.{ts,tsx}',
-    '!<rootDir>/x-pack/platform/plugins/shared/integration_assistant/{__jest__}/**/*',
-    '!<rootDir>/x-pack/platform/plugins/shared/integration_assistant/**/*.test.{ts,tsx}',
-    '!<rootDir>/x-pack/platform/plugins/shared/integration_assistant/**/*.config.ts',
+    '<rootDir>/x-pack/platform/plugins/shared/automatic_import/{common,server,public}/**/*.{ts,tsx}',
+    '!<rootDir>/x-pack/platform/plugins/shared/automatic_import/{__jest__}/**/*',
+    '!<rootDir>/x-pack/platform/plugins/shared/automatic_import/**/*.test.{ts,tsx}',
+    '!<rootDir>/x-pack/platform/plugins/shared/automatic_import/**/*.config.ts',
   ],
   setupFiles: ['jest-canvas-mock'],
 };

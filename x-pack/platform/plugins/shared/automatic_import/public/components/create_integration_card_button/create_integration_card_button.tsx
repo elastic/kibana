@@ -77,7 +77,7 @@ export const CreateIntegrationCardButton = React.memo<CreateIntegrationCardButto
                 <EuiTitle size="xs">
                   <h2>
                     <FormattedMessage
-                      id="xpack.integrationAssistant.createIntegrationTitle"
+                      id="xpack.automaticImport.createIntegrationTitle"
                       defaultMessage="Can't find an Integration?"
                     />
                   </h2>
@@ -85,7 +85,7 @@ export const CreateIntegrationCardButton = React.memo<CreateIntegrationCardButto
                 {!compressed && (
                   <EuiText size="s">
                     <FormattedMessage
-                      id="xpack.integrationAssistant.createIntegrationDescription"
+                      id="xpack.automaticImport.createIntegrationDescription"
                       defaultMessage="Create a custom one to fit your requirements"
                     />
                   </EuiText>
@@ -110,7 +110,7 @@ export const CreateIntegrationCardButton = React.memo<CreateIntegrationCardButto
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <FormattedMessage
-                        id="xpack.integrationAssistant.createIntegrationButton"
+                        id="xpack.automaticImport.createIntegrationButton"
                         defaultMessage="Create new integration"
                       />
                     </EuiFlexItem>

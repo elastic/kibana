@@ -12,10 +12,10 @@ import type { Services } from '../../services';
 import { TelemetryContextProvider } from './telemetry';
 import { CreateIntegrationLanding } from './create_integration_landing';
 import { CreateIntegrationUpload } from './create_integration_upload';
-import { CreateIntegrationAssistant } from './create_integration_assistant';
 import { Page, PagePath } from '../../common/constants';
 import { useRoutesAuthorization } from '../../common/hooks/use_authorization';
 import { useIsAvailable } from '../../common/hooks/use_availability';
+import { CreateAutomaticImport } from './create_automatic_import';
 
 interface CreateIntegrationProps {
   services: Services;
@@ -30,12 +30,12 @@ export const CreateIntegration = React.memo<CreateIntegrationProps>(({ services 
 CreateIntegration.displayName = 'CreateIntegration';
 
 const CreateIntegrationRouter = React.memo(() => {
-  const { canUseIntegrationAssistant, canUseIntegrationUpload } = useRoutesAuthorization();
+  const { canUseAutomaticImport: canUseAutomaticImport, canUseIntegrationUpload } = useRoutesAuthorization();
   const isAvailable = useIsAvailable();
   return (
     <Routes>
-      {isAvailable && canUseIntegrationAssistant && (
-        <Route path={PagePath[Page.assistant]} exact component={CreateIntegrationAssistant} />
+      {isAvailable && canUseAutomaticImport && (
+        <Route path={PagePath[Page.assistant]} exact component={CreateAutomaticImport} />
       )}
       {isAvailable && canUseIntegrationUpload && (
         <Route path={PagePath[Page.upload]} exact component={CreateIntegrationUpload} />

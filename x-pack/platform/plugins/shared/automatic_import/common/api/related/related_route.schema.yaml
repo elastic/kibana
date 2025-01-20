@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Integration Assistatnt Related API endpoint
+  title: Automatic Import Related API endpoint
   version: "1"
 paths:
   /internal/automatic_import/related:

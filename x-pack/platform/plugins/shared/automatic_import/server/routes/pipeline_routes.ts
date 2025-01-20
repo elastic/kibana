@@ -13,7 +13,7 @@ import {
   INTEGRATIONS_ALL_ROLE,
   ROUTE_HANDLER_TIMEOUT,
 } from '../constants';
-import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
+import type { AutomaticImportRouteHandlerContext } from '../plugin';
 import { testPipeline } from '../util/pipeline';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
@@ -21,7 +21,7 @@ import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
 import { handleCustomErrors } from './routes_util';
 import { GenerationErrorCode } from '../../common/constants';
 
-export function registerPipelineRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
+export function registerPipelineRoutes(router: IRouter<AutomaticImportRouteHandlerContext>) {
   router.versioned
     .post({
       path: CHECK_PIPELINE_PATH,

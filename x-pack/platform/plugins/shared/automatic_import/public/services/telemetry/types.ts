@@ -8,11 +8,11 @@
 // Event type definitions
 export enum TelemetryEventType {
   UploadIntegrationZipComplete = 'upload_integration_zip_complete',
-  IntegrationAssistantOpen = 'integration_assistant_open',
-  IntegrationAssistantStepComplete = 'integration_assistant_step_complete',
-  IntegrationAssistantGenerationComplete = 'integration_assistant_generation_complete',
-  IntegrationAssistantCelGenerationComplete = 'integration_assistant_cel_generation_complete',
-  IntegrationAssistantComplete = 'integration_assistant_complete',
+  AutomaticImportOpen = 'automatic_import_open',
+  AutomaticImportStepComplete = 'automatic_import_step_complete',
+  AutomaticImportGenerationComplete = 'automatic_import_generation_complete',
+  AutomaticImportCelGenerationComplete = 'automatic_import_cel_generation_complete',
+  AutomaticImportComplete = 'automatic_import_complete',
 }
 
 // Event data definitions
@@ -22,11 +22,11 @@ interface UploadIntegrationZipCompleteData {
   errorMessage?: string;
 }
 
-interface IntegrationAssistantOpenData {
+interface AutomaticImportOpenData {
   sessionId: string;
 }
 
-interface IntegrationAssistantStepCompleteData {
+interface AutomaticImportStepCompleteData {
   sessionId: string;
   step: number;
   stepName: string;
@@ -34,7 +34,7 @@ interface IntegrationAssistantStepCompleteData {
   sessionElapsedTime: number; // Total time spent in the current generation session
 }
 
-interface IntegrationAssistantGenerationCompleteData {
+interface AutomaticImportGenerationCompleteData {
   sessionId: string;
   sampleRows: number;
   durationMs: number;
@@ -44,7 +44,7 @@ interface IntegrationAssistantGenerationCompleteData {
   errorMessage?: string;
 }
 
-interface IntegrationAssistantCelGenerationCompleteData {
+interface AutomaticImportCelGenerationCompleteData {
   sessionId: string;
   durationMs: number;
   actionTypeId: string;
@@ -53,7 +53,7 @@ interface IntegrationAssistantCelGenerationCompleteData {
   errorMessage?: string;
 }
 
-interface IntegrationAssistantCompleteData {
+interface AutomaticImportCompleteData {
   sessionId: string;
   durationMs: number;
   integrationName: string;
@@ -73,14 +73,14 @@ interface IntegrationAssistantCompleteData {
 export type TelemetryEventTypeData<T extends TelemetryEventType> =
   T extends TelemetryEventType.UploadIntegrationZipComplete
     ? UploadIntegrationZipCompleteData
-    : T extends TelemetryEventType.IntegrationAssistantOpen
-    ? IntegrationAssistantOpenData
-    : T extends TelemetryEventType.IntegrationAssistantStepComplete
-    ? IntegrationAssistantStepCompleteData
-    : T extends TelemetryEventType.IntegrationAssistantGenerationComplete
-    ? IntegrationAssistantGenerationCompleteData
-    : T extends TelemetryEventType.IntegrationAssistantCelGenerationComplete
-    ? IntegrationAssistantCelGenerationCompleteData
-    : T extends TelemetryEventType.IntegrationAssistantComplete
-    ? IntegrationAssistantCompleteData
+    : T extends TelemetryEventType.AutomaticImportOpen
+    ? AutomaticImportOpenData
+    : T extends TelemetryEventType.AutomaticImportStepComplete
+    ? AutomaticImportStepCompleteData
+    : T extends TelemetryEventType.AutomaticImportGenerationComplete
+    ? AutomaticImportGenerationCompleteData
+    : T extends TelemetryEventType.AutomaticImportCelGenerationComplete
+    ? AutomaticImportCelGenerationCompleteData
+    : T extends TelemetryEventType.AutomaticImportComplete
+    ? AutomaticImportCompleteData
     : never;

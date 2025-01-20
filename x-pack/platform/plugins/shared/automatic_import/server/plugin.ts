@@ -16,30 +16,30 @@ import type {
 import { MINIMUM_LICENSE_TYPE } from '../common/constants';
 import { registerRoutes } from './routes';
 import type {
-  IntegrationAssistantPluginSetup,
-  IntegrationAssistantPluginStart,
-  IntegrationAssistantPluginStartDependencies,
-  IntegrationAssistantPluginSetupDependencies,
+  AutomaticImportPluginSetup,
+  AutomaticImportPluginStart,
+  AutomaticImportPluginStartDependencies,
+  AutomaticImportPluginSetupDependencies,
 } from './types';
 
-export type IntegrationAssistantRouteHandlerContext = CustomRequestHandlerContext<{
-  integrationAssistant: {
+export type AutomaticImportRouteHandlerContext = CustomRequestHandlerContext<{
+  automaticImport: {
     getStartServices: CoreSetup<
-      IntegrationAssistantPluginStartDependencies,
-      IntegrationAssistantPluginStart
+      AutomaticImportPluginStartDependencies,
+      AutomaticImportPluginStart
     >['getStartServices'];
     isAvailable: () => boolean;
     logger: Logger;
   };
 }>;
 
-export class IntegrationAssistantPlugin
+export class AutomaticImportPlugin
   implements
     Plugin<
-      IntegrationAssistantPluginSetup,
-      IntegrationAssistantPluginStart,
-      IntegrationAssistantPluginSetupDependencies,
-      IntegrationAssistantPluginStartDependencies
+      AutomaticImportPluginSetup,
+      AutomaticImportPluginStart,
+      AutomaticImportPluginSetupDependencies,
+      AutomaticImportPluginStartDependencies
     >
 {
   private readonly logger: Logger;
@@ -53,19 +53,19 @@ export class IntegrationAssistantPlugin
   }
 
   public setup(
-    core: CoreSetup<IntegrationAssistantPluginStartDependencies, IntegrationAssistantPluginStart>
-  ): IntegrationAssistantPluginSetup {
+    core: CoreSetup<AutomaticImportPluginStartDependencies, AutomaticImportPluginStart>
+  ): AutomaticImportPluginSetup {
     core.http.registerRouteHandlerContext<
-      IntegrationAssistantRouteHandlerContext,
-      'integrationAssistant'
-    >('integrationAssistant', () => ({
+      AutomaticImportRouteHandlerContext,
+      'automaticImport'
+    >('automaticImport', () => ({
       getStartServices: core.getStartServices,
       isAvailable: () => this.isAvailable && this.hasLicense,
       logger: this.logger,
     }));
-    const router = core.http.createRouter<IntegrationAssistantRouteHandlerContext>();
+    const router = core.http.createRouter<AutomaticImportRouteHandlerContext>();
 
-    this.logger.debug('integrationAssistant api: Setup');
+    this.logger.debug('automaticImport api: Setup');
 
     registerRoutes(router);
 
@@ -80,9 +80,9 @@ export class IntegrationAssistantPlugin
 
   public start(
     _: CoreStart,
-    dependencies: IntegrationAssistantPluginStartDependencies
-  ): IntegrationAssistantPluginStart {
-    this.logger.debug('integrationAssistant api: Started');
+    dependencies: AutomaticImportPluginStartDependencies
+  ): AutomaticImportPluginStart {
+    this.logger.debug('automaticImport api: Started');
     const { licensing } = dependencies;
 
     licensing.license$.subscribe((license) => {

@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Integration Assistatnt Categorization API endpoint
+  title: Automatic Import Categorization API endpoint
   version: "1"
 paths:
   /internal/automatic_import/categorization:

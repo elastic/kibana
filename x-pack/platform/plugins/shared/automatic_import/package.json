@@ -1,6 +1,6 @@
 {
   "author": "Elastic",
-  "name": "@kbn/integration-assistant-plugin",
+  "name": "@kbn/automatic-import-plugin",
   "version": "1.0.0",
   "private": true,
   "license": "Elastic License 2.0",

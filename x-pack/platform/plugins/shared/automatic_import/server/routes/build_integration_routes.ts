@@ -8,7 +8,7 @@
 import type { IRouter } from '@kbn/core/server';
 import { BuildIntegrationRequestBody, INTEGRATION_BUILDER_PATH } from '../../common';
 import { buildPackage } from '../integration_builder';
-import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
+import type { AutomaticImportRouteHandlerContext } from '../plugin';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
@@ -20,7 +20,7 @@ import {
   INTEGRATIONS_ALL_ROLE,
 } from '../constants';
 export function registerIntegrationBuilderRoutes(
-  router: IRouter<IntegrationAssistantRouteHandlerContext>
+  router: IRouter<AutomaticImportRouteHandlerContext>
 ) {
   router.versioned
     .post({

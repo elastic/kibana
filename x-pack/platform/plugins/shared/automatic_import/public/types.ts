@@ -14,9 +14,9 @@ import type { CreateIntegrationCardButtonComponent } from './components/create_i
 import type { RenderUpselling } from './services';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface IntegrationAssistantPluginSetup {}
+export interface AutomaticImportPluginSetup {}
 
-export interface IntegrationAssistantPluginStart {
+export interface AutomaticImportPluginStart {
   components: {
     /**
      * Component that allows the user to create an integration.
@@ -35,12 +35,12 @@ export interface IntegrationAssistantPluginStart {
   renderUpselling: (upselling: RenderUpselling | undefined) => void;
 }
 
-export interface IntegrationAssistantPluginSetupDependencies {
+export interface AutomaticImportPluginSetupDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   licensing: LicensingPluginSetup;
 }
 
-export interface IntegrationAssistantPluginStartDependencies {
+export interface AutomaticImportPluginStartDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   licensing: LicensingPluginStart;
 }
