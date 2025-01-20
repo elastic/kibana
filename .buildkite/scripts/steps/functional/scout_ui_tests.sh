@@ -24,6 +24,11 @@ run_tests() {
 
 EXIT_CODE=0
 
+# Discovery Enhanced parallel run
+for run_mode in "--stateful" "--serverless=es" "--serverless=oblt" "--serverless=security"; do
+  run_tests "Discovery Enhanced" "x-pack/platform/plugins/private/discover_enhanced/ui_tests/playwright.parallel.config.ts" "$run_mode"
+done
+
 # Discovery Enhanced
 for run_mode in "--stateful" "--serverless=es" "--serverless=oblt" "--serverless=security"; do
   run_tests "Discovery Enhanced" "x-pack/platform/plugins/private/discover_enhanced/ui_tests/playwright.config.ts" "$run_mode"
