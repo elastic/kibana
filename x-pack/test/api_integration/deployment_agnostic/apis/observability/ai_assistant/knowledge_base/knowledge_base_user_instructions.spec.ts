@@ -10,6 +10,7 @@ import { sortBy } from 'lodash';
 import { Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context';
 import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
+import pRetry from 'p-retry';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   TINY_ELSER,
@@ -24,6 +25,8 @@ import {
   LlmProxy,
   createLlmProxy,
 } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+
+const sortById = (data: Array<Instruction & { public?: boolean }>) => sortBy(data, 'id');
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
@@ -104,8 +107,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const instructions = res.body.userInstructions;
           expect(instructions).to.have.length(3);
 
-          const sortById = (data: Array<Instruction & { public?: boolean }>) => sortBy(data, 'id');
-
           expect(sortById(instructions)).to.eql(
             sortById([
               {
@@ -137,8 +138,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const instructions = res.body.userInstructions;
           expect(instructions).to.have.length(3);
 
-          const sortById = (data: Array<Instruction & { public?: boolean }>) => sortBy(data, 'id');
-
           expect(sortById(instructions)).to.eql(
             sortById([
               {
@@ -161,6 +160,64 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
     });
+
+    describe('when a public instruction already exists', () => {
+      const adminInstruction = {
+        id: `public-doc-from-admin-not-to-be-overwritten`,
+        text: `public user instruction from "admin" not to be overwritten by other users`,
+        public: true,
+      };
+
+      const editorInstruction = {
+        id: `public-doc-from-editor-must-not-overwrite-admin-instruction`,
+        text: `public user instruction from "admin" must not overwrite admin instruction`,
+        public: true,
+      };
+
+      before(async () => {
+        await clearKnowledgeBase(es);
+
+        const { status: statusAdmin } = await observabilityAIAssistantAPIClient.admin({
+          endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
+          params: { body: adminInstruction },
+        });
+        expect(statusAdmin).to.be(200);
+
+        // wait for the public instruction to be indexed before proceeding
+        await pRetry(async () => {
+          const res = await observabilityAIAssistantAPIClient.editor({
+            endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
+          });
+
+          const hasPublicAdminInstruction = res.body.userInstructions.some(
+            (instruction) => instruction.id === 'public-doc-from-admin-not-to-be-overwritten'
+          );
+
+          if (!hasPublicAdminInstruction) {
+            throw new Error('Public instruction not found');
+          }
+        });
+
+        const { status: statusEditor } = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
+          params: {
+            body: editorInstruction,
+          },
+        });
+
+        expect(statusEditor).to.be(200);
+      });
+
+      it("another user's public instruction will not overwrite it", async () => {
+        const res = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
+        });
+
+        const instructions = res.body.userInstructions;
+        expect(sortById(instructions)).to.eql(sortById([adminInstruction, editorInstruction]));
+      });
+    });
+
     describe('when updating an existing user instructions', () => {
       before(async () => {
         await clearKnowledgeBase(es);
