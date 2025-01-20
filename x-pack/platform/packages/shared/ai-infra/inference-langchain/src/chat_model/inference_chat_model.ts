@@ -88,6 +88,8 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   protected temperature?: number;
   protected functionCallingMode?: FunctionCallingMode;
   protected model?: string;
+  protected tools?: BindToolsInput[];
+  protected tool_choice?: ToolChoice;
 
   constructor(args: InferenceChatModelParams) {
     super(args);
@@ -96,6 +98,8 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     this.temperature = args.temperature;
     this.functionCallingMode = args.functionCallingMode;
     this.model = args.model;
+    this.tools = args.tools;
+    this.tool_choice = args.tool_choice;
   }
 
   static lc_name() {
@@ -103,7 +107,14 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   }
 
   public get callKeys() {
-    return [...super.callKeys, 'functionCallingMode', 'tools', 'tool_choice', 'temperature'];
+    return [
+      ...super.callKeys,
+      'functionCallingMode',
+      'tools',
+      'tool_choice',
+      'temperature',
+      'model',
+    ];
   }
 
   _llmType() {
