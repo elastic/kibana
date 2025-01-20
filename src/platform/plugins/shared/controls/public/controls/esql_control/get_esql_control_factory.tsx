@@ -12,9 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { css } from '@emotion/react';
 import { EuiComboBox } from '@elastic/eui';
-import { useBatchedPublishingSubjects, PublishingSubject } from '@kbn/presentation-publishing';
-import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
-import { esqlVariablesService } from '@kbn/esql-variables/common';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { ESQL_CONTROL } from '../../../common';
 import type { ESQLControlState, ESQLControlApi } from './types';
 import { ControlFactory } from '../types';
@@ -33,15 +31,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
     getIconType: () => 'editorChecklist',
     getDisplayName: () => displayName,
     buildControl: async (initialState, buildApi, uuid, controlGroupApi) => {
-      // initialize the variable
-      esqlVariablesService.addVariable({
-        key: initialState.variableName,
-        value: initialState.selectedOptions[0],
-        type: initialState.variableType,
-      });
-      const hasSelections$ = new BehaviorSubject<boolean>(false);
-      const defaultControl = initializeDefaultControlApi({ ...initialState });
-
+      const defaultControl = initializeDefaultControlApi(initialState);
       const selections = initializeESQLControlSelections(initialState);
 
       const onSaveControl = (updatedState: ESQLControlState) => {
@@ -54,6 +44,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
       const api = buildApi(
         {
           ...defaultControl.api,
+          ...selections.api,
           defaultPanelTitle: new BehaviorSubject<string | undefined>(initialState.title),
           isEditingEnabled: () => true,
           getTypeDisplayName: () => displayName,
@@ -70,7 +61,6 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
               initialState: state,
             });
           },
-          selectedOptions$: selections.selectedOptions$,
           serializeState: () => {
             const { rawState: defaultControlState } = defaultControl.serialize();
             return {
@@ -90,17 +80,6 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
           clearSelections: () => {
             // do nothing, not allowed for now;
           },
-          clearVariables: () => {
-            esqlVariablesService.removeVariable(initialState.variableName);
-          },
-          resetVariables: () => {
-            esqlVariablesService.updateVariable({
-              key: selections.variableName$.getValue(),
-              value: selections.selectedOptions$.getValue()[0],
-              type: selections.variableType$.getValue() as ESQLVariableType,
-            });
-          },
-          hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
         },
         {
           ...defaultControl.comparators,
@@ -116,13 +95,10 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
       return {
         api,
         Component: ({ className: controlPanelClassName }) => {
-          const [availableOptions, selectedOptions, variableName, variableType] =
-            useBatchedPublishingSubjects(
-              selections.availableOptions$,
-              selections.selectedOptions$,
-              selections.variableName$,
-              selections.variableType$
-            );
+          const [availableOptions, selectedOptions] = useBatchedPublishingSubjects(
+            selections.availableOptions$,
+            selections.selectedOptions$
+          );
 
           return (
             <div className={controlPanelClassName}>
@@ -150,12 +126,6 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
                 onChange={(options) => {
                   const selectedValues = options.map((option) => option.label);
                   selections.setSelectedOptions(selectedValues);
-
-                  esqlVariablesService.updateVariable({
-                    key: variableName,
-                    value: selectedValues[0],
-                    type: variableType as ESQLVariableType,
-                  });
                 }}
               />
             </div>

@@ -13,6 +13,7 @@ import type {
   TimeRange,
 } from '@kbn/es-query';
 import type { Adapters, InspectorOptions } from '@kbn/inspector-plugin/public';
+import { PublishesESQLVariables } from '@kbn/esql-variables/common';
 import type {
   HasEditCapabilities,
   HasInPlaceLibraryTransforms,
@@ -530,6 +531,6 @@ export interface ControlGroupApi {
   addNewPanel: (panelState: Record<string, unknown>) => void;
 }
 
-export interface DashboardApi extends PresentationContainer {
+export interface DashboardApi extends PresentationContainer, PublishesESQLVariables {
   controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
 }

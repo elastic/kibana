@@ -24,7 +24,6 @@ import {
 import type { ControlGroupRuntimeState, ControlPanelsState } from '../../common';
 import { apiPublishesAsyncFilters } from '../controls/data_controls/publishes_async_filters';
 import { getControlsInOrder, type ControlsInOrder } from './init_controls_manager';
-import { isVariablesControl } from '../controls/esql_control/types';
 
 export type ControlGroupComparatorState = Pick<
   ControlGroupRuntimeState,
@@ -79,9 +78,6 @@ export function initializeControlGroupUnsavedChanges(
           if (apiPublishesUnsavedChanges(controlApi)) controlApi.resetUnsavedChanges();
           if (apiPublishesAsyncFilters(controlApi)) {
             filtersReadyPromises.push(controlApi.untilFiltersReady());
-          }
-          if (apiPublishesUnsavedChanges(controlApi) && isVariablesControl(controlApi)) {
-            controlApi?.resetVariables();
           }
         });
 
