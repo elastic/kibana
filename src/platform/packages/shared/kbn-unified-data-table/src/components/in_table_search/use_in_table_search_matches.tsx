@@ -196,6 +196,10 @@ export const useInTableSearchMatches = (
           rows={rows}
           visibleColumns={visibleColumns}
           onFinish={({ matchesList: nextMatchesList, totalMatchesCount }) => {
+            if (numberOfRuns < numberOfRunsRef.current) {
+              return;
+            }
+
             setState({
               matchesList: nextMatchesList,
               matchesCount: totalMatchesCount,
