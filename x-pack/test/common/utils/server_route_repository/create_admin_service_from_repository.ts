@@ -12,10 +12,10 @@ import {
   ReturnOf,
   ClientRequestParamsOf,
 } from '@kbn/server-route-repository';
-import supertest from 'supertest';
 import { Subtract, RequiredKeys } from 'utility-types';
-import { format, UrlObject } from 'url';
-import { kbnTestConfig } from '@kbn/test';
+import { format } from 'url';
+import supertest from 'supertest';
+import { RoleScopedSupertestProvider } from '../../../api_integration/deployment_agnostic/services/role_scoped_supertest';
 
 type MaybeOptional<TArgs extends Record<string, any>> = RequiredKeys<TArgs> extends never
   ? [TArgs] | []
@@ -44,49 +44,13 @@ type RepositorySupertestReturnOf<
   }>
 >;
 
-type ScopedApiClientWithBasicAuthFactory<TServerRouteRepository extends ServerRouteRepository> = (
-  kibanaServer: UrlObject,
-  username: string
-) => RepositorySupertestClient<TServerRouteRepository>;
-
-type ApiClientFromSupertestFactory<TServerRouteRepository extends ServerRouteRepository> = (
-  st: supertest.Agent
-) => RepositorySupertestClient<TServerRouteRepository>;
-
-interface RepositorySupertestClientFactory<TServerRouteRepository extends ServerRouteRepository> {
-  getScopedApiClientWithBasicAuth: ScopedApiClientWithBasicAuthFactory<TServerRouteRepository>;
-  getApiClientFromSupertest: ApiClientFromSupertestFactory<TServerRouteRepository>;
-}
-
-export function createSupertestClientFactoryFromRepository<
-  TServerRouteRepository extends ServerRouteRepository
->(): RepositorySupertestClientFactory<TServerRouteRepository> {
-  return {
-    getScopedApiClientWithBasicAuth: (kibanaServer, username) => {
-      return getScopedApiClientWithBasicAuth<TServerRouteRepository>(kibanaServer, username);
-    },
-    getApiClientFromSupertest: (st) => {
-      return getApiClientFromSupertest<TServerRouteRepository>(st);
-    },
-  };
-}
-
-function getScopedApiClientWithBasicAuth<TServerRouteRepository extends ServerRouteRepository>(
-  kibanaServer: UrlObject,
-  username: string
-): RepositorySupertestClient<TServerRouteRepository> {
-  const { password } = kbnTestConfig.getUrlParts();
-  const baseUrlWithAuth = format({
-    ...kibanaServer,
-    auth: `${username}:${password}`,
+export async function getAdminApiClient<TServerRouteRepository extends ServerRouteRepository>(
+  st: ReturnType<typeof RoleScopedSupertestProvider>
+): Promise<RepositorySupertestClient<TServerRouteRepository>> {
+  const supertestAdmin = await st.getSupertestWithRoleScope('admin', {
+    useCookieHeader: true,
+    withInternalHeaders: true,
   });
-
-  return getApiClientFromSupertest(supertest(baseUrlWithAuth));
-}
-
-export function getApiClientFromSupertest<TServerRouteRepository extends ServerRouteRepository>(
-  st: supertest.Agent
-): RepositorySupertestClient<TServerRouteRepository> {
   return {
     fetch: (endpoint, ...rest) => {
       const options = rest.length ? rest[0] : { type: undefined };
@@ -98,16 +62,19 @@ export function getApiClientFromSupertest<TServerRouteRepository extends ServerR
       const { method, pathname, version } = formatRequest(endpoint, params.path);
       const url = format({ pathname, query: params?.query });
 
-      const headers: Record<string, string> = { 'kbn-xsrf': 'foo' };
+      const headers: Record<string, string> = {
+        'kbn-xsrf': 'foo',
+        'x-elastic-internal-origin': 'kibana',
+      };
 
       if (version) {
         headers['Elastic-Api-Version'] = version;
       }
 
-      let res: supertest.Test;
+      let res: unknown;
       if (type === 'form-data') {
         const fields: Array<[string, any]> = Object.entries(params.body);
-        const formDataRequest = st[method](url)
+        const formDataRequest = supertestAdmin[method](url)
           .set(headers)
           .set('Content-type', 'multipart/form-data');
 
@@ -117,9 +84,9 @@ export function getApiClientFromSupertest<TServerRouteRepository extends ServerR
 
         res = formDataRequest;
       } else if (params.body) {
-        res = st[method](url).send(params.body).set(headers);
+        res = supertestAdmin[method](url).send(params.body).set(headers);
       } else {
-        res = st[method](url).set(headers);
+        res = supertestAdmin[method](url).set(headers);
       }
 
       return res as RepositorySupertestReturnOf<
