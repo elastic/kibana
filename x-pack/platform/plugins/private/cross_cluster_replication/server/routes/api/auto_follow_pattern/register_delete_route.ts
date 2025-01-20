@@ -25,6 +25,12 @@ export const registerDeleteRoute = ({
   router.delete(
     {
       path: addBasePath('/auto_follow_patterns/{id}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         params: paramsSchema,
       },

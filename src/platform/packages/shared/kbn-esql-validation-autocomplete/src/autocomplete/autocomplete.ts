@@ -209,7 +209,10 @@ export async function suggest(
     return suggestions.filter((def) => !isSourceCommand(def));
   }
 
-  if (astContext.type === 'expression') {
+  if (
+    astContext.type === 'expression' ||
+    (astContext.type === 'option' && astContext.command?.name === 'join')
+  ) {
     return getSuggestionsWithinCommandExpression(
       innerText,
       ast,
@@ -220,7 +223,8 @@ export async function suggest(
       getPolicies,
       getPolicyMetadata,
       resourceRetriever?.getPreferences,
-      fullAst
+      fullAst,
+      resourceRetriever
     );
   }
   if (astContext.type === 'setting') {
@@ -399,7 +403,8 @@ async function getSuggestionsWithinCommandExpression(
   getPolicies: GetPoliciesFn,
   getPolicyMetadata: GetPolicyMetadataFn,
   getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
-  fullAst?: ESQLAst
+  fullAst?: ESQLAst,
+  callbacks?: ESQLCallbacks
 ) {
   const commandDef = getCommandDefinition(command.name);
 
@@ -419,7 +424,9 @@ async function getSuggestionsWithinCommandExpression(
       (expression: ESQLAstItem | undefined) =>
         getExpressionType(expression, references.fields, references.variables),
       getPreferences,
-      fullAst
+      fullAst,
+      commandDef,
+      callbacks
     );
   } else {
     // The deprecated path.
@@ -612,22 +619,30 @@ async function getExpressionSuggestionsByType(
           (fragment) => Boolean(getColumnByName(fragment, references)),
           (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
             // COMMAND fie<suggest>
-            return fieldSuggestions.map((suggestion) => ({
-              ...suggestion,
-              text: suggestion.text + (['grok', 'dissect'].includes(command.name) ? ' ' : ''),
-              command: TRIGGER_SUGGESTION_COMMAND,
-              rangeToReplace,
-            }));
+            return fieldSuggestions.map((suggestion) => {
+              // if there is already a command, we don't want to override it
+              if (suggestion.command) return suggestion;
+              return {
+                ...suggestion,
+                text: suggestion.text + (['grok', 'dissect'].includes(command.name) ? ' ' : ''),
+                command: TRIGGER_SUGGESTION_COMMAND,
+                rangeToReplace,
+              };
+            });
           },
           (fragment: string, rangeToReplace: { start: number; end: number }) => {
             // COMMAND field<suggest>
             if (['grok', 'dissect'].includes(command.name)) {
-              return fieldSuggestions.map((suggestion) => ({
-                ...suggestion,
-                text: suggestion.text + ' ',
-                command: TRIGGER_SUGGESTION_COMMAND,
-                rangeToReplace,
-              }));
+              return fieldSuggestions.map((suggestion) => {
+                // if there is already a command, we don't want to override it
+                if (suggestion.command) return suggestion;
+                return {
+                  ...suggestion,
+                  text: suggestion.text + ' ',
+                  command: TRIGGER_SUGGESTION_COMMAND,
+                  rangeToReplace,
+                };
+              });
             }
 
             const finalSuggestions = [{ ...pipeCompleteItem, text: ' | ' }];

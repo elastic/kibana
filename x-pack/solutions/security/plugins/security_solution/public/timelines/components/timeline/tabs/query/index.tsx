@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import React, { useMemo, useEffect, useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
@@ -41,7 +41,6 @@ import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { timelineDefaults } from '../../../../store/defaults';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { isActiveTimeline } from '../../../../../helpers';
-
 import type { TimelineModel } from '../../../../store/model';
 import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
 import { isTimerangeSame } from '../shared/utils';
@@ -173,24 +172,22 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const { augmentedColumnHeaders, defaultColumns, timelineQueryFieldsFromColumns } =
     useTimelineColumns(columns);
 
-  const [
-    dataLoadingState,
-    { events, inspect, totalCount, loadPage: loadNextEventBatch, refreshedAt, refetch },
-  ] = useTimelineEvents({
-    dataViewId,
-    endDate: end,
-    fields: timelineQueryFieldsFromColumns,
-    filterQuery: combinedQueries?.filterQuery,
-    id: timelineId,
-    indexNames: selectedPatterns,
-    language: kqlQuery.language,
-    limit: sampleSize,
-    runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
-    skip: !canQueryTimeline,
-    sort: timelineQuerySortField,
-    startDate: start,
-    timerangeKind,
-  });
+  const [dataLoadingState, { events, inspect, totalCount, loadNextBatch, refreshedAt, refetch }] =
+    useTimelineEvents({
+      dataViewId,
+      endDate: end,
+      fields: timelineQueryFieldsFromColumns,
+      filterQuery: combinedQueries?.filterQuery,
+      id: timelineId,
+      indexNames: selectedPatterns,
+      language: kqlQuery.language,
+      limit: sampleSize,
+      runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
+      skip: !canQueryTimeline,
+      sort: timelineQuerySortField,
+      startDate: start,
+      timerangeKind,
+    });
 
   const { onLoad: loadNotesOnEventsLoad } = useFetchNotes();
 
@@ -283,10 +280,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   );
 
   const leadingControlColumns = useTimelineControlColumn({
-    columns,
-    sort,
     timelineId,
-    activeTab: TimelineTabs.query,
     refetch,
     events,
     pinnedEventIds,
@@ -383,7 +377,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         dataLoadingState={dataLoadingState}
         totalCount={isBlankTimeline ? 0 : totalCount}
         leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
-        onFetchMoreRecords={loadNextEventBatch}
+        onFetchMoreRecords={loadNextBatch}
         activeTab={activeTab}
         updatedAt={refreshedAt}
         isTextBasedQuery={false}

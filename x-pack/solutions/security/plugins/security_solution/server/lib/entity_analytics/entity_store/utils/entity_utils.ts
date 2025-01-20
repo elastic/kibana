@@ -14,21 +14,8 @@ import type { DataViewsService, DataView } from '@kbn/data-views-plugin/common';
 import type { AppClient } from '../../../../types';
 import { getRiskScoreLatestIndex } from '../../../../../common/entity_analytics/risk_engine';
 import { getAssetCriticalityIndex } from '../../../../../common/entity_analytics/asset_criticality';
-import {
-  EntityTypeEnum,
-  type EntityType,
-} from '../../../../../common/api/entity_analytics/entity_store/common.gen';
+import { type EntityType as EntityTypeOpenAPI } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
 import { entityEngineDescriptorTypeName } from '../saved_object';
-
-const identityFieldMap: Record<EntityType, string> = {
-  [EntityTypeEnum.host]: 'host.name',
-  [EntityTypeEnum.user]: 'user.name',
-  [EntityTypeEnum.service]: 'service.name',
-};
-
-export const getIdentityFieldForEntityType = (entityType: EntityType) => {
-  return identityFieldMap[entityType];
-};
 
 export const buildIndexPatterns = async (
   space: string,
@@ -68,18 +55,18 @@ const getSecuritySolutionIndices = async (
   };
 };
 
-export const getByEntityTypeQuery = (entityType: EntityType) => {
+export const getByEntityTypeQuery = (entityType: EntityTypeOpenAPI) => {
   return `${entityEngineDescriptorTypeName}.attributes.type: ${entityType}`;
 };
 
-export const getEntitiesIndexName = (entityType: EntityType, namespace: string) =>
+export const getEntitiesIndexName = (entityType: EntityTypeOpenAPI, namespace: string) =>
   entitiesIndexPattern({
     schemaVersion: ENTITY_SCHEMA_VERSION_V1,
     dataset: ENTITY_LATEST,
     definitionId: buildEntityDefinitionId(entityType, namespace),
   });
 
-export const buildEntityDefinitionId = (entityType: EntityType, space: string) => {
+export const buildEntityDefinitionId = (entityType: EntityTypeOpenAPI, space: string) => {
   return `security_${entityType}_${space}`;
 };
 

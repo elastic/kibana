@@ -103,6 +103,21 @@ export const getFieldsFromKibanaDataView = (dataView: DataView): string[] => {
 };
 
 /**
+ * Retrieves just the populated fields from a Kibana data view.
+ * @param {DataView} dataView - The Kibana data view.
+ * @param {string[]} [populatedFields] - The populated fields.
+ * returns {string[]} - The array of populated fields from the data view.
+ */
+export const getPopulatedFieldsFromKibanaDataView = (
+  dataView: DataView,
+  populatedFields?: string[]
+): string[] => {
+  const allPopulatedFields = Array.isArray(populatedFields) ? populatedFields : [];
+  const allDataViewFields = getFieldsFromKibanaDataView(dataView);
+  return allPopulatedFields.filter((d) => allDataViewFields.includes(d)).sort();
+};
+
+/**
  * Record of ES field types.
  */
 export interface FieldTypes {

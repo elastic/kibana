@@ -19,10 +19,14 @@ export { SecurityPageName } from '@kbn/security-solution-navigation';
  */
 export const APP_ID = 'securitySolution' as const;
 export const APP_UI_ID = 'securitySolutionUI' as const;
+export const ASSET_INVENTORY_FEATURE_ID = 'securitySolutionAssetInventory' as const;
 export const ASSISTANT_FEATURE_ID = 'securitySolutionAssistant' as const;
 export const ATTACK_DISCOVERY_FEATURE_ID = 'securitySolutionAttackDiscovery' as const;
 export const CASES_FEATURE_ID = 'securitySolutionCasesV2' as const;
+export const TIMELINE_FEATURE_ID = 'securitySolutionTimeline' as const;
+export const NOTES_FEATURE_ID = 'securitySolutionNotes' as const;
 export const SERVER_APP_ID = 'siem' as const;
+export const SECURITY_FEATURE_ID = 'siemV2' as const;
 export const APP_NAME = 'Security' as const;
 export const APP_ICON = 'securityAnalyticsApp' as const;
 export const APP_ICON_SOLUTION = 'logoSecurity' as const;
@@ -47,7 +51,7 @@ export const DEFAULT_PREVIEW_INDEX = '.preview.alerts-security.alerts' as const;
 export const DEFAULT_LISTS_INDEX = '.lists' as const;
 export const DEFAULT_ITEMS_INDEX = '.items' as const;
 export const DEFAULT_RISK_SCORE_PAGE_SIZE = 1000 as const;
-// The DEFAULT_MAX_SIGNALS value exists also in `x-pack/plugins/cases/common/constants.ts`
+// The DEFAULT_MAX_SIGNALS value exists also in `x-pack/platform/plugins/shared/cases/common/constants.ts`
 // If either changes, engineer should ensure both values are updated
 export const DEFAULT_MAX_SIGNALS = 100 as const;
 export const DEFAULT_SEARCH_AFTER_PAGE_SIZE = 100 as const;
@@ -66,7 +70,6 @@ export const ENDPOINT_METRICS_INDEX = '.ds-metrics-endpoint.metrics-*' as const;
 export const DEFAULT_RULE_REFRESH_INTERVAL_ON = true as const;
 export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000 as const; // ms
 export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100 as const;
-export const SECURITY_FEATURE_ID = 'Security' as const;
 export const SECURITY_TAG_NAME = 'Security Solution' as const;
 export const SECURITY_TAG_DESCRIPTION = 'Security Solution auto-generated tag' as const;
 export const DEFAULT_SPACE_ID = 'default' as const;
@@ -102,6 +105,7 @@ export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const EXCEPTION_LIST_DETAIL_PATH = `${EXCEPTIONS_PATH}/details/:detailName` as const;
 export const HOSTS_PATH = '/hosts' as const;
 export const ATTACK_DISCOVERY_PATH = '/attack_discovery' as const;
+export const ASSET_INVENTORY_PATH = '/asset_inventory' as const;
 export const USERS_PATH = '/users' as const;
 export const KUBERNETES_PATH = '/kubernetes' as const;
 export const NETWORK_PATH = '/network' as const;
@@ -280,7 +284,6 @@ export const TIMELINE_COPY_URL = `${TIMELINE_URL}/_copy` as const;
 export const NOTE_URL = '/api/note' as const;
 export const PINNED_EVENT_URL = '/api/pinned_event' as const;
 export const SOURCERER_API_URL = '/internal/security_solution/sourcerer' as const;
-export const RISK_SCORE_INDEX_STATUS_API_URL = '/internal/risk_score/index_status' as const;
 
 /**
  * Default signals index key for kibana.dev.yml
@@ -352,10 +355,6 @@ export const showAllOthersBucket: string[] = [
   'destination.ip',
   'user.name',
 ];
-
-export const RISKY_HOSTS_INDEX_PREFIX = 'ml_host_risk_score_' as const;
-
-export const RISKY_USERS_INDEX_PREFIX = 'ml_user_risk_score_' as const;
 
 export const TRANSFORM_STATES = {
   ABORTING: 'aborting',

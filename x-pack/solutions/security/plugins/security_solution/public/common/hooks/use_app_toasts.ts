@@ -71,7 +71,7 @@ export const errorToErrorStackAdapter = (error: unknown): Error => {
  * See this file, we are not allowed to import files such as es_error.
  * So instead we say maybe err is on there so that we can unwrap it and get
  * our status code from it if possible within the error in our function.
- * src/plugins/data/public/search/errors/es_error.tsx
+ * src/platform/plugins/shared/data/public/search/errors/es_error.tsx
  */
 export type MaybeESError = IEsError & { err?: Record<string, unknown> };
 
