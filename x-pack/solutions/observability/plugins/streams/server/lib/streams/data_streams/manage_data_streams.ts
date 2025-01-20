@@ -108,24 +108,14 @@ export async function updateDataStreamsLifecycle({
   isServerless: boolean;
 }) {
   try {
-    if (!lifecycle || lifecycle.type === 'ilm') {
-      await retryTransientEsErrors(
-        () =>
-          esClient.indices.deleteDataLifecycle({
-            name: names,
-          }),
-        { logger }
-      );
-    } else if (lifecycle.type === 'dlm') {
-      await retryTransientEsErrors(
-        () =>
-          esClient.indices.putDataLifecycle({
-            name: names,
-            data_retention: lifecycle.data_retention,
-          }),
-        { logger }
-      );
-    }
+    await retryTransientEsErrors(
+      () =>
+        esClient.indices.putDataLifecycle({
+          name: names,
+          data_retention: lifecycle?.type === 'dlm' ? lifecycle.data_retention : undefined,
+        }),
+      { logger }
+    );
 
     // if we transition from ilm to dlm or vice versa, the rolled over backing
     // indices need to be updated or they'll retain their historical lifecycle
