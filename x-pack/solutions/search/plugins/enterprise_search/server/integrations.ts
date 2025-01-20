@@ -11,7 +11,8 @@ import { ConfigType } from '.';
 
 export const registerEnterpriseSearchIntegrations = (
   config: ConfigType,
-  customIntegrations: CustomIntegrationsPluginSetup
+  customIntegrations: CustomIntegrationsPluginSetup,
+  crawlerAssetBasePath: string
 ) => {
   if (config.hasWebCrawler) {
     customIntegrations.registerCustomIntegration({
@@ -26,8 +27,8 @@ export const registerEnterpriseSearchIntegrations = (
       uiInternalPath: '/app/elasticsearch/content/crawlers',
       icons: [
         {
-          type: 'eui',
-          src: 'logoEnterpriseSearch',
+          type: 'svg',
+          src: crawlerAssetBasePath,
         },
       ],
       shipper: 'search',
