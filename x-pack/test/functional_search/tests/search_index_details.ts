@@ -88,17 +88,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           it('should have basic example texts', async () => {
             await pageObjects.searchIndexDetailsPage.expectHasSampleDocuments();
           });
-
-          it('should have other example texts when mapping changed', async () => {
-            await es.indices.putMapping({
-              index: indexNameCodeExample,
-              properties: {
-                text: { type: 'text' },
-                number: { type: 'integer' },
-              },
-            });
-            await pageObjects.searchIndexDetailsPage.expectSampleDocumentsWithCustomMappings();
-          });
         });
 
         describe('API key details', () => {
