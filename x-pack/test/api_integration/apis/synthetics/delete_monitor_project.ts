@@ -6,7 +6,7 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
-import { REQUEST_TOO_LARGE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/delete_monitor_project';
+import { REQUEST_TOO_LARGE_DELETE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/project_monitor/delete_monitor_project';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import expect from '@kbn/expect';
@@ -47,10 +47,10 @@ export default function ({ getService }: FtrProviderContext) {
       projectMonitors = setUniqueIds(getFixtureJson('project_browser_monitor'));
     });
 
-    it('only allows 250 requests at a time', async () => {
+    it('only allows 500 requests at a time', async () => {
       const project = 'test-brower-suite';
       const monitors = [];
-      for (let i = 0; i < 251; i++) {
+      for (let i = 0; i < 550; i++) {
         monitors.push({
           ...projectMonitors.monitors[0],
           id: `test-id-${i}`,
@@ -93,7 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send({ monitors: monitorsToDelete })
           .expect(400);
         const { message } = response.body;
-        expect(message).to.eql(REQUEST_TOO_LARGE);
+        expect(message).to.eql(REQUEST_TOO_LARGE_DELETE);
       } finally {
         await supertest
           .delete(

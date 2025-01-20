@@ -12,7 +12,7 @@
     "patterns": [
       "_sql/async/status/{id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/get-async-sql-search-status-api.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/get-async-sql-search-status-api.html",
     "availability": {
       "stack": true,
       "serverless": true
