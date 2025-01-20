@@ -28,11 +28,14 @@ export const AttackDiscoveryPostRequestBody = z.object({
    * LLM API configuration.
    */
   apiConfig: ApiConfig,
+  end: z.string().optional(),
+  filter: z.object({}).catchall(z.unknown()).optional(),
   langSmithProject: z.string().optional(),
   langSmithApiKey: z.string().optional(),
   model: z.string().optional(),
   replacements: Replacements.optional(),
   size: z.number(),
+  start: z.string().optional(),
   subAction: z.enum(['invokeAI', 'invokeStream']),
 });
 export type AttackDiscoveryPostRequestBodyInput = z.input<typeof AttackDiscoveryPostRequestBody>;

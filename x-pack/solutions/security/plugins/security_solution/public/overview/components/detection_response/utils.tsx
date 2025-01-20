@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+// @deprecated
 export const SEVERITY_COLOR = {
   critical: '#E7664C',
   high: '#DA8B45',

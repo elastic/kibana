@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiText } from '@elastic/eui';
-import styled from 'styled-components';
+import { UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 
-export const StyledFilterGroupFlexItem = styled(EuiFlexItem)`
-  flex-basis: 17%;
-`;
-
-export const StyledText = styled(EuiText)`
-  font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
-`;
+export const textCss = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    fontWeight: euiTheme.font.weight.semiBold,
+  });

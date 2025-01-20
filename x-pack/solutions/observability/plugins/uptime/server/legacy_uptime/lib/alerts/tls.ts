@@ -9,7 +9,6 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { AlertsClientError, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import moment from 'moment';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
-import { schema } from '@kbn/config-schema';
 import {
   alertsLocatorID,
   AlertsLocatorParams,
@@ -20,6 +19,8 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
 import { asyncForEach } from '@kbn/std';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { uptimeTLSRuleParamsSchema } from '@kbn/response-ops-rule-params/uptime_tls';
+
 import { uptimeRuleFieldMap } from '../../../../common/rules/uptime_rule_field_map';
 import { formatFilterString } from './status_check';
 import { UptimeAlertTypeFactory } from './types';
@@ -123,12 +124,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
   producer: 'uptime',
   name: tlsTranslations.alertFactoryName,
   validate: {
-    params: schema.object({
-      stackVersion: schema.maybe(schema.string()),
-      search: schema.maybe(schema.string()),
-      certExpirationThreshold: schema.maybe(schema.number()),
-      certAgeThreshold: schema.maybe(schema.number()),
-    }),
+    params: uptimeTLSRuleParamsSchema,
   },
   defaultActionGroupId: TLS.id,
   actionGroups: [
