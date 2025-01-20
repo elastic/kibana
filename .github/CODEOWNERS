@@ -1304,6 +1304,9 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 # Observability settings
 /x-pack/plugins/observability_solution/observability/server/ui_settings.ts @elastic/obs-docs
 
+# Streams
+/x-pack/test/api_integration/deployment_agnostic/apis/observability/streams @elastic/streams-program-team
+
 ### END Observability Plugins
 
 # Presentation
