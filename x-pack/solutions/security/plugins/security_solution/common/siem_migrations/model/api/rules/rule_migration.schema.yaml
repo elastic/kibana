@@ -237,8 +237,6 @@ paths:
           application/json:
             schema:
               type: object
-              required:
-                - ids
               properties:
                 ids:
                   type: array
@@ -259,37 +257,8 @@ paths:
                   - installed
                 properties:
                   installed:
-                    type: boolean
-                    description: Indicates rules migrations have been installed.
-
-  /internal/siem_migrations/rules/{migration_id}/install_translated:
-    post:
-      summary: Installs all translated migration rules
-      operationId: InstallTranslatedMigrationRules
-      x-codegen-enabled: true
-      description: Installs all translated migration rules
-      tags:
-        - SIEM Rule Migrations
-      parameters:
-        - name: migration_id
-          in: path
-          required: true
-          schema:
-            description: The migration id to install translated rules for
-            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
-      responses:
-        200:
-          description: Indicates rules migrations have been installed correctly.
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - installed
-                properties:
-                  installed:
-                    type: boolean
-                    description: Indicates rules migrations have been installed.
+                    type: number
+                    description: Indicates the number of successfully installed migration rules.
 
   /internal/siem_migrations/rules/{migration_id}/start:
     put:
