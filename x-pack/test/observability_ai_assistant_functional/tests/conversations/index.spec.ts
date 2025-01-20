@@ -272,7 +272,19 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   conversationInterceptor.waitForIntercept(),
                 ]);
 
-                await titleSimulator.next('My title');
+                await titleSimulator.next({
+                  content: '',
+                  tool_calls: [
+                    {
+                      id: 'id',
+                      index: 0,
+                      function: {
+                        name: 'title_conversation',
+                        arguments: JSON.stringify({ title: 'My title' }),
+                      },
+                    },
+                  ],
+                });
 
                 await titleSimulator.tokenCount({ completion: 1, prompt: 1, total: 2 });
 
