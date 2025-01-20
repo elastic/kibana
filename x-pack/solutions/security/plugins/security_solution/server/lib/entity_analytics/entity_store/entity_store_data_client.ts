@@ -132,7 +132,7 @@ export const DEFAULT_INIT_ENTITY_STORE: InitEntityStoreRequestBody = {
   fieldHistoryLength: 10,
 };
 
-const defaultEngineRequest: InitEntityEngineRequestBody & { lookbackPeriod?: string } = {
+const DEFAULT_ENTITY_ENGINE: InitEntityEngineRequestBody & { lookbackPeriod?: string } = {
   ...DEFAULT_INIT_ENTITY_STORE,
 };
 
@@ -293,13 +293,13 @@ export class EntityStoreDataClient {
 
   public async init(
     entityType: EntityType,
-    InitEntityEngineRequestBodyOverrides: Partial<typeof defaultEngineRequest> = {},
+    InitEntityEngineRequestBodyOverrides: Partial<typeof DEFAULT_ENTITY_ENGINE> = {},
     { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
   ): Promise<InitEntityEngineResponse> {
     const mergedRequest = {
-      ...defaultEngineRequest,
+      ...DEFAULT_ENTITY_ENGINE,
       ...InitEntityEngineRequestBodyOverrides,
-    } as Required<typeof defaultEngineRequest>;
+    } as Required<typeof DEFAULT_ENTITY_ENGINE>;
 
     const { indexPattern, filter, fieldHistoryLength, lookbackPeriod } = mergedRequest;
     const { experimentalFeatures } = this.options;
