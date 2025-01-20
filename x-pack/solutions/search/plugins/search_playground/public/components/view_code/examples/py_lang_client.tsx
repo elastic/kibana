@@ -40,11 +40,12 @@ def get_elasticsearch_results():
 def create_openai_prompt(results):
     context = ""
     for hit in results:
-        inner_hit_path = f"{hit['_index']}.{index_source_fields.get(hit['_index'])[0]}"
-
-        ## For semantic_text matches, we need to extract the text from the inner_hits
-        if 'inner_hits' in hit and inner_hit_path in hit['inner_hits']:
-            context += '\\n --- \\n'.join(inner_hit['_source']['text'] for inner_hit in hit['inner_hits'][inner_hit_path]['hits']['hits'])
+        ## For semantic_text matches, we need to extract the text from the highlighted field
+        if "highlight" in hit:
+            highlighted_texts = []
+            for values in hit["highlight"].values():
+                highlighted_texts.extend(values)
+            context += "\\n --- \\n".join(highlighted_texts)
         else:
             source_field = index_source_fields.get(hit["_index"])[0]
             hit_context = hit["_source"][source_field]

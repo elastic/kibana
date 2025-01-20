@@ -132,7 +132,7 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
       const responseBody = JSON.stringify(error.response?.data ?? {});
 
       if (responseBody) {
-        return `${message}\nURL called: ${error.response?.config?.url}\nResponse body: ${responseBody}`;
+        return `${message}\nURL called:[${error.response?.config?.method}] ${error.response?.config?.url}\nResponse body: ${responseBody}`;
       }
 
       return message;
@@ -153,10 +153,14 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
     filter = {},
     page = 1,
     pageSize = 20,
+    sortField = '',
+    sortDirection = 'desc',
   }: {
     filter: Record<string, string | string[]>;
-    page: number;
-    pageSize: number;
+    page?: number;
+    pageSize?: number;
+    sortField?: string;
+    sortDirection?: string;
   }): Partial<BuildODataUrlParamsResponse> {
     const oDataQueryOptions: Partial<BuildODataUrlParamsResponse> = {
       $count: true,
@@ -168,6 +172,10 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
 
     if (page > 1) {
       oDataQueryOptions.$skip = page * pageSize - pageSize;
+    }
+
+    if (sortField) {
+      oDataQueryOptions.$orderby = `${sortField} ${sortDirection}`;
     }
 
     const filterEntries = Object.entries(filter);
@@ -185,7 +193,7 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
         oDataQueryOptions.$filter += `${key} ${isArrayValue ? 'in' : 'eq'} ${
           isArrayValue
             ? '(' + value.map((valueString) => `'${valueString}'`).join(',') + ')'
-            : value
+            : `'${value}'`
         }`;
       }
     }
@@ -313,7 +321,13 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
   }
 
   public async getActions(
-    { page = 1, pageSize = 20, ...filter }: MicrosoftDefenderEndpointGetActionsParams,
+    {
+      page = 1,
+      pageSize = 20,
+      sortField,
+      sortDirection = 'desc',
+      ...filter
+    }: MicrosoftDefenderEndpointGetActionsParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<MicrosoftDefenderEndpointGetActionsResponse> {
     // API Reference: https://learn.microsoft.com/en-us/defender-endpoint/api/get-machineactions-collection
@@ -323,7 +337,7 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
       {
         url: `${this.urls.machineActions}`,
         method: 'GET',
-        params: this.buildODataUrlParams({ filter, page, pageSize }),
+        params: this.buildODataUrlParams({ filter, page, pageSize, sortField, sortDirection }),
       },
       connectorUsageCollector
     );
@@ -342,4 +356,5 @@ interface BuildODataUrlParamsResponse {
   $top: number;
   $skip: number;
   $count: boolean;
+  $orderby: string;
 }
