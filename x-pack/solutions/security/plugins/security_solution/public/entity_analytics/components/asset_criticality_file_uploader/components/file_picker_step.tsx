@@ -37,13 +37,6 @@ interface AssetCriticalityFilePickerStepProps {
   errorMessage?: string;
 }
 
-const listStyle = css`
-  list-style-type: disc;
-  margin-bottom: ${euiTheme.size.l};
-  margin-left: ${euiTheme.size.l};
-  line-height: ${useEuiFontSize('s').lineHeight};
-`;
-
 const sampleCSVContent = `user,user-001,low_impact\nuser,user-002,medium_impact\nhost,host-001,extreme_impact`;
 
 export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePickerStepProps> =
@@ -52,6 +45,13 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
 
     const formatBytes = useFormatBytes();
     const { euiTheme } = useEuiTheme();
+
+    const listStyle = css`
+      list-style-type: disc;
+      margin-bottom: ${euiTheme.size.l};
+      margin-left: ${euiTheme.size.l};
+      line-height: ${useEuiFontSize('s').lineHeight};
+    `;
 
     const entityTypes = useAssetCriticalityEntityTypes();
     const i18nOrList = (items: string[]) =>

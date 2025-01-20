@@ -83,8 +83,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
       riskColors,
       riskEntity: entityType,
     });
-  }, [entityData?.name, entityData?.risk?.calculated_level, entityType riskColors]);
-          
+  }, [entityData?.name, entityData?.risk?.calculated_level, entityType, riskColors]);
   const xsFontSize = useEuiFontSize('xxs').fontSize;
   const rows = useMemo(() => getItems(entityData), [entityData]);
 
