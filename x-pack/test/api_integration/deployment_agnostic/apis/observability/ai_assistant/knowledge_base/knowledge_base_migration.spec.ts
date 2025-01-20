@@ -16,7 +16,8 @@ import {
   createKnowledgeBaseModel,
   clearKnowledgeBase,
   deleteInferenceEndpoint,
-  TINY_ELSER,
+  setupKnowledgeBase,
+  waitForKnowledgeBaseReady,
 } from './helpers';
 
 interface InferenceChunk {
@@ -75,16 +76,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await clearKnowledgeBase(es);
       await esArchiver.load(archive);
       await createKnowledgeBaseModel(ml);
-      const { status } = await observabilityAIAssistantAPIClient.admin({
-        endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-        params: {
-          query: {
-            model_id: TINY_ELSER.id,
-          },
-        },
-      });
-
-      expect(status).to.be(200);
+      await setupKnowledgeBase(observabilityAIAssistantAPIClient);
+      await waitForKnowledgeBaseReady(getService);
     });
 
     after(async () => {

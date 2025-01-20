@@ -9,11 +9,12 @@ import expect from '@kbn/expect';
 import { type KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
-  TINY_ELSER,
   clearKnowledgeBase,
   createKnowledgeBaseModel,
   deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
+  setupKnowledgeBase,
+  waitForKnowledgeBaseReady,
 } from './helpers';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -23,20 +24,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('Knowledge base', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
-    this.tags(['failsOnMKI']);
+
     before(async () => {
       await createKnowledgeBaseModel(ml);
-
-      const { status } = await observabilityAIAssistantAPIClient.admin({
-        endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-        params: {
-          query: {
-            model_id: TINY_ELSER.id,
-          },
-        },
-      });
-
-      expect(status).to.be(200);
+      await setupKnowledgeBase(observabilityAIAssistantAPIClient);
+      await waitForKnowledgeBaseReady(getService);
     });
 
     after(async () => {

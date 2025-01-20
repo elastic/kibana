@@ -14,11 +14,12 @@ import {
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { invokeChatCompleteWithFunctionRequest } from './helpers';
 import {
-  TINY_ELSER,
   clearKnowledgeBase,
   createKnowledgeBaseModel,
   deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
+  setupKnowledgeBase,
+  waitForKnowledgeBaseReady,
 } from '../../knowledge_base/helpers';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -35,15 +36,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     before(async () => {
       await createKnowledgeBaseModel(ml);
-      const { status } = await observabilityAIAssistantAPIClient.admin({
-        endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-        params: {
-          query: {
-            model_id: TINY_ELSER.id,
-          },
-        },
-      });
-      expect(status).to.be(200);
+      await setupKnowledgeBase(observabilityAIAssistantAPIClient);
+      await waitForKnowledgeBaseReady(getService);
 
       proxy = await createLlmProxy(log);
       connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({

@@ -13,12 +13,13 @@ import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types
 import pRetry from 'p-retry';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
-  TINY_ELSER,
   clearConversations,
   clearKnowledgeBase,
   createKnowledgeBaseModel,
   deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
+  setupKnowledgeBase,
+  waitForKnowledgeBaseReady,
 } from './helpers';
 import { getConversationCreatedEvent } from '../helpers';
 import {
@@ -38,17 +39,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   describe('Knowledge base user instructions', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
     this.tags(['failsOnMKI']);
+
     before(async () => {
       await createKnowledgeBaseModel(ml);
-      const { status } = await observabilityAIAssistantAPIClient.admin({
-        endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-        params: {
-          query: {
-            model_id: TINY_ELSER.id,
-          },
-        },
-      });
-      expect(status).to.be(200);
+      await setupKnowledgeBase(observabilityAIAssistantAPIClient);
+      await waitForKnowledgeBaseReady(getService);
     });
 
     after(async () => {
@@ -181,6 +176,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
           params: { body: adminInstruction },
         });
+
         expect(statusAdmin).to.be(200);
 
         // wait for the public instruction to be indexed before proceeding

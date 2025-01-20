@@ -13,6 +13,8 @@ import {
   createKnowledgeBaseModel,
   TINY_ELSER,
   deleteInferenceEndpoint,
+  setupKnowledgeBase,
+  waitForKnowledgeBaseReady,
 } from './helpers';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -23,16 +25,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   describe('/internal/observability_ai_assistant/kb/status', function () {
     beforeEach(async () => {
       await createKnowledgeBaseModel(ml);
-      const { status } = await observabilityAIAssistantAPIClient.admin({
-        endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-        params: {
-          query: {
-            model_id: TINY_ELSER.id,
-          },
-        },
-      });
-
-      expect(status).to.be(200);
+      await setupKnowledgeBase(observabilityAIAssistantAPIClient);
+      await waitForKnowledgeBaseReady(getService);
     });
 
     afterEach(async () => {

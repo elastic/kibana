@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { Client } from '@elastic/elasticsearch';
 import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/server/service/inference_endpoint';
+import type { ObservabilityAIAssistantApiClient } from '../../../../services/observability_ai_assistant_api';
+import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { MachineLearningProvider } from '../../../../../services/ml';
 import { SUPPORTED_TRAINED_MODELS } from '../../../../../../functional/services/ml/api';
 
@@ -25,6 +28,37 @@ export async function createKnowledgeBaseModel(ml: ReturnType<typeof MachineLear
   // necessary for MKI, check indices before importing model.  compatible with stateful
   await ml.api.assureMlStatsIndexExists();
   await ml.api.importTrainedModel(TINY_ELSER.name, TINY_ELSER.id, config);
+}
+
+export async function setupKnowledgeBase(
+  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient
+) {
+  const { status } = await observabilityAIAssistantAPIClient.admin({
+    endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
+    params: {
+      query: {
+        model_id: TINY_ELSER.id,
+      },
+    },
+  });
+  expect(status).to.be(200);
+}
+
+export async function waitForKnowledgeBaseReady(
+  getService: DeploymentAgnosticFtrProviderContext['getService']
+) {
+  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
+  const log = getService('log');
+  const retry = getService('retry');
+
+  await retry.try(async () => {
+    log.debug(`Waiting for knowledge base to be ready...`);
+    const res = await observabilityAIAssistantAPIClient.editor({
+      endpoint: 'GET /internal/observability_ai_assistant/kb/status',
+    });
+    expect(res.status).to.be(200);
+    expect(res.body.ready).to.be(true);
+  });
 }
 
 export async function deleteKnowledgeBaseModel(ml: ReturnType<typeof MachineLearningProvider>) {
