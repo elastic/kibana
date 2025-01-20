@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('shows full dataset names when toggled', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Data set name'];
+      const datasetNameCol = cols[PageObjects.datasetQuality.texts.datasetNameColumn];
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
       expect(datasetNameColCellTexts).to.eql(allDatasetNames);
 
@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('searches the datasets', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Data set name'];
+      const datasetNameCol = cols[PageObjects.datasetQuality.texts.datasetNameColumn];
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
       expect(datasetNameColCellTexts).to.eql(allDatasetNames);
 
@@ -95,7 +95,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       const colsAfterSearch = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameColAfterSearch = colsAfterSearch['Data set name'];
+      const datasetNameColAfterSearch =
+        colsAfterSearch[PageObjects.datasetQuality.texts.datasetNameColumn];
       const datasetNameColCellTextsAfterSearch = await datasetNameColAfterSearch.getCellTexts();
       expect(datasetNameColCellTextsAfterSearch).to.eql([datasetNames[2]]);
       // Reset the search field
@@ -104,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('filters for integration', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Data set name'];
+      const datasetNameCol = cols[PageObjects.datasetQuality.texts.datasetNameColumn];
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
       expect(datasetNameColCellTexts).to.eql(allDatasetNames);
 
@@ -112,7 +113,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.datasetQuality.filterForIntegrations([apacheIntegrationName]);
 
       const colsAfterFilter = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameColAfterFilter = colsAfterFilter['Data set name'];
+      const datasetNameColAfterFilter =
+        colsAfterFilter[PageObjects.datasetQuality.texts.datasetNameColumn];
       const datasetNameColCellTextsAfterFilter = await datasetNameColAfterFilter.getCellTexts();
       expect(datasetNameColCellTextsAfterFilter).to.eql([apacheAccessDatasetHumanName]);
       // Reset the filter by selecting from the dropdown again

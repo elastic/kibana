@@ -30,19 +30,27 @@ const failedDocsRoute = createDatasetQualityServerRoute({
   async handler(resources): Promise<{
     failedDocs: DataStreamDocsStat[];
   }> {
-    const { context, params } = resources;
+    const { context, params, logger } = resources;
     const coreContext = await context.core;
 
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-    const failedDocs = await getFailedDocsPaginated({
-      esClient,
-      ...params.query,
-    });
+    try {
+      const failedDocs = await getFailedDocsPaginated({
+        esClient,
+        ...params.query,
+      });
 
-    return {
-      failedDocs,
-    };
+      return {
+        failedDocs,
+      };
+    } catch (e) {
+      logger.error(`Failed to get failed docs: ${e}`);
+
+      return {
+        failedDocs: [],
+      };
+    }
   },
 });
 

@@ -60,13 +60,13 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     });
 
     after(async () => {
-      await synthtrace.clean();
-      await PageObjects.observabilityLogsExplorer.uninstallPackage(pkg);
+      // await synthtrace.clean();
+      // await PageObjects.observabilityLogsExplorer.uninstallPackage(pkg);
     });
 
     it('shows sort by dataset name and show namespace', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Data set name'];
+      const datasetNameCol = cols[PageObjects.datasetQuality.texts.datasetNameColumn];
       await datasetNameCol.sort('descending');
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
       expect(datasetNameColCellTexts).to.eql(
@@ -124,7 +124,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
     it('shows dataset from integration', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Data set name'];
+      const datasetNameCol = cols[PageObjects.datasetQuality.texts.datasetNameColumn];
 
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
 
@@ -134,7 +134,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     it('goes to log explorer page when opened', async () => {
       const rowIndexToOpen = 1;
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Data set name'];
+      const datasetNameCol = cols[PageObjects.datasetQuality.texts.datasetNameColumn];
       const actionsCol = cols.Actions;
 
       const datasetName = (await datasetNameCol.getCellTexts())[rowIndexToOpen];

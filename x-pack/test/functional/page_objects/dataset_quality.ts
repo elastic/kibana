@@ -70,6 +70,15 @@ const texts = {
   services: 'Services',
   hosts: 'Hosts',
   degradedDocs: 'Degraded docs',
+  datasetNameColumn: 'Data set name',
+  datasetNamespaceColumn: 'Namespace',
+  datasetTypeColumn: 'Type',
+  datasetSizeColumn: 'Size',
+  datasetQualityColumn: 'Data set quality',
+  datasetDegradedDocsColumn: 'Degraded docs (%)',
+  datasetFailedDocsColumn: 'Failed docs (%)',
+  datasetLastActivityColumn: 'Last activity',
+  datasetActionsColumn: 'Actions',
 };
 
 export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProviderContext) {
@@ -304,14 +313,15 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       await this.waitUntilTableLoaded();
       const table = await this.getDatasetsTable();
       return this.parseTable(table, [
-        '0',
-        'Data Set Name',
-        'Namespace',
-        'Size',
-        'Data Set Quality',
-        'Degraded Docs (%)',
-        'Last Activity',
-        'Actions',
+        texts.datasetNameColumn,
+        texts.datasetNamespaceColumn,
+        texts.datasetTypeColumn,
+        texts.datasetSizeColumn,
+        texts.datasetQualityColumn,
+        texts.datasetDegradedDocsColumn,
+        texts.datasetFailedDocsColumn,
+        texts.datasetLastActivityColumn,
+        texts.datasetActionsColumn,
       ]);
     },
 
