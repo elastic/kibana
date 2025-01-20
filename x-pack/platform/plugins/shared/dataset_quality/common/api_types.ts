@@ -155,11 +155,13 @@ export const failedDocsErrorRt = rt.type({
   type: rt.string,
 });
 
+export type FailedDocsError = rt.TypeOf<typeof failedDocsErrorRt>;
+
 export const failedDocsErrorsRt = rt.type({
   errors: rt.array(failedDocsErrorRt),
 });
 
-export type FailedDocsErrors = rt.TypeOf<typeof failedDocsErrorsRt>;
+export type FailedDocsErrorsResponse = rt.TypeOf<typeof failedDocsErrorsRt>;
 
 export const degradedFieldRt = rt.intersection([
   qualityIssueBaseRT,

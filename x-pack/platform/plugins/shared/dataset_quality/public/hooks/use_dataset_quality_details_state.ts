@@ -23,7 +23,7 @@ export const useDatasetQualityDetailsState = () => {
 
   const {
     dataStream,
-    degradedFields,
+    qualityIssues,
     timeRange,
     breakdownField,
     isIndexNotFoundError,
@@ -51,9 +51,24 @@ export const useDatasetQualityDetailsState = () => {
   );
 
   const dataStreamSettings = useSelector(service, (state) =>
-    state.matches('initializing.dataStreamSettings.fetchingDataStreamDegradedFields') ||
-    state.matches('initializing.dataStreamSettings.doneFetchingDegradedFields') ||
-    state.matches('initializing.dataStreamSettings.errorFetchingDegradedFields')
+    state.matches(
+      'initializing.dataStreamSettings.qualityIssues.dataStreamDegradedFields.fetchingDataStreamDegradedFields'
+    ) ||
+    state.matches(
+      'initializing.dataStreamSettings.qualityIssues.dataStreamDegradedFields.doneFetchingDegradedFields'
+    ) ||
+    state.matches(
+      'initializing.dataStreamSettings.qualityIssues.dataStreamDegradedFields.errorFetchingDegradedFields'
+    ) ||
+    state.matches(
+      'initializing.dataStreamSettings.qualityIssues.dataStreamFailedDocs.fetchingFailedDocs'
+    ) ||
+    state.matches(
+      'initializing.dataStreamSettings.qualityIssues.dataStreamFailedDocs.doneFetchingFailedDocs'
+    ) ||
+    state.matches(
+      'initializing.dataStreamSettings.qualityIssues.dataStreamFailedDocs.errorFetchingFailedDocs'
+    )
       ? state.context.dataStreamSettings
       : undefined
   );
@@ -128,8 +143,8 @@ export const useDatasetQualityDetailsState = () => {
     ),
   }));
 
-  const isDegradedFieldFlyoutOpen = useSelector(service, (state) =>
-    state.matches('initializing.degradedFieldFlyout.open')
+  const isQualityIssueFlyoutOpen = useSelector(service, (state) =>
+    state.matches('initializing.qualityIssueFlyout.open')
   );
 
   const updateTimeRange = useCallback(
@@ -153,7 +168,7 @@ export const useDatasetQualityDetailsState = () => {
     isIndexNotFoundError,
     dataStream,
     datasetDetails,
-    degradedFields,
+    qualityIssues,
     dataStreamDetails,
     docsTrendChart,
     breakdownField,
@@ -168,6 +183,6 @@ export const useDatasetQualityDetailsState = () => {
     canUserAccessDashboards,
     canUserViewIntegrations,
     expandedQualityIssue,
-    isDegradedFieldFlyoutOpen,
+    isQualityIssueFlyoutOpen,
   };
 };

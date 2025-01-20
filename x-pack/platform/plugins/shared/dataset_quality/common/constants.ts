@@ -22,6 +22,9 @@ export const DEFAULT_SORT_DIRECTION = 'asc';
 export const DEFAULT_QUALITY_ISSUE_SORT_FIELD = 'count';
 export const DEFAULT_QUALITY_ISSUE_SORT_DIRECTION = 'desc';
 
+export const DEFAULT_FAILED_DOCS_ERROR_SORT_FIELD = 'type';
+export const DEFAULT_FAILED_DOCS_ERROR_SORT_DIRECTION = 'desc';
+
 export const NONE = 'none';
 
 export const DEFAULT_TIME_RANGE = { from: 'now-24h', to: 'now' };

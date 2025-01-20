@@ -15,10 +15,10 @@ import {
   fieldLimitMitigationRolloverButton,
   fieldLimitMitigationSuccessComponentTemplateLinkText,
   fieldLimitMitigationSuccessMessage,
-} from '../../../../../../common/translations';
-import { useDatasetQualityDetailsState, useQualityIssues } from '../../../../../hooks';
-import { getComponentTemplatePrefixFromIndexTemplate } from '../../../../../../common/utils/component_template_name';
-import { useKibanaContextForPlugin } from '../../../../../utils';
+} from '../../../../../../../common/translations';
+import { useDatasetQualityDetailsState, useQualityIssues } from '../../../../../../hooks';
+import { getComponentTemplatePrefixFromIndexTemplate } from '../../../../../../../common/utils/component_template_name';
+import { useKibanaContextForPlugin } from '../../../../../../utils';
 
 export function MessageCallout() {
   const {

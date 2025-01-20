@@ -5,30 +5,25 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
+  EuiButtonIcon,
+  EuiFlexGroup,
   EuiFlyout,
-  EuiFlyoutHeader,
   EuiFlyoutBody,
+  EuiFlyoutHeader,
   EuiSpacer,
   EuiText,
-  EuiTitle,
-  useGeneratedHtmlId,
   EuiTextColor,
-  EuiFlexGroup,
-  EuiButtonIcon,
+  EuiTitle,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { NavigationSource } from '../../../services/telemetry';
-import {
-  useDatasetDetailsRedirectLinkTelemetry,
-  useDatasetQualityDetailsState,
-  useQualityIssues,
-  useRedirectLink,
-} from '../../../hooks';
+import React, { useMemo } from 'react';
+import { DEGRADED_DOCS_QUERY, FAILURE_STORE_SELECTOR } from '../../../../common/constants';
+import { _IGNORED } from '../../../../common/es_fields';
 import {
   degradedFieldMessageIssueDoesNotExistInLatestIndex,
   discoverAriaText,
@@ -36,13 +31,19 @@ import {
   openInDiscoverText,
   overviewQualityIssuesSectionTitle,
 } from '../../../../common/translations';
-import { DegradedFieldInfo } from './field_info';
-import { _IGNORED } from '../../../../common/es_fields';
-import { PossibleMitigations } from './possible_mitigations';
+import {
+  useDatasetDetailsRedirectLinkTelemetry,
+  useDatasetQualityDetailsState,
+  useQualityIssues,
+  useRedirectLink,
+} from '../../../hooks';
+import { NavigationSource } from '../../../services/telemetry';
+import DegradedFieldFlyout from './degraded_field';
+import FailedDocsFlyout from './failed_docs';
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
-export default function DegradedFieldFlyout() {
+export default function QualityIssueFlyout() {
   const {
     closeDegradedFieldFlyout,
     expandedDegradedField,
@@ -57,7 +58,7 @@ export default function DegradedFieldFlyout() {
 
   const fieldList = useMemo(() => {
     return renderedItems.find((item) => {
-      return item.name === expandedDegradedField?.name;
+      return item.name === expandedDegradedField?.name && item.type === expandedDegradedField?.type;
     });
   }, [renderedItems, expandedDegradedField]);
 
@@ -72,7 +73,17 @@ export default function DegradedFieldFlyout() {
   const redirectLinkProps = useRedirectLink({
     dataStreamStat: datasetDetails,
     timeRangeConfig: timeRange,
-    query: { language: 'kuery', query: `${_IGNORED}: ${expandedDegradedField}` },
+    query: {
+      language: 'kuery',
+      query:
+        expandedDegradedField && expandedDegradedField.type === 'degraded'
+          ? DEGRADED_DOCS_QUERY
+          : '',
+    },
+    selector:
+      expandedDegradedField && expandedDegradedField.type === 'failed'
+        ? FAILURE_STORE_SELECTOR
+        : undefined,
     sendTelemetry,
   });
 
@@ -90,8 +101,14 @@ export default function DegradedFieldFlyout() {
         <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
           <EuiTitle size="m">
             <EuiText>
-              {expandedDegradedField?.name}{' '}
-              <span style={{ fontWeight: 400 }}>{fieldIgnoredText}</span>
+              {expandedDegradedField?.type === 'degraded' ? (
+                <>
+                  {expandedDegradedField?.name}{' '}
+                  <span style={{ fontWeight: 400 }}>{fieldIgnoredText}</span>
+                </>
+              ) : (
+                <span style={{ fontWeight: 400 }}>{'Documents indexing failed'}</span>
+              )}
             </EuiText>
           </EuiTitle>
           <EuiToolTip content={openInDiscoverText}>
@@ -105,18 +122,20 @@ export default function DegradedFieldFlyout() {
             />
           </EuiToolTip>
         </EuiFlexGroup>
-        {!isUserViewingTheIssueOnLatestBackingIndex && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiTextColor
-              color="danger"
-              data-test-subj="datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist"
-            >
-              {degradedFieldMessageIssueDoesNotExistInLatestIndex}
-            </EuiTextColor>
-          </>
-        )}
-        {isUserViewingTheIssueOnLatestBackingIndex &&
+        {expandedDegradedField?.type === 'degraded' &&
+          !isUserViewingTheIssueOnLatestBackingIndex && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiTextColor
+                color="danger"
+                data-test-subj="datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist"
+              >
+                {degradedFieldMessageIssueDoesNotExistInLatestIndex}
+              </EuiTextColor>
+            </>
+          )}
+        {expandedDegradedField?.type === 'degraded' &&
+          isUserViewingTheIssueOnLatestBackingIndex &&
           !isAnalysisInProgress &&
           degradedFieldAnalysisFormattedResult &&
           !degradedFieldAnalysisFormattedResult.identifiedUsingHeuristics && (
@@ -145,13 +164,8 @@ export default function DegradedFieldFlyout() {
           )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <DegradedFieldInfo fieldList={fieldList} />
-        {isUserViewingTheIssueOnLatestBackingIndex && (
-          <>
-            <EuiSpacer size="s" />
-            <PossibleMitigations />
-          </>
-        )}
+        {expandedDegradedField?.type === 'degraded' && <DegradedFieldFlyout />}
+        {expandedDegradedField?.type === 'failed' && <FailedDocsFlyout />}
       </EuiFlyoutBody>
     </EuiFlyout>
   );

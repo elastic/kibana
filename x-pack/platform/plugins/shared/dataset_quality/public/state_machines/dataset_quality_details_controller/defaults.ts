@@ -7,6 +7,8 @@
 
 import {
   DEFAULT_DATEPICKER_REFRESH,
+  DEFAULT_FAILED_DOCS_ERROR_SORT_DIRECTION,
+  DEFAULT_FAILED_DOCS_ERROR_SORT_FIELD,
   DEFAULT_QUALITY_ISSUE_SORT_DIRECTION,
   DEFAULT_QUALITY_ISSUE_SORT_FIELD,
   DEFAULT_TIME_RANGE,
@@ -14,7 +16,7 @@ import {
 import { DefaultDatasetQualityDetailsContext, QualityIssueType } from './types';
 
 export const DEFAULT_CONTEXT: DefaultDatasetQualityDetailsContext = {
-  degradedFields: {
+  qualityIssues: {
     table: {
       page: 0,
       rowsPerPage: 10,
@@ -29,8 +31,8 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityDetailsContext = {
       page: 0,
       rowsPerPage: 10,
       sort: {
-        field: 'type',
-        direction: DEFAULT_QUALITY_ISSUE_SORT_DIRECTION,
+        field: DEFAULT_FAILED_DOCS_ERROR_SORT_FIELD,
+        direction: DEFAULT_FAILED_DOCS_ERROR_SORT_DIRECTION,
       },
     },
   },

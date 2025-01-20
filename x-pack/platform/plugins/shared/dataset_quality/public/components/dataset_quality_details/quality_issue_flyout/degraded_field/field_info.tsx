@@ -15,77 +15,25 @@ import {
   EuiTextColor,
   EuiTitle,
   EuiToolTip,
-  formatNumber,
-  useEuiTheme,
 } from '@elastic/eui';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-
-import { NUMBER_FORMAT } from '../../../../common/constants';
+import { useQualityIssues } from '../../../../hooks';
 import {
-  countColumnName,
   degradedFieldCurrentFieldLimitColumnName,
   degradedFieldMaximumCharacterLimitColumnName,
   degradedFieldPotentialCauseColumnName,
   degradedFieldValuesColumnName,
-  lastOccurrenceColumnName,
-} from '../../../../common/translations';
-import { useQualityIssues } from '../../../hooks';
-import { SparkPlot } from '../../common/spark_plot';
-import { QualityIssue } from '../../../../common/api_types';
+} from '../../../../../common/translations';
 
-export const DegradedFieldInfo = ({ fieldList }: { fieldList?: QualityIssue }) => {
-  const { euiTheme } = useEuiTheme();
-
+export const DegradedFieldInfo = () => {
   const {
-    fieldFormats,
     degradedFieldValues,
-    isDegradedFieldsLoading,
     isAnalysisInProgress,
     degradedFieldAnalysisFormattedResult,
     degradedFieldAnalysis,
   } = useQualityIssues();
 
-  const dateFormatter = fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE, [
-    ES_FIELD_TYPES.DATE,
-  ]);
-
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
-      <EuiFlexGroup data-test-subj={`datasetQualityDetailsDegradedFieldFlyoutFieldsList-docCount`}>
-        <EuiFlexItem grow={1}>
-          <EuiTitle size="xxs">
-            <span>{countColumnName}</span>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem
-          data-test-subj="datasetQualityDetailsDegradedFieldFlyoutFieldValue-docCount"
-          grow={2}
-        >
-          <SparkPlot
-            series={fieldList?.timeSeries}
-            valueLabel={formatNumber(fieldList?.count, NUMBER_FORMAT)}
-            isLoading={isDegradedFieldsLoading}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiHorizontalRule margin="s" />
-      <EuiFlexGroup
-        data-test-subj={`datasetQualityDetailsDegradedFieldFlyoutFieldsList-lastOccurrence`}
-      >
-        <EuiFlexItem grow={1}>
-          <EuiTitle size="xxs">
-            <span>{lastOccurrenceColumnName}</span>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem
-          data-test-subj="datasetQualityDetailsDegradedFieldFlyoutFieldValue-lastOccurrence"
-          grow={2}
-        >
-          <span>{dateFormatter.convert(fieldList?.lastOccurrence)}</span>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiHorizontalRule margin="s" />
-
+    <>
       <EuiFlexGroup data-test-subj={`datasetQualityDetailsDegradedFieldFlyoutFieldsList-cause`}>
         <EuiFlexItem grow={1}>
           <EuiTitle size="xxs">
@@ -167,7 +115,7 @@ export const DegradedFieldInfo = ({ fieldList }: { fieldList?: QualityIssue }) =
                 <EuiBadgeGroup gutterSize="s">
                   {degradedFieldValues?.values.map((value, idx) => (
                     <EuiBadge color="hollow" key={idx}>
-                      <EuiTextColor color={euiTheme.colors.vis.euiColorVis3}>
+                      <EuiTextColor color="#765B96">
                         <strong>{value}</strong>
                       </EuiTextColor>
                     </EuiBadge>
@@ -178,6 +126,6 @@ export const DegradedFieldInfo = ({ fieldList }: { fieldList?: QualityIssue }) =
             <EuiHorizontalRule margin="s" />
           </>
         )}
-    </EuiFlexGroup>
+    </>
   );
 };

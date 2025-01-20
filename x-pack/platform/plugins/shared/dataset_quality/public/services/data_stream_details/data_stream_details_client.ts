@@ -17,7 +17,7 @@ import {
   DegradedFieldValues,
   degradedFieldValuesRt,
   FailedDocsDetails,
-  FailedDocsErrors,
+  FailedDocsErrorsResponse,
   failedDocsErrorsRt,
   getDataStreamDegradedFieldsResponseRt,
   getDataStreamsDetailsResponseRt,
@@ -122,7 +122,7 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
     dataStream,
     start,
     end,
-  }: GetDataStreamFailedDocsErrorsParams): Promise<FailedDocsErrors> {
+  }: GetDataStreamFailedDocsErrorsParams): Promise<FailedDocsErrorsResponse> {
     const response = await this.http
       .get<FailedDocsDetails>(
         `/internal/dataset_quality/data_streams/${dataStream}/failed_docs/errors`,

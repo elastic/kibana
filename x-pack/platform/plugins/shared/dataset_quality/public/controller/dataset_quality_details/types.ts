@@ -8,16 +8,16 @@
 import { Observable } from 'rxjs';
 import {
   DatasetQualityDetailsControllerStateService,
-  DegradedFieldsTableConfig,
+  QualityIssuesTableConfig,
   WithDefaultControllerState,
 } from '../../state_machines/dataset_quality_details_controller';
 
-type DegradedFieldTableSortOptions = Omit<DegradedFieldsTableConfig['table']['sort'], 'field'> & {
+type DegradedFieldTableSortOptions = Omit<QualityIssuesTableConfig['table']['sort'], 'field'> & {
   field: string;
 };
 
 export type DatasetQualityDegradedFieldTableOptions = Partial<
-  Omit<DegradedFieldsTableConfig['table'], 'sort'> & {
+  Omit<QualityIssuesTableConfig['table'], 'sort'> & {
     sort?: DegradedFieldTableSortOptions;
   }
 >;

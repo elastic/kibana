@@ -19,8 +19,8 @@ import {
   fieldLimitMitigationCurrentLimitLabelText,
   fieldLimitMitigationNewLimitButtonText,
   fieldLimitMitigationNewLimitPlaceholderText,
-} from '../../../../../../common/translations';
-import { useQualityIssues } from '../../../../../hooks';
+} from '../../../../../../../common/translations';
+import { useQualityIssues } from '../../../../../../hooks';
 
 export function IncreaseFieldMappingLimit({ totalFieldLimit }: { totalFieldLimit: number }) {
   // Propose the user a 30% increase over the current limit

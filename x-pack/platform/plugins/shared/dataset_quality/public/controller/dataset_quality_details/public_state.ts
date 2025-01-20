@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DegradedFieldSortField } from '../../hooks';
+import { QualityIssueSortField } from '../../hooks';
 import {
   DatasetQualityDetailsControllerContext,
   DEFAULT_CONTEXT,
@@ -17,7 +17,7 @@ export const getPublicStateFromContext = (
 ): DatasetQualityDetailsPublicState => {
   return {
     dataStream: context.dataStream,
-    degradedFields: context.degradedFields,
+    qualityIssues: context.qualityIssues,
     failedDocsErrors: context.failedDocsErrors,
     timeRange: context.timeRange,
     breakdownField: context.breakdownField,
@@ -32,16 +32,16 @@ export const getContextFromPublicState = (
   publicState: DatasetQualityDetailsPublicStateUpdate
 ): DatasetQualityDetailsControllerContext => ({
   ...DEFAULT_CONTEXT,
-  degradedFields: {
+  qualityIssues: {
     table: {
-      ...DEFAULT_CONTEXT.degradedFields.table,
+      ...DEFAULT_CONTEXT.qualityIssues.table,
       ...publicState.degradedFields?.table,
       sort: publicState.degradedFields?.table?.sort
         ? {
             ...publicState.degradedFields.table.sort,
-            field: publicState.degradedFields.table.sort.field as DegradedFieldSortField,
+            field: publicState.degradedFields.table.sort.field as QualityIssueSortField,
           }
-        : DEFAULT_CONTEXT.degradedFields.table.sort,
+        : DEFAULT_CONTEXT.qualityIssues.table.sort,
     },
   },
   timeRange: {
