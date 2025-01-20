@@ -41,6 +41,7 @@ export interface ConfigProperties {
   sensitive: boolean;
   updatable: boolean;
   type: FieldType;
+  supported_task_types: string[];
 }
 
 interface ConfigEntry extends ConfigProperties {

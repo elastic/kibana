@@ -54,7 +54,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
   const [isProviderPopoverOpen, setProviderPopoverOpen] = useState(false);
   const [providerSchema, setProviderSchema] = useState<ConfigEntryView[]>([]);
   const [taskTypeOptions, setTaskTypeOptions] = useState<TaskTypeOption[]>([]);
-  const [selectedTaskType, setSelectedTaskType] = useState<string>(DEFAULT_TASK_TYPE);
+  const [selectedTaskType, setSelectedTaskType] = useState<string>();
 
   const { updateFieldValues, setFieldValue, validateFields, isSubmitting } = useFormContext();
   const [requiredProviderFormFields, setRequiredProviderFormFields] = useState<ConfigEntryView[]>(
@@ -104,13 +104,44 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
   );
 
   const onTaskTypeOptionsSelect = useCallback(
-    (taskType: string) => {
+    (taskType: string, providerSelected?: string) => {
       setSelectedTaskType(taskType);
 
       const inferenceId = generateInferenceEndpointId({
         ...config,
         taskType,
       });
+
+      const newProvider = providers?.find(
+        (p) => p.service === (config.provider === '' ? providerSelected : config.provider)
+      );
+
+      const newProviderSchema: ConfigEntryView[] = Object.keys(newProvider?.configurations ?? {})
+        .filter((pk) =>
+          (newProvider?.configurations[pk].supported_task_types ?? []).includes(taskType)
+        )
+        .map(
+          (k): ConfigEntryView => ({
+            key: k,
+            isValid: true,
+            validationErrors: [],
+            value: newProvider?.configurations[k].default_value ?? null,
+            default_value: newProvider?.configurations[k].default_value ?? null,
+            description: newProvider?.configurations[k].description ?? null,
+            label: newProvider?.configurations[k].label ?? '',
+            required: newProvider?.configurations[k].required ?? false,
+            sensitive: newProvider?.configurations[k].sensitive ?? false,
+            updatable: newProvider?.configurations[k].updatable ?? false,
+            type: newProvider?.configurations[k].type ?? FieldType.STRING,
+            supported_task_types: newProvider?.configurations[k].supported_task_types ?? [],
+          })
+        );
+
+      setProviderSchema(newProviderSchema);
+
+      // reset values for providerCOnfig and secrets
+      setFieldValue('config.providerConfig', {});
+      setFieldValue('secrets.providerSecrets', {});
 
       updateFieldValues({
         config: {
@@ -119,7 +150,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         },
       });
     },
-    [config, updateFieldValues]
+    [config, providers, setFieldValue, updateFieldValues]
   );
 
   const onProviderChange = useCallback(
@@ -128,28 +159,8 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
 
       setTaskTypeOptions(getTaskTypeOptions(newProvider?.task_types ?? []));
       if (newProvider?.task_types && newProvider?.task_types.length > 0) {
-        onTaskTypeOptionsSelect(newProvider?.task_types[0]);
+        onTaskTypeOptionsSelect(newProvider?.task_types[0], provider);
       }
-
-      const newProviderSchema: ConfigEntryView[] = Object.keys(
-        newProvider?.configurations ?? {}
-      ).map(
-        (k): ConfigEntryView => ({
-          key: k,
-          isValid: true,
-          validationErrors: [],
-          value: newProvider?.configurations[k].default_value ?? null,
-          default_value: newProvider?.configurations[k].default_value ?? null,
-          description: newProvider?.configurations[k].description ?? null,
-          label: newProvider?.configurations[k].label ?? '',
-          required: newProvider?.configurations[k].required ?? false,
-          sensitive: newProvider?.configurations[k].sensitive ?? false,
-          updatable: newProvider?.configurations[k].updatable ?? false,
-          type: newProvider?.configurations[k].type ?? FieldType.STRING,
-        })
-      );
-
-      setProviderSchema(newProviderSchema);
 
       const defaultProviderConfig: Record<string, unknown> = {};
       const defaultProviderSecrets: Record<string, unknown> = {};
@@ -265,15 +276,21 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     if (config?.provider && isEdit) {
       const newProvider = providers?.find((p) => p.service === config.provider);
       // Update connector providerSchema
-      const newProviderSchema = Object.keys(newProvider?.configurations ?? {}).map((k) => ({
-        key: k,
-        isValid: true,
-        ...newProvider?.configurations[k],
-      })) as ConfigEntryView[];
+      const newProviderSchema = Object.keys(newProvider?.configurations ?? {})
+        .filter((pk) =>
+          (newProvider?.configurations[pk].supported_task_types ?? []).includes(
+            selectedTaskType ?? newProvider?.task_types[0] ?? DEFAULT_TASK_TYPE
+          )
+        )
+        .map((k) => ({
+          key: k,
+          isValid: true,
+          ...newProvider?.configurations[k],
+        })) as ConfigEntryView[];
 
       setProviderSchema(newProviderSchema);
     }
-  }, [config?.provider, config?.taskType, isEdit, providers]);
+  }, [config?.provider, config?.taskType, isEdit, providers, selectedTaskType]);
 
   useEffect(() => {
     if (isSubmitting) {
@@ -304,9 +321,10 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
               typeof configValue === 'string' ||
               typeof configValue === 'number' ||
               typeof configValue === 'boolean' ||
-              configValue === null
+              configValue === null ||
+              configValue === undefined
             ) {
-              itemValue.value = configValue;
+              itemValue.value = configValue ?? null;
             }
           }
           return itemValue;
@@ -315,7 +333,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
 
     setOptionalProviderFormFields(existingConfiguration.filter((p) => !p.required && !p.sensitive));
     setRequiredProviderFormFields(existingConfiguration.filter((p) => p.required || p.sensitive));
-  }, [config?.providerConfig, providerSchema, secrets]);
+  }, [config?.providerConfig, providerSchema, secrets, selectedTaskType]);
 
   return !isLoading ? (
     <>

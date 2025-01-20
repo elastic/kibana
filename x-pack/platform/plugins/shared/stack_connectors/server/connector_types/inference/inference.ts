@@ -196,7 +196,6 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
         signal: params.signal,
       }
     );
-
     // errors should be thrown as it will not be a stream response
     if (response.statusCode >= 400) {
       const error = await streamToString(response.body as unknown as Readable);
