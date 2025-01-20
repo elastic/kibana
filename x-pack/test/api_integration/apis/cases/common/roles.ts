@@ -25,7 +25,7 @@ export const secAllCasesOnlyDelete: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['all'],
+          siem: ['all'],
           securitySolutionCases: ['cases_delete'],
           actions: ['all'],
           actionsSimulators: ['all'],
@@ -50,7 +50,7 @@ export const secAllCasesOnlyReadDelete: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['all'],
+          siem: ['all'],
           securitySolutionCases: ['read', 'cases_delete'],
           actions: ['all'],
           actionsSimulators: ['all'],
@@ -75,7 +75,7 @@ export const secAllCasesNoDelete: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['all'],
+          siem: ['all'],
           securitySolutionCases: ['minimal_all'],
           actions: ['all'],
           actionsSimulators: ['all'],
@@ -100,7 +100,7 @@ export const secAll: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['all'],
+          siem: ['all'],
           securitySolutionCases: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
@@ -125,10 +125,8 @@ export const secCasesV2All: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['all'],
+          siem: ['all'],
           securitySolutionCasesV2: ['all'],
-          securitySolutionTimeline: ['all'],
-          securitySolutionNotes: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -152,10 +150,8 @@ export const secCasesV2NoReopenWithCreateComment: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['all'],
+          siem: ['all'],
           securitySolutionCasesV2: ['read', 'update', 'create', 'delete', 'create_comment'],
-          securitySolutionTimeline: ['all'],
-          securitySolutionNotes: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -179,9 +175,7 @@ export const secCasesV2NoCreateCommentWithReopen: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['all'],
-          securitySolutionTimeline: ['all'],
-          securitySolutionNotes: ['all'],
+          siem: ['all'],
           securitySolutionCasesV2: ['read', 'update', 'create', 'delete', 'case_reopen'],
           actions: ['all'],
           actionsSimulators: ['all'],
@@ -206,7 +200,7 @@ export const secAllSpace1: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['all'],
+          siem: ['all'],
           securitySolutionCases: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
@@ -231,7 +225,7 @@ export const secAllCasesRead: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['all'],
+          siem: ['all'],
           securitySolutionCases: ['read'],
           actions: ['all'],
           actionsSimulators: ['all'],
@@ -256,7 +250,7 @@ export const secAllCasesNone: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['all'],
+          siem: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -280,7 +274,7 @@ export const secReadCasesAll: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['read'],
+          siem: ['read'],
           securitySolutionCases: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
@@ -305,7 +299,7 @@ export const secReadCasesRead: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['read'],
+          siem: ['read'],
           securitySolutionCases: ['read'],
           actions: ['all'],
           actionsSimulators: ['all'],
@@ -330,7 +324,7 @@ export const secRead: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['read'],
+          siem: ['read'],
           securitySolutionCases: ['read'],
           actions: ['all'],
           actionsSimulators: ['all'],
@@ -355,7 +349,7 @@ export const secReadCasesNone: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['read'],
+          siem: ['read'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },

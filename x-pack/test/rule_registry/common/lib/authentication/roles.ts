@@ -40,9 +40,7 @@ export const securitySolutionOnlyAll: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['all'],
-          securitySolutionTimeline: ['all'],
-          securitySolutionNotes: ['all'],
+          siem: ['all'],
         },
         spaces: ['space1'],
       },
@@ -59,9 +57,7 @@ export const securitySolutionOnlyAllSpace2: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['all'],
-          securitySolutionTimeline: ['all'],
-          securitySolutionNotes: ['all'],
+          siem: ['all'],
         },
         spaces: ['space2'],
       },
@@ -78,9 +74,7 @@ export const securitySolutionOnlyRead: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['read'],
-          securitySolutionTimeline: ['read'],
-          securitySolutionNotes: ['read'],
+          siem: ['read'],
         },
         spaces: ['space1'],
       },
@@ -97,9 +91,7 @@ export const securitySolutionOnlyReadSpace2: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['read'],
-          securitySolutionTimeline: ['read'],
-          securitySolutionNotes: ['read'],
+          siem: ['read'],
         },
         spaces: ['space2'],
       },
@@ -191,9 +183,7 @@ export const securitySolutionOnlyAllSpacesAll: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['all'],
-          securitySolutionTimeline: ['all'],
-          securitySolutionNotes: ['all'],
+          siem: ['all'],
         },
         spaces: ['*'],
       },
@@ -215,9 +205,7 @@ export const securitySolutionOnlyAllSpacesAllWithReadESIndices: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['all'],
-          securitySolutionTimeline: ['all'],
-          securitySolutionNotes: ['all'],
+          siem: ['all'],
         },
         spaces: ['*'],
       },
@@ -234,9 +222,7 @@ export const securitySolutionOnlyReadSpacesAll: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['read'],
-          securitySolutionTimeline: ['read'],
-          securitySolutionNotes: ['read'],
+          siem: ['read'],
         },
         spaces: ['*'],
       },

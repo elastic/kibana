@@ -238,9 +238,7 @@ export const securitySolutionOnlyReadAlerts: Role = {
       {
         feature: {
           securitySolutionFixture: ['all'],
-          siemV2: ['read'],
-          securitySolutionTimeline: ['read'],
-          securitySolutionNotes: ['read'],
+          siem: ['read'],
         },
         spaces: ['space1'],
       },
@@ -258,9 +256,7 @@ export const securitySolutionOnlyReadNoIndexAlerts: Role = {
       {
         feature: {
           securitySolutionFixture: ['all'],
-          siemV2: ['read'],
-          securitySolutionTimeline: ['read'],
-          securitySolutionNotes: ['read'],
+          siem: ['read'],
         },
         spaces: ['space1'],
       },

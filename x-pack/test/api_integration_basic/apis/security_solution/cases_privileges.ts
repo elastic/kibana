@@ -36,10 +36,8 @@ const secAll: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['all'],
+          siem: ['all'],
           securitySolutionCasesV2: ['all'],
-          securitySolutionTimeline: ['all'],
-          securitySolutionNotes: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -69,10 +67,8 @@ const secRead: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['read'],
+          siem: ['read'],
           securitySolutionCasesV2: ['read'],
-          securitySolutionTimeline: ['read'],
-          securitySolutionNotes: ['read'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
