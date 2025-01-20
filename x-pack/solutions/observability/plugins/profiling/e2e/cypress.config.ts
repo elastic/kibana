@@ -22,11 +22,11 @@ export default defineCypressConfig({
   viewportHeight: 1800,
   viewportWidth: 1440,
   video: false,
-  screenshotOnRunFailure: false,
+  screenshotOnRunFailure: true,
   e2e: {
     baseUrl: 'http://localhost:5601',
     supportFile: './cypress/support/e2e.ts',
-    specPattern: './cypress/e2e/profiling_views/functions.cy.ts',
+    specPattern: './cypress/e2e/**/*.cy.ts',
     experimentalMemoryManagement: true,
     numTestsKeptInMemory: 3,
     experimentalRunAllSpecs: true,
