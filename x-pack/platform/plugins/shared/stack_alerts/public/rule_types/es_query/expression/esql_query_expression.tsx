@@ -149,21 +149,21 @@ export const EsqlQueryExpression: React.FC<
     isServerless,
   ]);
 
-  const fetchTimeFieldsData = async (q: AggregateQuery) => {
-    try {
-      const esqlDataView = await getESQLAdHocDataview(q.esql, dataViews);
-      const indexPattern: string = esqlDataView.getIndexPattern();
-      const currentEsFields = await getFields(http, [indexPattern]);
-      const newTimeFieldOptions = getTimeFieldOptions(currentEsFields);
-      const timestampField = esqlDataView.timeFieldName;
-      return { newTimeFieldOptions, timestampField };
-    } catch (e) {
-      return { newTimeFieldOptions: [], timestampField: undefined };
-    }
-  };
-
   const refreshTimeFields = useCallback(
     async (q: AggregateQuery) => {
+      const fetchTimeFieldsData = async (q: AggregateQuery) => {
+        try {
+          const esqlDataView = await getESQLAdHocDataview(q.esql, dataViews);
+          const indexPattern: string = esqlDataView.getIndexPattern();
+          const currentEsFields = await getFields(http, [indexPattern]);
+          const newTimeFieldOptions = getTimeFieldOptions(currentEsFields);
+          const timestampField = esqlDataView.timeFieldName;
+          return { newTimeFieldOptions, timestampField };
+        } catch (e) {
+          return { newTimeFieldOptions: [], timestampField: undefined };
+        }
+      };
+
       const { newTimeFieldOptions, timestampField } = await fetchTimeFieldsData(q);
       setTimeFieldOptions([firstFieldOption, ...newTimeFieldOptions]);
       if (!timeField && timestampField) {
@@ -171,7 +171,7 @@ export const EsqlQueryExpression: React.FC<
       }
       setDetectedTimestamp(timestampField);
     },
-    [timeField, fetchTimeFieldsData, setParam]
+    [timeField, setParam]
   );
 
   return (
