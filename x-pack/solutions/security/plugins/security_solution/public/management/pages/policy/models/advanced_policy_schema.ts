@@ -95,6 +95,16 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.allow_cloud_features',
+    first_supported_version: '8.18',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.allow_cloud_features',
+      {
+        defaultMessage: `Advanced option to selectively choose which external services are allowed, valid keywords are "sample-collection,reputation-lookup,malware-lookup,artifacts-update,staged-artifacts-rollout". Everything is allowed by default. To disallow all a special keyword "none" can be used. The option imposes severe limitation on Endpoint functionality. It's meant only for telemetry extra-avoidant users, especially for FedRAMP High users.`,
+      }
+    ),
+  },
+  {
     key: 'linux.advanced.elasticsearch.delay',
     first_supported_version: '7.9',
     documentation: i18n.translate(
@@ -317,6 +327,16 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'PEM-encoded public key used to verify the user artifact manifest signature.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.allow_cloud_features',
+    first_supported_version: '8.18',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.allow_cloud_features',
+      {
+        defaultMessage: `Advanced option to selectively choose which external services are allowed, valid keywords are "sample-collection,reputation-lookup,malware-lookup,artifacts-update,staged-artifacts-rollout". Everything is allowed by default. To disallow all a special keyword "none" can be used. The option imposes severe limitation on Endpoint functionality. It's meant only for telemetry extra-avoidant users, especially for FedRAMP High users.`,
       }
     ),
   },
@@ -553,6 +573,16 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'PEM-encoded public key used to verify the user artifact manifest signature.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.allow_cloud_features',
+    first_supported_version: '8.18',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.allow_cloud_features',
+      {
+        defaultMessage: `Advanced option to selectively choose which external services are allowed, valid keywords are "sample-collection,reputation-lookup,malware-lookup,artifacts-update,staged-artifacts-rollout". Everything is allowed by default. To disallow all a special keyword "none" can be used. The option imposes severe limitation on Endpoint functionality. It's meant only for telemetry extra-avoidant users, especially for FedRAMP High users.`,
       }
     ),
   },
