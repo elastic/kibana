@@ -20,12 +20,6 @@ const params = {
   params: schema.object({
     case_id: schema.string(),
   }),
-  query: schema.object({
-    /**
-     * @deprecated since version 8.1.0
-     */
-    includeComments: schema.boolean({ defaultValue: true, meta: { deprecated: true } }),
-  }),
 };
 
 export const getCaseRoute = ({ isServerless }: { isServerless?: boolean }) =>
@@ -62,7 +56,6 @@ export const getCaseRoute = ({ isServerless }: { isServerless?: boolean }) =>
 
         const res: caseDomainV1.Case = await casesClient.cases.get({
           id,
-          includeComments: request.query.includeComments,
         });
 
         return response.ok({
@@ -75,7 +68,7 @@ export const getCaseRoute = ({ isServerless }: { isServerless?: boolean }) =>
         });
       } catch (error) {
         throw createCaseError({
-          message: `Failed to retrieve case in route case id: ${request.params.case_id} \ninclude comments: ${request.query.includeComments}: ${error}`,
+          message: `Failed to retrieve case in route case id: ${request.params.case_id}: ${error}`,
           error,
         });
       }
@@ -97,7 +90,6 @@ export const resolveCaseRoute = createCasesRoute({
 
       const res: caseApiV1.CaseResolveResponse = await casesClient.cases.resolve({
         id,
-        includeComments: request.query.includeComments,
       });
 
       return response.ok({
@@ -105,7 +97,7 @@ export const resolveCaseRoute = createCasesRoute({
       });
     } catch (error) {
       throw createCaseError({
-        message: `Failed to retrieve case in resolve route case id: ${request.params.case_id} \ninclude comments: ${request.query.includeComments}: ${error}`,
+        message: `Failed to retrieve case in resolve route case id: ${request.params.case_id}: ${error}`,
         error,
       });
     }

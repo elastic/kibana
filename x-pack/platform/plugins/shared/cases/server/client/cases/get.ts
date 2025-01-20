@@ -168,6 +168,7 @@ export interface GetParams {
  * @ignore
  */
 export const get = async (
+  // TODO: Remove includeComments
   { id, includeComments }: GetParams,
   clientArgs: CasesClientArgs
 ): Promise<Case> => {
