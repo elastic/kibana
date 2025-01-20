@@ -9,7 +9,6 @@
 
 import { has, isEmpty, get } from 'lodash/fp';
 import type { Unit } from '@kbn/datemath';
-import moment from 'moment';
 import deepmerge from 'deepmerge';
 import omit from 'lodash/omit';
 
@@ -33,6 +32,7 @@ import type {
 
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 
+import { TimeDuration } from '@kbn/securitysolution-utils/time_duration';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import {
   transformAlertToRuleAction,
@@ -70,6 +70,7 @@ import {
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../../../rule_creation/components/alert_suppression_edit';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit';
+import { convertDurationToDateMath } from '../../../../common/utils/date_math';
 
 export const getTimeTypeValue = (time: string): { unit: Unit; value: number } => {
   const timeObj: { unit: Unit; value: number } = {
@@ -530,7 +531,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         query: ruleFields.queryBar?.query?.query as string,
         required_fields: requiredFields,
         new_terms_fields: ruleFields.newTermsFields,
-        history_window_start: `now-${ruleFields.historyWindowSize}`,
+        history_window_start: convertDurationToDateMath(ruleFields.historyWindowSize),
         ...alertSuppressionFields,
       }
     : isEsqlFields(ruleFields) && !('index' in ruleFields)
@@ -569,22 +570,20 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
 
 export const formatScheduleStepData = (scheduleData: ScheduleStepRule): ScheduleStepRuleJson => {
   const { ...formatScheduleData } = scheduleData;
-  if (!isEmpty(formatScheduleData.interval) && !isEmpty(formatScheduleData.from)) {
-    const { unit: intervalUnit, value: intervalValue } = getTimeTypeValue(
-      formatScheduleData.interval
-    );
-    const { unit: fromUnit, value: fromValue } = getTimeTypeValue(formatScheduleData.from);
-    const duration = moment.duration(intervalValue, intervalUnit);
-    duration.add(fromValue, fromUnit);
-    formatScheduleData.from = `now-${duration.asSeconds()}s`;
+
+  const interval = TimeDuration.parse(formatScheduleData.interval ?? '');
+  const lookBack = TimeDuration.parse(formatScheduleData.from ?? '');
+
+  if (interval !== undefined && lookBack !== undefined) {
+    const fromOffset = TimeDuration.fromMilliseconds(
+      interval.toMilliseconds() + lookBack.toMilliseconds()
+    ).toString();
+
+    formatScheduleData.from = `now-${fromOffset}`;
     formatScheduleData.to = 'now';
   }
-  return {
-    ...formatScheduleData,
-    meta: {
-      from: scheduleData.from,
-    },
-  };
+
+  return formatScheduleData;
 };
 
 export const formatAboutStepData = (

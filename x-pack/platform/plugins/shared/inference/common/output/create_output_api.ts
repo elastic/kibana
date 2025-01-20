@@ -32,6 +32,7 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
     schema,
     system,
     previousMessages,
+    modelName,
     functionCalling,
     stream,
     abortSignal,
@@ -52,6 +53,7 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
     const response = chatCompleteApi({
       connectorId,
       stream,
+      modelName,
       functionCalling,
       abortSignal,
       system,
@@ -134,6 +136,7 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
                 }) ?? [])
               ),
               functionCalling,
+              modelName,
               stream: false,
               retry: {
                 onValidationError: retriesLeft - 1,

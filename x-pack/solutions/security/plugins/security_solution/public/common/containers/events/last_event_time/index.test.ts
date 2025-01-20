@@ -5,33 +5,19 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
-import { noop } from 'lodash/fp';
-import type { UseTimelineLastEventTimeArgs } from '.';
+import { waitFor, renderHook } from '@testing-library/react';
+import { BehaviorSubject } from 'rxjs';
 import { useTimelineLastEventTime } from '.';
 import { LastEventIndexKey } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../lib/kibana';
 
 const mockSearchStrategy = jest.fn();
+
 const mockUseKibana = {
   services: {
     data: {
       search: {
-        search: mockSearchStrategy.mockReturnValue({
-          unsubscribe: jest.fn(),
-          subscribe: jest.fn(({ next, error }) => {
-            const mockData = {
-              lastSeen: '1 minute ago',
-            };
-            try {
-              next(mockData);
-              /* eslint-disable no-empty */
-            } catch (e) {}
-            return {
-              unsubscribe: jest.fn(),
-            };
-          }),
-        }),
+        search: mockSearchStrategy,
       },
     },
     notifications: {
@@ -53,67 +39,68 @@ jest.mock('../../../lib/kibana', () => ({
 }));
 
 describe('useTimelineLastEventTime', () => {
+  let searchStrategy$: BehaviorSubject<{ lastSeen: string | null; errorMessage?: string }>;
+
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.useFakeTimers({ legacyFakeTimers: true });
+    searchStrategy$ = new BehaviorSubject<{ lastSeen: string | null; errorMessage?: string }>({
+      lastSeen: null,
+    });
+
+    mockSearchStrategy.mockReturnValue(searchStrategy$.asObservable());
+
     (useKibana as jest.Mock).mockReturnValue(mockUseKibana);
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should init', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<
-        string,
-        [boolean, UseTimelineLastEventTimeArgs]
-      >(() =>
-        useTimelineLastEventTime({
-          indexKey: LastEventIndexKey.hostDetails,
-          details: {},
-          indexNames: [],
-        })
-      );
-      await waitForNextUpdate();
-      expect(result.current).toEqual([
-        false,
-        { errorMessage: undefined, lastSeen: null, refetch: noop },
-      ]);
-    });
+    const { result } = renderHook(() =>
+      useTimelineLastEventTime({
+        indexKey: LastEventIndexKey.hostDetails,
+        details: {},
+        indexNames: [],
+      })
+    );
+
+    expect(result.current).toEqual([
+      false,
+      { errorMessage: undefined, lastSeen: null, refetch: expect.any(Function) },
+    ]);
   });
 
   it('should call search strategy', async () => {
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook<string, [boolean, UseTimelineLastEventTimeArgs]>(
-        () =>
-          useTimelineLastEventTime({
-            indexKey: LastEventIndexKey.hostDetails,
-            details: {},
-            indexNames: [],
-          })
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+    renderHook(() =>
+      useTimelineLastEventTime({
+        indexKey: LastEventIndexKey.hostDetails,
+        details: {},
+        indexNames: [],
+      })
+    );
+    await waitFor(() =>
       expect(mockSearchStrategy.mock.calls[0][0]).toEqual({
         defaultIndex: [],
         details: {},
         factoryQueryType: 'eventsLastEventTime',
         indexKey: 'hostDetails',
-      });
-    });
+      })
+    );
   });
 
   it('should set response', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<
-        string,
-        [boolean, UseTimelineLastEventTimeArgs]
-      >(() =>
-        useTimelineLastEventTime({
-          indexKey: LastEventIndexKey.hostDetails,
-          details: {},
-          indexNames: [],
-        })
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(result.current[1].lastSeen).toEqual('1 minute ago');
+    searchStrategy$.next({
+      lastSeen: '1 minute ago',
     });
+
+    const { result } = renderHook(() =>
+      useTimelineLastEventTime({
+        indexKey: LastEventIndexKey.hostDetails,
+        details: {},
+        indexNames: [],
+      })
+    );
+    await waitFor(() => expect(result.current[1].lastSeen).toEqual('1 minute ago'));
   });
 });

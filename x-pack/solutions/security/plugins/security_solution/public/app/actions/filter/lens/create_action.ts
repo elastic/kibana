@@ -11,8 +11,8 @@ import {
   filterOutNullableValues,
   valueToArray,
 } from '@kbn/cell-actions/actions/utils';
-import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-import type { CellValueContext, IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { hasBlockingError } from '@kbn/presentation-publishing';
+import type { CellValueContext } from '@kbn/embeddable-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '@kbn/cell-actions/src/actions/translations';
 import { i18n } from '@kbn/i18n';
@@ -79,7 +79,7 @@ export const createFilterLensAction = ({
           }),
     type: DefaultCellActionTypes.FILTER,
     isCompatible: async ({ embeddable, data }) =>
-      !isErrorEmbeddable(embeddable as IEmbeddable) &&
+      !hasBlockingError(embeddable) &&
       isLensApi(embeddable) &&
       isDataColumnsValid(data) &&
       isInSecurityApp(currentAppId),

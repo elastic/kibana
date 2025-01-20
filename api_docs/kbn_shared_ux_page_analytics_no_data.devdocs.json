@@ -17,7 +17,7 @@
           "AnalyticsNoDataPageProps",
           ") => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/page/analytics_no_data/impl/src/analytics_no_data_page.tsx",
+        "path": "src/platform/packages/private/shared-ux/page/analytics_no_data/impl/src/analytics_no_data_page.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -31,7 +31,7 @@
             "signature": [
               "AnalyticsNoDataPageProps"
             ],
-            "path": "packages/shared-ux/page/analytics_no_data/impl/src/analytics_no_data_page.tsx",
+            "path": "src/platform/packages/private/shared-ux/page/analytics_no_data/impl/src/analytics_no_data_page.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -52,7 +52,7 @@
         "signature": [
           "({ onDataViewCreated, allowAdHocDataView, showPlainSpinner, onTryESQL, onESQLNavigationComplete, ...services }: AnalyticsNoDataPageProps) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/page/analytics_no_data/impl/src/analytics_no_data_page.component.tsx",
+        "path": "src/platform/packages/private/shared-ux/page/analytics_no_data/impl/src/analytics_no_data_page.component.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -66,7 +66,7 @@
             "signature": [
               "AnalyticsNoDataPageProps"
             ],
-            "path": "packages/shared-ux/page/analytics_no_data/impl/src/analytics_no_data_page.component.tsx",
+            "path": "src/platform/packages/private/shared-ux/page/analytics_no_data/impl/src/analytics_no_data_page.component.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -89,7 +89,7 @@
           "AnalyticsNoDataPageKibanaDependencies",
           ">) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/page/analytics_no_data/impl/src/services.tsx",
+        "path": "src/platform/packages/private/shared-ux/page/analytics_no_data/impl/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -105,7 +105,7 @@
               "AnalyticsNoDataPageKibanaDependencies",
               ">"
             ],
-            "path": "packages/shared-ux/page/analytics_no_data/impl/src/services.tsx",
+            "path": "src/platform/packages/private/shared-ux/page/analytics_no_data/impl/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -128,7 +128,7 @@
           "AnalyticsNoDataPageServices",
           ">) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/page/analytics_no_data/impl/src/services.tsx",
+        "path": "src/platform/packages/private/shared-ux/page/analytics_no_data/impl/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -144,7 +144,7 @@
               "AnalyticsNoDataPageServices",
               ">"
             ],
-            "path": "packages/shared-ux/page/analytics_no_data/impl/src/services.tsx",
+            "path": "src/platform/packages/private/shared-ux/page/analytics_no_data/impl/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -167,7 +167,7 @@
           "HasApiKeysResponse",
           ">"
         ],
-        "path": "packages/shared-ux/page/analytics_no_data/impl/lib/get_has_api_keys.ts",
+        "path": "src/platform/packages/private/shared-ux/page/analytics_no_data/impl/lib/get_has_api_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -178,7 +178,7 @@
             "tags": [],
             "label": "{\n  get,\n}",
             "description": [],
-            "path": "packages/shared-ux/page/analytics_no_data/impl/lib/get_has_api_keys.ts",
+            "path": "src/platform/packages/private/shared-ux/page/analytics_no_data/impl/lib/get_has_api_keys.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -192,7 +192,7 @@
                 "signature": [
                   "<T>(path: string) => Promise<T>"
                 ],
-                "path": "packages/shared-ux/page/analytics_no_data/impl/lib/get_has_api_keys.ts",
+                "path": "src/platform/packages/private/shared-ux/page/analytics_no_data/impl/lib/get_has_api_keys.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "returnComment": [],
@@ -204,7 +204,7 @@
                     "tags": [],
                     "label": "path",
                     "description": [],
-                    "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
+                    "path": "src/platform/packages/private/shared-ux/page/analytics_no_data/types/index.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -227,7 +227,7 @@
         "description": [
           "\nProps for the `AnalyticsNoDataPage` component."
         ],
-        "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
+        "path": "src/platform/packages/private/shared-ux/page/analytics_no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -243,7 +243,7 @@
             "signature": [
               "(dataView: unknown) => void"
             ],
-            "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
+            "path": "src/platform/packages/private/shared-ux/page/analytics_no_data/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -257,7 +257,7 @@
                 "signature": [
                   "unknown"
                 ],
-                "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
+                "path": "src/platform/packages/private/shared-ux/page/analytics_no_data/types/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -277,7 +277,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
+            "path": "src/platform/packages/private/shared-ux/page/analytics_no_data/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -293,7 +293,7 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
+            "path": "src/platform/packages/private/shared-ux/page/analytics_no_data/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -311,7 +311,7 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
+            "path": "src/platform/packages/private/shared-ux/page/analytics_no_data/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -343,7 +343,7 @@
           " & ",
           "RedirectAppLinksKibanaDependencies"
         ],
-        "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
+        "path": "src/platform/packages/private/shared-ux/page/analytics_no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -368,7 +368,7 @@
           " & ",
           "NoDataViewsPromptServices"
         ],
-        "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
+        "path": "src/platform/packages/private/shared-ux/page/analytics_no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

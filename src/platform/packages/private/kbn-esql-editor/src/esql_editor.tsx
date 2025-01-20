@@ -25,14 +25,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  ESQLLang,
-  ESQL_LANG_ID,
-  ESQL_DARK_THEME_ID,
-  ESQL_LIGHT_THEME_ID,
-  monaco,
-  type ESQLCallbacks,
-} from '@kbn/monaco';
+import { ESQLLang, ESQL_LANG_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
 import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -84,6 +77,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   hideQueryHistory,
   hasOutline,
   displayDocumentationAsFlyout,
+  disableAutoFocus,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const datePickerOpenStatusRef = useRef<boolean>(false);
@@ -98,7 +92,6 @@ export const ESQLEditor = memo(function ESQLEditor({
     fieldsMetadata,
     uiSettings,
   } = kibana.services;
-  const darkMode = core.theme?.getTheme().darkMode;
 
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
   const [code, setCode] = useState<string>(query.esql ?? '');
@@ -132,15 +125,6 @@ export const ESQLEditor = memo(function ESQLEditor({
     errors: serverErrors ? parseErrors(serverErrors, code) : [],
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
-  // contains only client side validation messages
-  const [clientParserMessages, setClientParserMessages] = useState<{
-    errors: MonacoMessage[];
-    warnings: MonacoMessage[];
-  }>({
-    errors: [],
-    warnings: [],
-  });
-  const hideHistoryComponent = hideQueryHistory;
   const onQueryUpdate = useCallback(
     (value: string) => {
       onTextLangQueryChange({ esql: value } as AggregateQuery);
@@ -389,6 +373,7 @@ export const ESQLEditor = memo(function ESQLEditor({
       },
       // @ts-expect-error To prevent circular type import, type defined here is partial of full client
       getFieldsMetadata: fieldsMetadata?.getClient(),
+      getJoinIndices: kibana.services?.esql?.getJoinIndicesAutocomplete,
     };
     return callbacks;
   }, [
@@ -404,6 +389,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     indexManagementApiService,
     histogramBarTarget,
     fieldsMetadata,
+    kibana.services?.esql?.getJoinIndicesAutocomplete,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {
@@ -444,30 +430,26 @@ export const ESQLEditor = memo(function ESQLEditor({
     };
   }, [esqlCallbacks, code]);
 
-  const clientParserStatus = clientParserMessages.errors?.length
-    ? 'error'
-    : clientParserMessages.warnings.length
-    ? 'warning'
-    : 'success';
-
   useEffect(() => {
-    const validateQuery = async () => {
+    const setQueryToTheCache = async () => {
       if (editor1?.current) {
         const parserMessages = await parseMessages();
-        setClientParserMessages({
-          errors: parserMessages?.errors ?? [],
-          warnings: parserMessages?.warnings ?? [],
+        const clientParserStatus = parserMessages.errors?.length
+          ? 'error'
+          : parserMessages.warnings.length
+          ? 'warning'
+          : 'success';
+
+        addQueriesToCache({
+          queryString: code,
+          status: clientParserStatus,
         });
       }
     };
     if (isQueryLoading || isLoading) {
-      validateQuery();
-      addQueriesToCache({
-        queryString: code,
-        status: clientParserStatus,
-      });
+      setQueryToTheCache();
     }
-  }, [clientParserStatus, isLoading, isQueryLoading, parseMessages, code]);
+  }, [isLoading, isQueryLoading, parseMessages, code]);
 
   const queryValidation = useCallback(
     async ({ active }: { active: boolean }) => {
@@ -504,11 +486,6 @@ export const ESQLEditor = memo(function ESQLEditor({
           'Unified search',
           parsedErrors.length ? parsedErrors : []
         );
-        const parserMessages = await parseMessages();
-        setClientParserMessages({
-          errors: parserMessages?.errors ?? [],
-          warnings: parserMessages?.warnings ?? [],
-        });
         return;
       } else {
         queryValidation(subscription).catch(() => {});
@@ -606,7 +583,7 @@ export const ESQLEditor = memo(function ESQLEditor({
       verticalScrollbarSize: 6,
     },
     scrollBeyondLastLine: false,
-    theme: darkMode ? ESQL_DARK_THEME_ID : ESQL_LIGHT_THEME_ID,
+    theme: ESQL_LANG_ID,
     wordWrap: 'on',
     wrappingIndent: 'none',
   };
@@ -727,8 +704,10 @@ export const ESQLEditor = memo(function ESQLEditor({
                     editor.onDidChangeModelContent(showSuggestionsIfEmptyQuery);
 
                     // Auto-focus the editor and move the cursor to the end.
-                    editor.focus();
-                    editor.setPosition({ column: Infinity, lineNumber: Infinity });
+                    if (!disableAutoFocus) {
+                      editor.focus();
+                      editor.setPosition({ column: Infinity, lineNumber: Infinity });
+                    }
                   }}
                 />
               </div>
@@ -779,7 +758,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         isLanguageComponentOpen={isLanguageComponentOpen}
         setIsLanguageComponentOpen={setIsLanguageComponentOpen}
         measuredContainerWidth={measuredEditorWidth}
-        hideQueryHistory={hideHistoryComponent}
+        hideQueryHistory={hideQueryHistory}
         resizableContainerButton={resizableContainerButton}
         resizableContainerHeight={resizableContainerHeight}
         displayDocumentationAsFlyout={displayDocumentationAsFlyout}
