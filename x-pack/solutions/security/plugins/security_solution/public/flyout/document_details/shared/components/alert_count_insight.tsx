@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { capitalize } from 'lodash';
-import { EuiLoadingSpinner, EuiFlexItem, type EuiFlexGroupProps } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiFlexItem, EuiText, type EuiFlexGroupProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { InsightDistributionBar } from './insight_distribution_bar';
 import { getSeverityColor } from '../../../../detections/components/alerts_kpis/severity_level_panel/helpers';
@@ -26,6 +26,11 @@ import type {
   AlertsByStatus,
   ParsedAlertsData,
 } from '../../../../overview/components/detection_response/alerts_by_status/types';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import {
+  INSIGHTS_ALERTS_COUNT_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID,
+  INSIGHTS_ALERTS_COUNT_TEXT_TEST_ID,
+} from './test_ids';
 
 interface AlertCountInsightProps {
   /**
@@ -82,6 +87,10 @@ export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
   direction,
   'data-test-subj': dataTestSubj,
 }) => {
+  const {
+    timelinePrivileges: { read: canUseTimeline },
+  } = useUserPrivileges();
+
   const entityFilter = useMemo(() => ({ field: fieldName, value: name }), [fieldName, name]);
   const { to, from } = useGlobalTime();
   const { signalIndexName } = useSignalIndex();
@@ -119,6 +128,29 @@ export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
     [fieldName, name]
   );
 
+  // renders either a button to open timeline or just plain text depending on the user's timeline privileges
+  const alertCount = useMemo(() => {
+    const formattedAlertCount = <FormattedCount count={totalAlertCount} />;
+
+    if (!canUseTimeline) {
+      return (
+        <EuiText size="xs" data-test-subj={INSIGHTS_ALERTS_COUNT_TEXT_TEST_ID}>
+          {formattedAlertCount}
+        </EuiText>
+      );
+    }
+    return (
+      <InvestigateInTimelineButton
+        asEmptyButton
+        dataProviders={dataProviders}
+        flush={'both'}
+        data-test-subj={INSIGHTS_ALERTS_COUNT_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID}
+      >
+        {formattedAlertCount}
+      </InvestigateInTimelineButton>
+    );
+  }, [canUseTimeline, dataProviders, totalAlertCount]);
+
   if (!isLoading && totalAlertCount === 0) return null;
 
   return (
@@ -134,17 +166,7 @@ export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
             />
           }
           stats={alertStats}
-          count={
-            <div data-test-subj={`${dataTestSubj}-count`}>
-              <InvestigateInTimelineButton
-                asEmptyButton={true}
-                dataProviders={dataProviders}
-                flush={'both'}
-              >
-                <FormattedCount count={totalAlertCount} />
-              </InvestigateInTimelineButton>
-            </div>
-          }
+          count={<div data-test-subj={`${dataTestSubj}-count`}>{alertCount}</div>}
           direction={direction}
           data-test-subj={`${dataTestSubj}-distribution-bar`}
         />
