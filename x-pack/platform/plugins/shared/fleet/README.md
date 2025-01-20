@@ -139,6 +139,11 @@ You can also run a specific test by passing the filepath as an argument, e.g.:
 yarn jest --config x-pack/platform/plugins/shared/fleet/jest.config.dev.js x-pack/platform/plugins/shared/fleet/common/services/validate_package_policy.test.ts
 ```
 
+Or alternatively:
+```sh
+yarn test:jest x-pack/platform/plugins/shared/fleet/common/services/validate_package_policy.test.ts
+```
+
 #### API integration tests (stateful)
 
 API integration tests are run using the functional test runner (FTR). When developing or troubleshooting tests, it is convenient to run the server and tests separately as detailed below.
