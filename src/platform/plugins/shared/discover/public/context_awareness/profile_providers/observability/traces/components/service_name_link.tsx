@@ -8,7 +8,10 @@
  */
 
 import React from 'react';
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, useEuiTheme } from '@elastic/eui';
+import { AgentName } from '@kbn/elastic-agent-utils';
+import { css } from '@emotion/react';
+import { AgentIcon } from '@kbn/custom-icons';
 import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
 
 interface Props {
@@ -19,10 +22,20 @@ interface Props {
 export const ServiceNameLink: React.FC<Props> = ({ serviceName, agentName }: Props) => {
   const { share } = useDiscoverServices();
   const serviceLocator = share?.url.locators.get<{ serviceName: string }>('SERVICE_ENTITY_LOCATOR');
+  const { euiTheme } = useEuiTheme();
 
   // TODO add agent icon
   return (
     <EuiLink href={serviceLocator?.getRedirectUrl({ serviceName })} target="_blank">
+      {agentName && (
+        <AgentIcon
+          agentName={agentName as AgentName}
+          size="l"
+          css={css`
+            margin-right: ${euiTheme.size.xs};
+          `}
+        />
+      )}
       {serviceName}
     </EuiLink>
   );
