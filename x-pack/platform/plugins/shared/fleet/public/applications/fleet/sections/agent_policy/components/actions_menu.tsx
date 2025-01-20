@@ -106,6 +106,7 @@ export const AgentPolicyActionMenu = memo<{
           const manageAutoUpgradeAgentsItem = (
             <EuiContextMenuItem
               icon="gear"
+              disabled={!authz.fleet.allAgentPolicies}
               onClick={() => {
                 setIsContextMenuOpen(false);
                 setIsManageAutoUpgradeAgentsModalOpen(!isManageAutoUpgradeAgentsModalOpen);
@@ -300,9 +301,11 @@ export const AgentPolicyActionMenu = memo<{
                   <ManageAutoUpgradeAgentsModal
                     agentPolicy={agentPolicy}
                     agentCount={agentPolicy.agents || 0}
-                    onClose={() => {
+                    onClose={(refreshPolicy: boolean) => {
                       setIsManageAutoUpgradeAgentsModalOpen(false);
-                      refreshAgentPolicy();
+                      if (refreshPolicy) {
+                        refreshAgentPolicy();
+                      }
                     }}
                   />
                 </EuiPortal>

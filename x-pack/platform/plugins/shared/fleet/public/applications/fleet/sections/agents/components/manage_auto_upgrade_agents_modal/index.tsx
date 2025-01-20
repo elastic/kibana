@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiIconTip,
   EuiSpacer,
   EuiSuperSelect,
 } from '@elastic/eui';
@@ -33,7 +34,7 @@ import {
 import { checkTargetVersionsValidity } from '../../../../../../../common/services';
 
 export interface ManageAutoUpgradeAgentsModalProps {
-  onClose: () => void;
+  onClose: (refreshPolicy: boolean) => void;
   agentPolicy: AgentPolicy;
   agentCount: number;
 }
@@ -52,6 +53,7 @@ export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
 
   const submitUpdateAgentPolicy = async () => {
     setIsLoading(true);
+    let isSuccess = false;
     try {
       const { data, error } = await sendUpdateAgentPolicy(agentPolicy.id, {
         name: agentPolicy.name,
@@ -65,6 +67,7 @@ export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
             values: { name: agentPolicy.name },
           })
         );
+        isSuccess = true;
       } else {
         notifications.toasts.addDanger(
           error
@@ -82,7 +85,7 @@ export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
       );
     }
     setIsLoading(false);
-    onClose();
+    onClose(isSuccess);
   };
 
   async function onSubmit() {
@@ -105,7 +108,7 @@ export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
           defaultMessage="Manage auto-upgrade agents"
         />
       }
-      onCancel={onClose}
+      onCancel={() => onClose(false)}
       onConfirm={onSubmit}
       confirmButtonDisabled={isLoading || errors.length > 0}
       cancelButtonText={
@@ -222,10 +225,22 @@ const TargetVersionsRow: React.FunctionComponent<{
       <EuiFlexItem>
         <EuiFormRow
           label={
-            <FormattedMessage
-              id="xpack.fleet.manageAutoUpgradeAgents.targetAgentVersionTitle"
-              defaultMessage="Target agent version"
-            />
+            <>
+              <FormattedMessage
+                id="xpack.fleet.manageAutoUpgradeAgents.targetAgentVersionTitle"
+                defaultMessage="Target agent version"
+              />
+              <EuiIconTip
+                type="iInCircle"
+                content={
+                  <FormattedMessage
+                    data-test-subj="targetVersionTooltip"
+                    id="xpack.fleet.manageAutoUpgradeAgents.targetVersionTooltip"
+                    defaultMessage="You can only downgrade agents manually."
+                  />
+                }
+              />
+            </>
           }
           helpText=""
         >
