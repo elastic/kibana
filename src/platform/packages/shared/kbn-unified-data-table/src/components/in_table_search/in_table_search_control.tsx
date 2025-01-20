@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ChangeEvent, FocusEvent, useCallback, useState, useEffect } from 'react';
+import React, { ChangeEvent, FocusEvent, useCallback, useState, useEffect, useRef } from 'react';
 import {
   EuiFieldSearch,
   EuiButtonIcon,
@@ -24,6 +24,7 @@ import {
   useInTableSearchMatches,
   UseInTableSearchMatchesProps,
 } from './use_in_table_search_matches';
+import './in_table_search.scss';
 
 const BUTTON_TEST_SUBJ = 'startInTableSearchButton';
 
@@ -111,6 +112,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
   } = useInTableSearchMatches({ ...props, scrollToActiveMatch });
   const areArrowsDisabled = !matchesCount || isProcessing;
 
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const [isFocused, setIsFocused] = useState<boolean>(false);
 
   const focusInput = useCallback(() => {
@@ -118,11 +120,11 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
   }, [setIsFocused]);
 
   const hideInput = useCallback(
-    (shouldFocusTheButton?: boolean) => {
+    (shouldReturnFocusToButton?: boolean) => {
       setIsFocused(false);
       resetState();
 
-      if (shouldFocusTheButton) {
+      if (shouldReturnFocusToButton) {
         setTimeout(() => {
           const button = document.querySelector(`[data-test-subj='${BUTTON_TEST_SUBJ}']`);
           (button as HTMLButtonElement)?.focus();
@@ -186,6 +188,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
       ) {
         event.preventDefault(); // prevent default browser find-in-page behavior
         focusInput();
+        inputRef.current?.focus(); // if it was already open before, make sure to shift the focus to it
       }
     };
 
@@ -222,6 +225,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
   return (
     <div css={searchInputCss}>
       <EuiFieldSearch
+        inputRef={(node) => (inputRef.current = node)}
         autoFocus
         compressed
         isClearable={!isProcessing}
