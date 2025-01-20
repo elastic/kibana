@@ -76,6 +76,8 @@ const userPrivilegesInitial: ReturnType<typeof useUserPrivileges> = {
     canAccessFleet: false,
   }),
   kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+  timelinePrivileges: { crud: true, read: true },
+  notesPrivileges: { crud: true, read: true },
 };
 
 describe('useAlertsPrivileges', () => {
