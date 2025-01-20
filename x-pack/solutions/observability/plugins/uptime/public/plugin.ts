@@ -55,6 +55,7 @@ import {
   ObservabilityAIAssistantPublicStart,
   ObservabilityAIAssistantPublicSetup,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { PLUGIN } from '../common/constants/plugin';
 import { UptimeConfig } from '../common/config';
 import {
@@ -105,6 +106,7 @@ export interface ClientPluginsStart {
   docLinks: DocLinksStart;
   uiSettings: CoreStart['uiSettings'];
   usageCollection: UsageCollectionStart;
+  charts: ChartsPluginStart;
 }
 
 export interface UptimePluginServices extends Partial<CoreStart> {

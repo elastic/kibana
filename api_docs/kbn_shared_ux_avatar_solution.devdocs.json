@@ -39,7 +39,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/avatar/solution/src/solution_avatar.tsx",
+        "path": "src/platform/packages/shared/shared-ux/avatar/solution/src/solution_avatar.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -59,7 +59,7 @@
                 "text": "KibanaSolutionAvatarProps"
               }
             ],
-            "path": "packages/shared-ux/avatar/solution/src/solution_avatar.tsx",
+            "path": "src/platform/packages/shared/shared-ux/avatar/solution/src/solution_avatar.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -84,7 +84,7 @@
           " | ",
           "IconTypeProps"
         ],
-        "path": "packages/shared-ux/avatar/solution/src/solution_avatar.tsx",
+        "path": "src/platform/packages/shared/shared-ux/avatar/solution/src/solution_avatar.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

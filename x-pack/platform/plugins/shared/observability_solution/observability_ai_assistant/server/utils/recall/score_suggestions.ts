@@ -102,7 +102,7 @@ export async function scoreSuggestions({
           type: 'string',
         },
       },
-      required: ['score'],
+      required: ['scores'],
     } as const,
   };
 
@@ -112,6 +112,7 @@ export async function scoreSuggestions({
       functions: [scoreFunction],
       functionCall: 'score',
       signal,
+      stream: true,
     }).pipe(concatenateChatCompletionChunks())
   );
 

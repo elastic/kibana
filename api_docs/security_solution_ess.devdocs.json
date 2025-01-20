@@ -14,7 +14,7 @@
       "tags": [],
       "label": "SecuritySolutionEssPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/security_solution_ess/public/types.ts",
+      "path": "x-pack/solutions/security/plugins/security_solution_ess/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -28,7 +28,7 @@
       "tags": [],
       "label": "SecuritySolutionEssPluginStart",
       "description": [],
-      "path": "x-pack/plugins/security_solution_ess/public/types.ts",
+      "path": "x-pack/solutions/security/plugins/security_solution_ess/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -50,7 +50,7 @@
       "tags": [],
       "label": "SecuritySolutionEssPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/security_solution_ess/server/types.ts",
+      "path": "x-pack/solutions/security/plugins/security_solution_ess/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -64,7 +64,7 @@
       "tags": [],
       "label": "SecuritySolutionEssPluginStart",
       "description": [],
-      "path": "x-pack/plugins/security_solution_ess/server/types.ts",
+      "path": "x-pack/solutions/security/plugins/security_solution_ess/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -88,7 +88,7 @@
         "signature": [
           "\"securitySolutionEss\""
         ],
-        "path": "x-pack/plugins/security_solution_ess/common/index.ts",
+        "path": "x-pack/solutions/security/plugins/security_solution_ess/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -103,7 +103,7 @@
         "signature": [
           "\"securitySolutionEss\""
         ],
-        "path": "x-pack/plugins/security_solution_ess/common/index.ts",
+        "path": "x-pack/solutions/security/plugins/security_solution_ess/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

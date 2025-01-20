@@ -17,7 +17,7 @@ import {
 } from '@kbn/inference-common';
 import { parseSerdeChunkMessage } from './serde_utils';
 import { InferenceConnectorAdapter } from '../../types';
-import type { BedRockMessage, BedrockToolChoice } from './types';
+import type { BedRockImagePart, BedRockMessage, BedRockTextPart, BedrockToolChoice } from './types';
 import {
   BedrockChunkMember,
   serdeEventstreamIntoObservable,
@@ -26,7 +26,16 @@ import { processCompletionChunks } from './process_completion_chunks';
 import { addNoToolUsageDirective } from './prompts';
 
 export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
-  chatComplete: ({ executor, system, messages, toolChoice, tools }) => {
+  chatComplete: ({
+    executor,
+    system,
+    messages,
+    toolChoice,
+    tools,
+    temperature = 0,
+    modelName,
+    abortSignal,
+  }) => {
     const noToolUsage = toolChoice === ToolChoiceType.none;
 
     const subActionParams = {
@@ -34,8 +43,10 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
       messages: messagesToBedrock(messages),
       tools: noToolUsage ? [] : toolsToBedrock(tools, messages),
       toolChoice: toolChoiceToBedrock(toolChoice),
-      temperature: 0,
+      temperature,
+      model: modelName,
       stopSequences: ['\n\nHuman:'],
+      signal: abortSignal,
     };
 
     return from(
@@ -152,7 +163,24 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
       case MessageRole.User:
         return {
           role: 'user' as const,
-          rawContent: [{ type: 'text' as const, text: message.content }],
+          rawContent: (typeof message.content === 'string'
+            ? [message.content]
+            : message.content
+          ).map((contentPart) => {
+            if (typeof contentPart === 'string') {
+              return { text: contentPart, type: 'text' } satisfies BedRockTextPart;
+            } else if (contentPart.type === 'text') {
+              return { text: contentPart.text, type: 'text' } satisfies BedRockTextPart;
+            }
+            return {
+              type: 'image',
+              source: {
+                data: contentPart.source.data,
+                mediaType: contentPart.source.mimeType,
+                type: 'base64',
+              },
+            } satisfies BedRockImagePart;
+          }),
         };
       case MessageRole.Assistant:
         return {

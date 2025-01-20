@@ -9,6 +9,7 @@ import React, { VFC } from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useInvestigateInTimeline } from '../hooks/use_investigate_in_timeline';
+import { useSecurityContext } from '../../../hooks/use_security_context';
 import { Indicator } from '../../../../common/types/indicator';
 import { BUTTON_ICON_LABEL } from './translations';
 
@@ -28,7 +29,7 @@ export interface InvestigateInTimelineProps {
 }
 
 /**
- * Investigate in timeline button, uses the InvestigateInTimelineAction component (x-pack/plugins/security_solution/public/detections/components/alerts_table/timeline_actions/investigate_in_timeline_action.tsx)
+ * Investigate in timeline button, uses the InvestigateInTimelineAction component (x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table/timeline_actions/investigate_in_timeline_action.tsx)
  * retrieved from the SecuritySolutionContext.
  *
  * This component renders an {@link EuiContextMenu}.
@@ -41,7 +42,9 @@ export const InvestigateInTimelineContextMenu: VFC<InvestigateInTimelineProps> =
   'data-test-subj': dataTestSub,
 }) => {
   const { investigateInTimelineFn } = useInvestigateInTimeline({ indicator: data });
-  if (!investigateInTimelineFn) {
+  const securitySolutionContext = useSecurityContext();
+
+  if (!securitySolutionContext?.hasAccessToTimeline || !investigateInTimelineFn) {
     return null;
   }
 
@@ -65,7 +68,7 @@ export const InvestigateInTimelineContextMenu: VFC<InvestigateInTimelineProps> =
 };
 
 /**
- * Investigate in timeline button uses the InvestigateInTimelineAction component (x-pack/plugins/security_solution/public/detections/components/alerts_table/timeline_actions/investigate_in_timeline_action.tsx)
+ * Investigate in timeline button uses the InvestigateInTimelineAction component (x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table/timeline_actions/investigate_in_timeline_action.tsx)
  * retrieved from the SecuritySolutionContext.
  *
  * This component renders an {@link EuiButtonIcon}.
@@ -77,7 +80,9 @@ export const InvestigateInTimelineButtonIcon: VFC<InvestigateInTimelineProps> = 
   'data-test-subj': dataTestSub,
 }) => {
   const { investigateInTimelineFn } = useInvestigateInTimeline({ indicator: data });
-  if (!investigateInTimelineFn) {
+  const securitySolutionContext = useSecurityContext();
+
+  if (!securitySolutionContext?.hasAccessToTimeline || !investigateInTimelineFn) {
     return null;
   }
 

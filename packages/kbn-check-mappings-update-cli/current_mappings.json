@@ -589,6 +589,17 @@
           }
         }
       },
+      "observables": {
+        "properties": {
+          "typeKey": {
+            "type": "keyword"
+          },
+          "value": {
+            "type": "keyword"
+          }
+        },
+        "type": "nested"
+      },
       "owner": {
         "type": "keyword"
       },
@@ -1613,6 +1624,10 @@
           }
         }
       },
+      "agentless": {
+        "dynamic": false,
+        "properties": {}
+      },
       "data_output_id": {
         "type": "keyword"
       },
@@ -1982,6 +1997,10 @@
             "type": "keyword"
           }
         }
+      },
+      "agentless": {
+        "dynamic": false,
+        "properties": {}
       },
       "data_output_id": {
         "type": "keyword"
@@ -2525,6 +2544,20 @@
       "events": {
         "format": "epoch_millis||strict_date_optional_time",
         "type": "date_range"
+      },
+      "expirationDate": {
+        "type": "date"
+      },
+      "title": {
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "updatedAt": {
+        "type": "date"
       }
     }
   },

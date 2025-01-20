@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { REPO_ROOT } from '@kbn/repo-info';
+import path from 'path';
 import { FlagOptions, FlagsReader } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { SERVER_FLAG_OPTIONS, parseServerFlags } from '../../servers';
@@ -42,7 +44,8 @@ export async function parseTestFlags(flags: FlagsReader) {
     throw createFlagError(`Path to playwright config is required: --config <file path>`);
   }
 
-  await validatePlaywrightConfig(configPath);
+  const configFullPath = path.resolve(REPO_ROOT, configPath);
+  await validatePlaywrightConfig(configFullPath);
 
   return {
     ...options,

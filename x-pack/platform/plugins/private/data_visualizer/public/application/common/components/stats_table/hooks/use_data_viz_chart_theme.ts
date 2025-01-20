@@ -5,18 +5,22 @@
  * 2.0.
  */
 
-import type { PartialTheme } from '@elastic/charts';
 import { useMemo } from 'react';
-import { useCurrentEuiTheme } from '../../../hooks/use_current_eui_theme';
+
+import type { PartialTheme } from '@elastic/charts';
+import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
+
 export const useDataVizChartTheme = (): PartialTheme => {
-  const euiTheme = useCurrentEuiTheme();
+  const { euiTheme } = useEuiTheme();
+  const euiFontSizeXS = useEuiFontSize('xs', { unit: 'px' }).fontSize as string;
   const chartTheme = useMemo<PartialTheme>(() => {
-    const AREA_SERIES_COLOR = euiTheme.euiColorVis0;
+    // Amsterdam + Borealis
+    const AREA_SERIES_COLOR = euiTheme.colors.vis.euiColorVis0;
     return {
       axes: {
         tickLabel: {
-          fontSize: parseInt(euiTheme.euiFontSizeXS, 10),
-          fontFamily: euiTheme.euiFontFamily,
+          fontSize: parseInt(euiFontSizeXS, 10),
+          fontFamily: euiTheme.font.family,
           fontStyle: 'italic',
         },
       },
@@ -50,6 +54,6 @@ export const useDataVizChartTheme = (): PartialTheme => {
         area: { visible: true, opacity: 1 },
       },
     };
-  }, [euiTheme]);
+  }, [euiFontSizeXS, euiTheme]);
   return chartTheme;
 };

@@ -1,0 +1,37 @@
+{
+  "snapshot.repository_verify_integrity": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "blob_thread_pool_concurrency": [
+        "1"
+      ],
+      "index_snapshot_verification_concurrency": [
+        "1"
+      ],
+      "index_verification_concurrency": "",
+      "max_bytes_per_sec": [
+        "10mb"
+      ],
+      "max_failed_shard_snapshots": [
+        "10000"
+      ],
+      "meta_thread_pool_concurrency": "",
+      "snapshot_verification_concurrency": "",
+      "verify_blob_contents": "__flag__"
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_snapshot/{repository}/_verify_integrity"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/verify-repo-integrity-api.html",
+    "availability": {
+      "stack": false,
+      "serverless": false
+    }
+  }
+}
