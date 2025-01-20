@@ -109,14 +109,15 @@ describe('ConnectorForm', () => {
       submit();
     });
 
-    await waitFor(() => expect(onChange).toHaveBeenCalled());
-
-    expect(onChange).toHaveBeenCalledWith({
-      isSubmitted: false,
-      isSubmitting: false,
-      isValid: false,
-      preSubmitValidator: expect.anything(),
-      submit: expect.anything(),
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalled();
+      expect(onChange).toHaveBeenCalledWith({
+        isSubmitted: false,
+        isSubmitting: false,
+        isValid: false,
+        preSubmitValidator: expect.anything(),
+        submit: expect.anything(),
+      });
     });
   });
 
