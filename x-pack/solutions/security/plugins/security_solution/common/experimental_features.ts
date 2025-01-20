@@ -271,6 +271,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enabled Microsoft Defender for  Endpoint actions client
    */
   responseActionsMSDefenderEndpointEnabled: false,
+
+  /**
+   * Enables banner for informing users about changes in data collection.
+   */
+  eventCollectionDataReductionBannerEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
