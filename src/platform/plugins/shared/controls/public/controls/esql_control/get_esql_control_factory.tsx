@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { css } from '@emotion/react';
 import { EuiComboBox } from '@elastic/eui';
+import { apiPublishesESQLVariables } from '@kbn/esql-variables/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { ESQL_CONTROL } from '../../../common';
 import type { ESQLControlState, ESQLControlApi } from './types';
@@ -53,10 +54,14 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
               ...initialState,
               ...defaultControl.serialize().rawState,
             };
+            const variablesInParent = apiPublishesESQLVariables(api.parentApi)
+              ? api.parentApi.esqlVariables$.value
+              : [];
             await uiActionsService.getTrigger('ESQL_CONTROL_TRIGGER').exec({
               queryString: initialState.esqlQuery,
               variableType: initialState.variableType,
               controlType: initialState.controlType,
+              esqlVariables: variablesInParent,
               onSaveControl,
               initialState: state,
             });

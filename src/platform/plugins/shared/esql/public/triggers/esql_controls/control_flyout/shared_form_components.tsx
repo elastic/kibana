@@ -10,6 +10,7 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import {
   EuiFieldText,
   EuiFormRow,
@@ -31,7 +32,6 @@ import {
   EuiText,
   EuiTextColor,
 } from '@elastic/eui';
-import { esqlVariablesService } from '@kbn/esql-variables/common';
 import { EsqlControlType } from '../types';
 import { TooltipWrapper } from './tooltip_wrapper';
 
@@ -143,10 +143,12 @@ export function ControlType({
 export function VariableName({
   variableName,
   isControlInEditMode,
+  esqlVariables = [],
   onVariableNameChange,
 }: {
   variableName: string;
   isControlInEditMode: boolean;
+  esqlVariables?: ESQLControlVariable[];
   onVariableNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
   const genericContent = i18n.translate('esql.flyout.variableName.helpText', {
@@ -155,6 +157,9 @@ export function VariableName({
   const isDisabledTooltipText = i18n.translate('esql.flyout.variableName.disabledTooltip', {
     defaultMessage: 'You can’t edit a control name after it’s been created.',
   });
+  const variableExists =
+    esqlVariables.some((variable) => variable.key === variableName.replace('?', '')) &&
+    !isControlInEditMode;
   return (
     <EuiFormRow
       label={i18n.translate('esql.flyout.variableName.label', {
@@ -165,16 +170,13 @@ export function VariableName({
       })}
       fullWidth
       autoFocus
-      isInvalid={
-        !variableName ||
-        (esqlVariablesService.variableExists(variableName.replace('?', '')) && !isControlInEditMode)
-      }
+      isInvalid={!variableName || variableExists}
       error={
         !variableName
           ? i18n.translate('esql.flyout.variableName.error', {
               defaultMessage: 'Variable name is required',
             })
-          : esqlVariablesService.variableExists(variableName) && !isControlInEditMode
+          : variableExists
           ? i18n.translate('esql.flyout.variableNameExists.error', {
               defaultMessage: 'Variable name already exists',
             })
@@ -351,13 +353,8 @@ export function Footer({
 }) {
   const onCancel = useCallback(() => {
     closeFlyout();
-    // remove the variable from the service
-    if (!isControlInEditMode && !esqlVariablesService.variableExists(variableName)) {
-      esqlVariablesService.removeVariable(variableName);
-    }
-
     onCancelControl?.();
-  }, [closeFlyout, isControlInEditMode, onCancelControl, variableName]);
+  }, [closeFlyout, onCancelControl]);
 
   return (
     <EuiFlyoutFooter>

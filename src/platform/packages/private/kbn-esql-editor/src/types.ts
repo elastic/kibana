@@ -79,13 +79,8 @@ export interface ESQLEditorProps {
   onSaveControl?: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
   /** Function to be called after cancelling the control creation **/
   onCancelControl?: () => void;
-}
-
-interface EsqlVariablesService {
-  enableSuggestions: () => void;
-  disableSuggestions: () => void;
-  getVariablesByType: (type: ESQLControlVariable['type']) => ESQLControlVariable[];
-  areSuggestionsEnabled: boolean;
+  /** The available ESQL variables from the page context this editor was opened in */
+  esqlVariables?: ESQLControlVariable[];
 }
 
 export interface JoinIndicesAutocompleteResult {
@@ -111,6 +106,5 @@ export interface ESQLEditorDeps {
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
-  esqlService: EsqlVariablesService;
   esql?: EsqlPluginStartBase;
 }

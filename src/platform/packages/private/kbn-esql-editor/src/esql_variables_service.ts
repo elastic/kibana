@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+// import { BehaviorSubject } from 'rxjs';
 import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 
 export class EsqlVariablesService {
-  esqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
+  // esqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
   esqlVariables: ESQLControlVariable[] = [];
   areSuggestionsEnabled: boolean = false;
 
@@ -33,7 +33,7 @@ export class EsqlVariablesService {
       ...variable,
       value: Number.isNaN(Number(variable.value)) ? variable.value : Number(variable.value),
     });
-    this.esqlVariables$.next(variables);
+    // this.esqlVariables$.next(variables);
     this.esqlVariables = variables;
   }
 
@@ -60,18 +60,18 @@ export class EsqlVariablesService {
       return v;
     });
 
-    this.esqlVariables$.next(variables);
+    // this.esqlVariables$.next(variables);
     this.esqlVariables = variables;
   }
 
   removeVariable(key: string) {
     const variables = this.esqlVariables.filter((variable) => variable.key !== key);
-    this.esqlVariables$.next(variables);
+    // this.esqlVariables$.next(variables);
     this.esqlVariables = variables;
   }
 
   clearVariables() {
-    this.esqlVariables$.next([]);
+    // this.esqlVariables$.next([]);
     this.esqlVariables = [];
   }
 

@@ -33,6 +33,7 @@ describe('FieldControlForm', () => {
         onEditControl={jest.fn()}
         search={searchMock}
         cursorPosition={{ column: 19, lineNumber: 1 } as monaco.Position}
+        esqlVariables={[]}
       />
     );
     // control type dropdown should be rendered and default to 'STATIC_VALUES'
@@ -78,6 +79,7 @@ describe('FieldControlForm', () => {
         onEditControl={jest.fn()}
         search={searchMock}
         cursorPosition={{ column: 19, lineNumber: 1 } as monaco.Position}
+        esqlVariables={[]}
       />
     );
 
@@ -104,6 +106,7 @@ describe('FieldControlForm', () => {
         onEditControl={jest.fn()}
         search={searchMock}
         cursorPosition={{ column: 19, lineNumber: 1 } as monaco.Position}
+        esqlVariables={[]}
       />
     );
     // click on the cancel button
@@ -133,6 +136,7 @@ describe('FieldControlForm', () => {
         search={searchMock}
         cursorPosition={{ column: 19, lineNumber: 1 } as monaco.Position}
         initialState={initialState}
+        esqlVariables={[]}
       />
     );
     // variable name input should be rendered and with the default value
@@ -180,6 +184,7 @@ describe('FieldControlForm', () => {
         search={searchMock}
         cursorPosition={{ column: 19, lineNumber: 1 } as monaco.Position}
         initialState={initialState}
+        esqlVariables={[]}
       />
     );
 

@@ -30,11 +30,12 @@ import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
-import { ESQLRealField } from '@kbn/esql-validation-autocomplete';
+import { ESQLRealField, ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
 import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
+import { EsqlVariablesService } from './esql_variables_service';
 import {
   clearCacheWhenOld,
   getESQLSources,
@@ -65,6 +66,7 @@ const triggerControl = async (
   variableType: ESQLVariableType,
   position: monaco.Position | null | undefined,
   uiActions: ESQLEditorDeps['uiActions'],
+  esqlVariables?: ESQLControlVariable[],
   onSaveControl?: ESQLEditorProps['onSaveControl'],
   onCancelControl?: ESQLEditorProps['onCancelControl']
 ) => {
@@ -72,6 +74,7 @@ const triggerControl = async (
     queryString,
     variableType,
     cursorPosition: position,
+    esqlVariables,
     onSaveControl,
     onCancelControl,
   });
@@ -99,6 +102,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   onSaveControl,
   onCancelControl,
   supportsControls,
+  esqlVariables,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const datePickerOpenStatusRef = useRef<boolean>(false);
@@ -113,8 +117,11 @@ export const ESQLEditor = memo(function ESQLEditor({
     fieldsMetadata,
     uiSettings,
     uiActions,
-    esqlService,
   } = kibana.services;
+
+  const esqlService = useMemo(() => {
+    return new EsqlVariablesService();
+  }, []);
 
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
   const [code, setCode] = useState<string>(query.esql ?? '');
@@ -278,6 +285,7 @@ export const ESQLEditor = memo(function ESQLEditor({
       ESQLVariableType.TIME_LITERAL,
       position,
       uiActions,
+      esqlVariables,
       onSaveControl,
       onCancelControl
     );
@@ -290,6 +298,7 @@ export const ESQLEditor = memo(function ESQLEditor({
       ESQLVariableType.FIELDS,
       position,
       uiActions,
+      esqlVariables,
       onSaveControl,
       onCancelControl
     );
@@ -302,6 +311,7 @@ export const ESQLEditor = memo(function ESQLEditor({
       ESQLVariableType.VALUES,
       position,
       uiActions,
+      esqlVariables,
       onSaveControl,
       onCancelControl
     );

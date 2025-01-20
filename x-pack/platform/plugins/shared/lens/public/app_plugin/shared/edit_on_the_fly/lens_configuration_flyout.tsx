@@ -588,6 +588,7 @@ export function LensEditConfigurationFlyout({
                 isLoading={isVisualizationLoading}
                 onSaveControl={onSaveControl}
                 onCancelControl={onCancelControl}
+                esqlVariables={esqlVariables}
               />
             </EuiFlexItem>
           )}
