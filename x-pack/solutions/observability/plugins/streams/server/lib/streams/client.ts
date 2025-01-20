@@ -182,6 +182,7 @@ export class StreamsClient {
         definition,
         logger,
         scopedClusterClient,
+        isServerless: this.dependencies.isServerless,
       });
 
       await this.updateStreamLifecycle(definition);
