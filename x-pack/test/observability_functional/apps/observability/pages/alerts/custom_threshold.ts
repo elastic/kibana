@@ -222,7 +222,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         .send({});
 
       expect(rules.data.length).toEqual(1);
-      expect(rules.body.data[0]).toEqual(
+      expect(rules.data[0]).toEqual(
         expect.objectContaining({
           name: 'test custom threshold rule',
           tags: ['tag1'],
