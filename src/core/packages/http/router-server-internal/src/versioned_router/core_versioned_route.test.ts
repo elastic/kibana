@@ -23,9 +23,9 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { getEnvOptions, createTestEnv } from '@kbn/config-mocks';
 
-const devOptions = getEnvOptions();
-devOptions.cliArgs.dev = false;
-const notDevEnv = createTestEnv({ envOptions: devOptions });
+const notDevOptions = getEnvOptions();
+notDevOptions.cliArgs.dev = false;
+const notDevEnv = createTestEnv({ envOptions: notDevOptions });
 const devEnv = createTestEnv();
 
 describe('Versioned route', () => {
