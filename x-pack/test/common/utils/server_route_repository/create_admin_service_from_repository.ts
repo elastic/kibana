@@ -44,9 +44,7 @@ type RepositorySupertestReturnOf<
   }>
 >;
 
-export async function getApiClientFromSupertest<
-  TServerRouteRepository extends ServerRouteRepository
->(
+export async function getAdminApiClient<TServerRouteRepository extends ServerRouteRepository>(
   st: ReturnType<typeof RoleScopedSupertestProvider>
 ): Promise<RepositorySupertestClient<TServerRouteRepository>> {
   const supertestAdmin = await st.getSupertestWithRoleScope('admin', {

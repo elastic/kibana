@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
-  createStreamsRepositorySupertestClient,
+  createStreamsRepositoryAdminClient,
 } from './helpers/repository_client';
 import {
   disableStreams,
@@ -60,7 +60,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     }
 
     before(async () => {
-      apiClient = await createStreamsRepositorySupertestClient(roleScopedSupertest);
+      apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
     });
 
     describe('initially', () => {

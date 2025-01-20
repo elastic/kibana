@@ -12,7 +12,7 @@ import { ReadStreamDefinition, WiredReadStreamDefinition } from '@kbn/streams-sc
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
-  createStreamsRepositorySupertestClient,
+  createStreamsRepositoryAdminClient,
 } from './helpers/repository_client';
 import { disableStreams, enableStreams, indexDocument } from './helpers/requests';
 
@@ -132,7 +132,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   // An anticipated use case is that a user will want to flush a tree of streams from a config file
   describe('Flush from config file', () => {
     before(async () => {
-      apiClient = await createStreamsRepositorySupertestClient(roleScopedSupertest);
+      apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
       await createStreams();
       await indexDocuments();

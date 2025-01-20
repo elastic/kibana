@@ -10,7 +10,7 @@ import { disableStreams, enableStreams, forkStream, indexDocument } from './help
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
-  createStreamsRepositorySupertestClient,
+  createStreamsRepositoryAdminClient,
 } from './helpers/repository_client';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -21,7 +21,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   describe('Streams Schema', () => {
     before(async () => {
-      apiClient = await createStreamsRepositorySupertestClient(roleScopedSupertest);
+      apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
 
       const doc = {

@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { disableStreams, enableStreams, indexDocument } from '../helpers/requests';
 import {
   StreamsSupertestRepositoryClient,
-  createStreamsRepositorySupertestClient,
+  createStreamsRepositoryAdminClient,
 } from '../helpers/repository_client';
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -110,7 +110,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   describe('Asset links', () => {
     before(async () => {
-      apiClient = await createStreamsRepositorySupertestClient(roleScopedSupertest);
+      apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
 
       await indexDocument(esClient, 'logs', {

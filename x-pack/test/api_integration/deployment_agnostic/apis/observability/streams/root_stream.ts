@@ -11,7 +11,7 @@ import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_cont
 import { disableStreams, enableStreams, putStream } from './helpers/requests';
 import {
   StreamsSupertestRepositoryClient,
-  createStreamsRepositorySupertestClient,
+  createStreamsRepositoryAdminClient,
 } from './helpers/repository_client';
 
 const rootStreamDefinition: WiredStreamDefinition = {
@@ -46,7 +46,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   describe('Root stream', () => {
     before(async () => {
-      apiClient = await createStreamsRepositorySupertestClient(roleScopedSupertest);
+      apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
     });
 
