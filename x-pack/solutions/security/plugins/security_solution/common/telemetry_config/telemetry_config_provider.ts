@@ -24,7 +24,7 @@ export class TelemetryConfigProvider {
     this.subscription?.unsubscribe();
   }
 
-  public get isOptedIn() {
+  public getIsOptedIn() {
     return this._isOptedIn;
   }
 

@@ -48,7 +48,7 @@ export const createDefaultPolicy = (
     esClientInfo?.cluster_uuid,
     esClientInfo?.cluster_name,
     cloud?.isServerlessEnabled,
-    telemetryConfigProvider.isOptedIn
+    telemetryConfigProvider.getIsOptedIn()
   );
 
   let defaultPolicyPerType: PolicyConfig =

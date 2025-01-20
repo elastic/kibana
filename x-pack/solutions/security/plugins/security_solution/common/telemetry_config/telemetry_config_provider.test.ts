@@ -15,9 +15,9 @@ describe('TelemetryConfigProvider', () => {
     telemetryConfigProvider = new TelemetryConfigProvider();
   });
 
-  describe('isOptedIn', () => {
+  describe('getIsOptedIn()', () => {
     it('returns undefined when object is uninitialized', () => {
-      expect(telemetryConfigProvider.isOptedIn).toBe(undefined);
+      expect(telemetryConfigProvider.getIsOptedIn()).toBe(undefined);
     });
 
     it.each([true, false])('returns pushed %s value after subscribed', (value) => {
@@ -27,7 +27,7 @@ describe('TelemetryConfigProvider', () => {
 
       telemetryConfigProvider.start(observable$);
 
-      expect(telemetryConfigProvider.isOptedIn).toBe(value);
+      expect(telemetryConfigProvider.getIsOptedIn()).toBe(value);
     });
   });
 

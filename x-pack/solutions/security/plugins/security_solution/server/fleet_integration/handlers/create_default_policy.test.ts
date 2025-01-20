@@ -23,7 +23,7 @@ import type {
 } from '../types';
 import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 import { createProductFeaturesServiceMock } from '../../lib/product_features_service/mocks';
-import type { TelemetryConfigProvider } from '../../../common/telemetry_config/telemetry_config_provider';
+import { createTelemetryConfigProviderMock } from '../../../common/telemetry_config/mocks';
 
 describe('Create Default Policy tests ', () => {
   const cloud = cloudMock.createSetup();
@@ -34,9 +34,7 @@ describe('Create Default Policy tests ', () => {
   let licenseEmitter: Subject<ILicense>;
   let licenseService: LicenseService;
   let productFeaturesService: ProductFeaturesService;
-  let telemetryConfigProviderMock: Pick<TelemetryConfigProvider, 'isOptedIn'> = {
-    isOptedIn: false,
-  };
+  const telemetryConfigProviderMock = createTelemetryConfigProviderMock();
 
   const createDefaultPolicyCallback = async (
     config?: AnyPolicyCreateConfig
@@ -50,7 +48,7 @@ describe('Create Default Policy tests ', () => {
       cloud,
       esClientInfo,
       productFeaturesService,
-      telemetryConfigProviderMock as TelemetryConfigProvider
+      telemetryConfigProviderMock
     );
   };
 
@@ -215,7 +213,7 @@ describe('Create Default Policy tests ', () => {
       const policy = await createDefaultPolicyCallback(config);
       const licenseType = 'platinum';
       const isCloud = true;
-      const defaultPolicy = policyFactory(licenseType, isCloud);
+      const defaultPolicy = policyFactory(licenseType, isCloud, '', '', '', undefined, true);
       // update defaultPolicy w/ platinum license & cloud info
       defaultPolicy.meta.license = licenseType;
       defaultPolicy.meta.cloud = isCloud;
@@ -293,13 +291,19 @@ describe('Create Default Policy tests ', () => {
 
   describe('Global Telemetry Config', () => {
     it('should save telemetry config state in policy based on telemetry config provider', async () => {
-      telemetryConfigProviderMock = { isOptedIn: false };
+      telemetryConfigProviderMock.getIsOptedIn.mockReturnValue(false);
       let policyConfig = await createDefaultPolicyCallback();
       expect(policyConfig.global_telemetry_enabled).toBe(false);
 
-      telemetryConfigProviderMock = { isOptedIn: true };
+      telemetryConfigProviderMock.getIsOptedIn.mockReturnValue(true);
       policyConfig = await createDefaultPolicyCallback();
       expect(policyConfig.global_telemetry_enabled).toBe(true);
+    });
+
+    it('should fallback to `false` when global telemetry config is unavailable', async () => {
+      telemetryConfigProviderMock.getIsOptedIn.mockReturnValue(undefined);
+      const policyConfig = await createDefaultPolicyCallback();
+      expect(policyConfig.global_telemetry_enabled).toBe(false);
     });
   });
 });
