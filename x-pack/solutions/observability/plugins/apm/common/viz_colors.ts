@@ -7,6 +7,22 @@
 
 import type { EuiThemeComputed } from '@elastic/eui';
 
+function getVizColorsForTheme(euiTheme: EuiThemeComputed) {
+  return [
+    euiTheme.colors.vis.euiColorVis0,
+    euiTheme.colors.vis.euiColorVis1,
+    euiTheme.colors.vis.euiColorVis2,
+    euiTheme.colors.vis.euiColorVis3,
+    euiTheme.colors.vis.euiColorVis4,
+    euiTheme.colors.vis.euiColorVis5,
+    euiTheme.colors.vis.euiColorVis6,
+    euiTheme.colors.vis.euiColorVis7,
+    euiTheme.colors.vis.euiColorVis8,
+    euiTheme.colors.vis.euiColorVis9,
+  ];
+}
+
 export function getVizColorForIndex(index = 0, euiTheme: EuiThemeComputed) {
-  return euiTheme.colors.vis[`euiColorVis${index % 10}`];
+  const colors = getVizColorsForTheme(euiTheme);
+  return colors[index % colors.length];
 }
