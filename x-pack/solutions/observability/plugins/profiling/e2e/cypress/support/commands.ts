@@ -59,9 +59,8 @@ Cypress.Commands.add(
   'addKqlFilter',
   ({ key, value, dataTestSubj = 'profilingUnifiedSearchBar', waitForSuggestion = true }) => {
     cy.getByTestSubj(dataTestSubj).type(key);
-    cy.contains(key);
-    cy.getByTestSubj(`autocompleteSuggestion-field-${key}-`).click();
 
+    cy.getByTestSubj(`autocompleteSuggestion-field-${key}-`).should('be.visible');
     cy.getByTestSubj(dataTestSubj).type(`: ${value}`);
     if (waitForSuggestion) {
       cy.get(`[data-test-subj="autocompleteSuggestion-value-\\"${value}\\"-"]`)
