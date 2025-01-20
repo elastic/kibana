@@ -24,7 +24,7 @@ exports[`ColorFormatEditor should render boolean type normally 1`] = `
         Object {
           "background": "#ffffff",
           "boolean": "true",
-          "range": "-Infinity:Infinity",
+          "range": "min:max",
           "regex": "<insert regex>",
           "text": "#000000",
         }
@@ -81,7 +81,7 @@ exports[`ColorFormatEditor should render multiple colors 1`] = `
         Object {
           "background": "#ffffff",
           "boolean": "true",
-          "range": "-Infinity:Infinity",
+          "range": "min:max",
           "regex": "<insert regex>",
           "text": "#000000",
         }
@@ -98,7 +98,7 @@ exports[`ColorFormatEditor should render multiple colors 1`] = `
         Object {
           "background": "#ffffff",
           "boolean": "true",
-          "range": "-Infinity:Infinity",
+          "range": "min:max",
           "regex": "<insert regex>",
           "text": "#000000",
         }
@@ -155,7 +155,7 @@ exports[`ColorFormatEditor should render other type normally (range field) 1`] =
         Object {
           "background": "#ffffff",
           "boolean": "true",
-          "range": "-Infinity:Infinity",
+          "range": "min:max",
           "regex": "<insert regex>",
           "text": "#000000",
         }
@@ -212,7 +212,7 @@ exports[`ColorFormatEditor should render string type normally (regex field) 1`] 
         Object {
           "background": "#ffffff",
           "boolean": "true",
-          "range": "-Infinity:Infinity",
+          "range": "min:max",
           "regex": "<insert regex>",
           "text": "#000000",
         }

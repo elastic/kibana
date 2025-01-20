@@ -75,7 +75,7 @@ export const ColorRow = ({
       return (
         <EuiFieldText
           prepend={i18n.translate('indexPatternFieldEditor.color.patternLabel', {
-            defaultMessage: 'Pattern (regular expression)',
+            defaultMessage: 'Pattern',
           })}
           value={regex}
           data-test-subj={`colorEditorKeyPattern ${index}`}
@@ -92,7 +92,7 @@ export const ColorRow = ({
     return (
       <EuiFieldText
         prepend={i18n.translate('indexPatternFieldEditor.color.rangeLabel', {
-          defaultMessage: 'Range (min:max)',
+          defaultMessage: 'Range',
         })}
         value={range}
         data-test-subj={`colorEditorKeyRange ${index}`}
