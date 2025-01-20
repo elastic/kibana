@@ -134,7 +134,7 @@ describe('wrapScopedClusterClient', () => {
       expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
 
       expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
-        `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {\"ignore\":[404],\"requestTimeout\":10000} and 5000ms requestTimeout`
+        `executing query for rule .test-rule-type:abcdefg in space my-space - {\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}} - with options {\"ignore\":[404],\"requestTimeout\":10000} and 5000ms requestTimeout`
       );
       expect(loggingSystemMock.collect(logger).trace[0][0]).toEqual(
         `result of executing query for rule .test-rule-type:abcdefg in space my-space: {\"body\":{},\"statusCode\":200,\"headers\":{\"x-elastic-product\":\"Elasticsearch\"},\"warnings\":[],\"meta\":{}}`
@@ -159,11 +159,11 @@ describe('wrapScopedClusterClient', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong!"`);
 
       expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
-        `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {}`
+        `executing query for rule .test-rule-type:abcdefg in space my-space - {\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}} - with options {}`
       );
       expect(logger.trace).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(
-        `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {}`
+        `executing query for rule .test-rule-type:abcdefg in space my-space - {\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}} - with options {}`
       );
     });
 
@@ -228,7 +228,7 @@ describe('wrapScopedClusterClient', () => {
       expect(stats.esSearchDurationMs).toEqual(999);
 
       expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
-        `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {}`
+        `executing query for rule .test-rule-type:abcdefg in space my-space - {\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}} - with options {}`
       );
       expect(loggingSystemMock.collect(logger).trace[0][0]).toEqual(
         `result of executing query for rule .test-rule-type:abcdefg in space my-space: {\"took\":333}`
@@ -256,7 +256,7 @@ describe('wrapScopedClusterClient', () => {
       );
 
       expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
-        `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {}`
+        `executing query for rule .test-rule-type:abcdefg in space my-space - {\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}} - with options {}`
       );
       expect(logger.trace).not.toHaveBeenCalled();
       expect(logger.warn).not.toHaveBeenCalled();
@@ -457,7 +457,7 @@ describe('wrapScopedClusterClient', () => {
         expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
 
         expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
-          'executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {"method":"POST","path":"/_query","body":{"query":"from .kibana_task_manager"}} - with options {} and 5000ms requestTimeout'
+          'executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {"method":"POST","path":"/_query","query":"from .kibana_task_manager"} - with options {} and 5000ms requestTimeout'
         );
         expect(logger.warn).not.toHaveBeenCalled();
       });
@@ -483,7 +483,7 @@ describe('wrapScopedClusterClient', () => {
         expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
         expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
         expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
-          'executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {"method":"POST","path":"/_query","body":{"query":"from .kibana_task_manager"}} - with options {} and 5000ms requestTimeout'
+          'executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {"method":"POST","path":"/_query","query":"from .kibana_task_manager"} - with options {} and 5000ms requestTimeout'
         );
         expect(logger.warn).not.toHaveBeenCalled();
       });
@@ -514,7 +514,7 @@ describe('wrapScopedClusterClient', () => {
         expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
 
         expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
-          'executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {"method":"POST","path":"/_query","body":{"query":"from .kibana_task_manager"}} - with options {"ignore":[404],"requestTimeout":10000} and 5000ms requestTimeout'
+          'executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {"method":"POST","path":"/_query","query":"from .kibana_task_manager"} - with options {"ignore":[404],"requestTimeout":10000} and 5000ms requestTimeout'
         );
         expect(logger.warn).not.toHaveBeenCalled();
       });
@@ -570,7 +570,7 @@ describe('wrapScopedClusterClient', () => {
         expect(stats.totalSearchDurationMs).toBeGreaterThan(-1);
 
         expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
-          `executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {\"method\":\"POST\",\"path\":\"/_query\",\"body\":{\"query\":\"from .kibana_task_manager\"}} - with options {}`
+          `executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {\"method\":\"POST\",\"path\":\"/_query\",\"query\":\"from .kibana_task_manager\"} - with options {}`
         );
         expect(logger.warn).not.toHaveBeenCalled();
       });
