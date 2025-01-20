@@ -176,3 +176,14 @@ And no rules package has been installed locally
 When the user imports the rule
 Then all rules should be created or updated as custom rules
 ```
+
+#### Scenario: User imports a custom rule before a prebuilt rule asset is created with the same rule_id
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given the environment contains an imported custom rule
+And this rule has a rule_id of X
+When a prebuilt rule asset is added with a rule_id of X
+Then the imported custom rule should be upgradeable as if it were a prebuilt rule
+```
