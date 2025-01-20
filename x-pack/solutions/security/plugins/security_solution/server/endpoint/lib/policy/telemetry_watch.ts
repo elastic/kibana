@@ -43,8 +43,8 @@ export class TelemetryConfigWatcher {
 
   /**
    * The policy watcher is not called as part of a HTTP request chain, where the
-   * request-scoped SOClient could be passed down. It is called via license observable
-   * changes. We are acting as the 'system' in response to license changes, so we are
+   * request-scoped SOClient could be passed down. It is called via telemetry observable
+   * changes. We are acting as the 'system' in response to telemetry changes, so we are
    * intentionally using the system user here. Be very aware of what you are using this
    * client to do
    */
@@ -92,7 +92,7 @@ export class TelemetryConfigWatcher {
         });
       } catch (e) {
         this.logger.warn(
-          `Unable to verify endpoint policies in line with license change: failed to fetch package policies: ${e.message}`
+          `Unable to verify endpoint policies in line with telemetry change: failed to fetch package policies: ${e.message}`
         );
         return;
       }
