@@ -184,7 +184,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(statusAdmin).to.be(200);
 
         // wait for the public instruction to be indexed before proceeding
-        pRetry(async () => {
+        await pRetry(async () => {
           const res = await observabilityAIAssistantAPIClient.editor({
             endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
           });
