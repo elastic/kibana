@@ -10800,7 +10800,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "application-privilege_kibana-.kibana:feature_discover_v2.all",
+    "id": "application-privilege_kibana-.kibana:feature_discover.all",
     "index": ".security-7",
     "source": {
       "actions": [
@@ -10888,7 +10888,7 @@
       "application": "kibana-.kibana",
       "metadata": {
       },
-      "name": "feature_discover_v2.all",
+      "name": "feature_discover.all",
       "type": "application-privilege"
     }
   }
@@ -11159,7 +11159,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "application-privilege_kibana-.kibana:feature_discover_v2.read",
+    "id": "application-privilege_kibana-.kibana:feature_discover.read",
     "index": ".security-7",
     "source": {
       "actions": [
@@ -11205,7 +11205,7 @@
       "application": "kibana-.kibana",
       "metadata": {
       },
-      "name": "feature_discover_v2.read",
+      "name": "feature_discover.read",
       "type": "application-privilege"
     }
   }
@@ -11214,7 +11214,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "application-privilege_kibana-.kibana:feature_dashboard_v2.minimal_read",
+    "id": "application-privilege_kibana-.kibana:feature_dashboard.minimal_read",
     "index": ".security-7",
     "source": {
       "actions": [
@@ -11290,7 +11290,7 @@
       "application": "kibana-.kibana",
       "metadata": {
       },
-      "name": "feature_dashboard_v2.minimal_read",
+      "name": "feature_dashboard.minimal_read",
       "type": "application-privilege"
     }
   }
@@ -17629,7 +17629,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "application-privilege_kibana-.kibana:feature_maps_v2.minimal_all",
+    "id": "application-privilege_kibana-.kibana:feature_maps.minimal_all",
     "index": ".security-7",
     "source": {
       "actions": [
@@ -17700,7 +17700,7 @@
       "application": "kibana-.kibana",
       "metadata": {
       },
-      "name": "feature_maps_v2.minimal_all",
+      "name": "feature_maps.minimal_all",
       "type": "application-privilege"
     }
   }
@@ -17709,7 +17709,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "application-privilege_kibana-.kibana:feature_maps_v2.all",
+    "id": "application-privilege_kibana-.kibana:feature_maps.all",
     "index": ".security-7",
     "source": {
       "actions": [
@@ -17780,7 +17780,7 @@
       "application": "kibana-.kibana",
       "metadata": {
       },
-      "name": "feature_maps_v2.all",
+      "name": "feature_maps.all",
       "type": "application-privilege"
     }
   }
@@ -17956,7 +17956,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "application-privilege_kibana-.kibana:feature_maps_v2.read",
+    "id": "application-privilege_kibana-.kibana:feature_maps.read",
     "index": ".security-7",
     "source": {
       "actions": [
@@ -18007,7 +18007,7 @@
       "application": "kibana-.kibana",
       "metadata": {
       },
-      "name": "feature_maps_v2.read",
+      "name": "feature_maps.read",
       "type": "application-privilege"
     }
   }
@@ -19045,7 +19045,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "application-privilege_kibana-.kibana:feature_maps_v2.minimal_read",
+    "id": "application-privilege_kibana-.kibana:feature_maps.minimal_read",
     "index": ".security-7",
     "source": {
       "actions": [
@@ -19096,7 +19096,7 @@
       "application": "kibana-.kibana",
       "metadata": {
       },
-      "name": "feature_maps_v2.minimal_read",
+      "name": "feature_maps.minimal_read",
       "type": "application-privilege"
     }
   }
@@ -19972,7 +19972,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "application-privilege_kibana-.kibana:feature_dashboard_v2.all",
+    "id": "application-privilege_kibana-.kibana:feature_dashboard.all",
     "index": ".security-7",
     "source": {
       "actions": [
@@ -20090,7 +20090,7 @@
       "application": "kibana-.kibana",
       "metadata": {
       },
-      "name": "feature_dashboard_v2.all",
+      "name": "feature_dashboard.all",
       "type": "application-privilege"
     }
   }
@@ -20099,7 +20099,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "application-privilege_kibana-.kibana:feature_dashboard_v2.minimal_all",
+    "id": "application-privilege_kibana-.kibana:feature_dashboard.minimal_all",
     "index": ".security-7",
     "source": {
       "actions": [
@@ -20196,7 +20196,7 @@
       "application": "kibana-.kibana",
       "metadata": {
       },
-      "name": "feature_dashboard_v2.minimal_all",
+      "name": "feature_dashboard.minimal_all",
       "type": "application-privilege"
     }
   }
@@ -20205,7 +20205,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "application-privilege_kibana-.kibana:feature_visualize_v2.all",
+    "id": "application-privilege_kibana-.kibana:feature_visualize.all",
     "index": ".security-7",
     "source": {
       "actions": [
@@ -20302,7 +20302,7 @@
       "application": "kibana-.kibana",
       "metadata": {
       },
-      "name": "feature_visualize_v2.all",
+      "name": "feature_visualize.all",
       "type": "application-privilege"
     }
   }
@@ -20311,7 +20311,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "application-privilege_kibana-.kibana:feature_visualize_v2.minimal_all",
+    "id": "application-privilege_kibana-.kibana:feature_visualize.minimal_all",
     "index": ".security-7",
     "source": {
       "actions": [
@@ -20401,7 +20401,7 @@
       "application": "kibana-.kibana",
       "metadata": {
       },
-      "name": "feature_visualize_v2.minimal_all",
+      "name": "feature_visualize.minimal_all",
       "type": "application-privilege"
     }
   }
@@ -20410,7 +20410,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "application-privilege_kibana-.kibana:feature_dashboard_v2.read",
+    "id": "application-privilege_kibana-.kibana:feature_dashboard.read",
     "index": ".security-7",
     "source": {
       "actions": [
@@ -20486,7 +20486,7 @@
       "application": "kibana-.kibana",
       "metadata": {
       },
-      "name": "feature_dashboard_v2.read",
+      "name": "feature_dashboard.read",
       "type": "application-privilege"
     }
   }
@@ -20495,7 +20495,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "application-privilege_kibana-.kibana:feature_discover_v2.minimal_all",
+    "id": "application-privilege_kibana-.kibana:feature_discover.minimal_all",
     "index": ".security-7",
     "source": {
       "actions": [
@@ -20562,7 +20562,7 @@
       "application": "kibana-.kibana",
       "metadata": {
       },
-      "name": "feature_discover_v2.minimal_all",
+      "name": "feature_discover.minimal_all",
       "type": "application-privilege"
     }
   }
@@ -20571,7 +20571,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "application-privilege_kibana-.kibana:feature_visualize_v2.minimal_read",
+    "id": "application-privilege_kibana-.kibana:feature_visualize.minimal_read",
     "index": ".security-7",
     "source": {
       "actions": [
@@ -20634,7 +20634,7 @@
       "application": "kibana-.kibana",
       "metadata": {
       },
-      "name": "feature_visualize_v2.minimal_read",
+      "name": "feature_visualize.minimal_read",
       "type": "application-privilege"
     }
   }
@@ -20643,7 +20643,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "application-privilege_kibana-.kibana:feature_visualize_v2.read",
+    "id": "application-privilege_kibana-.kibana:feature_visualize.read",
     "index": ".security-7",
     "source": {
       "actions": [
@@ -20706,7 +20706,7 @@
       "application": "kibana-.kibana",
       "metadata": {
       },
-      "name": "feature_visualize_v2.read",
+      "name": "feature_visualize.read",
       "type": "application-privilege"
     }
   }
@@ -20715,7 +20715,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "application-privilege_kibana-.kibana:feature_discover_v2.minimal_read",
+    "id": "application-privilege_kibana-.kibana:feature_discover.minimal_read",
     "index": ".security-7",
     "source": {
       "actions": [
@@ -20761,7 +20761,7 @@
       "application": "kibana-.kibana",
       "metadata": {
       },
-      "name": "feature_discover_v2.minimal_read",
+      "name": "feature_discover.minimal_read",
       "type": "application-privilege"
     }
   }
