@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
 
 interface SpanLinkProps {
@@ -31,6 +32,9 @@ export const SpanLink: React.FC<SpanLinkProps> = ({ spanId, spanName, traceId }:
       })}
       target="_blank"
       data-test-subj=""
+      css={css`
+        line-break: anywhere;
+      `}
     >
       {spanName}
     </EuiLink>
