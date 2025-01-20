@@ -105,3 +105,4 @@ enabled:
   - x-pack/test/cloud_security_posture_functional/data_views/config.ts
   - x-pack/test/automatic_import_api_integration/apis/config_basic.ts
   - x-pack/test/automatic_import_api_integration/apis/config_graphs.ts
+  - x-pack/test/security_solution_api_integration/test_suites/asset_inventory/entity_store/trial_license_complete_tier/configs/ess.config.ts

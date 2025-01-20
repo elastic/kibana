@@ -95,4 +95,36 @@ export class AssetCriticalityMigrationClient {
       }
     );
   };
+
+  public copyTimestampToEventIngestedForAssetCriticality = (abortSignal?: AbortSignal) => {
+    return this.options.esClient.updateByQuery(
+      {
+        index: this.assetCriticalityDataClient.getIndex(),
+        conflicts: 'proceed',
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        body: {
+          query: {
+            bool: {
+              must_not: {
+                exists: {
+                  field: 'event.ingested',
+                },
+              },
+            },
+          },
+          script: {
+            source: 'ctx._source.event.ingested = ctx._source.@timestamp',
+            lang: 'painless',
+          },
+        },
+      },
+      {
+        requestTimeout: '5m',
+        retryOnTimeout: true,
+        maxRetries: 2,
+        signal: abortSignal,
+      }
+    );
+  };
 }
