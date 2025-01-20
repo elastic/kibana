@@ -244,6 +244,7 @@ export function continueConversation({
         functions: definitions,
         tracer,
         connectorId,
+        stream: true,
       }).pipe(emitWithConcatenatedMessage(), catchFunctionNotFoundError(functionLimitExceeded));
     }
 
