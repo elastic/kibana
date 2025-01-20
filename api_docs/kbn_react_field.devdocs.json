@@ -363,10 +363,13 @@
           {
             "parentPluginId": "@kbn/react-field",
             "id": "def-common.FieldIconProps.type",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "type",
             "description": [],
+            "signature": [
+              "\"string\" | \"number\" | \"boolean\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"version\" | \"murmur3\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"scaled_float\" | \"double\" | \"date_range\" | \"ip_range\" | \"rank_feature\" | \"rank_features\" | \"flattened\" | \"shape\" | \"histogram\" | \"dense_vector\" | \"semantic_text\" | \"sparse_vector\" | \"match_only_text\" | \"conflict\" | \"point\" | \"unsigned_long\" | \"_source\" | (string & {}) | \"gauge\" | \"counter\" | \"number_range\""
+            ],
             "path": "src/platform/packages/shared/kbn-react-field/src/field_icon/field_icon.tsx",
             "deprecated": false,
             "trackAdoption": false
