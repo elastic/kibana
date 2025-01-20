@@ -110,7 +110,6 @@ describe('ConnectorForm', () => {
     });
 
     await waitFor(() => {
-      expect(onChange).toHaveBeenCalled();
       expect(onChange).toHaveBeenCalledWith({
         isSubmitted: false,
         isSubmitting: false,
