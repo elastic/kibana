@@ -44,11 +44,6 @@ export function initializeESQLControlSelections(initialState: ESQLControlState) 
     () => esqlVariable$.next(getEsqlVariable())
   );
 
-  // update hasSelections$ when selectedOptions$ changes
-  // subscriptions.add(
-  //   selectedOptions$.subscribe((selectedOptions) => hasSelections$.next(selectedOptions.length > 0))
-  // );
-
   return {
     cleanup: () => subscriptions.unsubscribe(),
     api: {
