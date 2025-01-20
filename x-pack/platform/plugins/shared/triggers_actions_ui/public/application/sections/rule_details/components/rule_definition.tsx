@@ -113,7 +113,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
   const onEditRuleClick = () => {
     if (!isUsingRuleCreateFlyout && useNewRuleForm) {
       if (ruleEditBasePath) {
-        navigateToUrl(`${ruleEditBasePath}/${getEditRuleRoute(rule.id)}`);
+        navigateToUrl(`${ruleEditBasePath}${getEditRuleRoute(rule.id)}`);
       } else {
         navigateToApp('management', {
           path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,

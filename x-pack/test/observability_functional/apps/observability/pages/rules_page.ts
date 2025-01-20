@@ -203,13 +203,13 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await selectAndFillInEsQueryRule(ruleName);
 
         await retry.waitFor('consumer select modal is visible', async () => {
-          return await testSubjects.exists('ruleFormConsumerSelect');
+          return await testSubjects.exists('ruleConsumerSelection');
         });
 
-        const consumerSelect = await testSubjects.find('ruleFormConsumerSelect');
+        const consumerSelect = await testSubjects.find('ruleConsumerSelection');
         await consumerSelect.click();
         const consumerOptionsList = await testSubjects.find(
-          'comboBoxOptionsList ruleFormConsumerSelect-optionsList'
+          'comboBoxOptionsList ruleConsumerSelectionInput-optionsList'
         );
         const consumerOptions = await consumerOptionsList.findAllByClassName(
           'euiComboBoxOption__content'
