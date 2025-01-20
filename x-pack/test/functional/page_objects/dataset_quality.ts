@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import querystring from 'querystring';
-import rison from '@kbn/rison';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import {
   DATA_QUALITY_URL_STATE_KEY,
-  datasetQualityUrlSchemaV1,
   datasetQualityDetailsUrlSchemaV1,
+  datasetQualityUrlSchemaV1,
 } from '@kbn/data-quality-plugin/common';
 import {
-  DEFAULT_DEGRADED_FIELD_SORT_DIRECTION,
-  DEFAULT_DEGRADED_FIELD_SORT_FIELD,
+  DEFAULT_QUALITY_ISSUE_SORT_DIRECTION,
+  DEFAULT_QUALITY_ISSUE_SORT_FIELD,
 } from '@kbn/dataset-quality-plugin/common/constants';
+import expect from '@kbn/expect';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import rison from '@kbn/rison';
+import querystring from 'querystring';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const defaultPageState: datasetQualityUrlSchemaV1.UrlSchema = {
@@ -37,8 +37,8 @@ const defaultDetailsPageState: datasetQualityDetailsUrlSchemaV1.UrlSchema = {
       page: 0,
       rowsPerPage: 10,
       sort: {
-        field: DEFAULT_DEGRADED_FIELD_SORT_FIELD,
-        direction: DEFAULT_DEGRADED_FIELD_SORT_DIRECTION,
+        field: DEFAULT_QUALITY_ISSUE_SORT_FIELD,
+        direction: DEFAULT_QUALITY_ISSUE_SORT_DIRECTION,
       },
     },
   },
