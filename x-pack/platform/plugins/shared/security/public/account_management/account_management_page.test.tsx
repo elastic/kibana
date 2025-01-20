@@ -70,7 +70,7 @@ describe('<AccountManagementPage>', () => {
     expect(UserProfileMock).toHaveBeenCalledWith({ user, data }, expect.anything());
     expect(coreStart.chrome.setBreadcrumbs).toHaveBeenLastCalledWith([
       { href: '/security/account', text: 'User settings' },
-      { href: undefined, text: 'Profile' },
+      { href: undefined, text: 'user' },
     ]);
   });
 });
