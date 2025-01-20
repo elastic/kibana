@@ -163,9 +163,10 @@ export const mockServiceRiskScoreState: RiskScoreState<EntityType.service> = {
   refetch: () => {},
   totalCount: 0,
   isAuthorized: true,
-  hasEngineBeenInstalled: true,
   loading: false,
   error: undefined,
+  isModuleEnabled: true,
+  isDeprecated: false,
 };
 
 const hostMetadata: HostMetadataInterface = {

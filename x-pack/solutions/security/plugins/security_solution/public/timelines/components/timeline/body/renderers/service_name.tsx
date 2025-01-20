@@ -16,7 +16,6 @@ import { StatefulEventContext } from '../../../../../common/components/events_vi
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
-import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
 
 interface Props {
   contextId: string;
@@ -49,8 +48,6 @@ const ServiceNameComponent: React.FC<Props> = ({
   const serviceName = `${value}`;
   const isInTimelineContext = serviceName && eventContext?.timelineID;
   const { openFlyout } = useExpandableFlyoutApi();
-
-  const isInSecurityApp = useIsInSecurityApp();
 
   const openServiceDetailsSidePanel = useCallback(
     (e: React.SyntheticEvent) => {
@@ -87,7 +84,7 @@ const ServiceNameComponent: React.FC<Props> = ({
         Component={Component}
         entityName={serviceName}
         isButton={isButton}
-        onClick={isInTimelineContext || !isInSecurityApp ? openServiceDetailsSidePanel : undefined}
+        onClick={isInTimelineContext ? openServiceDetailsSidePanel : undefined}
         title={title}
         entityType={EntityType.service}
       >
@@ -96,15 +93,7 @@ const ServiceNameComponent: React.FC<Props> = ({
         </TruncatableText>
       </EntityDetailsLink>
     ),
-    [
-      serviceName,
-      isButton,
-      isInTimelineContext,
-      openServiceDetailsSidePanel,
-      Component,
-      title,
-      isInSecurityApp,
-    ]
+    [serviceName, isButton, isInTimelineContext, openServiceDetailsSidePanel, Component, title]
   );
 
   return isString(value) && serviceName.length > 0 ? (
