@@ -7,7 +7,7 @@
 
 import sinon from 'sinon';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { actionsClientMock, actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { SavedObject } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
@@ -25,7 +25,7 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { IEventLogger } from '@kbn/event-log-plugin/server';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { SharePluginStart } from '@kbn/share-plugin/server';
-import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
+import { ConcreteTaskInstance, TaskPriority, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { AdHocTaskRunner } from './ad_hoc_task_runner';
 import { TaskRunnerContext } from './types';
@@ -39,7 +39,7 @@ import {
 import { AdHocRunSchedule, AdHocRunSO } from '../data/ad_hoc_run/types';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { adHocRunStatus } from '../../common/constants';
-import { DATE_1970, ruleType } from './fixtures';
+import { DATE_1970, generateEnqueueFunctionInput, mockAAD, ruleType } from './fixtures';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { alertsMock } from '../mocks';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
@@ -93,6 +93,8 @@ import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
 import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
+import { alertsClientMock } from '../alerts_client/alerts_client.mock';
+import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 
 const UUID = '5f6aa57d-3e22-484e-bae8-cbed868f4d28';
 
@@ -121,7 +123,7 @@ type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
   executionContext: ReturnType<typeof executionContextServiceMock.createInternalStartContract>;
 };
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-
+const mockAlertsService = alertsServiceMock.create();
 const alertingEventLogger = alertingEventLoggerMock.create();
 const elasticsearchAndSOAvailability$ = of(true);
 const alertsService = new AlertsService({
@@ -133,6 +135,8 @@ const alertsService = new AlertsService({
   elasticsearchAndSOAvailability$,
   isServerless: false,
 });
+const alertsClient = alertsClientMock.create();
+const actionsClient = actionsClientMock.create();
 const backfillClient = backfillClientMock.create();
 const dataPlugin = dataPluginMock.createStartContract();
 const dataViewsMock = {
@@ -280,7 +284,7 @@ describe('Ad Hoc Task Runner', () => {
           name: 'test',
           tags: [],
           alertTypeId: 'siem.queryRule',
-          // @ts-expect-error
+          actions: [],
           params: {
             author: [],
             description: 'test',
@@ -367,10 +371,22 @@ describe('Ad Hoc Task Runner', () => {
     taskRunnerFactoryInitializerParams.executionContext.withContext.mockImplementation((ctx, fn) =>
       fn()
     );
+    taskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest.mockResolvedValue(
+      actionsClient
+    );
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.renderActionParameterTemplates.mockImplementation(
+      (_, __, params) => params
+    );
+    maintenanceWindowsService.getMaintenanceWindows.mockResolvedValue({
+      maintenanceWindows: [],
+      maintenanceWindowsWithoutScopedQueryIds: [],
+    });
     ruleTypeRegistry.get.mockReturnValue(ruleTypeWithAlerts);
     ruleTypeWithAlerts.executor.mockResolvedValue({ state: {} });
     mockValidateRuleTypeParams.mockReturnValue(mockedAdHocRunSO.attributes.rule.params);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedAdHocRunSO);
+    actionsClient.bulkEnqueueExecution.mockResolvedValue({ errors: false, items: [] });
   });
 
   afterAll(() => fakeTimer.restore());
@@ -539,6 +555,127 @@ describe('Ad Hoc Task Runner', () => {
       `rule test:rule-id: 'test' has 1 active alerts: [{"instanceId":"1","actionGroup":"default"}]`
     );
     expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  test('should schedule actions for rule with actions', async () => {
+    const mockedAdHocRunSOWithActions = {
+      ...mockedAdHocRunSO,
+      attributes: {
+        ...mockedAdHocRunSO.attributes,
+        rule: {
+          ...mockedAdHocRunSO.attributes.rule,
+          id: '1',
+          actions: [
+            {
+              uuid: '123abc',
+              group: 'default',
+              actionRef: 'action_0',
+              actionTypeId: 'action',
+              params: { foo: true },
+              frequency: {
+                notifyWhen: 'onActiveAlert',
+                summary: true,
+                throttle: null,
+              },
+            },
+          ],
+        },
+      },
+      references: [
+        { type: RULE_SAVED_OBJECT_TYPE, name: 'rule', id: '1' },
+        { id: '4', name: 'action_0', type: 'action' },
+      ],
+    };
+    alertsClient.getProcessedAlerts.mockReturnValue({});
+    alertsClient.getSummarizedAlerts.mockResolvedValue({
+      new: { count: 1, data: [mockAAD] },
+      ongoing: { count: 0, data: [] },
+      recovered: { count: 0, data: [] },
+    });
+    mockAlertsService.createAlertsClient.mockImplementation(() => alertsClient);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(
+      mockedAdHocRunSOWithActions
+    );
+
+    ruleTypeWithAlerts.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string,
+        RuleAlertData
+      >) => {
+        executorServices.alertsClient?.report({
+          id: '1',
+          actionGroup: 'default',
+          payload: { textField: 'foo', numericField: 27 },
+        });
+        return { state: {} };
+      }
+    );
+
+    const taskRunner = new AdHocTaskRunner({
+      context: { ...taskRunnerFactoryInitializerParams, alertsService: mockAlertsService },
+      internalSavedObjectsRepository,
+      taskInstance: mockedTaskInstance,
+    });
+    expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
+
+    const runnerResult = await taskRunner.run();
+    expect(runnerResult).toEqual({ state: {}, runAt: new Date('1970-01-01T00:00:00.000Z') });
+    await taskRunner.cleanup();
+
+    // Verify all the expected calls were made before calling the rule executor
+    expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+      AD_HOC_RUN_SAVED_OBJECT_TYPE,
+      'abc',
+      {}
+    );
+    expect(ruleTypeRegistry.ensureRuleTypeEnabled).toHaveBeenCalledWith('siem.queryRule');
+    expect(mockValidateRuleTypeParams).toHaveBeenCalledWith(
+      mockedAdHocRunSO.attributes.rule.params,
+      ruleTypeWithAlerts.validate.params
+    );
+    // @ts-ignore - accessing private variable
+    // should run the first entry in the schedule
+    expect(taskRunner.scheduleToRunIndex).toEqual(0);
+
+    // Verify all the expected calls were made while calling the rule executor
+    expect(RuleRunMetricsStore).toHaveBeenCalledTimes(1);
+    expect(ruleTypeWithAlerts.executor).toHaveBeenCalledTimes(1);
+
+    expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
+      AD_HOC_RUN_SAVED_OBJECT_TYPE,
+      mockedAdHocRunSO.id,
+      {
+        schedule: [
+          { ...schedule1, status: adHocRunStatus.COMPLETE },
+          schedule2,
+          schedule3,
+          schedule4,
+          schedule5,
+        ],
+      },
+      { namespace: undefined, refresh: false }
+    );
+
+    expect(internalSavedObjectsRepository.delete).not.toHaveBeenCalled();
+
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledWith(
+      generateEnqueueFunctionInput({
+        isBulk: true,
+        id: '4',
+        foo: true,
+        consumer: 'siem',
+        uuid: '123abc',
+        priority: TaskPriority.Low,
+        apiKeyId: 'apiKeyId',
+      })
+    );
   });
 
   test('should run with the next pending schedule', async () => {
