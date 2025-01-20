@@ -1014,11 +1014,11 @@ export const UnifiedDataTable = ({
   ]);
 
   const additionalControls = useMemo(() => {
-    if (!externalAdditionalControls && !selectedDocsCount) {
+    if (!externalAdditionalControls && !selectedDocsCount && !inTableSearchControl) {
       return null;
     }
 
-    return (
+    const leftControls = (
       <>
         {Boolean(selectedDocsCount) && (
           <DataTableDocumentToolbarBtn
@@ -1039,6 +1039,15 @@ export const UnifiedDataTable = ({
         {externalAdditionalControls}
       </>
     );
+
+    if (!renderCustomToolbar && inTableSearchControl) {
+      return {
+        left: leftControls,
+        right: inTableSearchControl,
+      };
+    }
+
+    return leftControls;
   }, [
     selectedDocsCount,
     selectedDocsState,
@@ -1053,6 +1062,8 @@ export const UnifiedDataTable = ({
     unifiedDataTableContextValue.pageSize,
     toastNotifications,
     visibleColumns,
+    renderCustomToolbar,
+    inTableSearchControl,
   ]);
 
   const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
@@ -1062,7 +1073,10 @@ export const UnifiedDataTable = ({
             renderCustomToolbar({
               toolbarProps,
               gridProps: {
-                additionalControls,
+                additionalControls:
+                  additionalControls && 'left' in additionalControls
+                    ? additionalControls.left
+                    : additionalControls,
                 inTableSearchControl,
               },
             })

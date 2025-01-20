@@ -221,10 +221,11 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
           iconType="search"
           size="xs"
           color="text"
-          onClick={focusInput}
+          className="unifiedDataTable__inTableSearchButton"
           aria-label={i18n.translate('unifiedDataTable.inTableSearch.inputPlaceholder', {
             defaultMessage: 'Search in the table',
           })}
+          onClick={focusInput}
         />
       </EuiToolTip>
     );
@@ -251,7 +252,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
                 color="text"
                 disabled={areArrowsDisabled}
                 aria-label={i18n.translate('unifiedDataTable.inTableSearch.buttonPreviousMatch', {
-                  defaultMessage: 'Previous match',
+                  defaultMessage: 'Previous',
                 })}
                 onClick={goToPrevMatch}
               />
@@ -262,7 +263,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
                 color="text"
                 disabled={areArrowsDisabled}
                 aria-label={i18n.translate('unifiedDataTable.inTableSearch.buttonNextMatch', {
-                  defaultMessage: 'Next match',
+                  defaultMessage: 'Next',
                 })}
                 onClick={goToNextMatch}
               />

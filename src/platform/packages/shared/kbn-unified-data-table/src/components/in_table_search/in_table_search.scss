@@ -2,3 +2,8 @@
   background-color: #E5FFC0; // TODO: Use a named color token
   transition: background-color $euiAnimSpeedFast ease-in-out;
 }
+
+.unifiedDataTable__inTableSearchButton {
+  /* to make the transition between the button and input more seamless for cases where a custom toolbar is not used */
+  min-height: 2 * $euiSize; // input height
+}
