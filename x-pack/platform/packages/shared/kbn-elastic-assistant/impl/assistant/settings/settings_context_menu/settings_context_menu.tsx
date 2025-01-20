@@ -16,6 +16,7 @@ import {
   EuiPopover,
   EuiButtonIcon,
   useEuiTheme,
+  EuiSwitch,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { KnowledgeBaseTour } from '../../../tour/knowledge_base';
@@ -33,7 +34,8 @@ interface Params {
 export const SettingsContextMenu: React.FC<Params> = React.memo(
   ({ isDisabled = false, onChatCleared }: Params) => {
     const { euiTheme } = useEuiTheme();
-    const { navigateToApp, knowledgeBase } = useAssistantContext();
+    const { navigateToApp, knowledgeBase, setContentReferencesVisible, contentReferencesVisible } =
+      useAssistantContext();
 
     const [isPopoverOpen, setPopover] = useState(false);
 
@@ -102,11 +104,22 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         <EuiContextMenuItem
           aria-label={'knowledge-base'}
           key={'knowledge-base'}
-          onClick={handleNavigateToKnowledgeBase}
           icon={'documents'}
           data-test-subj={'knowledge-base'}
         >
-          {i18n.KNOWLEDGE_BASE}
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow onClick={handleNavigateToKnowledgeBase}>
+              {i18n.KNOWLEDGE_BASE}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                label="Citations"
+                checked={contentReferencesVisible}
+                onChange={(value) => setContentReferencesVisible(value.target.checked)}
+                compressed
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiContextMenuItem>,
         <EuiContextMenuItem
           aria-label={'anonymization'}
@@ -148,6 +161,8 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
       ],
 
       [
+        contentReferencesVisible,
+        setContentReferencesVisible,
         euiTheme.colors.textDanger,
         handleNavigateToAnonymization,
         handleNavigateToKnowledgeBase,
@@ -186,7 +201,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
           <EuiContextMenuPanel
             items={items}
             css={css`
-              width: 250px;
+              width: 280px;
             `}
           />
         </EuiPopover>

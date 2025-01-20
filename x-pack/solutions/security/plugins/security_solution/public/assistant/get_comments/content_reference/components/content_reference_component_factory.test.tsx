@@ -11,7 +11,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { ContentReferenceNode } from '../content_reference_parser';
 
-const testContentReferenceNode = { contentReferenceId: '1' } as ContentReferenceNode
+const testContentReferenceNode = { contentReferenceId: '1' } as ContentReferenceNode;
 
 describe('contentReferenceComponentFactory', () => {
   it.each([
@@ -25,7 +25,7 @@ describe('contentReferenceComponentFactory', () => {
           label: '',
         },
       } as ContentReferences,
-      testContentReferenceNode
+      testContentReferenceNode,
     ],
     [
       'KnowledgeBaseEntryReference',
@@ -37,7 +37,7 @@ describe('contentReferenceComponentFactory', () => {
           knowledgeBaseEntryName: '',
         },
       } as ContentReferences,
-      testContentReferenceNode
+      testContentReferenceNode,
     ],
     [
       'ProductDocumentationReference',
@@ -49,7 +49,7 @@ describe('contentReferenceComponentFactory', () => {
           url: '',
         },
       } as ContentReferences,
-      testContentReferenceNode
+      testContentReferenceNode,
     ],
     [
       'SecurityAlertReference',
@@ -60,7 +60,7 @@ describe('contentReferenceComponentFactory', () => {
           alertId: '',
         },
       } as ContentReferences,
-      testContentReferenceNode
+      testContentReferenceNode,
     ],
     [
       'SecurityAlertsPageReference',
@@ -70,7 +70,7 @@ describe('contentReferenceComponentFactory', () => {
           type: 'SecurityAlertsPage',
         },
       } as ContentReferences,
-      testContentReferenceNode
+      testContentReferenceNode,
     ],
   ])(
     "Renders component: '%s'",

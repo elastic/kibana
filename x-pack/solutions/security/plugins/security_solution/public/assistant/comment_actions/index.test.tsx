@@ -24,9 +24,9 @@ const Wrapper: React.FC<React.PropsWithChildren> = ({ children }) => {
 };
 
 describe('CommentActions', () => {
-  beforeEach(()=>{
-    (EuiCopy as unknown as jest.Mock).mockClear()
-  })
+  beforeEach(() => {
+    (EuiCopy as unknown as jest.Mock).mockClear();
+  });
 
   it.each([
     [`Only this should be copied!{reference(exampleReferenceId)}`, 'Only this should be copied!'],
@@ -36,7 +36,7 @@ describe('CommentActions', () => {
     ],
     [`{reference(exampleReferenceId)}`, ''],
   ])("textToCopy is correct when input is '%s'", async (input, expected) => {
-    (EuiCopy as unknown as jest.Mock).mockReturnValue(null)
+    (EuiCopy as unknown as jest.Mock).mockReturnValue(null);
     const message: ClientMessage = {
       content: input,
       role: 'assistant',

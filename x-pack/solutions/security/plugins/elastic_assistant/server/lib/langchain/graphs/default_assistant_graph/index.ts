@@ -14,6 +14,7 @@ import {
 } from 'langchain/agents';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
+import { pruneContentReferences, MessageMetadata } from '@kbn/elastic-assistant-common';
 import { getLlmClass } from '../../../../routes/utils';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { AssistantToolParams } from '../../../../types';
@@ -23,7 +24,6 @@ import { GraphInputs } from './types';
 import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
-import { pruneContentReferences, MessageMetadata } from '@kbn/elastic-assistant-common';
 
 export const callAssistantGraph: AgentExecutor<true | false> = async ({
   abortSignal,
@@ -137,13 +137,13 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const agentRunnable =
     isOpenAI || llmType === 'inference'
       ? await createOpenAIToolsAgent({
-        llm: createLlmInstance(),
-        tools,
-        prompt: formatPrompt(systemPrompts.openai, systemPrompt),
-        streamRunnable: isStream,
-      })
+          llm: createLlmInstance(),
+          tools,
+          prompt: formatPrompt(systemPrompts.openai, systemPrompt),
+          streamRunnable: isStream,
+        })
       : llmType && ['bedrock', 'gemini'].includes(llmType)
-        ? await createToolCallingAgent({
+      ? await createToolCallingAgent({
           llm: createLlmInstance(),
           tools,
           prompt:
@@ -152,7 +152,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
               : formatPrompt(systemPrompts.gemini, systemPrompt),
           streamRunnable: isStream,
         })
-        : // used with OSS models
+      : // used with OSS models
         await createStructuredChatAgent({
           llm: createLlmInstance(),
           tools,
@@ -163,14 +163,14 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
   const telemetryTracer = telemetryParams
     ? new TelemetryTracer(
-      {
-        elasticTools: assistantTools.map(({ name }) => name),
-        totalTools: tools.length,
-        telemetry,
-        telemetryParams,
-      },
-      logger
-    )
+        {
+          elasticTools: assistantTools.map(({ name }) => name),
+          totalTools: tools.length,
+          telemetry,
+          telemetryParams,
+        },
+        logger
+      )
     : undefined;
   const assistantGraph = getDefaultAssistantGraph({
     agentRunnable,
@@ -221,7 +221,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   };
 
   const isMetadataPopulated = contentReferences !== undefined;
-
 
   return {
     body: {

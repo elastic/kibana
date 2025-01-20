@@ -80,78 +80,78 @@ describe('ContentReferenceParser', () => {
 
     expect(file.children[0].children).toEqual([
       {
-          "position": {
-              "end": {
-                  "column": 13,
-                  "line": 1,
-                  "offset": 12
-              },
-              "indent": [],
-              "start": {
-                  "column": 1,
-                  "line": 1,
-                  "offset": 0
-              }
+        position: {
+          end: {
+            column: 13,
+            line: 1,
+            offset: 12,
           },
-          "type": "text",
-          "value": "Hello world "
+          indent: [],
+          start: {
+            column: 1,
+            line: 1,
+            offset: 0,
+          },
+        },
+        type: 'text',
+        value: 'Hello world ',
       },
       {
-          "contentReferenceBlock": "{reference(example)}",
-          "contentReferenceCount": 1,
-          "contentReferenceId": "example",
-          "position": {
-              "end": {
-                  "column": 33,
-                  "line": 1,
-                  "offset": 32
-              },
-              "indent": [],
-              "start": {
-                  "column": 13,
-                  "line": 1,
-                  "offset": 12
-              }
+        contentReferenceBlock: '{reference(example)}',
+        contentReferenceCount: 1,
+        contentReferenceId: 'example',
+        position: {
+          end: {
+            column: 33,
+            line: 1,
+            offset: 32,
           },
-          "type": "contentReference"
+          indent: [],
+          start: {
+            column: 13,
+            line: 1,
+            offset: 12,
+          },
+        },
+        type: 'contentReference',
       },
       {
-          "position": {
-              "end": {
-                  "column": 46,
-                  "line": 1,
-                  "offset": 45
-              },
-              "indent": [],
-              "start": {
-                  "column": 33,
-                  "line": 1,
-                  "offset": 32
-              }
+        position: {
+          end: {
+            column: 46,
+            line: 1,
+            offset: 45,
           },
-          "type": "text",
-          "value": " hello world "
+          indent: [],
+          start: {
+            column: 33,
+            line: 1,
+            offset: 32,
+          },
+        },
+        type: 'text',
+        value: ' hello world ',
       },
       {
-          "contentReferenceBlock": "{reference(example2)}",
-          "contentReferenceCount": 2,
-          "contentReferenceId": "example2",
-          "position": {
-              "end": {
-                  "column": 67,
-                  "line": 1,
-                  "offset": 66
-              },
-              "indent": [],
-              "start": {
-                  "column": 46,
-                  "line": 1,
-                  "offset": 45
-              }
+        contentReferenceBlock: '{reference(example2)}',
+        contentReferenceCount: 2,
+        contentReferenceId: 'example2',
+        position: {
+          end: {
+            column: 67,
+            line: 1,
+            offset: 66,
           },
-          "type": "contentReference"
-      }
-  ]);
+          indent: [],
+          start: {
+            column: 46,
+            line: 1,
+            offset: 45,
+          },
+        },
+        type: 'contentReference',
+      },
+    ]);
   });
 
   it('handles multiple citation blocks with same referenceIds', async () => {

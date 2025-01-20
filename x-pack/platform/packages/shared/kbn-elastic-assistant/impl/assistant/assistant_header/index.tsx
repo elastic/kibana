@@ -48,7 +48,7 @@ interface OwnProps {
   onConversationCreate: () => Promise<void>;
   isAssistantEnabled: boolean;
   contentReferencesVisible: boolean;
-  setContentReferencesVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setContentReferencesVisible: React.Dispatch<React.SetStateAction<boolean | undefined>>;
   refetchPrompts?: (
     options?: RefetchOptions & RefetchQueryFilters<unknown>
   ) => Promise<QueryObserverResult<unknown, unknown>>;
