@@ -10,6 +10,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { AssetCriticalitySelector } from './asset_criticality_selector';
 import type { State } from './use_asset_criticality';
+import { EntityType } from '../../../../common/entity_analytics/types';
 
 const criticality = {
   status: 'create',
@@ -27,7 +28,7 @@ describe('AssetCriticalitySelector', () => {
     const { getByTestId } = render(
       <AssetCriticalitySelector
         criticality={criticality}
-        entity={{ type: 'host' as const, name: 'My test Host' }}
+        entity={{ type: EntityType.host, name: 'My test Host' }}
       />,
       {
         wrapper: TestProviders,
@@ -41,7 +42,7 @@ describe('AssetCriticalitySelector', () => {
     const { getByTestId } = render(
       <AssetCriticalitySelector
         criticality={criticality}
-        entity={{ type: 'host' as const, name: 'My test Host' }}
+        entity={{ type: EntityType.host, name: 'My test Host' }}
         compressed
       />,
       {
