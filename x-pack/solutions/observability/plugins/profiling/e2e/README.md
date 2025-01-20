@@ -11,7 +11,7 @@ Tests run on buildkite PR pipeline are parallelized (4 parallel jobs) and are or
 ```yml
     ...
     depends_on: build
-    parallelism: 4
+    parallelism: 3
     ...
 ```
 
@@ -20,7 +20,7 @@ Tests run on buildkite PR pipeline are parallelized (4 parallel jobs) and are or
 ### Start with Cypress Dashboard
 
 ```
-node x-pack/solutions/observability/plugins/profiling/scripts/test/e2e --headed
+node x-pack/solutions/observability/plugins/profiling/scripts/test/e2e --open
 ```
 
 ### Run tests
@@ -30,8 +30,16 @@ Runs all tests in the terminal
 node x-pack/solutions/observability/plugins/profiling/scripts/test/e2e
 ```
 
+### Run tests in headed mode
+
+```
+node x-pack/solutions/observability/plugins/profiling/scripts/test/e2e --headed
+```
+
 ### Arguments
 
 | Option       | Description                                     |
 | ------------ | ----------------------------------------------- |
-| --headed     | Opens Cypress dashboard                        |
+| --open       | Opens Cypress dashboard                         |
+| --headed     | Runs tests in headed mode                       |
+
