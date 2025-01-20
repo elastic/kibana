@@ -26163,6 +26163,21 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.NewAgentPolicy.agentless",
+            "type": "Object",
+            "tags": [],
+            "label": "agentless",
+            "description": [],
+            "signature": [
+              "AgentlessPolicy",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.NewAgentPolicy.monitoring_pprof_enabled",
             "type": "CompoundType",
             "tags": [],
@@ -26198,6 +26213,21 @@
             "description": [],
             "signature": [
               "{ limit?: { interval?: string | undefined; burst?: number | undefined; } | undefined; uploader?: { max_retries?: number | undefined; init_dur?: string | undefined; max_dur?: string | undefined; } | undefined; } | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewAgentPolicy.required_versions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "required_versions",
+            "description": [],
+            "signature": [
+              "AgentTargetVersion",
+              "[] | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
