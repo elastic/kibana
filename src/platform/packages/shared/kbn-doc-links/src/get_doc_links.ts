@@ -369,6 +369,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       batchReindex: `${KIBANA_DOCS}batch-start-resume-reindex.html`,
       remoteReindex: `${ELASTICSEARCH_DOCS}docs-reindex.html#reindex-from-remote`,
       reindexWithPipeline: `${ELASTICSEARCH_DOCS}docs-reindex.html#reindex-with-an-ingest-pipeline`,
+      logsDatastream: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/current/logs-data-stream.html`,
+      usingLogsDbIndexModeWithESSecurity: `${ELASTIC_WEBSITE_URL}guide/en/security/current/detections-logsdb-index-mode-impact.html`,
     },
     rollupJobs: `${KIBANA_DOCS}data-rollups.html`,
     elasticsearch: {
