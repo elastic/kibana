@@ -26,12 +26,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { AgentTargetVersion } from '../../../../../../../common/types';
 
 import type { AgentPolicy } from '../../../../../../../common';
-import {
-  sendUpdateAgentPolicy,
-  useGetAgentsAvailableVersionsQuery,
-  useStartServices,
-} from '../../../../../../hooks';
+import { useGetAgentsAvailableVersionsQuery, useStartServices } from '../../../../../../hooks';
 import { checkTargetVersionsValidity } from '../../../../../../../common/services';
+import { sendUpdateAgentPolicyForRq } from '../../../../../../hooks/use_request/agent_policy';
 
 export interface ManageAutoUpgradeAgentsModalProps {
   onClose: (refreshPolicy: boolean) => void;
@@ -55,28 +52,18 @@ export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
     setIsLoading(true);
     let isSuccess = false;
     try {
-      const { data, error } = await sendUpdateAgentPolicy(agentPolicy.id, {
+      const { data } = await sendUpdateAgentPolicyForRq(agentPolicy.id, {
         name: agentPolicy.name,
         namespace: agentPolicy.namespace,
         required_versions: targetVersions,
       });
-      if (data) {
-        notifications.toasts.addSuccess(
-          i18n.translate('xpack.fleet.manageAutoUpgradeAgents.successNotificationTitle', {
-            defaultMessage: "Successfully updated ''{name}'' auto-upgrade agents settings",
-            values: { name: agentPolicy.name },
-          })
-        );
-        isSuccess = true;
-      } else {
-        notifications.toasts.addDanger(
-          error
-            ? error.message
-            : i18n.translate('xpack.fleet.manageAutoUpgradeAgents.errorNotificationTitle', {
-                defaultMessage: 'Unable to update agent policy',
-              })
-        );
-      }
+      notifications.toasts.addSuccess(
+        i18n.translate('xpack.fleet.manageAutoUpgradeAgents.successNotificationTitle', {
+          defaultMessage: "Successfully updated ''{name}'' auto-upgrade agents settings",
+          values: { name: agentPolicy.name },
+        })
+      );
+      isSuccess = true;
     } catch (e) {
       notifications.toasts.addDanger(
         i18n.translate('xpack.fleet.manageAutoUpgradeAgents.errorNotificationTitle', {
