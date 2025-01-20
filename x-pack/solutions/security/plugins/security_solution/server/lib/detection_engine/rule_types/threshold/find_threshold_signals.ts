@@ -29,9 +29,9 @@ import type {
   ThresholdBucket,
   ThresholdSingleBucketAggregationResult,
 } from './types';
-import { shouldFilterByCardinality, searchResultHasAggs, stringifyAfterKey } from './utils';
+import { shouldFilterByCardinality, searchResultHasAggs } from './utils';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import { getMaxSignalsWarning } from '../utils/utils';
+import { getMaxSignalsWarning, stringifyAfterKey } from '../utils/utils';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import * as i18n from '../translations';
 

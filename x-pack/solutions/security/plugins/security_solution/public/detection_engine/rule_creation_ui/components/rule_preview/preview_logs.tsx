@@ -7,8 +7,8 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { Fragment, useMemo } from 'react';
-import { css } from '@emotion/css';
 import { EuiCallOut, EuiText, EuiSpacer, EuiAccordion } from '@elastic/eui';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import type { RulePreviewLogs } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
@@ -20,6 +20,7 @@ interface PreviewLogsProps {
   hasNoiseWarning: boolean;
   isAborted: boolean;
   showElasticsearchRequests: boolean;
+  ruleType: Type;
 }
 
 interface SortedLogs {
@@ -53,6 +54,7 @@ const PreviewLogsComponent: React.FC<PreviewLogsProps> = ({
   hasNoiseWarning,
   isAborted,
   showElasticsearchRequests,
+  ruleType,
 }) => {
   const sortedLogs = useMemo(
     () =>
@@ -76,7 +78,7 @@ const PreviewLogsComponent: React.FC<PreviewLogsProps> = ({
       <LogAccordion logs={sortedLogs.warnings}>
         {isAborted ? <CustomWarning message={i18n.PREVIEW_TIMEOUT_WARNING} /> : null}
       </LogAccordion>
-      {showElasticsearchRequests ? <LoggedRequests logs={logs} /> : null}
+      {showElasticsearchRequests ? <LoggedRequests logs={logs} ruleType={ruleType} /> : null}
     </>
   );
 };
@@ -110,9 +112,7 @@ const LogAccordion: FC<PropsWithChildren<LogAccordionProps>> = ({ logs, isError,
             isError ? i18n.QUERY_PREVIEW_SEE_ALL_ERRORS : i18n.QUERY_PREVIEW_SEE_ALL_WARNINGS
           }
           borders="horizontal"
-          css={css`
-            ${cssStyles}
-          `}
+          css={cssStyles}
         >
           {restOfLogs.map((log, key) => (
             <CalloutGroup

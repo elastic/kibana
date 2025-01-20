@@ -22,10 +22,16 @@ import type {
   CreateAlertsHook,
 } from './build_new_terms_aggregation';
 import type { NewTermsFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
-import { getMaxSignalsWarning, getSuppressionMaxSignalsWarning } from '../utils/utils';
+import {
+  getMaxSignalsWarning,
+  getSuppressionMaxSignalsWarning,
+  stringifyAfterKey,
+} from '../utils/utils';
 import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
 
 import type { RuleServices, SearchAfterAndBulkCreateReturnType, RunOpts } from '../types';
+import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
+import * as i18n from '../translations';
 
 /**
  * composite aggregation page batch size set to 500 as it shows th best performance(refer https://github.com/elastic/kibana/pull/157413) and
@@ -49,6 +55,7 @@ interface MultiTermsCompositeArgsBase {
   afterKey: Record<string, string | number | null> | undefined;
   createAlertsHook: CreateAlertsHook;
   isAlertSuppressionActive: boolean;
+  isLoggedRequestsEnabled: boolean;
 }
 
 interface MultiTermsCompositeArgs extends MultiTermsCompositeArgsBase {
@@ -75,6 +82,7 @@ const multiTermsCompositeNonRetryable = async ({
   createAlertsHook,
   batchSize,
   isAlertSuppressionActive,
+  isLoggedRequestsEnabled,
 }: MultiTermsCompositeArgs): Promise<
   Omit<GenericBulkCreateResponse<NewTermsFieldsLatest>, 'suppressedItemsCount'> | undefined
 > => {
@@ -86,6 +94,8 @@ const multiTermsCompositeNonRetryable = async ({
     primaryTimestamp,
     secondaryTimestamp,
   } = runOpts;
+
+  const loggedRequests: RulePreviewLoggedRequest[] = [];
 
   let internalAfterKey = afterKey ?? undefined;
 
@@ -115,6 +125,7 @@ const multiTermsCompositeNonRetryable = async ({
       searchResult: pageSearchResult,
       searchDuration: pageSearchDuration,
       searchErrors: pageSearchErrors,
+      loggedRequests: pageSearchLoggedRequests = [],
     } = await singleSearchAfter({
       aggregations: buildCompositeNewTermsAgg({
         newValueWindowStart: tuple.from,
@@ -136,10 +147,14 @@ const multiTermsCompositeNonRetryable = async ({
       pageSize: 0,
       primaryTimestamp,
       secondaryTimestamp,
+      loggedRequestDescription: isLoggedRequestsEnabled
+        ? i18n.FIND_NEW_TERMS_VALUES_DESCRIPTION(stringifyAfterKey(internalAfterKey))
+        : undefined,
     });
 
     result.searchAfterTimes.push(pageSearchDuration);
     result.errors.push(...pageSearchErrors);
+    loggedRequests.push(...pageSearchLoggedRequests);
     logger.debug(`Time spent on phase 2 terms agg: ${pageSearchDuration}`);
 
     const pageSearchResultWithAggs = pageSearchResult as CompositeNewTermsAggResult;
@@ -156,6 +171,7 @@ const multiTermsCompositeNonRetryable = async ({
         searchResult: docFetchSearchResult,
         searchDuration: docFetchSearchDuration,
         searchErrors: docFetchSearchErrors,
+        loggedRequests: docFetchLoggedRequests = [],
       } = await singleSearchAfter({
         aggregations: buildCompositeDocFetchAgg({
           newValueWindowStart: tuple.from,
@@ -175,9 +191,13 @@ const multiTermsCompositeNonRetryable = async ({
         pageSize: 0,
         primaryTimestamp,
         secondaryTimestamp,
+        loggedRequestDescription: isLoggedRequestsEnabled
+          ? i18n.FIND_NEW_TERMS_EVENTS_DESCRIPTION(stringifyAfterKey(internalAfterKey))
+          : undefined,
       });
       result.searchAfterTimes.push(docFetchSearchDuration);
       result.errors.push(...docFetchSearchErrors);
+      loggedRequests.push(...docFetchLoggedRequests);
 
       const docFetchResultWithAggs = docFetchSearchResult as CompositeDocFetchAggResult;
 
@@ -186,6 +206,10 @@ const multiTermsCompositeNonRetryable = async ({
       }
 
       const bulkCreateResult = await createAlertsHook(docFetchResultWithAggs);
+      // console.log('bulkCreateResult.loggedRequests ', bulkCreateResult.loggedRequests.length);
+      if (isLoggedRequestsEnabled) {
+        bulkCreateResult.loggedRequests = loggedRequests;
+      }
 
       if (bulkCreateResult.alertsWereTruncated) {
         result.warningMessages.push(
@@ -197,6 +221,8 @@ const multiTermsCompositeNonRetryable = async ({
 
     internalAfterKey = batch[batch.length - 1]?.key;
   }
+
+  return { loggedRequests };
 };
 
 /**

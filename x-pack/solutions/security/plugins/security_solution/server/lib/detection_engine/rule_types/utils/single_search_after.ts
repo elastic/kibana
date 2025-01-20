@@ -11,6 +11,7 @@ import type {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
+import type { LoggedRequestsEnabled } from '../types';
 import type { SignalSearchResponse, SignalSource, OverrideBodyQuery } from '../types';
 import { buildEventsSearchQuery } from './build_events_query';
 import { createErrorsFromShard, makeFloatString } from './utils';
@@ -37,7 +38,7 @@ export interface SingleSearchAfterParams {
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   additionalFilters?: estypes.QueryDslQueryContainer[];
   overrideBody?: OverrideBodyQuery;
-  loggedRequestDescription?: string;
+  loggedRequestsEnabled?: LoggedRequestsEnabled;
 }
 
 // utilize search_after for paging results into bulk.
@@ -60,7 +61,7 @@ export const singleSearchAfter = async <
   trackTotalHits,
   additionalFilters,
   overrideBody,
-  loggedRequestDescription,
+  loggedRequestsEnabled,
 }: SingleSearchAfterParams): Promise<{
   searchResult: SignalSearchResponse<TAggregations>;
   searchDuration: string;
@@ -105,10 +106,13 @@ export const singleSearchAfter = async <
         errors: nextSearchAfterResult._shards.failures ?? [],
       });
 
-      if (loggedRequestDescription) {
+      if (loggedRequestsEnabled) {
         loggedRequests.push({
-          request: logSearchRequest(searchAfterQuery),
-          description: loggedRequestDescription,
+          request: loggedRequestsEnabled.skipRequestQuery
+            ? undefined
+            : logSearchRequest(searchAfterQuery),
+          description: loggedRequestsEnabled.description,
+          request_type: loggedRequestsEnabled.type,
           duration: Math.round(end - start),
         });
       }

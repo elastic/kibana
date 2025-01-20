@@ -1364,5 +1364,103 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
     });
+
+    describe('preview logged requests', () => {
+      const rule: NewTermsRuleCreateProps = {
+        ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+        index: ['new_terms'],
+        new_terms_fields: ['host.name', 'host.ip'],
+        from: ruleExecutionStart,
+        history_window_start: historicalWindowStart,
+        query: '*',
+      };
+
+      it('should not return requests property when not enabled', async () => {
+        const { logs } = await previewRule({
+          supertest,
+          rule,
+        });
+
+        expect(logs[0].requests).toEqual(undefined);
+      });
+
+      it('should return requests property when enable_logged_requests set to true for single new term field', async () => {
+        // historical window documents
+        const historicalDocuments = [
+          {
+            host: { name: 'host-0', ip: '127.0.0.1' },
+          },
+          {
+            host: { name: 'host-1', ip: '127.0.0.2' },
+          },
+        ];
+
+        // rule execution documents
+        const ruleExecutionDocuments = [
+          {
+            host: { name: 'host-0', ip: '127.0.0.2' },
+          },
+          {
+            host: { name: 'host-2', ip: '127.0.0.1' },
+          },
+        ];
+
+        const testId = await newTermsTestExecutionSetup({
+          historicalDocuments,
+          ruleExecutionDocuments,
+        });
+
+        const { logs } = await previewRule({
+          supertest,
+          rule: { ...rule, query: `id: "${testId}"`, new_terms_fields: ['host.name'] },
+        });
+
+        expect(logs[0].requests).toEqual(3);
+        const requests = logs[0].requests ?? [];
+
+        expect(requests[0].description).toBe('Find historical values');
+        expect(requests[1].description).toBe('Find new terms');
+        expect(requests[2].description).toBe('Find events associated with new events');
+      });
+
+      it('should return requests property when enable_logged_requests set to true for multiple fields', async () => {
+        // historical window documents
+        const historicalDocuments = [
+          {
+            host: { name: 'host-0', ip: '127.0.0.1' },
+          },
+          {
+            host: { name: 'host-1', ip: '127.0.0.2' },
+          },
+        ];
+
+        // rule execution documents
+        const ruleExecutionDocuments = [
+          {
+            host: { name: 'host-0', ip: '127.0.0.2' },
+          },
+          {
+            host: { name: 'host-1', ip: '127.0.0.1' },
+          },
+        ];
+
+        const testId = await newTermsTestExecutionSetup({
+          historicalDocuments,
+          ruleExecutionDocuments,
+        });
+
+        const { logs } = await previewRule({
+          supertest,
+          rule: { ...rule, query: `id: "${testId}"` },
+        });
+
+        expect(logs[0].requests).toEqual(3);
+        const requests = logs[0].requests ?? [];
+
+        expect(requests[0].description).toBe('Find historical values');
+        expect(requests[1].description).toBe('Find new terms');
+        expect(requests[2].description).toBe('Find events associated with new events');
+      });
+    });
   });
 };

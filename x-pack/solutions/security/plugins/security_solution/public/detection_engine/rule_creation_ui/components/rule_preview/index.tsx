@@ -50,6 +50,7 @@ const RULE_TYPES_SUPPORTING_LOGGED_REQUESTS: Type[] = [
   'machine_learning',
   'query',
   'saved_query',
+  'new_terms',
 ];
 
 const timeRanges = [
@@ -323,6 +324,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
         hasNoiseWarning={hasNoiseWarning}
         isAborted={isAborted}
         showElasticsearchRequests={showElasticsearchRequests && isLoggedRequestsSupported}
+        ruleType={ruleType}
       />
     </div>
   );

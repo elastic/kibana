@@ -23,6 +23,7 @@ import type {
   SearchAfterAndBulkCreateParams,
   SearchAfterAndBulkCreateReturnType,
   SignalSourceHit,
+  LoggedRequestsEnabled,
 } from '../types';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { GenericBulkCreateResponse } from '../factories';
@@ -31,16 +32,23 @@ import type { RulePreviewLoggedRequest } from '../../../../../common/api/detecti
 import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import * as i18n from '../translations';
 
-const createLoggedRequestsDescription = (
+const createLoggedRequestsConfig = (
   isLoggedRequestsEnabled: boolean | undefined,
-  sortIds: estypes.SortResults | undefined
-): string | undefined => {
+  sortIds: estypes.SortResults | undefined,
+  page: number
+): LoggedRequestsEnabled | undefined => {
   if (!isLoggedRequestsEnabled) {
     return undefined;
   }
-  return sortIds
+  const description = sortIds
     ? i18n.FIND_EVENTS_AFTER_CURSOR_DESCRIPTION(JSON.stringify(sortIds))
     : i18n.FIND_EVENTS_DESCRIPTION;
+
+  return {
+    type: 'findDocuments',
+    description,
+    skipRequestQuery: page > 1, // skipping query logging for performance reasons, so we won't overwhelm Kibana with large response size
+  };
 };
 
 export interface SearchAfterAndBulkCreateFactoryParams extends SearchAfterAndBulkCreateParams {
@@ -125,9 +133,10 @@ export const searchAfterAndBulkCreateFactory = async ({
             trackTotalHits,
             sortOrder,
             additionalFilters,
-            loggedRequestDescription: createLoggedRequestsDescription(
+            loggedRequestsEnabled: createLoggedRequestsConfig(
               isLoggedRequestsEnabled,
-              sortIds
+              sortIds,
+              searchingIteration
             ),
           });
           mergedSearchResults = mergeSearchResults([mergedSearchResults, searchResult]);

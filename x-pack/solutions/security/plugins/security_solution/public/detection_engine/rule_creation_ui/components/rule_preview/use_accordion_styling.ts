@@ -11,6 +11,5 @@ export const useAccordionStyling = () => {
   const paddingLarge = useEuiPaddingSize('l');
   const paddingSmall = useEuiPaddingSize('s');
 
-  return `padding-bottom: ${paddingLarge};
-          padding-top: ${paddingSmall};`;
+  return { 'padding-bottom': paddingLarge, 'padding-top': paddingSmall };
 };

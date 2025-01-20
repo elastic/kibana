@@ -13,23 +13,9 @@ import {
   getSignalHistory,
   getThresholdTermsHash,
   transformBulkCreatedItemsToHits,
-  stringifyAfterKey,
 } from './utils';
 
 describe('threshold utils', () => {
-  describe('stringifyAfterKey', () => {
-    it('should stringify after_key object with single key value', () => {
-      expect(stringifyAfterKey({ 'agent.name': 'test' })).toBe('agent.name: test');
-    });
-    it('should stringify after_key object with multiple key values', () => {
-      expect(stringifyAfterKey({ 'agent.name': 'test', 'destination.ip': '127.0.0.1' })).toBe(
-        'agent.name: test, destination.ip: 127.0.0.1'
-      );
-    });
-    it('should return undefined if after_key is undefined', () => {
-      expect(stringifyAfterKey(undefined)).toBeUndefined();
-    });
-  });
   describe('calcualteThresholdSignalUuid', () => {
     it('should generate a uuid without key', () => {
       const startedAt = new Date('2020-12-17T16:27:00Z');

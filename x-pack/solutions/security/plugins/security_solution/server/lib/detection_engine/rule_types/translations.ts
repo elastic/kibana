@@ -66,3 +66,51 @@ export const FIND_EVENTS_AFTER_CURSOR_DESCRIPTION = (cursor?: string) =>
       values: { cursor },
     }
   );
+
+export const FIND_ALL_NEW_TERMS_FIELDS_DESCRIPTION = (afterKey?: string) =>
+  afterKey
+    ? i18n.translate(
+        'xpack.securitySolution.detectionEngine.newTermsRuleType.findAllNewTermsFieldsAfterDescription',
+        {
+          defaultMessage: 'Find all values in history window after {afterKey}',
+          values: { afterKey },
+        }
+      )
+    : i18n.translate(
+        'xpack.securitySolution.detectionEngine.newTermsRuleType.findAllNewTermsFieldsDescription',
+        {
+          defaultMessage: 'Find all values in history window',
+        }
+      );
+
+export const FIND_NEW_TERMS_VALUES_DESCRIPTION = (afterKey?: string) =>
+  afterKey
+    ? i18n.translate(
+        'xpack.securitySolution.detectionEngine.newTermsRuleType.findNewTermsValuesAfterDescription',
+        {
+          defaultMessage: 'Find new values after {afterKey}',
+          values: { afterKey },
+        }
+      )
+    : i18n.translate(
+        'xpack.securitySolution.detectionEngine.newTermsRuleType.findNewTermsValuesDescription',
+        {
+          defaultMessage: 'Find new values',
+        }
+      );
+
+export const FIND_NEW_TERMS_EVENTS_DESCRIPTION = (afterKey?: string) =>
+  afterKey
+    ? i18n.translate(
+        'xpack.securitySolution.detectionEngine.newTermsRuleType.findNewTermsEventsAfterDescription',
+        {
+          defaultMessage: 'Find documents associated with new values after {afterKey}',
+          values: { afterKey },
+        }
+      )
+    : i18n.translate(
+        'xpack.securitySolution.detectionEngine.newTermsRuleType.findNewTermsEventsDescription',
+        {
+          defaultMessage: 'Find documents associated with new values',
+        }
+      );

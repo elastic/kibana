@@ -409,6 +409,12 @@ export interface SearchAfterAndBulkCreateReturnType {
   loggedRequests?: RulePreviewLoggedRequest[];
 }
 
+export interface LoggedRequestsEnabled {
+  type: string;
+  description: string;
+  skipRequestQuery?: boolean;
+}
+
 // the new fields can be added later if needed
 export interface OverrideBodyQuery {
   _source?: estypes.SearchSourceConfig;

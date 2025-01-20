@@ -116,17 +116,3 @@ export const transformBulkCreatedItemsToHits = <T extends BaseFieldsLatest>(
       },
     };
   });
-
-/**
- * converts ES after_key object into string
- * for example: { "agent.name": "test" } would become `agent.name: test`
- */
-export const stringifyAfterKey = (afterKey: Record<string, string | number | null> | undefined) => {
-  if (!afterKey) {
-    return;
-  }
-
-  return Object.entries(afterKey)
-    .map((entry) => entry.join(': '))
-    .join(', ');
-};
