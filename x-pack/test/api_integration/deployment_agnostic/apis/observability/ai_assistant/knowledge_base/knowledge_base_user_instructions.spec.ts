@@ -170,7 +170,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       const editorInstruction = {
         id: `public-doc-from-editor-must-not-overwrite-admin-instruction`,
-        text: `public user instruction from "admin" not to be overwritten by other users`,
+        text: `public user instruction from "admin" must not overwrite admin instruction`,
         public: true,
       };
 
