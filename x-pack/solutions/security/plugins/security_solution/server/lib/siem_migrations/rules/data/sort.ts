@@ -21,7 +21,6 @@ const sortingOptions = {
       {
         'elastic_rule.prebuilt_rule_id': {
           order: direction,
-          nested: { path: 'elastic_rule' },
           missing: sortMissingValue(direction),
         },
       },
@@ -47,7 +46,6 @@ const sortingOptions = {
           `,
             lang: 'painless',
           },
-          nested: { path: 'elastic_rule' },
         },
       },
     ];
@@ -87,7 +85,6 @@ const sortingOptions = {
           `,
             lang: 'painless',
           },
-          nested: { path: 'elastic_rule' },
         },
       },
     ];
@@ -96,9 +93,7 @@ const sortingOptions = {
     return [{ updated_at: direction }];
   },
   name(direction: estypes.SortOrder = 'asc'): estypes.SortCombinations[] {
-    return [
-      { 'elastic_rule.title.keyword': { order: direction, nested: { path: 'elastic_rule' } } },
-    ];
+    return [{ 'elastic_rule.title.keyword': direction }];
   },
 };
 
