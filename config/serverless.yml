@@ -16,16 +16,16 @@ xpack.features.overrides:
     privileges:
       ### Dashboard's `All` feature privilege should implicitly grant `All` access to Maps and Visualize features.
       all.composedOf:
-        - feature: "maps_v2"
+        - feature: "maps"
           privileges: [ "all" ]
-        - feature: "visualize_v2"
+        - feature: "visualize"
           privileges: [ "all" ]
       ### Dashboard's `Read` feature privilege should implicitly grant `Read` access to Maps and Visualize features.
       ### Additionally, it should implicitly grant privilege to create short URLs in Visualize app.
       read.composedOf:
-        - feature: "maps_v2"
+        - feature: "maps"
           privileges: [ "read" ]
-        - feature: "visualize_v2"
+        - feature: "visualize"
           privileges: [ "read" ]
     ### All Dashboard sub-feature privileges should be hidden: reporting capabilities will be granted via dedicated
     ### Reporting feature and short URL sub-feature privilege should be granted for both `All` and `Read`.
