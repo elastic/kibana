@@ -59,42 +59,45 @@ describe('setAlertsToUntracked()', () => {
       Array [
         Object {
           "allow_no_indices": true,
-          "body": Object {
-            "conflicts": "proceed",
-            "query": Object {
-              "bool": Object {
-                "must": Array [
-                  Object {
-                    "term": Object {
-                      "kibana.alert.status": Object {
-                        "value": "active",
-                      },
+          "conflicts": "proceed",
+          "index": Array [
+            "test-index",
+          ],
+          "query": Object {
+            "bool": Object {
+              "must": Array [
+                Object {
+                  "term": Object {
+                    "kibana.alert.status": Object {
+                      "value": "active",
                     },
                   },
-                  Object {
-                    "bool": Object {
-                      "should": Array [
-                        Object {
-                          "term": Object {
-                            "kibana.alert.rule.uuid": Object {
-                              "value": "test-rule",
-                            },
+                },
+                Object {
+                  "bool": Object {
+                    "should": Array [
+                      Object {
+                        "term": Object {
+                          "kibana.alert.rule.uuid": Object {
+                            "value": "test-rule",
                           },
                         },
-                      ],
-                    },
+                      },
+                    ],
                   },
-                  Object {
-                    "bool": Object {
-                      "should": Array [],
-                    },
+                },
+                Object {
+                  "bool": Object {
+                    "should": Array [],
                   },
-                ],
-              },
+                },
+              ],
             },
-            "script": Object {
-              "lang": "painless",
-              "source": "
+          },
+          "refresh": true,
+          "script": Object {
+            "lang": "painless",
+            "source": "
       if (!ctx._source.containsKey('kibana.alert.status') || ctx._source['kibana.alert.status'].empty) {
         ctx._source.kibana.alert.status = 'untracked';
         ctx._source.kibana.alert.end = '2023-03-28T22:27:28.159Z';
@@ -104,12 +107,7 @@ describe('setAlertsToUntracked()', () => {
         ctx._source['kibana.alert.end'] = '2023-03-28T22:27:28.159Z';
         ctx._source['kibana.alert.time_range'].lte = '2023-03-28T22:27:28.159Z';
       }",
-            },
           },
-          "index": Array [
-            "test-index",
-          ],
-          "refresh": true,
         },
       ]
     `);
@@ -128,42 +126,45 @@ describe('setAlertsToUntracked()', () => {
       Array [
         Object {
           "allow_no_indices": true,
-          "body": Object {
-            "conflicts": "proceed",
-            "query": Object {
-              "bool": Object {
-                "must": Array [
-                  Object {
-                    "term": Object {
-                      "kibana.alert.status": Object {
-                        "value": "active",
-                      },
+          "conflicts": "proceed",
+          "index": Array [
+            "test-index",
+          ],
+          "query": Object {
+            "bool": Object {
+              "must": Array [
+                Object {
+                  "term": Object {
+                    "kibana.alert.status": Object {
+                      "value": "active",
                     },
                   },
-                  Object {
-                    "bool": Object {
-                      "should": Array [],
-                    },
+                },
+                Object {
+                  "bool": Object {
+                    "should": Array [],
                   },
-                  Object {
-                    "bool": Object {
-                      "should": Array [
-                        Object {
-                          "term": Object {
-                            "kibana.alert.uuid": Object {
-                              "value": "test-alert",
-                            },
+                },
+                Object {
+                  "bool": Object {
+                    "should": Array [
+                      Object {
+                        "term": Object {
+                          "kibana.alert.uuid": Object {
+                            "value": "test-alert",
                           },
                         },
-                      ],
-                    },
+                      },
+                    ],
                   },
-                ],
-              },
+                },
+              ],
             },
-            "script": Object {
-              "lang": "painless",
-              "source": "
+          },
+          "refresh": true,
+          "script": Object {
+            "lang": "painless",
+            "source": "
       if (!ctx._source.containsKey('kibana.alert.status') || ctx._source['kibana.alert.status'].empty) {
         ctx._source.kibana.alert.status = 'untracked';
         ctx._source.kibana.alert.end = '2023-03-28T22:27:28.159Z';
@@ -173,12 +174,7 @@ describe('setAlertsToUntracked()', () => {
         ctx._source['kibana.alert.end'] = '2023-03-28T22:27:28.159Z';
         ctx._source['kibana.alert.time_range'].lte = '2023-03-28T22:27:28.159Z';
       }",
-            },
           },
-          "index": Array [
-            "test-index",
-          ],
-          "refresh": true,
         },
       ]
     `);

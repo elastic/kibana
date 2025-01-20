@@ -193,7 +193,7 @@ describe('wrapScopedClusterClient', () => {
       expect(stats.esSearchDurationMs).toEqual(0);
 
       expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
-        `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {}`
+        `executing query for rule .test-rule-type:abcdefg in space my-space - {\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}} - with options {}`
       );
       expect(loggingSystemMock.collect(logger).trace[0][0]).toEqual(
         `result of executing query for rule .test-rule-type:abcdefg in space my-space: {}`

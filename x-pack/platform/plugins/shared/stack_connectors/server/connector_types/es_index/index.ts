@@ -105,20 +105,20 @@ async function executor(
   const { actionId, config, params, services, logger } = execOptions;
   const index = params.indexOverride || config.index;
 
-  const bulkBody = [];
+  const operations = [];
   for (const document of params.documents) {
     const timeField = config.executionTimeField == null ? '' : config.executionTimeField.trim();
     if (timeField !== '') {
       document[timeField] = new Date();
     }
 
-    bulkBody.push({ index: { op_type: 'create' } });
-    bulkBody.push(document);
+    operations.push({ index: { op_type: 'create' } });
+    operations.push(document);
   }
 
   const bulkParams = {
     index,
-    body: bulkBody,
+    operations,
     refresh: config.refresh,
   };
 

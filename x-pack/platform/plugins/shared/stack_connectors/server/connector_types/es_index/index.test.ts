@@ -202,24 +202,24 @@ describe('execute()', () => {
     });
 
     expect(scopedClusterClient.bulk.mock.calls).toMatchInlineSnapshot(`
-          Array [
-            Array [
+      Array [
+        Array [
+          Object {
+            "index": "index-value",
+            "operations": Array [
               Object {
-                "body": Array [
-                  Object {
-                    "index": Object {
-                      "op_type": "create",
-                    },
-                  },
-                  Object {
-                    "jim": "bob",
-                  },
-                ],
-                "index": "index-value",
-                "refresh": false,
+                "index": Object {
+                  "op_type": "create",
+                },
+              },
+              Object {
+                "jim": "bob",
               },
             ],
-          ]
+            "refresh": false,
+          },
+        ],
+      ]
     `);
 
     // full params
@@ -253,24 +253,24 @@ describe('execute()', () => {
     delete ((calls[0][0] as estypes.BulkRequest)?.operations?.[1] as Record<string, unknown>)
       .field_to_use_for_time;
     expect(calls).toMatchInlineSnapshot(`
+      Array [
         Array [
-          Array [
-            Object {
-              "body": Array [
-                Object {
-                  "index": Object {
-                    "op_type": "create",
-                  },
+          Object {
+            "index": "index-value",
+            "operations": Array [
+              Object {
+                "index": Object {
+                  "op_type": "create",
                 },
-                Object {
-                  "jimbob": "jr",
-                },
-              ],
-              "index": "index-value",
-              "refresh": true,
-            },
-          ],
-        ]
+              },
+              Object {
+                "jimbob": "jr",
+              },
+            ],
+            "refresh": true,
+          },
+        ],
+      ]
     `);
 
     // minimal params
@@ -301,7 +301,8 @@ describe('execute()', () => {
       Array [
         Array [
           Object {
-            "body": Array [
+            "index": "index-value",
+            "operations": Array [
               Object {
                 "index": Object {
                   "op_type": "create",
@@ -311,7 +312,6 @@ describe('execute()', () => {
                 "jim": "bob",
               },
             ],
-            "index": "index-value",
             "refresh": false,
           },
         ],
@@ -342,32 +342,32 @@ describe('execute()', () => {
     });
 
     expect(scopedClusterClient.bulk.mock.calls).toMatchInlineSnapshot(`
-          Array [
-            Array [
+      Array [
+        Array [
+          Object {
+            "index": "index-value",
+            "operations": Array [
               Object {
-                "body": Array [
-                  Object {
-                    "index": Object {
-                      "op_type": "create",
-                    },
-                  },
-                  Object {
-                    "a": 1,
-                  },
-                  Object {
-                    "index": Object {
-                      "op_type": "create",
-                    },
-                  },
-                  Object {
-                    "b": 2,
-                  },
-                ],
-                "index": "index-value",
-                "refresh": false,
+                "index": Object {
+                  "op_type": "create",
+                },
+              },
+              Object {
+                "a": 1,
+              },
+              Object {
+                "index": Object {
+                  "op_type": "create",
+                },
+              },
+              Object {
+                "b": 2,
               },
             ],
-          ]
+            "refresh": false,
+          },
+        ],
+      ]
     `);
   });
 
