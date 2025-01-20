@@ -13,9 +13,6 @@
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "kbn_references": [
-    "@kbn/ui-theme",
-    "@kbn/triggers-actions-ui-plugin",
-    "@kbn/elastic-assistant",
     "@kbn/i18n",
   ],
   "exclude": ["target/**/*"]
