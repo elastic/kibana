@@ -17,7 +17,7 @@ describe('observabilityRootProfileProvider', () => {
   const observabilityRootProfileProvider = createObservabilityRootProfileProvider(mockServices);
   const RESOLUTION_MATCH = {
     isMatch: true,
-    context: { solutionType: SolutionType.Observability },
+    context: expect.objectContaining({ solutionType: SolutionType.Observability }),
   };
   const RESOLUTION_MISMATCH = {
     isMatch: false,
@@ -47,5 +47,47 @@ describe('observabilityRootProfileProvider', () => {
         solutionNavId: SolutionType.Security,
       })
     ).toEqual(RESOLUTION_MISMATCH);
+  });
+
+  describe('getDefaultAdHocDataViews', () => {
+    it('should return an "All logs" default data view', async () => {
+      const result = await observabilityRootProfileProvider.resolve({
+        solutionNavId: SolutionType.Observability,
+      });
+      if (!result.isMatch) {
+        throw new Error('Expected result to match');
+      }
+      expect(result.context.allLogsIndexPattern).toEqual('logs-*');
+      const defaultDataViews = observabilityRootProfileProvider.profile.getDefaultAdHocDataViews?.(
+        () => [],
+        { context: result.context }
+      )();
+      expect(defaultDataViews).toEqual([
+        {
+          id: 'discover-observability-root-profile-all-logs',
+          name: 'All logs',
+          timeFieldName: '@timestamp',
+          title: 'logs-*',
+        },
+      ]);
+    });
+
+    it('should return no default data views', async () => {
+      jest
+        .spyOn(mockServices.logsContextService, 'getAllLogsIndexPattern')
+        .mockReturnValueOnce(undefined);
+      const result = await observabilityRootProfileProvider.resolve({
+        solutionNavId: SolutionType.Observability,
+      });
+      if (!result.isMatch) {
+        throw new Error('Expected result to match');
+      }
+      expect(result.context.allLogsIndexPattern).toEqual(undefined);
+      const defaultDataViews = observabilityRootProfileProvider.profile.getDefaultAdHocDataViews?.(
+        () => [],
+        { context: result.context }
+      )();
+      expect(defaultDataViews).toEqual([]);
+    });
   });
 });

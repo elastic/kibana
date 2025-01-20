@@ -21,17 +21,17 @@ export const createObservabilityRootProfileProvider = (
     getAppMenu: createGetAppMenu(services),
     getDefaultAdHocDataViews,
   },
-  resolve: async (params) => {
+  resolve: (params) => {
     if (params.solutionNavId !== SolutionType.Observability) {
       return { isMatch: false };
     }
 
-    const logsSources = await services.logsDataAccess?.services.logSourcesService.getLogSources();
-    const allLogsIndexPattern = logsSources?.map(({ indexPattern }) => indexPattern).join(',');
-
     return {
       isMatch: true,
-      context: { solutionType: SolutionType.Observability, allLogsIndexPattern },
+      context: {
+        solutionType: SolutionType.Observability,
+        allLogsIndexPattern: services.logsContextService.getAllLogsIndexPattern(),
+      },
     };
   },
 });
