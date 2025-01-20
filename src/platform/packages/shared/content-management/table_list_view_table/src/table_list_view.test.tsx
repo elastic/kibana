@@ -333,17 +333,22 @@ describe('TableListView', () => {
 
   describe('column sorting with custom columns', () => {
     const customSortingOptions: CustomSortingOptions = {
-      field: 'customColumn',
+      field: 'typeTitle',
       sortingLabels: [
         {
-          label: 'Custom column A-Z',
+          label: 'Type A-Z',
           direction: 'asc',
         },
         {
-          label: 'Custom column Z-A',
+          label: 'Type Z-A',
           direction: 'desc',
         },
       ],
+    };
+    const customTableColumn = {
+      field: 'typeTitle',
+      name: 'Type',
+      sortable: true,
     };
 
     const setupCustomColumnSorting = registerTestBed<string, TableListViewTableProps>(
@@ -351,30 +356,30 @@ describe('TableListView', () => {
         TagList: getTagList({ references: [] }),
       }),
       {
-        defaultProps: { ...requiredProps, customSortingOptions },
+        defaultProps: { ...requiredProps, customSortingOptions, customTableColumn },
       }
     );
 
-    const hits: Array<UserContentCommonSchema & { field: string }> = [
+    const hits: Array<UserContentCommonSchema & { typeTitle: string }> = [
       {
         id: '123',
         updatedAt: twoDaysAgo.toISOString(),
         type: 'maps',
         attributes: {
-          title: '',
+          title: 'Item 2',
         },
         references: [],
-        field: 'customColumn',
+        typeTitle: 'Vega',
       },
       {
         id: '456',
         updatedAt: yesterday.toISOString(),
         type: 'vega',
         attributes: {
-          title: '',
+          title: 'Item 1',
         },
         references: [],
-        field: 'customColumn',
+        typeTitle: 'Lens',
       },
     ];
 
@@ -401,12 +406,100 @@ describe('TableListView', () => {
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
         'Name A-Z ',
         'Name Z-A ',
-        'Custom column A-Z ',
-        'Custom column Z-A ',
+        'Type A-Z ',
+        'Type Z-A ',
         'Recently updated. Checked option. ',
         'Least recently updated ',
       ]);
       component.unmount();
+    });
+
+    test('should update the select option when custom column is selected', async () => {
+      const getCustomTableColumnSortButton = (testBed: TestBed, text: string) => {
+        const buttons = testBed.find('tableHeaderSortButton');
+        let wrapper: ReactWrapper | undefined;
+
+        buttons.forEach((_wrapper) => {
+          if (wrapper) {
+            return;
+          }
+
+          if (_wrapper.text().includes(text)) {
+            wrapper = _wrapper;
+          }
+        });
+        return wrapper;
+      };
+
+      let testBed: TestBed;
+
+      await act(async () => {
+        testBed = await setupCustomColumnSorting({
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+        });
+      });
+
+      const { component, table, find } = testBed!;
+      const { openSortSelect } = getActions(testBed!);
+      component.update();
+
+      act(() => {
+        openSortSelect();
+      });
+      component.update();
+      let filterOptions = find('sortSelect').find('li');
+      expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
+        'Name A-Z ',
+        'Name Z-A ',
+        'Type A-Z ',
+        'Type Z-A ',
+        'Recently updated. Checked option. ',
+        'Least recently updated ',
+      ]);
+
+      const nameColumnHeaderButton = getCustomTableColumnSortButton(testBed!, 'Type');
+
+      if (!nameColumnHeaderButton) {
+        throw new Error('Could not find table header button containing "Type".');
+      }
+
+      act(() => {
+        nameColumnHeaderButton.simulate('click');
+      });
+      component.update();
+
+      let { tableCellsValues } = table.getMetaData('itemsInMemTable');
+
+      expect(tableCellsValues).toEqual([
+        ['Item 1', 'Lens', yesterdayToString],
+        ['Item 2', 'Vega', twoDaysAgoToString],
+      ]);
+
+      act(() => {
+        nameColumnHeaderButton.simulate('click');
+      });
+      component.update();
+      ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
+
+      expect(tableCellsValues).toEqual([
+        ['Item 2', 'Vega', twoDaysAgoToString],
+        ['Item 1', 'Lens', yesterdayToString],
+      ]);
+
+      act(() => {
+        openSortSelect();
+      });
+      component.update();
+      filterOptions = find('sortSelect').find('li');
+
+      expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
+        'Name A-Z ',
+        'Name Z-A ',
+        'Type A-Z ',
+        'Type Z-A. Checked option. ',
+        'Recently updated ',
+        'Least recently updated ',
+      ]);
     });
   });
 
