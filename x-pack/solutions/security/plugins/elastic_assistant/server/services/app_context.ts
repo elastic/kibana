@@ -21,7 +21,7 @@ export interface ElasticAssistantAppContext {
 /**
  * Service for managing context specific to the Elastic Assistant
  *
- * Inspired by `AppContextService` impl from fleet plugin: x-pack/plugins/fleet/server/services/app_context.ts
+ * Inspired by `AppContextService` impl from fleet plugin: x-pack/platform/plugins/shared/fleet/server/services/app_context.ts
  */
 class AppContextService {
   private logger: Logger | undefined;

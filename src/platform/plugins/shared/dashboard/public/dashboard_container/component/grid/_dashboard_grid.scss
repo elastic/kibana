@@ -1,0 +1,27 @@
+.dshLayout {
+  position: relative;
+}
+
+/**
+ * 1. Need to override the react grid layout height when a single panel is expanded. Important is required because
+ * otherwise the height is set inline.
+ */
+.dshLayout-isMaximizedPanel {
+  height: 100%;
+
+  .embPanel__hoverActionsLeft {
+    visibility: hidden;
+  }
+
+  .dshDashboardGrid__item--expanded {
+    position: absolute;
+    width: 100%;
+  }
+}
+
+// Remove padding in fullscreen mode
+.kbnAppWrapper--hiddenChrome {
+  .dshDashboardGrid__item--expanded {
+    padding: 0;
+  }
+}

@@ -17,6 +17,7 @@ import {
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { withLicense } from './util/with_license';
+import { getRetryFilter } from './util/retry';
 
 export const registerSiemRuleMigrationsStartRoute = (
   router: SecuritySolutionPluginRouter,
@@ -41,16 +42,26 @@ export const registerSiemRuleMigrationsStartRoute = (
       withLicense(
         async (context, req, res): Promise<IKibanaResponse<StartRuleMigrationResponse>> => {
           const migrationId = req.params.migration_id;
-          const { langsmith_options: langsmithOptions, connector_id: connectorId } = req.body;
+          const {
+            langsmith_options: langsmithOptions,
+            connector_id: connectorId,
+            retry,
+          } = req.body;
 
           try {
             const ctx = await context.resolve(['core', 'actions', 'alerting', 'securitySolution']);
 
             const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
-            const inferenceClient = ctx.securitySolution.getInferenceClient();
-            const actionsClient = ctx.actions.getActionsClient();
-            const soClient = ctx.core.savedObjects.client;
-            const rulesClient = await ctx.alerting.getRulesClient();
+
+            if (retry) {
+              const { updated } = await ruleMigrationsClient.task.updateToRetry(
+                migrationId,
+                getRetryFilter(retry)
+              );
+              if (!updated) {
+                return res.ok({ body: { started: false } });
+              }
+            }
 
             const invocationConfig = {
               callbacks: [
@@ -63,10 +74,6 @@ export const registerSiemRuleMigrationsStartRoute = (
               migrationId,
               connectorId,
               invocationConfig,
-              inferenceClient,
-              actionsClient,
-              soClient,
-              rulesClient,
             });
 
             if (!exists) {

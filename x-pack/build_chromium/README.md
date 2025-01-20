@@ -65,7 +65,7 @@ node scripts/chromium_version.js [PuppeteerVersion]
 ```
 
 When bumping the Puppeteer version, make sure you also update the `ChromiumArchivePaths.revision` variable in
-`x-pack/plugins/reporting/server/browsers/chromium/paths.ts`.
+`x-pack/platform/plugins/private/reporting/server/browsers/chromium/paths.ts`.
 
 In some cases the revision number might not be available for the darwin or windows builds in `https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html`. For example, 1181205 was not available for darwin arm64 or windows. In that case, the next available revision numbers 1181286 and 1181280 were used. 
 
@@ -103,7 +103,7 @@ Here's the steps on how to test a Puppeteer upgrade, run these tests on Mac, Win
 
 - Make sure the Reporting plugin is fetching the correct version of the browser
   at start-up time, and that it can successfully unzip it and copy the files to
-  `x-pack/plugins/reporting/chromium`
+  `x-pack/platform/plugins/private/reporting/chromium`
 - Make sure there are no errors when using the **Reporting diagnostic tool**
 - All functional and API tests that generate PDF and PNG files should pass.
 - Use a VM to run Kibana in a low-memory environment and try to generate a PNG of a dashboard that outputs as a 4MB file. Document the minimum requirements in the PR.

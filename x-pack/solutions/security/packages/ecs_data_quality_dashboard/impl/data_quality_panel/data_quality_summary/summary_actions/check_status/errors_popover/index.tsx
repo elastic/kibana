@@ -14,7 +14,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import {
   COPY_TO_CLIPBOARD,
@@ -35,9 +35,11 @@ import { getErrorsMarkdownTable, getErrorsMarkdownTableRows } from '../../utils/
 import { ERROR, ERRORS, PATTERN } from '../../translations';
 import { COPIED_ERRORS_TOAST_TITLE, VIEW_ERRORS } from './translations';
 
-const CallOut = styled(EuiCallOut)`
-  max-width: ${ERRORS_CONTAINER_MAX_WIDTH}px;
-`;
+const styles = {
+  callout: css({
+    maxWidth: `${ERRORS_CONTAINER_MAX_WIDTH}px`,
+  }),
+};
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
@@ -89,7 +91,13 @@ const ErrorsPopoverComponent: React.FC<Props> = ({ addSuccessToast, errorSummary
       isOpen={isPopoverOpen}
       panelPaddingSize="s"
     >
-      <CallOut color="danger" data-test-subj="callout" size="s" title={ERRORS}>
+      <EuiCallOut
+        css={styles.callout}
+        color="danger"
+        data-test-subj="callout"
+        size="s"
+        title={ERRORS}
+      >
         <p>{ERRORS_CALLOUT_SUMMARY}</p>
 
         <p>{ERRORS_MAY_OCCUR}</p>
@@ -116,7 +124,7 @@ const ErrorsPopoverComponent: React.FC<Props> = ({ addSuccessToast, errorSummary
         >
           {COPY_TO_CLIPBOARD}
         </EuiButtonEmpty>
-      </CallOut>
+      </EuiCallOut>
 
       <EuiSpacer />
 
