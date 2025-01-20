@@ -8,3 +8,13 @@
  */
 
 export { coreWorkerFixtures } from './core';
+export { esArchiverFixture } from './es_archiver';
+export type { EsArchiverFixture } from './es_archiver';
+export type {
+  ToolingLog,
+  ScoutTestConfig,
+  KibanaUrl,
+  EsClient,
+  KbnClient,
+  SamlSessionManager,
+} from './core';

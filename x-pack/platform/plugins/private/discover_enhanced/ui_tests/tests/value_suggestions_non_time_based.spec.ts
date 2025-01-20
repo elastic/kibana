@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout';
 import { test, testData, assertionMessages } from '../fixtures';
 
-test.describe.only(
+test.describe(
   'Discover app - value suggestions non-time based',
   { tag: ['@ess', '@svlSearch', '@svlOblt'] },
   // TODO: Update to use an ES archive with an index accessible to 'viewer'

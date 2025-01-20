@@ -18,7 +18,7 @@ const createSavedSearch = async (
   await kbnClient.savedObjects.create({
     type: 'search',
     id: searchId,
-    overwrite: false,
+    overwrite: true,
     attributes: {
       space: spaceId,
       title: searchTitle,
@@ -45,21 +45,23 @@ spaceTest.describe.skip(
   () => {
     const SAVED_SEARCH_TITLE = 'TempSearch';
     const SAVED_SEARCH_ID = '90943e30-9a47-11e8-b64d-95841ca0b247';
-    spaceTest.beforeAll(async ({ kbnClient, uiSettings, workerSpace }) => {
+    let dataViewId: string;
+    spaceTest.beforeAll(async ({ kbnClient, kbnSpace }) => {
+      const results = await kbnSpace.savedObjects.load(testData.KBN_ARCHIVES.DASHBOARD_DRILLDOWNS);
+      dataViewId = results.find((i) => i.title === 'logstash-*')!.id;
+
       await kbnClient.importExport.load(testData.KBN_ARCHIVES.DASHBOARD_DRILLDOWNS, {
-        space: workerSpace.id,
+        space: kbnSpace.id,
       });
-      await uiSettings.set({
-        defaultIndex: testData.DATA_VIEW_ID.LOGSTASH, // TODO: investigate why it is required for `node scripts/playwright_test.js` run
+      await kbnSpace.uiSettings.set({
+        defaultIndex: dataViewId, // TODO: investigate why it is required for `node scripts/playwright_test.js` run
         'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_DEFAULT_START_TIME}", "to": "${testData.LOGSTASH_DEFAULT_END_TIME}"}`,
       });
     });
 
-    spaceTest.afterAll(async ({ kbnClient, uiSettings, workerSpace }) => {
-      await uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
-      await kbnClient.savedObjects.cleanStandardList({
-        space: workerSpace.id,
-      });
+    spaceTest.afterAll(async ({ kbnSpace }) => {
+      await kbnSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
+      await kbnSpace.savedObjects.cleanStandardList();
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -69,14 +71,14 @@ spaceTest.describe.skip(
 
     spaceTest(
       'should allow removing the dashboard panel after the underlying saved search has been deleted',
-      async ({ kbnClient, page, pageObjects, workerSpace }) => {
+      async ({ kbnClient, page, pageObjects, kbnSpace }) => {
         await pageObjects.dashboard.openNewDashboard();
         await createSavedSearch(
           kbnClient,
           SAVED_SEARCH_ID,
           SAVED_SEARCH_TITLE,
-          testData.DATA_VIEW_ID.LOGSTASH,
-          workerSpace.id
+          dataViewId,
+          kbnSpace.id
         );
         await pageObjects.dashboard.addPanelFromLibrary(SAVED_SEARCH_TITLE);
         await page.testSubj.locator('savedSearchTotalDocuments').waitFor({
@@ -87,7 +89,7 @@ spaceTest.describe.skip(
         await kbnClient.savedObjects.delete({
           type: 'search',
           id: SAVED_SEARCH_ID,
-          space: workerSpace.id,
+          space: kbnSpace.id,
         });
 
         await page.reload();

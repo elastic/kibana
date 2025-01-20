@@ -15,6 +15,24 @@ import { serviceLoadedMsg } from '../../../utils';
 
 type LoginFunction = (role: string) => Promise<void>;
 
+export interface BrowserAuthFixture {
+  /**
+   * Logs in as a user with viewer-only permissions.
+   * @returns A Promise that resolves once the cookie in browser is set.
+   */
+  loginAsViewer: () => Promise<void>;
+  /**
+   * Logs in as a user with administrative privileges
+   * @returns A Promise that resolves once the cookie in browser is set.
+   */
+  loginAsAdmin: () => Promise<void>;
+  /**
+   * Logs in as a user with elevated, but not admin, permissions.
+   * @returns A Promise that resolves once the cookie in browser is set.
+   */
+  loginAsPrivilegedUser: () => Promise<void>;
+}
+
 /**
  * The "browserAuth" fixture simplifies the process of logging into Kibana with
  * different roles during tests. It uses the "samlAuth" fixture to create an authentication session

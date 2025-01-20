@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './parallel_workers';
-export * from './single_worker';
+export { uiSettingsFixture } from './ui_settings';
+export type { UiSettingsFixture } from './ui_settings';

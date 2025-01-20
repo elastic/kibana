@@ -11,6 +11,7 @@ export const LOGSTASH_DEFAULT_END_TIME = '2015-09-23T18:31:44.000Z';
 export const DATA_VIEW_ID = {
   ECOMMERCE: '5193f870-d861-11e9-a311-0fa548c5f953',
   LOGSTASH: 'logstash-*',
+  NO_TIME_FIELD: 'c1e8af24-c7b7-4d9b-ab0e-e408c88d29c9',
 };
 
 export const DATA_VIEW = {

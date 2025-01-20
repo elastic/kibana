@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { uiSettingsFixture } from './ui_settings';
+export { kbnSpaceFixture } from './kbn_space';
+export type { KbnSpaceFixture } from './kbn_space';

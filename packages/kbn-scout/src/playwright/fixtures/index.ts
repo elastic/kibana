@@ -9,25 +9,25 @@
 
 import { mergeTests } from 'playwright/test';
 import * as common from './common';
-import * as spaceAware from './parallel_run';
-import * as singleThread from './single_thread';
+import * as spaceAware from './parallel_workers';
+import * as singleThread from './single_worker/worker_scope';
 
 export const scoutCoreFixtures = mergeTests(
   common.coreWorkerFixtures,
-  common.browserAuthFixture,
-  common.pageObjectsFixture,
-  common.scoutPageFixture,
   common.validateTagsFixture,
+  common.scoutPageFixture,
+  common.pageObjectsFixture,
+  common.esArchiverFixture,
+  common.browserAuthFixture,
   singleThread.uiSettingsFixture
 );
 export const scoutCoreSpaceAwareFixtures = mergeTests(
   common.coreWorkerFixtures,
-  spaceAware.browserAuthFixture,
-  common.pageObjectsFixture,
   common.validateTagsFixture,
-  spaceAware.scoutSpacePageFixture,
-  spaceAware.uiSettingsSpaceFixture,
-  spaceAware.workerSpaceFixure
+  spaceAware.scoutPageSpaceFixture,
+  common.pageObjectsFixture,
+  spaceAware.browserAuthFixture,
+  spaceAware.kbnSpaceFixture
 );
 
 export * from './types';

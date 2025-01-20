@@ -14,20 +14,14 @@ spaceTest.describe(
   // TODO: Update to use an ES archive with an index accessible to 'viewer'
   // for running this test against the Security serverless project.
   () => {
-    spaceTest.beforeAll(async ({ kbnClient, uiSettings, workerSpace }) => {
-      await kbnClient.importExport.load(testData.KBN_ARCHIVES.NO_TIME_FIELD, {
-        space: workerSpace.id,
-      });
-      await uiSettings.set({
-        defaultIndex: 'without-timefield',
-      });
+    spaceTest.beforeAll(async ({ kbnSpace }) => {
+      await kbnSpace.savedObjects.load(testData.KBN_ARCHIVES.NO_TIME_FIELD);
+      await kbnSpace.uiSettings.setDefaultIndex('without-timefield');
     });
 
-    spaceTest.afterAll(async ({ kbnClient, uiSettings, workerSpace }) => {
-      await uiSettings.unset('defaultIndex');
-      await kbnClient.savedObjects.cleanStandardList({
-        space: workerSpace.id,
-      });
+    spaceTest.afterAll(async ({ kbnSpace }) => {
+      await kbnSpace.uiSettings.unset('defaultIndex');
+      await kbnSpace.savedObjects.cleanStandardList();
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {

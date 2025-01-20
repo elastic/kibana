@@ -12,21 +12,18 @@ spaceTest.describe(
   'Discover app - value suggestions: useTimeRange enabled',
   { tag: tags.DEPLOYMENT_AGNOSTIC },
   () => {
-    spaceTest.beforeAll(async ({ kbnClient, uiSettings, workerSpace }) => {
-      await kbnClient.importExport.load(testData.KBN_ARCHIVES.DASHBOARD_DRILLDOWNS, {
-        space: workerSpace.id,
-      });
-      await uiSettings.set({
-        defaultIndex: testData.DATA_VIEW_ID.LOGSTASH, // TODO: investigate why it is required for `node scripts/playwright_test.js` run
-        'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_DEFAULT_START_TIME}", "to": "${testData.LOGSTASH_DEFAULT_END_TIME}"}`,
+    spaceTest.beforeAll(async ({ kbnSpace }) => {
+      await kbnSpace.savedObjects.load(testData.KBN_ARCHIVES.DASHBOARD_DRILLDOWNS);
+      await kbnSpace.uiSettings.setDefaultIndex('logstash-*');
+      await kbnSpace.uiSettings.setDefaultTime({
+        from: testData.LOGSTASH_DEFAULT_START_TIME,
+        to: testData.LOGSTASH_DEFAULT_END_TIME,
       });
     });
 
-    spaceTest.afterAll(async ({ kbnClient, uiSettings, workerSpace }) => {
-      await uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
-      await kbnClient.savedObjects.cleanStandardList({
-        space: workerSpace.id,
-      });
+    spaceTest.afterAll(async ({ kbnSpace }) => {
+      await kbnSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
+      await kbnSpace.savedObjects.cleanStandardList();
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {

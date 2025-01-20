@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { scoutSpacePageFixture } from './page';
-export { uiSettingsSpaceFixture } from './ui_settings';
-export { workerSpaceFixure } from './worker_space';
 export { browserAuthFixture } from './browser_auth';
+export type { BrowserAuthFixture } from './browser_auth';
+export { scoutPageSpaceFixture } from './page';
+export type { ScoutPageSpaceFixture } from './page';

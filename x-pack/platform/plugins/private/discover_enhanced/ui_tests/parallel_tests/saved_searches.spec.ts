@@ -47,18 +47,16 @@ spaceTest.describe(
       value: `Men's Shoes`,
     };
 
-    spaceTest.beforeAll(async ({ kbnClient, uiSettings, workerSpace }) => {
-      await kbnClient.importExport.load(testData.KBN_ARCHIVES.DISCOVER, { space: workerSpace.id });
-      await kbnClient.importExport.load(testData.KBN_ARCHIVES.ECOMMERCE, { space: workerSpace.id });
-      await uiSettings.set({
-        defaultIndex: testData.DATA_VIEW_ID.ECOMMERCE,
-        'timepicker:timeDefaults': `{ "from": "${START_TIME}", "to": "${END_TIME}"}`,
-      });
+    spaceTest.beforeAll(async ({ kbnSpace }) => {
+      await kbnSpace.savedObjects.load(testData.KBN_ARCHIVES.DISCOVER);
+      await kbnSpace.savedObjects.load(testData.KBN_ARCHIVES.ECOMMERCE);
+      await kbnSpace.uiSettings.setDefaultIndex('ecommerce');
+      await kbnSpace.uiSettings.setDefaultTime({ from: START_TIME, to: END_TIME });
     });
 
-    spaceTest.afterAll(async ({ kbnClient, uiSettings, workerSpace }) => {
-      await uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
-      await kbnClient.savedObjects.cleanStandardList({ space: workerSpace.id });
+    spaceTest.afterAll(async ({ kbnSpace }) => {
+      await kbnSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
+      await kbnSpace.savedObjects.cleanStandardList();
     });
 
     spaceTest.beforeEach(async ({ browserAuth }) => {

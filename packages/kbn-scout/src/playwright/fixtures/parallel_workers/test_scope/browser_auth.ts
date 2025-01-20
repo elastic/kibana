@@ -8,12 +8,29 @@
  */
 
 import { test as base } from '@playwright/test';
-import { PROJECT_DEFAULT_ROLES } from '../../../common';
-import { SamlSessionManager, ScoutTestConfig, ToolingLog } from '../../../types';
-import { LoginFixture } from '../types';
-import { serviceLoadedMsg } from '../../utils';
+import { PROJECT_DEFAULT_ROLES } from '../../../../common';
+import { SamlSessionManager, ScoutTestConfig, ToolingLog } from '../../../../types';
+import { serviceLoadedMsg } from '../../../utils';
 
 type LoginFunction = (role: string) => Promise<void>;
+
+export interface BrowserAuthFixture {
+  /**
+   * Logs in as a user with viewer-only permissions.
+   * @returns A Promise that resolves once the cookie in browser is set.
+   */
+  loginAsViewer: () => Promise<void>;
+  /**
+   * Logs in as a user with administrative privileges
+   * @returns A Promise that resolves once the cookie in browser is set.
+   */
+  loginAsAdmin: () => Promise<void>;
+  /**
+   * Logs in as a user with elevated, but not admin, permissions.
+   * @returns A Promise that resolves once the cookie in browser is set.
+   */
+  loginAsPrivilegedUser: () => Promise<void>;
+}
 
 /**
  * The "browserAuth" fixture simplifies the process of logging into Kibana with
@@ -21,7 +38,7 @@ type LoginFunction = (role: string) => Promise<void>;
  * for the specified role and the "context" fixture to update the cookie with the role-scoped session.
  */
 export const browserAuthFixture = base.extend<
-  { browserAuth: LoginFixture },
+  { browserAuth: BrowserAuthFixture },
   { log: ToolingLog; samlAuth: SamlSessionManager; config: ScoutTestConfig }
 >({
   browserAuth: async ({ log, context, samlAuth, config }, use) => {
