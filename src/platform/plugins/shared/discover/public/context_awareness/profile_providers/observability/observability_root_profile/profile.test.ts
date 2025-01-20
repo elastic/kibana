@@ -23,27 +23,27 @@ describe('observabilityRootProfileProvider', () => {
     isMatch: false,
   };
 
-  it('should match when the solution project is observability', () => {
+  it('should match when the solution project is observability', async () => {
     expect(
-      observabilityRootProfileProvider.resolve({
+      await observabilityRootProfileProvider.resolve({
         solutionNavId: SolutionType.Observability,
       })
     ).toEqual(RESOLUTION_MATCH);
   });
 
-  it('should NOT match when the solution project anything but observability', () => {
+  it('should NOT match when the solution project anything but observability', async () => {
     expect(
-      observabilityRootProfileProvider.resolve({
+      await observabilityRootProfileProvider.resolve({
         solutionNavId: SolutionType.Default,
       })
     ).toEqual(RESOLUTION_MISMATCH);
     expect(
-      observabilityRootProfileProvider.resolve({
+      await observabilityRootProfileProvider.resolve({
         solutionNavId: SolutionType.Search,
       })
     ).toEqual(RESOLUTION_MISMATCH);
     expect(
-      observabilityRootProfileProvider.resolve({
+      await observabilityRootProfileProvider.resolve({
         solutionNavId: SolutionType.Security,
       })
     ).toEqual(RESOLUTION_MISMATCH);
