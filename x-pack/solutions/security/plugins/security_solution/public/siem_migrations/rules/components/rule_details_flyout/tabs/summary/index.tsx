@@ -10,10 +10,8 @@ import type { EuiCommentProps } from '@elastic/eui';
 import { EuiCommentList, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 import moment from 'moment';
 import { AssistantAvatar } from '@kbn/ai-assistant-icon';
-import {
-  RuleMigrationStatusEnum,
-  type RuleMigration,
-} from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import { type RuleMigration } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import { RuleTranslationResult } from '../../../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
 
 interface SummaryTabProps {
@@ -33,8 +31,8 @@ export const SummaryTab: React.FC<SummaryTabProps> = React.memo(({ ruleMigration
         timelineAvatarAriaLabel: i18n.ASSISTANT_USERNAME,
         timelineAvatar: <AssistantAvatar name="machine" size="l" color="subdued" />,
         event:
-          ruleMigration.status === RuleMigrationStatusEnum.failed
-            ? i18n.COMMENT_EVENT_FAILED
+          ruleMigration.translation_result === RuleTranslationResult.UNTRANSLATABLE
+            ? i18n.COMMENT_EVENT_UNTRANSLATABLE
             : i18n.COMMENT_EVENT_TRANSLATED,
         timestamp,
         children: <EuiMarkdownFormat textSize="s">{comment}</EuiMarkdownFormat>,
