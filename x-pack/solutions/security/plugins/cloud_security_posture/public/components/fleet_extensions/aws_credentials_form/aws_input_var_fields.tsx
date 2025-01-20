@@ -17,6 +17,7 @@ export const AwsInputVarFields = ({
   fields,
   onChange,
   packageInfo,
+  isConditionallyRequired,
 }: {
   fields: Array<
     AwsOptions[keyof AwsOptions]['fields'][number] & {
@@ -27,6 +28,7 @@ export const AwsInputVarFields = ({
   >;
   onChange: (key: string, value: string) => void;
   packageInfo: PackageInfo;
+  isConditionallyRequired: boolean;
 }) => {
   return (
     <div>
@@ -58,8 +60,10 @@ export const AwsInputVarFields = ({
                     onChange={(value) => {
                       onChange(field.id, value);
                     }}
-                    errors={[]}
-                    forceShowErrors={false}
+                    errors={
+                      isConditionallyRequired && !field.value ? [`${field.label} is required`] : []
+                    }
+                    forceShowErrors={isConditionallyRequired && !field.value}
                     isEditPage={true}
                     data-test-subj={field.dataTestSubj}
                   />
@@ -72,6 +76,10 @@ export const AwsInputVarFields = ({
             <EuiFormRow
               key={field.id}
               label={field.label}
+              isInvalid={isConditionallyRequired && !field.value}
+              error={
+                isConditionallyRequired && !field.value ? `${field.label} is required` : undefined
+              }
               fullWidth
               hasChildLabel={true}
               id={field.id}
@@ -80,6 +88,7 @@ export const AwsInputVarFields = ({
                 id={field.id}
                 fullWidth
                 value={field.value || ''}
+                isInvalid={isConditionallyRequired && !field.value}
                 onChange={(event) => onChange(field.id, event.target.value)}
                 data-test-subj={field.dataTestSubj}
               />

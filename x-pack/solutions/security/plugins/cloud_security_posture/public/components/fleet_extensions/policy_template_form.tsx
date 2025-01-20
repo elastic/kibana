@@ -764,6 +764,10 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       (key) => (validationResults?.vars || {})[key] !== null
     );
 
+    const isConditionallyRequired =
+      validationResults?.conditionalRequired &&
+      Object.entries(validationResults.conditionalRequired).length > 0;
+
     const [isLoading, setIsLoading] = useState(validationResultsNonNullFields.length > 0);
     const [canFetchIntegration, setCanFetchIntegration] = useState(true);
 
@@ -1010,6 +1014,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           disabled={isEditPage}
           setupTechnology={setupTechnology}
           isEditPage={isEditPage}
+          isConditionallyRequired={isConditionallyRequired}
         />
         <EuiSpacer />
       </>

@@ -141,12 +141,6 @@ const DEFAULT_PACKAGE_POLICY = {
   inputs: [],
 };
 
-interface RequiredVarsValidation {
-  name: string;
-  requiredVars?: RegistryRequiredVars;
-  vars: PackagePolicyConfigRecord;
-}
-
 export function useOnSubmit({
   agentCount,
   selectedPolicyTab,
@@ -202,91 +196,7 @@ export function useOnSubmit({
 
   const { isAgentlessIntegration, isAgentlessAgentPolicy } = useAgentless();
 
-  const conditionallyInvalid = () => {
-    const requiredVars: { [key: string]: RequiredVarsValidation } = {};
-    const validatedVars: {
-      [key: string]: boolean;
-    } = {};
-
-    if (packageInfo?.data_streams && packagePolicy.inputs) {
-      packagePolicy.inputs.forEach((input) => {
-        if (input.enabled && input.streams) {
-          input.streams.forEach((stream) => {
-            if (stream.enabled && stream.vars) {
-              requiredVars[input.type] = {
-                name: input.type,
-                vars: stream.vars,
-              };
-            }
-          });
-        }
-      });
-
-      packageInfo.data_streams.forEach((dataStream) => {
-        if (dataStream.streams) {
-          dataStream.streams.forEach((stream) => {
-            if (
-              stream.required_vars &&
-              stream.vars &&
-              requiredVars[stream.input] &&
-              !requiredVars[stream.input].requiredVars
-            ) {
-              requiredVars[stream.input].requiredVars = stream.required_vars;
-            }
-          });
-        }
-      });
-
-      for (const [streamName, validator] of Object.entries(requiredVars)) {
-        if (validator.requiredVars && validator.vars) {
-          // TODO refactor below
-          for (const [requiredVarName, requiredVarDefinition] of Object.entries(
-            validator.requiredVars
-          )) {
-            const validations = Array<boolean>();
-            // loop through the reqruiredVar's item
-            requiredVarDefinition.forEach((requiredVar) => {
-              const varItem = validator.vars[requiredVar.name];
-
-              if (varItem) {
-                if (!requiredVar.value && varItem.value) {
-                  validations.push(true);
-                  return;
-                }
-
-                if (requiredVar.value && varItem.value && requiredVar.value === varItem.value) {
-                  validations.push(true);
-                  return;
-                }
-
-                validations.push(false);
-              }
-            });
-
-            validatedVars[streamName] = {
-              ...validatedVars[streamName],
-              [requiredVarName]: !validations.some((v) => v === false),
-            };
-          }
-        }
-      }
-    }
-
-    // console.log('validatedVars', validatedVars);
-    const allStreamsValid = Object.values(validatedVars).every((stream) => {
-      return Object.values(stream).some((valid) => {
-        return valid;
-      });
-    });
-
-    console.log('allStreamsValid', allStreamsValid);
-
-    return !allStreamsValid;
-  };
-
-  const hasErrors = validationResults
-    ? validationHasErrors(validationResults) || conditionallyInvalid()
-    : false;
+  const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
   // Update agent policy method
   const updateAgentPolicies = useCallback(

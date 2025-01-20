@@ -17,6 +17,8 @@ import type {
   PackageInfo,
   RegistryStream,
   RegistryVarsEntry,
+  PackagePolicyConfigRecord,
+  RegistryRequiredVars,
 } from '../types';
 
 import { DATASET_VAR_NAME } from '../constants';
@@ -47,7 +49,86 @@ export type PackagePolicyValidationResults = {
   description: Errors;
   namespace: Errors;
   inputs: Record<PackagePolicyInput['type'], PackagePolicyInputValidationResults> | null;
+  conditionalRequired: Record<string, Record<string, boolean>> | null;
 } & PackagePolicyConfigValidationResults;
+
+const validateConditionalRequiredVars = (
+  packageInfo: PackageInfo,
+  packagePolicy: NewPackagePolicy
+) => {
+  const vars: Record<string, PackagePolicyConfigRecord> = {};
+  const requiredVarDefinitions: Record<string, RegistryRequiredVars> = {};
+  const validatedVars: Record<string, Record<string, boolean>> = {};
+  const validCriteriaMet = false;
+  const invalidCriteriaMet = true;
+  let hasMetAtleastOneCondition = false;
+
+  if (packageInfo?.data_streams && packagePolicy.inputs) {
+    // get all the vars
+    packagePolicy.inputs.forEach((input) => {
+      if (input.enabled && input.streams) {
+        input.streams.forEach((stream) => {
+          if (stream.enabled && stream.vars) {
+            vars[input.type] = stream.vars;
+          }
+        });
+      }
+    });
+
+    // get all the required vars definitions
+    packageInfo.data_streams.forEach((dataStream) => {
+      if (dataStream.streams) {
+        dataStream.streams.forEach((stream) => {
+          if (
+            stream.required_vars &&
+            stream.vars &&
+            vars[stream.input] &&
+            !requiredVarDefinitions[stream.input]
+          ) {
+            requiredVarDefinitions[stream.input] = stream.required_vars;
+          }
+        });
+      }
+    });
+
+    if (Object.entries(requiredVarDefinitions) && Object.entries(vars)) {
+      for (const [streamName, requiredVars] of Object.entries(requiredVarDefinitions)) {
+        for (const [conditionName, conditionCriteria] of Object.entries(requiredVars)) {
+          // refactor this to return if of the conditions are true
+          validatedVars[streamName] = {
+            ...validatedVars[streamName],
+            [conditionName]: validCriteriaMet,
+          };
+          // loop through the reqruiredVar's item
+          conditionCriteria.forEach((conditionVar) => {
+            const varItem = vars[streamName][conditionVar.name];
+
+            if (varItem) {
+              if (!conditionVar.value && varItem.value) {
+                return;
+              }
+
+              if (conditionVar.value && varItem.value && conditionVar.value === varItem.value) {
+                return;
+              }
+
+              validatedVars[streamName] = {
+                ...validatedVars[streamName],
+                [conditionName]: invalidCriteriaMet,
+              };
+            }
+          });
+
+          if (validatedVars[streamName][conditionName] === validCriteriaMet) {
+            hasMetAtleastOneCondition = true;
+          }
+        }
+      }
+    }
+  }
+
+  return !hasMetAtleastOneCondition ? validatedVars : null;
+};
 
 /*
  * Returns validation information for a given package policy and package info
@@ -66,6 +147,7 @@ export const validatePackagePolicy = (
     namespace: null,
     inputs: {},
     vars: {},
+    conditionalRequired: {},
   };
   if (!packagePolicy.name.trim()) {
     validationResults.name = [
@@ -207,6 +289,12 @@ export const validatePackagePolicy = (
 
   if (Object.entries(validationResults.inputs!).length === 0) {
     validationResults.inputs = {};
+  }
+
+  const conditionalRequiredVars = validateConditionalRequiredVars(packageInfo, packagePolicy);
+
+  if (conditionalRequiredVars) {
+    validationResults.conditionalRequired = conditionalRequiredVars;
   }
 
   return validationResults;
@@ -397,6 +485,7 @@ export const countValidationErrors = (
     | PackagePolicyConfigValidationResults
 ): number => {
   const flattenedValidation = getFlattenedObject(validationResults);
+
   const errors = Object.values(flattenedValidation).filter((value) => Boolean(value)) || [];
   return errors.length;
 };
