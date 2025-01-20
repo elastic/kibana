@@ -61,7 +61,7 @@ export const FailedFieldInfo = () => {
           <EuiSpacer size="m" />
           <EuiText size="xs">
             <FormattedMessage
-              id="xpack.datasetQuality.tableSummary"
+              id="xpack.datasetQuality.qualityIssueFlyout.table"
               defaultMessage="Showing {items}"
               values={{
                 items: resultsCount,
