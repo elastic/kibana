@@ -17,9 +17,7 @@ import { registerSiemRuleMigrationsStopRoute } from './stop';
 import { registerSiemRuleMigrationsStatsAllRoute } from './stats_all';
 import { registerSiemRuleMigrationsResourceUpsertRoute } from './resources/upsert';
 import { registerSiemRuleMigrationsResourceGetRoute } from './resources/get';
-import { registerSiemRuleMigrationsRetryRoute } from './retry';
 import { registerSiemRuleMigrationsInstallRoute } from './install';
-import { registerSiemRuleMigrationsInstallTranslatedRoute } from './install_translated';
 import { registerSiemRuleMigrationsResourceGetMissingRoute } from './resources/missing';
 import { registerSiemRuleMigrationsPrebuiltRulesRoute } from './get_prebuilt_rules';
 import { registerSiemRuleMigrationsIntegrationsRoute } from './get_integrations';
@@ -34,12 +32,10 @@ export const registerSiemRuleMigrationsRoutes = (
   registerSiemRuleMigrationsPrebuiltRulesRoute(router, logger);
   registerSiemRuleMigrationsGetRoute(router, logger);
   registerSiemRuleMigrationsStartRoute(router, logger);
-  registerSiemRuleMigrationsRetryRoute(router, logger);
   registerSiemRuleMigrationsStatsRoute(router, logger);
   registerSiemRuleMigrationsTranslationStatsRoute(router, logger);
   registerSiemRuleMigrationsStopRoute(router, logger);
   registerSiemRuleMigrationsInstallRoute(router, logger);
-  registerSiemRuleMigrationsInstallTranslatedRoute(router, logger);
   registerSiemRuleMigrationsIntegrationsRoute(router, logger);
 
   registerSiemRuleMigrationsResourceUpsertRoute(router, logger);
