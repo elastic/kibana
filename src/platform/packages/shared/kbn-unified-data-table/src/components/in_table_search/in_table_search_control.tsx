@@ -28,32 +28,6 @@ import './in_table_search.scss';
 
 const BUTTON_TEST_SUBJ = 'startInTableSearchButton';
 
-const searchInputCss = css`
-  input.euiFieldSearch {
-    /* to prevent the width from changing when entering the search term */
-    min-width: 210px;
-  }
-
-  .euiFormControlLayout__append {
-    padding-inline-end: 0 !important;
-    background: none;
-  }
-
-  /* override borders style only if it's under the custom grid toolbar */
-  .unifiedDataTableToolbarControlIconButton {
-    .euiFormControlLayout,
-    input.euiFieldSearch {
-      border-top-right-radius: 0;
-      border-bottom-right-radius: 0;
-      border-right: 0;
-    }
-  }
-`;
-
-const matchesCss = css`
-  font-variant-numeric: tabular-nums;
-`;
-
 export interface InTableSearchControlProps
   extends Omit<UseInTableSearchMatchesProps, 'scrollToActiveMatch'> {
   pageSize: number | null; // null when the pagination is disabled
@@ -232,16 +206,17 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
   }
 
   return (
-    <div css={searchInputCss}>
+    <div className="unifiedDataTable__inTableSearchInputContainer">
       <EuiFieldSearch
         inputRef={(node) => (inputRef.current = node)}
         autoFocus
         compressed
+        className="unifiedDataTable__inTableSearchInput"
         isClearable={!isProcessing}
         isLoading={isProcessing}
         append={
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
-            <EuiFlexItem grow={false} css={matchesCss}>
+            <EuiFlexItem grow={false} className="unifiedDataTable__inTableSearchMatchesCounter">
               <EuiText color="subdued" size="s">
                 {matchesCount ? `${activeMatchPosition}/${matchesCount}` : '0/0'}&nbsp;
               </EuiText>
