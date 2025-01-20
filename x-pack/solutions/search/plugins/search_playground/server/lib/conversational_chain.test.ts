@@ -237,19 +237,7 @@ describe('conversational chain', () => {
         {
           _index: 'index',
           _id: '1',
-          inner_hits: {
-            'index.field': {
-              hits: {
-                hits: [
-                  {
-                    _source: {
-                      text: 'value',
-                    },
-                  },
-                ],
-              },
-            },
-          },
+          highlight: { field: ['value'] },
         },
       ],
       expectedDocs: [
