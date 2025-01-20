@@ -11,8 +11,10 @@ import {
   Condition,
   FilterCondition,
   UnaryFilterCondition,
-} from '../../../../common/types';
-import { isAndCondition, isFilterCondition, isOrCondition } from './condition_guards';
+  isAndCondition,
+  isFilterCondition,
+  isOrCondition,
+} from '@kbn/streams-schema';
 
 function safePainlessField(conditionOrField: FilterCondition | string) {
   if (isFilterCondition(conditionOrField)) {
@@ -114,7 +116,7 @@ function extractAllFields(condition: Condition, fields: string[] = []): string[]
   return uniq(fields);
 }
 
-export function conditionToStatement(condition: Condition, nested = false): string {
+export function conditionToStatement(condition?: Condition, nested = false): string {
   if (isFilterCondition(condition)) {
     if (isUnaryFilterCondition(condition)) {
       return unaryToPainless(condition);
@@ -132,7 +134,10 @@ export function conditionToStatement(condition: Condition, nested = false): stri
   return 'false';
 }
 
-export function conditionToPainless(condition: Condition): string {
+export function conditionToPainless(condition?: Condition): string {
+  if (!condition) {
+    return 'false';
+  }
   const fields = extractAllFields(condition);
   let fieldCheck = '';
   if (fields.length !== 0) {

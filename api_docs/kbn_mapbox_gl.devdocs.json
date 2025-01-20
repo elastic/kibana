@@ -9624,7 +9624,7 @@
         "signature": [
           "any"
         ],
-        "path": "packages/kbn-mapbox-gl/index.ts",
+        "path": "src/platform/packages/private/kbn-mapbox-gl/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

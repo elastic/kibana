@@ -18,7 +18,6 @@
     "@kbn/dashboard-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/presentation-publishing",
-    "@kbn/ui-theme",
     "@kbn/i18n",
     "@kbn/es-query",
     "@kbn/data-views-plugin",

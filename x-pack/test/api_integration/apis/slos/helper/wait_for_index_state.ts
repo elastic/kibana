@@ -6,8 +6,14 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import pRetry from 'p-retry';
+import type {
+  AggregationsAggregate,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/types';
+import { retryForSuccess } from '@kbn/ftr-common-functional-services';
+import { ToolingLog } from '@kbn/tooling-log';
+
+const debugLog = ToolingLog.bind(ToolingLog, { level: 'debug', writeTo: process.stdout });
 
 export async function waitForDocumentInIndex<T>({
   esClient,
@@ -18,8 +24,10 @@ export async function waitForDocumentInIndex<T>({
   indexName: string;
   docCountTarget?: number;
 }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
-  return pRetry(
-    async () => {
+  return await retryForSuccess(new debugLog({ context: 'waitForDocumentInIndex' }), {
+    timeout: 20_000,
+    methodName: 'waitForDocumentInIndex',
+    block: async () => {
       const response = await esClient.search<T>({ index: indexName, rest_total_hits_as_int: true });
       if (
         !response.hits.total ||
@@ -30,8 +38,8 @@ export async function waitForDocumentInIndex<T>({
       }
       return response;
     },
-    { retries: 10 }
-  );
+    retryCount: 10,
+  });
 }
 
 export async function waitForIndexToBeEmpty<T>({
@@ -41,8 +49,10 @@ export async function waitForIndexToBeEmpty<T>({
   esClient: Client;
   indexName: string;
 }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
-  return pRetry(
-    async () => {
+  return await retryForSuccess(new debugLog({ context: 'waitForIndexToBeEmpty' }), {
+    timeout: 20_000,
+    methodName: 'waitForIndexToBeEmpty',
+    block: async () => {
       const response = await esClient.search<T>({ index: indexName, rest_total_hits_as_int: true });
       // @ts-expect-error upgrade typescript v5.1.6
       if (response.hits.total != null && response.hits.total > 0) {
@@ -50,6 +60,6 @@ export async function waitForIndexToBeEmpty<T>({
       }
       return response;
     },
-    { retries: 10 }
-  );
+    retryCount: 10,
+  });
 }
