@@ -47,6 +47,8 @@ export const getColor = (euiTheme: EuiThemeComputed, isEnabled: boolean, status?
   }
   const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
 
+  // make sure these are synced with slo card colors while making changes
+
   switch (status) {
     case 'down':
       return isAmsterdam
