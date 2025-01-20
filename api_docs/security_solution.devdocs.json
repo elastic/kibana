@@ -2938,6 +2938,23 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getAssetInventoryClient",
+            "type": "Function",
+            "tags": [],
+            "label": "getAssetInventoryClient",
+            "description": [],
+            "signature": [
+              "() => ",
+              "AssetInventoryDataClient"
+            ],
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
