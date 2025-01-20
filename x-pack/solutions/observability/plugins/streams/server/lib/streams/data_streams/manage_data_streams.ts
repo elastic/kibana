@@ -137,7 +137,7 @@ export async function updateDataStreamsLifecycle({
 
     const dataStreams = await esClient.indices.getDataStream({ name: names });
     for (const dataStream of dataStreams.data_streams) {
-      logger.info(`updating settings for data stream ${dataStream.name} backing indices`);
+      logger.debug(`updating settings for data stream ${dataStream.name} backing indices`);
       await retryTransientEsErrors(
         () =>
           esClient.indices.putSettings({
