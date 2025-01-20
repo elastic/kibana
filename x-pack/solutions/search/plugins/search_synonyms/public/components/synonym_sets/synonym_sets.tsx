@@ -6,14 +6,7 @@
  */
 
 import { SynonymsGetSynonymsSetsSynonymsSetItem } from '@elastic/elasticsearch/lib/api/types';
-import {
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiPopover,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { DEFAULT_PAGE_VALUE, paginationToPage } from '../../../common/pagination';
@@ -53,41 +46,6 @@ export const SynonymSets = () => {
       render: (ruleCount: number) => (
         <div data-test-subj="synonyms-set-item-rule-count">{ruleCount}</div>
       ),
-    },
-    {
-      actions: [
-        {
-          render: (item: SynonymsGetSynonymsSetsSynonymsSetItem) => (
-            <EuiPopover
-              closePopover={() => {
-                setIsPopoverOpen(false);
-              }}
-              isOpen={isPopoverOpen}
-              button={
-                <EuiButtonIcon
-                  iconType="boxesHorizontal"
-                  data-test-subj="synonyms-set-item-actions"
-                  onClick={() => {
-                    setIsPopoverOpen(!isPopoverOpen);
-                  }}
-                  aria-label={i18n.translate(
-                    'xpack.searchSynonyms.synonymsSetTable.actionsButton.ariaLabel',
-                    {
-                      defaultMessage: 'Press to open the actions menu for {name}',
-                      values: { name: item.synonyms_set },
-                    }
-                  )}
-                />
-              }
-            >
-              <EuiContextMenuPanel
-                data-test-subj="synonyms-set-item-action-popover-panel"
-                items={[<EuiContextMenuItem key="edit" icon="pencil" onClick={() => {}} />]}
-              />
-            </EuiPopover>
-          ),
-        },
-      ],
     },
   ];
   return (
