@@ -22,7 +22,6 @@ interface OtelSharedResourceAttributes {
   'telemetry.sdk.language'?: string;
   'telemetry.sdk.name'?: string;
   'telemetry.sdk.version'?: string;
-  'some.resource.attribute'?: string;
 }
 
 export interface OtelDocument extends Fields {
@@ -166,7 +165,7 @@ class Otel extends Serializable<OtelDocument> {
         'transaction.sampled': true,
         'transaction.type': 'unknown',
         'http.request.method': 'POST',
-        'http.response.status_code': '200',
+        'http.response.status_code': 200,
         'url.full': 'elastic.co',
       },
       data_stream: {

@@ -26,7 +26,7 @@ export class Transaction extends BaseSpan {
       'transaction.id': generateShortId(),
       'transaction.sampled': true,
       'http.request.method': 'GET',
-      'http.response.status_code': '200',
+      'http.response.status_code': 200,
       'url.full': 'elastic.co',
     });
   }
