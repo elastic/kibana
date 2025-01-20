@@ -9,6 +9,13 @@
 
 import { ESQLVariablesPlugin } from './plugin';
 
+export {
+  type PublishesESQLVariable,
+  type PublishesESQLVariables,
+  apiPublishesESQLVariable,
+  apiPublishesESQLVariables,
+} from './esql_publishing';
+
 export function plugin() {
   return new ESQLVariablesPlugin();
 }
