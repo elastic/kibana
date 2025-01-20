@@ -27,6 +27,7 @@ import {
 } from '@elastic/eui';
 import type { EuiTabbedContentTab, EuiTabbedContentProps, EuiFlyoutProps } from '@elastic/eui';
 
+import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
 import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
@@ -100,7 +101,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
 
     const handleTranslationUpdate = useCallback(
       async (ruleName: string, ruleQuery: string) => {
-        if (!ruleMigration || isLoading) {
+        if (isLoading) {
           return;
         }
         setIsUpdating(true);
@@ -111,6 +112,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
               elastic_rule: {
                 title: ruleName,
                 query: ruleQuery,
+                query_language: 'esql',
               },
             },
           ]);
@@ -137,13 +139,11 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
         name: i18n.TRANSLATION_TAB_LABEL,
         content: (
           <TabContentPadding>
-            {ruleMigration && (
-              <TranslationTab
-                ruleMigration={ruleMigration}
-                matchedPrebuiltRule={matchedPrebuiltRule}
-                onTranslationUpdate={handleTranslationUpdate}
-              />
-            )}
+            <TranslationTab
+              ruleMigration={ruleMigration}
+              matchedPrebuiltRule={matchedPrebuiltRule}
+              onTranslationUpdate={handleTranslationUpdate}
+            />
           </TabContentPadding>
         ),
       }),
@@ -170,8 +170,15 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
             )}
           </TabContentPadding>
         ),
+        disabled: ruleMigration.translation_result === RuleTranslationResult.UNTRANSLATABLE,
       }),
-      [ruleDetailsToOverview, size, expandedOverviewSections, toggleOverviewSection]
+      [
+        ruleDetailsToOverview,
+        size,
+        expandedOverviewSections,
+        toggleOverviewSection,
+        ruleMigration.translation_result,
+      ]
     );
 
     const summaryTab: EuiTabbedContentTab = useMemo(
@@ -233,7 +240,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
           <EuiTitle size="m">
             <h2 id={migrationsRulesFlyoutTitleId}>
               {ruleDetailsToOverview?.name ??
-                ruleMigration?.original_rule.title ??
+                ruleMigration.original_rule.title ??
                 i18n.UNKNOWN_MIGRATION_RULE_TITLE}
             </h2>
           </EuiTitle>
@@ -255,7 +262,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty onClick={closeFlyout} flush="left">
-                {i18n.DISMISS_BUTTON_LABEL}
+                {i18n.CLOSE_BUTTON_LABEL}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>{ruleActions}</EuiFlexItem>

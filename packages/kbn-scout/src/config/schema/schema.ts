@@ -75,7 +75,7 @@ export const schema = Joi.object()
 
     esTestCluster: Joi.object()
       .keys({
-        license: Joi.valid('basic', 'trial', 'gold').default('basic'),
+        license: Joi.valid('basic', 'trial', 'gold').default('trial'),
         from: Joi.string().default('snapshot'),
         serverArgs: Joi.array().items(Joi.string()).default([]),
         esJavaOpts: Joi.string(),

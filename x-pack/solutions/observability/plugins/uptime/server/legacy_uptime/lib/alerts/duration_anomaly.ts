@@ -12,7 +12,6 @@ import {
   SavedObjectsClientContract,
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
 import {
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_THRESHOLD,
@@ -21,6 +20,7 @@ import {
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
 import { getSeverityType } from '@kbn/ml-anomaly-utils';
+import { uptimeDurationAnomalyRuleParamsSchema } from '@kbn/response-ops-rule-params/uptime_duration_anomaly';
 import {
   alertsLocatorID,
   AlertsLocatorParams,
@@ -109,11 +109,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
   producer: 'uptime',
   name: durationAnomalyTranslations.alertFactoryName,
   validate: {
-    params: schema.object({
-      stackVersion: schema.maybe(schema.string()),
-      monitorId: schema.string(),
-      severity: schema.number(),
-    }),
+    params: uptimeDurationAnomalyRuleParamsSchema,
   },
   defaultActionGroupId: DURATION_ANOMALY.id,
   actionGroups: [

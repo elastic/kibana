@@ -60,14 +60,8 @@
               "[] | undefined; order?: number | undefined; name: string; alerting?: ",
               "AlertingKibanaPrivilege",
               " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | undefined; category: ",
-              {
-                "pluginId": "@kbn/core-application-common",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationCommonPluginApi",
-                "section": "def-common.AppCategory",
-                "text": "AppCategory"
-              },
-              "; management?: { [sectionId: string]: readonly string[]; } | undefined; app: readonly string[]; readonly deprecated?: Readonly<{ notice: string; }> | undefined; privileges: { all: ",
+              "AppCategory",
+              "; management?: { [sectionId: string]: readonly string[]; } | undefined; app: readonly string[]; readonly deprecated?: Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined; privileges: { all: ",
               {
                 "pluginId": "features",
                 "scope": "common",
@@ -175,14 +169,8 @@
           "[] | undefined; order?: number | undefined; name: string; alerting?: ",
           "AlertingKibanaPrivilege",
           " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | undefined; category: ",
-          {
-            "pluginId": "@kbn/core-application-common",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationCommonPluginApi",
-            "section": "def-common.AppCategory",
-            "text": "AppCategory"
-          },
-          "; management?: { [sectionId: string]: readonly string[]; } | undefined; app: readonly string[]; readonly deprecated?: Readonly<{ notice: string; }> | undefined; privileges: { all: ",
+          "AppCategory",
+          "; management?: { [sectionId: string]: readonly string[]; } | undefined; app: readonly string[]; readonly deprecated?: Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined; privileges: { all: ",
           {
             "pluginId": "features",
             "scope": "common",

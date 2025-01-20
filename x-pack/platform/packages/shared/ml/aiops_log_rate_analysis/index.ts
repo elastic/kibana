@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { LOG_RATE_ANALYSIS_HIGHLIGHT_COLOR } from './constants';
+export { useLogRateAnalysisBarColors } from './constants';
 export { getLogRateAnalysisTypeForHistogram } from './get_log_rate_analysis_type_for_histogram';
 export { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from './log_rate_analysis_type';
 export type { LogRateHistogramItem } from './log_rate_histogram_item';

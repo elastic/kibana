@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { reduce, size } from 'lodash';
@@ -79,6 +79,12 @@ export function registerGetRoute({ router, license, lib: { handleEsError } }: Ro
   router.post(
     {
       path: '/api/watcher/indices',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         body: bodySchema,
       },

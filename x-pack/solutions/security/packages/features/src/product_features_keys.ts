@@ -88,6 +88,9 @@ export enum ProductFeatureSecurityKey {
    * enables the integration assistant
    */
   integrationAssistant = 'integration_assistant',
+
+  /** Enables Endpoint Workflow Insights */
+  securityWorkflowInsights = 'security_workflow_insights',
 }
 
 export enum ProductFeatureCasesKey {
@@ -111,19 +114,37 @@ export enum ProductFeatureAttackDiscoveryKey {
   attackDiscovery = 'attack_discovery',
 }
 
+export enum ProductFeatureTimelineFeatureKey {
+  /**
+   * Enables Timeline
+   */
+  timeline = 'timeline',
+}
+
+export enum ProductFeatureNotesFeatureKey {
+  /**
+   * Enables Notes
+   */
+  notes = 'notes',
+}
+
 // Merges the two enums.
 export const ProductFeatureKey = {
   ...ProductFeatureSecurityKey,
   ...ProductFeatureCasesKey,
   ...ProductFeatureAssistantKey,
   ...ProductFeatureAttackDiscoveryKey,
+  ...ProductFeatureTimelineFeatureKey,
+  ...ProductFeatureNotesFeatureKey,
 };
 // We need to merge the value and the type and export both to replicate how enum works.
 export type ProductFeatureKeyType =
   | ProductFeatureSecurityKey
   | ProductFeatureCasesKey
   | ProductFeatureAssistantKey
-  | ProductFeatureAttackDiscoveryKey;
+  | ProductFeatureAttackDiscoveryKey
+  | ProductFeatureTimelineFeatureKey
+  | ProductFeatureNotesFeatureKey;
 
 export const ALL_PRODUCT_FEATURE_KEYS = Object.freeze(Object.values(ProductFeatureKey));
 
@@ -137,6 +158,7 @@ export enum SecuritySubFeatureId {
   eventFilters = 'eventFiltersSubFeature',
   policyManagement = 'policyManagementSubFeature',
   responseActionsHistory = 'responseActionsHistorySubFeature',
+  workflowInsights = 'workflowInsightsSubFeature',
   hostIsolation = 'hostIsolationSubFeature',
   processOperations = 'processOperationsSubFeature',
   fileOperations = 'fileOperationsSubFeature',

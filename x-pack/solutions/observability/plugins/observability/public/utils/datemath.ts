@@ -10,7 +10,7 @@ import { chain } from 'fp-ts/Either';
 import { pipe } from 'fp-ts/pipeable';
 import * as r from 'io-ts';
 
-// Copied from x-pack/plugins/observability_solution/infra/public/utils/datemath.ts
+// Copied from x-pack/solutions/observability/plugins/infra/public/utils/datemath.ts
 export function isValidDatemath(value: string): boolean {
   const parsedValue = dateMath.parse(value);
   return !!(parsedValue && parsedValue.isValid());

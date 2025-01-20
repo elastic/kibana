@@ -35,15 +35,14 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.sidenav.expectSectionClosed('project_settings_project_nav');
 
       // navigate to the logs explorer tab by default
-      // 'last-used-logs-viewer' is wrapper app to handle the navigation between logs explorer and discover
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'last-used-logs-viewer' });
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover' });
       await svlCommonNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'last-used-logs-viewer',
+        deepLinkId: 'discover',
       });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'observability-logs-explorer',
+        deepLinkId: 'discover',
       });
-      expect(await browser.getCurrentUrl()).contain('/app/observability-logs-explorer');
+      expect(await browser.getCurrentUrl()).contain('/app/discover');
 
       // check the aiops subsection
       await svlCommonNavigation.sidenav.clickLink({ navId: 'observabilityAIAssistant' }); // click on AI Assistant link
