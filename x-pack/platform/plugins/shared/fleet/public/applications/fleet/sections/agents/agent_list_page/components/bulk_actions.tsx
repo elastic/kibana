@@ -23,7 +23,7 @@ import {
   AgentUnenrollAgentModal,
   AgentUpgradeAgentModal,
 } from '../../components';
-import { useLicense } from '../../../../hooks';
+import { useAuthz, useLicense } from '../../../../hooks';
 import { LICENSE_FOR_SCHEDULE_UPGRADE, AGENTS_PREFIX } from '../../../../../../../common/constants';
 import { ExperimentalFeaturesService } from '../../../../services';
 
@@ -66,6 +66,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   sortOrder,
 }) => {
   const licenseService = useLicense();
+  const authz = useAuthz();
   const isLicenceAllowingScheduleUpgrade = licenseService.hasAtLeast(LICENSE_FOR_SCHEDULE_UPGRADE);
 
   // Bulk actions menu states
@@ -119,6 +120,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         />
       ),
       icon: <EuiIcon type="tag" size="m" />,
+      disabled: !authz.fleet.allAgents,
       onClick: (event: any) => {
         setTagsPopoverButton((event.target as Element).closest('button')!);
         setIsTagAddVisible(!isTagAddVisible);
@@ -133,6 +135,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         />
       ),
       icon: <EuiIcon type="pencil" size="m" />,
+      disabled: !authz.fleet.allAgents,
       onClick: () => {
         closeMenu();
         setIsReassignFlyoutOpen(true);
@@ -150,6 +153,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         />
       ),
       icon: <EuiIcon type="refresh" size="m" />,
+      disabled: !authz.fleet.allAgents,
       onClick: () => {
         closeMenu();
         setUpgradeModalState({ isOpen: true, isScheduled: false, isUpdating: false });
@@ -167,7 +171,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         />
       ),
       icon: <EuiIcon type="timeRefresh" size="m" />,
-      disabled: !isLicenceAllowingScheduleUpgrade,
+      disabled: !authz.fleet.allAgents || !isLicenceAllowingScheduleUpgrade,
       onClick: () => {
         closeMenu();
         setUpgradeModalState({ isOpen: true, isScheduled: true, isUpdating: false });
@@ -185,6 +189,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         />
       ),
       icon: <EuiIcon type="refresh" size="m" />,
+      disabled: !authz.fleet.allAgents,
       onClick: () => {
         closeMenu();
         setUpgradeModalState({ isOpen: true, isScheduled: false, isUpdating: true });
@@ -203,6 +208,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
                 }}
               />
             ),
+            disabled: !authz.fleet.readAgents,
             icon: <EuiIcon type="download" size="m" />,
             onClick: () => {
               closeMenu();
@@ -222,6 +228,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           }}
         />
       ),
+      disabled: !authz.fleet.allAgents,
       icon: <EuiIcon type="trash" size="m" />,
       onClick: () => {
         closeMenu();
@@ -241,6 +248,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
                 }}
               />
             ),
+            disabled: !authz.fleet.readAgents,
             icon: <EuiIcon type="exportAction" size="m" />,
             onClick: () => {
               closeMenu();

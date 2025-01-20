@@ -8,7 +8,7 @@
 import type { HttpSetup } from '@kbn/core/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { StartRenderServices } from '../../../types';
-import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { EntityType } from '../../../../common/search_strategy';
 import * as utils from '../../../../common/utils/risk_score_modules';
 import type { inputsModel } from '../../../common/store';
 
@@ -34,7 +34,7 @@ interface InstallRiskScoreModule {
   refetch?: inputsModel.Refetch;
   renderDashboardLink?: (message: string, dashboardUrl: string) => React.ReactNode;
   renderDocLink?: (message: string) => React.ReactNode;
-  riskScoreEntity: RiskScoreEntity;
+  riskScoreEntity: EntityType;
   spaceId?: string;
   timerange: {
     from: string;
@@ -58,7 +58,7 @@ const installHostRiskScoreModule = async ({
     http,
     renderDocLink,
     options: {
-      riskScoreEntity: RiskScoreEntity.host,
+      riskScoreEntity: EntityType.host,
     },
     startServices,
   });
@@ -71,7 +71,7 @@ const installHostRiskScoreModule = async ({
     renderDocLink,
     ...timerange,
     options: {
-      templateName: `${RiskScoreEntity.host}RiskScoreDashboards`,
+      templateName: `${EntityType.host}RiskScoreDashboards`,
     },
     startServices,
   });
@@ -95,7 +95,7 @@ const installUserRiskScoreModule = async ({
     http,
     renderDocLink,
     options: {
-      riskScoreEntity: RiskScoreEntity.user,
+      riskScoreEntity: EntityType.user,
     },
     startServices,
   });
@@ -105,7 +105,7 @@ const installUserRiskScoreModule = async ({
     dashboard,
     http,
     options: {
-      templateName: `${RiskScoreEntity.user}RiskScoreDashboards`,
+      templateName: `${EntityType.user}RiskScoreDashboards`,
     },
     renderDashboardLink,
     renderDocLink,
@@ -119,7 +119,7 @@ const installUserRiskScoreModule = async ({
 };
 
 export const installRiskScoreModule = async (settings: InstallRiskScoreModule) => {
-  if (settings.riskScoreEntity === RiskScoreEntity.user) {
+  if (settings.riskScoreEntity === EntityType.user) {
     await installUserRiskScoreModule(settings);
   } else {
     await installHostRiskScoreModule(settings);
@@ -137,7 +137,7 @@ export const uninstallRiskScoreModule = async ({
   http: HttpSetup;
   refetch?: inputsModel.Refetch;
   renderDocLink?: (message: string) => React.ReactNode;
-  riskScoreEntity: RiskScoreEntity;
+  riskScoreEntity: EntityType;
   spaceId?: string;
   deleteAll?: boolean;
   startServices: StartRenderServices;
@@ -149,25 +149,25 @@ export const uninstallRiskScoreModule = async ({
   ];
   const legacyRiskScoreHostsScriptIds = [
     // 8.4
-    utils.getLegacyRiskScoreLevelScriptId(RiskScoreEntity.host),
-    utils.getLegacyRiskScoreInitScriptId(RiskScoreEntity.host),
-    utils.getLegacyRiskScoreMapScriptId(RiskScoreEntity.host),
-    utils.getLegacyRiskScoreReduceScriptId(RiskScoreEntity.host),
+    utils.getLegacyRiskScoreLevelScriptId(EntityType.host),
+    utils.getLegacyRiskScoreInitScriptId(EntityType.host),
+    utils.getLegacyRiskScoreMapScriptId(EntityType.host),
+    utils.getLegacyRiskScoreReduceScriptId(EntityType.host),
     // 8.3 and after 8.5
-    utils.getRiskScoreLevelScriptId(RiskScoreEntity.host, spaceId),
-    utils.getRiskScoreInitScriptId(RiskScoreEntity.host, spaceId),
-    utils.getRiskScoreMapScriptId(RiskScoreEntity.host, spaceId),
-    utils.getRiskScoreReduceScriptId(RiskScoreEntity.host, spaceId),
+    utils.getRiskScoreLevelScriptId(EntityType.host, spaceId),
+    utils.getRiskScoreInitScriptId(EntityType.host, spaceId),
+    utils.getRiskScoreMapScriptId(EntityType.host, spaceId),
+    utils.getRiskScoreReduceScriptId(EntityType.host, spaceId),
   ];
   const legacyRiskScoreUsersScriptIds = [
     // 8.4
-    utils.getLegacyRiskScoreLevelScriptId(RiskScoreEntity.user),
-    utils.getLegacyRiskScoreMapScriptId(RiskScoreEntity.user),
-    utils.getLegacyRiskScoreReduceScriptId(RiskScoreEntity.user),
+    utils.getLegacyRiskScoreLevelScriptId(EntityType.user),
+    utils.getLegacyRiskScoreMapScriptId(EntityType.user),
+    utils.getLegacyRiskScoreReduceScriptId(EntityType.user),
     // 8.3 and after 8.5
-    utils.getRiskScoreLevelScriptId(RiskScoreEntity.user, spaceId),
-    utils.getRiskScoreMapScriptId(RiskScoreEntity.user, spaceId),
-    utils.getRiskScoreReduceScriptId(RiskScoreEntity.user, spaceId),
+    utils.getRiskScoreLevelScriptId(EntityType.user, spaceId),
+    utils.getRiskScoreMapScriptId(EntityType.user, spaceId),
+    utils.getRiskScoreReduceScriptId(EntityType.user, spaceId),
   ];
 
   const legacyIngestPipelineNames = [
@@ -234,7 +234,7 @@ export const uninstallRiskScoreModule = async ({
     deleteStoredScripts({
       http,
       ids:
-        riskScoreEntity === RiskScoreEntity.user
+        riskScoreEntity === EntityType.user
           ? legacyRiskScoreUsersScriptIds
           : legacyRiskScoreHostsScriptIds,
       startServices,
@@ -259,7 +259,7 @@ export const upgradeHostRiskScoreModule = async ({
   await uninstallRiskScoreModule({
     http,
     renderDocLink,
-    riskScoreEntity: RiskScoreEntity.host,
+    riskScoreEntity: EntityType.host,
     spaceId,
     startServices,
   });
@@ -269,7 +269,7 @@ export const upgradeHostRiskScoreModule = async ({
     refetch,
     renderDashboardLink,
     renderDocLink,
-    riskScoreEntity: RiskScoreEntity.host,
+    riskScoreEntity: EntityType.host,
     spaceId,
     timerange,
     startServices,
@@ -289,7 +289,7 @@ export const upgradeUserRiskScoreModule = async ({
   await uninstallRiskScoreModule({
     http,
     renderDocLink,
-    riskScoreEntity: RiskScoreEntity.user,
+    riskScoreEntity: EntityType.user,
     spaceId,
     startServices,
   });
@@ -299,7 +299,7 @@ export const upgradeUserRiskScoreModule = async ({
     refetch,
     renderDashboardLink,
     renderDocLink,
-    riskScoreEntity: RiskScoreEntity.user,
+    riskScoreEntity: EntityType.user,
     spaceId,
     timerange,
     startServices,
@@ -317,7 +317,7 @@ export const restartRiskScoreTransforms = async ({
   http: HttpSetup;
   refetch?: inputsModel.Refetch;
   renderDocLink?: (message: string) => React.ReactNode;
-  riskScoreEntity: RiskScoreEntity;
+  riskScoreEntity: EntityType;
   spaceId?: string;
   startServices: StartRenderServices;
 }) => {

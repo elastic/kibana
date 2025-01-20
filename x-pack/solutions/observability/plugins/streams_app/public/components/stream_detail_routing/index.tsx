@@ -906,25 +906,16 @@ function RoutingStreamEntry({
           })}
         />
       </EuiFlexGroup>
-      {child.condition && (
-        <ConditionEditor
-          readonly={!edit}
-          condition={child.condition}
-          onConditionChange={(condition) => {
-            onChildChange({
-              ...child,
-              condition,
-            });
-          }}
-        />
-      )}
-      {!child.condition && (
-        <EuiText>
-          {i18n.translate('xpack.streams.streamDetailRouting.noCondition', {
-            defaultMessage: 'No condition, no documents will be routed',
-          })}
-        </EuiText>
-      )}
+      <ConditionEditor
+        readonly={!edit}
+        condition={child.condition}
+        onConditionChange={(condition) => {
+          onChildChange({
+            ...child,
+            condition,
+          });
+        }}
+      />
     </EuiPanel>
   );
 }
@@ -958,25 +949,16 @@ function NewRoutingStreamEntry({
             }}
           />
         </EuiFormRow>
-        {child.condition && (
-          <ConditionEditor
-            readonly={false}
-            condition={child.condition}
-            onConditionChange={(condition) => {
-              onChildChange({
-                ...child,
-                condition,
-              });
-            }}
-          />
-        )}
-        {!child.condition && (
-          <EuiText>
-            {i18n.translate('xpack.streams.streamDetailRouting.noCondition', {
-              defaultMessage: 'No condition, no documents will be routed',
-            })}
-          </EuiText>
-        )}
+        <ConditionEditor
+          readonly={false}
+          condition={child.condition}
+          onConditionChange={(condition) => {
+            onChildChange({
+              ...child,
+              condition,
+            });
+          }}
+        />
       </EuiFlexGroup>
     </EuiPanel>
   );

@@ -9,10 +9,10 @@ import {
   FtrConfigProviderContext,
   GenericFtrProviderContext,
   defineDockerServersConfig,
+  fleetPackageRegistryDockerImage,
 } from '@kbn/test';
 import { createLogger, LogLevel, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import path from 'path';
-import { dockerImage } from '../../../fleet_api_integration/config.base';
 import { FtrProviderContext as InheritedFtrProviderContext } from '../../ftr_provider_context';
 
 export type InheritedServices = InheritedFtrProviderContext extends GenericFtrProviderContext<
@@ -60,7 +60,7 @@ export default async function createTestConfig({
     dockerServers: defineDockerServersConfig({
       registry: {
         enabled: !!dockerRegistryPort,
-        image: dockerImage,
+        image: fleetPackageRegistryDockerImage,
         portInContainer: 8080,
         port: dockerRegistryPort,
         args: dockerArgs,
