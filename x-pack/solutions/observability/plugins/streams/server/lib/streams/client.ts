@@ -311,13 +311,15 @@ export class StreamsClient {
     }
 
     if (isWiredStream(definition)) {
-      const validateWiredStreamResult = await this.validateWiredStreamAndCreateChildrenIfNeeded({
+      const validateWiredStreamResult = await this.validateWiredStream({
         existingDefinition: existingDefinition as WiredStreamDefinition,
         definition,
       });
 
       parentDefinition = validateWiredStreamResult.parentDefinition;
     }
+
+    await this.createChildrenIfNeeded(definition);
 
     const result = !!existingDefinition ? ('updated' as const) : ('created' as const);
 
@@ -340,7 +342,7 @@ export class StreamsClient {
    *
    * It also creates children that do not exist.
    */
-  private async validateWiredStreamAndCreateChildrenIfNeeded({
+  private async validateWiredStream({
     existingDefinition,
     definition,
   }: {
@@ -351,8 +353,6 @@ export class StreamsClient {
       this.getAncestors(definition),
       this.getDescendants(definition),
     ]);
-
-    const descendantsById = keyBy(descendants, (stream) => stream.name);
 
     const parentId = getParentId(definition.name);
 
@@ -375,6 +375,21 @@ export class StreamsClient {
     if (existingDefinition) {
       validateStreamChildrenChanges(existingDefinition, definition);
     }
+
+    return { parentDefinition };
+  }
+
+  /**
+   * Validates whether:
+   * - there are no conflicting field types,
+   * - the parent is not an ingest stream
+   *
+   * It also creates children that do not exist.
+   */
+  private async createChildrenIfNeeded(definition: StreamDefinition) {
+    const descendants = await this.getDescendants(definition);
+
+    const descendantsById = keyBy(descendants, (stream) => stream.name);
 
     for (const child of definition.stream.ingest.routing) {
       if (descendantsById[child.name]) {
@@ -400,8 +415,6 @@ export class StreamsClient {
         },
       });
     }
-
-    return { parentDefinition };
   }
 
   /**

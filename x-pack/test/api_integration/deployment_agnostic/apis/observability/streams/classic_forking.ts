@@ -108,5 +108,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     // it('Validates field rules within tree of wired streams under classic root', async () => {});
 
     // it('Allows creating a wired child for classic stream via PUT', async () => {});
+    
+    // it('Allows creating a wired child for classic stream via PUT and extending routing array', async () => {});
+ 
+    // it('Allows creating multi-nested wired children via PUT API', async () => {});
   });
 }
