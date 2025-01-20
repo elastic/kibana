@@ -94,9 +94,7 @@ describe('FetchAggregatedIndicatorsService', () => {
         expect(mockedSearchService.search).toHaveBeenCalledWith(
           expect.objectContaining({
             params: expect.objectContaining({
-              body: expect.objectContaining({
-                query: expect.objectContaining({ bool: expect.anything() }),
-              }),
+              query: expect.objectContaining({ bool: expect.anything() }),
               index: [],
             }),
             factoryQueryType: FactoryQueryType.Barchart,
