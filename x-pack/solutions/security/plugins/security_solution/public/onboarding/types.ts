@@ -140,7 +140,7 @@ export interface TopicConfig extends OnboardingConfigAvailabilityProps {
   /**
    * The onboarding topic title.
    */
-  title: string;
+  title: React.ReactNode;
   /**
    * The onboarding body configuration.
    */
