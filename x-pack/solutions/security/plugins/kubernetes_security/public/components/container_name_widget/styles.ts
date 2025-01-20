@@ -45,6 +45,7 @@ export const useStyles = () => {
       border: euiTheme.border.thin,
       bottom: '-25px',
       boxShadow: `0 ${size.xs} ${size.xs} ${transparentize(euiTheme.colors.shadow, 0.04)}`,
+      display: 'flex',
       zIndex: 1,
     };
 

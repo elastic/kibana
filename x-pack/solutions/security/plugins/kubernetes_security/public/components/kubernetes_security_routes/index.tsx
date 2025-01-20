@@ -8,16 +8,10 @@
 import React, { useCallback } from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import {
   KUBERNETES_PATH,
   KUBERNETES_TITLE,
@@ -59,7 +53,6 @@ const KubernetesSecurityRoutesComponent = ({
   globalFilter,
   renderSessionsView,
 }: KubernetesSecurityDeps) => {
-  const { euiTheme } = useEuiTheme();
   const [shouldHideCharts, setShouldHideCharts] = useLocalStorage(
     LOCAL_STORAGE_HIDE_WIDGETS_KEY,
     false
@@ -198,7 +191,7 @@ const KubernetesSecurityRoutesComponent = ({
                             }
                           ),
                           fieldName: ENTRY_LEADER_INTERACTIVE,
-                          color: euiTheme.colors.vis.euiColorVis0,
+                          color: euiThemeVars.euiColorVis0,
                         },
                         false: {
                           name: i18n.translate(
@@ -208,7 +201,7 @@ const KubernetesSecurityRoutesComponent = ({
                             }
                           ),
                           fieldName: ENTRY_LEADER_INTERACTIVE,
-                          color: euiTheme.colors.vis.euiColorVis1,
+                          color: euiThemeVars.euiColorVis1,
                           shouldHideFilter: true,
                         },
                       }}
@@ -248,14 +241,14 @@ const KubernetesSecurityRoutesComponent = ({
                             defaultMessage: 'Root',
                           }),
                           fieldName: ENTRY_LEADER_USER_ID,
-                          color: euiTheme.colors.vis.euiColorVis2,
+                          color: euiThemeVars.euiColorVis2,
                         },
                         nonRoot: {
                           name: i18n.translate('xpack.kubernetesSecurity.entryUserChart.nonRoot', {
                             defaultMessage: 'Non-root',
                           }),
                           fieldName: ENTRY_LEADER_USER_ID,
-                          color: euiTheme.colors.vis.euiColorVis3,
+                          color: euiThemeVars.euiColorVis3,
                           shouldHideFilter: true,
                         },
                       }}
