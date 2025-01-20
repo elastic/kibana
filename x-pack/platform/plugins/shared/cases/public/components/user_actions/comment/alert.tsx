@@ -34,12 +34,12 @@ type BuilderArgs = Pick<
   | 'userProfiles'
   | 'handleDeleteComment'
   | 'loadingCommentIds'
-> & { comment: SnakeToCamelCase<AlertAttachment> };
+> & { attachment: SnakeToCamelCase<AlertAttachment> };
 
 const getSingleAlertUserAction = ({
   userAction,
   userProfiles,
-  comment,
+  attachment,
   alertData,
   loadingAlertData,
   loadingCommentIds,
@@ -48,16 +48,16 @@ const getSingleAlertUserAction = ({
   onShowAlertDetails,
   handleDeleteComment,
 }: BuilderArgs): EuiCommentProps[] => {
-  const alertId = getNonEmptyField(comment.alertId);
-  const alertIndex = getNonEmptyField(comment.index);
+  const alertId = getNonEmptyField(attachment.alertId);
+  const alertIndex = getNonEmptyField(attachment.index);
 
   if (!alertId || !alertIndex) {
     return [];
   }
 
   const alertField: unknown | undefined = alertData[alertId];
-  const ruleId = getRuleId(comment, alertField);
-  const ruleName = getRuleName(comment, alertField);
+  const ruleId = getRuleId(attachment, alertField);
+  const ruleName = getRuleName(attachment, alertField);
 
   return [
     {
@@ -79,7 +79,7 @@ const getSingleAlertUserAction = ({
       timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
       timelineAvatar: 'bell',
       actions: (
-        <UserActionContentToolbar id={comment.id}>
+        <UserActionContentToolbar id={attachment.id}>
           <EuiFlexItem grow={false}>
             <UserActionShowAlert
               id={userAction.id}
@@ -89,8 +89,8 @@ const getSingleAlertUserAction = ({
             />
           </EuiFlexItem>
           <AlertPropertyActions
-            onDelete={() => handleDeleteComment(comment.id, DELETE_ALERTS_SUCCESS_TITLE(1))}
-            isLoading={loadingCommentIds.includes(comment.id)}
+            onDelete={() => handleDeleteComment(attachment.id, DELETE_ALERTS_SUCCESS_TITLE(1))}
+            isLoading={loadingCommentIds.includes(attachment.id)}
             totalAlerts={1}
           />
         </UserActionContentToolbar>
@@ -102,7 +102,7 @@ const getSingleAlertUserAction = ({
 const getMultipleAlertsUserAction = ({
   userAction,
   userProfiles,
-  comment,
+  attachment,
   alertData,
   loadingAlertData,
   loadingCommentIds,
@@ -110,12 +110,12 @@ const getMultipleAlertsUserAction = ({
   onRuleDetailsClick,
   handleDeleteComment,
 }: BuilderArgs): EuiCommentProps[] => {
-  if (!Array.isArray(comment.alertId)) {
+  if (!Array.isArray(attachment.alertId)) {
     return [];
   }
 
-  const totalAlerts = comment.alertId.length;
-  const { ruleId, ruleName } = getRuleInfo(comment, alertData);
+  const totalAlerts = attachment.alertId.length;
+  const { ruleId, ruleName } = getRuleInfo(attachment, alertData);
 
   return [
     {
@@ -138,15 +138,15 @@ const getMultipleAlertsUserAction = ({
       timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
       timelineAvatar: 'bell',
       actions: (
-        <UserActionContentToolbar id={comment.id}>
+        <UserActionContentToolbar id={attachment.id}>
           <EuiFlexItem grow={false}>
             <ShowAlertTableLink />
           </EuiFlexItem>
           <AlertPropertyActions
             onDelete={() =>
-              handleDeleteComment(comment.id, DELETE_ALERTS_SUCCESS_TITLE(totalAlerts))
+              handleDeleteComment(attachment.id, DELETE_ALERTS_SUCCESS_TITLE(totalAlerts))
             }
-            isLoading={loadingCommentIds.includes(comment.id)}
+            isLoading={loadingCommentIds.includes(attachment.id)}
             totalAlerts={totalAlerts}
           />
         </UserActionContentToolbar>
@@ -159,8 +159,8 @@ export const createAlertAttachmentUserActionBuilder = (
   params: BuilderArgs
 ): ReturnType<UserActionBuilder> => ({
   build: () => {
-    const { comment } = params;
-    const alertId = Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
+    const { attachment } = params;
+    const alertId = Array.isArray(attachment.alertId) ? attachment.alertId : [attachment.alertId];
 
     if (alertId.length === 1) {
       return getSingleAlertUserAction(params);
@@ -174,35 +174,41 @@ const getFirstItem = (items?: string | string[] | null): string | null => {
   return Array.isArray(items) ? items[0] : items ?? null;
 };
 
-export const getRuleId = (comment: BuilderArgs['comment'], alertData?: unknown): string | null =>
+export const getRuleId = (
+  attachment: BuilderArgs['attachment'],
+  alertData?: unknown
+): string | null =>
   getRuleField({
-    commentRuleField: comment?.rule?.id,
+    attachmentRuleField: attachment?.rule?.id,
     alertData,
     signalRuleFieldPath: 'signal.rule.id',
     kibanaAlertFieldPath: ALERT_RULE_UUID,
   });
 
-export const getRuleName = (comment: BuilderArgs['comment'], alertData?: unknown): string | null =>
+export const getRuleName = (
+  attachment: BuilderArgs['attachment'],
+  alertData?: unknown
+): string | null =>
   getRuleField({
-    commentRuleField: comment?.rule?.name,
+    attachmentRuleField: attachment?.rule?.name,
     alertData,
     signalRuleFieldPath: 'signal.rule.name',
     kibanaAlertFieldPath: ALERT_RULE_NAME,
   });
 
 const getRuleField = ({
-  commentRuleField,
+  attachmentRuleField,
   alertData,
   signalRuleFieldPath,
   kibanaAlertFieldPath,
 }: {
-  commentRuleField: string | string[] | null | undefined;
+  attachmentRuleField: string | string[] | null | undefined;
   alertData: unknown | undefined;
   signalRuleFieldPath: string;
   kibanaAlertFieldPath: string;
 }): string | null => {
   const field =
-    getNonEmptyField(commentRuleField) ??
+    getNonEmptyField(attachmentRuleField) ??
     getNonEmptyField(get(alertData, signalRuleFieldPath)) ??
     getNonEmptyField(get(alertData, kibanaAlertFieldPath));
 
@@ -218,16 +224,19 @@ function getNonEmptyField(field: string | string[] | undefined | null): string |
   return firstItem;
 }
 
-export function getRuleInfo(comment: BuilderArgs['comment'], alertData: BuilderArgs['alertData']) {
-  const alertId = getNonEmptyField(comment.alertId);
+export function getRuleInfo(
+  attachment: BuilderArgs['attachment'],
+  alertData: BuilderArgs['alertData']
+) {
+  const alertId = getNonEmptyField(attachment.alertId);
 
   if (!alertId) {
     return { ruleId: null, ruleName: null };
   }
 
   const alertField: unknown | undefined = alertData[alertId];
-  const ruleId = getRuleId(comment, alertField);
-  const ruleName = getRuleName(comment, alertField);
+  const ruleId = getRuleId(attachment, alertField);
+  const ruleName = getRuleName(attachment, alertField);
 
   return { ruleId, ruleName };
 }

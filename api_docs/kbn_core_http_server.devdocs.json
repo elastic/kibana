@@ -15037,7 +15037,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/install_translated.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory/routes/enablement.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -15552,6 +15552,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/delete.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory/routes/delete.ts"
               },
               {
                 "plugin": "metricsDataAccess",
