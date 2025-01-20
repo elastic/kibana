@@ -13,6 +13,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import type { History } from 'history';
 import React, { useMemo } from 'react';
 import type { Observable } from 'rxjs';
+import { FilesContext } from '@kbn/shared-ux-file-context';
 import { InvestigateAppContextProvider } from './components/investigate_app_context_provider';
 import { InvestigateAppKibanaContext } from './hooks/use_kibana';
 import { getRoutes } from './routes/config';
@@ -71,7 +72,12 @@ function Application({
           <coreStart.i18n.Context>
             <Router history={history}>
               <QueryClientProvider client={queryClient}>
-                <App />
+                <FilesContext
+                  client={services.files.filesClientFactory.asScoped('defaultFileKind')}
+                >
+                  <App />
+                </FilesContext>
+
                 <ReactQueryDevtools initialIsOpen={false} />
               </QueryClientProvider>
             </Router>

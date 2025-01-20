@@ -36,6 +36,7 @@ import type {
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -57,6 +58,7 @@ export interface InvestigateAppSetupDependencies {
   unifiedSearch: {};
   uiActions: UiActionsSetup;
   security: SecurityPluginSetup;
+  files: FilesSetup;
 }
 
 export interface InvestigateAppStartDependencies {
@@ -74,8 +76,9 @@ export interface InvestigateAppStartDependencies {
   uiActions: UiActionsStart;
   security: SecurityPluginStart;
   charts: ChartsPluginStart;
+  files: FilesStart;
 }
 
-export interface InvestigateAppPublicSetup {}
+export interface InvestigateAppPublicSetup { }
 
-export interface InvestigateAppPublicStart {}
+export interface InvestigateAppPublicStart { }

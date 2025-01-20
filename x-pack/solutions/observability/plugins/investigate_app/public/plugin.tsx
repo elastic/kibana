@@ -19,6 +19,7 @@ import type { Logger } from '@kbn/logging';
 import { once } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
+
 import type { InvestigateAppServices } from './services/types';
 import type {
   ConfigSchema,
@@ -28,6 +29,7 @@ import type {
   InvestigateAppStartDependencies,
 } from './types';
 import { createInvestigateAppRepositoryClient, InvestigateAppRepositoryClient } from './api';
+import { registerCaseFileKinds } from './files';
 
 const getCreateEsqlService = once(() => import('./services/esql').then((m) => m.createEsqlService));
 
@@ -54,6 +56,7 @@ export class InvestigateAppPlugin
     pluginsSetup: InvestigateAppSetupDependencies
   ): InvestigateAppPublicSetup {
     this.repositoryClient = createInvestigateAppRepositoryClient(coreSetup);
+    registerCaseFileKinds(pluginsSetup.files);
 
     coreSetup.application.register({
       id: INVESTIGATE_APP_ID,
@@ -98,8 +101,8 @@ export class InvestigateAppPlugin
           }),
           charts: pluginsStart.charts,
           investigateAppRepositoryClient: this.repositoryClient,
+          files: pluginsStart.files,
         };
-
         ReactDOM.render(
           <Application
             coreStart={coreStart}
@@ -139,6 +142,7 @@ export class InvestigateAppPlugin
             lens: pluginsStart.lens,
           }),
           charts: pluginsStart.charts,
+          files: pluginsStart.files,
         },
       });
     });
