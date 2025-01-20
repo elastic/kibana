@@ -22,7 +22,7 @@ export const wiredStreamConfigDefinitonSchema = z
       }),
       routing: z.array(streamChildSchema),
       lifecycle: z.optional(lifecycleSchema),
-    }),
+    }).strict(),
   })
   .strict();
 
