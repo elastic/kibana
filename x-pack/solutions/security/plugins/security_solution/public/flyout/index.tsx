@@ -46,7 +46,11 @@ import { HostDetailsPanel, HostDetailsPanelKey } from './entity_details/host_det
 import { NetworkPanel, NetworkPanelKey, NetworkPreviewPanelKey } from './network_details';
 import type { AnalyzerPanelExpandableFlyoutProps } from './document_details/analyzer_panels';
 import { AnalyzerPanel } from './document_details/analyzer_panels';
-import { UserPanelKey, HostPanelKey } from './entity_details/shared/constants';
+import { UserPanelKey, HostPanelKey, ServicePanelKey } from './entity_details/shared/constants';
+import type { ServicePanelExpandableFlyoutProps } from './entity_details/service_right';
+import { ServicePanel } from './entity_details/service_right';
+import type { ServiceDetailsExpandableFlyoutProps } from './entity_details/service_details_left';
+import { ServiceDetailsPanel, ServiceDetailsPanelKey } from './entity_details/service_details_left';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -157,6 +161,17 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     key: NetworkPreviewPanelKey,
     component: (props) => (
       <NetworkPanel {...(props as NetworkExpandableFlyoutProps).params} isPreviewMode />
+    ),
+  },
+
+  {
+    key: ServicePanelKey,
+    component: (props) => <ServicePanel {...(props as ServicePanelExpandableFlyoutProps).params} />,
+  },
+  {
+    key: ServiceDetailsPanelKey,
+    component: (props) => (
+      <ServiceDetailsPanel {...(props as ServiceDetailsExpandableFlyoutProps).params} />
     ),
   },
 ];

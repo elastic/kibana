@@ -5,25 +5,21 @@
  * 2.0.
  */
 import { SavedObjectReference } from '@kbn/core/server';
+import { ActionsClient } from '@kbn/actions-plugin/server';
 import {
   preconfiguredConnectorActionRefPrefix,
   systemConnectorActionRefPrefix,
 } from '../common/constants';
-import {
-  DenormalizedAction,
-  NormalizedAlertActionWithGeneratedValues,
-  RulesClientContext,
-} from '../types';
+import { DenormalizedAction, NormalizedAlertActionWithGeneratedValues } from '../types';
 
 export async function denormalizeActions(
-  context: RulesClientContext,
+  actionsClient: ActionsClient,
   alertActions: NormalizedAlertActionWithGeneratedValues[]
 ): Promise<{ actions: DenormalizedAction[]; references: SavedObjectReference[] }> {
   const references: SavedObjectReference[] = [];
   const actions: DenormalizedAction[] = [];
 
   if (alertActions.length) {
-    const actionsClient = await context.getActionsClient();
     const actionIds = [...new Set(alertActions.map((alertAction) => alertAction.id))];
 
     const actionResults = await actionsClient.getBulk({

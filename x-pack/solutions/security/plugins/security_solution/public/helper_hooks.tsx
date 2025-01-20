@@ -27,5 +27,5 @@ export const useOnOpenCloseHandler = (): [boolean, () => void, () => void] => {
  */
 export const useHasSecurityCapability = (capability: string): boolean => {
   const { capabilities } = useKibana().services.application;
-  return !!capabilities.siem[capability];
+  return !!capabilities.siemV2[capability];
 };
