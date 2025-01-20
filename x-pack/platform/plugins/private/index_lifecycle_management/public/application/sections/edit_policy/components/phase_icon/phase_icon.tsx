@@ -7,7 +7,6 @@
 
 import React, { FunctionComponent } from 'react';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { Phases } from '../../../../../../common/types';
 import './phase_icon.scss';
@@ -21,10 +20,16 @@ export const PhaseIcon: FunctionComponent<Props> = ({ enabled, phase }) => {
   const isBorealis = euiTheme.themeName === 'EUI_THEME_BOREALIS';
 
   const phaseIconColors = {
-    hot: isBorealis ? euiTheme.colors.vis.euiColorVis6 : euiThemeVars.euiColorVis9_behindText,
-    warm: isBorealis ? euiTheme.colors.vis.euiColorVis9 : euiThemeVars.euiColorVis5_behindText,
-    cold: isBorealis ? euiTheme.colors.vis.euiColorVis2 : euiThemeVars.euiColorVis1_behindText,
-    frozen: euiTheme.colors.vis.euiColorVis4,
+    hot: isBorealis ? euiTheme.colors.vis.euiColorVis6 : euiTheme.colors.vis.euiColorVisBehindText9,
+    warm: isBorealis
+      ? euiTheme.colors.vis.euiColorVis9
+      : euiTheme.colors.vis.euiColorVisBehindText5,
+    cold: isBorealis
+      ? euiTheme.colors.vis.euiColorVis2
+      : euiTheme.colors.vis.euiColorVisBehindText1,
+    frozen: isBorealis
+      ? euiTheme.colors.vis.euiColorVis4
+      : euiTheme.colors.vis.euiColorVisBehindText4,
     delete: euiTheme.colors.darkShade,
   };
 

@@ -39,6 +39,20 @@ function isInteger(n: number) {
   }
 }
 
+const memoryRegex = /^\d+(Mi|Gi)$/;
+function validateMemory(s: string) {
+  if (!memoryRegex.test(s)) {
+    return 'Invalid memory format';
+  }
+}
+
+const cpuRegex = /^(\d+m|\d+(\.\d+)?)$/;
+function validateCPU(s: string) {
+  if (!cpuRegex.test(s)) {
+    return 'Invalid CPU format';
+  }
+}
+
 export const AgentPolicyBaseSchema = {
   id: schema.maybe(schema.string()),
   space_ids: schema.maybe(schema.arrayOf(schema.string())),
@@ -131,6 +145,20 @@ export const AgentPolicyBaseSchema = {
         },
       }
     )
+  ),
+  agentless: schema.maybe(
+    schema.object({
+      resources: schema.maybe(
+        schema.object({
+          requests: schema.maybe(
+            schema.object({
+              memory: schema.maybe(schema.string({ validate: validateMemory })),
+              cpu: schema.maybe(schema.string({ validate: validateCPU })),
+            })
+          ),
+        })
+      ),
+    })
   ),
   monitoring_pprof_enabled: schema.maybe(schema.boolean()),
   monitoring_http: schema.maybe(
