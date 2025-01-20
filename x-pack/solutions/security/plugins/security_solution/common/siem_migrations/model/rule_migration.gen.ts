@@ -91,6 +91,10 @@ export const ElasticRule = z.object({
    */
   severity: z.string().optional(),
   /**
+   * The migrated rule risk_score value, integer between 0 and 100.
+   */
+  risk_score: z.number().optional(),
+  /**
    * The translated elastic query.
    */
   query: z.string().optional(),
@@ -103,9 +107,9 @@ export const ElasticRule = z.object({
    */
   prebuilt_rule_id: NonEmptyString.optional(),
   /**
-   * The Elastic integration ID found to be most relevant to the splunk rule.
+   * The IDs of the Elastic integrations suggested to be installed for this rule.
    */
-  integration_id: z.string().optional(),
+  integration_ids: z.array(z.string()).optional(),
   /**
    * The Elastic rule id installed as a result.
    */
@@ -343,14 +347,18 @@ export const UpdateRuleMigrationData = z.object({
    */
   elastic_rule: ElasticRulePartial.optional(),
   /**
-   * The rule translation result.
-   */
-  translation_result: RuleMigrationTranslationResult.optional(),
-  /**
    * The comments for the migration including a summary from the LLM in markdown.
    */
   comments: RuleMigrationComments.optional(),
 });
+
+/**
+ * Indicates the filter to retry the migrations rules translation
+ */
+export type RuleMigrationRetryFilter = z.infer<typeof RuleMigrationRetryFilter>;
+export const RuleMigrationRetryFilter = z.enum(['failed', 'not_fully_translated']);
+export type RuleMigrationRetryFilterEnum = typeof RuleMigrationRetryFilter.enum;
+export const RuleMigrationRetryFilterEnum = RuleMigrationRetryFilter.enum;
 
 /**
  * The type of the rule migration resource.

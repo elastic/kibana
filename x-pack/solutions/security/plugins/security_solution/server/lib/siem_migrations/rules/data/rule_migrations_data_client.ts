@@ -6,12 +6,12 @@
  */
 
 import type { AuthenticatedUser, IScopedClusterClient, Logger } from '@kbn/core/server';
-import type { PackageService } from '@kbn/fleet-plugin/server';
 import { RuleMigrationsDataIntegrationsClient } from './rule_migrations_data_integrations_client';
 import { RuleMigrationsDataPrebuiltRulesClient } from './rule_migrations_data_prebuilt_rules_client';
 import { RuleMigrationsDataResourcesClient } from './rule_migrations_data_resources_client';
 import { RuleMigrationsDataRulesClient } from './rule_migrations_data_rules_client';
 import { RuleMigrationsDataLookupsClient } from './rule_migrations_data_lookups_client';
+import type { SiemRuleMigrationsClientDependencies } from '../types';
 import type { AdapterId } from './rule_migrations_data_service';
 
 export type IndexNameProvider = () => Promise<string>;
@@ -29,32 +29,35 @@ export class RuleMigrationsDataClient {
     currentUser: AuthenticatedUser,
     esScopedClient: IScopedClusterClient,
     logger: Logger,
-    packageService?: PackageService
+    dependencies: SiemRuleMigrationsClientDependencies
   ) {
     this.rules = new RuleMigrationsDataRulesClient(
       indexNameProviders.rules,
       currentUser,
       esScopedClient,
-      logger
+      logger,
+      dependencies
     );
     this.resources = new RuleMigrationsDataResourcesClient(
       indexNameProviders.resources,
       currentUser,
       esScopedClient,
-      logger
+      logger,
+      dependencies
     );
     this.integrations = new RuleMigrationsDataIntegrationsClient(
       indexNameProviders.integrations,
       currentUser,
       esScopedClient,
       logger,
-      packageService
+      dependencies
     );
     this.prebuiltRules = new RuleMigrationsDataPrebuiltRulesClient(
       indexNameProviders.prebuiltrules,
       currentUser,
       esScopedClient,
-      logger
+      logger,
+      dependencies
     );
     this.lookups = new RuleMigrationsDataLookupsClient(currentUser, esScopedClient, logger);
   }

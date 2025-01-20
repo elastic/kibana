@@ -101,5 +101,7 @@
     "@kbn/discover-shared-plugin",
     "@kbn/server-route-repository-client",
     "@kbn/security-plugin-types-public",
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/security-plugin",
   ]
 }

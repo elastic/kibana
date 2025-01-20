@@ -430,5 +430,39 @@ describe('bedrockClaudeAdapter', () => {
         }),
       });
     });
+
+    it('propagates the temperature parameter', () => {
+      bedrockClaudeAdapter.chatComplete({
+        logger,
+        executor: executorMock,
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        temperature: 0.9,
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(executorMock.invoke).toHaveBeenCalledWith({
+        subAction: 'invokeStream',
+        subActionParams: expect.objectContaining({
+          temperature: 0.9,
+        }),
+      });
+    });
+
+    it('propagates the modelName parameter', () => {
+      bedrockClaudeAdapter.chatComplete({
+        logger,
+        executor: executorMock,
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        modelName: 'claude-opus-3.5',
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(executorMock.invoke).toHaveBeenCalledWith({
+        subAction: 'invokeStream',
+        subActionParams: expect.objectContaining({
+          model: 'claude-opus-3.5',
+        }),
+      });
+    });
   });
 });

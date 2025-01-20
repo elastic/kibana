@@ -84,10 +84,6 @@ export function isColumnItem(arg: ESQLAstItem): arg is ESQLColumn {
   return isSingleItem(arg) && arg.type === 'column';
 }
 
-export function isIdentifier(arg: ESQLAstItem): arg is ESQLIdentifier {
-  return isSingleItem(arg) && arg.type === 'identifier';
-}
-
 export function isLiteralItem(arg: ESQLAstItem): arg is ESQLLiteral {
   return isSingleItem(arg) && arg.type === 'literal';
 }
