@@ -62,7 +62,7 @@ Cypress.Commands.add(
     cy.contains(key);
     cy.getByTestSubj(`autocompleteSuggestion-field-${key}-`).click();
 
-    cy.getByTestSubj(dataTestSubj).type(`: `);
+    cy.getByTestSubj(dataTestSubj).type(`: ${value}`);
     if (waitForSuggestion) {
       cy.get(`[data-test-subj="autocompleteSuggestion-value-\\"${value}\\"-"]`)
         .should('be.visible')
