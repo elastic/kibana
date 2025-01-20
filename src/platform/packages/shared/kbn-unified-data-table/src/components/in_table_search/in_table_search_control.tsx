@@ -7,15 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
-  ChangeEvent,
-  FocusEvent,
-  useCallback,
-  useState,
-  useEffect,
-  useRef,
-  useMemo,
-} from 'react';
+import React, { ChangeEvent, FocusEvent, useCallback, useState, useEffect, useRef } from 'react';
 import {
   EuiFieldSearch,
   EuiButtonIcon,
@@ -25,88 +17,109 @@ import {
   EuiText,
   keys,
 } from '@elastic/eui';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 import { i18n } from '@kbn/i18n';
-import { debounce } from 'lodash';
 import { css, type SerializedStyles } from '@emotion/react';
 import {
   useInTableSearchMatches,
   UseInTableSearchMatchesProps,
+  UseInTableSearchMatchesReturn,
 } from './use_in_table_search_matches';
 import './in_table_search.scss';
 
 const BUTTON_TEST_SUBJ = 'startInTableSearchButton';
 
 export interface InTableSearchControlProps
-  extends Omit<UseInTableSearchMatchesProps, 'scrollToActiveMatch'> {
+  extends Omit<UseInTableSearchMatchesProps, 'inTableSearchTerm'> {
   pageSize: number | null; // null when the pagination is disabled
-  changeToExpectedPage: (pageIndex: number) => void;
   scrollToCell: (params: { rowIndex: number; columnIndex: number; align: 'smart' }) => void;
   shouldOverrideCmdF: (element: HTMLElement) => boolean;
   onChange: (searchTerm: string | undefined) => void;
   onChangeCss: (styles: SerializedStyles) => void;
+  onChangeToExpectedPage: (pageIndex: number) => void;
 }
 
 export const InTableSearchControl: React.FC<InTableSearchControlProps> = React.memo(
   ({
     pageSize,
-    changeToExpectedPage,
     scrollToCell,
     shouldOverrideCmdF,
     onChange,
     onChangeCss,
+    onChangeToExpectedPage,
     ...props
   }) => {
-    const scrollToActiveMatch: UseInTableSearchMatchesProps['scrollToActiveMatch'] = useCallback(
-      ({ rowIndex, fieldName, matchIndex, shouldJump }) => {
-        if (typeof pageSize === 'number') {
-          const expectedPageIndex = Math.floor(rowIndex / pageSize);
-          changeToExpectedPage(expectedPageIndex);
-        }
-
-        // TODO: use a named color token
-        onChangeCss(css`
-          .euiDataGridRowCell[data-gridcell-row-index='${rowIndex}'][data-gridcell-column-id='${fieldName}']
-            .unifiedDataTable__inTableSearchMatch[data-match-index='${matchIndex}'] {
-            background-color: #ffc30e;
-          }
-        `);
-
-        if (shouldJump) {
-          const anyCellForFieldName = document.querySelector(
-            `.euiDataGridRowCell[data-gridcell-column-id='${fieldName}']`
-          );
-
-          // getting column index by column id
-          const columnIndex = anyCellForFieldName?.getAttribute('data-gridcell-column-index') ?? 0;
-
-          // getting rowIndex for the visible page
-          const visibleRowIndex = typeof pageSize === 'number' ? rowIndex % pageSize : rowIndex;
-
-          scrollToCell({
-            rowIndex: visibleRowIndex,
-            columnIndex: Number(columnIndex),
-            align: 'smart',
-          });
-        }
-      },
-      [pageSize, changeToExpectedPage, scrollToCell, onChangeCss]
-    );
-
-    const {
-      matchesCount,
-      activeMatchPosition,
-      isProcessing,
-      cellsShadowPortal,
-      goToPrevMatch,
-      goToNextMatch,
-      resetState,
-    } = useInTableSearchMatches({ ...props, scrollToActiveMatch });
-    const areArrowsDisabled = !matchesCount || isProcessing;
-    const [inputValue, setInputValue] = useState<string>(props.inTableSearchTerm);
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [buttonNode, setButtonNode] = useState<HTMLButtonElement | null>(null);
     const shouldReturnFocusToButtonRef = useRef<boolean>(false);
     const [isFocused, setIsFocused] = useState<boolean>(false);
+    const processedActiveMatchRef = useRef<UseInTableSearchMatchesReturn['activeMatch']>(null);
+
+    const [inTableSearchTerm, setInTableSearchTerm] = useState<string>('');
+    const onChangeSearchTerm = useCallback(
+      (value: string) => {
+        // sending the value to the grid and to the hook, so they can process it hopefully in parallel
+        onChange(value);
+        setInTableSearchTerm(value);
+      },
+      [onChange, setInTableSearchTerm]
+    );
+    const { inputValue, handleInputChange } = useDebouncedValue({
+      onChange: onChangeSearchTerm,
+      value: inTableSearchTerm,
+    });
+
+    const {
+      matchesCount,
+      activeMatch,
+      isProcessing,
+      renderCellsShadowPortal,
+      goToPrevMatch,
+      goToNextMatch,
+      resetState,
+    } = useInTableSearchMatches({ ...props, inTableSearchTerm });
+
+    const isSearching = isProcessing;
+    const areArrowsDisabled = !matchesCount || isSearching;
+
+    useEffect(() => {
+      if (!activeMatch || processedActiveMatchRef.current === activeMatch) {
+        return;
+      }
+
+      processedActiveMatchRef.current = activeMatch; // prevent multiple executions
+
+      const { rowIndex, columnId, matchIndexWithinCell } = activeMatch;
+
+      if (typeof pageSize === 'number') {
+        const expectedPageIndex = Math.floor(rowIndex / pageSize);
+        onChangeToExpectedPage(expectedPageIndex);
+      }
+
+      // TODO: use a named color token
+      onChangeCss(css`
+        .euiDataGridRowCell[data-gridcell-row-index='${rowIndex}'][data-gridcell-column-id='${columnId}']
+          .unifiedDataTable__inTableSearchMatch[data-match-index='${matchIndexWithinCell}'] {
+          background-color: #ffc30e;
+        }
+      `);
+
+      const anyCellForColumnId = document.querySelector(
+        `.euiDataGridRowCell[data-gridcell-column-id='${columnId}']`
+      );
+
+      // getting column index by column id
+      const columnIndex = anyCellForColumnId?.getAttribute('data-gridcell-column-index') ?? 0;
+
+      // getting rowIndex for the visible page
+      const visibleRowIndex = typeof pageSize === 'number' ? rowIndex % pageSize : rowIndex;
+
+      scrollToCell({
+        rowIndex: visibleRowIndex,
+        columnIndex: Number(columnIndex),
+        align: 'smart',
+      });
+    }, [activeMatch, scrollToCell, onChange, onChangeCss, onChangeToExpectedPage, pageSize]);
 
     const focusInput = useCallback(() => {
       setIsFocused(true);
@@ -121,25 +134,11 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = React.m
       [setIsFocused, resetState]
     );
 
-    const debouncedOnChange = useMemo(
-      () =>
-        debounce(
-          (value: string) => {
-            onChange(value);
-          },
-          300,
-          { leading: false, trailing: true }
-        ),
-      [onChange]
-    );
-
     const onInputChange = useCallback(
       (event: ChangeEvent<HTMLInputElement>) => {
-        const nextValue = event.target.value;
-        setInputValue(nextValue);
-        debouncedOnChange(nextValue);
+        handleInputChange(event.target.value);
       },
-      [debouncedOnChange, setInputValue]
+      [handleInputChange]
     );
 
     const onKeyUp = useCallback(
@@ -236,13 +235,14 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = React.m
           autoFocus
           compressed
           className="unifiedDataTable__inTableSearchInput"
-          isClearable={!isProcessing}
-          isLoading={isProcessing}
+          isClearable={!isSearching}
+          isLoading={isSearching}
           append={
             <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false} className="unifiedDataTable__inTableSearchMatchesCounter">
                 <EuiText color="subdued" size="s">
-                  {matchesCount ? `${activeMatchPosition}/${matchesCount}` : '0/0'}&nbsp;
+                  {matchesCount && activeMatch ? `${activeMatch.position}/${matchesCount}` : '0/0'}
+                  &nbsp;
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -277,7 +277,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = React.m
           onKeyUp={onKeyUp}
           onBlur={onBlur}
         />
-        {cellsShadowPortal}
+        {renderCellsShadowPortal ? renderCellsShadowPortal() : null}
       </div>
     );
   }

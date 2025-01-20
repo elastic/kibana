@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useState, ReactNode, useRef, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, ReactNode, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import { InTableSearchContext, InTableSearchContextValue } from './in_table_search_context';
 import { InTableSearchHighlightsWrapperProps } from './in_table_search_highlights_wrapper';
 
 let latestTimeoutTimer: NodeJS.Timeout | null = null;
@@ -19,7 +18,7 @@ let latestTimeoutTimer: NodeJS.Timeout | null = null;
 interface RowMatches {
   rowIndex: number;
   rowMatchesCount: number;
-  matchesCountPerField: Record<string, number>;
+  matchesCountPerColumnId: Record<string, number>;
 }
 
 export interface UseInTableSearchMatchesProps {
@@ -28,150 +27,55 @@ export interface UseInTableSearchMatchesProps {
   inTableSearchTerm: string;
   renderCellValue: (
     props: EuiDataGridCellValueElementProps &
-      Pick<InTableSearchHighlightsWrapperProps, 'onHighlightsCountFound'>
+      Pick<InTableSearchHighlightsWrapperProps, 'inTableSearchTerm' | 'onHighlightsCountFound'>
   ) => ReactNode;
-  scrollToActiveMatch: (params: {
-    rowIndex: number;
-    fieldName: string;
-    matchIndex: number;
-    shouldJump: boolean;
-  }) => void;
 }
 
 interface UseInTableSearchMatchesState {
   matchesList: RowMatches[];
   matchesCount: number | null;
-  activeMatchPosition: number;
+  activeMatch: {
+    position: number;
+    rowIndex: number;
+    columnId: string;
+    matchIndexWithinCell: number;
+  } | null;
+  columns: string[];
   isProcessing: boolean;
-  cellsShadowPortal: ReactNode | null;
+  calculatedForSearchTerm: string | null;
+  renderCellsShadowPortal: (() => ReactNode) | null;
 }
 
 export interface UseInTableSearchMatchesReturn
-  extends Omit<UseInTableSearchMatchesState, 'matchesList'> {
+  extends Omit<UseInTableSearchMatchesState, 'matchesList' | 'columns'> {
   goToPrevMatch: () => void;
   goToNextMatch: () => void;
   resetState: () => void;
 }
 
-const DEFAULT_MATCHES: RowMatches[] = [];
-const DEFAULT_ACTIVE_MATCH_POSITION = 1;
 const INITIAL_STATE: UseInTableSearchMatchesState = {
-  matchesList: DEFAULT_MATCHES,
+  matchesList: [],
   matchesCount: null,
-  activeMatchPosition: DEFAULT_ACTIVE_MATCH_POSITION,
+  activeMatch: null,
+  columns: [],
   isProcessing: false,
-  cellsShadowPortal: null,
+  calculatedForSearchTerm: null,
+  renderCellsShadowPortal: null,
 };
 
 export const useInTableSearchMatches = (
   props: UseInTableSearchMatchesProps
 ): UseInTableSearchMatchesReturn => {
-  const { visibleColumns, rows, inTableSearchTerm, renderCellValue, scrollToActiveMatch } = props;
+  const { visibleColumns, rows, inTableSearchTerm, renderCellValue } = props;
   const [state, setState] = useState<UseInTableSearchMatchesState>(INITIAL_STATE);
-  const { matchesList, matchesCount, activeMatchPosition, isProcessing, cellsShadowPortal } = state;
+  const {
+    matchesCount,
+    activeMatch,
+    calculatedForSearchTerm,
+    isProcessing,
+    renderCellsShadowPortal,
+  } = state;
   const numberOfRunsRef = useRef<number>(0);
-
-  const scrollToMatch = useCallback(
-    ({
-      matchPosition,
-      activeMatchesList,
-      activeColumns,
-      shouldJump,
-    }: {
-      matchPosition: number;
-      activeMatchesList: RowMatches[];
-      activeColumns: string[];
-      shouldJump: boolean;
-    }) => {
-      let traversedMatchesCount = 0;
-
-      for (const rowMatch of activeMatchesList) {
-        const rowIndex = rowMatch.rowIndex;
-
-        if (traversedMatchesCount + rowMatch.rowMatchesCount < matchPosition) {
-          // going faster to next row
-          traversedMatchesCount += rowMatch.rowMatchesCount;
-          continue;
-        }
-
-        const matchesCountPerField = rowMatch.matchesCountPerField;
-
-        for (const fieldName of activeColumns) {
-          // going slow to next field within the row
-          const matchesCountForFieldName = matchesCountPerField[fieldName] ?? 0;
-
-          if (
-            traversedMatchesCount < matchPosition &&
-            traversedMatchesCount + matchesCountForFieldName >= matchPosition
-          ) {
-            // can even go slower to next match within the field within the row
-            scrollToActiveMatch({
-              rowIndex: Number(rowIndex),
-              fieldName,
-              matchIndex: matchPosition - traversedMatchesCount - 1,
-              shouldJump,
-            });
-            return;
-          }
-
-          traversedMatchesCount += matchesCountForFieldName;
-        }
-      }
-    },
-    [scrollToActiveMatch]
-  );
-
-  const goToPrevMatch = useCallback(() => {
-    setState((prevState) => {
-      if (typeof prevState.matchesCount !== 'number') {
-        return prevState;
-      }
-
-      let nextMatchPosition = prevState.activeMatchPosition - 1;
-
-      if (nextMatchPosition < 1) {
-        nextMatchPosition = prevState.matchesCount; // allow to endlessly circle though matches
-      }
-
-      scrollToMatch({
-        matchPosition: nextMatchPosition,
-        activeMatchesList: matchesList,
-        activeColumns: visibleColumns,
-        shouldJump: true,
-      });
-
-      return {
-        ...prevState,
-        activeMatchPosition: nextMatchPosition,
-      };
-    });
-  }, [setState, scrollToMatch, matchesList, visibleColumns]);
-
-  const goToNextMatch = useCallback(() => {
-    setState((prevState) => {
-      if (typeof prevState.matchesCount !== 'number') {
-        return prevState;
-      }
-
-      let nextMatchPosition = prevState.activeMatchPosition + 1;
-
-      if (nextMatchPosition > prevState.matchesCount) {
-        nextMatchPosition = 1; // allow to endlessly circle though matches
-      }
-
-      scrollToMatch({
-        matchPosition: nextMatchPosition,
-        activeMatchesList: matchesList,
-        activeColumns: visibleColumns,
-        shouldJump: true,
-      });
-
-      return {
-        ...prevState,
-        activeMatchPosition: nextMatchPosition,
-      };
-    });
-  }, [setState, scrollToMatch, matchesList, visibleColumns]);
 
   useEffect(() => {
     numberOfRunsRef.current += 1;
@@ -188,13 +92,13 @@ export const useInTableSearchMatches = (
     setState((prevState) => ({
       ...prevState,
       isProcessing: true,
-      cellsShadowPortal: (
+      renderCellsShadowPortal: () => (
         <AllCellsHighlightsCounter
           key={numberOfRuns}
           inTableSearchTerm={inTableSearchTerm}
-          renderCellValue={renderCellValue}
           rows={rows}
           visibleColumns={visibleColumns}
+          renderCellValue={renderCellValue}
           onFinish={({ matchesList: nextMatchesList, totalMatchesCount }) => {
             if (numberOfRuns < numberOfRunsRef.current) {
               return;
@@ -203,24 +107,32 @@ export const useInTableSearchMatches = (
             setState({
               matchesList: nextMatchesList,
               matchesCount: totalMatchesCount,
-              activeMatchPosition: DEFAULT_ACTIVE_MATCH_POSITION,
+              activeMatch:
+                totalMatchesCount > 0
+                  ? getActiveMatch({
+                      matchPosition: 1,
+                      matchesList: nextMatchesList,
+                      columns: visibleColumns,
+                    })
+                  : null,
+              columns: visibleColumns,
               isProcessing: false,
-              cellsShadowPortal: null,
+              calculatedForSearchTerm: inTableSearchTerm,
+              renderCellsShadowPortal: null,
             });
-
-            if (totalMatchesCount > 0) {
-              scrollToMatch({
-                matchPosition: DEFAULT_ACTIVE_MATCH_POSITION,
-                activeMatchesList: nextMatchesList,
-                activeColumns: visibleColumns,
-                shouldJump: true,
-              });
-            }
           }}
         />
       ),
     }));
-  }, [setState, renderCellValue, scrollToMatch, visibleColumns, rows, inTableSearchTerm]);
+  }, [setState, renderCellValue, visibleColumns, rows, inTableSearchTerm]);
+
+  const goToPrevMatch = useCallback(() => {
+    setState((prevState) => changeActiveMatchInState(prevState, 'prev'));
+  }, [setState]);
+
+  const goToNextMatch = useCallback(() => {
+    setState((prevState) => changeActiveMatchInState(prevState, 'next'));
+  }, [setState]);
 
   const resetState = useCallback(() => {
     stopTimer(latestTimeoutTimer);
@@ -229,14 +141,89 @@ export const useInTableSearchMatches = (
 
   return {
     matchesCount,
-    activeMatchPosition,
+    activeMatch,
     goToPrevMatch,
     goToNextMatch,
     resetState,
     isProcessing,
-    cellsShadowPortal,
+    calculatedForSearchTerm,
+    renderCellsShadowPortal,
   };
 };
+
+function getActiveMatch({
+  matchPosition,
+  matchesList,
+  columns,
+}: {
+  matchPosition: number;
+  matchesList: RowMatches[];
+  columns: string[];
+}): UseInTableSearchMatchesState['activeMatch'] {
+  let traversedMatchesCount = 0;
+
+  for (const rowMatch of matchesList) {
+    const rowIndex = rowMatch.rowIndex;
+
+    if (traversedMatchesCount + rowMatch.rowMatchesCount < matchPosition) {
+      // going faster to next row
+      traversedMatchesCount += rowMatch.rowMatchesCount;
+      continue;
+    }
+
+    const matchesCountPerColumnId = rowMatch.matchesCountPerColumnId;
+
+    for (const columnId of columns) {
+      // going slow to next cell within the row
+      const matchesCountInCell = matchesCountPerColumnId[columnId] ?? 0;
+
+      if (
+        traversedMatchesCount < matchPosition &&
+        traversedMatchesCount + matchesCountInCell >= matchPosition
+      ) {
+        // can even go slower to next match within the cell
+        return {
+          position: matchPosition,
+          rowIndex: Number(rowIndex),
+          columnId,
+          matchIndexWithinCell: matchPosition - traversedMatchesCount - 1,
+        };
+      }
+
+      traversedMatchesCount += matchesCountInCell;
+    }
+  }
+
+  // no match found for the requested position
+  return null;
+}
+
+function changeActiveMatchInState(
+  prevState: UseInTableSearchMatchesState,
+  direction: 'prev' | 'next'
+): UseInTableSearchMatchesState {
+  if (typeof prevState.matchesCount !== 'number' || !prevState.activeMatch) {
+    return prevState;
+  }
+
+  let nextMatchPosition =
+    direction === 'prev' ? prevState.activeMatch.position - 1 : prevState.activeMatch.position + 1;
+
+  if (nextMatchPosition < 1) {
+    nextMatchPosition = prevState.matchesCount; // allow to endlessly circle though matches
+  } else if (nextMatchPosition > prevState.matchesCount) {
+    nextMatchPosition = 1; // allow to endlessly circle though matches
+  }
+
+  return {
+    ...prevState,
+    activeMatch: getActiveMatch({
+      matchPosition: nextMatchPosition,
+      matchesList: prevState.matchesList,
+      columns: prevState.columns,
+    }),
+  };
+}
 
 type AllCellsProps = Pick<
   UseInTableSearchMatchesProps,
@@ -254,7 +241,7 @@ function AllCellsHighlightsCounter(
   const remainingNumberOfResultsRef = useRef<number>(rows.length * visibleColumns.length);
 
   const onHighlightsCountFound = useCallback(
-    (rowIndex: number, fieldName: string, count: number) => {
+    (rowIndex: number, columnId: string, count: number) => {
       remainingNumberOfResultsRef.current = remainingNumberOfResultsRef.current - 1;
 
       if (count === 0) {
@@ -264,7 +251,7 @@ function AllCellsHighlightsCounter(
       if (!resultsMapRef.current[rowIndex]) {
         resultsMapRef.current[rowIndex] = {};
       }
-      resultsMapRef.current[rowIndex][fieldName] = count;
+      resultsMapRef.current[rowIndex][columnId] = count;
     },
     []
   );
@@ -277,8 +264,8 @@ function AllCellsHighlightsCounter(
       .map((rowIndex) => Number(rowIndex))
       .sort((a, b) => a - b)
       .forEach((rowIndex) => {
-        const matchesCountPerField = resultsMapRef.current[rowIndex];
-        const rowMatchesCount = Object.values(matchesCountPerField).reduce(
+        const matchesCountPerColumnId = resultsMapRef.current[rowIndex];
+        const rowMatchesCount = Object.values(matchesCountPerColumnId).reduce(
           (acc, count) => acc + count,
           0
         );
@@ -286,7 +273,7 @@ function AllCellsHighlightsCounter(
         newMatchesList.push({
           rowIndex,
           rowMatchesCount,
-          matchesCountPerField,
+          matchesCountPerColumnId,
         });
         totalMatchesCount += rowMatchesCount;
       });
@@ -310,8 +297,8 @@ function AllCellsHighlightsCounter(
   return createPortal(
     <AllCells
       {...props}
-      onHighlightsCountFound={(rowIndex, fieldName, count) => {
-        onHighlightsCountFound(rowIndex, fieldName, count);
+      onHighlightsCountFound={(rowIndex, columnId, count) => {
+        onHighlightsCountFound(rowIndex, columnId, count);
 
         if (remainingNumberOfResultsRef.current === 0) {
           stopTimer(timerRef.current);
@@ -330,42 +317,39 @@ function AllCells({
   renderCellValue,
   onHighlightsCountFound,
 }: AllCellsProps & {
-  onHighlightsCountFound: (rowIndex: number, fieldName: string, count: number) => void;
+  onHighlightsCountFound: (rowIndex: number, columnId: string, count: number) => void;
 }) {
   const UnifiedDataTableRenderCellValue = renderCellValue;
-  const contextValue = useMemo<InTableSearchContextValue>(
-    () => ({ inTableSearchTerm }),
-    [inTableSearchTerm]
-  );
 
   return (
-    <InTableSearchContext.Provider value={contextValue}>
+    <>
       {(rows || []).flatMap((_, rowIndex) => {
-        return visibleColumns.map((fieldName) => {
+        return visibleColumns.map((columnId) => {
           return (
             <ErrorBoundary
-              key={`${rowIndex}-${fieldName}`}
+              key={`${rowIndex}-${columnId}`}
               onError={() => {
-                onHighlightsCountFound(rowIndex, fieldName, 0);
+                onHighlightsCountFound(rowIndex, columnId, 0);
               }}
             >
               <UnifiedDataTableRenderCellValue
-                columnId={fieldName}
+                columnId={columnId}
                 rowIndex={rowIndex}
                 isExpandable={false}
                 isExpanded={false}
                 isDetails={false}
                 colIndex={0}
                 setCellProps={() => {}}
+                inTableSearchTerm={inTableSearchTerm}
                 onHighlightsCountFound={(count) => {
-                  onHighlightsCountFound(rowIndex, fieldName, count);
+                  onHighlightsCountFound(rowIndex, columnId, count);
                 }}
               />
             </ErrorBoundary>
           );
         });
       })}
-    </InTableSearchContext.Provider>
+    </>
   );
 }
 
