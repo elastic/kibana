@@ -782,6 +782,11 @@ export class StreamsClient {
     }).then((streams) => streams.filter(isWiredStream));
   }
 
+  /**
+   * Updates either the dlm or ilm policy of a stream. A lifecycle being
+   * inherited, any updates to a given data stream also triggers an update
+   * to existing children data streams that do not specify an override.
+   */
   private async updateStreamLifecycle(root: WiredStreamDefinition) {
     const { logger, scopedClusterClient } = this.dependencies;
     const descendants = await this.getDescendants(root.name);
@@ -804,6 +809,7 @@ export class StreamsClient {
       esClient: scopedClusterClient.asCurrentUser,
       names: toUpdate,
       lifecycle: root.stream.ingest.lifecycle,
+      isServerless: this.dependencies.isServerless,
       logger,
     });
   }

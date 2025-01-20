@@ -99,11 +99,13 @@ export async function updateDataStreamsLifecycle({
   logger,
   names,
   lifecycle,
+  isServerless,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   names: string[];
   lifecycle?: StreamLifecycle;
+  isServerless: boolean;
 }) {
   try {
     if (!lifecycle || lifecycle.type === 'ilm') {
@@ -125,8 +127,14 @@ export async function updateDataStreamsLifecycle({
       );
     }
 
-    // if we transition from ilm to dlm or vice versa, the rolled over backing indices
-    // need to be updated or they'll retain their historical lifecycle configuration
+    // if we transition from ilm to dlm or vice versa, the rolled over backing
+    // indices need to be updated or they'll retain their historical lifecycle
+    // configuration.
+    // this is not needed for serverless since only dlm is allowed.
+    if (isServerless) {
+      return;
+    }
+
     const dataStreams = await esClient.indices.getDataStream({ name: names });
     for (const dataStream of dataStreams.data_streams) {
       logger.info(`updating settings for data stream ${dataStream.name} backing indices`);
