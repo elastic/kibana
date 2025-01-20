@@ -20,7 +20,7 @@ describe('getUnitedEntityDefinition', () => {
       },
       defaultIndexPatterns,
       config: {
-        syncDelay: duration(60, 'seconds'),
+        syncDelay: duration(1, 'seconds'),
         frequency: duration(60, 'seconds'),
         developer: { pipelineDebugMode: false },
       },
@@ -125,9 +125,9 @@ describe('getUnitedEntityDefinition', () => {
             "settings": Object {
               "frequency": "60s",
               "syncDelay": "60s",
-              "syncField": "@timestamp",
+              "syncField": "event.ingested",
             },
-            "timestampField": "@timestamp",
+            "timestampField": "event.ingested",
           },
           "managed": true,
           "metadata": Array [
@@ -364,9 +364,9 @@ describe('getUnitedEntityDefinition', () => {
             "settings": Object {
               "frequency": "60s",
               "syncDelay": "60s",
-              "syncField": "@timestamp",
+              "syncField": "event.ingested",
             },
-            "timestampField": "@timestamp",
+            "timestampField": "event.ingested",
           },
           "managed": true,
           "metadata": Array [
@@ -576,9 +576,9 @@ describe('getUnitedEntityDefinition', () => {
             "settings": Object {
               "frequency": "60s",
               "syncDelay": "60s",
-              "syncField": "@timestamp",
+              "syncField": "event.ingested",
             },
-            "timestampField": "@timestamp",
+            "timestampField": "event.ingested",
           },
           "managed": true,
           "metadata": Array [

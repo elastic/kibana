@@ -7,6 +7,7 @@
 
 import type { EntityDescription } from '../types';
 import { collectValues as collect, newestValue } from './field_utils';
+import { DEFAULT_TIMESTAMP_FIELD } from '../constants';
 
 export const SERVICE_DEFINITION_VERSION = '1.0.0';
 export const SERVICE_IDENTITY_FIELD = 'service.name';
@@ -16,7 +17,7 @@ export const serviceEntityEngineDescription: EntityDescription = {
   version: SERVICE_DEFINITION_VERSION,
   identityField: SERVICE_IDENTITY_FIELD,
   settings: {
-    timestampField: '@timestamp',
+    timestampField: DEFAULT_TIMESTAMP_FIELD,
   },
   fields: [
     collect({ source: 'service.address' }),

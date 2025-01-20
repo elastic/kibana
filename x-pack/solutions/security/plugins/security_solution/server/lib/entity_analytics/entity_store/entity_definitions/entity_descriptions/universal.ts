@@ -8,6 +8,7 @@
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityDescription } from '../types';
 import { collectValues } from './field_utils';
+import { DEFAULT_TIMESTAMP_FIELD } from '../constants';
 
 export const UNIVERSAL_DEFINITION_VERSION = '1.0.0';
 export const UNIVERSAL_IDENTITY_FIELD = 'related.entity';
@@ -77,7 +78,7 @@ export const universalEntityEngineDescription: EntityDescription = {
   identityField: UNIVERSAL_IDENTITY_FIELD,
   fields: [collectValues({ source: 'entities.keyword', destination: 'collected.metadata' })],
   settings: {
-    timestampField: 'event.ingested',
+    timestampField: DEFAULT_TIMESTAMP_FIELD,
   },
   pipeline: (processors: IngestProcessorContainer[]) => {
     const index = processors.findIndex((p) => Boolean(p.enrich));

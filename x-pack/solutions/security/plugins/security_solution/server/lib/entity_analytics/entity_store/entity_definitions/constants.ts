@@ -21,7 +21,7 @@ export const VERSIONS_BY_ENTITY_TYPE: Record<EntityType, string> = {
 };
 
 export const DEFAULT_FIELD_HISTORY_LENGTH = 10;
-export const DEFAULT_SYNC_DELAY = '1m';
+export const DEFAULT_SYNC_DELAY = '1s';
 export const DEFAULT_FREQUENCY = '1m';
 export const DEFAULT_LOOKBACK_PERIOD = '1d';
-export const DEFAULT_TIMESTAMP_FIELD = '@timestamp';
+export const DEFAULT_TIMESTAMP_FIELD = 'event.ingested';

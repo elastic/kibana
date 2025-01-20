@@ -19,21 +19,22 @@ import { mockGlobalState } from '../../../../public/common/mock';
 import type { EntityDefinition } from '@kbn/entities-schema';
 import { convertToEntityManagerDefinition } from './entity_definitions/entity_manager_conversion';
 import { EntityType } from '../../../../common/search_strategy';
+import { DEFAULT_SYNC_DELAY, DEFAULT_TIMESTAMP_FIELD } from './entity_definitions/constants';
 
 const definition: EntityDefinition = convertToEntityManagerDefinition(
   {
     id: 'host_engine',
     entityType: 'host',
     pipeline: [],
-    version: '0.0.1',
+    version: '0.0.2',
     fields: [],
     identityField: 'host.name',
     indexMappings: {},
     indexPatterns: [],
     settings: {
-      syncDelay: '1m',
+      syncDelay: DEFAULT_SYNC_DELAY,
       frequency: '1m',
-      timestampField: '@timestamp',
+      timestampField: DEFAULT_TIMESTAMP_FIELD,
       lookbackPeriod: '24h',
     },
     dynamic: false,

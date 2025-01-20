@@ -8,6 +8,7 @@
 import { collectValues as collect } from './field_utils';
 import type { EntityDescription } from '../types';
 import { getCommonFieldDescriptions } from './common';
+import { DEFAULT_TIMESTAMP_FIELD } from '../constants';
 
 export const HOST_DEFINITION_VERSION = '1.0.0';
 export const HOST_IDENTITY_FIELD = 'host.name';
@@ -16,7 +17,7 @@ export const hostEntityEngineDescription: EntityDescription = {
   version: HOST_DEFINITION_VERSION,
   identityField: HOST_IDENTITY_FIELD,
   settings: {
-    timestampField: '@timestamp',
+    timestampField: DEFAULT_TIMESTAMP_FIELD,
   },
   fields: [
     collect({ source: 'host.domain' }),
