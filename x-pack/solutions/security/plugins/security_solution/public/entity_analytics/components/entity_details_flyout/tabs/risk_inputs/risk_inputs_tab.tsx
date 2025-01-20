@@ -25,12 +25,8 @@ import { useRiskContributingAlerts } from '../../../../hooks/use_risk_contributi
 import { PreferenceFormattedDate } from '../../../../../common/components/formatted_date';
 
 import { useRiskScore } from '../../../../api/hooks/use_risk_score';
-import type { EntityRiskScore } from '../../../../../../common/search_strategy';
-import {
-  buildHostNamesFilter,
-  buildUserNamesFilter,
-  EntityType,
-} from '../../../../../../common/search_strategy';
+import type { EntityRiskScore, EntityType } from '../../../../../../common/search_strategy';
+import { buildEntityNameFilter } from '../../../../../../common/search_strategy';
 import { AssetCriticalityBadge } from '../../../asset_criticality';
 import { RiskInputsUtilityBar } from '../../components/utility_bar';
 import { ActionColumn } from '../../components/action_column';
@@ -58,12 +54,7 @@ export const RiskInputsTab = <T extends EntityType>({
   const [selectedItems, setSelectedItems] = useState<InputAlert[]>([]);
 
   const nameFilterQuery = useMemo(() => {
-    // TODO Add support for services on a follow-up PR
-    if (entityType === EntityType.host) {
-      return buildHostNamesFilter([entityName]);
-    } else if (entityType === EntityType.user) {
-      return buildUserNamesFilter([entityName]);
-    }
+    return buildEntityNameFilter(entityType, [entityName]);
   }, [entityName, entityType]);
 
   const {

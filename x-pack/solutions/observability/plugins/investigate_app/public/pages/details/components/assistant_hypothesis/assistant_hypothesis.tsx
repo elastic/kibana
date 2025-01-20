@@ -8,19 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import type { RootCauseAnalysisEvent } from '@kbn/observability-ai-server/root_cause_analysis';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
-import {
-  ALERT_FLAPPING_HISTORY,
-  ALERT_RULE_EXECUTION_TIMESTAMP,
-  ALERT_RULE_EXECUTION_UUID,
-  EVENT_ACTION,
-  EVENT_KIND,
-} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { isRequestAbortedError } from '@kbn/server-route-repository-client';
-import { omit } from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useUpdateInvestigation } from '../../../../hooks/use_update_investigation';
 import { useInvestigation } from '../../contexts/investigation_context';
+import { getRCAContext } from '../../../../../common/rca/llm_context';
 
 export interface InvestigationContextualInsight {
   key: string;
@@ -90,10 +83,7 @@ export function AssistantHypothesis() {
           body: {
             investigationId: investigation!.id,
             connectorId,
-            context: `The user is investigating an alert for the ${serviceName} service,
-            and wants to find the root cause. Here is the alert:
-
-            ${JSON.stringify(sanitizeAlert(nonNullishAlert))}`,
+            context: getRCAContext(nonNullishAlert, nonNullishServiceName),
             rangeFrom,
             rangeTo,
             serviceName: nonNullishServiceName,
@@ -188,18 +178,5 @@ export function AssistantHypothesis() {
         }
       }}
     />
-  );
-}
-
-function sanitizeAlert(alert: EcsFieldsResponse) {
-  return omit(
-    alert,
-    ALERT_RULE_EXECUTION_TIMESTAMP,
-    '_index',
-    ALERT_FLAPPING_HISTORY,
-    EVENT_ACTION,
-    EVENT_KIND,
-    ALERT_RULE_EXECUTION_UUID,
-    '@timestamp'
   );
 }
