@@ -57,12 +57,14 @@ export const getUsers = async (
     const reporter = theCase.case.created_by;
     const reporterProfileIdAsArray = reporter.profile_uid != null ? [reporter.profile_uid] : [];
 
-    const userProfileUids = new Set([
-      ...assignedAndUnassignedUsers,
-      ...participantsUids,
-      ...assigneesUids,
-      ...reporterProfileIdAsArray,
-    ]);
+    const userProfileUids = new Set(
+      [
+        ...assignedAndUnassignedUsers,
+        ...participantsUids,
+        ...assigneesUids,
+        ...reporterProfileIdAsArray,
+      ].filter((uid) => uid !== '')
+    );
 
     const userProfiles = await getUserProfiles(securityStartPlugin, userProfileUids, 'avatar');
 
