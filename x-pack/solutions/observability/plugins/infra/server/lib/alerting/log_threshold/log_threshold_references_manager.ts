@@ -9,7 +9,10 @@ import type { SavedObjectReference } from '@kbn/core/server';
 import { logViewReferenceRT } from '@kbn/logs-shared-plugin/common';
 import { logViewSavedObjectName } from '@kbn/logs-shared-plugin/server';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { type LogThresholdParams, logThresholdParamsRT } from '@kbn/response-ops-rule-params/log_threshold';
+import {
+  type LogThresholdParams,
+  logThresholdParamsRT,
+} from '@kbn/response-ops-rule-params/log_threshold';
 
 export const LOG_VIEW_REFERENCE_NAME = 'log-view-reference-0';
 
@@ -37,7 +40,10 @@ export const extractReferences = (params: LogThresholdParams) => {
   return { params: newParams, references };
 };
 
-export const injectReferences = (params: LogThresholdParams, references: SavedObjectReference[]) => {
+export const injectReferences = (
+  params: LogThresholdParams,
+  references: SavedObjectReference[]
+) => {
   const decodedParams = decodeOrThrow(logThresholdParamsRT)(params);
 
   if (!logViewReferenceRT.is(decodedParams.logView)) {

@@ -25,16 +25,16 @@ export const getESQueryForLogRateAnalysis = (
 
   const groupByFilters = groupBy
     ? groupBy
-      .filter((groupByField) => !mustFiltersFields.includes(groupByField))
-      .map((groupByField) => {
-        const groupByValue = get(
-          alert.fields[ALERT_CONTEXT],
-          ['groupByKeys', ...groupByField.split('.')],
-          null
-        );
-        return groupByValue ? { term: { [groupByField]: { value: groupByValue } } } : null;
-      })
-      .filter((groupByFilter) => groupByFilter)
+        .filter((groupByField) => !mustFiltersFields.includes(groupByField))
+        .map((groupByField) => {
+          const groupByValue = get(
+            alert.fields[ALERT_CONTEXT],
+            ['groupByKeys', ...groupByField.split('.')],
+            null
+          );
+          return groupByValue ? { term: { [groupByField]: { value: groupByValue } } } : null;
+        })
+        .filter((groupByFilter) => groupByFilter)
     : [];
 
   const query = {

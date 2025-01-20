@@ -27,14 +27,14 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { i18n } from '@kbn/i18n';
 import { pick, orderBy } from 'lodash';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { Color, colorTransformer } from '../../../../../../common/color_palette';
-import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
-import type { PartialRuleParams } from '../../../../../../common/alerting/logs/log_threshold';
-import { isRatioRuleParams } from '../../../../../../common/alerting/logs/log_threshold';
 import {
   logThresholdParamsRT,
   type CountRuleParams,
 } from '@kbn/response-ops-rule-params/log_threshold';
+import { Color, colorTransformer } from '../../../../../../common/color_palette';
+import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
+import type { PartialRuleParams } from '../../../../../../common/alerting/logs/log_threshold';
+import { isRatioRuleParams } from '../../../../../../common/alerting/logs/log_threshold';
 import { getESQueryForLogRateAnalysis } from '../log_rate_analysis_query';
 
 export interface AlertDetailsLogRateAnalysisSectionProps {
