@@ -45,7 +45,7 @@ export const registerRuleManagementRoutes = (
   bulkCreateRulesRoute(router, logger, docLinks);
   bulkUpdateRulesRoute(router, logger, docLinks);
   bulkPatchRulesRoute(router, logger, docLinks);
-  bulkDeleteRulesRoute(router, logger);
+  bulkDeleteRulesRoute(router, logger, docLinks);
   // ALONG WITH THEIR IMPORTS
 
   // Rules bulk actions
