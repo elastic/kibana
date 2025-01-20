@@ -73,7 +73,8 @@ export function toSearchResult({
 export function getSearchResultProvider(
   config: ConfigType,
   connectorTypes: ConnectorServerSideDefinition[],
-  isCloud: boolean
+  isCloud: boolean,
+  crawlerIconPath: string
 ): GlobalSearchResultProvider {
   return {
     find: ({ term, types, tags }, { aborted$, maxResults }, { core: { capabilities } }) => {
@@ -92,6 +93,18 @@ export function getSearchResultProvider(
           }
 
           const services: ServiceDefinition[] = [
+            ...(config.hasWebCrawler
+              ? [
+                  {
+                    iconPath: crawlerIconPath,
+                    keywords: ['crawler', 'web', 'website', 'internet', 'google'],
+                    name: i18n.translate('xpack.enterpriseSearch.searchProvider.webCrawler.name', {
+                      defaultMessage: 'Elastic Web Crawler',
+                    }),
+                    serviceType: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
+                  },
+                ]
+              : []),
             ...(config.hasConnectors ? connectorTypes : []),
 
             {

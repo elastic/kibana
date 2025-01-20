@@ -369,7 +369,12 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
 
     if (globalSearch) {
       globalSearch.registerResultProvider(
-        getSearchResultProvider(config, searchConnectors?.getConnectorTypes() || [], isCloud)
+        getSearchResultProvider(
+          config,
+          searchConnectors?.getConnectorTypes() || [],
+          isCloud,
+          http.staticAssets.getPluginAssetHref('images/crawler.svg')
+        )
       );
       globalSearch.registerResultProvider(getIndicesSearchResultProvider(http.staticAssets));
       globalSearch.registerResultProvider(getConnectorsSearchResultProvider(http.staticAssets));
