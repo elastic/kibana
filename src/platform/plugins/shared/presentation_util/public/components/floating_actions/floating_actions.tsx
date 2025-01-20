@@ -50,7 +50,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   useEffect(() => {
     if (!api) return;
 
-    let mounted = true;
+    let canceled = false;
     const context = {
       embeddable: api,
       trigger: panelHoverTrigger,
@@ -74,7 +74,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
     const subscriptions = new Subscription();
 
     const handleActionCompatibilityChange = (isCompatible: boolean, action: Action) => {
-      if (!mounted) return;
+      if (canceled) return;
       setFloatingActions((currentActions) => {
         const newActions: FloatingActionItem[] = currentActions
           ?.filter((current) => current.id !== action.id)
@@ -88,13 +88,12 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
 
     (async () => {
       const actions = await getActions();
-      if (!mounted) return;
+      if (canceled) return;
       setFloatingActions(actions);
 
-      const frequentlyChangingActions = uiActionsService.getFrequentlyChangingActionsForTrigger(
-        PANEL_HOVER_TRIGGER,
-        context
-      );
+      const frequentlyChangingActions =
+        await uiActionsService.getFrequentlyChangingActionsForTrigger(PANEL_HOVER_TRIGGER, context);
+      if (canceled) return;
 
       for (const action of frequentlyChangingActions) {
         subscriptions.add(
@@ -104,7 +103,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
     })();
 
     return () => {
-      mounted = false;
+      canceled = true;
       subscriptions.unsubscribe();
     };
   }, [api, viewMode, disabledActions]);
