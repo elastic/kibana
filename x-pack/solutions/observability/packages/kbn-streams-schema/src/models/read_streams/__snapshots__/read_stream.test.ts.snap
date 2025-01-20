@@ -2,6 +2,9 @@
 
 exports[`ReadStream should successfully parse ingestReadStream 1`] = `
 Object {
+  "effective_lifecycle": Object {
+    "type": "dlm",
+  },
   "elasticsearch_assets": Array [],
   "inherited_fields": Object {
     "@timestamp": Object {
@@ -12,9 +15,6 @@ Object {
       "from": "logs",
       "type": "match_only_text",
     },
-  },
-  "lifecycle": Object {
-    "type": "dlm",
   },
   "name": "logs.nginx",
   "stream": Object {
@@ -53,6 +53,10 @@ Object {
 
 exports[`ReadStream should successfully parse wiredReadStream 1`] = `
 Object {
+  "effective_lifecycle": Object {
+    "from": "logs",
+    "type": "dlm",
+  },
   "elasticsearch_assets": Array [],
   "inherited_fields": Object {
     "@timestamp": Object {
@@ -63,9 +67,6 @@ Object {
       "from": "logs",
       "type": "match_only_text",
     },
-  },
-  "lifecycle": Object {
-    "type": "dlm",
   },
   "name": "logs.nginx",
   "stream": Object {

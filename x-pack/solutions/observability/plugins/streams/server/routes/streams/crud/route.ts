@@ -12,10 +12,10 @@ import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import {
   streamConfigDefinitionSchema,
   ListStreamsResponse,
-  FieldDefinitionConfig,
   ReadStreamDefinition,
   WiredReadStreamDefinition,
   isWiredStream,
+  InheritedFieldDefinition,
 } from '@kbn/streams-schema';
 import { isResponseError } from '@kbn/es-errors';
 import { MalformedStreamId } from '../../../lib/streams/errors/malformed_stream_id';
@@ -64,11 +64,11 @@ export const readStreamRoute = createServerRoute({
       ]);
 
       if (!isWiredStream(streamDefinition)) {
-        const effectiveLifecycle = getDataStreamLifecycle(dataStream);
+        const lifecycle = getDataStreamLifecycle(dataStream);
         return {
           ...streamDefinition,
-          effectiveLifecycle,
           dashboards,
+          effective_lifecycle: lifecycle,
           inherited_fields: {},
         };
       }
@@ -82,7 +82,7 @@ export const readStreamRoute = createServerRoute({
       const body: WiredReadStreamDefinition = {
         ...streamDefinition,
         dashboards,
-        effectiveLifecycle: lifecycleOriginDefinition && {
+        effective_lifecycle: lifecycleOriginDefinition && {
           from: lifecycleOriginDefinition.name,
           ...lifecycleOriginDefinition.stream.ingest.lifecycle!,
         },
@@ -91,8 +91,7 @@ export const readStreamRoute = createServerRoute({
             acc[key] = { ...fieldDef, from: def.name };
           });
           return acc;
-          // TODO: replace this with a proper type
-        }, {} as Record<string, FieldDefinitionConfig & { from: string }>),
+        }, {} as InheritedFieldDefinition),
       };
 
       return body;

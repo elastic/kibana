@@ -12,7 +12,7 @@ import { inheritedFieldDefinitionSchema, lifecycleSchema } from '../common';
 export const ingestReadStreamDefinitonSchema = ingestStreamDefinitonSchema
   .extend({
     inherited_fields: inheritedFieldDefinitionSchema,
-    effectiveLifecycle: z.optional(lifecycleSchema),
+    effective_lifecycle: z.optional(lifecycleSchema),
   })
   .strict();
 
