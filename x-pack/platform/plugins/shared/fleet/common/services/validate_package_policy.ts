@@ -17,8 +17,8 @@ import type {
   PackageInfo,
   RegistryStream,
   RegistryVarsEntry,
-  PackagePolicyConfigRecord,
   RegistryRequiredVars,
+  NewPackagePolicyInputStream,
 } from '../types';
 
 import { DATASET_VAR_NAME } from '../constants';
@@ -35,8 +35,10 @@ import { isValidDataset } from './is_valid_namespace';
 type Errors = string[] | null;
 
 type ValidationEntry = Record<string, Errors>;
+type ValidationRequiredVars = Record<string, 'invalid' | null>;
 
 export interface PackagePolicyConfigValidationResults {
+  required_vars?: ValidationRequiredVars | null;
   vars?: ValidationEntry;
 }
 
@@ -49,85 +51,53 @@ export type PackagePolicyValidationResults = {
   description: Errors;
   namespace: Errors;
   inputs: Record<PackagePolicyInput['type'], PackagePolicyInputValidationResults> | null;
-  conditionalRequired: Record<string, Record<string, boolean>> | null;
 } & PackagePolicyConfigValidationResults;
 
 const validateConditionalRequiredVars = (
-  packageInfo: PackageInfo,
-  packagePolicy: NewPackagePolicy
+  stream: NewPackagePolicyInputStream,
+  requiredVars?: RegistryRequiredVars
 ) => {
-  const vars: Record<string, PackagePolicyConfigRecord> = {};
-  const requiredVarDefinitions: Record<string, RegistryRequiredVars> = {};
-  const validatedVars: Record<string, Record<string, boolean>> = {};
-  const validCriteriaMet = false;
-  const invalidCriteriaMet = true;
-  let hasMetAtleastOneCondition = false;
+  const evaluatedRequiredVars: ValidationRequiredVars = {};
+  let hasMetRequiredCriteria = false;
 
-  if (packageInfo?.data_streams && packagePolicy.inputs) {
-    // get all the vars
-    packagePolicy.inputs.forEach((input) => {
-      if (input.enabled && input.streams) {
-        input.streams.forEach((stream) => {
-          if (stream.enabled && stream.vars) {
-            vars[input.type] = stream.vars;
-          }
-        });
-      }
-    });
+  if (
+    stream.enabled === true &&
+    stream.vars &&
+    requiredVars &&
+    Object.entries(requiredVars).length > 0
+  ) {
+    for (const [requiredVarName, requiredVar] of Object.entries(requiredVars)) {
+      evaluatedRequiredVars[requiredVarName] = null;
 
-    // get all the required vars definitions
-    packageInfo.data_streams.forEach((dataStream) => {
-      if (dataStream.streams) {
-        dataStream.streams.forEach((stream) => {
-          if (
-            stream.required_vars &&
-            stream.vars &&
-            vars[stream.input] &&
-            !requiredVarDefinitions[stream.input]
-          ) {
-            requiredVarDefinitions[stream.input] = stream.required_vars;
-          }
-        });
-      }
-    });
+      requiredVar.forEach((requiredCondition) => {
+        if (stream.vars && stream.vars[requiredCondition.name]) {
+          const varItem = stream.vars[requiredCondition.name];
 
-    if (Object.entries(requiredVarDefinitions) && Object.entries(vars)) {
-      for (const [streamName, requiredVars] of Object.entries(requiredVarDefinitions)) {
-        for (const [conditionName, conditionCriteria] of Object.entries(requiredVars)) {
-          // refactor this to return if of the conditions are true
-          validatedVars[streamName] = {
-            ...validatedVars[streamName],
-            [conditionName]: validCriteriaMet,
-          };
-          // loop through the reqruiredVar's item
-          conditionCriteria.forEach((conditionVar) => {
-            const varItem = vars[streamName][conditionVar.name];
-
-            if (varItem) {
-              if (!conditionVar.value && varItem.value) {
-                return;
-              }
-
-              if (conditionVar.value && varItem.value && conditionVar.value === varItem.value) {
-                return;
-              }
-
-              validatedVars[streamName] = {
-                ...validatedVars[streamName],
-                [conditionName]: invalidCriteriaMet,
-              };
+          if (varItem) {
+            if (!requiredCondition.value && varItem.value) {
+              return;
             }
-          });
 
-          if (validatedVars[streamName][conditionName] === validCriteriaMet) {
-            hasMetAtleastOneCondition = true;
+            if (
+              requiredCondition.value &&
+              varItem.value &&
+              requiredCondition.value === varItem.value
+            ) {
+              return;
+            }
+
+            evaluatedRequiredVars[requiredVarName] = 'invalid';
           }
         }
+      });
+
+      if (evaluatedRequiredVars[requiredVarName] === null) {
+        hasMetRequiredCriteria = true;
       }
     }
   }
 
-  return !hasMetAtleastOneCondition ? validatedVars : null;
+  return hasMetRequiredCriteria ? null : evaluatedRequiredVars;
 };
 
 /*
@@ -147,7 +117,6 @@ export const validatePackagePolicy = (
     namespace: null,
     inputs: {},
     vars: {},
-    conditionalRequired: {},
   };
   if (!packagePolicy.name.trim()) {
     validationResults.name = [
@@ -171,6 +140,7 @@ export const validatePackagePolicy = (
   // Validate package-level vars
   const packageVarsByName = keyBy(packageInfo.vars || [], 'name');
   const packageVars = Object.entries(packagePolicy.vars || {});
+
   if (packageVars.length) {
     validationResults.vars = packageVars.reduce((results, [name, varEntry]) => {
       results[name] = validatePackagePolicyConfig(
@@ -220,6 +190,13 @@ export const validatePackagePolicy = (
     return varDefs;
   }, {});
 
+  const streamRequiredVarsDefsByDataAndInput = Object.entries(streamsByDatasetAndInput).reduce<
+    Record<string, RegistryRequiredVars | undefined>
+  >((reqVarDefs, [path, stream]) => {
+    reqVarDefs[path] = stream.required_vars;
+    return reqVarDefs;
+  }, {});
+
   // Validate each package policy input with either its own var fields and stream vars
   packagePolicy.inputs.forEach((input) => {
     if (!input.vars && !input.streams) {
@@ -256,7 +233,6 @@ export const validatePackagePolicy = (
 
         const streamVarDefs =
           streamVarDefsByDatasetAndInput[`${stream.data_stream.dataset}-${input.type}`];
-
         if (streamVarDefs && Object.keys(streamVarDefs).length) {
           streamValidationResults.vars = Object.keys(streamVarDefs).reduce((results, name) => {
             const configEntry = stream?.vars?.[name];
@@ -277,24 +253,29 @@ export const validatePackagePolicy = (
         }
 
         inputValidationResults.streams![stream.data_stream.dataset] = streamValidationResults;
+
+        if (stream.vars && stream.enabled) {
+          inputValidationResults.required_vars = validateConditionalRequiredVars(
+            stream,
+            streamRequiredVarsDefsByDataAndInput[`${stream.data_stream.dataset}-${input.type}`]
+          );
+        }
       });
     } else {
       delete inputValidationResults.streams;
     }
 
-    if (inputValidationResults.vars || inputValidationResults.streams) {
+    if (
+      inputValidationResults.vars ||
+      inputValidationResults.streams ||
+      inputValidationResults.required_vars
+    ) {
       validationResults.inputs![inputKey] = inputValidationResults;
     }
   });
 
   if (Object.entries(validationResults.inputs!).length === 0) {
     validationResults.inputs = {};
-  }
-
-  const conditionalRequiredVars = validateConditionalRequiredVars(packageInfo, packagePolicy);
-
-  if (conditionalRequiredVars) {
-    validationResults.conditionalRequired = conditionalRequiredVars;
   }
 
   return validationResults;

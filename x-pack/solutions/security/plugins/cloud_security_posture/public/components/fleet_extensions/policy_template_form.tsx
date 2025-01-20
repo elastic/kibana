@@ -764,9 +764,12 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       (key) => (validationResults?.vars || {})[key] !== null
     );
 
+    const inputName = `${input.policy_template}-${input.type}`;
     const isConditionallyRequired =
-      validationResults?.conditionalRequired &&
-      Object.entries(validationResults.conditionalRequired).length > 0;
+      validationResults?.inputs &&
+      // validationResults.inputs[inputName] &&
+      // validationResults.inputs[inputName].required_vars &&
+      Object.entries(validationResults.inputs[inputName].required_vars ?? {}).length > 0;
 
     const [isLoading, setIsLoading] = useState(validationResultsNonNullFields.length > 0);
     const [canFetchIntegration, setCanFetchIntegration] = useState(true);
