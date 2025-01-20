@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { hasCapabilities, type RequiredCapabilities } from './has_capabilities';
+export {
+  hasCapabilities,
+  CapabilitiesChecker,
+  type RequiredCapabilities,
+} from './has_capabilities';

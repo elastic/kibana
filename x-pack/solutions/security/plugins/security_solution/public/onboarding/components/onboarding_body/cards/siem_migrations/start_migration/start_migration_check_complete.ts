@@ -5,15 +5,39 @@
  * 2.0.
  */
 
+import { SIEM_MIGRATIONS_FEATURE_ID } from '@kbn/security-solution-features/constants';
+import { CapabilitiesChecker } from '../../../../../../common/lib/capabilities';
+// import { getUserPrivilege as getAlertsUserPrivilege } from '../../../../../../detections/containers/detection_engine/alerts/api';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
-import type { OnboardingCardCheckComplete } from '../../../../../types';
 
-export const checkStartMigrationCardComplete: OnboardingCardCheckComplete = async ({
-  siemMigrations,
-}) => {
-  const migrationsStats = await siemMigrations.rules.getRuleMigrationsStats();
-  const isComplete = migrationsStats.some(
-    (migrationStats) => migrationStats.status === SiemMigrationTaskStatus.FINISHED
-  );
-  return isComplete;
+import type { OnboardingCardCheckComplete } from '../../../../../types';
+import type { StartMigrationCardMetadata } from './types';
+import { CAPABILITIES_REQUIRED } from './translations';
+
+export const checkStartMigrationCardComplete: OnboardingCardCheckComplete<
+  StartMigrationCardMetadata
+> = async ({ siemMigrations, application }) => {
+  const capabilities = new CapabilitiesChecker(application.capabilities);
+
+  const missingCapabilities: string[] = [];
+  if (!capabilities.has('siem.all')) {
+    missingCapabilities.push(CAPABILITIES_REQUIRED.securityAll);
+  }
+  if (!capabilities.has(`${SIEM_MIGRATIONS_FEATURE_ID}.all`)) {
+    missingCapabilities.push(CAPABILITIES_REQUIRED.siemMigrationsAll);
+  }
+  if (!capabilities.has('actions.execute')) {
+    missingCapabilities.push(CAPABILITIES_REQUIRED.connectorsRead);
+  }
+
+  let isComplete = false;
+
+  if (missingCapabilities.length === 0) {
+    const migrationsStats = await siemMigrations.rules.getRuleMigrationsStats();
+    isComplete = migrationsStats.some(
+      (migrationStats) => migrationStats.status === SiemMigrationTaskStatus.FINISHED
+    );
+  }
+
+  return { isComplete, metadata: { missingCapabilities, missingIndexPrivileges: [] } };
 };

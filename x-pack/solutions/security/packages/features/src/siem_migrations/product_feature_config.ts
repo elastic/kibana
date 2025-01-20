@@ -27,7 +27,7 @@ export const siemMigrationsDefaultProductFeaturesConfig: Record<
     privileges: {
       all: {
         api: [SIEM_MIGRATIONS_FEATURE_ID],
-        ui: ['siem-migrations'],
+        ui: ['all'],
       },
     },
   },

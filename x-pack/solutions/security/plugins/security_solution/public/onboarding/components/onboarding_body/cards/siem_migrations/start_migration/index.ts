@@ -10,12 +10,12 @@ import type { OnboardingCardConfig } from '../../../../../types';
 import { OnboardingCardId } from '../../../../../constants';
 import { START_MIGRATION_CARD_TITLE } from './translations';
 import cardIcon from './images/card_header_icon.png';
-import { checkStartMigrationCardComplete } from './start_migration_check_complete';
 
 export const startMigrationCardConfig: OnboardingCardConfig = {
   id: OnboardingCardId.siemMigrationsStart,
   title: START_MIGRATION_CARD_TITLE,
   icon: cardIcon,
+  licenseTypeRequired: 'enterprise',
   Component: React.lazy(
     () =>
       import(
@@ -23,6 +23,9 @@ export const startMigrationCardConfig: OnboardingCardConfig = {
         './start_migration_card'
       )
   ),
-  checkComplete: checkStartMigrationCardComplete,
-  licenseTypeRequired: 'enterprise',
+  checkComplete: (services) =>
+    import(
+      /* webpackChunkName: "onboarding_siem_migrations_start_migration_card_check_complete" */
+      './start_migration_check_complete'
+    ).then((module) => module.checkStartMigrationCardComplete(services)),
 };
