@@ -10,9 +10,12 @@
 import React from 'react';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { isDataSourceType, DataSourceType } from '../../../../../common/data_sources';
 import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
+import { ServiceNameLink } from './components/service_name_link';
+import { SpanLink } from './components/span_link';
+import { TransactionLink } from './components/transaction_link';
 
 export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvider => ({
   profileId: 'traces-data-source-profile',
@@ -43,26 +46,60 @@ export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvid
           docViewsRegistry: (registry) => {
             registry.add({
               id: 'doc_view_overview',
-              title: 'Overview',
+              title: `${params.record.flattened['parent.id'] ? 'Span' : 'Transaction'} overview`,
               order: 0,
               component: () => {
                 const spanName = params.record.flattened['span.name'];
+                const spanId = params.record.flattened['span.id'];
                 const transactionName = params.record.flattened['transaction.name'];
                 const serviceName = params.record.flattened['service.name'];
+                const agentName = params.record.flattened['agent.name']?.toString();
                 const traceId = params.record.flattened['trace.id'];
                 const isRootSpan = !params.record.flattened['parent.id'];
                 return (
                   <EuiPanel color="transparent" hasShadow={false}>
-                    {!isRootSpan && <p>Name: {spanName as string}</p>}
-                    <p>Service: {serviceName as string}</p>
-                    <p>
-                      Transaction:
+                    <EuiFlexGroup>
+                      <EuiFlexItem>
+                        <EuiText color="subdued" size="xs">
+                          Name
+                        </EuiText>
                       {isRootSpan ? (
-                        <span>{transactionName as string}</span>
+                          <TransactionLink
+                            traceId={traceId as string}
+                            transactionName={transactionName as string}
+                          />
                       ) : (
-                        <span>{traceId as string}</span>
+                          <SpanLink
+                            spanId={spanId as string}
+                            spanName={spanName as string}
+                            traceId={traceId as string}
+                          />
+                        )}
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    <EuiSpacer size="l" />
+                    <EuiFlexGroup>
+                      <EuiFlexItem>
+                        <EuiText color="subdued" size="xs">
+                          Service
+                        </EuiText>
+                        <ServiceNameLink
+                          serviceName={serviceName as string}
+                          agentName={agentName as string}
+                        />
+                      </EuiFlexItem>
+                      {!isRootSpan && (
+                        <EuiFlexItem>
+                          <EuiText color="subdued" size="xs">
+                            Transaction
+                          </EuiText>
+                          <TransactionLink
+                            traceId={traceId as string}
+                            transactionName={transactionName as string}
+                          />
+                        </EuiFlexItem>
                       )}
-                    </p>
+                    </EuiFlexGroup>
                   </EuiPanel>
                 );
               },
