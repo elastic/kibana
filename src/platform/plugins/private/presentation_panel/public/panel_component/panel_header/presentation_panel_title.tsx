@@ -106,7 +106,11 @@ export const PresentationPanelTitle = ({
     `;
 
     if (viewMode !== 'edit' || !isApiCompatibleWithCustomizePanelAction(api)) {
-      return <span css={titleStyles}>{panelTitle}</span>;
+      return (
+        <span data-test-subj="embeddablePanelTitleInner" css={titleStyles}>
+          {panelTitle}
+        </span>
+      );
     }
 
     return (
@@ -116,14 +120,14 @@ export const PresentationPanelTitle = ({
         css={titleStyles}
         aria-label={i18n.translate('presentationPanel.header.titleAriaLabel', {
           defaultMessage: 'Click to edit title: {title}',
-          values: { title: panelTitle ?? placeholderTitle },
+          values: { title: panelTitle },
         })}
-        data-test-subj={'embeddablePanelTitleLink'}
+        data-test-subj="embeddablePanelTitleLink"
       >
-        {panelTitle || placeholderTitle}
+        {panelTitle}
       </EuiLink>
     );
-  }, [setPanelTitleElmRef, hideTitle, panelTitle, viewMode, api]);
+  }, [setPanelTitleElmRef, hideTitle, panelTitle, viewMode, api, euiTheme]);
 
   const onClick = usePresentationPanelTitleClickHandler(panelTitleElmRef);
 
@@ -163,7 +167,7 @@ export const PresentationPanelTitle = ({
         }}
       >
         <>
-          {panelTitleElement}{' '}
+          {panelTitleElement}
           <EuiIcon
             type="iInCircle"
             color="subdued"
@@ -172,7 +176,7 @@ export const PresentationPanelTitle = ({
         </>
       </EuiToolTip>
     );
-  }, [hideTitle, panelDescription, panelTitle, panelTitleElement]);
+  }, [hideTitle, panelDescription, panelTitle, panelTitleElement, euiTheme]);
 
   return describedPanelTitleElement;
 };
