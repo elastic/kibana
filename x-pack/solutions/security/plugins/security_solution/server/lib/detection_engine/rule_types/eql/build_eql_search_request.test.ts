@@ -229,95 +229,95 @@ describe('buildEqlSearchRequest', () => {
       exceptionFilter: filter,
     });
     expect(request).toMatchInlineSnapshot(`
-        Object {
-          "allow_no_indices": true,
-          "event_category_field": undefined,
-          "fields": Array [
-            Object {
-              "field": "*",
-              "include_unmapped": true,
-            },
-            Object {
-              "field": "@timestamp",
-              "format": "strict_date_optional_time",
-            },
-          ],
-          "filter": Object {
-            "bool": Object {
-              "filter": Array [
-                Object {
-                  "range": Object {
-                    "@timestamp": Object {
-                      "format": "strict_date_optional_time",
-                      "gte": "now-5m",
-                      "lte": "now",
-                    },
+      Object {
+        "allow_no_indices": true,
+        "event_category_field": undefined,
+        "fields": Array [
+          Object {
+            "field": "*",
+            "include_unmapped": true,
+          },
+          Object {
+            "field": "@timestamp",
+            "format": "strict_date_optional_time",
+          },
+        ],
+        "filter": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "format": "strict_date_optional_time",
+                    "gte": "now-5m",
+                    "lte": "now",
                   },
                 },
-                Object {
-                  "bool": Object {
-                    "filter": Array [],
-                    "must": Array [],
-                    "must_not": Array [
-                      Object {
-                        "bool": Object {
-                          "should": Array [
-                            Object {
-                              "bool": Object {
-                                "filter": Array [
-                                  Object {
-                                    "nested": Object {
-                                      "path": "some.parentField",
-                                      "query": Object {
-                                        "bool": Object {
-                                          "minimum_should_match": 1,
-                                          "should": Array [
-                                            Object {
-                                              "match_phrase": Object {
-                                                "some.parentField.nested.field": "some value",
-                                              },
+              },
+              Object {
+                "bool": Object {
+                  "filter": Array [],
+                  "must": Array [],
+                  "must_not": Array [
+                    Object {
+                      "bool": Object {
+                        "should": Array [
+                          Object {
+                            "bool": Object {
+                              "filter": Array [
+                                Object {
+                                  "nested": Object {
+                                    "path": "some.parentField",
+                                    "query": Object {
+                                      "bool": Object {
+                                        "minimum_should_match": 1,
+                                        "should": Array [
+                                          Object {
+                                            "match_phrase": Object {
+                                              "some.parentField.nested.field": "some value",
                                             },
-                                          ],
+                                          },
+                                        ],
+                                      },
+                                    },
+                                    "score_mode": "none",
+                                  },
+                                },
+                                Object {
+                                  "bool": Object {
+                                    "minimum_should_match": 1,
+                                    "should": Array [
+                                      Object {
+                                        "match_phrase": Object {
+                                          "some.not.nested.field": "some value",
                                         },
                                       },
-                                      "score_mode": "none",
-                                    },
+                                    ],
                                   },
-                                  Object {
-                                    "bool": Object {
-                                      "minimum_should_match": 1,
-                                      "should": Array [
-                                        Object {
-                                          "match_phrase": Object {
-                                            "some.not.nested.field": "some value",
-                                          },
-                                        },
-                                      ],
-                                    },
-                                  },
-                                ],
-                              },
+                                },
+                              ],
                             },
-                          ],
-                        },
+                          },
+                        ],
                       },
-                    ],
-                    "should": Array [],
-                  },
+                    },
+                  ],
+                  "should": Array [],
                 },
-              ],
-            },
+              },
+            ],
           },
-          "query": "process where true",
-          "runtime_mappings": undefined,
-          "size": 100,
-          "timestamp_field": undefined,
-          "index": Array [
-            "testindex1",
-            "testindex2",
-          ],
-        }
-      `);
+        },
+        "index": Array [
+          "testindex1",
+          "testindex2",
+        ],
+        "query": "process where true",
+        "runtime_mappings": undefined,
+        "size": 100,
+        "timestamp_field": undefined,
+      }
+    `);
   });
 
   test('should build a request with filters', () => {
