@@ -8,16 +8,14 @@
 import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import { AbortError, abortSignalToPromise } from '@kbn/kibana-utils-plugin/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
+import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
 import {
   SiemMigrationStatus,
   SiemMigrationTaskStatus,
 } from '../../../../../common/siem_migrations/constants';
 import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
-import type {
-  RuleMigrationDataStats,
-  RuleMigrationFilters,
-} from '../data/rule_migrations_data_rules_client';
+import type { RuleMigrationDataStats } from '../data/rule_migrations_data_rules_client';
 import type { SiemRuleMigrationsClientDependencies } from '../types';
 import { getRuleMigrationAgent } from './agent';
 import type { MigrateRuleState } from './agent/types';

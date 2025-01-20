@@ -13,6 +13,7 @@ import { isEmpty, isNumber } from 'lodash/fp';
 import React from 'react';
 import { css } from '@emotion/css';
 import type { FieldSpec } from '@kbn/data-plugin/common';
+import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import { getAgentTypeForAgentIdField } from '../../../../../common/lib/endpoint/utils/get_agent_type_for_agent_id_field';
 import {
   ALERT_HOST_CRITICALITY,
@@ -35,20 +36,19 @@ import {
   EVENT_MODULE_FIELD_NAME,
   EVENT_URL_FIELD_NAME,
   GEO_FIELD_TYPE,
-  HOST_NAME_FIELD_NAME,
   IP_FIELD_TYPE,
   MESSAGE_FIELD_NAME,
   REFERENCE_URL_FIELD_NAME,
   RULE_REFERENCE_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
   SIGNAL_STATUS_FIELD_NAME,
-  USER_NAME_FIELD_NAME,
 } from './constants';
 import { renderEventModule, RenderRuleName, renderUrl } from './formatted_field_helpers';
 import { RuleStatus } from './rule_status';
 import { HostName } from './host_name';
 import { UserName } from './user_name';
 import { AssetCriticalityLevel } from './asset_criticality_level';
+import { ServiceName } from './service_name';
 
 // simple black-list to prevent dragging and dropping fields such as message name
 const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
@@ -177,7 +177,7 @@ const FormattedFieldValueComponent: React.FC<{
         value={`${value}`}
       />
     );
-  } else if (fieldName === HOST_NAME_FIELD_NAME) {
+  } else if (fieldName === EntityTypeToIdentifierField.host) {
     return (
       <HostName
         Component={Component}
@@ -193,9 +193,25 @@ const FormattedFieldValueComponent: React.FC<{
         value={value}
       />
     );
-  } else if (fieldName === USER_NAME_FIELD_NAME) {
+  } else if (fieldName === EntityTypeToIdentifierField.user) {
     return (
       <UserName
+        Component={Component}
+        contextId={contextId}
+        eventId={eventId}
+        fieldName={fieldName}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
+        isDraggable={isDraggable}
+        isButton={isButton}
+        onClick={onClick}
+        title={title}
+        value={value}
+      />
+    );
+  } else if (fieldName === EntityTypeToIdentifierField.service) {
+    return (
+      <ServiceName
         Component={Component}
         contextId={contextId}
         eventId={eventId}
