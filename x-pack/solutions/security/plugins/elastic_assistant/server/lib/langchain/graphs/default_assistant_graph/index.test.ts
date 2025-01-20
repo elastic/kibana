@@ -67,7 +67,7 @@ describe('callAssistantGraph', () => {
     telemetryParams: {},
     traceOptions: {},
     responseLanguage: 'English',
-    contentReferencesStore: contentReferencesStoreFactory()
+    contentReferencesStore: contentReferencesStoreFactory(),
   } as unknown as AgentExecutorParams<boolean>;
 
   beforeEach(() => {
