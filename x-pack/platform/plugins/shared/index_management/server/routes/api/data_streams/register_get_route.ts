@@ -177,8 +177,6 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
         const { index_templates: indexTemplates } =
           await client.asCurrentUser.indices.getIndexTemplate();
 
-        const { persistent } = await client.asCurrentUser.cluster.getSettings();
-
         // Only take the lifecycle of the first data stream since all data streams have the same global retention period
         const lifecycle = await getDataStreamLifecycle(client, dataStreams[0].name);
         // @ts-ignore - TS doesn't know about the `global_retention` property yet
@@ -193,12 +191,7 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
           indexTemplates,
         });
 
-        return response.ok({
-          body: deserializeDataStreamList(
-            enhancedDataStreams,
-            persistent?.cluster?.logsdb?.enabled
-          ),
-        });
+        return response.ok({ body: deserializeDataStreamList(enhancedDataStreams) });
       } catch (error) {
         return handleEsError({ error, response });
       }
@@ -269,13 +262,7 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
             globalMaxRetention,
             indexTemplates,
           });
-
-          const { persistent } = await client.asCurrentUser.cluster.getSettings();
-
-          const body = deserializeDataStream(
-            enhancedDataStreams[0],
-            persistent?.cluster?.logsdb?.enabled
-          );
+          const body = deserializeDataStream(enhancedDataStreams[0]);
           return response.ok({ body });
         }
 

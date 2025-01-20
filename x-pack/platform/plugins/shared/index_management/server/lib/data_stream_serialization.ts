@@ -6,14 +6,11 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import { LOGSDB_INDEX_MODE, STANDARD_INDEX_MODE } from '../../common/constants';
+import { STANDARD_INDEX_MODE } from '../../common/constants';
 import { IndexMode } from '../../common/types/data_streams';
 import type { DataStream, EnhancedDataStreamFromEs, Health } from '../../common';
 
-export function deserializeDataStream(
-  dataStreamFromEs: EnhancedDataStreamFromEs,
-  isLogsdbEnabled: boolean
-): DataStream {
+export function deserializeDataStream(dataStreamFromEs: EnhancedDataStreamFromEs): DataStream {
   const {
     name,
     timestamp_field: timeStampField,
@@ -79,16 +76,12 @@ export function deserializeDataStream(
       globalMaxRetention,
     },
     nextGenerationManagedBy,
-    indexMode: (indexMode ??
-      (isLogsdbEnabled && /^logs-[^-]+-[^-]+$/.test(name)
-        ? LOGSDB_INDEX_MODE
-        : STANDARD_INDEX_MODE)) as IndexMode,
+    indexMode: (indexMode ?? STANDARD_INDEX_MODE) as IndexMode,
   };
 }
 
 export function deserializeDataStreamList(
-  dataStreamsFromEs: EnhancedDataStreamFromEs[],
-  isLogsdbEnabled: boolean
+  dataStreamsFromEs: EnhancedDataStreamFromEs[]
 ): DataStream[] {
-  return dataStreamsFromEs.map((dataStream) => deserializeDataStream(dataStream, isLogsdbEnabled));
+  return dataStreamsFromEs.map((dataStream) => deserializeDataStream(dataStream));
 }
