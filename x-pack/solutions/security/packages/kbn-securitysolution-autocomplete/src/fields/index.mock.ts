@@ -7,7 +7,7 @@
 
 import { DataViewFieldBase } from '@kbn/es-query';
 
-// Copied from "src/plugins/data/common/index_patterns/fields/fields.mocks.ts" but with the types changed to "DataViewFieldBase" since that type is compatible.
+// Copied from "src/platform/plugins/shared/data/common/index_patterns/fields/fields.mocks.ts" but with the types changed to "DataViewFieldBase" since that type is compatible.
 // TODO: This should move out once those mocks are directly useable or in their own package, https://github.com/elastic/kibana/issues/100715
 
 export const fields: DataViewFieldBase[] = [

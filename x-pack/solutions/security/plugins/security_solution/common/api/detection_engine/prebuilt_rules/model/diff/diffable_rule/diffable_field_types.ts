@@ -23,7 +23,6 @@ import {
   TimestampOverride,
   TimestampOverrideFallbackDisabled,
 } from '../../../../model/rule_schema';
-import { TimeDuration } from '../../../../model/rule_schema/time_duration';
 
 // -------------------------------------------------------------------------------------------------
 // Rule data source
@@ -90,15 +89,6 @@ export type RuleEsqlQuery = z.infer<typeof RuleEsqlQuery>;
 export const RuleEsqlQuery = z.object({
   query: RuleQuery,
   language: z.literal('esql'),
-});
-
-// -------------------------------------------------------------------------------------------------
-// Rule schedule
-
-export type RuleSchedule = z.infer<typeof RuleSchedule>;
-export const RuleSchedule = z.object({
-  interval: TimeDuration({ allowedUnits: ['s', 'm', 'h'] }),
-  lookback: TimeDuration({ allowedUnits: ['s', 'm', 'h'] }),
 });
 
 // -------------------------------------------------------------------------------------------------

@@ -219,7 +219,10 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
 };
 
 export const getUserConfirmationProvider =
-  (overlays: OverlayStart, startServices: Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>) =>
+  (
+    overlays: OverlayStart,
+    startServices: Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile'>
+  ) =>
   async (forceStopModel: NLPModelItem): Promise<string[]> => {
     return new Promise(async (resolve, reject) => {
       try {

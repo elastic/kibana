@@ -145,14 +145,12 @@ const getBenchmarkTableColumns = (
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.APPLICABLE_TO,
     render: (benchmarkId: BenchmarksCisId) => {
       return (
-        <>
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <CISBenchmarkIcon type={benchmarkId} size={'l'} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{getBenchmarkApplicableTo(benchmarkId)}</EuiFlexItem>
-          </EuiFlexGroup>
-        </>
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <CISBenchmarkIcon type={benchmarkId} size={'l'} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{getBenchmarkApplicableTo(benchmarkId)}</EuiFlexItem>
+        </EuiFlexGroup>
       );
     },
   },
@@ -189,8 +187,8 @@ const getBenchmarkTableColumns = (
 
       const isKspmBenchmark = ['cis_k8s', 'cis_eks'].includes(benchmark.id);
       const groupByField = isKspmBenchmark
-        ? FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME
-        : FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME;
+        ? FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_ID
+        : FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID;
 
       return (
         <EuiButtonEmpty

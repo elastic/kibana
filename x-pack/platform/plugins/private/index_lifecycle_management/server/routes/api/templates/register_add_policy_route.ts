@@ -101,7 +101,16 @@ export function registerAddPolicyRoute({
   lib: { handleEsError },
 }: RouteDependencies) {
   router.post(
-    { path: addBasePath('/template'), validate: { body: bodySchema, query: querySchema } },
+    {
+      path: addBasePath('/template'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: { body: bodySchema, query: querySchema },
+    },
     license.guardApiRoute(async (context, request, response) => {
       const body = request.body as typeof bodySchema.type;
       const { templateName, policyName, aliasName } = body;

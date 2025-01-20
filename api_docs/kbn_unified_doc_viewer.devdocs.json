@@ -25,7 +25,7 @@
         "tags": [],
         "label": "DocViewsRegistry",
         "description": [],
-        "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
+        "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,7 +39,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
+            "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -62,7 +62,7 @@
                   "DocView",
                   "[] | undefined"
                 ],
-                "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
+                "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -82,7 +82,7 @@
               "DocView",
               "[]"
             ],
-            "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
+            "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -102,7 +102,7 @@
               "DocViewFactory",
               ") => void"
             ],
-            "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
+            "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -118,7 +118,7 @@
                   " | ",
                   "DocViewFactory"
                 ],
-                "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
+                "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -136,7 +136,7 @@
             "signature": [
               "(id: string) => void"
             ],
-            "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
+            "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -150,7 +150,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
+                "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -168,7 +168,7 @@
             "signature": [
               "(id: string) => void"
             ],
-            "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
+            "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -182,7 +182,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
+                "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -200,7 +200,7 @@
             "signature": [
               "(id: string) => void"
             ],
-            "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
+            "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -214,7 +214,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
+                "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -239,7 +239,7 @@
                 "text": "DocViewsRegistry"
               }
             ],
-            "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
+            "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -264,7 +264,7 @@
           "DocViewerProps",
           ") => React.JSX.Element | null"
         ],
-        "path": "packages/kbn-unified-doc-viewer/src/components/doc_viewer/doc_viewer.tsx",
+        "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/components/doc_viewer/doc_viewer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -278,7 +278,7 @@
             "signature": [
               "DocViewerProps"
             ],
-            "path": "packages/kbn-unified-doc-viewer/src/components/doc_viewer/doc_viewer.tsx",
+            "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/components/doc_viewer/doc_viewer.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -297,7 +297,7 @@
         "signature": [
           "({\n  fieldName,\n  fieldMapping,\n  fieldType,\n  fieldIconProps,\n  scripted = false,\n  highlight = '',\n}: Props) => React.JSX.Element"
         ],
-        "path": "packages/kbn-unified-doc-viewer/src/components/field_name/field_name.tsx",
+        "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/components/field_name/field_name.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -311,7 +311,7 @@
             "signature": [
               "Props"
             ],
-            "path": "packages/kbn-unified-doc-viewer/src/components/field_name/field_name.tsx",
+            "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/components/field_name/field_name.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -330,7 +330,7 @@
         "tags": [],
         "label": "ElasticRequestState",
         "description": [],
-        "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
+        "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

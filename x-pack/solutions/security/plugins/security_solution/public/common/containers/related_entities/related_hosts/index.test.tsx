@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { act, renderHook } from '@testing-library/react-hooks';
+
+import { renderHook, act } from '@testing-library/react';
 import { TestProviders } from '../../../mock';
 import { useUserRelatedHosts } from '.';
 import { useSearchStrategy } from '../../use_search_strategy';
@@ -13,11 +14,6 @@ jest.mock('../../use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
 }));
 
-jest.mock('../../../../entity_analytics/api/hooks/use_risk_engine_status', () => ({
-  useIsNewRiskScoreModuleInstalled: jest
-    .fn()
-    .mockReturnValue({ isLoading: false, installed: true }),
-}));
 const mockUseSearchStrategy = useSearchStrategy as jest.Mock;
 const mockSearch = jest.fn();
 
