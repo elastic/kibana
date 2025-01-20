@@ -52,7 +52,7 @@ export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
     setIsLoading(true);
     let isSuccess = false;
     try {
-      const { data } = await sendUpdateAgentPolicyForRq(agentPolicy.id, {
+      await sendUpdateAgentPolicyForRq(agentPolicy.id, {
         name: agentPolicy.name,
         namespace: agentPolicy.namespace,
         required_versions: targetVersions,
