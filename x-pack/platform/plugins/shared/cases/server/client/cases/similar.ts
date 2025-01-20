@@ -20,7 +20,7 @@ import { Operations } from '../../authorization';
 import { buildFilter, buildObservablesFieldsFilter, combineFilters } from '../utils';
 import { combineFilterWithAuthorizationFilter } from '../../authorization/utils';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
-import { getAvailableObservableTypesSet } from '../observable_types';
+import { getAvailableObservableTypesMap } from '../observable_types';
 
 interface Similarity {
   typeKey: string;
@@ -80,7 +80,7 @@ export const similar = async (
     const paramArgs = decodeWithExcessOrThrow(SimilarCasesSearchRequestRt)(params);
     const retrievedCase = await caseService.getCase({ id: caseId });
 
-    const availableObservableTypesSet = await getAvailableObservableTypesSet(
+    const availableObservableTypesSet = await getAvailableObservableTypesMap(
       casesClient,
       retrievedCase.attributes.owner
     );

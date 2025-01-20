@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import type { ObservableType } from '../../common/types/domain';
 import { OBSERVABLE_TYPES_BUILTIN } from '../../common/constants';
 import type { CasesClient } from './client';
 
 export const getAvailableObservableTypes = async (casesClient: CasesClient, owner: string) => {
-  try {
-    const configurations = await casesClient.configure.get({
-      owner,
-    });
-    const observableTypes = configurations?.[0]?.observableTypes ?? [];
+  const configurations = await casesClient.configure.get({
+    owner,
+  });
+  const observableTypes = configurations?.[0]?.observableTypes ?? [];
 
-    return [...observableTypes, ...OBSERVABLE_TYPES_BUILTIN];
-  } catch (error) {
-    return [];
-  }
+  return [...observableTypes, ...OBSERVABLE_TYPES_BUILTIN];
 };
 
-export const getAvailableObservableTypesSet = async (casesClient: CasesClient, owner: string) => {
+export const getAvailableObservableTypesMap = async (
+  casesClient: CasesClient,
+  owner: string
+): Promise<Map<string, ObservableType>> => {
   try {
     const observableTypes = await getAvailableObservableTypes(casesClient, owner);
 
