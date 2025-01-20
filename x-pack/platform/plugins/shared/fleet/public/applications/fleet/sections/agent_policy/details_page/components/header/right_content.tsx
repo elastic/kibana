@@ -21,6 +21,7 @@ import {
   EuiToolTip,
   EuiIconTip,
   EuiPortal,
+  EuiNotificationBadge,
 } from '@elastic/eui';
 
 import { useAgentPolicyRefresh, useAuthz, useLink } from '../../../../../hooks';
@@ -241,11 +242,11 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
                             </EuiLink>
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
-                            <FormattedMessage
-                              id="xpack.fleet.policyDetails.summary.autoUpgradeCount"
-                              defaultMessage="{count}"
-                              values={{ count: agentPolicy.required_versions?.length || 0 }}
-                            />
+                            <EuiNotificationBadge
+                              color={agentPolicy.required_versions?.length ? 'accent' : 'subdued'}
+                            >
+                              {agentPolicy.required_versions?.length || 0}
+                            </EuiNotificationBadge>
                           </EuiFlexItem>
                         </EuiFlexGroup>
                       ),
