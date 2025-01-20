@@ -30,6 +30,7 @@ import { useInvalidateGetMigrationTranslationStats } from '../logic/use_get_migr
 import { useGetIntegrations } from '../service/hooks/use_get_integrations';
 import { PageTitle } from './page_title';
 import { RuleMigrationsUploadMissingPanel } from '../components/migration_status_panels/upload_missing_panel';
+import { SiemTranslatedRulesTour } from '../components/tours/translation_guide';
 
 type MigrationRulesPageProps = RouteComponentProps<{ migrationId?: string }>;
 
@@ -133,6 +134,7 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
       <>
         <NeedAdminForUpdateRulesCallOut />
         <MissingPrivilegesCallOut />
+        <SiemTranslatedRulesTour />
 
         <SecuritySolutionPageWrapper>
           <HeaderPage title={pageTitle}>
