@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EsqlVariablesService } from './esql_variables_service';
+
+const esqlVariablesService = new EsqlVariablesService();
+
+export { esqlVariablesService, type EsqlVariablesService };
 export {
   type PublishesESQLVariable,
   type PublishesESQLVariables,
   apiPublishesESQLVariable,
   apiPublishesESQLVariables,
-  getVariablesByType,
-  variableExists,
-} from './esql_variables';
+} from './esql_publishing';

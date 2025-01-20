@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLControlVariable, ESQLVariableType } from '@kbn/esql-validation-autocomplete';
+import { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import { PublishingSubject } from '@kbn/presentation-publishing';
 
 /**
@@ -35,9 +35,3 @@ export const apiPublishesESQLVariables = (
     unknownApi && (unknownApi as PublishesESQLVariables)?.esqlVariables$ !== undefined
   );
 };
-
-export const getVariablesByType = (esqlVariables: ESQLControlVariable[], type: ESQLVariableType) =>
-  esqlVariables.filter((variable) => variable.type === type);
-
-export const variableExists = (esqlVariables: ESQLControlVariable[], key: string) =>
-  esqlVariables.some((variable) => variable.key === key);

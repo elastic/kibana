@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
-import type { ESQLControlVariable, ESQLVariableType } from '@kbn/esql-validation-autocomplete';
+import type { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
 import { monaco } from '@kbn/monaco';
 import type { ESQLControlState } from './types';
 
@@ -20,7 +20,6 @@ const ACTION_CREATE_ESQL_CONTROL = 'ACTION_CREATE_ESQL_CONTROL';
 interface Context {
   queryString: string;
   variableType: ESQLVariableType;
-  esqlVariables: ESQLControlVariable[];
   onSaveControl?: (controlState: ESQLControlState, updatedQuery: string) => Promise<void>;
   onCancelControl?: () => void;
   cursorPosition?: monaco.Position;
@@ -54,7 +53,6 @@ export class CreateESQLControlAction implements Action<Context> {
   public async execute({
     queryString,
     variableType,
-    esqlVariables,
     onSaveControl,
     onCancelControl,
     cursorPosition,
@@ -63,7 +61,6 @@ export class CreateESQLControlAction implements Action<Context> {
     const { executeAction } = await getHelpersAsync();
     return executeAction({
       queryString,
-      esqlVariables,
       core: this.core,
       search: this.search,
       variableType,

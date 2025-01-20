@@ -22,9 +22,9 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ISearchGeneric } from '@kbn/search-types';
 import ESQLEditor from '@kbn/esql-editor';
-import { getVariablesByType, variableExists } from '@kbn/esql-variables/common';
-import { ESQLControlVariable, ESQLVariableType } from '@kbn/esql-validation-autocomplete';
+import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
 import { getIndexPatternFromESQLQuery, getESQLResults } from '@kbn/esql-utils';
+import { esqlVariablesService } from '@kbn/esql-variables/common';
 import type { ESQLControlState } from '../types';
 import {
   Header,
@@ -47,7 +47,6 @@ import { ChooseColumnPopover } from './choose_column_popover';
 interface ValueControlFormProps {
   search: ISearchGeneric;
   variableType: ESQLVariableType;
-  esqlVariables?: ESQLControlVariable[];
   queryString: string;
   closeFlyout: () => void;
   onCreateControl: (state: ESQLControlState, variableName: string, variableValue: string) => void;
@@ -66,7 +65,6 @@ export function ValueControlForm({
   search,
   closeFlyout,
   onCreateControl,
-  esqlVariables = [],
   onEditControl,
 }: ValueControlFormProps) {
   const valuesField = useMemo(() => {
@@ -76,7 +74,7 @@ export function ValueControlForm({
     return null;
   }, [variableType, queryString]);
   const suggestedVariableName = useMemo(() => {
-    const existingVariables = getVariablesByType(esqlVariables, variableType);
+    const existingVariables = esqlVariablesService.getVariablesByType(variableType);
 
     if (initialState) {
       return initialState.variableName;
@@ -101,7 +99,7 @@ export function ValueControlForm({
       'variable',
       existingVariables.map((variable) => variable.key)
     );
-  }, [esqlVariables, variableType, initialState, valuesField]);
+  }, [variableType, initialState, valuesField]);
 
   const [controlFlyoutType, setControlFlyoutType] = useState<EsqlControlType>(
     initialState?.controlType ??
@@ -154,20 +152,10 @@ export function ValueControlForm({
   }, [variableType, selectedValues]);
 
   useEffect(() => {
-    setFormIsInvalid(
-      !variableName ||
-        variableExists(esqlVariables, variableName.replace('?', '')) ||
-        !areValuesValid ||
-        !selectedValues.length
-    );
-  }, [
-    areValuesValid,
-    esqlVariables,
-    isControlInEditMode,
-    selectedValues.length,
-    valuesQuery,
-    variableName,
-  ]);
+    const variableExists =
+      esqlVariablesService.variableExists(variableName.replace('?', '')) && !isControlInEditMode;
+    setFormIsInvalid(!variableName || variableExists || !areValuesValid || !selectedValues.length);
+  }, [areValuesValid, isControlInEditMode, selectedValues.length, valuesQuery, variableName]);
 
   const onValuesChange = useCallback((selectedOptions: EuiComboBoxOptionOption[]) => {
     setSelectedValues(selectedOptions);
@@ -355,7 +343,6 @@ export function ValueControlForm({
         />
 
         <VariableName
-          esqlVariables={esqlVariables}
           variableName={variableName}
           isControlInEditMode={isControlInEditMode}
           onVariableNameChange={onVariableNameChange}

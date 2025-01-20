@@ -19,9 +19,9 @@ import {
 import { css } from '@emotion/react';
 import { monaco } from '@kbn/monaco';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { getVariablesByType, variableExists } from '@kbn/esql-variables/common';
-import { ESQLControlVariable, ESQLVariableType } from '@kbn/esql-validation-autocomplete';
+import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
+import { esqlVariablesService } from '@kbn/esql-variables/common';
 import type { ESQLControlState } from '../types';
 import {
   Header,
@@ -37,7 +37,6 @@ import { EsqlControlType } from '../types';
 interface FieldControlFormProps {
   search: ISearchGeneric;
   variableType: ESQLVariableType;
-  esqlVariables?: ESQLControlVariable[];
   queryString: string;
   closeFlyout: () => void;
   onCreateControl: (state: ESQLControlState, variableName: string, variableValue: string) => void;
@@ -53,14 +52,13 @@ export function FieldControlForm({
   queryString,
   cursorPosition,
   onCreateControl,
-  esqlVariables = [],
   onEditControl,
   onCancelControl,
   search,
   closeFlyout,
 }: FieldControlFormProps) {
   const suggestedVariableName = useMemo(() => {
-    const existingVariables = getVariablesByType(esqlVariables, variableType);
+    const existingVariables = esqlVariablesService.getVariablesByType(variableType);
 
     return initialState
       ? `${initialState.variableName}`
@@ -68,7 +66,7 @@ export function FieldControlForm({
           'field',
           existingVariables.map((variable) => variable.key)
         );
-  }, [esqlVariables, variableType, initialState]);
+  }, [variableType, initialState]);
 
   const [availableFieldsOptions, setAvailableFieldsOptions] = useState<EuiComboBoxOptionOption[]>(
     []
@@ -114,12 +112,10 @@ export function FieldControlForm({
   }, [availableFieldsOptions.length, variableType, cursorPosition, queryString, search]);
 
   useEffect(() => {
-    setFormIsInvalid(
-      !selectedFields.length ||
-        !variableName ||
-        (variableExists(esqlVariables, variableName.replace('?', '')) && !isControlInEditMode)
-    );
-  }, [esqlVariables, isControlInEditMode, selectedFields.length, variableName]);
+    const variableExists =
+      esqlVariablesService.variableExists(variableName.replace('?', '')) && !isControlInEditMode;
+    setFormIsInvalid(!selectedFields.length || !variableName || variableExists);
+  }, [isControlInEditMode, selectedFields.length, variableName]);
 
   const onFieldsChange = useCallback((selectedOptions: EuiComboBoxOptionOption[]) => {
     setSelectedFields(selectedOptions);
@@ -224,7 +220,6 @@ export function FieldControlForm({
         <ControlType isDisabled initialControlFlyoutType={EsqlControlType.STATIC_VALUES} />
 
         <VariableName
-          esqlVariables={esqlVariables}
           variableName={variableName}
           isControlInEditMode={isControlInEditMode}
           onVariableNameChange={onVariableNameChange}
