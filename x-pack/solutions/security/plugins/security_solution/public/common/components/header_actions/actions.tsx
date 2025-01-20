@@ -73,6 +73,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
   refetch,
   toggleShowNotes,
   disablePinAction = true,
+  disableTimelineAction = false,
 }) => {
   const dispatch = useDispatch();
 
@@ -339,7 +340,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           </GuidedOnboardingTourStep>
         )}
         <>
-          {timelineId !== TimelineId.active && (
+          {!disableTimelineAction && timelineId !== TimelineId.active && (
             <InvestigateInTimelineAction
               ariaLabel={i18n.SEND_ALERT_TO_TIMELINE_FOR_ROW({ ariaRowindex, columnValues })}
               key="investigate-in-timeline"

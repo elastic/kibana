@@ -6,17 +6,19 @@
  */
 
 import { useMemo } from 'react';
-import { action } from '@storybook/addon-actions';
 import type { UseFetchGraphDataParams } from '../../hooks/use_fetch_graph_data';
-import { USE_FETCH_GRAPH_DATA_ACTION, USE_FETCH_GRAPH_DATA_REFRESH_ACTION } from './constants';
+import { useMockDataContext } from './mock_context_provider';
 
 export const useFetchGraphData = (params: UseFetchGraphDataParams) => {
-  action(USE_FETCH_GRAPH_DATA_ACTION)(JSON.stringify(params));
+  const {
+    data: { useFetchGraphDataMock },
+  } = useMockDataContext();
 
+  useFetchGraphDataMock?.log?.(JSON.stringify(params));
   return useMemo(
     () => ({
       isLoading: false,
-      isFetching: false,
+      isFetching: useFetchGraphDataMock?.isFetching ?? false,
       isError: false,
       data: {
         nodes: [
@@ -64,8 +66,8 @@ export const useFetchGraphData = (params: UseFetchGraphDataParams) => {
           },
         ],
       },
-      refresh: action(USE_FETCH_GRAPH_DATA_REFRESH_ACTION),
+      refresh: useFetchGraphDataMock?.refresh ?? (() => {}),
     }),
-    []
+    [useFetchGraphDataMock]
   );
 };
