@@ -86,5 +86,9 @@
     "@kbn/search-navigation",
     "@kbn/cell-actions",
     "@kbn/ui-actions-plugin",
+    "@kbn/core-deprecations-server",
+    "@kbn/core-deprecations-common",
+    "@kbn/fleet-plugin",
+    "@kbn/core-http-request-handler-context-server",
   ]
 }

@@ -22,7 +22,7 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { hostsModel, hostsSelectors } from '../../store';
 import type { State } from '../../../../common/store';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../../../common/search_strategy';
+import { EMPTY_SEVERITY_COUNT, EntityType } from '../../../../../common/search_strategy';
 import { RiskScoresNoDataDetected } from '../../../../entity_analytics/components/risk_score_onboarding/risk_score_no_data_detected';
 import { useRiskEngineStatus } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
 import { RiskScoreUpdatePanel } from '../../../../entity_analytics/components/risk_score_update_panel';
@@ -80,7 +80,7 @@ export const HostRiskScoreQueryTabBody = ({
   } = useRiskScore({
     filterQuery,
     pagination,
-    riskEntity: RiskScoreEntity.host,
+    riskEntity: EntityType.host,
     skip: querySkip,
     sort,
     timerange,
@@ -89,7 +89,7 @@ export const HostRiskScoreQueryTabBody = ({
   const { severityCount, loading: isKpiLoading } = useRiskScoreKpi({
     filterQuery,
     skip: querySkip,
-    riskEntity: RiskScoreEntity.host,
+    riskEntity: EntityType.host,
   });
 
   const status = {
@@ -116,7 +116,7 @@ export const HostRiskScoreQueryTabBody = ({
       <EuiPanel hasBorder>
         <EnableRiskScore
           {...status}
-          entityType={RiskScoreEntity.host}
+          entityType={EntityType.host}
           refetch={refetch}
           timerange={timerange}
         />
@@ -131,7 +131,7 @@ export const HostRiskScoreQueryTabBody = ({
     data &&
     data.length === 0
   ) {
-    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.host} refetch={refetch} />;
+    return <RiskScoresNoDataDetected entityType={EntityType.host} refetch={refetch} />;
   }
 
   return (

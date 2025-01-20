@@ -8,7 +8,7 @@ import type { Logger } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { i18n } from '@kbn/i18n';
-import type { RiskScoreEntity } from '../../../../../common/search_strategy';
+import type { EntityType } from '../../../../../common/search_strategy';
 import { RISK_SCORE_TAG_DESCRIPTION, getRiskScoreTagName } from './utils';
 import type { BulkCreateSavedObjectsResult } from '../types';
 import { createTag, findTagsByName } from '../../../tags/saved_objects';
@@ -20,7 +20,7 @@ export const createRiskScoreTag = async ({
   spaceId = 'default',
 }: {
   logger: Logger;
-  riskScoreEntity: RiskScoreEntity;
+  riskScoreEntity: EntityType;
   savedObjectsClient: SavedObjectsClientContract;
   spaceId?: string;
 }): Promise<BulkCreateSavedObjectsResult> => {

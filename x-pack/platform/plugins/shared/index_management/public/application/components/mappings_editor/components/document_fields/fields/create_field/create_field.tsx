@@ -106,7 +106,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
     }
   };
 
-  const { createInferenceEndpoint, handleSemanticText } = useSemanticText({
+  const { createInferenceEndpoint } = useSemanticText({
     form,
     setErrorsInTrainedModelDeployment,
     ml,
@@ -130,8 +130,9 @@ export const CreateField = React.memo(function CreateFieldComponent({
     const { isValid, data } = await form.submit();
 
     if (isValid && !clickOutside) {
-      if (isSemanticTextField(data)) {
-        handleSemanticText(data);
+      if (isSemanticTextField(data) && !data.inference_id) {
+        const { inference_id: inferenceId, ...rest } = data;
+        dispatch({ type: 'field.add', value: rest });
       } else {
         dispatch({ type: 'field.add', value: data });
       }

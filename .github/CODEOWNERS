@@ -506,7 +506,7 @@ x-pack/platform/plugins/private/global_search_providers @elastic/appex-sharedux
 x-pack/test/plugin_functional/plugins/global_search_test @elastic/kibana-core
 x-pack/platform/plugins/private/graph @elastic/kibana-visualizations
 examples/grid_example @elastic/kibana-presentation
-packages/kbn-grid-layout @elastic/kibana-presentation
+src/platform/packages/private/kbn-grid-layout @elastic/kibana-presentation
 x-pack/platform/plugins/private/grokdebugger @elastic/kibana-management
 src/platform/packages/shared/kbn-grouping @elastic/response-ops
 src/platform/packages/shared/kbn-guided-onboarding @elastic/appex-sharedux
@@ -1266,6 +1266,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 # APM
 /x-pack/test/functional/apps/apm/  @elastic/obs-ux-infra_services-team
 /x-pack/test/apm_api_integration/ @elastic/obs-ux-infra_services-team
+/x-pack/test/apm_cypress/ @elastic/obs-ux-infra_services-team
 /src/apm.js @elastic/kibana-core @vigneshshanmugam
 /src/platform/packages/shared/kbn-utility-types/src/dot.ts @dgieselaar
 /src/platform/packages/shared/kbn-utility-types/src/dot_test.ts @dgieselaar
@@ -1628,6 +1629,7 @@ x-pack/test/security_solution_api_integration/test_suites/detections_response/te
 x-pack/test/security_solution_api_integration/test_suites/detections_response/user_roles @elastic/security-detections-response
 x-pack/test/security_solution_api_integration/test_suites/explore @elastic/security-threat-hunting-explore
 x-pack/test/security_solution_api_integration/test_suites/investigations @elastic/security-threat-hunting-investigations
+x-pack/test/security_solution_api_integration/test_suites/siem_migrations @elastic/security-threat-hunting
 x-pack/test/security_solution_api_integration/test_suites/sources @elastic/security-detections-response
 
 # Security Solution sub teams
