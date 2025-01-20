@@ -15,13 +15,7 @@
         "description": [],
         "signature": [
           "{ createSubHistory: jest.MockInstance<",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-public.ScopedHistory",
-            "text": "ScopedHistory"
-          },
+          "ScopedHistory",
           "<unknown>, [basePath: string], unknown>; createHref: jest.MockInstance<string, [location: ",
           "LocationDescriptorObject",
           "<unknown>, options?: { prependBasePath?: boolean | undefined; } | undefined], unknown>; length: number; action: ",
@@ -41,13 +35,7 @@
           ", [listener: ",
           "LocationListener",
           "<unknown>], unknown>; } & ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-public.ScopedHistory",
-            "text": "ScopedHistory"
-          },
+          "ScopedHistory",
           "<unknown>"
         ],
         "path": "packages/core/application/core-application-browser-mocks/src/scoped_history.mock.ts",
@@ -93,13 +81,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.ApplicationSetup",
-                "text": "ApplicationSetup"
-              },
+              "ApplicationSetup",
               ">"
             ],
             "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
@@ -117,13 +99,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.ApplicationStart",
-                "text": "ApplicationStart"
-              },
+              "ApplicationStart",
               ">"
             ],
             "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
@@ -192,21 +168,9 @@
             "description": [],
             "signature": [
               "(parts?: Partial<",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.AppMountParameters",
-                "text": "AppMountParameters"
-              },
+              "AppMountParameters",
               "<unknown>>) => ",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.AppMountParameters",
-                "text": "AppMountParameters"
-              },
+              "AppMountParameters",
               "<unknown>"
             ],
             "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
@@ -223,39 +187,15 @@
                 "description": [],
                 "signature": [
                   "{ element?: HTMLElement | undefined; history?: ",
-                  {
-                    "pluginId": "@kbn/core-application-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                    "section": "def-public.ScopedHistory",
-                    "text": "ScopedHistory"
-                  },
+                  "ScopedHistory",
                   "<unknown> | undefined; appBasePath?: string | undefined; onAppLeave?: ((handler: ",
-                  {
-                    "pluginId": "@kbn/core-application-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                    "section": "def-public.AppLeaveHandler",
-                    "text": "AppLeaveHandler"
-                  },
+                  "AppLeaveHandler",
                   ") => void) | undefined; setHeaderActionMenu?: ((menuMount: ",
-                  {
-                    "pluginId": "@kbn/core-mount-utils-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                    "section": "def-public.MountPoint",
-                    "text": "MountPoint"
-                  },
+                  "MountPoint",
                   "<HTMLElement> | undefined) => void) | undefined; theme$?: ",
                   "Observable",
                   "<",
-                  {
-                    "pluginId": "@kbn/core-theme-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreThemeBrowserPluginApi",
-                    "section": "def-public.CoreTheme",
-                    "text": "CoreTheme"
-                  },
+                  "CoreTheme",
                   "> | undefined; }"
                 ],
                 "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",

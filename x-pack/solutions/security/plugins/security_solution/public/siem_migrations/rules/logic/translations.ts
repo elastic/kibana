@@ -28,6 +28,12 @@ export const GET_MIGRATION_TRANSLATION_STATS_FAILURE = i18n.translate(
   }
 );
 
+export const INSTALL_MIGRATION_RULES_SUCCESS = (succeeded: number) =>
+  i18n.translate('xpack.securitySolution.siemMigrations.rules.installMigrationRulesSuccess', {
+    defaultMessage: '{succeeded, plural, one {# rule} other {# rules}} installed successfully.',
+    values: { succeeded },
+  });
+
 export const INSTALL_MIGRATION_RULES_FAILURE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.installMigrationRulesFailDescription',
   {
@@ -39,5 +45,12 @@ export const UPDATE_MIGRATION_RULES_FAILURE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.updateMigrationRulesFailDescription',
   {
     defaultMessage: 'Failed to update migration rules',
+  }
+);
+
+export const RETRY_FAILED_RULES_FAILURE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.retryFailedRulesFailDescription',
+  {
+    defaultMessage: 'Failed to reprocess migration rules',
   }
 );

@@ -11,9 +11,16 @@ import type { Package } from '../types';
 
 type TransformFunction = (param: string) => string;
 const TRANSFORMS: Record<string, string | TransformFunction> = {
+  'src/platform/packages/shared/chart_expressions/common':
+    'src/platform/packages/shared/chart-expressions-common',
+  'x-pack/solutions/search/packages/search/shared_ui': 'x-pack/solutions/search/packages/shared_ui',
   'x-pack/solutions/security/packages/security-solution/': 'x-pack/solutions/security/packages/',
+  'x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant':
+    'x-pack/platform/plugins/shared/observability_ai_assistant',
   'x-pack/solutions/observability/plugins/observability_solution/':
     'x-pack/solutions/observability/plugins/',
+  'x-pack/solutions/observability/packages/observability/observability_utils/observability_':
+    'x-pack/solutions/observability/packages/',
   'x-pack/solutions/observability/packages/observability/':
     'x-pack/solutions/observability/packages/',
   'src/core/packages/core/': (path: string) => {
