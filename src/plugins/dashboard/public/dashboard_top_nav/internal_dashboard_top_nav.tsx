@@ -121,6 +121,13 @@ export function InternalDashboardTopNav({
     dashboardTitleRef.current?.focus();
   }, [title, viewMode]);
 
+  /*
+   * Manage chrome visibility when dashboard is in print mode.
+   */
+  useEffect(() => {
+    if (!embedSettings && viewMode === 'print') coreServices.chrome.setIsVisible(false);
+  }, [embedSettings, viewMode]);
+
   /**
    * populate recently accessed, and set is chrome visible.
    */
