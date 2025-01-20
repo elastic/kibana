@@ -83,7 +83,7 @@ import type {
 import type { EndpointMetadataService } from '../endpoint/services/metadata';
 import { createEndpointMetadataServiceTestContextMock } from '../endpoint/services/metadata/mocks';
 import { createPolicyDataStreamsIfNeeded as _createPolicyDataStreamsIfNeeded } from './handlers/create_policy_datastreams';
-import { TelemetryConfigProvider } from '../../common/telemetry_config/telemetry_config_provider';
+import { createTelemetryConfigProviderMock } from '../../common/telemetry_config/mocks';
 
 jest.mock('uuid', () => ({
   v4: (): string => 'NEW_UUID',
@@ -119,7 +119,7 @@ describe('Fleet integrations', () => {
   });
   const generator = new EndpointDocGenerator();
   const cloudService = cloudMock.createSetup();
-  const telemetryConfigProvider = new TelemetryConfigProvider();
+  const telemetryConfigProviderMock = createTelemetryConfigProviderMock();
   let productFeaturesService: ProductFeaturesService;
   let endpointMetadataService: EndpointMetadataService;
   let logger: Logger;
@@ -159,7 +159,8 @@ describe('Fleet integrations', () => {
       licenseUuid = 'updated-uid',
       clusterUuid = '',
       clusterName = '',
-      isServerlessEnabled = cloudService.isServerlessEnabled
+      isServerlessEnabled = cloudService.isServerlessEnabled,
+      isTelemetryEnabled = true
     ) => ({
       type: 'endpoint',
       enabled: true,
@@ -174,7 +175,8 @@ describe('Fleet integrations', () => {
               licenseUuid,
               clusterUuid,
               clusterName,
-              isServerlessEnabled
+              isServerlessEnabled,
+              isTelemetryEnabled
             )
           ),
         },
@@ -192,7 +194,7 @@ describe('Fleet integrations', () => {
         exceptionListClient,
         cloudService,
         productFeaturesService,
-        telemetryConfigProvider
+        telemetryConfigProviderMock
       );
 
       return callback(
@@ -368,6 +370,19 @@ describe('Fleet integrations', () => {
 
       isBillablePolicySpy.mockRestore();
     });
+
+    it.each([false, true])(
+      'should correctly set `global_telemetry_enabled` to %s',
+      async (targetValue) => {
+        const manifestManager = buildManifestManagerMock();
+        telemetryConfigProviderMock.getIsOptedIn.mockReturnValue(targetValue);
+
+        const packagePolicy = await invokeCallback(manifestManager);
+
+        const policyConfig: PolicyConfig = packagePolicy.inputs[0].config!.policy.value;
+        expect(policyConfig.global_telemetry_enabled).toBe(targetValue);
+      }
+    );
   });
 
   describe('package policy post create callback', () => {
