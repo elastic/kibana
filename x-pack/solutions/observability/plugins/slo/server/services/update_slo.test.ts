@@ -247,6 +247,7 @@ describe('UpdateSLO', () => {
             name: 'updated name',
             revision: 2,
             updatedAt: expect.anything(),
+            updatedBy: 'some-user-id',
           })
         );
         expectInstallationOfUpdatedSLOResources();
