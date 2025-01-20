@@ -100,7 +100,7 @@ function isService(el: cytoscape.NodeSingular) {
   return el.data(SERVICE_NAME) !== undefined;
 }
 
-const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
+const getStyle = (theme: EuiTheme): cytoscape.StylesheetJson => {
   const lineColor = theme.eui.euiColorMediumShade;
   return [
     {
