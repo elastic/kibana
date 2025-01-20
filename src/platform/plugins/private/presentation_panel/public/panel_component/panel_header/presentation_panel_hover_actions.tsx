@@ -139,12 +139,6 @@ export const PresentationPanelHoverActions = ({
   const EDIT_MODE_OUTLINE = `${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseFormsControl}`;
   const VIEW_MODE_OUTLINE = `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`;
 
-  const TOP_ROUNDED_CORNERS = `
-  border-top-left-radius: ${euiTheme.border.radius.medium};
-  border-top-right-radius: ${euiTheme.border.radius.medium};
-  border-bottom: 0px;
-`;
-
   const [
     defaultTitle,
     title,
@@ -432,6 +426,7 @@ export const PresentationPanelHoverActions = ({
           data-test-subj="embeddablePanelDragHandle"
           css={css`
             margin: ${euiTheme.size.xs};
+            cursor: move;
           `}
         />
       </button>
@@ -446,7 +441,7 @@ export const PresentationPanelHoverActions = ({
     <div
       ref={anchorRef}
       className={classNames('embPanel__hoverActionsAnchor', {
-        'embPanel__hoverActionsAnchor--lockHoverActions': true,
+        'embPanel__hoverActionsAnchor--lockHoverActions': hasLockedHoverActions,
       })}
       data-test-embeddable-id={api?.uuid}
       data-test-subj={`embeddablePanelHoverActions-${(title || defaultTitle || '').replace(

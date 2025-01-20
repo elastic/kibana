@@ -36,10 +36,11 @@ export const useHoverActionStyles = () => {
 
       &:hover .embPanel__hoverActions,
       &:focus .embPanel__hoverActions,
-      &:focus-within .embPanel__hoverActions,
+      &:has(:focus-visible) .embPanel__hoverActions,
       &.embPanel__hoverActionsAnchor--lockHoverActions .embPanel__hoverActions,
       .embPanel__hoverActions:hover,
-      .embPanel__hoverActions:focus {
+      .embPanel__hoverActions:focus,
+      .embPanel__hoverActions:has(:focus-visible) {
         z-index: ${euiTheme.levels.toast};
         opacity: 1;
         transition: none; // apply transition on hover out only

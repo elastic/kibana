@@ -119,11 +119,3 @@
   padding-left: $euiSizeS;
   z-index: $euiZLevel1;
 }
-
-.embPanel--dragHandle {
-  cursor: move;
-
-  img {
-    pointer-events: all !important;
-  }
-}
