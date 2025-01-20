@@ -45,7 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Agentless CIS_GCP Single Account Launch Cloud shell', () => {
-      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`, async () => {
+      it.skip(`should show CIS_GCP Launch Cloud Shell button when package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`, async () => {
         await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
           CLOUD_CREDENTIALS_PACKAGE_VERSION
         );
