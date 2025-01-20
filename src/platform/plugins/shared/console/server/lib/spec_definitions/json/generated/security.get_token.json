@@ -12,7 +12,7 @@
     "patterns": [
       "_security/oauth2/token"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-get-token.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/security-api-get-token.html",
     "availability": {
       "stack": true,
       "serverless": false

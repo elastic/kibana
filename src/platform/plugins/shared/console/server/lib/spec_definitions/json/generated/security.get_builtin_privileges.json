@@ -12,7 +12,7 @@
     "patterns": [
       "_security/privilege/_builtin"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-get-builtin-privileges.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/security-api-get-builtin-privileges.html",
     "availability": {
       "stack": true,
       "serverless": true

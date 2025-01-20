@@ -12,7 +12,7 @@
     "patterns": [
       "_security/saml/authenticate"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-saml-authenticate.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/security-api-saml-authenticate.html",
     "availability": {
       "stack": true,
       "serverless": false
