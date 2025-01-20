@@ -166,14 +166,14 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
-  async getTelemetryPreviewEventCount(expected: number): Promise<number> {
+  async getTelemetryPreviewEventCount(): Promise<number> {
     return await this.ebtUIHelper.getEventCount({
       eventTypes: [GRAPH_PREVIEW_EVENT],
       withTimeoutMs: 500,
     });
   }
 
-  async getTelemetryGraphInvestigationEventCount(expected: number): Promise<number> {
+  async getTelemetryGraphInvestigationEventCount(): Promise<number> {
     return await this.ebtUIHelper.getEventCount({
       eventTypes: [GRAPH_INVESTIGATION_EVENT],
       withTimeoutMs: 500,
