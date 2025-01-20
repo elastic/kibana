@@ -34,7 +34,7 @@ export const TraceData = z.object({
 });
 
 /**
- * The base of a content reference
+ * The basis of a content reference
  */
 export type BaseContentReference = z.infer<typeof BaseContentReference>;
 export const BaseContentReference = z.object({
@@ -143,7 +143,7 @@ export type ContentReference = z.infer<typeof ContentReferenceInternal>;
 export const ContentReference = ContentReferenceInternal as z.ZodType<ContentReference>;
 
 /**
- * Multiple content references
+ * A union of all content reference types
  */
 export type ContentReferences = z.infer<typeof ContentReferences>;
 export const ContentReferences = z
