@@ -31,7 +31,7 @@ import {
 import { v4 } from 'uuid';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
-import { ToolChoiceType } from '@kbn/inference-common';
+import { ChatCompleteResponse, FunctionCallingMode, ToolChoiceType } from '@kbn/inference-common';
 
 import { resourceNames } from '..';
 import {
@@ -251,14 +251,14 @@ export class ObservabilityAIAssistantClient {
                   getGeneratedTitle({
                     messages,
                     logger: this.dependencies.logger,
-                    chat: (name, chatParams) => {
-                      return this.chat(name, {
+                    chat: (name, chatParams) =>
+                      this.chat(name, {
                         ...chatParams,
                         simulateFunctionCalling,
                         connectorId,
                         signal,
-                      });
-                    },
+                        stream: false,
+                      }),
                     tracer: completeTracer,
                   })
                 ),
@@ -294,6 +294,7 @@ export class ObservabilityAIAssistantClient {
                     signal,
                     simulateFunctionCalling,
                     connectorId,
+                    stream: true,
                   });
                 },
                 // start out with the max number of function calls
@@ -462,7 +463,7 @@ export class ObservabilityAIAssistantClient {
     );
   };
 
-  chat = (
+  chat<TStream extends boolean>(
     name: string,
     {
       messages,
@@ -472,6 +473,7 @@ export class ObservabilityAIAssistantClient {
       signal,
       simulateFunctionCalling,
       tracer,
+      stream,
     }: {
       messages: Message[];
       connectorId: string;
@@ -480,8 +482,11 @@ export class ObservabilityAIAssistantClient {
       signal: AbortSignal;
       simulateFunctionCalling?: boolean;
       tracer: LangTracer;
+      stream: TStream;
     }
-  ): Observable<ChatCompletionChunkEvent | TokenCountEvent | ChatCompletionMessageEvent> => {
+  ): TStream extends true
+    ? Observable<ChatCompletionChunkEvent | TokenCountEvent | ChatCompletionMessageEvent>
+    : Promise<ChatCompleteResponse> {
     let tools: Record<string, { description: string; schema: any }> | undefined;
     let toolChoice: ToolChoiceType | { function: string } | undefined;
 
@@ -500,35 +505,44 @@ export class ObservabilityAIAssistantClient {
           }
         : ToolChoiceType.auto;
     }
-
-    const chatComplete$ = defer(() =>
-      this.dependencies.inferenceClient.chatComplete({
-        connectorId,
-        stream: true,
-        messages: convertMessagesForInference(
-          messages.filter((message) => message.message.role !== MessageRole.System)
-        ),
-        functionCalling: simulateFunctionCalling ? 'simulated' : 'native',
-        toolChoice,
-        tools,
-      })
-    ).pipe(
-      convertInferenceEventsToStreamingEvents(),
-      instrumentAndCountTokens(name),
-      failOnNonExistingFunctionCall({ functions }),
-      tap((event) => {
-        if (
-          event.type === StreamingChatResponseEventType.ChatCompletionChunk &&
-          this.dependencies.logger.isLevelEnabled('trace')
-        ) {
-          this.dependencies.logger.trace(`Received chunk: ${JSON.stringify(event.message)}`);
-        }
-      }),
-      shareReplay()
-    );
-
-    return chatComplete$;
-  };
+    const options = {
+      connectorId,
+      messages: convertMessagesForInference(
+        messages.filter((message) => message.message.role !== MessageRole.System)
+      ),
+      toolChoice,
+      tools,
+      functionCalling: (simulateFunctionCalling ? 'simulated' : 'native') as FunctionCallingMode,
+    };
+    if (stream) {
+      return defer(() =>
+        this.dependencies.inferenceClient.chatComplete({
+          ...options,
+          stream: true,
+        })
+      ).pipe(
+        convertInferenceEventsToStreamingEvents(),
+        instrumentAndCountTokens(name),
+        failOnNonExistingFunctionCall({ functions }),
+        tap((event) => {
+          if (
+            event.type === StreamingChatResponseEventType.ChatCompletionChunk &&
+            this.dependencies.logger.isLevelEnabled('trace')
+          ) {
+            this.dependencies.logger.trace(`Received chunk: ${JSON.stringify(event.message)}`);
+          }
+        }),
+        shareReplay()
+      ) as TStream extends true
+        ? Observable<ChatCompletionChunkEvent | TokenCountEvent | ChatCompletionMessageEvent>
+        : never;
+    } else {
+      return this.dependencies.inferenceClient.chatComplete({
+        ...options,
+        stream: false,
+      }) as TStream extends true ? never : Promise<ChatCompleteResponse>;
+    }
+  }
 
   find = async (options?: { query?: string }): Promise<{ conversations: Conversation[] }> => {
     const response = await this.dependencies.esClient.asInternalUser.search<Conversation>({

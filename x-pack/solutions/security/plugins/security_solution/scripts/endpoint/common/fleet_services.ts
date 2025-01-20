@@ -122,6 +122,7 @@ const getAgentPolicyDataForUpdate = (
     'download_source_id',
     'fleet_server_host_id',
     'global_data_tags',
+    'agentless',
     'has_fleet_server',
     'id',
     'inactivity_timeout',
