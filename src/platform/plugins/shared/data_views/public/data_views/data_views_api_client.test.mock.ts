@@ -12,3 +12,6 @@ import { setup } from '@kbn/core-test-helpers-http-setup-browser';
 export const { http } = setup((injectedMetadata) => {
   injectedMetadata.getBasePath.mockReturnValue('/hola/daro/');
 });
+
+export const indexFilterMock = { bool: { must: [{ match_all: {} }] } };
+export const runtimeMappingsMock = { myField: { type: 'keyword' } };

@@ -125,6 +125,7 @@ describe('getUnitedEntityDefinition', () => {
             "settings": Object {
               "frequency": "60s",
               "syncDelay": "60s",
+              "syncField": "@timestamp",
             },
             "timestampField": "@timestamp",
           },
@@ -363,6 +364,7 @@ describe('getUnitedEntityDefinition', () => {
             "settings": Object {
               "frequency": "60s",
               "syncDelay": "60s",
+              "syncField": "@timestamp",
             },
             "timestampField": "@timestamp",
           },
@@ -574,6 +576,7 @@ describe('getUnitedEntityDefinition', () => {
             "settings": Object {
               "frequency": "60s",
               "syncDelay": "60s",
+              "syncField": "@timestamp",
             },
             "timestampField": "@timestamp",
           },
