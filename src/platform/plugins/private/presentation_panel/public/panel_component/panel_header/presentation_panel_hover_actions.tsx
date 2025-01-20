@@ -130,75 +130,19 @@ export const PresentationPanelHoverActions = ({
   const [showNotification, setShowNotification] = useState<boolean>(false);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean>(false);
   const [notifications, setNotifications] = useState<AnyApiAction[]>([]);
-  const hoverActionsRef = useRef<HTMLDivElement | null>(null);
   const dragHandleRef = useRef<HTMLButtonElement | null>(null);
   const anchorRef = useRef<HTMLDivElement | null>(null);
-  const rightHoverActionsRef = useRef<HTMLDivElement | null>(null);
-
-  const [combineHoverActions, setCombineHoverActions] = useState<boolean>(false);
 
   const { euiTheme } = useEuiTheme();
 
   const EDIT_MODE_OUTLINE = `${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseFormsControl}`;
   const VIEW_MODE_OUTLINE = `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`;
 
-  const ALL_ROUNDED_CORNERS = `
-  border-radius: ${euiTheme.border.radius.medium};
-`;
   const TOP_ROUNDED_CORNERS = `
   border-top-left-radius: ${euiTheme.border.radius.medium};
   border-top-right-radius: ${euiTheme.border.radius.medium};
   border-bottom: 0px;
 `;
-
-  const [borderStyles, setBorderStyles] = useState<string>(TOP_ROUNDED_CORNERS);
-
-  const updateCombineHoverActions = () => {
-    if (!hoverActionsRef.current || !anchorRef.current) return;
-    const anchorBox = anchorRef.current.getBoundingClientRect();
-    const anchorLeft = anchorBox.left;
-    const anchorTop = anchorBox.top;
-    const anchorWidth = anchorRef.current.offsetWidth;
-    const hoverActionsWidth =
-      (rightHoverActionsRef.current?.offsetWidth ?? 0) +
-      (dragHandleRef.current?.offsetWidth ?? 0) +
-      parseInt(euiTheme.size.base, 10) * 2;
-    const hoverActionsHeight = rightHoverActionsRef.current?.offsetHeight ?? 0;
-
-    // Left align hover actions when they would get cut off by the right edge of the window
-    if (anchorLeft - (hoverActionsWidth - anchorWidth) <= parseInt(euiTheme.size.base, 10)) {
-      dragHandleRef.current?.style.removeProperty('right');
-      dragHandleRef.current?.style.setProperty('left', '0');
-    } else {
-      hoverActionsRef.current.style.removeProperty('left');
-      hoverActionsRef.current.style.setProperty('right', '0');
-    }
-
-    if (anchorRef.current && rightHoverActionsRef.current) {
-      const shouldCombine = anchorWidth < hoverActionsWidth;
-      const willGetCutOff = anchorTop < hoverActionsHeight;
-
-      if (shouldCombine !== combineHoverActions) {
-        setCombineHoverActions(shouldCombine);
-      }
-
-      if (willGetCutOff) {
-        hoverActionsRef.current.style.setProperty('position', 'absolute');
-        hoverActionsRef.current.style.setProperty('top', `-${euiTheme.size.s}`);
-      } else if (shouldCombine) {
-        hoverActionsRef.current.style.setProperty('top', `-${euiTheme.size.l}`);
-      } else {
-        hoverActionsRef.current.style.removeProperty('position');
-        hoverActionsRef.current.style.removeProperty('top');
-      }
-
-      if (shouldCombine || willGetCutOff) {
-        setBorderStyles(ALL_ROUNDED_CORNERS);
-      } else {
-        setBorderStyles(TOP_ROUNDED_CORNERS);
-      }
-    }
-  };
 
   const [
     defaultTitle,
@@ -472,6 +416,7 @@ export const PresentationPanelHoverActions = ({
     // memoize the drag handle to avoid calling `setDragHandle` unnecessarily
     () => (
       <button
+        className={'leftActions'}
         ref={(ref) => {
           dragHandleRef.current = ref;
           setDragHandle('hoverActions', ref);
@@ -498,8 +443,6 @@ export const PresentationPanelHoverActions = ({
 
   return (
     <div
-      onMouseOver={updateCombineHoverActions}
-      onFocus={updateCombineHoverActions}
       ref={anchorRef}
       className={classNames('embPanel__hoverActionsAnchor', {
         'embPanel__hoverActionsAnchor--lockHoverActions': hasLockedHoverActions,
@@ -510,6 +453,7 @@ export const PresentationPanelHoverActions = ({
         ''
       )}`}
       css={css`
+        container: hoverActionsAnchor / size;
         border-radius: ${euiTheme.border.radius.medium};
         position: relative;
         height: 100%;
@@ -521,144 +465,149 @@ export const PresentationPanelHoverActions = ({
             `
             : ''}
         }
-
-        .embPanel__hoverActions {
-          opacity: 0;
-          padding: calc(${euiTheme.size.xs} - 1px);
-          display: flex;
-          flex-wrap: nowrap;
-
-          background-color: ${euiTheme.colors.backgroundBasePlain};
-          height: ${euiTheme.size.xl};
-
-          pointer-events: all; // Re-enable pointer-events for hover actions
-        }
-
-        &:hover,
-        &:focus-within,
-        &.embPanel__hoverActionsAnchor--lockHoverActions {
-          .embPanel {
-            outline: ${viewMode === 'edit' ? EDIT_MODE_OUTLINE : VIEW_MODE_OUTLINE};
-            z-index: ${euiTheme.levels.menu};
-          }
-          .embPanel__hoverActionsWrapper {
-            z-index: ${euiTheme.levels.toast};
-            top: -${euiTheme.size.xl};
-
-            .embPanel__hoverActions {
-              opacity: 1;
-            }
-          }
-        }
       `}
     >
       {children}
-      {api ? (
+      {api && hasHoverActions && (
         <div
-          ref={hoverActionsRef}
-          className="embPanel__hoverActionsWrapper"
+          className={classNames('embPanel__hoverActions', className)}
           css={css`
-            height: ${euiTheme.size.xl};
-            position: absolute;
-            top: 0;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 ${euiTheme.size.base};
-            flex-wrap: nowrap;
-            min-width: 100%;
-            z-index: -1;
-            pointer-events: none; // Prevent hover actions wrapper from blocking interactions with other panels
+            & {
+              pointer-events: none; // Prevent hover actions wrapper from blocking interactions with other panels
+
+              & > * {
+                &:not(.breakpoint) {
+                  pointer-events: all; // Prevent hover actions wrapper from blocking interactions with other panels
+                }
+              }
+
+              height: ${euiTheme.size.xl};
+
+              padding: 0px ${euiTheme.size.m};
+              width: 100%;
+              display: grid;
+              grid-template-columns: max-content auto; // left actions + breakpoint
+              grid-auto-columns: max-content; // handle all right actions
+              grid-auto-flow: column;
+              position: absolute;
+              top: -${euiTheme.size.xl};
+              z-index: 10000;
+
+              --borderStyle: ${viewMode === 'edit' ? EDIT_MODE_OUTLINE : VIEW_MODE_OUTLINE};
+              --paddingAroundAction: calc(${euiTheme.size.xs} - 1px);
+
+              & > * {
+                &:not(.breakpoint) {
+                  border-top: var(--borderStyle);
+                  border-radius: 0px;
+                  background-color: ${euiTheme.colors.backgroundBasePlain};
+                  padding-top: var(--paddingAroundAction);
+                }
+              }
+
+              // left action
+              & > *:first-child {
+                border: var(--borderStyle);
+                border-bottom: 0px;
+                border-top-left-radius: ${euiTheme.border.radius.medium};
+                border-top-right-radius: ${euiTheme.border.radius.medium};
+                padding-left: var(--paddingAroundAction);
+                padding-right: var(--paddingAroundAction);
+              }
+
+              // start of right actions
+              & > *:nth-child(3) {
+                border-left: var(--borderStyle);
+                border-top-left-radius: ${euiTheme.border.radius.medium};
+                padding-left: var(--paddingAroundAction);
+              }
+
+              // end of right actions
+              & > *:last-child {
+                border-right: var(--borderStyle);
+                border-top-right-radius: ${euiTheme.border.radius.medium};
+                padding-right: var(--paddingAroundAction);
+              }
+
+              @container hoverActionsAnchor (width < 300px) {
+                width: fit-content;
+                top: -${euiTheme.size.l};
+                right: ${euiTheme.size.xs};
+
+                border-radius: ${euiTheme.border.radius.medium};
+                border: ${viewMode === 'edit' ? EDIT_MODE_OUTLINE : VIEW_MODE_OUTLINE};
+                background-color: ${euiTheme.colors.backgroundBasePlain};
+                grid-template-columns: max-content;
+
+                & > * {
+                  border: none !important;
+                }
+              }
+            }
           `}
         >
-          {viewMode === 'edit' && !combineHoverActions ? (
-            <div
-              data-test-subj="embPanel__hoverActions__left"
-              className={classNames(
-                'embPanel__hoverActions',
-                'embPanel__hoverActionsLeft',
-                className
-              )}
-              css={css`
-                border: ${viewMode === 'edit' ? EDIT_MODE_OUTLINE : VIEW_MODE_OUTLINE};
-                ${borderStyles}
-              `}
-            >
-              {dragHandle}
-            </div>
-          ) : (
-            <div /> // necessary for the right hover actions to align correctly when left hover actions are not present
+          {viewMode === 'edit' && dragHandle}
+          <div className="breakpoint" />
+          {showNotifications && notificationElements}
+          {showDescription && (
+            <EuiIconTip
+              title={!hideTitle ? title || undefined : undefined}
+              content={description}
+              delay="regular"
+              position="top"
+              anchorClassName="embPanel__descriptionTooltipAnchor"
+              data-test-subj="embeddablePanelDescriptionTooltip"
+              type="iInCircle"
+            />
           )}
-          {hasHoverActions ? (
-            <div
-              ref={rightHoverActionsRef}
-              data-test-subj="embPanel__hoverActions__right"
-              className={classNames(
-                'embPanel__hoverActions',
-                'embPanel__hoverActionsRight',
-                className
-              )}
-              css={css`
-                border: ${viewMode === 'edit' ? EDIT_MODE_OUTLINE : VIEW_MODE_OUTLINE};
-                ${borderStyles}
-              `}
-            >
-              {viewMode === 'edit' && combineHoverActions && dragHandle}
-              {showNotifications && notificationElements}
-              {showDescription && (
-                <EuiIconTip
-                  title={!hideTitle ? title || undefined : undefined}
-                  content={description}
-                  delay="regular"
-                  position="top"
-                  anchorClassName="embPanel__descriptionTooltipAnchor"
-                  data-test-subj="embeddablePanelDescriptionTooltip"
-                  type="iInCircle"
+          {quickActionElements.map(
+            ({ iconType, 'data-test-subj': dataTestSubj, onClick, name }, i) => (
+              <EuiToolTip
+                key={`main_action_${dataTestSubj}_${api?.uuid}`}
+                content={name}
+                anchorProps={{ className: 'rightAction' }}
+              >
+                <EuiButtonIcon
+                  iconType={iconType}
+                  color="text"
+                  onClick={onClick as MouseEventHandler}
+                  data-test-subj={dataTestSubj}
+                  aria-label={name as string}
                 />
-              )}
-              {quickActionElements.map(
-                ({ iconType, 'data-test-subj': dataTestSubj, onClick, name }, i) => (
-                  <EuiToolTip key={`main_action_${dataTestSubj}_${api?.uuid}`} content={name}>
-                    <EuiButtonIcon
-                      iconType={iconType}
-                      color="text"
-                      onClick={onClick as MouseEventHandler}
-                      data-test-subj={dataTestSubj}
-                      aria-label={name as string}
-                    />
-                  </EuiToolTip>
-                )
-              )}
-              {contextMenuPanels.length ? (
-                <EuiPopover
-                  repositionOnScroll
-                  panelPaddingSize="none"
-                  anchorPosition="downRight"
-                  button={ContextMenuButton}
-                  isOpen={isContextMenuOpen}
-                  className={contextMenuClasses}
-                  closePopover={onClose}
-                  data-test-subj={
-                    isContextMenuOpen
-                      ? 'embeddablePanelContextMenuOpen'
-                      : 'embeddablePanelContextMenuClosed'
-                  }
-                  focusTrapProps={{
-                    closeOnMouseup: true,
-                    clickOutsideDisables: false,
-                    onClickOutside: onClose,
-                  }}
-                >
-                  <EuiContextMenu
-                    data-test-subj="presentationPanelContextMenuItems"
-                    initialPanelId={'mainMenu'}
-                    panels={contextMenuPanels}
-                  />
-                </EuiPopover>
-              ) : null}
-            </div>
+              </EuiToolTip>
+            )
+          )}
+          {contextMenuPanels.length ? (
+            <EuiPopover
+              className="rightAction"
+              repositionOnScroll
+              panelPaddingSize="none"
+              anchorPosition="downRight"
+              button={ContextMenuButton}
+              isOpen={isContextMenuOpen}
+              className={contextMenuClasses}
+              closePopover={onClose}
+              data-test-subj={
+                isContextMenuOpen
+                  ? 'embeddablePanelContextMenuOpen'
+                  : 'embeddablePanelContextMenuClosed'
+              }
+              focusTrapProps={{
+                closeOnMouseup: true,
+                clickOutsideDisables: false,
+                onClickOutside: onClose,
+              }}
+            >
+              <EuiContextMenu
+                data-test-subj="presentationPanelContextMenuItems"
+                initialPanelId={'mainMenu'}
+                panels={contextMenuPanels}
+              />
+            </EuiPopover>
           ) : null}
         </div>
-      ) : null}
+        // </div>
+      )}
     </div>
   );
 };
