@@ -386,8 +386,6 @@ import type {
   InstallMigrationRulesRequestParamsInput,
   InstallMigrationRulesRequestBodyInput,
   InstallMigrationRulesResponse,
-  InstallTranslatedMigrationRulesRequestParamsInput,
-  InstallTranslatedMigrationRulesResponse,
   StartRuleMigrationRequestParamsInput,
   StartRuleMigrationRequestBodyInput,
   StartRuleMigrationResponse,
@@ -1736,24 +1734,6 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  /**
-   * Installs all translated migration rules
-   */
-  async installTranslatedMigrationRules(props: InstallTranslatedMigrationRulesProps) {
-    this.log.info(`${new Date().toISOString()} Calling API InstallTranslatedMigrationRules`);
-    return this.kbnClient
-      .request<InstallTranslatedMigrationRulesResponse>({
-        path: replaceParams(
-          '/internal/siem_migrations/rules/{migration_id}/install_translated',
-          props.params
-        ),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'POST',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
   async internalUploadAssetCriticalityRecords(props: InternalUploadAssetCriticalityRecordsProps) {
     this.log.info(`${new Date().toISOString()} Calling API InternalUploadAssetCriticalityRecords`);
     return this.kbnClient
@@ -2540,9 +2520,6 @@ export interface InstallMigrationRulesProps {
 }
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;
-}
-export interface InstallTranslatedMigrationRulesProps {
-  params: InstallTranslatedMigrationRulesRequestParamsInput;
 }
 export interface InternalUploadAssetCriticalityRecordsProps {
   attachment: FormData;
