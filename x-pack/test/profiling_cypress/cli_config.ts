@@ -30,7 +30,6 @@ async function ftrConfig({ readConfigFile }: FtrConfigProviderContext) {
         // define custom es server here
         // API Keys is enabled at the top level
         'xpack.security.enabled=true',
-        'xpack.ml.enabled=false',
       ],
     },
 
