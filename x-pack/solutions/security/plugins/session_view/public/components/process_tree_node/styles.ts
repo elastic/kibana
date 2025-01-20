@@ -58,9 +58,9 @@ export const useStyles = ({
      */
     const getHighlightColors = () => {
       let bgColor = 'none';
-      let hoverColor = transparentize(colors.primary, 0.04); // TODO: replace transparentize with color token
+      let hoverColor = transparentize(colors.primary, 0.04); // TODO: Borealis migration - replace transparentize with color token
       let borderColor = 'transparent';
-      let searchResColor = transparentize(colors.warning, 0.32); // TODO: replace transparentize with color token
+      let searchResColor = transparentize(colors.warning, 0.32); // TODO: Borealis migration - replace transparentize with color token
 
       if (hasAlerts) {
         borderColor = colors.danger;
@@ -68,15 +68,15 @@ export const useStyles = ({
 
       if (isSelected) {
         searchResColor = colors.warning;
-        bgColor = transparentize(colors.primary, 0.08); // TODO: replace transparentize with color token
-        hoverColor = transparentize(colors.primary, 0.12); // TODO: replace transparentize with color token
+        bgColor = transparentize(colors.primary, 0.08); // TODO: Borealis migration - replace transparentize with color token
+        hoverColor = transparentize(colors.primary, 0.12); // TODO: Borealis migration - replace transparentize with color token
       }
 
       if (hasInvestigatedAlert) {
-        bgColor = transparentize(colors.danger, 0.04); // TODO: replace transparentize with color token
-        hoverColor = transparentize(colors.danger, 0.12); // TODO: replace transparentize with color token
+        bgColor = transparentize(colors.danger, 0.04); // TODO: Borealis migration - replace transparentize with color token
+        hoverColor = transparentize(colors.danger, 0.12); // TODO: Borealis migration - replace transparentize with color token
         if (isSelected) {
-          bgColor = transparentize(colors.danger, 0.08); // TODO: replace transparentize with color token
+          bgColor = transparentize(colors.danger, 0.08); // TODO: Borealis migration - replace transparentize with color token
         }
       }
 

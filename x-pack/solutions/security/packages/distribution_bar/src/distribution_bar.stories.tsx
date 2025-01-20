@@ -32,7 +32,7 @@ const mockStatsAlerts = [
   {
     key: 'medium',
     count: 800,
-    color: '#f7dc6f',
+    color: 'gold',
   },
   {
     key: 'high',

@@ -22,6 +22,7 @@ const isAmsterdam = (euiThemeName: string) => {
 
 // Designers blocked the migration to tokens from EUI during the Borealys theme migration.
 // We keep using hardcoded colors until security severity palette is ready https://github.com/elastic/kibana/issues/203387
+// TODO: Borealis migration - move from hardcoded values to severity palette https://github.com/elastic/security-team/issues/11606
 export const SEVERITY_COLOR = {
   critical: '#E7664C',
   high: '#DA8B45',
@@ -30,12 +31,12 @@ export const SEVERITY_COLOR = {
   unknown: '#aaa',
 } as const;
 
-// TODO: migrate to security severity palette when it's ready https://github.com/elastic/kibana/issues/203387
+// TODO: Borealis migration - migrate to security severity palette when it's ready https://github.com/elastic/security-team/issues/11606
 export const getSeverityStatusColor = (
   severity: VulnSeverity,
   euiTheme: EuiThemeComputed
 ): string => {
-  // TODO: remove old mapping in main after Serverless switched to Borealis
+  // TODO: Borealis migration - remove old mapping in main after Serverless switched to Borealis
   if (euiTheme && isAmsterdam(euiTheme.themeName)) {
     switch (severity) {
       case VULNERABILITIES_SEVERITY.LOW:
@@ -66,7 +67,7 @@ export const getSeverityStatusColor = (
 };
 
 export const getCvsScoreColor = (score: number, euiTheme: EuiThemeComputed): string | undefined => {
-  // TODO: remove old mapping in main when Serverless switched to Borealis
+  // TODO: Borealis migration - remove old mapping in main when Serverless switched to Borealis
   if (euiTheme && isAmsterdam(euiTheme.themeName)) {
     if (score <= 4) {
       return euiThemeVars.euiColorVis0; // low severity
@@ -92,7 +93,7 @@ export const getCvsScoreColor = (score: number, euiTheme: EuiThemeComputed): str
   }
 };
 
-// TODO: migrate to EUI color tokens when they are ready https://github.com/elastic/kibana/issues/203387
+// TODO: Borealis migration - migrate to EUI color tokens when they are ready https://github.com/elastic/security-team/issues/11606
 export const getMisconfigurationStatusColor = (
   status?: MisconfigurationEvaluationStatus
 ): string => {
