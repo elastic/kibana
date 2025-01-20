@@ -9,13 +9,16 @@
 
 import moment, { type Moment } from 'moment-timezone';
 
-import { Frequency, Weekday, type WeekdayStr, type Options, type IterOptions } from './types';
+import {
+  Frequency,
+  Weekday,
+  type WeekdayStr,
+  type Options,
+  type IterOptions,
+  ConstructorOptions,
+} from './types';
 import { sanitizeOptions } from './sanitize';
-
-type ConstructorOptions = Omit<Options, 'byweekday' | 'wkst'> & {
-  byweekday?: Array<string | number> | null;
-  wkst?: Weekday | WeekdayStr | number | null;
-};
+import { validateOptions } from './validate';
 
 const ISO_WEEKDAYS = [
   Weekday.MO,
@@ -36,6 +39,7 @@ const TIMEOUT_LIMIT = 100000;
 
 export class RRule {
   private options: Options;
+
   constructor(options: ConstructorOptions) {
     this.options = sanitizeOptions(options as Options);
     if (typeof options.wkst === 'string') {
@@ -137,27 +141,7 @@ export class RRule {
 
   static isValid(options: ConstructorOptions): boolean {
     try {
-      const sanitizedOptions = sanitizeOptions(options as Options);
-
-      if (moment.tz.zone(options.tzid) == null) {
-        return false;
-      }
-
-      if (options.bymonth != null && !sanitizedOptions.bymonth == null) {
-        return false;
-      }
-
-      if (options.bymonthday != null && !sanitizedOptions.bymonthday == null) {
-        return false;
-      }
-
-      if (options.byweekday != null && !sanitizedOptions.byweekday == null) {
-        return false;
-      }
-
-      if (options.byyearday != null && !sanitizedOptions.byyearday == null) {
-        return false;
-      }
+      validateOptions(options);
 
       return true;
     } catch (e) {

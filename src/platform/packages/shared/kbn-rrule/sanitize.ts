@@ -26,6 +26,10 @@ export function sanitizeOptions(opts: Options) {
     throw new Error('Cannot create RRule: dtstart is an invalid date');
   }
 
+  if (moment.tz.zone(options.tzid) == null) {
+    throw new Error('Cannot create RRule: tzid is invalid');
+  }
+
   if (options.until && isNaN(options.until.getTime())) {
     throw new Error('Cannot create RRule: until is an invalid date');
   }
@@ -38,11 +42,6 @@ export function sanitizeOptions(opts: Options) {
     if (options.interval < 1) {
       throw new Error('Cannot create RRule: interval must be greater than 0');
     }
-  }
-
-  // Omit invalid options
-  if (moment.tz.zone(options.tzid) == null) {
-    options.tzid = moment.tz.guess();
   }
 
   if (options.bymonth) {
