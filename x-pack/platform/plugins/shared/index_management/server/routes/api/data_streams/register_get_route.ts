@@ -27,13 +27,13 @@ interface MeteringStatsResponse {
   datastreams: MeteringStats[];
 }
 const enhanceDataStreams = ({
-  dataStreams,
-  dataStreamsStats,
-  meteringStats,
-  dataStreamsPrivileges,
-  globalMaxRetention,
-  indexTemplates,
-}: {
+                              dataStreams,
+                              dataStreamsStats,
+                              meteringStats,
+                              dataStreamsPrivileges,
+                              globalMaxRetention,
+                              indexTemplates,
+                            }: {
   dataStreams: IndicesDataStream[];
   dataStreamsStats?: IndicesDataStreamsStatsDataStreamsStatsItem[];
   meteringStats?: MeteringStats[];
@@ -177,6 +177,12 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
         const { index_templates: indexTemplates } =
           await client.asCurrentUser.indices.getIndexTemplate();
 
+        const { persistent, defaults } = await client.asInternalUser.cluster.getSettings({
+          include_defaults: true,
+        });
+        const isLogsdbEnabled =
+          persistent?.cluster?.logsdb?.enabled ?? defaults?.cluster?.logsdb?.enabled;
+
         // Only take the lifecycle of the first data stream since all data streams have the same global retention period
         const lifecycle = await getDataStreamLifecycle(client, dataStreams[0].name);
         // @ts-ignore - TS doesn't know about the `global_retention` property yet
@@ -191,7 +197,12 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
           indexTemplates,
         });
 
-        return response.ok({ body: deserializeDataStreamList(enhancedDataStreams) });
+        return response.ok({
+          body: deserializeDataStreamList(
+            enhancedDataStreams,
+            isLogsdbEnabled
+          ),
+        });
       } catch (error) {
         return handleEsError({ error, response });
       }
@@ -262,7 +273,17 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
             globalMaxRetention,
             indexTemplates,
           });
-          const body = deserializeDataStream(enhancedDataStreams[0]);
+
+          const { persistent, defaults } = await client.asInternalUser.cluster.getSettings({
+            include_defaults: true,
+          });
+          const isLogsdbEnabled =
+            persistent?.cluster?.logsdb?.enabled ?? defaults?.cluster?.logsdb?.enabled;
+
+          const body = deserializeDataStream(
+            enhancedDataStreams[0],
+            isLogsdbEnabled
+          );
           return response.ok({ body });
         }
 

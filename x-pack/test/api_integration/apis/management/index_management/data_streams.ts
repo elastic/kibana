@@ -14,6 +14,7 @@ import { datastreamsHelpers } from './lib/datastreams.helpers';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const es = getService('es');
 
   const {
     createDataStream,
@@ -164,20 +165,101 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      it('correctly returns index mode property', async () => {
-        const logsdbDataStreamName = 'logsdb-test-data-stream';
-        const indexMode = 'logsdb';
+      describe('index mode', () => {
+        it('correctly returns index mode property based on index settings', async () => {
+          const logsdbDataStreamName = 'logsdb-test-data-stream';
+          const indexMode = 'logsdb';
 
-        await createDataStream(logsdbDataStreamName, indexMode);
+          await createDataStream(logsdbDataStreamName, indexMode);
 
-        const { body: dataStream } = await supertest
-          .get(`${API_BASE_PATH}/data_streams/${logsdbDataStreamName}`)
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
+          const { body: dataStream } = await supertest
+            .get(`${API_BASE_PATH}/data_streams/${logsdbDataStreamName}`)
+            .set('kbn-xsrf', 'xxx')
+            .expect(200);
 
-        expect(dataStream.indexMode).to.eql(indexMode);
+          expect(dataStream.indexMode).to.eql(indexMode);
 
-        await deleteDataStream(logsdbDataStreamName);
+          await deleteDataStream(logsdbDataStreamName);
+        });
+
+        // In stateful Kibana, the cluster.logsdb.enabled setting is false by default
+        it('returns standard index mode for logs-*-* data stream if logsdg.enabled setting is not set', async () => {
+          await es.cluster.putSettings({
+            body: {
+              persistent: {
+                cluster: {
+                  logsdb: {
+                    enabled: undefined,
+                  },
+                },
+              },
+            },
+          });
+
+          const logsdbDataStreamName = 'logs-test-3';
+          await createDataStream(logsdbDataStreamName);
+
+          const { body: dataStream } = await supertest
+            .get(`${API_BASE_PATH}/data_streams/${logsdbDataStreamName}`)
+            .set('kbn-xsrf', 'xxx')
+            .expect(200);
+
+          expect(dataStream.indexMode).to.eql('standard');
+
+          await deleteDataStream(logsdbDataStreamName);
+        });
+
+        it('returns logsdb index mode for logs-*-* data stream if logsdg.enabled setting is true', async () => {
+          await es.cluster.putSettings({
+            body: {
+              persistent: {
+                cluster: {
+                  logsdb: {
+                    enabled: true,
+                  },
+                },
+              },
+            },
+          });
+
+          const logsdbDataStreamName = 'logs-test-1';
+          await createDataStream(logsdbDataStreamName);
+
+          const { body: dataStream } = await supertest
+            .get(`${API_BASE_PATH}/data_streams/${logsdbDataStreamName}`)
+            .set('kbn-xsrf', 'xxx')
+            .expect(200);
+
+          expect(dataStream.indexMode).to.eql('logsdb');
+
+          await deleteDataStream(logsdbDataStreamName);
+        });
+
+        it('returns standard index mode for logs-*-* data stream if logsdg.enabled setting is false', async () => {
+          await es.cluster.putSettings({
+            body: {
+              persistent: {
+                cluster: {
+                  logsdb: {
+                    enabled: false,
+                  },
+                },
+              },
+            },
+          });
+
+          const logsdbDataStreamName = 'logs-test-2';
+          await createDataStream(logsdbDataStreamName);
+
+          const { body: dataStream } = await supertest
+            .get(`${API_BASE_PATH}/data_streams/${logsdbDataStreamName}`)
+            .set('kbn-xsrf', 'xxx')
+            .expect(200);
+
+          expect(dataStream.indexMode).to.eql('standard');
+
+          await deleteDataStream(logsdbDataStreamName);
+        });
       });
     });
 
