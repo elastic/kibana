@@ -37,7 +37,7 @@ export const contentReferenceBlock = (
  * @returns the string: `Reference: <contentReferenceBlock>`
  */
 export const contentReferenceString = (contentReference: ContentReference) => {
-  return `Reference: ${contentReferenceBlock(contentReference)}` as const;
+  return `Citation: ${contentReferenceBlock(contentReference)}` as const;
 };
 
 /**
