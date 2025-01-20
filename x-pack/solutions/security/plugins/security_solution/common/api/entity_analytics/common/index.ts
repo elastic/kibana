@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './common.gen';
+export type { EntityAnalyticsPrivileges } from './common.gen';

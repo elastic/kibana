@@ -94,6 +94,7 @@ export function chunksIntoMessage(obs$: Observable<UnifiedChatCompleteResponse>)
               },
             ],
             object: 'chat.completion',
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } as any
         ),
         last(),

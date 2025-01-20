@@ -146,6 +146,7 @@ export function StreamDetailOverview({ definition }: { definition?: ReadStreamDe
         },
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [definition, dataViews, streamsRepositoryClient, start, end]
   );
 
