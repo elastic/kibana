@@ -22,7 +22,7 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
+import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
@@ -33,27 +33,27 @@ import type {
 } from '@kbn/observability-shared-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
-import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import {
+import type { CasesPublicStart } from '@kbn/cases-plugin/public';
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type {
   LogsSharedClientSetupExports,
   LogsSharedClientStartExports,
 } from '@kbn/logs-shared-plugin/public';
-import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
+import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
-import { InventoryViewsServiceStart } from './services/inventory_views';
-import { MetricsExplorerViewsServiceStart } from './services/metrics_explorer_views';
-import { TelemetryServiceStart } from './services/telemetry';
+import type { InventoryViewsServiceStart } from './services/inventory_views';
+import type { MetricsExplorerViewsServiceStart } from './services/metrics_explorer_views';
+import type { TelemetryServiceStart } from './services/telemetry';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface InfraClientSetupExports {}

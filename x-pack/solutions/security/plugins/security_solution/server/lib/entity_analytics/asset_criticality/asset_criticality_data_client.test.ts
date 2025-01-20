@@ -42,6 +42,9 @@ describe('AssetCriticalityDataClient', () => {
         options: {
           index: '.asset-criticality.asset-criticality-default',
           mappings: {
+            _meta: {
+              version: 3,
+            },
             dynamic: 'strict',
             properties: {
               id_field: {
@@ -52,6 +55,13 @@ describe('AssetCriticalityDataClient', () => {
               },
               criticality_level: {
                 type: 'keyword',
+              },
+              event: {
+                properties: {
+                  ingested: {
+                    type: 'date',
+                  },
+                },
               },
               '@timestamp': {
                 type: 'date',
@@ -81,6 +91,20 @@ describe('AssetCriticalityDataClient', () => {
                   },
                 },
               },
+              service: {
+                properties: {
+                  asset: {
+                    properties: {
+                      criticality: {
+                        type: 'keyword',
+                      },
+                    },
+                  },
+                  name: {
+                    type: 'keyword',
+                  },
+                },
+              },
               user: {
                 properties: {
                   asset: {
@@ -96,6 +120,9 @@ describe('AssetCriticalityDataClient', () => {
                 },
               },
             },
+          },
+          settings: {
+            default_pipeline: 'entity_analytics_create_eventIngest_from_timestamp-pipeline-default',
           },
         },
       });

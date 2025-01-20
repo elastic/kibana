@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpHandler } from '@kbn/core/public';
+import type { HttpHandler } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import {
   getLogAnalysisIdFormatsRequestPayloadRT,

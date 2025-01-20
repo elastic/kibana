@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import dateMath, { Unit } from '@kbn/datemath';
-import { TimeRange } from '@kbn/es-query';
+import type { Unit } from '@kbn/datemath';
+import dateMath from '@kbn/datemath';
+import type { TimeRange } from '@kbn/es-query';
 import { chain } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';

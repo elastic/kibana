@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { TopAlert } from '@kbn/observability-plugin/public';
+import type { TopAlert } from '@kbn/observability-plugin/public';
 import { ALERT_CONTEXT } from '@kbn/rule-data-utils';
 import { get } from 'lodash';
-import { RuleParams, CountCriteria } from '../../../../../common/alerting/logs/log_threshold';
+import type { RuleParams, CountCriteria } from '../../../../../common/alerting/logs/log_threshold';
 import { buildFiltersFromCriteria } from '../../../../../common/alerting/logs/log_threshold/query_helpers';
 
 export const getESQueryForLogRateAnalysis = (

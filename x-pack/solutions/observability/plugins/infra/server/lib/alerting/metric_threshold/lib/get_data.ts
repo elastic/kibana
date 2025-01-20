@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { SearchResponse, AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { SearchResponse, AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
-import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
+import type { MetricExpressionParams } from '../../../../../common/alerting/metrics';
+import { Aggregators } from '../../../../../common/alerting/metrics';
+import type { AdditionalContext } from '../../common/utils';
 import {
-  AdditionalContext,
   doFieldsExist,
   KUBERNETES_POD_UID,
   termsAggField,

@@ -14,11 +14,11 @@ import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/p
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
+import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { StatusRuleComponent } from '../../../components/alerts/status_rule_ui';
 import { kibanaService } from '../../../../../utils/kibana_service';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { store } from '../../../state';
-import type { StatusRuleParams } from '../../../../../../common/rules/status_rule';
 
 interface Props {
   coreStart: CoreStart;
