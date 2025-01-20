@@ -328,9 +328,17 @@ export const IndexDataVisualizer: FC<Props> = ({
     unifiedSearch,
   };
 
-  const startServices = pick(coreStart, 'analytics', 'i18n', 'theme');
+  const startServices = pick(coreStart, 'analytics', 'i18n', 'theme', 'userProfile');
   const datePickerDeps: DatePickerDependencies = {
-    ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
+    ...pick(services, [
+      'data',
+      'http',
+      'notifications',
+      'theme',
+      'uiSettings',
+      'userProfile',
+      'i18n',
+    ]),
     uiSettingsKeys: UI_SETTINGS,
     showFrozenDataTierChoice,
   };

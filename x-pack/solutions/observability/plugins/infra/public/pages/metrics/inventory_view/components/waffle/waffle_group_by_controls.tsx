@@ -5,22 +5,20 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiContextMenu,
+import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
-  EuiPopover,
 } from '@elastic/eui';
+import { EuiBadge, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { css } from '@emotion/react';
 import { useBoolean } from '@kbn/react-hooks';
-import { InfraGroupByOptions } from '../../../../../common/inventory/types';
+import type { InfraGroupByOptions } from '../../../../../common/inventory/types';
 import { CustomFieldPanel } from './custom_field_panel';
-import { SnapshotGroupBy } from '../../../../../../common/http_api/snapshot_api';
+import type { SnapshotGroupBy } from '../../../../../../common/http_api/snapshot_api';
 import { DropdownButton } from '../dropdown_button';
 
 const maxGroupByTooltip = i18n.translate('xpack.infra.waffle.maxGroupByTooltip', {

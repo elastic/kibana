@@ -1,7 +1,9 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-onboarding-plugin",
-  "owner": ["@elastic/obs-ux-logs-team"],
+  "owner": [
+    "@elastic/obs-ux-logs-team"
+  ],
   "group": "observability",
   "visibility": "private",
   "plugin": {
@@ -16,6 +18,7 @@
       "data",
       "observability",
       "observabilityShared",
+      "logsShared",
       "discover",
       "share",
       "fleet",

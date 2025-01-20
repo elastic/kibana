@@ -290,6 +290,7 @@ export const TemplateDetailsContent = ({
                             defaultMessage: 'Edit',
                           }),
                           icon: 'pencil',
+                          'data-test-subj': 'editIndexTemplateButton',
                           onClick: () => editTemplate(templateName, isLegacy),
                           disabled: isCloudManaged,
                         },

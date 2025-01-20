@@ -8,11 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import type { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import {
-  FilterQuery,
-  InventoryMetricConditions,
-  QUERY_INVALID,
-} from '../../../../common/alerting/metrics';
+import type { FilterQuery, InventoryMetricConditions } from '../../../../common/alerting/metrics';
+import { QUERY_INVALID } from '../../../../common/alerting/metrics';
 
 export function validateMetricThreshold({
   criteria,

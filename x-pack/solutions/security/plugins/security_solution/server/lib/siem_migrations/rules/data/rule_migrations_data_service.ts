@@ -4,10 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
-import { IndexPatternAdapter, type FieldMap, type InstallParams } from '@kbn/index-adapter';
+import type { AuthenticatedUser, IScopedClusterClient, Logger } from '@kbn/core/server';
+import {
+  IndexAdapter,
+  IndexPatternAdapter,
+  type FieldMap,
+  type InstallParams,
+} from '@kbn/index-adapter';
 import type { IndexNameProvider, IndexNameProviders } from './rule_migrations_data_client';
 import { RuleMigrationsDataClient } from './rule_migrations_data_client';
+import type { SiemRuleMigrationsClientDependencies } from '../types';
 import {
   integrationsFieldMap,
   prebuiltRulesFieldMap,
@@ -18,29 +24,68 @@ import {
 const TOTAL_FIELDS_LIMIT = 2500;
 export const INDEX_PATTERN = '.kibana-siem-rule-migrations';
 
-export type AdapterId = 'rules' | 'resources' | 'integrations' | 'prebuiltrules';
+export interface Adapters {
+  rules: IndexPatternAdapter;
+  resources: IndexPatternAdapter;
+  integrations: IndexAdapter;
+  prebuiltrules: IndexAdapter;
+}
+
+export type AdapterId = keyof Adapters;
 
 interface CreateClientParams {
   spaceId: string;
   currentUser: AuthenticatedUser;
-  esClient: ElasticsearchClient;
+  esScopedClient: IScopedClusterClient;
+  dependencies: SiemRuleMigrationsClientDependencies;
+}
+interface CreateAdapterParams {
+  adapterId: AdapterId;
+  fieldMap: FieldMap;
 }
 
 export class RuleMigrationsDataService {
-  private readonly adapters: Record<AdapterId, IndexPatternAdapter>;
+  private readonly adapters: Adapters;
 
   constructor(private logger: Logger, private kibanaVersion: string) {
     this.adapters = {
-      rules: this.createAdapter({ id: 'rules', fieldMap: ruleMigrationsFieldMap }),
-      resources: this.createAdapter({ id: 'resources', fieldMap: ruleMigrationResourcesFieldMap }),
-      integrations: this.createAdapter({ id: 'integrations', fieldMap: integrationsFieldMap }),
-      prebuiltrules: this.createAdapter({ id: 'prebuiltrules', fieldMap: prebuiltRulesFieldMap }),
+      rules: this.createIndexPatternAdapter({
+        adapterId: 'rules',
+        fieldMap: ruleMigrationsFieldMap,
+      }),
+      resources: this.createIndexPatternAdapter({
+        adapterId: 'resources',
+        fieldMap: ruleMigrationResourcesFieldMap,
+      }),
+      integrations: this.createIndexAdapter({
+        adapterId: 'integrations',
+        fieldMap: integrationsFieldMap,
+      }),
+      prebuiltrules: this.createIndexAdapter({
+        adapterId: 'prebuiltrules',
+        fieldMap: prebuiltRulesFieldMap,
+      }),
     };
   }
 
-  private createAdapter({ id, fieldMap }: { id: AdapterId; fieldMap: FieldMap }) {
-    const name = `${INDEX_PATTERN}-${id}`;
+  private getAdapterIndexName(adapterId: AdapterId) {
+    return `${INDEX_PATTERN}-${adapterId}`;
+  }
+
+  private createIndexPatternAdapter({ adapterId, fieldMap }: CreateAdapterParams) {
+    const name = this.getAdapterIndexName(adapterId);
     const adapter = new IndexPatternAdapter(name, {
+      kibanaVersion: this.kibanaVersion,
+      totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+    });
+    adapter.setComponentTemplate({ name, fieldMap });
+    adapter.setIndexTemplate({ name, componentTemplateRefs: [name] });
+    return adapter;
+  }
+
+  private createIndexAdapter({ adapterId, fieldMap }: CreateAdapterParams) {
+    const name = this.getAdapterIndexName(adapterId);
+    const adapter = new IndexAdapter(name, {
       kibanaVersion: this.kibanaVersion,
       totalFieldsLimit: TOTAL_FIELDS_LIMIT,
     });
@@ -58,26 +103,30 @@ export class RuleMigrationsDataService {
     ]);
   }
 
-  public createClient({ spaceId, currentUser, esClient }: CreateClientParams) {
+  public createClient({ spaceId, currentUser, esScopedClient, dependencies }: CreateClientParams) {
     const indexNameProviders: IndexNameProviders = {
-      rules: this.createIndexNameProvider('rules', spaceId),
-      resources: this.createIndexNameProvider('resources', spaceId),
-      integrations: this.createIndexNameProvider('integrations', spaceId),
-      prebuiltrules: this.createIndexNameProvider('prebuiltrules', spaceId),
+      rules: this.createIndexNameProvider(this.adapters.rules, spaceId),
+      resources: this.createIndexNameProvider(this.adapters.resources, spaceId),
+      integrations: async () => this.getAdapterIndexName('integrations'),
+      prebuiltrules: async () => this.getAdapterIndexName('prebuiltrules'),
     };
 
     return new RuleMigrationsDataClient(
       indexNameProviders,
-      currentUser.username,
-      esClient,
-      this.logger
+      currentUser,
+      esScopedClient,
+      this.logger,
+      dependencies
     );
   }
 
-  private createIndexNameProvider(adapter: AdapterId, spaceId: string): IndexNameProvider {
+  private createIndexNameProvider(
+    adapter: IndexPatternAdapter,
+    spaceId: string
+  ): IndexNameProvider {
     return async () => {
-      await this.adapters[adapter].createIndex(spaceId); // This will resolve instantly when the index is already created
-      return this.adapters[adapter].getIndexName(spaceId);
+      await adapter.createIndex(spaceId); // This will resolve instantly when the index is already created
+      return adapter.getIndexName(spaceId);
     };
   }
 }

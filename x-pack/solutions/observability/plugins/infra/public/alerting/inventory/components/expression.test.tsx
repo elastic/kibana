@@ -8,14 +8,16 @@
 import { mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { DataView, type FieldSpec } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { type FieldSpec } from '@kbn/data-views-plugin/common';
 // We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { InventoryMetricConditions } from '../../../../common/alerting/metrics';
-import { AlertContextMeta, defaultExpression, ExpressionRow, Expressions } from './expression';
+import type { InventoryMetricConditions } from '../../../../common/alerting/metrics';
+import type { AlertContextMeta } from './expression';
+import { defaultExpression, ExpressionRow, Expressions } from './expression';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { ResolvedDataView } from '../../../utils/data_view';
+import type { ResolvedDataView } from '../../../utils/data_view';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import type { SnapshotCustomMetricInput } from '../../../../common/http_api';
 

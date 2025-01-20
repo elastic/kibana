@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
@@ -23,6 +23,12 @@ export const registerUpdateRoute = ({
   router.put(
     {
       path: addBasePath('/component_templates/{name}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         body: componentTemplateSchema,
         params: paramsSchema,
