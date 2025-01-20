@@ -132,6 +132,7 @@ const SuppressionDurationSelectorFields = memo(function SuppressionDurationSelec
             disabled ||
             suppressionDurationSelectorField.value !== AlertSuppressionDurationType.PerTimePeriod
           }
+          aria-label={i18n.ALERT_SUPPRESSION_DURATION_PER_TIME_PERIOD_OPTION}
           minimumValue={1}
         />
       </div>

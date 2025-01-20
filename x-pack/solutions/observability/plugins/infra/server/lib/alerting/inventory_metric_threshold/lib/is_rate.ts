@@ -6,14 +6,14 @@
  */
 
 import { has } from 'lodash';
+import type { MetricsUIAggregation } from '@kbn/metrics-data-access-plugin/common';
 import {
-  MetricsUIAggregation,
   isBasicMetricAgg,
   isDerivativeAgg,
   isSumBucketAgg,
   isTermsWithAggregation,
 } from '@kbn/metrics-data-access-plugin/common';
-import { SnapshotCustomMetricInput } from '../../../../../common/http_api';
+import type { SnapshotCustomMetricInput } from '../../../../../common/http_api';
 
 export const isMetricRate = (metric: MetricsUIAggregation | undefined): boolean => {
   if (!metric) {

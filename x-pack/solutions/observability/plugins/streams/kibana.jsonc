@@ -16,7 +16,8 @@
       "encryptedSavedObjects",
       "usageCollection",
       "licensing",
-      "taskManager"
+      "taskManager",
+      "alerting"
     ],
     "optionalPlugins": [
       "cloud",

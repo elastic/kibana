@@ -8,7 +8,7 @@
  */
 
 import { Command } from '@kbn/dev-cli-runner';
-import { ScoutReportDataStream } from '../reporting/report';
+import { ScoutReportDataStream } from '../reporting/report/events';
 import { getValidatedESClient } from './common';
 
 export const initializeReportDatastream: Command<void> = {

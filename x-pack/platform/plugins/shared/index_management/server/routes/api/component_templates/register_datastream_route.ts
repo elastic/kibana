@@ -54,6 +54,12 @@ export const registerGetDatastreams = ({
   router.get(
     {
       path: addBasePath('/component_templates/{name}/datastreams'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         params: paramsSchema,
       },
@@ -85,6 +91,12 @@ export const registerReferencedIndexTemplateMeta = ({
   router.get(
     {
       path: addBasePath('/component_templates/{name}/referenced_index_template_meta'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         params: paramsSchema,
       },

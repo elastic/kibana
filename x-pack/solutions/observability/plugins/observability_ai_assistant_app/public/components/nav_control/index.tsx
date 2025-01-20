@@ -12,7 +12,12 @@ import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { AIAssistantAppService, useAIAssistantAppService, ChatFlyout } from '@kbn/ai-assistant';
+import {
+  AIAssistantAppService,
+  useAIAssistantAppService,
+  ChatFlyout,
+  FlyoutPositionMode,
+} from '@kbn/ai-assistant';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { useKibana } from '../../hooks/use_kibana';
 import { useTheme } from '../../hooks/use_theme';
@@ -20,6 +25,7 @@ import { useNavControlScreenContext } from '../../hooks/use_nav_control_screen_c
 import { SharedProviders } from '../../utils/shared_providers';
 import { ObservabilityAIAssistantAppPluginStartDependencies } from '../../types';
 import { useNavControlScope } from '../../hooks/use_nav_control_scope';
+import { useLocalStorage } from '../../hooks/use_local_storage';
 
 interface NavControlWithProviderDeps {
   appService: AIAssistantAppService;
@@ -62,10 +68,20 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
     },
   } = useKibana();
 
-  const [hasBeenOpened, setHasBeenOpened] = useState(false);
-
   useNavControlScreenContext();
   useNavControlScope();
+
+  const [flyoutSettings, setFlyoutSettings] = useLocalStorage(
+    'observabilityAIAssistant.flyoutSettings',
+    {
+      mode: FlyoutPositionMode.OVERLAY,
+      isOpen: false,
+    }
+  );
+
+  const [isOpen, setIsOpen] = useState(flyoutSettings.isOpen);
+  const [hasBeenOpened, setHasBeenOpened] = useState(isOpen);
+  const keyRef = useRef(v4());
 
   const chatService = useAbortableAsync(
     ({ signal }) => {
@@ -90,21 +106,18 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
     [service, hasBeenOpened, notifications.toasts]
   );
 
-  const [isOpen, setIsOpen] = useState(false);
-
-  const keyRef = useRef(v4());
-
   useEffect(() => {
     const conversationSubscription = service.conversations.predefinedConversation$.subscribe(() => {
       keyRef.current = v4();
       setHasBeenOpened(true);
+      setFlyoutSettings((prev) => ({ ...prev, isOpen: true }));
       setIsOpen(true);
     });
 
     return () => {
       conversationSubscription.unsubscribe();
     };
-  }, [service.conversations.predefinedConversation$]);
+  }, [service.conversations.predefinedConversation$, setFlyoutSettings]);
 
   const { messages, title, hideConversationList } = useObservable(
     service.conversations.predefinedConversation$
@@ -186,8 +199,13 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
             isOpen={isOpen}
             initialMessages={messages}
             initialTitle={title ?? ''}
+            initialFlyoutPositionMode={flyoutSettings.mode}
             onClose={() => {
+              setFlyoutSettings((prev) => ({ ...prev, isOpen: false }));
               setIsOpen(false);
+            }}
+            onFlyoutPositionModeChange={(next) => {
+              setFlyoutSettings((prev) => ({ ...prev, mode: next }));
             }}
             navigateToConversation={(conversationId?: string) => {
               application.navigateToUrl(

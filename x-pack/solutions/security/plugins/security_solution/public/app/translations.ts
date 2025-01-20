@@ -104,7 +104,7 @@ export const EXCEPTIONS = i18n.translate('xpack.securitySolution.navigation.exce
 export const SIEM_MIGRATIONS_RULES = i18n.translate(
   'xpack.securitySolution.navigation.siemMigrationsRules',
   {
-    defaultMessage: 'SIEM Rules Migrations',
+    defaultMessage: 'SIEM Rule Migrations',
   }
 );
 
@@ -118,6 +118,10 @@ export const ATTACK_DISCOVERY = i18n.translate(
     defaultMessage: 'Attack discovery',
   }
 );
+
+export const INVENTORY = i18n.translate('xpack.securitySolution.navigation.inventory', {
+  defaultMessage: 'Inventory',
+});
 
 export const TIMELINES = i18n.translate('xpack.securitySolution.navigation.timelines', {
   defaultMessage: 'Timelines',

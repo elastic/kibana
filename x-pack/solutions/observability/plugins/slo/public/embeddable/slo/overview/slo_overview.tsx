@@ -95,8 +95,6 @@ export function SloOverview({ sloId, sloInstanceId, remoteName, reloadSubject }:
   const rules = rulesBySlo?.[slo?.id];
   const activeAlerts = activeAlertsBySlo.get(slo);
 
-  const hasGroupBy = Boolean(slo.groupBy && slo.groupBy !== ALL_VALUE);
-
   const historicalSummary = historicalSummaries.find(
     (histSummary) =>
       histSummary.sloId === slo.id && histSummary.instanceId === (slo.instanceId ?? ALL_VALUE)
@@ -112,14 +110,7 @@ export function SloOverview({ sloId, sloInstanceId, remoteName, reloadSubject }:
         onClick={() => {
           setSelectedSlo(slo);
         }}
-        badges={
-          <SloCardItemBadges
-            slo={slo}
-            rules={rules}
-            activeAlerts={activeAlerts}
-            hasGroupBy={hasGroupBy}
-          />
-        }
+        badges={<SloCardItemBadges slo={slo} rules={rules} activeAlerts={activeAlerts} />}
       />
       <SloOverviewDetails slo={selectedSlo} setSelectedSlo={setSelectedSlo} />
     </div>

@@ -27,6 +27,16 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const start = Date.now() - 24 * 60 * 60 * 1000;
   const end = Date.now();
 
+  const cleanUpAlerts = ({ roleAuthc, ruleId }: { roleAuthc: RoleCredentials; ruleId: string }) => {
+    return alertingApi.cleanUpAlerts({
+      roleAuthc,
+      ruleId,
+      alertIndexName: APM_ALERTS_INDEX,
+      connectorIndexName: APM_ACTION_VARIABLE_INDEX,
+      consumer: 'apm',
+    });
+  };
+
   describe('Service group counts', () => {
     let synthbeansServiceGroupId: string;
     let opbeansServiceGroupId: string;
@@ -73,6 +83,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       before(async () => {
         roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+        await cleanUpAlerts({ roleAuthc, ruleId });
         const createdRule = await alertingApi.createRule({
           name: 'Latency threshold | synth-go',
           params: {
@@ -94,13 +105,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       after(async () => {
-        await alertingApi.cleanUpAlerts({
-          roleAuthc,
-          ruleId,
-          alertIndexName: APM_ALERTS_INDEX,
-          connectorIndexName: APM_ACTION_VARIABLE_INDEX,
-          consumer: 'apm',
-        });
+        await cleanUpAlerts({ roleAuthc, ruleId });
         await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       });
 

@@ -16,6 +16,7 @@ import {
 import { useNavigation } from '../../../common/lib/kibana';
 import { SecurityPageName } from '../../../../common/constants';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import type { SortFieldTimeline } from '../../../../common/api/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 import type { TimelineModel } from '../../store/model';
@@ -368,13 +369,20 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       focusInput();
     }, []);
 
+    const {
+      timelinePrivileges: { crud: canWriteTimelines },
+    } = useUserPrivileges();
     useEffect(() => {
       const fetchData = async () => {
-        await installPrepackagedTimelines();
-        refetch();
+        if (canWriteTimelines) {
+          await installPrepackagedTimelines();
+          refetch();
+        } else {
+          refetch();
+        }
       };
       fetchData();
-    }, [refetch, installPrepackagedTimelines]);
+    }, [refetch, installPrepackagedTimelines, canWriteTimelines]);
 
     return !isModal ? (
       <OpenTimeline

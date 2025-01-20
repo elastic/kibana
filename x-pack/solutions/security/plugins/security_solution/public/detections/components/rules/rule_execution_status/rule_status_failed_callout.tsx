@@ -7,6 +7,7 @@
 
 import React, { useCallback } from 'react';
 
+import { css } from '@emotion/react';
 import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
 
 import { NewChat } from '@kbn/elastic-assistant';
@@ -48,7 +49,7 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
 
   return (
     <div
-      css={`
+      css={css`
         pre {
           margin-block-end: 0;
           margin-right: 24px; // Otherwise the copy button overlaps the scrollbar

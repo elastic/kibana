@@ -19,6 +19,11 @@ export default {
       options: ['original', 's', 'm', 'l', 'xl', 'xxl'],
       defaultValue: 'xxl',
     },
+    backgroundColor: {
+      control: 'select',
+      options: ['body', 'emptyShade', 'lightShade', 'darkShade'],
+      defaultValue: 'body',
+    },
   },
 } as ComponentMeta<typeof Component>;
 

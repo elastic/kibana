@@ -27,7 +27,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import moment, { Moment } from 'moment';
+import type { Moment } from 'moment';
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { FeatureFeedbackButton, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { css } from '@emotion/react';

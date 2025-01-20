@@ -8,7 +8,10 @@
 import { EuiLink, EuiToolTip, useEuiFontSize } from '@elastic/eui';
 import React from 'react';
 import styled from '@emotion/styled';
-import { InfraWaffleMapGroup, InfraWaffleMapOptions } from '../../../../../common/inventory/types';
+import type {
+  InfraWaffleMapGroup,
+  InfraWaffleMapOptions,
+} from '../../../../../common/inventory/types';
 
 interface Props {
   onDrilldown: (filter: string) => void;
