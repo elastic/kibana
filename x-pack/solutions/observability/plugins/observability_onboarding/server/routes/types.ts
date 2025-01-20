@@ -46,7 +46,6 @@ export interface ObservabilityOnboardingRouteHandlerResources {
 }
 
 export interface ObservabilityOnboardingRouteCreateOptions {
-  tags: string[];
   xsrfRequired?: boolean;
 }
 
