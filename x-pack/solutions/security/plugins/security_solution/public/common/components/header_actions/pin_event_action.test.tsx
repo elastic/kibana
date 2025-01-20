@@ -25,7 +25,7 @@ describe('PinEventAction', () => {
   describe('isDisabled', () => {
     test('it disables the pin event button when the user does NOT have crud privileges', () => {
       useUserPrivilegesMock.mockReturnValue({
-        kibanaSecuritySolutionsPrivileges: { crud: false, read: true },
+        timelinePrivileges: { crud: false, read: true },
         endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
       });
 
@@ -46,7 +46,7 @@ describe('PinEventAction', () => {
 
     test('it enables the pin event button when the user has crud privileges', () => {
       useUserPrivilegesMock.mockReturnValue({
-        kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+        timelinePrivileges: { crud: true, read: true },
         endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
       });
 

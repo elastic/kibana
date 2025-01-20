@@ -36,6 +36,7 @@ const definition: EntityDefinition = convertToEntityManagerDefinition(
       timestampField: '@timestamp',
       lookbackPeriod: '24h',
     },
+    dynamic: false,
   },
   { namespace: 'test', filter: '' }
 );
@@ -270,7 +271,7 @@ describe('EntityStoreDataClient', () => {
           installed: true,
         },
         {
-          id: 'security_host_test',
+          id: 'indexTemplates_id',
           installed: true,
           resource: 'index_template',
         },
