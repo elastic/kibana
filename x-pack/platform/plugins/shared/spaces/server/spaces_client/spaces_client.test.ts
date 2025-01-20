@@ -86,6 +86,37 @@ const features = [
       },
     },
   },
+  {
+    deprecated: { notice: 'It was another mistake.', replacedBy: ['feature_2'] },
+    id: 'feature_5_deprecated',
+    name: 'Another deprecated Feature',
+    app: ['feature2', 'feature3'],
+    catalogue: ['feature2Entry', 'feature3Entry'],
+    category: { id: 'deprecated', label: 'deprecated' },
+    scope: ['spaces', 'security'],
+    privileges: {
+      all: {
+        savedObject: { all: [], read: [] },
+        ui: [],
+        app: ['feature2', 'feature3'],
+        catalogue: ['feature2Entry', 'feature3Entry'],
+        replacedBy: [
+          { feature: 'feature_2', privileges: ['all'] },
+          { feature: 'feature_3', privileges: ['all'] },
+        ],
+      },
+      read: {
+        savedObject: { all: [], read: [] },
+        ui: [],
+        app: ['feature2', 'feature3'],
+        catalogue: ['feature2Entry', 'feature3Entry'],
+        replacedBy: [
+          { feature: 'feature_2', privileges: ['read'] },
+          { feature: 'feature_3', privileges: ['read'] },
+        ],
+      },
+    },
+  },
 ] as unknown as KibanaFeature[];
 const featuresStart = featuresPluginMock.createStart();
 
@@ -135,7 +166,7 @@ describe('#getAll', () => {
       },
     },
     {
-      // alpha only has deprecated disabled features
+      // alpha has deprecated disabled features
       id: 'alpha',
       type: 'space',
       references: [],
@@ -143,6 +174,17 @@ describe('#getAll', () => {
         name: 'alpha-name',
         description: 'alpha-description',
         disabledFeatures: ['feature_1', 'feature_4_deprecated'],
+      },
+    },
+    {
+      // beta has deprecated disabled features with specified `replacedBy` on feature level
+      id: 'beta',
+      type: 'space',
+      references: [],
+      attributes: {
+        name: 'beta-name',
+        description: 'beta-description',
+        disabledFeatures: ['feature_1', 'feature_5_deprecated'],
       },
     },
   ];
@@ -177,6 +219,12 @@ describe('#getAll', () => {
       name: 'alpha-name',
       description: 'alpha-description',
       disabledFeatures: ['feature_1', 'feature_2', 'feature_3'],
+    },
+    {
+      id: 'beta',
+      name: 'beta-name',
+      description: 'beta-description',
+      disabledFeatures: ['feature_1', 'feature_2'],
     },
   ];
 
