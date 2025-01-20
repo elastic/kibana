@@ -43,32 +43,30 @@ export const performRemoveReferencesTo = async <T>(
     {
       index: targetIndices,
       refresh,
-      body: {
-        script: {
-          source: `
-              if (ctx._source.containsKey('references')) {
-                def items_to_remove = [];
-                for (item in ctx._source.references) {
-                  if ( (item['type'] == params['type']) && (item['id'] == params['id']) ) {
-                    items_to_remove.add(item);
-                  }
-                }
-                ctx._source.references.removeAll(items_to_remove);
+      script: {
+        source: `
+          if (ctx._source.containsKey('references')) {
+            def items_to_remove = [];
+            for (item in ctx._source.references) {
+              if ( (item['type'] == params['type']) && (item['id'] == params['id']) ) {
+                items_to_remove.add(item);
               }
-            `,
-          params: {
-            type,
-            id,
-          },
-          lang: 'painless',
+            }
+            ctx._source.references.removeAll(items_to_remove);
+          }
+        `,
+        params: {
+          type,
+          id,
         },
-        conflicts: 'proceed',
-        ...getSearchDsl(mappings, registry, {
-          namespaces: namespace ? [namespace] : undefined,
-          type: allTypes,
-          hasReference: { type, id },
-        }),
+        lang: 'painless',
       },
+      conflicts: 'proceed',
+      ...(getSearchDsl(mappings, registry, {
+        namespaces: namespace ? [namespace] : undefined,
+        type: allTypes,
+        hasReference: { type, id },
+      }) as Omit<ReturnType<typeof getSearchDsl>, 'sort'>), // TS is complaining and it's unlikely that we sort here
     },
     { ignore: [404], meta: true }
   );

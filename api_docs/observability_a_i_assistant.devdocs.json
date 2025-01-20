@@ -2429,11 +2429,11 @@
               "ObservabilityAIAssistantRouteHandlerResources",
               ", { errorMessage?: string | undefined; ready: boolean; enabled: boolean; endpoint?: Partial<",
               "InferenceInferenceEndpointInfo",
-              "> | undefined; model_stats?: { deployment_state: ",
+              "> | undefined; model_stats?: { deployment_state?: ",
               "MlDeploymentAssignmentState",
-              " | undefined; allocation_state: ",
+              " | undefined; allocation_state?: ",
               "MlDeploymentAllocationState",
-              " | undefined; } | undefined; }, ",
+              " | undefined; allocation_count?: number | undefined; } | undefined; }, ",
               "ObservabilityAIAssistantRouteCreateOptions",
               ">; \"POST /internal/observability_ai_assistant/kb/reset\": ",
               {
@@ -3401,11 +3401,11 @@
               "ObservabilityAIAssistantRouteHandlerResources",
               ", { errorMessage?: string | undefined; ready: boolean; enabled: boolean; endpoint?: Partial<",
               "InferenceInferenceEndpointInfo",
-              "> | undefined; model_stats?: { deployment_state: ",
+              "> | undefined; model_stats?: { deployment_state?: ",
               "MlDeploymentAssignmentState",
-              " | undefined; allocation_state: ",
+              " | undefined; allocation_state?: ",
               "MlDeploymentAllocationState",
-              " | undefined; } | undefined; }, ",
+              " | undefined; allocation_count?: number | undefined; } | undefined; }, ",
               "ObservabilityAIAssistantRouteCreateOptions",
               ">; \"POST /internal/observability_ai_assistant/kb/reset\": ",
               {
@@ -5098,11 +5098,11 @@
           "ObservabilityAIAssistantRouteHandlerResources",
           ", { errorMessage?: string | undefined; ready: boolean; enabled: boolean; endpoint?: Partial<",
           "InferenceInferenceEndpointInfo",
-          "> | undefined; model_stats?: { deployment_state: ",
+          "> | undefined; model_stats?: { deployment_state?: ",
           "MlDeploymentAssignmentState",
-          " | undefined; allocation_state: ",
+          " | undefined; allocation_state?: ",
           "MlDeploymentAllocationState",
-          " | undefined; } | undefined; }, ",
+          " | undefined; allocation_count?: number | undefined; } | undefined; }, ",
           "ObservabilityAIAssistantRouteCreateOptions",
           ">; \"POST /internal/observability_ai_assistant/kb/reset\": ",
           {
@@ -6291,11 +6291,11 @@
           "ObservabilityAIAssistantRouteHandlerResources",
           ", { errorMessage?: string | undefined; ready: boolean; enabled: boolean; endpoint?: Partial<",
           "InferenceInferenceEndpointInfo",
-          "> | undefined; model_stats?: { deployment_state: ",
+          "> | undefined; model_stats?: { deployment_state?: ",
           "MlDeploymentAssignmentState",
-          " | undefined; allocation_state: ",
+          " | undefined; allocation_state?: ",
           "MlDeploymentAllocationState",
-          " | undefined; } | undefined; }, ",
+          " | undefined; allocation_count?: number | undefined; } | undefined; }, ",
           "ObservabilityAIAssistantRouteCreateOptions",
           ">; \"POST /internal/observability_ai_assistant/kb/reset\": ",
           {
@@ -8308,7 +8308,7 @@
             "label": "chat",
             "description": [],
             "signature": [
-              "(name: string, { messages, connectorId, functions, functionCall, signal, simulateFunctionCalling, tracer, }: { messages: ",
+              "<TStream extends boolean>(name: string, { messages, connectorId, functions, functionCall, signal, simulateFunctionCalling, tracer, stream, }: { messages: ",
               {
                 "pluginId": "observabilityAIAssistant",
                 "scope": "common",
@@ -8326,7 +8326,7 @@
               },
               " | undefined; }[] | undefined; functionCall?: string | undefined; signal: AbortSignal; simulateFunctionCalling?: boolean | undefined; tracer: ",
               "LangTracer",
-              "; }) => ",
+              "; stream: TStream; }) => TStream extends true ? ",
               "Observable",
               "<",
               {
@@ -8352,7 +8352,23 @@
                 "section": "def-common.TokenCountEvent",
                 "text": "TokenCountEvent"
               },
-              ">"
+              "> : Promise<",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteResponse",
+                "text": "ChatCompleteResponse"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolOptions",
+                "text": "ToolOptions"
+              },
+              "<string>>>"
             ],
             "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/server/service/client/index.ts",
             "deprecated": false,
@@ -8378,7 +8394,7 @@
                 "id": "def-server.ObservabilityAIAssistantClient.chat.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      messages,\n      connectorId,\n      functions,\n      functionCall,\n      signal,\n      simulateFunctionCalling,\n      tracer,\n    }",
+                "label": "{\n      messages,\n      connectorId,\n      functions,\n      functionCall,\n      signal,\n      simulateFunctionCalling,\n      tracer,\n      stream,\n    }",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/server/service/client/index.ts",
                 "deprecated": false,
@@ -8489,6 +8505,20 @@
                     "description": [],
                     "signature": [
                       "LangTracer"
+                    ],
+                    "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/server/service/client/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "observabilityAIAssistant",
+                    "id": "def-server.ObservabilityAIAssistantClient.chat.$2.stream",
+                    "type": "Uncategorized",
+                    "tags": [],
+                    "label": "stream",
+                    "description": [],
+                    "signature": [
+                      "TStream"
                     ],
                     "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/server/service/client/index.ts",
                     "deprecated": false,
@@ -9623,11 +9653,11 @@
           "ObservabilityAIAssistantRouteHandlerResources",
           ", { errorMessage?: string | undefined; ready: boolean; enabled: boolean; endpoint?: Partial<",
           "InferenceInferenceEndpointInfo",
-          "> | undefined; model_stats?: { deployment_state: ",
+          "> | undefined; model_stats?: { deployment_state?: ",
           "MlDeploymentAssignmentState",
-          " | undefined; allocation_state: ",
+          " | undefined; allocation_state?: ",
           "MlDeploymentAllocationState",
-          " | undefined; } | undefined; }, ",
+          " | undefined; allocation_count?: number | undefined; } | undefined; }, ",
           "ObservabilityAIAssistantRouteCreateOptions",
           ">; \"POST /internal/observability_ai_assistant/kb/reset\": ",
           {

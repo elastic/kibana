@@ -22,7 +22,16 @@ import { processVertexStream } from './process_vertex_stream';
 import type { GenerateContentResponseChunk, GeminiMessage, GeminiToolConfig } from './types';
 
 export const geminiAdapter: InferenceConnectorAdapter = {
-  chatComplete: ({ executor, system, messages, toolChoice, tools, abortSignal }) => {
+  chatComplete: ({
+    executor,
+    system,
+    messages,
+    toolChoice,
+    tools,
+    temperature = 0,
+    modelName,
+    abortSignal,
+  }) => {
     return from(
       executor.invoke({
         subAction: 'invokeStream',
@@ -31,7 +40,8 @@ export const geminiAdapter: InferenceConnectorAdapter = {
           systemInstruction: system,
           tools: toolsToGemini(tools),
           toolConfig: toolChoiceToConfig(toolChoice),
-          temperature: 0,
+          temperature,
+          model: modelName,
           signal: abortSignal,
           stopSequences: ['\n\nHuman:'],
         },
