@@ -8,10 +8,9 @@
  */
 
 import { test as base } from '@playwright/test';
-import { ScoutTestConfig, ToolingLog } from '../../../../types';
 import { PROJECT_DEFAULT_ROLES } from '../../../../common';
-import { LoginFixture, SamlSessionManager } from '../../types';
 import { serviceLoadedMsg } from '../../../utils';
+import { SamlSessionManager, ScoutTestConfig, ToolingLog } from '../worker_scope';
 
 type LoginFunction = (role: string) => Promise<void>;
 
@@ -39,7 +38,7 @@ export interface BrowserAuthFixture {
  * for the specified role and the "context" fixture to update the cookie with the role-scoped session.
  */
 export const browserAuthFixture = base.extend<
-  { browserAuth: LoginFixture },
+  { browserAuth: BrowserAuthFixture },
   { log: ToolingLog; samlAuth: SamlSessionManager; config: ScoutTestConfig }
 >({
   browserAuth: async ({ log, context, samlAuth, config }, use) => {

@@ -8,8 +8,8 @@
  */
 
 import { test as base } from '@playwright/test';
-import { ScoutPage } from '../../types';
 import { PageObjects, createCorePageObjects } from '../../../page_objects';
+import { ScoutPage } from './page';
 
 /**
  * The "pageObjects" fixture provides a centralized and consistent way to access and

@@ -9,7 +9,7 @@
 
 import { Page, test as base } from '@playwright/test';
 import { subj } from '@kbn/test-subj-selector';
-import { KibanaUrl } from '../../types';
+import { KibanaUrl } from '../worker_scope';
 
 /**
  * Extends the Playwright 'Page' interface with methods specific to Kibana.
