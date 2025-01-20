@@ -38,7 +38,6 @@ export enum DiffMethod {
   WORDS = 'diffWords',
   WORDS_WITH_SPACE = 'diffWordsWithSpace',
   LINES = 'diffLines',
-  TRIMMED_LINES = 'diffTrimmedLines',
   SENTENCES = 'diffSentences',
   CSS = 'diffCss',
 }
@@ -262,7 +261,7 @@ function diffChangeBlock(
  * The format of the strings is as follows:
  */
 export function markEdits(hunks: HunkData[], diffMethod: DiffMethod): TokenizeEnhancer {
-  /* 
+  /*
     changeBlocks is an array that contains information about the lines that have changes (additions or deletions).
     Unchanged lines are not included.
   */

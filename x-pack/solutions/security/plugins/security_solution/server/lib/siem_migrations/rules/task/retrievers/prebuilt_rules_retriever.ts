@@ -5,25 +5,33 @@
  * 2.0.
  */
 
-import type { RuleMigrationsDataClient } from '../../data/rule_migrations_data_client';
-import type { RuleMigrationPrebuiltRule } from '../../types';
+import type { PrebuildRuleVersionsMap } from '../../data/rule_migrations_data_prebuilt_rules_client';
+import type { RuleSemanticSearchResult } from '../../types';
+import type { RuleMigrationsRetrieverClients } from './rule_migrations_retriever';
 
 export class PrebuiltRulesRetriever {
-  constructor(private readonly dataClient: RuleMigrationsDataClient) {}
+  private rulesMap?: PrebuildRuleVersionsMap;
 
-  public async getRules(
-    semanticString: string,
-    techniqueIds: string
-  ): Promise<RuleMigrationPrebuiltRule[]> {
-    return this.prebuiltRulesRetriever(semanticString, techniqueIds);
+  constructor(private readonly clients: RuleMigrationsRetrieverClients) {}
+
+  public async populateIndex() {
+    if (!this.rulesMap) {
+      this.rulesMap = await this.clients.data.prebuiltRules.getRuleVersionsMap();
+    }
+    return this.clients.data.prebuiltRules.populate(this.rulesMap);
   }
 
-  private prebuiltRulesRetriever = async (
+  public async search(
     semanticString: string,
     techniqueIds: string
-  ): Promise<RuleMigrationPrebuiltRule[]> => {
-    const rules = await this.dataClient.prebuiltRules.retrieveRules(semanticString, techniqueIds);
-
-    return rules;
-  };
+  ): Promise<RuleSemanticSearchResult[]> {
+    if (!this.rulesMap) {
+      this.rulesMap = await this.clients.data.prebuiltRules.getRuleVersionsMap();
+    }
+    const results = await this.clients.data.prebuiltRules.search(semanticString, techniqueIds);
+    return results.map((rule) => {
+      const versions = this.rulesMap?.get(rule.rule_id) ?? {};
+      return { ...rule, ...versions };
+    });
+  }
 }

@@ -39,6 +39,8 @@ export type AfterKeys = z.infer<typeof AfterKeys>;
 export const AfterKeys = z.object({
   host: EntityAfterKey.optional(),
   user: EntityAfterKey.optional(),
+  service: EntityAfterKey.optional(),
+  universal: EntityAfterKey.optional(),
 });
 
 /**
@@ -72,7 +74,7 @@ export const DateRange = z.object({
 });
 
 export type IdentifierType = z.infer<typeof IdentifierType>;
-export const IdentifierType = z.enum(['host', 'user']);
+export const IdentifierType = z.enum(['host', 'user', 'service', 'universal']);
 export type IdentifierTypeEnum = typeof IdentifierType.enum;
 export const IdentifierTypeEnum = IdentifierType.enum;
 
@@ -169,21 +171,35 @@ export const RiskScoreWeightGlobalShared = z.object({
   type: z.literal('global_identifier'),
 });
 
-export type RiskScoreWeight = z.infer<typeof RiskScoreWeight>;
-export const RiskScoreWeight = z.union([
+export const RiskScoreWeightInternal = z.union([
   RiskScoreWeightGlobalShared.merge(
     z.object({
       host: RiskScoreEntityIdentifierWeights,
       user: RiskScoreEntityIdentifierWeights.optional(),
+      service: RiskScoreEntityIdentifierWeights.optional(),
+      universal: RiskScoreEntityIdentifierWeights.optional(),
     })
   ),
   RiskScoreWeightGlobalShared.merge(
     z.object({
       host: RiskScoreEntityIdentifierWeights.optional(),
       user: RiskScoreEntityIdentifierWeights,
+      service: RiskScoreEntityIdentifierWeights.optional(),
+      universal: RiskScoreEntityIdentifierWeights.optional(),
+    })
+  ),
+  RiskScoreWeightGlobalShared.merge(
+    z.object({
+      host: RiskScoreEntityIdentifierWeights.optional(),
+      user: RiskScoreEntityIdentifierWeights.optional(),
+      service: RiskScoreEntityIdentifierWeights,
+      universal: RiskScoreEntityIdentifierWeights.optional(),
     })
   ),
 ]);
+
+export type RiskScoreWeight = z.infer<typeof RiskScoreWeightInternal>;
+export const RiskScoreWeight = RiskScoreWeightInternal as z.ZodType<RiskScoreWeight>;
 
 /**
  * A list of weights to be applied to the scoring calculation.

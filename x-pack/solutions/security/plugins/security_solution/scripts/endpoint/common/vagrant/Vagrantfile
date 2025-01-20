@@ -21,6 +21,7 @@ Vagrant.configure("2") do |config|
   config.vm.provider :vmware_desktop do |v, override|
     override.vm.box = "starboard/ubuntu-arm64-20.04.5"
     override.vm.box_version = "20221120.20.40.0"
+    config.vm.box_url = "https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64-vagrant.box"
     override.vm.box_download_insecure = true
     override.vm.network "private_network", type: "dhcp"
 

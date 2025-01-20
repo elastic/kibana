@@ -18,6 +18,7 @@ interface DurationInputProps {
   minimumValue?: number;
   isDisabled: boolean;
   durationUnitOptions?: Array<{ value: 's' | 'm' | 'h' | 'd'; text: string }>;
+  'aria-label'?: string;
 }
 
 // This component is similar to the ScheduleItem component, but instead of combining the value
@@ -33,6 +34,7 @@ export const DurationInput = memo(function DurationInputComponent({
     { value: 'm', text: I18n.MINUTES },
     { value: 'h', text: I18n.HOURS },
   ],
+  'aria-label': ariaLabel,
   ...props
 }: DurationInputProps): JSX.Element {
   const { euiTheme } = useEuiTheme();
@@ -98,6 +100,7 @@ export const DurationInput = memo(function DurationInputComponent({
         onChange={onChangeTimeVal}
         value={durationValue}
         data-test-subj="interval"
+        aria-label={ariaLabel}
         {...rest}
       />
     </EuiFormRow>

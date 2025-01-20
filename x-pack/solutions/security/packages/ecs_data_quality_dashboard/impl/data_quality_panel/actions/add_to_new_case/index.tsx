@@ -10,7 +10,7 @@ import { EuiIcon, EuiLink } from '@elastic/eui';
 
 import { useDataQualityContext } from '../../data_quality_context';
 import { useAddToNewCase } from './hooks/use_add_to_new_case';
-import { StyledLinkText } from '../styles';
+import { linkTextCss } from '../styles';
 import { ADD_TO_NEW_CASE } from '../../translations';
 
 interface Props {
@@ -42,10 +42,10 @@ const AddToNewCaseActionComponent: React.FC<Props> = ({ markdownComment }) => {
       disabled={addToNewCaseDisabled || disableAll}
       onClick={addToNewCaseContextMenuOnClick}
     >
-      <StyledLinkText>
+      <span css={linkTextCss}>
         <EuiIcon type="listAdd" />
         {ADD_TO_NEW_CASE}
-      </StyledLinkText>
+      </span>
     </EuiLink>
   );
 };

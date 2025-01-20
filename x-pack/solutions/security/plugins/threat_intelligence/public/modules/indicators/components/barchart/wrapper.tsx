@@ -18,7 +18,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TimeRange } from '@kbn/es-query';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
-import { SecuritySolutionDataViewBase } from '../../../../types';
 import { RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { IndicatorsFieldSelector } from './field_selector';
 import { IndicatorsBarChart } from './barchart';
@@ -36,10 +35,6 @@ export interface IndicatorsBarChartWrapperProps {
    * From and to values received from the KQL bar and passed down to the hook to query data.
    */
   timeRange?: TimeRange;
-  /**
-   * List of fields coming from the Security Solution sourcerer data view, passed down to the {@link IndicatorsFieldSelector} to populate the dropdown.
-   */
-  indexPattern: SecuritySolutionDataViewBase;
 
   series: ChartSeries[];
 
@@ -61,7 +56,7 @@ export interface IndicatorsBarChartWrapperProps {
  * and handles retrieving aggregated indicator data.
  */
 export const IndicatorsBarChartWrapper = memo<IndicatorsBarChartWrapperProps>(
-  ({ timeRange, indexPattern, isLoading, isFetching, series, dateRange, field, onFieldChange }) => {
+  ({ timeRange, isLoading, isFetching, series, dateRange, field, onFieldChange }) => {
     if (isLoading) {
       return (
         <EuiFlexGroup justifyContent="spaceAround">
@@ -89,7 +84,6 @@ export const IndicatorsBarChartWrapper = memo<IndicatorsBarChartWrapperProps>(
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <IndicatorsFieldSelector
-              indexPattern={indexPattern}
               defaultStackByValue={DEFAULT_FIELD}
               valueChange={onFieldChange}
             />

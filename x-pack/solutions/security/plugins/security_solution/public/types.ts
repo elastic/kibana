@@ -21,6 +21,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { PluginStart as ListsPluginStart } from '@kbn/lists-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
@@ -77,6 +78,7 @@ import type { CloudSecurityPosture } from './cloud_security_posture';
 import type { CloudDefend } from './cloud_defend';
 import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
+import type { AssetInventory } from './asset_inventory';
 import type { AttackDiscovery } from './attack_discovery';
 import type { Explore } from './explore';
 import type { NavigationLink } from './common/links';
@@ -160,6 +162,7 @@ export interface StartPlugins {
   core: CoreStart;
   integrationAssistant?: IntegrationAssistantPluginStart;
   serverless?: ServerlessPluginStart;
+  productDocBase: ProductDocBasePluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
@@ -197,6 +200,7 @@ export type StartServices = CoreStart &
     topValuesPopover: TopValuesPopoverService;
     timelineDataService: DataPublicPluginStart;
     siemMigrations: SiemMigrationsService;
+    productDocBase: ProductDocBasePluginStart;
   };
 
 export type StartRenderServices = Pick<
@@ -231,6 +235,7 @@ export const CASES_SUB_PLUGIN_KEY = 'cases';
 export interface SubPlugins {
   [CASES_SUB_PLUGIN_KEY]: Cases;
   alerts: Detections;
+  assetInventory: AssetInventory;
   attackDiscovery: AttackDiscovery;
   cloudDefend: CloudDefend;
   cloudSecurityPosture: CloudSecurityPosture;
@@ -255,6 +260,7 @@ export interface SubPlugins {
 export interface StartedSubPlugins {
   [CASES_SUB_PLUGIN_KEY]: ReturnType<Cases['start']>;
   alerts: Awaited<ReturnType<Detections['start']>>;
+  assetInventory: Awaited<ReturnType<AssetInventory['start']>>;
   attackDiscovery: ReturnType<AttackDiscovery['start']>;
   cloudDefend: ReturnType<CloudDefend['start']>;
   cloudSecurityPosture: ReturnType<CloudSecurityPosture['start']>;
