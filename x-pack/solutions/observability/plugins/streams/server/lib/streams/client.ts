@@ -22,13 +22,13 @@ import {
   getAncestors,
   getParentId,
   isChildOf,
-  isDSNS,
   isIngestStream,
   isRootStream,
   isWiredStream,
   streamDefinitionSchema,
 } from '@kbn/streams-schema';
 import { cloneDeep, keyBy, omit, orderBy } from 'lodash';
+import { isDSNS, parseStreamName } from '@kbn/streams-schema/src/helpers/stream_name';
 import { AssetClient } from './assets/asset_client';
 import { DefinitionNotFound, SecurityException } from './errors';
 import { MalformedStreamId } from './errors/malformed_stream_id';
@@ -757,27 +757,29 @@ export class StreamsClient {
     });
   }
 
+  /**
+   * Returns the unwired root stream for a wired stream.
+   *
+   * For a stream wired to logs, this returns undefined.
+   * For a stream wired to an unwired classic stream, this returns the classic stream.
+   *
+   * This is done by fetching all classic stream definitions that start with the first dot part of the dataset
+   * and looking for the longest match (in terms of numbers of dots in the dataset).
+   */
   async getUnwiredRootForStream(
     definition: WiredStreamDefinition
   ): Promise<StreamDefinition | undefined> {
     let classicRoot: StreamDefinition | undefined;
-    if (isDSNS(definition.name)) {
-      // if the stream is a DSNS but wired, it doesn't inherit from logs, but from a classic stream
-      // we need to find that classic stream to be able to build the component stack properly
-      // we can do this by fetching all stream definitions that start with the first dot part of the dataset
-      // then look for the shortest match (in terms of numbers of dots in the dataset)
-
-      const [type, dataset, namespace] = definition.name.split('-');
-      const datasetParts = dataset.split('.');
-      const datasetPrefix = datasetParts[0];
-
+    let classicRootSegmentLength = 0;
+    const streamName = parseStreamName(definition.name);
+    if (streamName.type === 'dsns') {
       const streams = await this.getStreamDefinitions({
         query: {
           bool: {
             filter: [
               {
                 prefix: {
-                  name: `${type}-${datasetPrefix}`,
+                  name: `${streamName.datastreamType}-${streamName.datasetSegments[0]}`,
                 },
               },
             ],
@@ -786,18 +788,21 @@ export class StreamsClient {
       });
 
       streams
-        .filter((s) => !isWiredStream(s))
-        .forEach((stream) => {
-          const [t, d, n] = stream.name.split('-');
+        .filter((candidateStream) => isWiredStream(candidateStream))
+        .forEach((candidateStream) => {
+          const candidateStreamName = parseStreamName(candidateStream.name);
           // The longest unwired stream with a matching prefix is the classic root
           if (
-            dataset.startsWith(d) &&
-            n === namespace &&
-            t === type &&
-            definition.name !== stream.name &&
-            (!classicRoot || d.split('.').length > classicRoot.name.split('-')[1].split('.').length)
+            candidateStreamName.type === 'dsns' &&
+            candidateStreamName.datasetSegments.every(
+              (segment, index) => segment === streamName.datasetSegments[index]
+            ) &&
+            candidateStreamName.datastreamType === streamName.datastreamType &&
+            candidateStreamName.datastreamNamespace === streamName.datastreamNamespace &&
+            candidateStreamName.datasetSegments.length > classicRootSegmentLength
           ) {
-            classicRoot = stream;
+            classicRoot = candidateStream;
+            classicRootSegmentLength = candidateStreamName.datasetSegments.length;
           }
         });
     }

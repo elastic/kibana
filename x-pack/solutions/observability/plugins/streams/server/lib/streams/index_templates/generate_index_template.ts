@@ -6,6 +6,8 @@
  */
 
 import { StreamDefinition, isWiredStream } from '@kbn/streams-schema';
+import { parseStreamName } from '@kbn/streams-schema/src/helpers/stream_name';
+import { stringifyStreamName } from '@kbn/streams-schema/src/helpers/stream_name/stringify';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { getProcessingPipelineName } from '../ingest_pipelines/name';
 import { getIndexTemplateName } from './name';
@@ -15,31 +17,54 @@ export function generateIndexTemplate(
   classicRoot?: StreamDefinition
 ) {
   const name = definition.name;
-  let composedOf = name.split('.').reduce((acc, _, index, array) => {
-    const parent = array.slice(0, index + 1).join('.');
-    return [...acc, `${parent}@stream.layer`];
-  }, [] as string[]);
+  const streamName = parseStreamName(name);
+  let composedOf: string[] = [];
 
-  if (isWiredStream(definition) && classicRoot) {
-    // if the stream is managed and has a classic root, we need to:
+  if (!isWiredStream(definition)) {
+    throw new Error(`Can only generate index templates for wired streams`);
+  }
+
+  if (streamName.type === 'unknown') {
+    throw new Error(`Unknown stream type: ${name}`);
+  }
+
+  if (streamName.type === 'dsns') {
+    if (!classicRoot) {
+      throw new Error(`DSNS stream ${name} does not have a classic root`);
+    }
+    const classicRootStreamName = parseStreamName(classicRoot.name);
+    if (classicRootStreamName.type !== 'dsns') {
+      throw new Error(`Classic root ${classicRoot.name} is not a DSNS stream`);
+    }
+    // if the stream is wired and has a classic root, we need to:
     // * find the dataset of the classic root
     // * for every part (separated by dots) added after that, add the @stream.layer component template
-    const classicRootDataset = classicRoot.name.split('-')[1];
-    const dataset = name.split('-')[1];
-    const classicRootDatasetParts = classicRootDataset.split('.');
-    const datasetParts = dataset.split('.');
     let commonParts = 0;
-    while (classicRootDatasetParts[commonParts] === datasetParts[commonParts]) {
+    while (
+      classicRootStreamName.datasetSegments[commonParts] === streamName.datasetSegments[commonParts]
+    ) {
       commonParts++;
     }
     composedOf = [
       `${classicRoot.name}@stream.layer`,
-      ...datasetParts.slice(commonParts).map((part, index) => {
-        return `${classicRoot.name.split('-')[0]}-${datasetParts
-          .slice(0, commonParts + index + 1)
-          .join('.')}-${classicRoot.name.split('-')[2]}@stream.layer`;
+      ...streamName.datasetSegments.slice(commonParts).map((part, index) => {
+        const parentStreamName = stringifyStreamName({
+          type: 'dsns',
+          datastreamType: streamName.datastreamType,
+          datastreamNamespace: streamName.datastreamNamespace,
+          datasetSegments: streamName.datasetSegments.slice(0, commonParts + index + 1),
+        });
+        return `${parentStreamName}@stream.layer`;
       }),
     ];
+  } else {
+    composedOf = streamName.segments.reduce((acc, _, index, array) => {
+      const parent = stringifyStreamName({
+        type: 'wired',
+        segments: array.slice(0, index + 1),
+      });
+      return [...acc, `${parent}@stream.layer`];
+    }, [] as string[]);
   }
 
   return {
