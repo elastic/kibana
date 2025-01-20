@@ -43,7 +43,7 @@ export const registerRuleManagementRoutes = (
 
   // DEPRECATED. NIKITA, REMOVE THESE
   bulkCreateRulesRoute(router, logger, docLinks);
-  bulkUpdateRulesRoute(router, logger);
+  bulkUpdateRulesRoute(router, logger, docLinks);
   bulkPatchRulesRoute(router, logger, docLinks);
   bulkDeleteRulesRoute(router, logger);
   // ALONG WITH THEIR IMPORTS
