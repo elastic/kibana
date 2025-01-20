@@ -7,15 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLVariablesPlugin } from './plugin';
-
-export {
-  type PublishesESQLVariable,
-  type PublishesESQLVariables,
-  apiPublishesESQLVariable,
-  apiPublishesESQLVariables,
-} from './esql_publishing';
-
-export function plugin() {
-  return new ESQLVariablesPlugin();
-}
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-es-types'],
+};

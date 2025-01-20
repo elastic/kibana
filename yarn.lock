@@ -5607,7 +5607,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/esql-variables@link:src/platform/plugins/shared/esql_variables":
+"@kbn/esql-variables-types@link:src/platform/packages/shared/kbn-esql-variables-types":
   version "0.0.0"
   uid ""
 

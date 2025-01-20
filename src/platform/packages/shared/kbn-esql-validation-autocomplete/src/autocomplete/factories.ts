@@ -203,7 +203,7 @@ export const buildFieldsDefinitionsWithMetadata = (
     variableType?: ESQLVariableType;
     supportsControls?: boolean;
   },
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[]
+  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined
 ): SuggestionRawDefinition[] => {
   const fieldsSuggestions = fields.map((field) => {
     const titleCaseType = field.type.charAt(0).toUpperCase() + field.type.slice(1);
@@ -466,7 +466,7 @@ export function getCompatibleLiterals(
     addComma?: boolean;
     supportsControls?: boolean;
   },
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[]
+  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined
 ) {
   const suggestions: SuggestionRawDefinition[] = [];
   if (types.some(isNumericType)) {

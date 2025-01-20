@@ -93,8 +93,18 @@ export interface JoinIndexAutocompleteItem {
   aliases: string[];
 }
 
+interface ESQLVariableService {
+  areSuggestionsEnabled: boolean;
+  esqlVariables: ESQLControlVariable[];
+  enableSuggestions: () => void;
+  disableSuggestions: () => void;
+  clearVariables: () => void;
+  addVariable: (variable: ESQLControlVariable) => void;
+}
+
 export interface EsqlPluginStartBase {
   getJoinIndicesAutocomplete: () => Promise<JoinIndicesAutocompleteResult>;
+  variablesService: ESQLVariableService;
 }
 
 export interface ESQLEditorDeps {

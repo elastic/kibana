@@ -63,7 +63,6 @@
       "charts",
       "esqlDataGrid",
       "esql",
-      "esqlVariables",
     ],
     "extraPublicDirs": [
       "common/constants"
