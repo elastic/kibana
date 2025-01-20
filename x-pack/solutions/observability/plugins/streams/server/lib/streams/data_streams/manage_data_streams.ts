@@ -114,7 +114,7 @@ export async function updateDataStreamsLifecycle({
           }),
         { logger }
       );
-    } else if (lifecycle.type == 'dlm') {
+    } else if (lifecycle.type === 'dlm') {
       await retryTransientEsErrors(
         () =>
           esClient.indices.putDataLifecycle({
