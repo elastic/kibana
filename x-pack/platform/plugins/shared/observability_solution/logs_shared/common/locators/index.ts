@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+export * from './discover_logs_locator';
 export * from './logs_locator';
 export * from './trace_logs_locator';
 export * from './node_logs_locator';
 export * from './get_logs_locators';
+export * from './helpers';
 
 export type {
   LogsSharedLocators,

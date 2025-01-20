@@ -66,6 +66,13 @@ export {
   TRACE_LOGS_LOCATOR_ID,
   NODE_LOGS_LOCATOR_ID,
   getLogsLocatorsFromUrlService,
+  getTimeRangeEndFromTime,
+  getTimeRangeStartFromTime,
 } from './locators';
-export type { LogsLocatorParams, NodeLogsLocatorParams, TraceLogsLocatorParams } from './locators';
+export type {
+  DiscoverLogsLocatorParams,
+  LogsLocatorParams,
+  NodeLogsLocatorParams,
+  TraceLogsLocatorParams,
+} from './locators';
 export { createNodeLogsQuery } from './locators/helpers';

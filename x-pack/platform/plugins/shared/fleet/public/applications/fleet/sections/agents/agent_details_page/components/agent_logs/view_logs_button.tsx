@@ -7,7 +7,11 @@
 
 import React, { useMemo } from 'react';
 
-import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
+import {
+  getLogsLocatorsFromUrlService,
+  getTimeRangeEndFromTime,
+  getTimeRangeStartFromTime,
+} from '@kbn/logs-shared-plugin/common';
 
 import moment from 'moment';
 
@@ -35,7 +39,7 @@ export const ViewLogsButton: React.FunctionComponent<ViewLogsProps> = ({
   endTime,
 }) => {
   const { share } = useStartServices();
-  const { logsLocator } = getLogsLocatorsFromUrlService(share.url);
+  const { discoverLogsLocator } = getLogsLocatorsFromUrlService(share.url);
   const authz = useAuthz();
 
   const logsUrl = useMemo(() => {
@@ -44,21 +48,21 @@ export const ViewLogsButton: React.FunctionComponent<ViewLogsProps> = ({
     const defaultStartTime = getFormattedRange(oneDayAgo);
     const defaultEndTime = getFormattedRange(now);
 
-    return logsLocator.getRedirectUrl({
+    return discoverLogsLocator?.getRedirectUrl({
       time: endTime ? endTime : defaultEndTime,
       timeRange: {
-        startTime: startTime ? startTime : defaultStartTime,
-        endTime: endTime ? endTime : defaultEndTime,
+        from: getTimeRangeStartFromTime(startTime ? startTime : defaultStartTime),
+        to: getTimeRangeEndFromTime(endTime ? endTime : defaultEndTime),
       },
       filter: logStreamQuery,
     });
-  }, [endTime, logStreamQuery, logsLocator, startTime]);
+  }, [endTime, logStreamQuery, discoverLogsLocator, startTime]);
 
-  return authz.fleet.readAgents && logsLocator ? (
+  return authz.fleet.readAgents && discoverLogsLocator ? (
     <EuiButton href={logsUrl} iconType="popout" data-test-subj="viewInLogsBtn">
       <FormattedMessage
         id="xpack.fleet.agentLogs.openInLogsUiLinkText"
-        defaultMessage="Open in Logs Explorer"
+        defaultMessage="Open in Discover"
       />
     </EuiButton>
   ) : null;
