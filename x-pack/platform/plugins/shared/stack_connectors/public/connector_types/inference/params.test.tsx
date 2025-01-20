@@ -21,7 +21,7 @@ describe('Inference Params Fields renders', () => {
         actionConnector={{
           actionTypeId: '.inference',
           config: {
-            taskType: 'completion',
+            taskType: 'chat_completion',
           },
           id: 'test',
           isPreconfigured: false,
@@ -80,19 +80,10 @@ describe('Inference Params Fields renders', () => {
       );
       expect(editAction).toHaveBeenCalledTimes(2);
       if (provider === 'openai') {
-        expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.UNIFIED_COMPLETION, 0);
+        expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.COMPLETION, 0);
         expect(editAction).toHaveBeenCalledWith(
           'subActionParams',
-          {
-            body: {
-              messages: [
-                {
-                  content: 'Hello world',
-                  role: 'user',
-                },
-              ],
-            },
-          },
+          { input: 'What is Elastic?' },
           0
         );
       }
