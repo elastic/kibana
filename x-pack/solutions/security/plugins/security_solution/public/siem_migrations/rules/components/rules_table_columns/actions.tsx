@@ -106,14 +106,12 @@ export const createActionsColumn = ({
             values={{
               lineBreak: <br />,
               title: (
-                <>
-                  <EuiText size="s">
-                    <p>
-                      <b>{i18n.COLUMN_ACTIONS}</b>
-                      <EuiHorizontalRule margin="s" />
-                    </p>
-                  </EuiText>
-                </>
+                <EuiText size="s">
+                  <p>
+                    <b>{i18n.COLUMN_ACTIONS}</b>
+                    <EuiHorizontalRule margin="s" />
+                  </p>
+                </EuiText>
               ),
               view: <b>{i18n.ACTIONS_VIEW_LABEL}</b>,
               install: <b>{i18n.ACTIONS_INSTALL_LABEL}</b>,

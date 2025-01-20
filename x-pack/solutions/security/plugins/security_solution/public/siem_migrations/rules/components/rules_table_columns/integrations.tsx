@@ -33,14 +33,12 @@ export const createIntegrationsColumn = ({
             defaultMessage="{title} The AI migration process tries to infer integrations from the queries provided, but its possible that a match might not be present."
             values={{
               title: (
-                <>
-                  <EuiText size="s">
-                    <p>
-                      <b>{i18n.COLUMN_INTEGRATIONS}</b>
-                      <EuiHorizontalRule margin="s" />
-                    </p>
-                  </EuiText>
-                </>
+                <EuiText size="s">
+                  <p>
+                    <b>{i18n.COLUMN_INTEGRATIONS}</b>
+                    <EuiHorizontalRule margin="s" />
+                  </p>
+                </EuiText>
               ),
             }}
           />

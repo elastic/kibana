@@ -28,14 +28,12 @@ export const createSeverityColumn = (): TableColumn => {
             defaultMessage="{title} If the severity cannot be inferred from the rule export data, the rule Severity will be set to the default: Low severity."
             values={{
               title: (
-                <>
-                  <EuiText size="s">
-                    <p>
-                      <b>{i18n.COLUMN_SEVERITY}</b>
-                      <EuiHorizontalRule margin="s" />
-                    </p>
-                  </EuiText>
-                </>
+                <EuiText size="s">
+                  <p>
+                    <b>{i18n.COLUMN_SEVERITY}</b>
+                    <EuiHorizontalRule margin="s" />
+                  </p>
+                </EuiText>
               ),
             }}
           />

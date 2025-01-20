@@ -44,14 +44,12 @@ export const createAuthorColumn = (): TableColumn => {
             values={{
               lineBreak: <br />,
               title: (
-                <>
-                  <EuiText size="s">
-                    <p>
-                      <b>{i18n.COLUMN_AUTHOR}</b>
-                      <EuiHorizontalRule margin="s" />
-                    </p>
-                  </EuiText>
-                </>
+                <EuiText size="s">
+                  <p>
+                    <b>{i18n.COLUMN_AUTHOR}</b>
+                    <EuiHorizontalRule margin="s" />
+                  </p>
+                </EuiText>
               ),
               elastic: <b>{i18n.ELASTIC_AUTHOR_TITLE}</b>,
               custom: <b>{i18n.CUSTOM_AUTHOR_TITLE}</b>,

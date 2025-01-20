@@ -33,14 +33,12 @@ export const createStatusColumn = (): TableColumn => {
             values={{
               lineBreak: <br />,
               title: (
-                <>
-                  <EuiText size="s">
-                    <p>
-                      <b>{i18n.STATUS_TOOLTIP_TITLE}</b>
-                      <EuiHorizontalRule margin="s" />
-                    </p>
-                  </EuiText>
-                </>
+                <EuiText size="s">
+                  <p>
+                    <b>{i18n.STATUS_TOOLTIP_TITLE}</b>
+                    <EuiHorizontalRule margin="s" />
+                  </p>
+                </EuiText>
               ),
               installed: <b>{i18n.INSTALLED_STATUS_TITLE}</b>,
               translated: <b>{convertTranslationResultIntoText(RuleTranslationResult.FULL)}</b>,
