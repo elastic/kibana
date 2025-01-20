@@ -246,10 +246,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <InTableSearchHighlightsWrapper
-        inTableSearchTerm=""
-        key="0-0-"
-      >
+      <InTableSearchHighlightsWrapper>
         <SourcePopoverContent
           closeButton={
             <EuiButtonIcon
@@ -432,10 +429,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <InTableSearchHighlightsWrapper
-        inTableSearchTerm=""
-        key="0-0-"
-      >
+      <InTableSearchHighlightsWrapper>
         <SourcePopoverContent
           closeButton={
             <EuiButtonIcon
@@ -590,10 +584,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <InTableSearchHighlightsWrapper
-        inTableSearchTerm=""
-        key="0-0-"
-      >
+      <InTableSearchHighlightsWrapper>
         <SourcePopoverContent
           closeButton={
             <EuiButtonIcon
@@ -697,10 +688,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <InTableSearchHighlightsWrapper
-        inTableSearchTerm=""
-        key="0-0-"
-      >
+      <InTableSearchHighlightsWrapper>
         <span
           className="unifiedDataTable__cellValue"
           dangerouslySetInnerHTML={
@@ -799,10 +787,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <InTableSearchHighlightsWrapper
-        inTableSearchTerm=""
-        key="0-0-"
-      >
+      <InTableSearchHighlightsWrapper>
         <span
           className="unifiedDataTable__cellValue"
           dangerouslySetInnerHTML={
@@ -828,10 +813,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(componentWithDetails).toMatchInlineSnapshot(`
-      <InTableSearchHighlightsWrapper
-        inTableSearchTerm=""
-        key="0-0-"
-      >
+      <InTableSearchHighlightsWrapper>
         <EuiFlexGroup
           data-test-subj="dataTableExpandCellActionPopover"
           direction="row"
