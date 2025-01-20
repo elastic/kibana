@@ -100,7 +100,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         name: TEST_STREAM_NAME,
         dashboards: [],
         inherited_fields: {},
-        lifecycle: isServerless
+        effective_lifecycle: isServerless
           ? { type: 'dlm' }
           : {
               policy: 'logs',
