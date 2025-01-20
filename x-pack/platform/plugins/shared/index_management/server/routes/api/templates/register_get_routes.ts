@@ -43,11 +43,11 @@ export function registerGetAllRoute({ router, config, lib: { handleEsError } }: 
         const isLogsdbEnabled =
           persistent?.cluster?.logsdb?.enabled ?? defaults?.cluster?.logsdb?.enabled;
 
-        // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
         const templates = deserializeTemplateList(
+          // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
           templatesEs,
-          cloudManagedTemplatePrefix,
-          isLogsdbEnabled
+          isLogsdbEnabled,
+          cloudManagedTemplatePrefix
         );
 
         if (config.isLegacyTemplatesEnabled === false) {
@@ -60,8 +60,8 @@ export function registerGetAllRoute({ router, config, lib: { handleEsError } }: 
 
         const legacyTemplates = deserializeLegacyTemplateList(
           legacyTemplatesEs,
-          cloudManagedTemplatePrefix,
-          isLogsdbEnabled
+          isLogsdbEnabled,
+          cloudManagedTemplatePrefix
         );
 
         const body = {
@@ -124,8 +124,8 @@ export function registerGetOneRoute({ router, config, lib: { handleEsError } }: 
             return response.ok({
               body: deserializeLegacyTemplate(
                 { ...indexTemplateByName[name], name },
-                cloudManagedTemplatePrefix,
-                isLogsdbEnabled
+                isLogsdbEnabled,
+                cloudManagedTemplatePrefix
               ),
             });
           }
@@ -138,8 +138,8 @@ export function registerGetOneRoute({ router, config, lib: { handleEsError } }: 
               body: deserializeTemplate(
                 // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
                 { ...indexTemplates[0].index_template, name },
-                cloudManagedTemplatePrefix,
-                isLogsdbEnabled
+                isLogsdbEnabled,
+                cloudManagedTemplatePrefix
               ),
             });
           }
