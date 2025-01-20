@@ -23,7 +23,6 @@ import { css, type SerializedStyles } from '@emotion/react';
 import {
   useInTableSearchMatches,
   UseInTableSearchMatchesProps,
-  UseInTableSearchMatchesReturn,
 } from './use_in_table_search_matches';
 import './in_table_search.scss';
 
@@ -39,58 +38,22 @@ export interface InTableSearchControlProps
   onChangeToExpectedPage: (pageIndex: number) => void;
 }
 
-export const InTableSearchControl: React.FC<InTableSearchControlProps> = React.memo(
-  ({
-    pageSize,
-    scrollToCell,
-    shouldOverrideCmdF,
-    onChange,
-    onChangeCss,
-    onChangeToExpectedPage,
-    ...props
-  }) => {
-    const inputRef = useRef<HTMLInputElement | null>(null);
-    const [buttonNode, setButtonNode] = useState<HTMLButtonElement | null>(null);
-    const shouldReturnFocusToButtonRef = useRef<boolean>(false);
-    const [isFocused, setIsFocused] = useState<boolean>(false);
-    const processedActiveMatchRef = useRef<UseInTableSearchMatchesReturn['activeMatch']>(null);
+export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
+  pageSize,
+  scrollToCell,
+  shouldOverrideCmdF,
+  onChange,
+  onChangeCss,
+  onChangeToExpectedPage,
+  ...props
+}) => {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [buttonNode, setButtonNode] = useState<HTMLButtonElement | null>(null);
+  const shouldReturnFocusToButtonRef = useRef<boolean>(false);
+  const [isFocused, setIsFocused] = useState<boolean>(false);
 
-    const [inTableSearchTerm, setInTableSearchTerm] = useState<string>('');
-    const onChangeSearchTerm = useCallback(
-      (value: string) => {
-        // sending the value to the grid and to the hook, so they can process it hopefully in parallel
-        onChange(value);
-        setInTableSearchTerm(value);
-      },
-      [onChange, setInTableSearchTerm]
-    );
-    const { inputValue, handleInputChange } = useDebouncedValue({
-      onChange: onChangeSearchTerm,
-      value: inTableSearchTerm,
-    });
-
-    const {
-      matchesCount,
-      activeMatch,
-      isProcessing,
-      renderCellsShadowPortal,
-      goToPrevMatch,
-      goToNextMatch,
-      resetState,
-    } = useInTableSearchMatches({ ...props, inTableSearchTerm });
-
-    const isSearching = isProcessing;
-    const areArrowsDisabled = !matchesCount || isSearching;
-
-    useEffect(() => {
-      if (!activeMatch || processedActiveMatchRef.current === activeMatch) {
-        return;
-      }
-
-      processedActiveMatchRef.current = activeMatch; // prevent multiple executions
-
-      const { rowIndex, columnId, matchIndexWithinCell } = activeMatch;
-
+  const onScrollToActiveMatch: UseInTableSearchMatchesProps['onScrollToActiveMatch'] = useCallback(
+    ({ rowIndex, columnId, matchIndexWithinCell }) => {
       if (typeof pageSize === 'number') {
         const expectedPageIndex = Math.floor(rowIndex / pageSize);
         onChangeToExpectedPage(expectedPageIndex);
@@ -119,166 +82,200 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = React.m
         columnIndex: Number(columnIndex),
         align: 'smart',
       });
-    }, [activeMatch, scrollToCell, onChange, onChangeCss, onChangeToExpectedPage, pageSize]);
+    },
+    [scrollToCell, onChangeCss, onChangeToExpectedPage, pageSize]
+  );
 
-    const focusInput = useCallback(() => {
-      setIsFocused(true);
-    }, [setIsFocused]);
+  const [inTableSearchTerm, setInTableSearchTerm] = useState<string>('');
+  const onChangeSearchTerm = useCallback(
+    (value: string) => {
+      // sending the value to the grid and to the hook, so they can process it hopefully in parallel
+      onChange(value);
+      setInTableSearchTerm(value);
+    },
+    [onChange, setInTableSearchTerm]
+  );
+  const { inputValue, handleInputChange } = useDebouncedValue({
+    onChange: onChangeSearchTerm,
+    value: inTableSearchTerm,
+  });
 
-    const hideInput = useCallback(
-      (shouldReturnFocusToButton: boolean = false) => {
-        setIsFocused(false);
-        resetState();
-        shouldReturnFocusToButtonRef.current = shouldReturnFocusToButton;
-      },
-      [setIsFocused, resetState]
-    );
+  const {
+    matchesCount,
+    activeMatchPosition,
+    isProcessing,
+    renderCellsShadowPortal,
+    goToPrevMatch,
+    goToNextMatch,
+    resetState,
+  } = useInTableSearchMatches({ ...props, inTableSearchTerm, onScrollToActiveMatch });
 
-    const onInputChange = useCallback(
-      (event: ChangeEvent<HTMLInputElement>) => {
-        handleInputChange(event.target.value);
-      },
-      [handleInputChange]
-    );
+  const isSearching = isProcessing;
+  const areArrowsDisabled = !matchesCount || isSearching;
 
-    const onKeyUp = useCallback(
-      (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === keys.ESCAPE) {
-          hideInput(true);
-          return;
-        }
+  const focusInput = useCallback(() => {
+    setIsFocused(true);
+  }, [setIsFocused]);
 
-        if (areArrowsDisabled) {
-          return;
-        }
+  const hideInput = useCallback(
+    (shouldReturnFocusToButton: boolean = false) => {
+      setIsFocused(false);
+      resetState();
+      shouldReturnFocusToButtonRef.current = shouldReturnFocusToButton;
+    },
+    [setIsFocused, resetState]
+  );
 
-        if (event.key === keys.ENTER && event.shiftKey) {
-          goToPrevMatch();
-        } else if (event.key === keys.ENTER) {
-          goToNextMatch();
-        }
-      },
-      [goToPrevMatch, goToNextMatch, hideInput, areArrowsDisabled]
-    );
+  const onInputChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      handleInputChange(event.target.value);
+    },
+    [handleInputChange]
+  );
 
-    const onBlur = useCallback(
-      (event: FocusEvent<HTMLInputElement>) => {
-        if (
-          (!event.relatedTarget ||
-            event.relatedTarget.getAttribute('data-test-subj') !== 'clearSearchButton') &&
-          !inputValue
-        ) {
-          hideInput();
-        }
-      },
-      [hideInput, inputValue]
-    );
-
-    useEffect(() => {
-      const handleGlobalKeyDown = (event: KeyboardEvent) => {
-        if (
-          (event.metaKey || event.ctrlKey) &&
-          event.key === 'f' &&
-          shouldOverrideCmdF(event.target as HTMLElement)
-        ) {
-          event.preventDefault(); // prevent default browser find-in-page behavior
-          focusInput();
-          inputRef.current?.focus(); // if it was already open before, make sure to shift the focus to it
-        }
-      };
-
-      document.addEventListener('keydown', handleGlobalKeyDown);
-
-      // Cleanup the event listener
-      return () => {
-        document.removeEventListener('keydown', handleGlobalKeyDown);
-      };
-    }, [focusInput, shouldOverrideCmdF]);
-
-    const shouldRenderButton = !isFocused && !inputValue;
-
-    useEffect(() => {
-      if (shouldReturnFocusToButtonRef.current && buttonNode && shouldRenderButton) {
-        shouldReturnFocusToButtonRef.current = false;
-        buttonNode.focus();
+  const onKeyUp = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === keys.ESCAPE) {
+        hideInput(true);
+        return;
       }
-    }, [buttonNode, shouldRenderButton]);
 
-    if (shouldRenderButton) {
-      return (
-        <EuiToolTip
-          content={i18n.translate('unifiedDataTable.inTableSearch.inputPlaceholder', {
-            defaultMessage: 'Search in the table',
-          })}
-          delay="long"
-        >
-          <EuiButtonIcon
-            buttonRef={setButtonNode}
-            data-test-subj={BUTTON_TEST_SUBJ}
-            iconType="search"
-            size="xs"
-            color="text"
-            className="unifiedDataTable__inTableSearchButton"
-            aria-label={i18n.translate('unifiedDataTable.inTableSearch.inputPlaceholder', {
-              defaultMessage: 'Search in the table',
-            })}
-            onClick={focusInput}
-          />
-        </EuiToolTip>
-      );
+      if (areArrowsDisabled) {
+        return;
+      }
+
+      if (event.key === keys.ENTER && event.shiftKey) {
+        goToPrevMatch();
+      } else if (event.key === keys.ENTER) {
+        goToNextMatch();
+      }
+    },
+    [goToPrevMatch, goToNextMatch, hideInput, areArrowsDisabled]
+  );
+
+  const onBlur = useCallback(
+    (event: FocusEvent<HTMLInputElement>) => {
+      if (
+        (!event.relatedTarget ||
+          event.relatedTarget.getAttribute('data-test-subj') !== 'clearSearchButton') &&
+        !inputValue
+      ) {
+        hideInput();
+      }
+    },
+    [hideInput, inputValue]
+  );
+
+  const onSetInputRef = useCallback((node: HTMLInputElement | null) => {
+    inputRef.current = node;
+  }, []);
+
+  useEffect(() => {
+    const handleGlobalKeyDown = (event: KeyboardEvent) => {
+      if (
+        (event.metaKey || event.ctrlKey) &&
+        event.key === 'f' &&
+        shouldOverrideCmdF(event.target as HTMLElement)
+      ) {
+        event.preventDefault(); // prevent default browser find-in-page behavior
+        focusInput();
+        inputRef.current?.focus(); // if it was already open before, make sure to shift the focus to it
+      }
+    };
+
+    document.addEventListener('keydown', handleGlobalKeyDown);
+
+    // Cleanup the event listener
+    return () => {
+      document.removeEventListener('keydown', handleGlobalKeyDown);
+    };
+  }, [focusInput, shouldOverrideCmdF]);
+
+  const shouldRenderButton = !isFocused && !inputValue;
+
+  useEffect(() => {
+    if (shouldReturnFocusToButtonRef.current && buttonNode && shouldRenderButton) {
+      shouldReturnFocusToButtonRef.current = false;
+      buttonNode.focus();
     }
+  }, [buttonNode, shouldRenderButton]);
 
+  if (shouldRenderButton) {
     return (
-      <div className="unifiedDataTable__inTableSearchInputContainer">
-        <EuiFieldSearch
-          inputRef={(node) => (inputRef.current = node)}
-          autoFocus
-          compressed
-          className="unifiedDataTable__inTableSearchInput"
-          isClearable={!isSearching}
-          isLoading={isSearching}
-          append={
-            <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
-              <EuiFlexItem grow={false} className="unifiedDataTable__inTableSearchMatchesCounter">
-                <EuiText color="subdued" size="s">
-                  {matchesCount && activeMatch ? `${activeMatch.position}/${matchesCount}` : '0/0'}
-                  &nbsp;
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="arrowUp"
-                  color="text"
-                  disabled={areArrowsDisabled}
-                  aria-label={i18n.translate('unifiedDataTable.inTableSearch.buttonPreviousMatch', {
-                    defaultMessage: 'Previous',
-                  })}
-                  onClick={goToPrevMatch}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="arrowDown"
-                  color="text"
-                  disabled={areArrowsDisabled}
-                  aria-label={i18n.translate('unifiedDataTable.inTableSearch.buttonNextMatch', {
-                    defaultMessage: 'Next',
-                  })}
-                  onClick={goToNextMatch}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-          placeholder={i18n.translate('unifiedDataTable.inTableSearch.inputPlaceholder', {
+      <EuiToolTip
+        content={i18n.translate('unifiedDataTable.inTableSearch.inputPlaceholder', {
+          defaultMessage: 'Search in the table',
+        })}
+        delay="long"
+      >
+        <EuiButtonIcon
+          buttonRef={setButtonNode}
+          data-test-subj={BUTTON_TEST_SUBJ}
+          iconType="search"
+          size="xs"
+          color="text"
+          className="unifiedDataTable__inTableSearchButton"
+          aria-label={i18n.translate('unifiedDataTable.inTableSearch.inputPlaceholder', {
             defaultMessage: 'Search in the table',
           })}
-          value={inputValue}
-          onChange={onInputChange}
-          onKeyUp={onKeyUp}
-          onBlur={onBlur}
+          onClick={focusInput}
         />
-        {renderCellsShadowPortal ? renderCellsShadowPortal() : null}
-      </div>
+      </EuiToolTip>
     );
   }
-);
+
+  return (
+    <div className="unifiedDataTable__inTableSearchInputContainer">
+      <EuiFieldSearch
+        inputRef={onSetInputRef}
+        autoFocus
+        compressed
+        className="unifiedDataTable__inTableSearchInput"
+        isClearable={!isSearching}
+        isLoading={isSearching}
+        append={
+          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
+            <EuiFlexItem grow={false} className="unifiedDataTable__inTableSearchMatchesCounter">
+              <EuiText color="subdued" size="s">
+                {matchesCount && activeMatchPosition
+                  ? `${activeMatchPosition}/${matchesCount}`
+                  : '0/0'}
+                &nbsp;
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="arrowUp"
+                color="text"
+                disabled={areArrowsDisabled}
+                aria-label={i18n.translate('unifiedDataTable.inTableSearch.buttonPreviousMatch', {
+                  defaultMessage: 'Previous',
+                })}
+                onClick={goToPrevMatch}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="arrowDown"
+                color="text"
+                disabled={areArrowsDisabled}
+                aria-label={i18n.translate('unifiedDataTable.inTableSearch.buttonNextMatch', {
+                  defaultMessage: 'Next',
+                })}
+                onClick={goToNextMatch}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+        placeholder={i18n.translate('unifiedDataTable.inTableSearch.inputPlaceholder', {
+          defaultMessage: 'Search in the table',
+        })}
+        value={inputValue}
+        onChange={onInputChange}
+        onKeyUp={onKeyUp}
+        onBlur={onBlur}
+      />
+      {renderCellsShadowPortal ? renderCellsShadowPortal() : null}
+    </div>
+  );
+};

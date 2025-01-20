@@ -21,6 +21,12 @@ interface RowMatches {
   matchesCountPerColumnId: Record<string, number>;
 }
 
+interface ActiveMatch {
+  rowIndex: number;
+  columnId: string;
+  matchIndexWithinCell: number;
+}
+
 export interface UseInTableSearchMatchesProps {
   visibleColumns: string[];
   rows: DataTableRecord[];
@@ -29,17 +35,13 @@ export interface UseInTableSearchMatchesProps {
     props: EuiDataGridCellValueElementProps &
       Pick<InTableSearchHighlightsWrapperProps, 'inTableSearchTerm' | 'onHighlightsCountFound'>
   ) => ReactNode;
+  onScrollToActiveMatch: (activeMatch: ActiveMatch) => void;
 }
 
 interface UseInTableSearchMatchesState {
   matchesList: RowMatches[];
   matchesCount: number | null;
-  activeMatch: {
-    position: number;
-    rowIndex: number;
-    columnId: string;
-    matchIndexWithinCell: number;
-  } | null;
+  activeMatchPosition: number | null;
   columns: string[];
   isProcessing: boolean;
   calculatedForSearchTerm: string | null;
@@ -56,7 +58,7 @@ export interface UseInTableSearchMatchesReturn
 const INITIAL_STATE: UseInTableSearchMatchesState = {
   matchesList: [],
   matchesCount: null,
-  activeMatch: null,
+  activeMatchPosition: null,
   columns: [],
   isProcessing: false,
   calculatedForSearchTerm: null,
@@ -66,11 +68,11 @@ const INITIAL_STATE: UseInTableSearchMatchesState = {
 export const useInTableSearchMatches = (
   props: UseInTableSearchMatchesProps
 ): UseInTableSearchMatchesReturn => {
-  const { visibleColumns, rows, inTableSearchTerm, renderCellValue } = props;
+  const { visibleColumns, rows, inTableSearchTerm, renderCellValue, onScrollToActiveMatch } = props;
   const [state, setState] = useState<UseInTableSearchMatchesState>(INITIAL_STATE);
   const {
     matchesCount,
-    activeMatch,
+    activeMatchPosition,
     calculatedForSearchTerm,
     isProcessing,
     renderCellsShadowPortal,
@@ -104,35 +106,38 @@ export const useInTableSearchMatches = (
               return;
             }
 
+            const nextActiveMatchPosition = totalMatchesCount > 0 ? 1 : null;
             setState({
               matchesList: nextMatchesList,
               matchesCount: totalMatchesCount,
-              activeMatch:
-                totalMatchesCount > 0
-                  ? getActiveMatch({
-                      matchPosition: 1,
-                      matchesList: nextMatchesList,
-                      columns: visibleColumns,
-                    })
-                  : null,
+              activeMatchPosition: nextActiveMatchPosition,
               columns: visibleColumns,
               isProcessing: false,
               calculatedForSearchTerm: inTableSearchTerm,
               renderCellsShadowPortal: null,
             });
+
+            if (totalMatchesCount > 0) {
+              updateActiveMatchPosition({
+                matchPosition: nextActiveMatchPosition,
+                matchesList: nextMatchesList,
+                columns: visibleColumns,
+                onScrollToActiveMatch,
+              });
+            }
           }}
         />
       ),
     }));
-  }, [setState, renderCellValue, visibleColumns, rows, inTableSearchTerm]);
+  }, [setState, renderCellValue, visibleColumns, rows, inTableSearchTerm, onScrollToActiveMatch]);
 
   const goToPrevMatch = useCallback(() => {
-    setState((prevState) => changeActiveMatchInState(prevState, 'prev'));
-  }, [setState]);
+    setState((prevState) => changeActiveMatchInState(prevState, 'prev', onScrollToActiveMatch));
+  }, [setState, onScrollToActiveMatch]);
 
   const goToNextMatch = useCallback(() => {
-    setState((prevState) => changeActiveMatchInState(prevState, 'next'));
-  }, [setState]);
+    setState((prevState) => changeActiveMatchInState(prevState, 'next', onScrollToActiveMatch));
+  }, [setState, onScrollToActiveMatch]);
 
   const resetState = useCallback(() => {
     stopTimer(latestTimeoutTimer);
@@ -141,7 +146,7 @@ export const useInTableSearchMatches = (
 
   return {
     matchesCount,
-    activeMatch,
+    activeMatchPosition,
     goToPrevMatch,
     goToNextMatch,
     resetState,
@@ -159,7 +164,7 @@ function getActiveMatch({
   matchPosition: number;
   matchesList: RowMatches[];
   columns: string[];
-}): UseInTableSearchMatchesState['activeMatch'] {
+}): ActiveMatch | null {
   let traversedMatchesCount = 0;
 
   for (const rowMatch of matchesList) {
@@ -183,7 +188,6 @@ function getActiveMatch({
       ) {
         // can even go slower to next match within the cell
         return {
-          position: matchPosition,
           rowIndex: Number(rowIndex),
           columnId,
           matchIndexWithinCell: matchPosition - traversedMatchesCount - 1,
@@ -198,16 +202,45 @@ function getActiveMatch({
   return null;
 }
 
+function updateActiveMatchPosition({
+  matchPosition,
+  matchesList,
+  columns,
+  onScrollToActiveMatch,
+}: {
+  matchPosition: number | null;
+  matchesList: RowMatches[];
+  columns: string[];
+  onScrollToActiveMatch: (activeMatch: ActiveMatch) => void;
+}) {
+  if (typeof matchPosition !== 'number') {
+    return;
+  }
+
+  setTimeout(() => {
+    const activeMatch = getActiveMatch({
+      matchPosition,
+      matchesList,
+      columns,
+    });
+
+    if (activeMatch) {
+      onScrollToActiveMatch(activeMatch);
+    }
+  }, 0);
+}
+
 function changeActiveMatchInState(
   prevState: UseInTableSearchMatchesState,
-  direction: 'prev' | 'next'
+  direction: 'prev' | 'next',
+  onScrollToActiveMatch: (activeMatch: ActiveMatch) => void
 ): UseInTableSearchMatchesState {
-  if (typeof prevState.matchesCount !== 'number' || !prevState.activeMatch) {
+  if (typeof prevState.matchesCount !== 'number' || !prevState.activeMatchPosition) {
     return prevState;
   }
 
   let nextMatchPosition =
-    direction === 'prev' ? prevState.activeMatch.position - 1 : prevState.activeMatch.position + 1;
+    direction === 'prev' ? prevState.activeMatchPosition - 1 : prevState.activeMatchPosition + 1;
 
   if (nextMatchPosition < 1) {
     nextMatchPosition = prevState.matchesCount; // allow to endlessly circle though matches
@@ -215,13 +248,16 @@ function changeActiveMatchInState(
     nextMatchPosition = 1; // allow to endlessly circle though matches
   }
 
+  updateActiveMatchPosition({
+    matchPosition: nextMatchPosition,
+    matchesList: prevState.matchesList,
+    columns: prevState.columns,
+    onScrollToActiveMatch,
+  });
+
   return {
     ...prevState,
-    activeMatch: getActiveMatch({
-      matchPosition: nextMatchPosition,
-      matchesList: prevState.matchesList,
-      columns: prevState.columns,
-    }),
+    activeMatchPosition: nextMatchPosition,
   };
 }
 
