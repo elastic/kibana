@@ -11,7 +11,7 @@ import {
   NETWORK_PATH,
   USERS_PATH,
   EXPLORE_PATH,
-  SERVER_APP_ID,
+  SECURITY_FEATURE_ID,
   SecurityPageName,
 } from '../../common/constants';
 import { EXPLORE, HOSTS, NETWORK, USERS } from '../app/translations';
@@ -34,7 +34,7 @@ const networkLinks: LinkItem = {
       defaultMessage: 'Network',
     }),
   ],
-  capabilities: [`${SERVER_APP_ID}.show`],
+  capabilities: [`${SECURITY_FEATURE_ID}.show`],
   links: [
     {
       id: SecurityPageName.networkFlows,
@@ -97,7 +97,7 @@ const usersLinks: LinkItem = {
       defaultMessage: 'Users',
     }),
   ],
-  capabilities: [`${SERVER_APP_ID}.show`],
+  capabilities: [`${SECURITY_FEATURE_ID}.show`],
   links: [
     {
       id: SecurityPageName.usersAll,
@@ -152,7 +152,7 @@ const hostsLinks: LinkItem = {
       defaultMessage: 'Hosts',
     }),
   ],
-  capabilities: [`${SERVER_APP_ID}.show`],
+  capabilities: [`${SECURITY_FEATURE_ID}.show`],
   links: [
     {
       id: SecurityPageName.hostsAll,
@@ -209,7 +209,7 @@ export const exploreLinks: LinkItem = {
   title: EXPLORE,
   path: EXPLORE_PATH,
   globalNavPosition: 9,
-  capabilities: [`${SERVER_APP_ID}.show`],
+  capabilities: [`${SECURITY_FEATURE_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.explore', {
       defaultMessage: 'Explore',
