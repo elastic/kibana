@@ -170,7 +170,7 @@ EOF
 # Scout reporter settings
 {
   # TODO: Change default to 'false' when done with PR testing
-  SCOUT_REPORTER_ENABLED="${SCOUT_REPORTER_ENABLED:-true}"
+  export SCOUT_REPORTER_ENABLED="${SCOUT_REPORTER_ENABLED:-true}"
 
   SCOUT_REPORTER_ES_URL="$(vault_get scout/reporter/cluster-credentials es-url)"
   export SCOUT_REPORTER_ES_URL
