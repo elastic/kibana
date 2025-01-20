@@ -78,7 +78,7 @@ export const EsqlQueryExpression: React.FC<
   const setDefaultExpressionValues = () => {
     setRuleProperty('params', currentRuleParams);
     if (esqlQuery?.esql) {
-      refreshTimeFields(esqlQuery)
+      refreshTimeFields(esqlQuery);
     }
   };
 
