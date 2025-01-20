@@ -17,7 +17,6 @@ export const SynonymSets = () => {
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_VALUE.size);
   const { from } = paginationToPage({ pageIndex, pageSize, totalItemCount: 0 });
   const { data: synonyms } = useFetchSynonymsSets({ from, size: pageSize });
-  const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
 
   if (!synonyms) {
     return null;
