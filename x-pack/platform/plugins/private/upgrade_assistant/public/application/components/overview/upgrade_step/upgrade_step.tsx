@@ -15,7 +15,9 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiLink,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { useAppContext } from '../../../app_context';
@@ -44,6 +46,13 @@ const i18nTexts = {
   upgradeGuideLink: i18n.translate('xpack.upgradeAssistant.overview.upgradeGuideLink', {
     defaultMessage: 'View upgrade guide',
   }),
+
+  securitySolnLogsDBCalloutTitle: i18n.translate(
+    'xpack.upgradeAssistant.overview.securitySolutionLogsDBCalloutTitle',
+    {
+      defaultMessage: 'Elastic Security and LogsDB index mode',
+    }
+  ),
 };
 
 const UpgradeStep = () => {
@@ -142,6 +151,36 @@ const UpgradeStep = () => {
             : i18nTexts.upgradeStepDescription}
         </p>
       </EuiText>
+
+      <EuiSpacer size="m" />
+
+      <EuiCallOut title={i18nTexts.securitySolnLogsDBCalloutTitle}>
+        <FormattedMessage
+          id="xpack.upgradeAssistant.overview.securitySolutionLogsDBCalloutBody"
+          defaultMessage="Elastic Security users are advised to opt out of enabling logsdb index mode during this upgrade. Users should fully understand and accept the impact of using logsdb index mode with Elastic Security ({logsDataStreamDocs}), and ensure their deployment has excess hot data tier CPU resource capacity before enabling logsdb index mode, as it requires additional CPU resources during the data ingest/indexing process. Enabling logsdb index mode without sufficient hot data tier CPU resources may result in data ingestion backups and/or security detection rule timeouts and errors. Users who wish to use logsdb index mode and logs data streams may enable it after the upgrade ({indexModeWithSecuritySoln})."
+          values={{
+            logsDataStreamDocs: (
+              <EuiLink target="_blank" href={docLinks.links.upgradeAssistant.logsDatastream}>
+                {i18n.translate(
+                  'xpack.upgradeAssistant.overview.securitySolutionLogsDBCalloutBody.logsDataStreamLink',
+                  { defaultMessage: 'documentation' }
+                )}
+              </EuiLink>
+            ),
+            indexModeWithSecuritySoln: (
+              <EuiLink
+                target="_blank"
+                href={docLinks.links.upgradeAssistant.usingLogsDbIndexModeWithESSecurity}
+              >
+                {i18n.translate(
+                  'xpack.upgradeAssistant.overview.securitySolutionLogsDBCalloutBody.indexModeWithSecuritySolnLink',
+                  { defaultMessage: 'learn more' }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiCallOut>
 
       <EuiSpacer size="m" />
 
