@@ -22,6 +22,11 @@ import { Router } from '@kbn/core-http-router-server-internal';
 import { createHttpService } from '@kbn/core-http-server-mocks';
 import type { HttpService } from '@kbn/core-http-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
+import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
+
+const options = getEnvOptions();
+options.cliArgs.dev = false;
+const env = createTestEnv({ envOptions: options });
 
 let server: HttpService;
 let logger: ReturnType<typeof loggingSystemMock.create>;
@@ -2266,7 +2271,7 @@ describe('registerRouterAfterListening', () => {
     const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
     const otherRouter = new Router('/test', loggerMock.create(), enhanceWithContext, {
-      isDev: false,
+      env,
       versionedRouterOptions: {
         defaultHandlerResolutionStrategy: 'oldest',
       },
@@ -2303,7 +2308,7 @@ describe('registerRouterAfterListening', () => {
     const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
     const otherRouter = new Router('/test', loggerMock.create(), enhanceWithContext, {
-      isDev: false,
+      env,
       versionedRouterOptions: {
         defaultHandlerResolutionStrategy: 'oldest',
       },
