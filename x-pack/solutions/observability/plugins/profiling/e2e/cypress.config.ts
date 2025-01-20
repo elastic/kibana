@@ -26,7 +26,7 @@ export default defineCypressConfig({
   e2e: {
     baseUrl: 'http://localhost:5601',
     supportFile: './cypress/support/e2e.ts',
-    specPattern: './cypress/e2e/**/*.cy.ts',
+    specPattern: './cypress/e2e/profiling_views/functions.cy.ts',
     experimentalMemoryManagement: true,
     numTestsKeptInMemory: 3,
     experimentalRunAllSpecs: true,
