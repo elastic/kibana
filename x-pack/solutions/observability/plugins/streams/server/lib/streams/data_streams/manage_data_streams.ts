@@ -7,8 +7,8 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import { retryTransientEsErrors } from '../helpers/retry';
 import { StreamLifecycle } from '@kbn/streams-schema';
+import { retryTransientEsErrors } from '../helpers/retry';
 
 interface DataStreamManagementOptions {
   esClient: ElasticsearchClient;

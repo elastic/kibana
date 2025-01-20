@@ -15,14 +15,16 @@ import {
 
 export const wiredStreamConfigDefinitonSchema = z
   .object({
-    ingest: z.object({
-      processing: z.array(processingDefinitionSchema),
-      wired: z.object({
-        fields: fieldDefinitionSchema,
-      }),
-      routing: z.array(streamChildSchema),
-      lifecycle: z.optional(lifecycleSchema),
-    }).strict(),
+    ingest: z
+      .object({
+        processing: z.array(processingDefinitionSchema),
+        wired: z.object({
+          fields: fieldDefinitionSchema,
+        }),
+        routing: z.array(streamChildSchema),
+        lifecycle: z.optional(lifecycleSchema),
+      })
+      .strict(),
   })
   .strict();
 
