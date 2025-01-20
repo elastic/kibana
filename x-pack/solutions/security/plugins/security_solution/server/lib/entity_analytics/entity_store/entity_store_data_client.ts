@@ -125,6 +125,17 @@ interface SearchEntitiesParams {
   sortOrder: SortOrder;
 }
 
+export const DEFAULT_INIT_ENTITY_STORE: InitEntityStoreRequestBody = {
+  indexPattern: '',
+  lookbackPeriod: '24h',
+  filter: '',
+  fieldHistoryLength: 10,
+};
+
+const defaultEngineRequest: InitEntityEngineRequestBody & { lookbackPeriod?: string } = {
+  ...DEFAULT_INIT_ENTITY_STORE,
+};
+
 export class EntityStoreDataClient {
   private engineClient: EngineDescriptorClient;
   private assetCriticalityMigrationClient: AssetCriticalityMigrationClient;
@@ -199,17 +210,17 @@ export class EntityStoreDataClient {
   }
 
   public async enable(
-    {
-      indexPattern = '',
-      lookbackPeriod = '24h',
-      filter = '',
-      fieldHistoryLength = 10,
-    }: InitEntityStoreRequestBody,
+    requestBodyOverrides: Partial<InitEntityStoreRequestBody> = {},
     { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
   ): Promise<InitEntityStoreResponse> {
     if (!this.options.taskManager) {
       throw new Error('Task Manager is not available');
     }
+
+    const { indexPattern, lookbackPeriod, filter, fieldHistoryLength } = {
+      ...DEFAULT_INIT_ENTITY_STORE,
+      ...requestBodyOverrides,
+    };
 
     // Immediately defer the initialization to the next tick. This way we don't block on the init preflight checks
     const run = <T>(fn: () => Promise<T>) =>
@@ -282,14 +293,15 @@ export class EntityStoreDataClient {
 
   public async init(
     entityType: EntityType,
-    {
-      indexPattern = '',
-      filter = '',
-      fieldHistoryLength = 10,
-      lookbackPeriod = '24h',
-    }: InitEntityEngineRequestBody & { lookbackPeriod?: string },
+    InitEntityEngineRequestBodyOverrides: Partial<typeof defaultEngineRequest> = {},
     { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
   ): Promise<InitEntityEngineResponse> {
+    const mergedRequest = {
+      ...defaultEngineRequest,
+      ...InitEntityEngineRequestBodyOverrides,
+    } as Required<typeof defaultEngineRequest>;
+
+    const { indexPattern, filter, fieldHistoryLength, lookbackPeriod } = mergedRequest;
     const { experimentalFeatures } = this.options;
 
     if (entityType === EntityType.universal && !experimentalFeatures.assetInventoryStoreEnabled) {
