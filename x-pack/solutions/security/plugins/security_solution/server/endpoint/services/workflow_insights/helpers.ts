@@ -149,3 +149,14 @@ export function generateInsightId(insight: SecurityWorkflowInsight): string {
 
   return hash.digest('hex');
 }
+
+export function getUniqueInsights(insights: SecurityWorkflowInsight[]): SecurityWorkflowInsight[] {
+  const uniqueInsights: { [key: string]: SecurityWorkflowInsight } = {};
+  for (const insight of insights) {
+    const id = generateInsightId(insight);
+    if (!uniqueInsights[id]) {
+      uniqueInsights[id] = insight;
+    }
+  }
+  return Object.values(uniqueInsights);
+}
