@@ -187,6 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
           "observabilityCases",
           "securitySolutionCases",
           "visualize",
+          "siem",
         ]
       `);
     });
@@ -212,6 +213,7 @@ export default function ({ getService }: FtrProviderContext) {
         'dashboard',
         'visualize',
         'maps',
+        'siem',
       ]);
       for (const feature of features) {
         if (

@@ -13,6 +13,7 @@ import type { State } from '../../../common/store';
 import { selectTimelineById } from '../../store/selectors';
 import { timelineActions } from '../../store';
 import { TimelineStatusEnum } from '../../../../common/api/timeline';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 const ADD_TO_FAVORITES = i18n.translate(
   'xpack.securitySolution.timeline.addToFavoriteButtonLabel',
@@ -44,8 +45,12 @@ export const AddToFavoritesButton = React.memo<AddToFavoritesButtonProps>(({ tim
   const { isFavorite, status } = useSelector((state: State) =>
     selectTimelineById(state, timelineId)
   );
+  const {
+    timelinePrivileges: { crud: canWriteTimeline },
+  } = useUserPrivileges();
 
   const isTimelineDraftOrImmutable = status !== TimelineStatusEnum.active;
+  const isDisabled = !canWriteTimeline || isTimelineDraftOrImmutable;
   const label = isFavorite ? REMOVE_FROM_FAVORITES : ADD_TO_FAVORITES;
 
   const handleClick = useCallback(
@@ -57,7 +62,7 @@ export const AddToFavoritesButton = React.memo<AddToFavoritesButtonProps>(({ tim
     <EuiButtonIcon
       iconType={isFavorite ? 'starFilled' : 'starEmpty'}
       isSelected={isFavorite}
-      disabled={isTimelineDraftOrImmutable}
+      disabled={isDisabled}
       aria-label={label}
       title={label}
       data-test-subj={`timeline-favorite-${isFavorite ? 'filled' : 'empty'}-star`}
