@@ -733,8 +733,8 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
   handleAutoHeight = onRaf(() => {
     if (this.inputRef !== null && document.activeElement === this.inputRef) {
       this.inputRef.classList.add('kbnQueryBar__textarea--autoHeight');
-      this.inputRef.style.setProperty('height', `${this.inputRef.scrollHeight}px`, 'important');
-    }
+      this.inputRef.style.setProperty('height', '165px', 'important');
+      this.inputRef.style.setProperty('max-height', `165px`);    }
   });
 
   handleRemoveHeight = onRaf(() => {
