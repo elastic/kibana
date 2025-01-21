@@ -23,7 +23,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { Form, FormDataProvider, FormHook } from '../../../../../shared_imports';
+import { Form, FormDataProvider, FormHook, useFormIsModified } from '../../../../../shared_imports';
 import { ProcessorInternal } from '../../types';
 import { useTestPipelineContext } from '../../context';
 import { getProcessorDescriptor } from '../shared';
@@ -153,6 +153,7 @@ export const EditProcessorForm: FunctionComponent<Props> = ({
     flyoutContent = <ProcessorSettingsFields processor={processor} />;
   }
 
+  const isFormDirty = useFormIsModified({ form });
   return (
     <Form data-test-subj="editProcessorForm" form={form} onSubmit={handleSubmit}>
       <EuiFlyout
@@ -162,6 +163,7 @@ export const EditProcessorForm: FunctionComponent<Props> = ({
           resetProcessors();
           closeFlyout();
         }}
+        outsideClickCloses={!isFormDirty}
       >
         <EuiFlyoutHeader>
           <EuiFlexGroup gutterSize="xs">

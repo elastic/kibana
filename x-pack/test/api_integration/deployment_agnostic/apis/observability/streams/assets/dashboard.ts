@@ -108,7 +108,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     }
   }
 
-  describe('Asset links', () => {
+  describe('Asset links', function () {
+    // see details: https://github.com/elastic/kibana/issues/207310
+    this.tags(['failsOnMKI']);
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
