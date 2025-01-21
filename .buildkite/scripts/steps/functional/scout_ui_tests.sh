@@ -34,5 +34,7 @@ for run_mode in "--stateful" "--serverless=oblt"; do
   run_tests "Observability Onboarding" "x-pack/solutions/observability/plugins/observability_onboarding/ui_tests/playwright.config.ts" "$run_mode"
 done
 
+# Maps
+run_tests "Maps" "x-pack/platform/plugins/shared/maps/ui_tests/playwright.config.ts" "--stateful"
 
 exit $EXIT_CODE
