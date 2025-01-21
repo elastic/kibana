@@ -113,7 +113,7 @@ export const PipelineDeleteModal = ({
         {managedPipelinesToDelete > 0 && (
           <>
             <DeleteManagedAssetsCallout
-              assetName={i18n.translate('management.deleteManagedAssetsCallout.assetName', {
+              assetName={i18n.translate('xpack.ingestPipelines.deleteModal.assetName', {
                 defaultMessage: 'Ingest Pipeline',
               })}
             />
