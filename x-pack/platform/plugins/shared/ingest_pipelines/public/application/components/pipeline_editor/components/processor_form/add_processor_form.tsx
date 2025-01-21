@@ -20,7 +20,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import { Form, FormDataProvider, FormHook } from '../../../../../shared_imports';
+import { Form, FormDataProvider, FormHook, useFormIsModified } from '../../../../../shared_imports';
 import { getProcessorDescriptor } from '../shared';
 
 import { DocumentationButton } from './documentation_button';
@@ -75,9 +75,11 @@ export const AddProcessorForm: FunctionComponent<Props> = ({
     [] /* eslint-disable-line react-hooks/exhaustive-deps */
   );
 
+  const isFormDirty = useFormIsModified({ form });
+
   return (
     <Form data-test-subj="addProcessorForm" form={form} onSubmit={handleSubmit}>
-      <EuiFlyout size="m" maxWidth={720} onClose={closeFlyout}>
+      <EuiFlyout size="m" maxWidth={720} onClose={closeFlyout} outsideClickCloses={!isFormDirty}>
         <EuiFlyoutHeader>
           <EuiFlexGroup gutterSize="xs">
             <EuiFlexItem>

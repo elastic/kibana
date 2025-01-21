@@ -131,7 +131,8 @@
     "@kbn/saved-search-plugin",
     "@kbn/charts-theme",
     "@kbn/response-ops-rule-params",
-    "@kbn/entityManager-plugin"
+    "@kbn/entityManager-plugin",
+    "@kbn/core-http-server-utils"
   ],
   "exclude": ["target/**/*"]
 }

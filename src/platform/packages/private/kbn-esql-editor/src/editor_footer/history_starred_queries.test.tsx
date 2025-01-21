@@ -78,6 +78,7 @@ describe('Starred and History queries components', () => {
           field: 'queryString',
           name: 'Query',
           render: expect.anything(),
+          css: expect.anything(),
         },
         {
           'data-test-subj': 'timeRan',
@@ -120,6 +121,7 @@ describe('Starred and History queries components', () => {
           field: 'queryString',
           name: 'Query',
           render: expect.anything(),
+          css: expect.anything(),
         },
         {
           'data-test-subj': 'timeRan',
@@ -171,6 +173,7 @@ describe('Starred and History queries components', () => {
         field: 'queryString',
         name: 'Query',
         render: expect.anything(),
+        css: expect.anything(),
       },
       {
         actions: [],
