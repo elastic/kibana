@@ -25,7 +25,6 @@ const getDisplayedConversation = (conversation: Conversation) => {
 };
 
 describe('useConversationsByDate', () => {
-  const now = new Date();
   const startOfToday = new Date('2025-01-21T00:00:00Z').valueOf();
   const startOfYesterday = new Date('2025-01-20T00:00:00Z').valueOf();
   const startOfThisWeek = new Date('2025-01-19T00:00:00Z').valueOf();
@@ -37,7 +36,6 @@ describe('useConversationsByDate', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
-    jest.setSystemTime(now);
 
     (getAbsoluteTime as jest.Mock).mockImplementation((range: string) => {
       switch (range) {
