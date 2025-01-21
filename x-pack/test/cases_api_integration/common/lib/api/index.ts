@@ -55,14 +55,12 @@ import {
   CasesSimilarResponse,
   UserActionFindRequest,
   UserActionInternalFindResponse,
-  AttachmentsFindResponse,
 } from '@kbn/cases-plugin/common/types/api';
 import {
   getCaseCreateObservableUrl,
   getCaseUpdateObservableUrl,
   getCaseDeleteObservableUrl,
   getCaseFindUserActionsUrl,
-  getCaseFindAttachmentsUrl,
 } from '@kbn/cases-plugin/common/api';
 import { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
@@ -991,22 +989,4 @@ export const findInternalCaseUserActions = async ({
     .expect(expectedHttpCode);
 
   return userActions;
-};
-
-export const findComments = async ({
-  supertest,
-  caseId,
-  auth,
-}: {
-  supertest: SuperTest.Agent;
-  caseId: string;
-  auth: { user: User; space: string };
-}): Promise<AttachmentsFindResponse> => {
-  const { body } = await supertest
-    .get(`${getSpaceUrlPrefix(auth.space)}${getCaseFindAttachmentsUrl(caseId)}`)
-    .auth(auth.user.username, auth.user.password)
-    .set('kbn-xsrf', 'true')
-    .expect(200);
-
-  return body;
 };

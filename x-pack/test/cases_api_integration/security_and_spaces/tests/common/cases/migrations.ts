@@ -19,8 +19,8 @@ import {
   getCaseSavedObjectsFromES,
   resolveCase,
   findCases,
-  findComments,
 } from '../../../../common/lib/api';
+import { findAttachments } from '../../../../common/lib/api/attachments';
 import { superUser } from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
@@ -99,7 +99,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           category: null,
           closed_at: null,
           closed_by: null,
-          comments: [],
           connector: {
             fields: null,
             id: 'connector-1',
@@ -389,7 +388,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           });
 
           it('should preserve the comment', async () => {
-            const { comments } = await findComments({
+            const { comments } = await findAttachments({
               supertest,
               caseId: 'a97a13b0-22f3-11ec-9f3b-fbc97859d7ed',
               auth,
