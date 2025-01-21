@@ -317,16 +317,6 @@ module.exports = {
       ],
     ],
 
-    '@typescript-eslint/consistent-type-exports': 'error',
-    '@typescript-eslint/consistent-type-imports':[
-      'error',
-      {
-        disallowTypeAnnotations: false,
-        fixStyle: 'separate-type-imports',
-        prefer: 'type-imports',
-      }
-    ],
-
     '@kbn/disable/no_protected_eslint_disable': 'error',
     '@kbn/disable/no_naked_eslint_disable': 'error',
     '@kbn/eslint/no_async_promise_body': 'error',

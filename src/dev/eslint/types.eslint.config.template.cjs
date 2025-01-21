@@ -23,6 +23,7 @@ module.exports = {
   },
   plugins: ['@typescript-eslint'],
   rules: {
+    '@typescript-eslint/consistent-type-imports': 'error',
     '@typescript-eslint/consistent-type-exports': 'error',
   },
   overrides: [
