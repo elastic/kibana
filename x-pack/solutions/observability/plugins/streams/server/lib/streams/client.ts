@@ -81,6 +81,7 @@ export class StreamsClient {
       assetClient: AssetClient;
       storageClient: StreamsStorageClient;
       logger: Logger;
+      isServerless: boolean;
     }
   ) {}
 
@@ -182,6 +183,7 @@ export class StreamsClient {
         definition,
         logger,
         scopedClusterClient,
+        isServerless: this.dependencies.isServerless,
       });
     } else if (isUnwiredStreamDefinition(definition)) {
       await syncUnwiredStreamDefinitionObjects({
