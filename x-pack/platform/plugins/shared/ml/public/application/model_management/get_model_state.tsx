@@ -19,7 +19,8 @@ import { MODEL_STATE, type ModelState } from '@kbn/ml-trained-models-utils';
 import React from 'react';
 
 export const getModelStateColor = (
-  state: ModelState | undefined
+  state: ModelState | undefined,
+  isModalEmbedded?: boolean
 ): { color: EuiHealthProps['color']; name: string; component?: React.ReactNode } | null => {
   switch (state) {
     case MODEL_STATE.DOWNLOADED:
@@ -32,9 +33,13 @@ export const getModelStateColor = (
     case MODEL_STATE.DOWNLOADING:
       return {
         color: 'primary',
-        name: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.downloadingName', {
-          defaultMessage: 'Downloading',
-        }),
+        name: isModalEmbedded
+          ? i18n.translate('xpack.ml.trainedModels.modelsList.modelState.downloadingName', {
+              defaultMessage: 'Downloading model',
+            })
+          : i18n.translate('xpack.ml.trainedModels.modelsList.modelState.downloadingName', {
+              defaultMessage: 'Downloading',
+            }),
       };
     case MODEL_STATE.STARTED:
       return {

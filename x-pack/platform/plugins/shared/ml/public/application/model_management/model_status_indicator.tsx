@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
-import { EuiProgress, EuiFlexItem, EuiFlexGroup, EuiText } from '@elastic/eui';
+import { EuiProgress, EuiFlexItem, EuiFlexGroup, EuiText, useEuiTheme } from '@elastic/eui';
 
 import useObservable from 'react-use/lib/useObservable';
 import { isBaseNLPModelItem } from '../../../common/types/trained_models';
@@ -21,6 +21,8 @@ export const ModelStatusIndicator = ({
   modelId: string;
   isModalEmbedded?: boolean;
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   const trainedModelsService = useTrainedModelsService();
 
   const currentModel = useObservable(
@@ -33,7 +35,7 @@ export const ModelStatusIndicator = ({
   }
 
   const { state, downloadState } = currentModel;
-  const config = getModelStateColor(state);
+  const config = getModelStateColor(state, isModalEmbedded);
 
   if (!config) {
     return null;
@@ -57,6 +59,13 @@ export const ModelStatusIndicator = ({
         <EuiFlexItem>
           <EuiProgress
             label={config.name}
+            labelProps={{
+              ...(isModalEmbedded && {
+                css: {
+                  color: euiTheme.colors.textSubdued,
+                },
+              }),
+            }}
             valueText={
               <>
                 {downloadState
