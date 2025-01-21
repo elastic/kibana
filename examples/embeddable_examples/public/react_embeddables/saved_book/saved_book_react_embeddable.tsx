@@ -162,7 +162,6 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
             bookAttributesManager.bookTitle,
             bookAttributesManager.bookSynopsis
           );
-          const { euiTheme } = useEuiTheme();
 
           return (
             <div
