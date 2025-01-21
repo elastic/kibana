@@ -8,7 +8,7 @@
 import { ingestStreamConfig } from './ingest_stream_config';
 
 export const ingestStream = {
-  name: 'logs.nginx',
+  name: 'logs-nginx-default',
   elasticsearch_assets: [],
   stream: ingestStreamConfig,
 };

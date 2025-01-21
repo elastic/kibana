@@ -10,5 +10,6 @@ import { wiredStreamConfig } from './wired_stream_config';
 export const wiredStream = {
   name: 'logs.nginx',
   elasticsearch_assets: [],
+  root: 'logs',
   stream: wiredStreamConfig,
 };

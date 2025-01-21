@@ -13,6 +13,7 @@ export const wiredReadStreamDefinitonSchema = wiredStreamDefinitonSchema
   .extend({
     inherited_fields: inheritedFieldDefinitionSchema,
     lifecycle: lifecycleSchema,
+    root: z.string(),
   })
   .strict();
 

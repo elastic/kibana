@@ -82,6 +82,7 @@ export const readStreamRoute = createServerRoute({
         ...streamDefinition,
         dashboards,
         lifecycle,
+        root: (await streamsClient.getUnwiredRootForStream(streamDefinition))?.name ?? 'logs',
         inherited_fields: ancestors.reduce((acc, def) => {
           if (!isWiredStream(def)) {
             return acc;
