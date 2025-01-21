@@ -223,5 +223,32 @@ describe('Grouping', () => {
       expect(customGroupsUnit).toHaveBeenCalledWith(3, testProps.selectedGroup, true);
       expect(screen.getByTestId('group-count').textContent).toBe('3 custom units');
     });
+
+    it('calls custom groupsUnit callback with hasNullGroup = false', () => {
+      const customGroupsUnit = jest.fn(
+        (n, parentSelectedGroup, hasNullGroup) => `${n} custom units`
+      );
+
+      const customProps = {
+        ...testProps,
+        groupsUnit: customGroupsUnit,
+        data: {
+          ...testProps.data,
+          nullGroupItems: {
+            ...testProps.data.nullGroupItems,
+            doc_count: 0,
+          },
+        },
+      };
+
+      render(
+        <I18nProvider>
+          <Grouping {...customProps} />
+        </I18nProvider>
+      );
+
+      expect(customGroupsUnit).toHaveBeenCalledWith(3, testProps.selectedGroup, false);
+      expect(screen.getByTestId('group-count').textContent).toBe('3 custom units');
+    });
   });
 });
