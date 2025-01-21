@@ -57,6 +57,7 @@ export const ConnectionModeCloud: FunctionComponent<Props> = (props) => {
             id="xpack.remoteClusters.remoteClusterForm.sectionModeCloudDescription"
             defaultMessage="Configure how to connect to the remote cluster."
           />
+          <EuiSpacer size="l" />
           <EuiFormRow fullWidth>
             <EuiSwitch
               label={
@@ -99,9 +100,9 @@ export const ConnectionModeCloud: FunctionComponent<Props> = (props) => {
         <EuiFieldText
           value={cloudRemoteAddress}
           placeholder={i18n.translate(
-            'xpack.remoteClusters.remoteClusterForm.fieldProxyAddressPlaceholder',
+            'xpack.remoteClusters.remoteClusterForm.fieldRemoteAddressPlaceholder',
             {
-              defaultMessage: 'host:port',
+              defaultMessage: 'hostname:port',
             }
           )}
           onChange={(e) => onFieldsChange({ cloudRemoteAddress: e.target.value })}

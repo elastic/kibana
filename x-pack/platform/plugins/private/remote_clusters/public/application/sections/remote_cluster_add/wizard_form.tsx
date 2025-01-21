@@ -32,6 +32,7 @@ export const RemoteClusterWizard = ({
   addClusterError,
 }: Props) => {
   const [formState, setFormState] = useState<ClusterPayload>();
+  const [formHasErrors, setFormHasErrors] = useState(false);
   const [currentStep, setCurrentStep] = useState(SETUP_TRUST);
   const [securityModel, setSecurityModel] = useState('');
 
@@ -39,8 +40,8 @@ export const RemoteClusterWizard = ({
     () => [
       {
         step: SETUP_TRUST,
-        title: i18n.translate('xpack.remoteClusters.clusterWizard.setupTrustLabel', {
-          defaultMessage: 'Establish trust',
+        title: i18n.translate('xpack.remoteClusters.clusterWizard.selectConnectionTypeLabel', {
+          defaultMessage: 'Select connection type',
         }),
         status: (currentStep === SETUP_TRUST ? 'current' : 'complete') as EuiStepStatus,
         onClick: () => setCurrentStep(SETUP_TRUST),
@@ -59,17 +60,22 @@ export const RemoteClusterWizard = ({
         title: i18n.translate('xpack.remoteClusters.clusterWizard.confirmSetup', {
           defaultMessage: 'Confirm setup',
         }),
-        disabled: !formState,
+        disabled: !formState || formHasErrors,
         status: (currentStep === REVIEW ? 'current' : 'incomplete') as EuiStepStatus,
         onClick: () => setCurrentStep(REVIEW),
       },
     ],
-    [currentStep, formState, securityModel]
+    [currentStep, formHasErrors, formState, securityModel]
   );
 
   const completeTrustStep = (model: string) => {
     setSecurityModel(model);
     setCurrentStep(CONFIGURE_CONNECTION);
+  };
+  const onSecurityUpdate = (model: string) => {
+    if (securityModel !== '') {
+      setSecurityModel(model);
+    }
   };
 
   // Upon finalizing configuring the connection, we need to temporarily store the
@@ -78,6 +84,13 @@ export const RemoteClusterWizard = ({
   const completeConfigStep = (clusterConfig: ClusterPayload) => {
     setFormState(clusterConfig);
     setCurrentStep(REVIEW);
+  };
+
+  const onConfigUpdate = (clusterConfig: ClusterPayload, hasErrors: boolean) => {
+    if (formState !== undefined) {
+      setFormState(clusterConfig);
+      setFormHasErrors(hasErrors);
+    }
   };
 
   const completeReviewStep = () => {
@@ -98,6 +111,7 @@ export const RemoteClusterWizard = ({
           next={completeTrustStep}
           cancel={onCancel}
           currentSecurityModel={securityModel}
+          onSecurityChange={onSecurityUpdate}
         />
       )}
 
@@ -111,6 +125,7 @@ export const RemoteClusterWizard = ({
               defaultMessage="Next"
             />
           }
+          onConfigChange={onConfigUpdate}
         />
       </div>
       <div style={{ display: currentStep === REVIEW ? 'block' : 'none' }}>

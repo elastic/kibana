@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useContext, useCallback } from 'react';
+
+import React, { useState, useContext, useCallback, useEffect } from 'react';
 import { merge } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -56,6 +57,7 @@ interface Props {
   saveError?: any;
   cluster?: Cluster;
   confirmFormText: ReactNode;
+  onConfigChange?: (cluster: ClusterPayload, hasErrors: boolean) => void;
 }
 export type FormFields = ClusterPayload & {
   cloudRemoteAddress?: string;
@@ -68,6 +70,7 @@ export const RemoteClusterForm: React.FC<Props> = ({
   saveError,
   cluster,
   confirmFormText,
+  onConfigChange,
 }) => {
   const context = useContext(AppContext);
   const { euiTheme } = useEuiTheme();
@@ -88,8 +91,8 @@ export const RemoteClusterForm: React.FC<Props> = ({
     validateCluster(initialFieldsState, isCloudEnabled)
   );
   const [areErrorsVisible, setAreErrorsVisible] = useState(false);
+  const [formHasBeenSubmited, setFormHasBeenSubmited] = useState(false);
   const generateId = htmlIdGenerator();
-
   const getCluster = useCallback((): ClusterPayload => {
     const {
       name,
@@ -128,6 +131,7 @@ export const RemoteClusterForm: React.FC<Props> = ({
       setAreErrorsVisible(true);
       return;
     }
+    setFormHasBeenSubmited(true);
     confirmFormAction(getCluster());
   };
 
@@ -175,6 +179,16 @@ export const RemoteClusterForm: React.FC<Props> = ({
     const errorValues = Object.values(fieldsErrors);
     return errorValues.some((error) => error != null);
   }, [fieldsErrors]);
+
+  useEffect(() => {
+    if (onConfigChange && formHasBeenSubmited) {
+      const errors = hasErrors();
+      setAreErrorsVisible(errors);
+      onConfigChange(getCluster(), errors);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fields]);
+
   const onSkipUnavailableChange = useCallback(
     (e: EuiSwitchEvent) => {
       const skipUnavailable = e.target.checked;
@@ -357,10 +371,27 @@ export const RemoteClusterForm: React.FC<Props> = ({
             </EuiTitle>
           }
           description={
-            <FormattedMessage
-              id="xpack.remoteClusters.remoteClusterForm.sectionNameDescription"
-              defaultMessage="A unique name for the cluster."
-            />
+            isCloudEnabled ? (
+              <FormattedMessage
+                id="xpack.remoteClusters.remoteClusterForm.cloud.sectionNameDescription"
+                defaultMessage="A unique identifier for the remote cluster. Must match the {remoteClusterName} in this deployment’s Cloud -> Security settings."
+                values={{
+                  remoteClusterName: (
+                    <strong>
+                      <FormattedMessage
+                        id="xpack.remoteClusters.remoteClusterForm.cloud.sectionNameDescription.remoteClusterName"
+                        defaultMessage="remote cluster name"
+                      />
+                    </strong>
+                  ),
+                }}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.remoteClusters.remoteClusterForm.stateful.sectionNameDescription"
+                defaultMessage="A unique identifier for the remote cluster."
+              />
+            )
           }
           fullWidth
         >

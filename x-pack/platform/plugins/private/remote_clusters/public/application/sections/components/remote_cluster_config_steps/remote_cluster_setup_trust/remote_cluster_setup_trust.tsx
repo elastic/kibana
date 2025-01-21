@@ -42,11 +42,17 @@ const i18nTexts = {
 
 interface Props {
   next: (model: string) => void;
+  onSecurityChange: (model: string) => void;
   cancel?: () => void;
   currentSecurityModel: string;
 }
 
-export const RemoteClusterSetupTrust = ({ cancel, next, currentSecurityModel }: Props) => {
+export const RemoteClusterSetupTrust = ({
+  cancel,
+  next,
+  currentSecurityModel,
+  onSecurityChange,
+}: Props) => {
   const { canUseAPIKeyTrustModel } = useContext(AppContext);
   const [securityModel, setSecurityModel] = useState<string>(currentSecurityModel);
 
@@ -55,6 +61,7 @@ export const RemoteClusterSetupTrust = ({ cancel, next, currentSecurityModel }: 
       <EuiButton
         onClick={() => {
           setSecurityModel(securityModelType);
+          onSecurityChange(securityModelType);
         }}
         color="success"
         iconType="check"
@@ -71,6 +78,7 @@ export const RemoteClusterSetupTrust = ({ cancel, next, currentSecurityModel }: 
       <EuiButton
         onClick={() => {
           setSecurityModel(securityModelType);
+          onSecurityChange(securityModelType);
         }}
         color="text"
         fullWidth
