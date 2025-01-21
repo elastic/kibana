@@ -41,12 +41,11 @@ export const registerRuleManagementRoutes = (
   patchRuleRoute(router);
   deleteRuleRoute(router);
 
-  // DEPRECATED. NIKITA, REMOVE THESE
+  // These four bulk endpoints are deprecated and will be removed in 9.0
   bulkCreateRulesRoute(router, logger, docLinks);
   bulkUpdateRulesRoute(router, logger, docLinks);
   bulkPatchRulesRoute(router, logger, docLinks);
   bulkDeleteRulesRoute(router, logger, docLinks);
-  // ALONG WITH THEIR IMPORTS
 
   // Rules bulk actions
   performBulkActionRoute(router, config, ml, logger);
