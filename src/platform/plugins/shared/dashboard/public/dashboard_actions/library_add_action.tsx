@@ -79,7 +79,7 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-  
+
     const lastTitle = getTitle(embeddable);
     try {
       const { byRefPackage, libraryTitle } = await new Promise<{

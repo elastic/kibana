@@ -247,7 +247,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
           if (!inspector.isAvailable(adapters)) return;
           return getInspector().open(adapters, {
             title:
-            titleManager.api.title$?.getValue() ||
+              titleManager.api.title$?.getValue() ||
               i18n.translate('visualizations.embeddable.inspectorTitle', {
                 defaultMessage: 'Inspector',
               }),

@@ -212,10 +212,7 @@ export const getLinksEmbeddableFactory = () => {
             defaultDescription$,
             (nextDescription?: string) => defaultDescription$.next(nextDescription),
           ],
-          defaultPanelTitle: [
-            defaultTitle$,
-            (nextTitle?: string) => defaultTitle$.next(nextTitle),
-          ],
+          defaultPanelTitle: [defaultTitle$, (nextTitle?: string) => defaultTitle$.next(nextTitle)],
           savedObjectId: [savedObjectId$, (val) => savedObjectId$.next(val)],
         }
       );

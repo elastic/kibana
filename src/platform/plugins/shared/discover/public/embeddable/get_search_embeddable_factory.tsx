@@ -78,9 +78,7 @@ export const getSearchEmbeddableFactory = ({
 
       /** Specific by-reference state */
       const savedObjectId$ = new BehaviorSubject<string | undefined>(initialState?.savedObjectId);
-      const defaultTitle$ = new BehaviorSubject<string | undefined>(
-        initialState?.savedObjectTitle
-      );
+      const defaultTitle$ = new BehaviorSubject<string | undefined>(initialState?.savedObjectTitle);
       const defaultDescription$ = new BehaviorSubject<string | undefined>(
         initialState?.savedObjectDescription
       );
@@ -109,8 +107,8 @@ export const getSearchEmbeddableFactory = ({
           ...timeRange.api,
           savedSearch$: searchEmbeddable.api.savedSearch$,
           dataViews$: searchEmbeddable.api.dataViews$,
-          savedObjectId$: savedObjectId$,
-          dataLoading$: dataLoading$,
+          savedObjectId$,
+          dataLoading$,
           blockingError$,
           fetchContext$,
           fetchWarnings$,
@@ -188,10 +186,7 @@ export const getSearchEmbeddableFactory = ({
           rawSavedObjectAttributes: getUnchangingComparator(),
           savedObjectId: [savedObjectId$, (value) => savedObjectId$.next(value)],
           savedObjectTitle: [defaultTitle$, (value) => defaultTitle$.next(value)],
-          savedObjectDescription: [
-            defaultDescription$,
-            (value) => defaultDescription$.next(value),
-          ],
+          savedObjectDescription: [defaultDescription$, (value) => defaultDescription$.next(value)],
           nonPersistedDisplayOptions: [
             nonPersistedDisplayOptions$,
             (value) => nonPersistedDisplayOptions$.next(value),
