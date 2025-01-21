@@ -13,19 +13,30 @@
                 "properties": {
                   "level": {
                     "description": "Service status levels as human and machine readable values.",
-                    "enum": ["available", "degraded", "unavailable", "critical"],
+                    "enum": [
+                      "available",
+                      "degraded",
+                      "unavailable",
+                      "critical"
+                    ],
                     "type": "string"
                   }
                 },
-                "required": ["level"],
+                "required": [
+                  "level"
+                ],
                 "type": "object"
               }
             },
-            "required": ["overall"],
+            "required": [
+              "overall"
+            ],
             "type": "object"
           }
         },
-        "required": ["status"],
+        "required": [
+          "status"
+        ],
         "type": "object"
       },
       "core_status_response": {
@@ -57,7 +68,11 @@
                     "type": "number"
                   }
                 },
-                "required": ["totalActiveSockets", "totalIdleSockets", "totalQueuedRequests"],
+                "required": [
+                  "totalActiveSockets",
+                  "totalIdleSockets",
+                  "totalQueuedRequests"
+                ],
                 "type": "object"
               },
               "last_updated": {
@@ -65,7 +80,11 @@
                 "type": "string"
               }
             },
-            "required": ["elasticsearch_client", "last_updated", "collection_interval_in_millis"],
+            "required": [
+              "elasticsearch_client",
+              "last_updated",
+              "collection_interval_in_millis"
+            ],
             "type": "object"
           },
           "name": {
@@ -92,7 +111,12 @@
                       },
                       "level": {
                         "description": "Service status levels as human and machine readable values.",
-                        "enum": ["available", "degraded", "unavailable", "critical"],
+                        "enum": [
+                          "available",
+                          "degraded",
+                          "unavailable",
+                          "critical"
+                        ],
                         "type": "string"
                       },
                       "meta": {
@@ -105,7 +129,11 @@
                         "type": "string"
                       }
                     },
-                    "required": ["level", "summary", "meta"],
+                    "required": [
+                      "level",
+                      "summary",
+                      "meta"
+                    ],
                     "type": "object"
                   },
                   "savedObjects": {
@@ -121,7 +149,12 @@
                       },
                       "level": {
                         "description": "Service status levels as human and machine readable values.",
-                        "enum": ["available", "degraded", "unavailable", "critical"],
+                        "enum": [
+                          "available",
+                          "degraded",
+                          "unavailable",
+                          "critical"
+                        ],
                         "type": "string"
                       },
                       "meta": {
@@ -134,11 +167,18 @@
                         "type": "string"
                       }
                     },
-                    "required": ["level", "summary", "meta"],
+                    "required": [
+                      "level",
+                      "summary",
+                      "meta"
+                    ],
                     "type": "object"
                   }
                 },
-                "required": ["elasticsearch", "savedObjects"],
+                "required": [
+                  "elasticsearch",
+                  "savedObjects"
+                ],
                 "type": "object"
               },
               "overall": {
@@ -154,7 +194,12 @@
                   },
                   "level": {
                     "description": "Service status levels as human and machine readable values.",
-                    "enum": ["available", "degraded", "unavailable", "critical"],
+                    "enum": [
+                      "available",
+                      "degraded",
+                      "unavailable",
+                      "critical"
+                    ],
                     "type": "string"
                   },
                   "meta": {
@@ -167,7 +212,11 @@
                     "type": "string"
                   }
                 },
-                "required": ["level", "summary", "meta"],
+                "required": [
+                  "level",
+                  "summary",
+                  "meta"
+                ],
                 "type": "object"
               },
               "plugins": {
@@ -184,7 +233,12 @@
                     },
                     "level": {
                       "description": "Service status levels as human and machine readable values.",
-                      "enum": ["available", "degraded", "unavailable", "critical"],
+                      "enum": [
+                        "available",
+                        "degraded",
+                        "unavailable",
+                        "critical"
+                      ],
                       "type": "string"
                     },
                     "meta": {
@@ -197,14 +251,22 @@
                       "type": "string"
                     }
                   },
-                  "required": ["level", "summary", "meta"],
+                  "required": [
+                    "level",
+                    "summary",
+                    "meta"
+                  ],
                   "type": "object"
                 },
                 "description": "A dynamic mapping of plugin ID to plugin status.",
                 "type": "object"
               }
             },
-            "required": ["overall", "core", "plugins"],
+            "required": [
+              "overall",
+              "core",
+              "plugins"
+            ],
             "type": "object"
           },
           "uuid": {
@@ -220,7 +282,10 @@
               },
               "build_flavor": {
                 "description": "The build flavour determines configuration and behavior of Kibana. On premise users will almost always run the \"traditional\" flavour, while other flavours are reserved for Elastic-specific use cases.",
-                "enum": ["serverless", "traditional"],
+                "enum": [
+                  "serverless",
+                  "traditional"
+                ],
                 "type": "string"
               },
               "build_hash": {
@@ -251,7 +316,13 @@
             "type": "object"
           }
         },
-        "required": ["name", "uuid", "version", "status", "metrics"],
+        "required": [
+          "name",
+          "uuid",
+          "version",
+          "status",
+          "metrics"
+        ],
         "type": "object"
       }
     },
@@ -280,7 +351,9 @@
         "parameters": [],
         "responses": {},
         "summary": "Get all connectors",
-        "tags": ["connectors"]
+        "tags": [
+          "connectors"
+        ]
       }
     },
     "/api/actions/action": {
@@ -324,7 +397,10 @@
                     "type": "object"
                   }
                 },
-                "required": ["name", "actionTypeId"],
+                "required": [
+                  "name",
+                  "actionTypeId"
+                ],
                 "type": "object"
               }
             }
@@ -386,7 +462,9 @@
           }
         },
         "summary": "Create a connector",
-        "tags": ["connectors"]
+        "tags": [
+          "connectors"
+        ]
       }
     },
     "/api/actions/action/{id}": {
@@ -421,7 +499,9 @@
           }
         },
         "summary": "Delete a connector",
-        "tags": ["connectors"]
+        "tags": [
+          "connectors"
+        ]
       },
       "get": {
         "deprecated": true,
@@ -493,7 +573,9 @@
           }
         },
         "summary": "Get connector information",
-        "tags": ["connectors"]
+        "tags": [
+          "connectors"
+        ]
       },
       "put": {
         "deprecated": true,
@@ -539,7 +621,9 @@
                     "type": "object"
                   }
                 },
-                "required": ["name"],
+                "required": [
+                  "name"
+                ],
                 "type": "object"
               }
             }
@@ -601,7 +685,9 @@
           }
         },
         "summary": "Update a connector",
-        "tags": ["connectors"]
+        "tags": [
+          "connectors"
+        ]
       }
     },
     "/api/actions/action/{id}/_execute": {
@@ -640,7 +726,9 @@
                     "type": "object"
                   }
                 },
-                "required": ["params"],
+                "required": [
+                  "params"
+                ],
                 "type": "object"
               }
             }
@@ -702,7 +790,9 @@
           }
         },
         "summary": "Run a connector",
-        "tags": ["connectors"]
+        "tags": [
+          "connectors"
+        ]
       }
     },
     "/api/actions/connector/{id}": {
@@ -736,7 +826,9 @@
           }
         },
         "summary": "Delete a connector",
-        "tags": ["connectors"]
+        "tags": [
+          "connectors"
+        ]
       },
       "get": {
         "operationId": "get-actions-connector-id",
@@ -807,7 +899,9 @@
           }
         },
         "summary": "Get connector information",
-        "tags": ["connectors"]
+        "tags": [
+          "connectors"
+        ]
       },
       "post": {
         "operationId": "post-actions-connector-id",
@@ -857,7 +951,10 @@
                     "type": "object"
                   }
                 },
-                "required": ["name", "connector_type_id"],
+                "required": [
+                  "name",
+                  "connector_type_id"
+                ],
                 "type": "object"
               }
             }
@@ -919,7 +1016,9 @@
           }
         },
         "summary": "Create a connector",
-        "tags": ["connectors"]
+        "tags": [
+          "connectors"
+        ]
       },
       "put": {
         "operationId": "put-actions-connector-id",
@@ -965,7 +1064,9 @@
                     "type": "object"
                   }
                 },
-                "required": ["name"],
+                "required": [
+                  "name"
+                ],
                 "type": "object"
               }
             }
@@ -1027,7 +1128,9 @@
           }
         },
         "summary": "Update a connector",
-        "tags": ["connectors"]
+        "tags": [
+          "connectors"
+        ]
       }
     },
     "/api/actions/connector/{id}/_execute": {
@@ -1066,7 +1169,9 @@
                     "type": "object"
                   }
                 },
-                "required": ["params"],
+                "required": [
+                  "params"
+                ],
                 "type": "object"
               }
             }
@@ -1128,7 +1233,9 @@
           }
         },
         "summary": "Run a connector",
-        "tags": ["connectors"]
+        "tags": [
+          "connectors"
+        ]
       }
     },
     "/api/actions/connector_types": {
@@ -1148,7 +1255,9 @@
         ],
         "responses": {},
         "summary": "Get connector types",
-        "tags": ["connectors"]
+        "tags": [
+          "connectors"
+        ]
       }
     },
     "/api/actions/connectors": {
@@ -1157,7 +1266,9 @@
         "parameters": [],
         "responses": {},
         "summary": "Get all connectors",
-        "tags": ["connectors"]
+        "tags": [
+          "connectors"
+        ]
       }
     },
     "/api/actions/list_action_types": {
@@ -1167,7 +1278,9 @@
         "parameters": [],
         "responses": {},
         "summary": "Get connector types",
-        "tags": ["connectors"]
+        "tags": [
+          "connectors"
+        ]
       }
     },
     "/api/alerting/rule/{id}": {
@@ -1209,7 +1322,9 @@
           }
         },
         "summary": "Delete a rule",
-        "tags": ["alerting"]
+        "tags": [
+          "alerting"
+        ]
       },
       "get": {
         "operationId": "get-alerting-rule-id",
@@ -1256,11 +1371,16 @@
                                           "properties": {
                                             "store": {
                                               "description": "A filter can be either specific to an application context or applied globally.",
-                                              "enum": ["appState", "globalState"],
+                                              "enum": [
+                                                "appState",
+                                                "globalState"
+                                              ],
                                               "type": "string"
                                             }
                                           },
-                                          "required": ["store"],
+                                          "required": [
+                                            "store"
+                                          ],
                                           "type": "object"
                                         },
                                         "meta": {
@@ -1272,7 +1392,9 @@
                                           "type": "object"
                                         }
                                       },
-                                      "required": ["meta"],
+                                      "required": [
+                                        "meta"
+                                      ],
                                       "type": "object"
                                     },
                                     "type": "array"
@@ -1282,7 +1404,10 @@
                                     "type": "string"
                                   }
                                 },
-                                "required": ["kql", "filters"],
+                                "required": [
+                                  "kql",
+                                  "filters"
+                                ],
                                 "type": "object"
                               },
                               "timeframe": {
@@ -1291,7 +1416,15 @@
                                   "days": {
                                     "description": "Defines the days of the week that the action can run, represented as an array of numbers. For example, `1` represents Monday. An empty array is equivalent to specifying all the days of the week.",
                                     "items": {
-                                      "enum": [1, 2, 3, 4, 5, 6, 7],
+                                      "enum": [
+                                        1,
+                                        2,
+                                        3,
+                                        4,
+                                        5,
+                                        6,
+                                        7
+                                      ],
                                       "type": "integer"
                                     },
                                     "type": "array"
@@ -1308,7 +1441,10 @@
                                         "type": "string"
                                       }
                                     },
-                                    "required": ["start", "end"],
+                                    "required": [
+                                      "start",
+                                      "end"
+                                    ],
                                     "type": "object"
                                   },
                                   "timezone": {
@@ -1316,7 +1452,11 @@
                                     "type": "string"
                                   }
                                 },
-                                "required": ["days", "hours", "timezone"],
+                                "required": [
+                                  "days",
+                                  "hours",
+                                  "timezone"
+                                ],
                                 "type": "object"
                               }
                             },
@@ -1348,7 +1488,11 @@
                                 "type": "string"
                               }
                             },
-                            "required": ["summary", "notify_when", "throttle"],
+                            "required": [
+                              "summary",
+                              "notify_when",
+                              "throttle"
+                            ],
                             "type": "object"
                           },
                           "group": {
@@ -1373,7 +1517,11 @@
                             "type": "string"
                           }
                         },
-                        "required": ["id", "connector_type_id", "params"],
+                        "required": [
+                          "id",
+                          "connector_type_id",
+                          "params"
+                        ],
                         "type": "object"
                       },
                       "type": "array"
@@ -1394,7 +1542,9 @@
                           "type": "number"
                         }
                       },
-                      "required": ["active"],
+                      "required": [
+                        "active"
+                      ],
                       "type": "object"
                     },
                     "api_key_created_by_user": {
@@ -1449,7 +1599,10 @@
                               "type": "string"
                             }
                           },
-                          "required": ["reason", "message"],
+                          "required": [
+                            "reason",
+                            "message"
+                          ],
                           "type": "object"
                         },
                         "last_duration": {
@@ -1462,7 +1615,14 @@
                         },
                         "status": {
                           "description": "Status of rule execution.",
-                          "enum": ["ok", "active", "error", "warning", "pending", "unknown"],
+                          "enum": [
+                            "ok",
+                            "active",
+                            "error",
+                            "warning",
+                            "pending",
+                            "unknown"
+                          ],
                           "type": "string"
                         },
                         "warning": {
@@ -1483,11 +1643,17 @@
                               "type": "string"
                             }
                           },
-                          "required": ["reason", "message"],
+                          "required": [
+                            "reason",
+                            "message"
+                          ],
                           "type": "object"
                         }
                       },
-                      "required": ["status", "last_execution_date"],
+                      "required": [
+                        "status",
+                        "last_execution_date"
+                      ],
                       "type": "object"
                     },
                     "flapping": {
@@ -1508,7 +1674,10 @@
                           "type": "number"
                         }
                       },
-                      "required": ["look_back_window", "status_change_threshold"],
+                      "required": [
+                        "look_back_window",
+                        "status_change_threshold"
+                      ],
                       "type": "object"
                     },
                     "id": {
@@ -1552,7 +1721,11 @@
                         },
                         "outcome": {
                           "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
-                          "enum": ["succeeded", "warning", "failed"],
+                          "enum": [
+                            "succeeded",
+                            "warning",
+                            "failed"
+                          ],
                           "type": "string"
                         },
                         "outcome_msg": {
@@ -1587,7 +1760,10 @@
                           "type": "string"
                         }
                       },
-                      "required": ["outcome", "alerts_count"],
+                      "required": [
+                        "outcome",
+                        "alerts_count"
+                      ],
                       "type": "object"
                     },
                     "mapped_params": {
@@ -1619,7 +1795,9 @@
                                   "type": "number"
                                 }
                               },
-                              "required": ["success_ratio"],
+                              "required": [
+                                "success_ratio"
+                              ],
                               "type": "object"
                             },
                             "history": {
@@ -1633,7 +1811,11 @@
                                   },
                                   "outcome": {
                                     "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
-                                    "enum": ["succeeded", "warning", "failed"],
+                                    "enum": [
+                                      "succeeded",
+                                      "warning",
+                                      "failed"
+                                    ],
                                     "type": "string"
                                   },
                                   "success": {
@@ -1645,7 +1827,10 @@
                                     "type": "number"
                                   }
                                 },
-                                "required": ["success", "timestamp"],
+                                "required": [
+                                  "success",
+                                  "timestamp"
+                                ],
                                 "type": "object"
                               },
                               "type": "array"
@@ -1693,15 +1878,24 @@
                                   "type": "string"
                                 }
                               },
-                              "required": ["timestamp", "metrics"],
+                              "required": [
+                                "timestamp",
+                                "metrics"
+                              ],
                               "type": "object"
                             }
                           },
-                          "required": ["history", "calculated_metrics", "last_run"],
+                          "required": [
+                            "history",
+                            "calculated_metrics",
+                            "last_run"
+                          ],
                           "type": "object"
                         }
                       },
-                      "required": ["run"],
+                      "required": [
+                        "run"
+                      ],
                       "type": "object"
                     },
                     "mute_all": {
@@ -1726,7 +1920,11 @@
                     },
                     "notify_when": {
                       "description": "Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
-                      "enum": ["onActionGroupChange", "onActiveAlert", "onThrottleInterval"],
+                      "enum": [
+                        "onActionGroupChange",
+                        "onActiveAlert",
+                        "onThrottleInterval"
+                      ],
                       "nullable": true,
                       "type": "string"
                     },
@@ -1756,7 +1954,9 @@
                           "type": "string"
                         }
                       },
-                      "required": ["interval"],
+                      "required": [
+                        "interval"
+                      ],
                       "type": "object"
                     },
                     "scheduled_task_id": {
@@ -1867,7 +2067,15 @@
                               },
                               "freq": {
                                 "description": "Indicates frequency of the rule. Options are YEARLY, MONTHLY, WEEKLY, DAILY.",
-                                "enum": [0, 1, 2, 3, 4, 5, 6],
+                                "enum": [
+                                  0,
+                                  1,
+                                  2,
+                                  3,
+                                  4,
+                                  5,
+                                  6
+                                ],
                                 "type": "integer"
                               },
                               "interval": {
@@ -1884,11 +2092,22 @@
                               },
                               "wkst": {
                                 "description": "Indicates the start of week, defaults to Monday.",
-                                "enum": ["MO", "TU", "WE", "TH", "FR", "SA", "SU"],
+                                "enum": [
+                                  "MO",
+                                  "TU",
+                                  "WE",
+                                  "TH",
+                                  "FR",
+                                  "SA",
+                                  "SU"
+                                ],
                                 "type": "string"
                               }
                             },
-                            "required": ["dtstart", "tzid"],
+                            "required": [
+                              "dtstart",
+                              "tzid"
+                            ],
                             "type": "object"
                           },
                           "skipRecurrences": {
@@ -1899,7 +2118,10 @@
                             "type": "array"
                           }
                         },
-                        "required": ["duration", "rRule"],
+                        "required": [
+                          "duration",
+                          "rRule"
+                        ],
                         "type": "object"
                       },
                       "type": "array"
@@ -1969,7 +2191,9 @@
           }
         },
         "summary": "Get rule details",
-        "tags": ["alerting"]
+        "tags": [
+          "alerting"
+        ]
       },
       "post": {
         "operationId": "post-alerting-rule-id",
@@ -2027,11 +2251,16 @@
                                         "properties": {
                                           "store": {
                                             "description": "A filter can be either specific to an application context or applied globally.",
-                                            "enum": ["appState", "globalState"],
+                                            "enum": [
+                                              "appState",
+                                              "globalState"
+                                            ],
                                             "type": "string"
                                           }
                                         },
-                                        "required": ["store"],
+                                        "required": [
+                                          "store"
+                                        ],
                                         "type": "object"
                                       },
                                       "meta": {
@@ -2043,7 +2272,9 @@
                                         "type": "object"
                                       }
                                     },
-                                    "required": ["meta"],
+                                    "required": [
+                                      "meta"
+                                    ],
                                     "type": "object"
                                   },
                                   "type": "array"
@@ -2053,7 +2284,10 @@
                                   "type": "string"
                                 }
                               },
-                              "required": ["kql", "filters"],
+                              "required": [
+                                "kql",
+                                "filters"
+                              ],
                               "type": "object"
                             },
                             "timeframe": {
@@ -2063,7 +2297,15 @@
                                 "days": {
                                   "description": "Defines the days of the week that the action can run, represented as an array of numbers. For example, `1` represents Monday. An empty array is equivalent to specifying all the days of the week.",
                                   "items": {
-                                    "enum": [1, 2, 3, 4, 5, 6, 7],
+                                    "enum": [
+                                      1,
+                                      2,
+                                      3,
+                                      4,
+                                      5,
+                                      6,
+                                      7
+                                    ],
                                     "type": "integer"
                                   },
                                   "type": "array"
@@ -2081,7 +2323,10 @@
                                       "type": "string"
                                     }
                                   },
-                                  "required": ["start", "end"],
+                                  "required": [
+                                    "start",
+                                    "end"
+                                  ],
                                   "type": "object"
                                 },
                                 "timezone": {
@@ -2089,7 +2334,11 @@
                                   "type": "string"
                                 }
                               },
-                              "required": ["days", "hours", "timezone"],
+                              "required": [
+                                "days",
+                                "hours",
+                                "timezone"
+                              ],
                               "type": "object"
                             }
                           },
@@ -2117,7 +2366,11 @@
                               "type": "string"
                             }
                           },
-                          "required": ["summary", "notify_when", "throttle"],
+                          "required": [
+                            "summary",
+                            "notify_when",
+                            "throttle"
+                          ],
                           "type": "object"
                         },
                         "group": {
@@ -2143,7 +2396,9 @@
                           "type": "string"
                         }
                       },
-                      "required": ["id"],
+                      "required": [
+                        "id"
+                      ],
                       "type": "object"
                     },
                     "type": "array"
@@ -2157,7 +2412,9 @@
                         "type": "number"
                       }
                     },
-                    "required": ["active"],
+                    "required": [
+                      "active"
+                    ],
                     "type": "object"
                   },
                   "consumer": {
@@ -2187,7 +2444,10 @@
                         "type": "number"
                       }
                     },
-                    "required": ["look_back_window", "status_change_threshold"],
+                    "required": [
+                      "look_back_window",
+                      "status_change_threshold"
+                    ],
                     "type": "object"
                   },
                   "name": {
@@ -2196,7 +2456,11 @@
                   },
                   "notify_when": {
                     "description": "Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
-                    "enum": ["onActionGroupChange", "onActiveAlert", "onThrottleInterval"],
+                    "enum": [
+                      "onActionGroupChange",
+                      "onActiveAlert",
+                      "onThrottleInterval"
+                    ],
                     "nullable": true,
                     "type": "string"
                   },
@@ -2219,7 +2483,9 @@
                         "type": "string"
                       }
                     },
-                    "required": ["interval"],
+                    "required": [
+                      "interval"
+                    ],
                     "type": "object"
                   },
                   "tags": {
@@ -2236,7 +2502,12 @@
                     "type": "string"
                   }
                 },
-                "required": ["name", "rule_type_id", "consumer", "schedule"],
+                "required": [
+                  "name",
+                  "rule_type_id",
+                  "consumer",
+                  "schedule"
+                ],
                 "type": "object"
               }
             }
@@ -2274,11 +2545,16 @@
                                           "properties": {
                                             "store": {
                                               "description": "A filter can be either specific to an application context or applied globally.",
-                                              "enum": ["appState", "globalState"],
+                                              "enum": [
+                                                "appState",
+                                                "globalState"
+                                              ],
                                               "type": "string"
                                             }
                                           },
-                                          "required": ["store"],
+                                          "required": [
+                                            "store"
+                                          ],
                                           "type": "object"
                                         },
                                         "meta": {
@@ -2290,7 +2566,9 @@
                                           "type": "object"
                                         }
                                       },
-                                      "required": ["meta"],
+                                      "required": [
+                                        "meta"
+                                      ],
                                       "type": "object"
                                     },
                                     "type": "array"
@@ -2300,7 +2578,10 @@
                                     "type": "string"
                                   }
                                 },
-                                "required": ["kql", "filters"],
+                                "required": [
+                                  "kql",
+                                  "filters"
+                                ],
                                 "type": "object"
                               },
                               "timeframe": {
@@ -2309,7 +2590,15 @@
                                   "days": {
                                     "description": "Defines the days of the week that the action can run, represented as an array of numbers. For example, `1` represents Monday. An empty array is equivalent to specifying all the days of the week.",
                                     "items": {
-                                      "enum": [1, 2, 3, 4, 5, 6, 7],
+                                      "enum": [
+                                        1,
+                                        2,
+                                        3,
+                                        4,
+                                        5,
+                                        6,
+                                        7
+                                      ],
                                       "type": "integer"
                                     },
                                     "type": "array"
@@ -2326,7 +2615,10 @@
                                         "type": "string"
                                       }
                                     },
-                                    "required": ["start", "end"],
+                                    "required": [
+                                      "start",
+                                      "end"
+                                    ],
                                     "type": "object"
                                   },
                                   "timezone": {
@@ -2334,7 +2626,11 @@
                                     "type": "string"
                                   }
                                 },
-                                "required": ["days", "hours", "timezone"],
+                                "required": [
+                                  "days",
+                                  "hours",
+                                  "timezone"
+                                ],
                                 "type": "object"
                               }
                             },
@@ -2366,7 +2662,11 @@
                                 "type": "string"
                               }
                             },
-                            "required": ["summary", "notify_when", "throttle"],
+                            "required": [
+                              "summary",
+                              "notify_when",
+                              "throttle"
+                            ],
                             "type": "object"
                           },
                           "group": {
@@ -2391,7 +2691,11 @@
                             "type": "string"
                           }
                         },
-                        "required": ["id", "connector_type_id", "params"],
+                        "required": [
+                          "id",
+                          "connector_type_id",
+                          "params"
+                        ],
                         "type": "object"
                       },
                       "type": "array"
@@ -2412,7 +2716,9 @@
                           "type": "number"
                         }
                       },
-                      "required": ["active"],
+                      "required": [
+                        "active"
+                      ],
                       "type": "object"
                     },
                     "api_key_created_by_user": {
@@ -2467,7 +2773,10 @@
                               "type": "string"
                             }
                           },
-                          "required": ["reason", "message"],
+                          "required": [
+                            "reason",
+                            "message"
+                          ],
                           "type": "object"
                         },
                         "last_duration": {
@@ -2480,7 +2789,14 @@
                         },
                         "status": {
                           "description": "Status of rule execution.",
-                          "enum": ["ok", "active", "error", "warning", "pending", "unknown"],
+                          "enum": [
+                            "ok",
+                            "active",
+                            "error",
+                            "warning",
+                            "pending",
+                            "unknown"
+                          ],
                           "type": "string"
                         },
                         "warning": {
@@ -2501,11 +2817,17 @@
                               "type": "string"
                             }
                           },
-                          "required": ["reason", "message"],
+                          "required": [
+                            "reason",
+                            "message"
+                          ],
                           "type": "object"
                         }
                       },
-                      "required": ["status", "last_execution_date"],
+                      "required": [
+                        "status",
+                        "last_execution_date"
+                      ],
                       "type": "object"
                     },
                     "flapping": {
@@ -2526,7 +2848,10 @@
                           "type": "number"
                         }
                       },
-                      "required": ["look_back_window", "status_change_threshold"],
+                      "required": [
+                        "look_back_window",
+                        "status_change_threshold"
+                      ],
                       "type": "object"
                     },
                     "id": {
@@ -2570,7 +2895,11 @@
                         },
                         "outcome": {
                           "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
-                          "enum": ["succeeded", "warning", "failed"],
+                          "enum": [
+                            "succeeded",
+                            "warning",
+                            "failed"
+                          ],
                           "type": "string"
                         },
                         "outcome_msg": {
@@ -2605,7 +2934,10 @@
                           "type": "string"
                         }
                       },
-                      "required": ["outcome", "alerts_count"],
+                      "required": [
+                        "outcome",
+                        "alerts_count"
+                      ],
                       "type": "object"
                     },
                     "mapped_params": {
@@ -2637,7 +2969,9 @@
                                   "type": "number"
                                 }
                               },
-                              "required": ["success_ratio"],
+                              "required": [
+                                "success_ratio"
+                              ],
                               "type": "object"
                             },
                             "history": {
@@ -2651,7 +2985,11 @@
                                   },
                                   "outcome": {
                                     "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
-                                    "enum": ["succeeded", "warning", "failed"],
+                                    "enum": [
+                                      "succeeded",
+                                      "warning",
+                                      "failed"
+                                    ],
                                     "type": "string"
                                   },
                                   "success": {
@@ -2663,7 +3001,10 @@
                                     "type": "number"
                                   }
                                 },
-                                "required": ["success", "timestamp"],
+                                "required": [
+                                  "success",
+                                  "timestamp"
+                                ],
                                 "type": "object"
                               },
                               "type": "array"
@@ -2711,15 +3052,24 @@
                                   "type": "string"
                                 }
                               },
-                              "required": ["timestamp", "metrics"],
+                              "required": [
+                                "timestamp",
+                                "metrics"
+                              ],
                               "type": "object"
                             }
                           },
-                          "required": ["history", "calculated_metrics", "last_run"],
+                          "required": [
+                            "history",
+                            "calculated_metrics",
+                            "last_run"
+                          ],
                           "type": "object"
                         }
                       },
-                      "required": ["run"],
+                      "required": [
+                        "run"
+                      ],
                       "type": "object"
                     },
                     "mute_all": {
@@ -2744,7 +3094,11 @@
                     },
                     "notify_when": {
                       "description": "Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
-                      "enum": ["onActionGroupChange", "onActiveAlert", "onThrottleInterval"],
+                      "enum": [
+                        "onActionGroupChange",
+                        "onActiveAlert",
+                        "onThrottleInterval"
+                      ],
                       "nullable": true,
                       "type": "string"
                     },
@@ -2774,7 +3128,9 @@
                           "type": "string"
                         }
                       },
-                      "required": ["interval"],
+                      "required": [
+                        "interval"
+                      ],
                       "type": "object"
                     },
                     "scheduled_task_id": {
@@ -2885,7 +3241,15 @@
                               },
                               "freq": {
                                 "description": "Indicates frequency of the rule. Options are YEARLY, MONTHLY, WEEKLY, DAILY.",
-                                "enum": [0, 1, 2, 3, 4, 5, 6],
+                                "enum": [
+                                  0,
+                                  1,
+                                  2,
+                                  3,
+                                  4,
+                                  5,
+                                  6
+                                ],
                                 "type": "integer"
                               },
                               "interval": {
@@ -2902,11 +3266,22 @@
                               },
                               "wkst": {
                                 "description": "Indicates the start of week, defaults to Monday.",
-                                "enum": ["MO", "TU", "WE", "TH", "FR", "SA", "SU"],
+                                "enum": [
+                                  "MO",
+                                  "TU",
+                                  "WE",
+                                  "TH",
+                                  "FR",
+                                  "SA",
+                                  "SU"
+                                ],
                                 "type": "string"
                               }
                             },
-                            "required": ["dtstart", "tzid"],
+                            "required": [
+                              "dtstart",
+                              "tzid"
+                            ],
                             "type": "object"
                           },
                           "skipRecurrences": {
@@ -2917,7 +3292,10 @@
                             "type": "array"
                           }
                         },
-                        "required": ["duration", "rRule"],
+                        "required": [
+                          "duration",
+                          "rRule"
+                        ],
                         "type": "object"
                       },
                       "type": "array"
@@ -2987,7 +3365,9 @@
           }
         },
         "summary": "Create a rule",
-        "tags": ["alerting"]
+        "tags": [
+          "alerting"
+        ]
       },
       "put": {
         "operationId": "put-alerting-rule-id",
@@ -3044,11 +3424,16 @@
                                         "properties": {
                                           "store": {
                                             "description": "A filter can be either specific to an application context or applied globally.",
-                                            "enum": ["appState", "globalState"],
+                                            "enum": [
+                                              "appState",
+                                              "globalState"
+                                            ],
                                             "type": "string"
                                           }
                                         },
-                                        "required": ["store"],
+                                        "required": [
+                                          "store"
+                                        ],
                                         "type": "object"
                                       },
                                       "meta": {
@@ -3060,7 +3445,9 @@
                                         "type": "object"
                                       }
                                     },
-                                    "required": ["meta"],
+                                    "required": [
+                                      "meta"
+                                    ],
                                     "type": "object"
                                   },
                                   "type": "array"
@@ -3070,7 +3457,10 @@
                                   "type": "string"
                                 }
                               },
-                              "required": ["kql", "filters"],
+                              "required": [
+                                "kql",
+                                "filters"
+                              ],
                               "type": "object"
                             },
                             "timeframe": {
@@ -3080,7 +3470,15 @@
                                 "days": {
                                   "description": "Defines the days of the week that the action can run, represented as an array of numbers. For example, `1` represents Monday. An empty array is equivalent to specifying all the days of the week.",
                                   "items": {
-                                    "enum": [1, 2, 3, 4, 5, 6, 7],
+                                    "enum": [
+                                      1,
+                                      2,
+                                      3,
+                                      4,
+                                      5,
+                                      6,
+                                      7
+                                    ],
                                     "type": "integer"
                                   },
                                   "type": "array"
@@ -3098,7 +3496,10 @@
                                       "type": "string"
                                     }
                                   },
-                                  "required": ["start", "end"],
+                                  "required": [
+                                    "start",
+                                    "end"
+                                  ],
                                   "type": "object"
                                 },
                                 "timezone": {
@@ -3106,7 +3507,11 @@
                                   "type": "string"
                                 }
                               },
-                              "required": ["days", "hours", "timezone"],
+                              "required": [
+                                "days",
+                                "hours",
+                                "timezone"
+                              ],
                               "type": "object"
                             }
                           },
@@ -3134,7 +3539,11 @@
                               "type": "string"
                             }
                           },
-                          "required": ["summary", "notify_when", "throttle"],
+                          "required": [
+                            "summary",
+                            "notify_when",
+                            "throttle"
+                          ],
                           "type": "object"
                         },
                         "group": {
@@ -3160,7 +3569,9 @@
                           "type": "string"
                         }
                       },
-                      "required": ["id"],
+                      "required": [
+                        "id"
+                      ],
                       "type": "object"
                     },
                     "type": "array"
@@ -3174,7 +3585,9 @@
                         "type": "number"
                       }
                     },
-                    "required": ["active"],
+                    "required": [
+                      "active"
+                    ],
                     "type": "object"
                   },
                   "flapping": {
@@ -3195,7 +3608,10 @@
                         "type": "number"
                       }
                     },
-                    "required": ["look_back_window", "status_change_threshold"],
+                    "required": [
+                      "look_back_window",
+                      "status_change_threshold"
+                    ],
                     "type": "object"
                   },
                   "name": {
@@ -3204,7 +3620,11 @@
                   },
                   "notify_when": {
                     "description": "Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
-                    "enum": ["onActionGroupChange", "onActiveAlert", "onThrottleInterval"],
+                    "enum": [
+                      "onActionGroupChange",
+                      "onActiveAlert",
+                      "onThrottleInterval"
+                    ],
                     "nullable": true,
                     "type": "string"
                   },
@@ -3222,7 +3642,9 @@
                         "type": "string"
                       }
                     },
-                    "required": ["interval"],
+                    "required": [
+                      "interval"
+                    ],
                     "type": "object"
                   },
                   "tags": {
@@ -3239,7 +3661,10 @@
                     "type": "string"
                   }
                 },
-                "required": ["name", "schedule"],
+                "required": [
+                  "name",
+                  "schedule"
+                ],
                 "type": "object"
               }
             }
@@ -3277,11 +3702,16 @@
                                           "properties": {
                                             "store": {
                                               "description": "A filter can be either specific to an application context or applied globally.",
-                                              "enum": ["appState", "globalState"],
+                                              "enum": [
+                                                "appState",
+                                                "globalState"
+                                              ],
                                               "type": "string"
                                             }
                                           },
-                                          "required": ["store"],
+                                          "required": [
+                                            "store"
+                                          ],
                                           "type": "object"
                                         },
                                         "meta": {
@@ -3293,7 +3723,9 @@
                                           "type": "object"
                                         }
                                       },
-                                      "required": ["meta"],
+                                      "required": [
+                                        "meta"
+                                      ],
                                       "type": "object"
                                     },
                                     "type": "array"
@@ -3303,7 +3735,10 @@
                                     "type": "string"
                                   }
                                 },
-                                "required": ["kql", "filters"],
+                                "required": [
+                                  "kql",
+                                  "filters"
+                                ],
                                 "type": "object"
                               },
                               "timeframe": {
@@ -3312,7 +3747,15 @@
                                   "days": {
                                     "description": "Defines the days of the week that the action can run, represented as an array of numbers. For example, `1` represents Monday. An empty array is equivalent to specifying all the days of the week.",
                                     "items": {
-                                      "enum": [1, 2, 3, 4, 5, 6, 7],
+                                      "enum": [
+                                        1,
+                                        2,
+                                        3,
+                                        4,
+                                        5,
+                                        6,
+                                        7
+                                      ],
                                       "type": "integer"
                                     },
                                     "type": "array"
@@ -3329,7 +3772,10 @@
                                         "type": "string"
                                       }
                                     },
-                                    "required": ["start", "end"],
+                                    "required": [
+                                      "start",
+                                      "end"
+                                    ],
                                     "type": "object"
                                   },
                                   "timezone": {
@@ -3337,7 +3783,11 @@
                                     "type": "string"
                                   }
                                 },
-                                "required": ["days", "hours", "timezone"],
+                                "required": [
+                                  "days",
+                                  "hours",
+                                  "timezone"
+                                ],
                                 "type": "object"
                               }
                             },
@@ -3369,7 +3819,11 @@
                                 "type": "string"
                               }
                             },
-                            "required": ["summary", "notify_when", "throttle"],
+                            "required": [
+                              "summary",
+                              "notify_when",
+                              "throttle"
+                            ],
                             "type": "object"
                           },
                           "group": {
@@ -3394,7 +3848,11 @@
                             "type": "string"
                           }
                         },
-                        "required": ["id", "connector_type_id", "params"],
+                        "required": [
+                          "id",
+                          "connector_type_id",
+                          "params"
+                        ],
                         "type": "object"
                       },
                       "type": "array"
@@ -3415,7 +3873,9 @@
                           "type": "number"
                         }
                       },
-                      "required": ["active"],
+                      "required": [
+                        "active"
+                      ],
                       "type": "object"
                     },
                     "api_key_created_by_user": {
@@ -3470,7 +3930,10 @@
                               "type": "string"
                             }
                           },
-                          "required": ["reason", "message"],
+                          "required": [
+                            "reason",
+                            "message"
+                          ],
                           "type": "object"
                         },
                         "last_duration": {
@@ -3483,7 +3946,14 @@
                         },
                         "status": {
                           "description": "Status of rule execution.",
-                          "enum": ["ok", "active", "error", "warning", "pending", "unknown"],
+                          "enum": [
+                            "ok",
+                            "active",
+                            "error",
+                            "warning",
+                            "pending",
+                            "unknown"
+                          ],
                           "type": "string"
                         },
                         "warning": {
@@ -3504,11 +3974,17 @@
                               "type": "string"
                             }
                           },
-                          "required": ["reason", "message"],
+                          "required": [
+                            "reason",
+                            "message"
+                          ],
                           "type": "object"
                         }
                       },
-                      "required": ["status", "last_execution_date"],
+                      "required": [
+                        "status",
+                        "last_execution_date"
+                      ],
                       "type": "object"
                     },
                     "flapping": {
@@ -3529,7 +4005,10 @@
                           "type": "number"
                         }
                       },
-                      "required": ["look_back_window", "status_change_threshold"],
+                      "required": [
+                        "look_back_window",
+                        "status_change_threshold"
+                      ],
                       "type": "object"
                     },
                     "id": {
@@ -3573,7 +4052,11 @@
                         },
                         "outcome": {
                           "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
-                          "enum": ["succeeded", "warning", "failed"],
+                          "enum": [
+                            "succeeded",
+                            "warning",
+                            "failed"
+                          ],
                           "type": "string"
                         },
                         "outcome_msg": {
@@ -3608,7 +4091,10 @@
                           "type": "string"
                         }
                       },
-                      "required": ["outcome", "alerts_count"],
+                      "required": [
+                        "outcome",
+                        "alerts_count"
+                      ],
                       "type": "object"
                     },
                     "mapped_params": {
@@ -3640,7 +4126,9 @@
                                   "type": "number"
                                 }
                               },
-                              "required": ["success_ratio"],
+                              "required": [
+                                "success_ratio"
+                              ],
                               "type": "object"
                             },
                             "history": {
@@ -3654,7 +4142,11 @@
                                   },
                                   "outcome": {
                                     "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
-                                    "enum": ["succeeded", "warning", "failed"],
+                                    "enum": [
+                                      "succeeded",
+                                      "warning",
+                                      "failed"
+                                    ],
                                     "type": "string"
                                   },
                                   "success": {
@@ -3666,7 +4158,10 @@
                                     "type": "number"
                                   }
                                 },
-                                "required": ["success", "timestamp"],
+                                "required": [
+                                  "success",
+                                  "timestamp"
+                                ],
                                 "type": "object"
                               },
                               "type": "array"
@@ -3714,15 +4209,24 @@
                                   "type": "string"
                                 }
                               },
-                              "required": ["timestamp", "metrics"],
+                              "required": [
+                                "timestamp",
+                                "metrics"
+                              ],
                               "type": "object"
                             }
                           },
-                          "required": ["history", "calculated_metrics", "last_run"],
+                          "required": [
+                            "history",
+                            "calculated_metrics",
+                            "last_run"
+                          ],
                           "type": "object"
                         }
                       },
-                      "required": ["run"],
+                      "required": [
+                        "run"
+                      ],
                       "type": "object"
                     },
                     "mute_all": {
@@ -3747,7 +4251,11 @@
                     },
                     "notify_when": {
                       "description": "Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
-                      "enum": ["onActionGroupChange", "onActiveAlert", "onThrottleInterval"],
+                      "enum": [
+                        "onActionGroupChange",
+                        "onActiveAlert",
+                        "onThrottleInterval"
+                      ],
                       "nullable": true,
                       "type": "string"
                     },
@@ -3777,7 +4285,9 @@
                           "type": "string"
                         }
                       },
-                      "required": ["interval"],
+                      "required": [
+                        "interval"
+                      ],
                       "type": "object"
                     },
                     "scheduled_task_id": {
@@ -3888,7 +4398,15 @@
                               },
                               "freq": {
                                 "description": "Indicates frequency of the rule. Options are YEARLY, MONTHLY, WEEKLY, DAILY.",
-                                "enum": [0, 1, 2, 3, 4, 5, 6],
+                                "enum": [
+                                  0,
+                                  1,
+                                  2,
+                                  3,
+                                  4,
+                                  5,
+                                  6
+                                ],
                                 "type": "integer"
                               },
                               "interval": {
@@ -3905,11 +4423,22 @@
                               },
                               "wkst": {
                                 "description": "Indicates the start of week, defaults to Monday.",
-                                "enum": ["MO", "TU", "WE", "TH", "FR", "SA", "SU"],
+                                "enum": [
+                                  "MO",
+                                  "TU",
+                                  "WE",
+                                  "TH",
+                                  "FR",
+                                  "SA",
+                                  "SU"
+                                ],
                                 "type": "string"
                               }
                             },
-                            "required": ["dtstart", "tzid"],
+                            "required": [
+                              "dtstart",
+                              "tzid"
+                            ],
                             "type": "object"
                           },
                           "skipRecurrences": {
@@ -3920,7 +4449,10 @@
                             "type": "array"
                           }
                         },
-                        "required": ["duration", "rRule"],
+                        "required": [
+                          "duration",
+                          "rRule"
+                        ],
                         "type": "object"
                       },
                       "type": "array"
@@ -3993,7 +4525,9 @@
           }
         },
         "summary": "Update a rule",
-        "tags": ["alerting"]
+        "tags": [
+          "alerting"
+        ]
       }
     },
     "/api/alerting/rule/{id}/_disable": {
@@ -4053,7 +4587,9 @@
           }
         },
         "summary": "Disable a rule",
-        "tags": ["alerting"]
+        "tags": [
+          "alerting"
+        ]
       }
     },
     "/api/alerting/rule/{id}/_enable": {
@@ -4095,7 +4631,9 @@
           }
         },
         "summary": "Enable a rule",
-        "tags": ["alerting"]
+        "tags": [
+          "alerting"
+        ]
       }
     },
     "/api/alerting/rule/{id}/_mute_all": {
@@ -4137,7 +4675,9 @@
           }
         },
         "summary": "Mute all alerts",
-        "tags": ["alerting"]
+        "tags": [
+          "alerting"
+        ]
       }
     },
     "/api/alerting/rule/{id}/_unmute_all": {
@@ -4179,7 +4719,9 @@
           }
         },
         "summary": "Unmute all alerts",
-        "tags": ["alerting"]
+        "tags": [
+          "alerting"
+        ]
       }
     },
     "/api/alerting/rule/{id}/_update_api_key": {
@@ -4224,7 +4766,9 @@
           }
         },
         "summary": "Update the API key for a rule",
-        "tags": ["alerting"]
+        "tags": [
+          "alerting"
+        ]
       }
     },
     "/api/alerting/rule/{rule_id}/alert/{alert_id}/_mute": {
@@ -4275,7 +4819,9 @@
           }
         },
         "summary": "Mute an alert",
-        "tags": ["alerting"]
+        "tags": [
+          "alerting"
+        ]
       }
     },
     "/api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute": {
@@ -4326,7 +4872,9 @@
           }
         },
         "summary": "Unmute an alert",
-        "tags": ["alerting"]
+        "tags": [
+          "alerting"
+        ]
       }
     },
     "/api/alerting/rules/_find": {
@@ -4371,7 +4919,10 @@
             "required": false,
             "schema": {
               "default": "OR",
-              "enum": ["OR", "AND"],
+              "enum": [
+                "OR",
+                "AND"
+              ],
               "type": "string"
             }
           },
@@ -4409,7 +4960,10 @@
             "name": "sort_order",
             "required": false,
             "schema": {
-              "enum": ["asc", "desc"],
+              "enum": [
+                "asc",
+                "desc"
+              ],
               "type": "string"
             }
           },
@@ -4429,7 +4983,10 @@
                   "type": "string"
                 }
               },
-              "required": ["type", "id"],
+              "required": [
+                "type",
+                "id"
+              ],
               "type": "object"
             }
           },
@@ -4499,11 +5056,16 @@
                                           "properties": {
                                             "store": {
                                               "description": "A filter can be either specific to an application context or applied globally.",
-                                              "enum": ["appState", "globalState"],
+                                              "enum": [
+                                                "appState",
+                                                "globalState"
+                                              ],
                                               "type": "string"
                                             }
                                           },
-                                          "required": ["store"],
+                                          "required": [
+                                            "store"
+                                          ],
                                           "type": "object"
                                         },
                                         "meta": {
@@ -4515,7 +5077,9 @@
                                           "type": "object"
                                         }
                                       },
-                                      "required": ["meta"],
+                                      "required": [
+                                        "meta"
+                                      ],
                                       "type": "object"
                                     },
                                     "type": "array"
@@ -4525,7 +5089,10 @@
                                     "type": "string"
                                   }
                                 },
-                                "required": ["kql", "filters"],
+                                "required": [
+                                  "kql",
+                                  "filters"
+                                ],
                                 "type": "object"
                               },
                               "timeframe": {
@@ -4534,7 +5101,15 @@
                                   "days": {
                                     "description": "Defines the days of the week that the action can run, represented as an array of numbers. For example, `1` represents Monday. An empty array is equivalent to specifying all the days of the week.",
                                     "items": {
-                                      "enum": [1, 2, 3, 4, 5, 6, 7],
+                                      "enum": [
+                                        1,
+                                        2,
+                                        3,
+                                        4,
+                                        5,
+                                        6,
+                                        7
+                                      ],
                                       "type": "integer"
                                     },
                                     "type": "array"
@@ -4551,7 +5126,10 @@
                                         "type": "string"
                                       }
                                     },
-                                    "required": ["start", "end"],
+                                    "required": [
+                                      "start",
+                                      "end"
+                                    ],
                                     "type": "object"
                                   },
                                   "timezone": {
@@ -4559,7 +5137,11 @@
                                     "type": "string"
                                   }
                                 },
-                                "required": ["days", "hours", "timezone"],
+                                "required": [
+                                  "days",
+                                  "hours",
+                                  "timezone"
+                                ],
                                 "type": "object"
                               }
                             },
@@ -4591,7 +5173,11 @@
                                 "type": "string"
                               }
                             },
-                            "required": ["summary", "notify_when", "throttle"],
+                            "required": [
+                              "summary",
+                              "notify_when",
+                              "throttle"
+                            ],
                             "type": "object"
                           },
                           "group": {
@@ -4616,7 +5202,11 @@
                             "type": "string"
                           }
                         },
-                        "required": ["id", "connector_type_id", "params"],
+                        "required": [
+                          "id",
+                          "connector_type_id",
+                          "params"
+                        ],
                         "type": "object"
                       },
                       "type": "array"
@@ -4637,7 +5227,9 @@
                           "type": "number"
                         }
                       },
-                      "required": ["active"],
+                      "required": [
+                        "active"
+                      ],
                       "type": "object"
                     },
                     "api_key_created_by_user": {
@@ -4692,7 +5284,10 @@
                               "type": "string"
                             }
                           },
-                          "required": ["reason", "message"],
+                          "required": [
+                            "reason",
+                            "message"
+                          ],
                           "type": "object"
                         },
                         "last_duration": {
@@ -4705,7 +5300,14 @@
                         },
                         "status": {
                           "description": "Status of rule execution.",
-                          "enum": ["ok", "active", "error", "warning", "pending", "unknown"],
+                          "enum": [
+                            "ok",
+                            "active",
+                            "error",
+                            "warning",
+                            "pending",
+                            "unknown"
+                          ],
                           "type": "string"
                         },
                         "warning": {
@@ -4726,11 +5328,17 @@
                               "type": "string"
                             }
                           },
-                          "required": ["reason", "message"],
+                          "required": [
+                            "reason",
+                            "message"
+                          ],
                           "type": "object"
                         }
                       },
-                      "required": ["status", "last_execution_date"],
+                      "required": [
+                        "status",
+                        "last_execution_date"
+                      ],
                       "type": "object"
                     },
                     "flapping": {
@@ -4751,7 +5359,10 @@
                           "type": "number"
                         }
                       },
-                      "required": ["look_back_window", "status_change_threshold"],
+                      "required": [
+                        "look_back_window",
+                        "status_change_threshold"
+                      ],
                       "type": "object"
                     },
                     "id": {
@@ -4795,7 +5406,11 @@
                         },
                         "outcome": {
                           "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
-                          "enum": ["succeeded", "warning", "failed"],
+                          "enum": [
+                            "succeeded",
+                            "warning",
+                            "failed"
+                          ],
                           "type": "string"
                         },
                         "outcome_msg": {
@@ -4830,7 +5445,10 @@
                           "type": "string"
                         }
                       },
-                      "required": ["outcome", "alerts_count"],
+                      "required": [
+                        "outcome",
+                        "alerts_count"
+                      ],
                       "type": "object"
                     },
                     "mapped_params": {
@@ -4862,7 +5480,9 @@
                                   "type": "number"
                                 }
                               },
-                              "required": ["success_ratio"],
+                              "required": [
+                                "success_ratio"
+                              ],
                               "type": "object"
                             },
                             "history": {
@@ -4876,7 +5496,11 @@
                                   },
                                   "outcome": {
                                     "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
-                                    "enum": ["succeeded", "warning", "failed"],
+                                    "enum": [
+                                      "succeeded",
+                                      "warning",
+                                      "failed"
+                                    ],
                                     "type": "string"
                                   },
                                   "success": {
@@ -4888,7 +5512,10 @@
                                     "type": "number"
                                   }
                                 },
-                                "required": ["success", "timestamp"],
+                                "required": [
+                                  "success",
+                                  "timestamp"
+                                ],
                                 "type": "object"
                               },
                               "type": "array"
@@ -4936,15 +5563,24 @@
                                   "type": "string"
                                 }
                               },
-                              "required": ["timestamp", "metrics"],
+                              "required": [
+                                "timestamp",
+                                "metrics"
+                              ],
                               "type": "object"
                             }
                           },
-                          "required": ["history", "calculated_metrics", "last_run"],
+                          "required": [
+                            "history",
+                            "calculated_metrics",
+                            "last_run"
+                          ],
                           "type": "object"
                         }
                       },
-                      "required": ["run"],
+                      "required": [
+                        "run"
+                      ],
                       "type": "object"
                     },
                     "mute_all": {
@@ -4969,7 +5605,11 @@
                     },
                     "notify_when": {
                       "description": "Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.",
-                      "enum": ["onActionGroupChange", "onActiveAlert", "onThrottleInterval"],
+                      "enum": [
+                        "onActionGroupChange",
+                        "onActiveAlert",
+                        "onThrottleInterval"
+                      ],
                       "nullable": true,
                       "type": "string"
                     },
@@ -4999,7 +5639,9 @@
                           "type": "string"
                         }
                       },
-                      "required": ["interval"],
+                      "required": [
+                        "interval"
+                      ],
                       "type": "object"
                     },
                     "scheduled_task_id": {
@@ -5110,7 +5752,15 @@
                               },
                               "freq": {
                                 "description": "Indicates frequency of the rule. Options are YEARLY, MONTHLY, WEEKLY, DAILY.",
-                                "enum": [0, 1, 2, 3, 4, 5, 6],
+                                "enum": [
+                                  0,
+                                  1,
+                                  2,
+                                  3,
+                                  4,
+                                  5,
+                                  6
+                                ],
                                 "type": "integer"
                               },
                               "interval": {
@@ -5127,11 +5777,22 @@
                               },
                               "wkst": {
                                 "description": "Indicates the start of week, defaults to Monday.",
-                                "enum": ["MO", "TU", "WE", "TH", "FR", "SA", "SU"],
+                                "enum": [
+                                  "MO",
+                                  "TU",
+                                  "WE",
+                                  "TH",
+                                  "FR",
+                                  "SA",
+                                  "SU"
+                                ],
                                 "type": "string"
                               }
                             },
-                            "required": ["dtstart", "tzid"],
+                            "required": [
+                              "dtstart",
+                              "tzid"
+                            ],
                             "type": "object"
                           },
                           "skipRecurrences": {
@@ -5142,7 +5803,10 @@
                             "type": "array"
                           }
                         },
-                        "required": ["duration", "rRule"],
+                        "required": [
+                          "duration",
+                          "rRule"
+                        ],
                         "type": "object"
                       },
                       "type": "array"
@@ -5209,7 +5873,9 @@
           }
         },
         "summary": "Get information about rules",
-        "tags": ["alerting"]
+        "tags": [
+          "alerting"
+        ]
       }
     },
     "/api/dashboards/dashboard": {
@@ -5269,7 +5935,9 @@
                                 "type": "string"
                               }
                             },
-                            "required": ["title"],
+                            "required": [
+                              "title"
+                            ],
                             "type": "object"
                           },
                           "createdAt": {
@@ -5296,7 +5964,11 @@
                                 "type": "number"
                               }
                             },
-                            "required": ["error", "message", "statusCode"],
+                            "required": [
+                              "error",
+                              "message",
+                              "statusCode"
+                            ],
                             "type": "object"
                           },
                           "id": {
@@ -5328,7 +6000,11 @@
                                   "type": "string"
                                 }
                               },
-                              "required": ["name", "type", "id"],
+                              "required": [
+                                "name",
+                                "type",
+                                "id"
+                              ],
                               "type": "object"
                             },
                             "type": "array"
@@ -5346,7 +6022,12 @@
                             "type": "string"
                           }
                         },
-                        "required": ["id", "type", "attributes", "references"],
+                        "required": [
+                          "id",
+                          "type",
+                          "attributes",
+                          "references"
+                        ],
                         "type": "object"
                       },
                       "type": "array"
@@ -5355,7 +6036,10 @@
                       "type": "number"
                     }
                   },
-                  "required": ["items", "total"],
+                  "required": [
+                    "items",
+                    "total"
+                  ],
                   "type": "object"
                 }
               }
@@ -5363,7 +6047,9 @@
           }
         },
         "summary": "Get a list of dashboards",
-        "tags": ["Dashboards"],
+        "tags": [
+          "Dashboards"
+        ],
         "x-state": "Technical Preview"
       }
     },
@@ -5394,7 +6080,9 @@
         ],
         "responses": {},
         "summary": "Delete a dashboard",
-        "tags": ["Dashboards"],
+        "tags": [
+          "Dashboards"
+        ],
         "x-state": "Technical Preview"
       },
       "get": {
@@ -5435,7 +6123,10 @@
                                 "chainingSystem": {
                                   "default": "HIERARCHICAL",
                                   "description": "The chaining strategy for multiple controls. For example, \"HIERARCHICAL\" or \"NONE\".",
-                                  "enum": ["NONE", "HIERARCHICAL"],
+                                  "enum": [
+                                    "NONE",
+                                    "HIERARCHICAL"
+                                  ],
                                   "type": "string"
                                 },
                                 "controls": {
@@ -5468,11 +6159,18 @@
                                       "width": {
                                         "default": "medium",
                                         "description": "Minimum width of the control panel in the control group.",
-                                        "enum": ["small", "medium", "large"],
+                                        "enum": [
+                                          "small",
+                                          "medium",
+                                          "large"
+                                        ],
                                         "type": "string"
                                       }
                                     },
-                                    "required": ["type", "order"],
+                                    "required": [
+                                      "type",
+                                      "order"
+                                    ],
                                     "type": "object"
                                   },
                                   "type": "array"
@@ -5510,11 +6208,16 @@
                                 "labelPosition": {
                                   "default": "oneLine",
                                   "description": "Position of the labels for controls. For example, \"oneLine\", \"twoLine\".",
-                                  "enum": ["oneLine", "twoLine"],
+                                  "enum": [
+                                    "oneLine",
+                                    "twoLine"
+                                  ],
                                   "type": "string"
                                 }
                               },
-                              "required": ["ignoreParentSettings"],
+                              "required": [
+                                "ignoreParentSettings"
+                              ],
                               "type": "object"
                             },
                             "description": {
@@ -5540,11 +6243,16 @@
                                             "properties": {
                                               "store": {
                                                 "description": "Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').",
-                                                "enum": ["appState", "globalState"],
+                                                "enum": [
+                                                  "appState",
+                                                  "globalState"
+                                                ],
                                                 "type": "string"
                                               }
                                             },
-                                            "required": ["store"],
+                                            "required": [
+                                              "store"
+                                            ],
                                             "type": "object"
                                           },
                                           "meta": {
@@ -5586,7 +6294,9 @@
                                                 "type": "string"
                                               }
                                             },
-                                            "required": ["params"],
+                                            "required": [
+                                              "params"
+                                            ],
                                             "type": "object"
                                           },
                                           "query": {
@@ -5594,7 +6304,9 @@
                                             "type": "object"
                                           }
                                         },
-                                        "required": ["meta"],
+                                        "required": [
+                                          "meta"
+                                        ],
                                         "type": "object"
                                       },
                                       "type": "array"
@@ -5619,7 +6331,10 @@
                                           ]
                                         }
                                       },
-                                      "required": ["query", "language"],
+                                      "required": [
+                                        "query",
+                                        "language"
+                                      ],
                                       "type": "object"
                                     },
                                     "sort": {
@@ -5627,7 +6342,10 @@
                                         "additionalProperties": {
                                           "anyOf": [
                                             {
-                                              "enum": ["asc", "desc"],
+                                              "enum": [
+                                                "asc",
+                                                "desc"
+                                              ],
                                               "type": "string"
                                             },
                                             {
@@ -5637,26 +6355,41 @@
                                                   "type": "string"
                                                 },
                                                 "order": {
-                                                  "enum": ["asc", "desc"],
+                                                  "enum": [
+                                                    "asc",
+                                                    "desc"
+                                                  ],
                                                   "type": "string"
                                                 }
                                               },
-                                              "required": ["order"],
+                                              "required": [
+                                                "order"
+                                              ],
                                               "type": "object"
                                             },
                                             {
                                               "additionalProperties": false,
                                               "properties": {
                                                 "numeric_type": {
-                                                  "enum": ["double", "long", "date", "date_nanos"],
+                                                  "enum": [
+                                                    "double",
+                                                    "long",
+                                                    "date",
+                                                    "date_nanos"
+                                                  ],
                                                   "type": "string"
                                                 },
                                                 "order": {
-                                                  "enum": ["asc", "desc"],
+                                                  "enum": [
+                                                    "asc",
+                                                    "desc"
+                                                  ],
                                                   "type": "string"
                                                 }
                                               },
-                                              "required": ["order"],
+                                              "required": [
+                                                "order"
+                                              ],
                                               "type": "object"
                                             }
                                           ]
@@ -5738,7 +6471,11 @@
                                         "type": "number"
                                       }
                                     },
-                                    "required": ["x", "y", "i"],
+                                    "required": [
+                                      "x",
+                                      "y",
+                                      "i"
+                                    ],
                                     "type": "object"
                                   },
                                   "id": {
@@ -5795,7 +6532,12 @@
                                     "type": "string"
                                   }
                                 },
-                                "required": ["panelConfig", "type", "gridData", "panelIndex"],
+                                "required": [
+                                  "panelConfig",
+                                  "type",
+                                  "gridData",
+                                  "panelIndex"
+                                ],
                                 "type": "object"
                               },
                               "type": "array"
@@ -5823,7 +6565,10 @@
                                   "type": "number"
                                 }
                               },
-                              "required": ["pause", "value"],
+                              "required": [
+                                "pause",
+                                "value"
+                              ],
                               "type": "object"
                             },
                             "timeFrom": {
@@ -5848,7 +6593,10 @@
                               "type": "number"
                             }
                           },
-                          "required": ["title", "options"],
+                          "required": [
+                            "title",
+                            "options"
+                          ],
                           "type": "object"
                         },
                         "createdAt": {
@@ -5875,7 +6623,11 @@
                               "type": "number"
                             }
                           },
-                          "required": ["error", "message", "statusCode"],
+                          "required": [
+                            "error",
+                            "message",
+                            "statusCode"
+                          ],
                           "type": "object"
                         },
                         "id": {
@@ -5907,7 +6659,11 @@
                                 "type": "string"
                               }
                             },
-                            "required": ["name", "type", "id"],
+                            "required": [
+                              "name",
+                              "type",
+                              "id"
+                            ],
                             "type": "object"
                           },
                           "type": "array"
@@ -5925,29 +6681,46 @@
                           "type": "string"
                         }
                       },
-                      "required": ["id", "type", "attributes", "references"],
+                      "required": [
+                        "id",
+                        "type",
+                        "attributes",
+                        "references"
+                      ],
                       "type": "object"
                     },
                     "meta": {
                       "additionalProperties": false,
                       "properties": {
                         "aliasPurpose": {
-                          "enum": ["savedObjectConversion", "savedObjectImport"],
+                          "enum": [
+                            "savedObjectConversion",
+                            "savedObjectImport"
+                          ],
                           "type": "string"
                         },
                         "aliasTargetId": {
                           "type": "string"
                         },
                         "outcome": {
-                          "enum": ["exactMatch", "aliasMatch", "conflict"],
+                          "enum": [
+                            "exactMatch",
+                            "aliasMatch",
+                            "conflict"
+                          ],
                           "type": "string"
                         }
                       },
-                      "required": ["outcome"],
+                      "required": [
+                        "outcome"
+                      ],
                       "type": "object"
                     }
                   },
-                  "required": ["item", "meta"],
+                  "required": [
+                    "item",
+                    "meta"
+                  ],
                   "type": "object"
                 }
               }
@@ -5955,7 +6728,9 @@
           }
         },
         "summary": "Get a dashboard",
-        "tags": ["Dashboards"],
+        "tags": [
+          "Dashboards"
+        ],
         "x-state": "Technical Preview"
       },
       "post": {
@@ -6002,7 +6777,10 @@
                           "chainingSystem": {
                             "default": "HIERARCHICAL",
                             "description": "The chaining strategy for multiple controls. For example, \"HIERARCHICAL\" or \"NONE\".",
-                            "enum": ["NONE", "HIERARCHICAL"],
+                            "enum": [
+                              "NONE",
+                              "HIERARCHICAL"
+                            ],
                             "type": "string"
                           },
                           "controls": {
@@ -6035,11 +6813,18 @@
                                 "width": {
                                   "default": "medium",
                                   "description": "Minimum width of the control panel in the control group.",
-                                  "enum": ["small", "medium", "large"],
+                                  "enum": [
+                                    "small",
+                                    "medium",
+                                    "large"
+                                  ],
                                   "type": "string"
                                 }
                               },
-                              "required": ["type", "order"],
+                              "required": [
+                                "type",
+                                "order"
+                              ],
                               "type": "object"
                             },
                             "type": "array"
@@ -6077,11 +6862,16 @@
                           "labelPosition": {
                             "default": "oneLine",
                             "description": "Position of the labels for controls. For example, \"oneLine\", \"twoLine\".",
-                            "enum": ["oneLine", "twoLine"],
+                            "enum": [
+                              "oneLine",
+                              "twoLine"
+                            ],
                             "type": "string"
                           }
                         },
-                        "required": ["ignoreParentSettings"],
+                        "required": [
+                          "ignoreParentSettings"
+                        ],
                         "type": "object"
                       },
                       "description": {
@@ -6107,11 +6897,16 @@
                                       "properties": {
                                         "store": {
                                           "description": "Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').",
-                                          "enum": ["appState", "globalState"],
+                                          "enum": [
+                                            "appState",
+                                            "globalState"
+                                          ],
                                           "type": "string"
                                         }
                                       },
-                                      "required": ["store"],
+                                      "required": [
+                                        "store"
+                                      ],
                                       "type": "object"
                                     },
                                     "meta": {
@@ -6153,7 +6948,9 @@
                                           "type": "string"
                                         }
                                       },
-                                      "required": ["params"],
+                                      "required": [
+                                        "params"
+                                      ],
                                       "type": "object"
                                     },
                                     "query": {
@@ -6161,7 +6958,9 @@
                                       "type": "object"
                                     }
                                   },
-                                  "required": ["meta"],
+                                  "required": [
+                                    "meta"
+                                  ],
                                   "type": "object"
                                 },
                                 "type": "array"
@@ -6186,7 +6985,10 @@
                                     ]
                                   }
                                 },
-                                "required": ["query", "language"],
+                                "required": [
+                                  "query",
+                                  "language"
+                                ],
                                 "type": "object"
                               },
                               "sort": {
@@ -6194,7 +6996,10 @@
                                   "additionalProperties": {
                                     "anyOf": [
                                       {
-                                        "enum": ["asc", "desc"],
+                                        "enum": [
+                                          "asc",
+                                          "desc"
+                                        ],
                                         "type": "string"
                                       },
                                       {
@@ -6204,26 +7009,41 @@
                                             "type": "string"
                                           },
                                           "order": {
-                                            "enum": ["asc", "desc"],
+                                            "enum": [
+                                              "asc",
+                                              "desc"
+                                            ],
                                             "type": "string"
                                           }
                                         },
-                                        "required": ["order"],
+                                        "required": [
+                                          "order"
+                                        ],
                                         "type": "object"
                                       },
                                       {
                                         "additionalProperties": false,
                                         "properties": {
                                           "numeric_type": {
-                                            "enum": ["double", "long", "date", "date_nanos"],
+                                            "enum": [
+                                              "double",
+                                              "long",
+                                              "date",
+                                              "date_nanos"
+                                            ],
                                             "type": "string"
                                           },
                                           "order": {
-                                            "enum": ["asc", "desc"],
+                                            "enum": [
+                                              "asc",
+                                              "desc"
+                                            ],
                                             "type": "string"
                                           }
                                         },
-                                        "required": ["order"],
+                                        "required": [
+                                          "order"
+                                        ],
                                         "type": "object"
                                       }
                                     ]
@@ -6306,7 +7126,10 @@
                                   "type": "number"
                                 }
                               },
-                              "required": ["x", "y"],
+                              "required": [
+                                "x",
+                                "y"
+                              ],
                               "type": "object"
                             },
                             "id": {
@@ -6364,7 +7187,11 @@
                               "type": "string"
                             }
                           },
-                          "required": ["panelConfig", "type", "gridData"],
+                          "required": [
+                            "panelConfig",
+                            "type",
+                            "gridData"
+                          ],
                           "type": "object"
                         },
                         "type": "array"
@@ -6392,7 +7219,10 @@
                             "type": "number"
                           }
                         },
-                        "required": ["pause", "value"],
+                        "required": [
+                          "pause",
+                          "value"
+                        ],
                         "type": "object"
                       },
                       "timeFrom": {
@@ -6417,7 +7247,10 @@
                         "type": "number"
                       }
                     },
-                    "required": ["title", "options"],
+                    "required": [
+                      "title",
+                      "options"
+                    ],
                     "type": "object"
                   },
                   "references": {
@@ -6434,7 +7267,11 @@
                           "type": "string"
                         }
                       },
-                      "required": ["name", "type", "id"],
+                      "required": [
+                        "name",
+                        "type",
+                        "id"
+                      ],
                       "type": "object"
                     },
                     "type": "array"
@@ -6446,7 +7283,9 @@
                     "type": "array"
                   }
                 },
-                "required": ["attributes"],
+                "required": [
+                  "attributes"
+                ],
                 "type": "object"
               }
             }
@@ -6476,7 +7315,10 @@
                                 "chainingSystem": {
                                   "default": "HIERARCHICAL",
                                   "description": "The chaining strategy for multiple controls. For example, \"HIERARCHICAL\" or \"NONE\".",
-                                  "enum": ["NONE", "HIERARCHICAL"],
+                                  "enum": [
+                                    "NONE",
+                                    "HIERARCHICAL"
+                                  ],
                                   "type": "string"
                                 },
                                 "controls": {
@@ -6509,11 +7351,18 @@
                                       "width": {
                                         "default": "medium",
                                         "description": "Minimum width of the control panel in the control group.",
-                                        "enum": ["small", "medium", "large"],
+                                        "enum": [
+                                          "small",
+                                          "medium",
+                                          "large"
+                                        ],
                                         "type": "string"
                                       }
                                     },
-                                    "required": ["type", "order"],
+                                    "required": [
+                                      "type",
+                                      "order"
+                                    ],
                                     "type": "object"
                                   },
                                   "type": "array"
@@ -6551,11 +7400,16 @@
                                 "labelPosition": {
                                   "default": "oneLine",
                                   "description": "Position of the labels for controls. For example, \"oneLine\", \"twoLine\".",
-                                  "enum": ["oneLine", "twoLine"],
+                                  "enum": [
+                                    "oneLine",
+                                    "twoLine"
+                                  ],
                                   "type": "string"
                                 }
                               },
-                              "required": ["ignoreParentSettings"],
+                              "required": [
+                                "ignoreParentSettings"
+                              ],
                               "type": "object"
                             },
                             "description": {
@@ -6581,11 +7435,16 @@
                                             "properties": {
                                               "store": {
                                                 "description": "Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').",
-                                                "enum": ["appState", "globalState"],
+                                                "enum": [
+                                                  "appState",
+                                                  "globalState"
+                                                ],
                                                 "type": "string"
                                               }
                                             },
-                                            "required": ["store"],
+                                            "required": [
+                                              "store"
+                                            ],
                                             "type": "object"
                                           },
                                           "meta": {
@@ -6627,7 +7486,9 @@
                                                 "type": "string"
                                               }
                                             },
-                                            "required": ["params"],
+                                            "required": [
+                                              "params"
+                                            ],
                                             "type": "object"
                                           },
                                           "query": {
@@ -6635,7 +7496,9 @@
                                             "type": "object"
                                           }
                                         },
-                                        "required": ["meta"],
+                                        "required": [
+                                          "meta"
+                                        ],
                                         "type": "object"
                                       },
                                       "type": "array"
@@ -6660,7 +7523,10 @@
                                           ]
                                         }
                                       },
-                                      "required": ["query", "language"],
+                                      "required": [
+                                        "query",
+                                        "language"
+                                      ],
                                       "type": "object"
                                     },
                                     "sort": {
@@ -6668,7 +7534,10 @@
                                         "additionalProperties": {
                                           "anyOf": [
                                             {
-                                              "enum": ["asc", "desc"],
+                                              "enum": [
+                                                "asc",
+                                                "desc"
+                                              ],
                                               "type": "string"
                                             },
                                             {
@@ -6678,26 +7547,41 @@
                                                   "type": "string"
                                                 },
                                                 "order": {
-                                                  "enum": ["asc", "desc"],
+                                                  "enum": [
+                                                    "asc",
+                                                    "desc"
+                                                  ],
                                                   "type": "string"
                                                 }
                                               },
-                                              "required": ["order"],
+                                              "required": [
+                                                "order"
+                                              ],
                                               "type": "object"
                                             },
                                             {
                                               "additionalProperties": false,
                                               "properties": {
                                                 "numeric_type": {
-                                                  "enum": ["double", "long", "date", "date_nanos"],
+                                                  "enum": [
+                                                    "double",
+                                                    "long",
+                                                    "date",
+                                                    "date_nanos"
+                                                  ],
                                                   "type": "string"
                                                 },
                                                 "order": {
-                                                  "enum": ["asc", "desc"],
+                                                  "enum": [
+                                                    "asc",
+                                                    "desc"
+                                                  ],
                                                   "type": "string"
                                                 }
                                               },
-                                              "required": ["order"],
+                                              "required": [
+                                                "order"
+                                              ],
                                               "type": "object"
                                             }
                                           ]
@@ -6779,7 +7663,11 @@
                                         "type": "number"
                                       }
                                     },
-                                    "required": ["x", "y", "i"],
+                                    "required": [
+                                      "x",
+                                      "y",
+                                      "i"
+                                    ],
                                     "type": "object"
                                   },
                                   "id": {
@@ -6836,7 +7724,12 @@
                                     "type": "string"
                                   }
                                 },
-                                "required": ["panelConfig", "type", "gridData", "panelIndex"],
+                                "required": [
+                                  "panelConfig",
+                                  "type",
+                                  "gridData",
+                                  "panelIndex"
+                                ],
                                 "type": "object"
                               },
                               "type": "array"
@@ -6864,7 +7757,10 @@
                                   "type": "number"
                                 }
                               },
-                              "required": ["pause", "value"],
+                              "required": [
+                                "pause",
+                                "value"
+                              ],
                               "type": "object"
                             },
                             "timeFrom": {
@@ -6889,7 +7785,10 @@
                               "type": "number"
                             }
                           },
-                          "required": ["title", "options"],
+                          "required": [
+                            "title",
+                            "options"
+                          ],
                           "type": "object"
                         },
                         "createdAt": {
@@ -6916,7 +7815,11 @@
                               "type": "number"
                             }
                           },
-                          "required": ["error", "message", "statusCode"],
+                          "required": [
+                            "error",
+                            "message",
+                            "statusCode"
+                          ],
                           "type": "object"
                         },
                         "id": {
@@ -6948,7 +7851,11 @@
                                 "type": "string"
                               }
                             },
-                            "required": ["name", "type", "id"],
+                            "required": [
+                              "name",
+                              "type",
+                              "id"
+                            ],
                             "type": "object"
                           },
                           "type": "array"
@@ -6966,11 +7873,18 @@
                           "type": "string"
                         }
                       },
-                      "required": ["id", "type", "attributes", "references"],
+                      "required": [
+                        "id",
+                        "type",
+                        "attributes",
+                        "references"
+                      ],
                       "type": "object"
                     }
                   },
-                  "required": ["item"],
+                  "required": [
+                    "item"
+                  ],
                   "type": "object"
                 }
               }
@@ -6978,7 +7892,9 @@
           }
         },
         "summary": "Create a dashboard",
-        "tags": ["Dashboards"],
+        "tags": [
+          "Dashboards"
+        ],
         "x-state": "Technical Preview"
       },
       "put": {
@@ -7025,7 +7941,10 @@
                           "chainingSystem": {
                             "default": "HIERARCHICAL",
                             "description": "The chaining strategy for multiple controls. For example, \"HIERARCHICAL\" or \"NONE\".",
-                            "enum": ["NONE", "HIERARCHICAL"],
+                            "enum": [
+                              "NONE",
+                              "HIERARCHICAL"
+                            ],
                             "type": "string"
                           },
                           "controls": {
@@ -7058,11 +7977,18 @@
                                 "width": {
                                   "default": "medium",
                                   "description": "Minimum width of the control panel in the control group.",
-                                  "enum": ["small", "medium", "large"],
+                                  "enum": [
+                                    "small",
+                                    "medium",
+                                    "large"
+                                  ],
                                   "type": "string"
                                 }
                               },
-                              "required": ["type", "order"],
+                              "required": [
+                                "type",
+                                "order"
+                              ],
                               "type": "object"
                             },
                             "type": "array"
@@ -7100,11 +8026,16 @@
                           "labelPosition": {
                             "default": "oneLine",
                             "description": "Position of the labels for controls. For example, \"oneLine\", \"twoLine\".",
-                            "enum": ["oneLine", "twoLine"],
+                            "enum": [
+                              "oneLine",
+                              "twoLine"
+                            ],
                             "type": "string"
                           }
                         },
-                        "required": ["ignoreParentSettings"],
+                        "required": [
+                          "ignoreParentSettings"
+                        ],
                         "type": "object"
                       },
                       "description": {
@@ -7130,11 +8061,16 @@
                                       "properties": {
                                         "store": {
                                           "description": "Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').",
-                                          "enum": ["appState", "globalState"],
+                                          "enum": [
+                                            "appState",
+                                            "globalState"
+                                          ],
                                           "type": "string"
                                         }
                                       },
-                                      "required": ["store"],
+                                      "required": [
+                                        "store"
+                                      ],
                                       "type": "object"
                                     },
                                     "meta": {
@@ -7176,7 +8112,9 @@
                                           "type": "string"
                                         }
                                       },
-                                      "required": ["params"],
+                                      "required": [
+                                        "params"
+                                      ],
                                       "type": "object"
                                     },
                                     "query": {
@@ -7184,7 +8122,9 @@
                                       "type": "object"
                                     }
                                   },
-                                  "required": ["meta"],
+                                  "required": [
+                                    "meta"
+                                  ],
                                   "type": "object"
                                 },
                                 "type": "array"
@@ -7209,7 +8149,10 @@
                                     ]
                                   }
                                 },
-                                "required": ["query", "language"],
+                                "required": [
+                                  "query",
+                                  "language"
+                                ],
                                 "type": "object"
                               },
                               "sort": {
@@ -7217,7 +8160,10 @@
                                   "additionalProperties": {
                                     "anyOf": [
                                       {
-                                        "enum": ["asc", "desc"],
+                                        "enum": [
+                                          "asc",
+                                          "desc"
+                                        ],
                                         "type": "string"
                                       },
                                       {
@@ -7227,26 +8173,41 @@
                                             "type": "string"
                                           },
                                           "order": {
-                                            "enum": ["asc", "desc"],
+                                            "enum": [
+                                              "asc",
+                                              "desc"
+                                            ],
                                             "type": "string"
                                           }
                                         },
-                                        "required": ["order"],
+                                        "required": [
+                                          "order"
+                                        ],
                                         "type": "object"
                                       },
                                       {
                                         "additionalProperties": false,
                                         "properties": {
                                           "numeric_type": {
-                                            "enum": ["double", "long", "date", "date_nanos"],
+                                            "enum": [
+                                              "double",
+                                              "long",
+                                              "date",
+                                              "date_nanos"
+                                            ],
                                             "type": "string"
                                           },
                                           "order": {
-                                            "enum": ["asc", "desc"],
+                                            "enum": [
+                                              "asc",
+                                              "desc"
+                                            ],
                                             "type": "string"
                                           }
                                         },
-                                        "required": ["order"],
+                                        "required": [
+                                          "order"
+                                        ],
                                         "type": "object"
                                       }
                                     ]
@@ -7329,7 +8290,10 @@
                                   "type": "number"
                                 }
                               },
-                              "required": ["x", "y"],
+                              "required": [
+                                "x",
+                                "y"
+                              ],
                               "type": "object"
                             },
                             "id": {
@@ -7387,7 +8351,11 @@
                               "type": "string"
                             }
                           },
-                          "required": ["panelConfig", "type", "gridData"],
+                          "required": [
+                            "panelConfig",
+                            "type",
+                            "gridData"
+                          ],
                           "type": "object"
                         },
                         "type": "array"
@@ -7415,7 +8383,10 @@
                             "type": "number"
                           }
                         },
-                        "required": ["pause", "value"],
+                        "required": [
+                          "pause",
+                          "value"
+                        ],
                         "type": "object"
                       },
                       "timeFrom": {
@@ -7440,7 +8411,10 @@
                         "type": "number"
                       }
                     },
-                    "required": ["title", "options"],
+                    "required": [
+                      "title",
+                      "options"
+                    ],
                     "type": "object"
                   },
                   "references": {
@@ -7457,13 +8431,19 @@
                           "type": "string"
                         }
                       },
-                      "required": ["name", "type", "id"],
+                      "required": [
+                        "name",
+                        "type",
+                        "id"
+                      ],
                       "type": "object"
                     },
                     "type": "array"
                   }
                 },
-                "required": ["attributes"],
+                "required": [
+                  "attributes"
+                ],
                 "type": "object"
               }
             }
@@ -7493,7 +8473,10 @@
                                 "chainingSystem": {
                                   "default": "HIERARCHICAL",
                                   "description": "The chaining strategy for multiple controls. For example, \"HIERARCHICAL\" or \"NONE\".",
-                                  "enum": ["NONE", "HIERARCHICAL"],
+                                  "enum": [
+                                    "NONE",
+                                    "HIERARCHICAL"
+                                  ],
                                   "type": "string"
                                 },
                                 "controls": {
@@ -7526,11 +8509,18 @@
                                       "width": {
                                         "default": "medium",
                                         "description": "Minimum width of the control panel in the control group.",
-                                        "enum": ["small", "medium", "large"],
+                                        "enum": [
+                                          "small",
+                                          "medium",
+                                          "large"
+                                        ],
                                         "type": "string"
                                       }
                                     },
-                                    "required": ["type", "order"],
+                                    "required": [
+                                      "type",
+                                      "order"
+                                    ],
                                     "type": "object"
                                   },
                                   "type": "array"
@@ -7568,11 +8558,16 @@
                                 "labelPosition": {
                                   "default": "oneLine",
                                   "description": "Position of the labels for controls. For example, \"oneLine\", \"twoLine\".",
-                                  "enum": ["oneLine", "twoLine"],
+                                  "enum": [
+                                    "oneLine",
+                                    "twoLine"
+                                  ],
                                   "type": "string"
                                 }
                               },
-                              "required": ["ignoreParentSettings"],
+                              "required": [
+                                "ignoreParentSettings"
+                              ],
                               "type": "object"
                             },
                             "description": {
@@ -7598,11 +8593,16 @@
                                             "properties": {
                                               "store": {
                                                 "description": "Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').",
-                                                "enum": ["appState", "globalState"],
+                                                "enum": [
+                                                  "appState",
+                                                  "globalState"
+                                                ],
                                                 "type": "string"
                                               }
                                             },
-                                            "required": ["store"],
+                                            "required": [
+                                              "store"
+                                            ],
                                             "type": "object"
                                           },
                                           "meta": {
@@ -7644,7 +8644,9 @@
                                                 "type": "string"
                                               }
                                             },
-                                            "required": ["params"],
+                                            "required": [
+                                              "params"
+                                            ],
                                             "type": "object"
                                           },
                                           "query": {
@@ -7652,7 +8654,9 @@
                                             "type": "object"
                                           }
                                         },
-                                        "required": ["meta"],
+                                        "required": [
+                                          "meta"
+                                        ],
                                         "type": "object"
                                       },
                                       "type": "array"
@@ -7677,7 +8681,10 @@
                                           ]
                                         }
                                       },
-                                      "required": ["query", "language"],
+                                      "required": [
+                                        "query",
+                                        "language"
+                                      ],
                                       "type": "object"
                                     },
                                     "sort": {
@@ -7685,7 +8692,10 @@
                                         "additionalProperties": {
                                           "anyOf": [
                                             {
-                                              "enum": ["asc", "desc"],
+                                              "enum": [
+                                                "asc",
+                                                "desc"
+                                              ],
                                               "type": "string"
                                             },
                                             {
@@ -7695,26 +8705,41 @@
                                                   "type": "string"
                                                 },
                                                 "order": {
-                                                  "enum": ["asc", "desc"],
+                                                  "enum": [
+                                                    "asc",
+                                                    "desc"
+                                                  ],
                                                   "type": "string"
                                                 }
                                               },
-                                              "required": ["order"],
+                                              "required": [
+                                                "order"
+                                              ],
                                               "type": "object"
                                             },
                                             {
                                               "additionalProperties": false,
                                               "properties": {
                                                 "numeric_type": {
-                                                  "enum": ["double", "long", "date", "date_nanos"],
+                                                  "enum": [
+                                                    "double",
+                                                    "long",
+                                                    "date",
+                                                    "date_nanos"
+                                                  ],
                                                   "type": "string"
                                                 },
                                                 "order": {
-                                                  "enum": ["asc", "desc"],
+                                                  "enum": [
+                                                    "asc",
+                                                    "desc"
+                                                  ],
                                                   "type": "string"
                                                 }
                                               },
-                                              "required": ["order"],
+                                              "required": [
+                                                "order"
+                                              ],
                                               "type": "object"
                                             }
                                           ]
@@ -7796,7 +8821,11 @@
                                         "type": "number"
                                       }
                                     },
-                                    "required": ["x", "y", "i"],
+                                    "required": [
+                                      "x",
+                                      "y",
+                                      "i"
+                                    ],
                                     "type": "object"
                                   },
                                   "id": {
@@ -7853,7 +8882,12 @@
                                     "type": "string"
                                   }
                                 },
-                                "required": ["panelConfig", "type", "gridData", "panelIndex"],
+                                "required": [
+                                  "panelConfig",
+                                  "type",
+                                  "gridData",
+                                  "panelIndex"
+                                ],
                                 "type": "object"
                               },
                               "type": "array"
@@ -7881,7 +8915,10 @@
                                   "type": "number"
                                 }
                               },
-                              "required": ["pause", "value"],
+                              "required": [
+                                "pause",
+                                "value"
+                              ],
                               "type": "object"
                             },
                             "timeFrom": {
@@ -7906,7 +8943,10 @@
                               "type": "number"
                             }
                           },
-                          "required": ["title", "options"],
+                          "required": [
+                            "title",
+                            "options"
+                          ],
                           "type": "object"
                         },
                         "createdAt": {
@@ -7933,7 +8973,11 @@
                               "type": "number"
                             }
                           },
-                          "required": ["error", "message", "statusCode"],
+                          "required": [
+                            "error",
+                            "message",
+                            "statusCode"
+                          ],
                           "type": "object"
                         },
                         "id": {
@@ -7965,7 +9009,11 @@
                                 "type": "string"
                               }
                             },
-                            "required": ["name", "type", "id"],
+                            "required": [
+                              "name",
+                              "type",
+                              "id"
+                            ],
                             "type": "object"
                           },
                           "type": "array"
@@ -7983,11 +9031,18 @@
                           "type": "string"
                         }
                       },
-                      "required": ["id", "type", "attributes", "references"],
+                      "required": [
+                        "id",
+                        "type",
+                        "attributes",
+                        "references"
+                      ],
                       "type": "object"
                     }
                   },
-                  "required": ["item"],
+                  "required": [
+                    "item"
+                  ],
                   "type": "object"
                 }
               }
@@ -7995,7 +9050,9 @@
           }
         },
         "summary": "Update an existing dashboard",
-        "tags": ["Dashboards"],
+        "tags": [
+          "Dashboards"
+        ],
         "x-state": "Technical Preview"
       }
     },
@@ -8019,7 +9076,9 @@
           }
         },
         "summary": "Get all roles",
-        "tags": ["roles"]
+        "tags": [
+          "roles"
+        ]
       }
     },
     "/api/security/role/{name}": {
@@ -8052,7 +9111,9 @@
           }
         },
         "summary": "Delete a role",
-        "tags": ["roles"]
+        "tags": [
+          "roles"
+        ]
       },
       "get": {
         "operationId": "get-security-role-name",
@@ -8083,7 +9144,9 @@
           }
         },
         "summary": "Get a role",
-        "tags": ["roles"]
+        "tags": [
+          "roles"
+        ]
       },
       "put": {
         "description": "Create a new Kibana role or update the attributes of an existing role. Kibana roles are stored in the Elasticsearch native realm.",
@@ -8181,7 +9244,10 @@
                               "type": "string"
                             }
                           },
-                          "required": ["names", "privileges"],
+                          "required": [
+                            "names",
+                            "privileges"
+                          ],
                           "type": "object"
                         },
                         "type": "array"
@@ -8207,7 +9273,10 @@
                               "type": "array"
                             }
                           },
-                          "required": ["privileges", "clusters"],
+                          "required": [
+                            "privileges",
+                            "clusters"
+                          ],
                           "type": "object"
                         },
                         "type": "array"
@@ -8259,7 +9328,11 @@
                               "type": "string"
                             }
                           },
-                          "required": ["clusters", "names", "privileges"],
+                          "required": [
+                            "clusters",
+                            "names",
+                            "privileges"
+                          ],
                           "type": "object"
                         },
                         "type": "array"
@@ -8329,7 +9402,9 @@
                           "anyOf": [
                             {
                               "items": {
-                                "enum": ["*"],
+                                "enum": [
+                                  "*"
+                                ],
                                 "type": "string"
                               },
                               "maxItems": 1,
@@ -8344,10 +9419,14 @@
                               "type": "array"
                             }
                           ],
-                          "default": ["*"]
+                          "default": [
+                            "*"
+                          ]
                         }
                       },
-                      "required": ["base"],
+                      "required": [
+                        "base"
+                      ],
                       "type": "object"
                     },
                     "type": "array"
@@ -8357,7 +9436,9 @@
                     "type": "object"
                   }
                 },
-                "required": ["elasticsearch"],
+                "required": [
+                  "elasticsearch"
+                ],
                 "type": "object"
               }
             }
@@ -8369,7 +9450,9 @@
           }
         },
         "summary": "Create or update a role",
-        "tags": ["roles"]
+        "tags": [
+          "roles"
+        ]
       }
     },
     "/api/security/roles": {
@@ -8451,7 +9534,10 @@
                                     "type": "string"
                                   }
                                 },
-                                "required": ["names", "privileges"],
+                                "required": [
+                                  "names",
+                                  "privileges"
+                                ],
                                 "type": "object"
                               },
                               "type": "array"
@@ -8477,7 +9563,10 @@
                                     "type": "array"
                                   }
                                 },
-                                "required": ["privileges", "clusters"],
+                                "required": [
+                                  "privileges",
+                                  "clusters"
+                                ],
                                 "type": "object"
                               },
                               "type": "array"
@@ -8529,7 +9618,11 @@
                                     "type": "string"
                                   }
                                 },
-                                "required": ["clusters", "names", "privileges"],
+                                "required": [
+                                  "clusters",
+                                  "names",
+                                  "privileges"
+                                ],
                                 "type": "object"
                               },
                               "type": "array"
@@ -8599,7 +9692,9 @@
                                 "anyOf": [
                                   {
                                     "items": {
-                                      "enum": ["*"],
+                                      "enum": [
+                                        "*"
+                                      ],
                                       "type": "string"
                                     },
                                     "maxItems": 1,
@@ -8614,10 +9709,14 @@
                                     "type": "array"
                                   }
                                 ],
-                                "default": ["*"]
+                                "default": [
+                                  "*"
+                                ]
                               }
                             },
-                            "required": ["base"],
+                            "required": [
+                              "base"
+                            ],
                             "type": "object"
                           },
                           "type": "array"
@@ -8627,13 +9726,17 @@
                           "type": "object"
                         }
                       },
-                      "required": ["elasticsearch"],
+                      "required": [
+                        "elasticsearch"
+                      ],
                       "type": "object"
                     },
                     "type": "object"
                   }
                 },
-                "required": ["roles"],
+                "required": [
+                  "roles"
+                ],
                 "type": "object"
               }
             }
@@ -8645,7 +9748,9 @@
           }
         },
         "summary": "Create or update roles",
-        "tags": ["roles"]
+        "tags": [
+          "roles"
+        ]
       }
     },
     "/api/spaces/_copy_saved_objects": {
@@ -8698,7 +9803,10 @@
                           "type": "string"
                         }
                       },
-                      "required": ["type", "id"],
+                      "required": [
+                        "type",
+                        "id"
+                      ],
                       "type": "object"
                     },
                     "type": "array"
@@ -8716,7 +9824,10 @@
                     "type": "array"
                   }
                 },
-                "required": ["spaces", "objects"],
+                "required": [
+                  "spaces",
+                  "objects"
+                ],
                 "type": "object"
               }
             }
@@ -8724,7 +9835,9 @@
         },
         "responses": {},
         "summary": "Copy saved objects between spaces",
-        "tags": ["spaces"]
+        "tags": [
+          "spaces"
+        ]
       }
     },
     "/api/spaces/_disable_legacy_url_aliases": {
@@ -8765,13 +9878,19 @@
                           "type": "string"
                         }
                       },
-                      "required": ["targetSpace", "targetType", "sourceId"],
+                      "required": [
+                        "targetSpace",
+                        "targetType",
+                        "sourceId"
+                      ],
                       "type": "object"
                     },
                     "type": "array"
                   }
                 },
-                "required": ["aliases"],
+                "required": [
+                  "aliases"
+                ],
                 "type": "object"
               }
             }
@@ -8779,7 +9898,9 @@
         },
         "responses": {},
         "summary": "Disable legacy URL aliases",
-        "tags": ["spaces"]
+        "tags": [
+          "spaces"
+        ]
       }
     },
     "/api/spaces/_get_shareable_references": {
@@ -8815,13 +9936,18 @@
                           "type": "string"
                         }
                       },
-                      "required": ["type", "id"],
+                      "required": [
+                        "type",
+                        "id"
+                      ],
                       "type": "object"
                     },
                     "type": "array"
                   }
                 },
-                "required": ["objects"],
+                "required": [
+                  "objects"
+                ],
                 "type": "object"
               }
             }
@@ -8829,7 +9955,9 @@
         },
         "responses": {},
         "summary": "Get shareable references",
-        "tags": ["spaces"]
+        "tags": [
+          "spaces"
+        ]
       }
     },
     "/api/spaces/_resolve_copy_saved_objects_errors": {
@@ -8877,7 +10005,10 @@
                           "type": "string"
                         }
                       },
-                      "required": ["type", "id"],
+                      "required": [
+                        "type",
+                        "id"
+                      ],
                       "type": "object"
                     },
                     "type": "array"
@@ -8913,7 +10044,10 @@
                             "type": "string"
                           }
                         },
-                        "required": ["type", "id"],
+                        "required": [
+                          "type",
+                          "id"
+                        ],
                         "type": "object"
                       },
                       "type": "array"
@@ -8921,7 +10055,10 @@
                     "type": "object"
                   }
                 },
-                "required": ["retries", "objects"],
+                "required": [
+                  "retries",
+                  "objects"
+                ],
                 "type": "object"
               }
             }
@@ -8967,7 +10104,10 @@
                           "type": "string"
                         }
                       },
-                      "required": ["type", "id"],
+                      "required": [
+                        "type",
+                        "id"
+                      ],
                       "type": "object"
                     },
                     "type": "array"
@@ -8987,7 +10127,11 @@
                     "type": "array"
                   }
                 },
-                "required": ["objects", "spacesToAdd", "spacesToRemove"],
+                "required": [
+                  "objects",
+                  "spacesToAdd",
+                  "spacesToRemove"
+                ],
                 "type": "object"
               }
             }
@@ -8995,7 +10139,9 @@
         },
         "responses": {},
         "summary": "Update saved objects in spaces",
-        "tags": ["spaces"]
+        "tags": [
+          "spaces"
+        ]
       }
     },
     "/api/spaces/space": {
@@ -9008,7 +10154,11 @@
             "name": "purpose",
             "required": false,
             "schema": {
-              "enum": ["any", "copySavedObjectsIntoSpace", "shareSavedObjectsIntoSpace"],
+              "enum": [
+                "any",
+                "copySavedObjectsIntoSpace",
+                "shareSavedObjectsIntoSpace"
+              ],
               "type": "string"
             }
           },
@@ -9039,7 +10189,9 @@
               "nullable": true,
               "oneOf": [
                 {
-                  "enum": [false],
+                  "enum": [
+                    false
+                  ],
                   "type": "boolean",
                   "x-oas-optional": true
                 },
@@ -9057,7 +10209,9 @@
           }
         },
         "summary": "Get all spaces",
-        "tags": ["spaces"]
+        "tags": [
+          "spaces"
+        ]
       },
       "post": {
         "operationId": "post-spaces-space",
@@ -9117,11 +10271,19 @@
                     "type": "string"
                   },
                   "solution": {
-                    "enum": ["security", "oblt", "es", "classic"],
+                    "enum": [
+                      "security",
+                      "oblt",
+                      "es",
+                      "classic"
+                    ],
                     "type": "string"
                   }
                 },
-                "required": ["id", "name"],
+                "required": [
+                  "id",
+                  "name"
+                ],
                 "type": "object"
               }
             }
@@ -9133,7 +10295,9 @@
           }
         },
         "summary": "Create a space",
-        "tags": ["spaces"]
+        "tags": [
+          "spaces"
+        ]
       }
     },
     "/api/spaces/space/{id}": {
@@ -9170,7 +10334,9 @@
           }
         },
         "summary": "Delete a space",
-        "tags": ["spaces"]
+        "tags": [
+          "spaces"
+        ]
       },
       "get": {
         "operationId": "get-spaces-space-id",
@@ -9191,7 +10357,9 @@
           }
         },
         "summary": "Get a space",
-        "tags": ["spaces"]
+        "tags": [
+          "spaces"
+        ]
       },
       "put": {
         "operationId": "put-spaces-space-id",
@@ -9260,11 +10428,19 @@
                     "type": "string"
                   },
                   "solution": {
-                    "enum": ["security", "oblt", "es", "classic"],
+                    "enum": [
+                      "security",
+                      "oblt",
+                      "es",
+                      "classic"
+                    ],
                     "type": "string"
                   }
                 },
-                "required": ["id", "name"],
+                "required": [
+                  "id",
+                  "name"
+                ],
                 "type": "object"
               }
             }
@@ -9276,7 +10452,9 @@
           }
         },
         "summary": "Update a space",
-        "tags": ["spaces"]
+        "tags": [
+          "spaces"
+        ]
       }
     },
     "/api/status": {
@@ -9341,7 +10519,9 @@
           }
         },
         "summary": "Get Kibana's current status",
-        "tags": ["system"]
+        "tags": [
+          "system"
+        ]
       }
     }
   },
