@@ -19,7 +19,7 @@ import {
   ALERT_STATUS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FEATURE_LABEL } from '../translations';

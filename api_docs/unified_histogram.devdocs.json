@@ -1880,7 +1880,7 @@
           "\nThe API exposed by the container"
         ],
         "signature": [
-          "{ refetch: () => void; } & Pick<",
+          "{ fetch: () => void; } & Pick<",
           "UnifiedHistogramStateService",
           ", \"state$\" | \"setChartHidden\" | \"setTopPanelHeight\" | \"setTimeInterval\" | \"setTotalHits\">"
         ],

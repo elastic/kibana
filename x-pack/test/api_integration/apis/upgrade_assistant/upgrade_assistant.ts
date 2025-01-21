@@ -48,10 +48,8 @@ export default function ({ getService }: FtrProviderContext) {
         try {
           await es.indices.create({
             index: indexName,
-            body: {
-              settings: {
-                index: indexSettings,
-              },
+            settings: {
+              index: indexSettings,
             },
           });
         } catch (err) {
