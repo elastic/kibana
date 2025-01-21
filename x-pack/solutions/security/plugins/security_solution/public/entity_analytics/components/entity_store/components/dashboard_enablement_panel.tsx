@@ -17,8 +17,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { UseQueryResult } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { EntityType } from '../../../../../common/entity_analytics/types';
 import type { GetEntityStoreStatusResponse } from '../../../../../common/api/entity_analytics/entity_store/status.gen';
 import type {
   RiskEngineStatusResponse,
@@ -40,6 +38,7 @@ import {
 import type { Enablements } from './enablement_modal';
 import { EntityStoreEnablementModal } from './enablement_modal';
 import dashboardEnableImg from '../../../images/entity_store_dashboard.png';
+import { useStoreEntityTypes } from '../../../hooks/use_enabled_entity_types';
 
 interface EnableEntityStorePanelProps {
   state: {
@@ -52,7 +51,7 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
   const riskEngineStatus = state.riskEngine.data?.risk_engine_status;
   const entityStoreStatus = state.entityStore.data?.status;
   const engines = state.entityStore.data?.engines;
-  const isServiceEntityStoreEnabled = useIsExperimentalFeatureEnabled('serviceEntityStoreEnabled');
+  const enabledEntityTypes = useStoreEntityTypes();
 
   const [modal, setModalState] = useState({ visible: false });
   const [riskEngineInitializing, setRiskEngineInitializing] = useState(false);
@@ -67,7 +66,7 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
           onSuccess: () => {
             setRiskEngineInitializing(false);
             if (enable.entityStore) {
-              storeEnablement.mutate();
+              storeEnablement.mutate({});
             }
           },
         };
@@ -78,7 +77,7 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
       }
 
       if (enable.entityStore) {
-        storeEnablement.mutate();
+        storeEnablement.mutate({});
         setModalState({ visible: false });
       }
     },
@@ -132,59 +131,62 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
     );
   }
 
+  const installedTypes = engines?.map((engine) => engine.type);
+  const uninstalledTypes = enabledEntityTypes.filter(
+    (type) => !(installedTypes || []).includes(type)
+  );
+
+  if (entityStoreStatus === 'running' && uninstalledTypes.length > 0) {
+    const title = i18n.translate(
+      'xpack.securitySolution.entityAnalytics.entityStore.enablement.moreEntityTypesTitle',
+      {
+        defaultMessage: 'More entity types available',
+      }
+    );
+
+    return (
+      <EuiEmptyPrompt
+        css={{ minWidth: '100%' }}
+        hasBorder
+        layout="horizontal"
+        actions={
+          <EuiToolTip content={title}>
+            <EuiButton
+              color="primary"
+              fill
+              onClick={() => {
+                storeEnablement.mutate({ entityTypes: uninstalledTypes });
+              }}
+              data-test-subj={`entityStoreEnablementButton`}
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.entityStore.enablement.enableButton"
+                defaultMessage="Enable"
+              />
+            </EuiButton>
+          </EuiToolTip>
+        }
+        icon={<EuiImage size="l" hasShadow src={dashboardEnableImg} alt={title} />}
+        data-test-subj="entityStoreEnablementPanel"
+        title={<h2>{title}</h2>}
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.entityStore.enablement.moreEntityTypes"
+              defaultMessage={
+                'Enable the service entity type in the entity store to capture even more entities observed in events'
+              }
+            />
+          </p>
+        }
+      />
+    );
+  }
+
   if (
     riskEngineStatus !== RiskEngineStatusEnum.NOT_INSTALLED &&
     (entityStoreStatus === 'running' || entityStoreStatus === 'stopped')
   ) {
-    const installedEnginesType = engines?.map((engine) => engine.type);
-
-    if (isServiceEntityStoreEnabled && !installedEnginesType?.includes(EntityType.service)) {
-      const title = i18n.translate(
-        'xpack.securitySolution.entityAnalytics.entityStore.enablement.moreEntityTypesTitle',
-        {
-          defaultMessage: 'More entity types available',
-        }
-      );
-
-      return (
-        <EuiEmptyPrompt
-          css={{ minWidth: '100%' }}
-          hasBorder
-          layout="horizontal"
-          actions={
-            <EuiToolTip content={title}>
-              <EuiButton
-                color="primary"
-                fill
-                onClick={() => {
-                  storeEnablement.mutate();
-                }}
-                data-test-subj={`entityStoreEnablementButton`}
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.entityAnalytics.entityStore.enablement.enableButton"
-                  defaultMessage="Enable"
-                />
-              </EuiButton>
-            </EuiToolTip>
-          }
-          icon={<EuiImage size="l" hasShadow src={dashboardEnableImg} alt={title} />}
-          data-test-subj="entityStoreEnablementPanel"
-          title={<h2>{title}</h2>}
-          body={
-            <p>
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.entityStore.enablement.moreEntityTypes"
-                defaultMessage={
-                  'Enable the service entity type in the entity store to capture even more entities observed in events'
-                }
-              />
-            </p>
-          }
-        />
-      );
-    }
-
     return null;
   }
 

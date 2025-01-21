@@ -199,7 +199,12 @@ export class EntityStoreDataClient {
   }
 
   public async enable(
-    { indexPattern = '', filter = '', fieldHistoryLength = 10 }: InitEntityStoreRequestBody,
+    {
+      indexPattern = '',
+      filter = '',
+      fieldHistoryLength = 10,
+      entityTypes,
+    }: InitEntityStoreRequestBody,
     { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
   ): Promise<InitEntityStoreResponse> {
     if (!this.options.taskManager) {
@@ -211,7 +216,13 @@ export class EntityStoreDataClient {
       new Promise<T>((resolve) => setTimeout(() => fn().then(resolve), 0));
 
     const { experimentalFeatures } = this.options;
-    const enginesTypes = getEnabledStoreEntityTypes(experimentalFeatures);
+    const enabledEntityTypes = getEnabledStoreEntityTypes(experimentalFeatures);
+
+    // TODO ADD TEST
+    // entityTypes param is defined only enable the engines that are provided
+    const enginesTypes = entityTypes
+      ? (entityTypes as EntityType[]).filter((type) => enabledEntityTypes.includes(type))
+      : enabledEntityTypes;
 
     const promises = enginesTypes.map((entity) =>
       run(() =>

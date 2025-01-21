@@ -10,7 +10,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { GetEntityStoreStatusResponse } from '../../../../../common/api/entity_analytics/entity_store/status.gen';
-import type { InitEntityStoreResponse } from '../../../../../common/api/entity_analytics/entity_store/enable.gen';
+import type {
+  InitEntityStoreRequestBody,
+  InitEntityStoreResponse,
+} from '../../../../../common/api/entity_analytics/entity_store/enable.gen';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import type { EntityType } from '../../../../../common/api/entity_analytics';
 import {
@@ -47,18 +50,24 @@ export const useEntityStoreStatus = (opts: Options = {}) => {
 };
 
 export const ENABLE_STORE_STATUS_KEY = ['POST', 'ENABLE_ENTITY_STORE'];
-export const useEnableEntityStoreMutation = (options?: UseMutationOptions<{}>) => {
+export const useEnableEntityStoreMutation = (
+  options?: UseMutationOptions<
+    InitEntityStoreResponse,
+    ResponseError,
+    Partial<InitEntityStoreRequestBody>
+  >
+) => {
   const { telemetry } = useKibana().services;
   const queryClient = useQueryClient();
   const { enableEntityStore } = useEntityStoreRoutes();
 
-  return useMutation<InitEntityStoreResponse, ResponseError>(
-    () => {
+  return useMutation<InitEntityStoreResponse, ResponseError, Partial<InitEntityStoreRequestBody>>(
+    ({ fieldHistoryLength, ...otherParams }) => {
       telemetry?.reportEvent(EntityEventTypes.EntityStoreEnablementToggleClicked, {
         timestamp: new Date().toISOString(),
         action: 'start',
       });
-      return enableEntityStore();
+      return enableEntityStore({ ...otherParams, fieldHistoryLength: fieldHistoryLength ?? 10 });
     },
     {
       mutationKey: ENABLE_STORE_STATUS_KEY,
@@ -67,7 +76,6 @@ export const useEnableEntityStoreMutation = (options?: UseMutationOptions<{}>) =
     }
   );
 };
-
 export const INIT_ENTITY_ENGINE_STATUS_KEY = ['POST', 'INIT_ENTITY_ENGINE'];
 /**
  * @deprecated
