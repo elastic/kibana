@@ -13,7 +13,7 @@ import { z } from '@kbn/zod';
 import * as t from 'io-ts';
 import { NEVER } from 'rxjs';
 import { ServerRouteRepository } from '@kbn/server-route-repository-utils';
-import * as makeZodValidationObject from './make_zod_validation_object';
+import * as makeZodValidations from './make_zod_validation_object';
 import { registerRoutes } from './register_routes';
 import { passThroughValidationObject, noParamsValidationObject } from './validation_objects';
 
@@ -281,13 +281,10 @@ describe('registerRoutes', () => {
   });
 
   describe('when using zod', () => {
-    const makeZodValidationObjectSpy = jest.spyOn(
-      makeZodValidationObject,
-      'makeZodValidationObject'
-    );
+    const makeZodValidationObjectSpy = jest.spyOn(makeZodValidations, 'makeZodValidationObject');
 
-    const makeZodResponseValidationObjectSpy = jest.spyOn(
-      makeZodValidationObject,
+    const makeZodResponsesValidationObjectSpy = jest.spyOn(
+      makeZodValidations,
       'makeZodResponsesValidationObject'
     );
 
@@ -327,9 +324,9 @@ describe('registerRoutes', () => {
         makeZodValidationObjectSpy.mock.results[0].value
       );
 
-      expect(makeZodResponseValidationObjectSpy).toHaveBeenCalledWith(zodResponseRt);
+      expect(makeZodResponsesValidationObjectSpy).toHaveBeenCalledWith(zodResponseRt);
       expect(internalRoute.validate.response).toEqual(
-        makeZodResponseValidationObjectSpy.mock.results[0].value
+        makeZodResponsesValidationObjectSpy.mock.results[0].value
       );
     });
 
