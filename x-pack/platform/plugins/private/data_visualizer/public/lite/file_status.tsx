@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiProgress,
+  EuiIcon,
 } from '@elastic/eui';
 import type { AnalyzedFile } from './file_manager/file_wrapper';
 import { STATUS, type UploadStatus } from './file_manager/file_manager';
@@ -51,12 +52,21 @@ export const FileStatus: FC<Props> = ({ fileStatus, uploadStatus, deleteFile, in
           <EuiFlexItem grow={2}>
             {uploadStatus.overallImportStatus === STATUS.STARTED ||
             uploadStatus.overallImportStatus === STATUS.COMPLETED ? (
-              <EuiFlexItem grow={true}>
-                {fileStatus.importStatus === STATUS.STARTED ||
-                fileStatus.importStatus === STATUS.COMPLETED ? (
-                  <EuiProgress value={fileStatus.importProgress} max={100} size="s" />
+              <>
+                {fileStatus.importStatus === STATUS.STARTED ? (
+                  <EuiFlexItem grow={true}>
+                    <EuiProgress value={fileStatus.importProgress} max={100} size="s" />
+                  </EuiFlexItem>
                 ) : null}
-              </EuiFlexItem>
+                {fileStatus.importStatus === STATUS.COMPLETED ? (
+                  <EuiFlexGroup gutterSize="none">
+                    <EuiFlexItem grow={true} />
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="checkInCircleFilled" color="success" />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ) : null}
+              </>
             ) : (
               <>
                 <EuiFlexGroup gutterSize="none">

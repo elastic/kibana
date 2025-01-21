@@ -151,23 +151,26 @@ export const FileUploadLiteView: FC<Props> = ({
       <EuiFlyoutBody>
         <>
           <>
-            <EuiFilePicker
-              ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
-              id="filePicker"
-              fullWidth
-              display="large"
-              compressed
-              multiple
-              disabled={uploadStatus.overallImportStatus !== STATUS.NOT_STARTED}
-              initialPromptText={i18n.translate(
-                'xpack.dataVisualizer.file.aboutPanel.selectOrDragAndDropFileDescription',
-                {
-                  defaultMessage: 'Select or drag and drop a file',
-                }
-              )}
-              onChange={(files) => onFilePickerChange(files)}
-            />
-            <EuiSpacer />
+            {uploadStatus.overallImportStatus === STATUS.NOT_STARTED ? (
+              <>
+                <EuiFilePicker
+                  ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
+                  id="filePicker"
+                  fullWidth
+                  display="large"
+                  compressed
+                  multiple
+                  initialPromptText={i18n.translate(
+                    'xpack.dataVisualizer.file.aboutPanel.selectOrDragAndDropFileDescription',
+                    {
+                      defaultMessage: 'Select or drag and drop a file',
+                    }
+                  )}
+                  onChange={(files) => onFilePickerChange(files)}
+                />
+                <EuiSpacer />
+              </>
+            ) : null}
 
             {uploadStatus.overallImportStatus === STATUS.NOT_STARTED ? (
               <>
@@ -184,10 +187,9 @@ export const FileUploadLiteView: FC<Props> = ({
                 {fileClashes ? (
                   <MappingClashWarning uploadStatus={uploadStatus} filesStatus={filesStatus} />
                 ) : null}
+                <EuiSpacer />
               </>
             ) : null}
-
-            <EuiSpacer />
 
             {uploadStatus.overallImportStatus === STATUS.NOT_STARTED &&
             filesStatus.length > 0 &&
@@ -222,7 +224,7 @@ export const FileUploadLiteView: FC<Props> = ({
               <EuiSpacer size="s" />
             )} */}
 
-                <EuiSpacer size="s" />
+                {/* <EuiSpacer size="s" /> */}
 
                 <OverallUploadStatus uploadStatus={uploadStatus} filesStatus={filesStatus} />
               </>

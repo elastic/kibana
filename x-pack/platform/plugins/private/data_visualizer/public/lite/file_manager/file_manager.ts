@@ -7,7 +7,8 @@
 
 import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
 
-import type { Observable, Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
+import { Observable } from 'rxjs';
 import { switchMap, combineLatest, BehaviorSubject } from 'rxjs';
 // import { BehaviorSubject } from 'rxjs';
 import type { HttpSetup } from '@kbn/core/public';
@@ -50,7 +51,11 @@ export class FileManager {
   private readonly files$ = new BehaviorSubject<FileWrapper[]>([]);
   private readonly analysisValid$ = new BehaviorSubject<boolean>(false);
   public readonly analysisStatus$: Observable<AnalyzedFile[]> = this.files$.pipe(
-    switchMap((files) => combineLatest(files.map((file) => file.fileStatus$)))
+    switchMap((files) => {
+      return files.length === 0
+        ? new Observable<AnalyzedFile[]>((subscriber) => subscriber.next([]))
+        : combineLatest(files.map((file) => file.fileStatus$));
+    })
   );
   public readonly analysisOk$ = new BehaviorSubject<boolean>(false); // can this be removed in favour of uploadStatus?
   private mappingsCheckSubscription: Subscription;
@@ -83,8 +88,14 @@ export class FileManager {
     // eslint-disable-next-line no-console
     console.log('FileManager constructor');
 
+    // this.files$.subscribe((files) => {
+    //   console.log('files', files);
+    // });
+
     // this.files = new Map<string, FileWrapper>();
     this.mappingsCheckSubscription = this.analysisStatus$.subscribe((statuses) => {
+      // console.log('statuses', statuses);
+
       const allFilesAnalyzed = statuses.every((status) => status.loaded);
       if (allFilesAnalyzed) {
         this.analysisValid$.next(true);
