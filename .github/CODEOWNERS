@@ -658,7 +658,6 @@ src/platform/plugins/shared/embeddable @elastic/kibana-presentation
 src/platform/plugins/shared/es_ui_shared @elastic/kibana-management
 src/platform/plugins/shared/esql @elastic/kibana-esql
 src/platform/plugins/shared/esql_datagrid @elastic/kibana-esql
-src/platform/plugins/shared/esql_variables @elastic/kibana-esql
 src/platform/plugins/shared/expression_error @elastic/kibana-presentation
 src/platform/plugins/shared/expression_image @elastic/kibana-presentation
 src/platform/plugins/shared/expression_metric @elastic/kibana-presentation
