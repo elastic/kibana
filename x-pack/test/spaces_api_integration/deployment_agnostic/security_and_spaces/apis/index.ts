@@ -15,6 +15,8 @@ export default function ({ loadTestFile, getService }: DeploymentAgnosticFtrProv
   const supertest = getService('supertest');
 
   describe('spaces api with security', function () {
+    // Should we enabled when custom roles can be provisioned for MKI
+    // See: https://github.com/elastic/kibana/issues/207361
     this.tags('skipMKI');
     before(async () => {
       if (license === 'basic') {

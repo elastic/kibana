@@ -16,6 +16,8 @@ export default function ({ loadTestFile, getService }: DeploymentAgnosticFtrProv
   const isServerless = config.get('serverless');
 
   describe('spaces api with security', function () {
+    // Should be enabled when custom roles can be provisioned for MKI
+    // See: https://github.com/elastic/kibana/issues/207361
     this.tags('skipMKI');
     before(async () => {
       if (license === 'basic' && !isServerless) {
