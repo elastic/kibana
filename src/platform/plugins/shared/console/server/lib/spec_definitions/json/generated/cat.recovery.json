@@ -6,11 +6,6 @@
       ],
       "h": [],
       "help": "__flag__",
-      "master_timeout": [
-        "30s",
-        "-1",
-        "0"
-      ],
       "s": [],
       "v": "__flag__",
       "error_trace": "__flag__",
@@ -26,7 +21,16 @@
         "tb",
         "pb"
       ],
-      "detailed": "__flag__"
+      "detailed": "__flag__",
+      "time": [
+        "nanos",
+        "micros",
+        "ms",
+        "s",
+        "m",
+        "h",
+        "d"
+      ]
     },
     "methods": [
       "GET"

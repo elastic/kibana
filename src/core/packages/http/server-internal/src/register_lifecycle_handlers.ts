@@ -17,6 +17,7 @@ import {
   createVersionCheckPostAuthHandler,
   createBuildNrMismatchLoggerPreResponseHandler,
   createXsrfPostAuthHandler,
+  createDeprecationWarningHeaderPreResponseHandler,
 } from './lifecycle_handlers';
 
 export const registerCoreHandlers = (
@@ -27,6 +28,10 @@ export const registerCoreHandlers = (
 ) => {
   // add headers based on config
   registrar.registerOnPreResponse(createCustomHeadersPreResponseHandler(config));
+  // add headers for deprecated endpoints
+  registrar.registerOnPreResponse(
+    createDeprecationWarningHeaderPreResponseHandler(env.packageInfo.version)
+  );
   // add extra request checks stuff
   registrar.registerOnPostAuth(createXsrfPostAuthHandler(config));
   if (config.versioned.strictClientVersionCheck !== false) {

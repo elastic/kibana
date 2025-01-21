@@ -36,6 +36,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
         // Required to load new platform plugins via `--plugin-path` flag.
         '--env.name=development',
+        // Needed for search_examples tests
+        '--data.search.sessions.enabled=true',
         ...findTestPluginPaths([
           resolve(KIBANA_ROOT, 'examples'),
           resolve(KIBANA_ROOT, 'x-pack/examples'),
