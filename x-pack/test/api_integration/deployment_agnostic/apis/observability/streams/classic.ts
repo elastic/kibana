@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { unwiredStreamGetResponseOrThrow } from '@kbn/streams-schema';
+import { asUnwiredStreamGetResponse } from '@kbn/streams-schema';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
@@ -99,7 +99,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(getResponse.status).to.eql(200);
 
-      const body = unwiredStreamGetResponseOrThrow(getResponse.body);
+      const body = asUnwiredStreamGetResponse(getResponse.body);
 
       const { dashboards, stream, lifecycle, elasticsearch_assets: elasticsearchAssets } = body;
 
