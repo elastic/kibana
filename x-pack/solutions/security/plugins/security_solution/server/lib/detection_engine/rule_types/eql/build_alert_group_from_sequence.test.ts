@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_RULE_CONSUMER, ALERT_URL } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_RULE_CONSUMER, ALERT_URL } from '@kbn/rule-data-utils';
 
 import { sampleDocNoSortId, sampleRuleGuid } from '../__mocks__/es_results';
 import {
@@ -23,6 +23,7 @@ import {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_GROUP_ID,
 } from '../../../../../common/field_maps/field_names';
+import { buildReasonMessageForEqlAlert } from '../utils/reason_formatters';
 
 const SPACE_ID = 'space';
 const PUBLIC_BASE_URL = 'http://testkibanabaseurl.com';
@@ -49,7 +50,7 @@ describe('buildAlert', () => {
       completeRule,
       mergeStrategy: 'allFields',
       spaceId: SPACE_ID,
-      buildReasonMessage: jest.fn(),
+      buildReasonMessage: buildReasonMessageForEqlAlert,
       indicesToQuery: completeRule.ruleParams.index as string[],
       alertTimestampOverride: undefined,
       publicBaseUrl: PUBLIC_BASE_URL,
@@ -129,6 +130,7 @@ describe('buildAlert', () => {
           [ALERT_DEPTH]: 2,
           [ALERT_BUILDING_BLOCK_TYPE]: 'default',
           [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
+          [ALERT_REASON]: 'event with source 127.0.0.1 created high alert rule-name.',
         }),
       })
     );

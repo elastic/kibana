@@ -35,13 +35,13 @@ const createPackageInfo = (parts: Partial<PackageInfo> = {}): PackageInfo => ({
 });
 
 const getClientGetMockImplementation =
-  ({ darkMode, name }: { darkMode?: boolean; name?: string } = {}) =>
+  ({ darkMode, name }: { darkMode?: boolean | string; name?: string } = {}) =>
   (key: string) => {
     switch (key) {
       case 'theme:darkMode':
         return Promise.resolve(darkMode ?? false);
       case 'theme:name':
-        return Promise.resolve(name ?? 'amsterdam');
+        return Promise.resolve(name ?? 'borealis');
     }
     return Promise.resolve();
   };
@@ -67,7 +67,7 @@ describe('bootstrapRenderer', () => {
     packageInfo = createPackageInfo();
     userSettingsService = userSettingsServiceMock.createSetupContract();
 
-    getThemeTagMock.mockReturnValue('v8light');
+    getThemeTagMock.mockReturnValue('borealislight');
     getPluginsBundlePathsMock.mockReturnValue(new Map());
     renderTemplateMock.mockReturnValue('__rendered__');
     getJsDependencyPathsMock.mockReturnValue([]);
@@ -124,7 +124,7 @@ describe('bootstrapRenderer', () => {
 
       expect(getThemeTagMock).toHaveBeenCalledTimes(1);
       expect(getThemeTagMock).toHaveBeenCalledWith({
-        name: 'v8',
+        name: 'borealis',
         darkMode: true,
       });
     });
@@ -141,7 +141,7 @@ describe('bootstrapRenderer', () => {
 
       expect(getThemeTagMock).toHaveBeenCalledTimes(1);
       expect(getThemeTagMock).toHaveBeenCalledWith({
-        name: 'v8',
+        name: 'borealis',
         darkMode: false,
       });
     });
@@ -167,7 +167,7 @@ describe('bootstrapRenderer', () => {
 
       expect(getThemeTagMock).toHaveBeenCalledTimes(1);
       expect(getThemeTagMock).toHaveBeenCalledWith({
-        name: 'v8',
+        name: 'borealis',
         darkMode: true,
       });
     });
@@ -192,7 +192,7 @@ describe('bootstrapRenderer', () => {
 
       expect(getThemeTagMock).toHaveBeenCalledTimes(1);
       expect(getThemeTagMock).toHaveBeenCalledWith({
-        name: 'v8',
+        name: 'borealis',
         darkMode: false,
       });
     });
@@ -217,7 +217,7 @@ describe('bootstrapRenderer', () => {
 
       expect(getThemeTagMock).toHaveBeenCalledTimes(1);
       expect(getThemeTagMock).toHaveBeenCalledWith({
-        name: 'v8',
+        name: 'borealis',
         darkMode: false,
       });
     });
@@ -247,7 +247,7 @@ describe('bootstrapRenderer', () => {
 
       expect(getThemeTagMock).toHaveBeenCalledTimes(1);
       expect(getThemeTagMock).toHaveBeenCalledWith({
-        name: 'v8',
+        name: 'borealis',
         darkMode: true,
       });
     });
@@ -290,13 +290,17 @@ describe('bootstrapRenderer', () => {
 
       expect(getThemeTagMock).toHaveBeenCalledTimes(1);
       expect(getThemeTagMock).toHaveBeenCalledWith({
-        name: 'v8',
+        name: 'borealis',
         darkMode: true,
       });
     });
 
     it('calls getThemeTag with the correct parameters when darkMode is `system`', async () => {
-      uiSettingsClient.get.mockResolvedValue('system');
+      uiSettingsClient.get.mockImplementation(
+        getClientGetMockImplementation({
+          darkMode: 'system',
+        })
+      );
 
       const request = httpServerMock.createKibanaRequest();
 
@@ -307,7 +311,7 @@ describe('bootstrapRenderer', () => {
 
       expect(getThemeTagMock).toHaveBeenCalledTimes(1);
       expect(getThemeTagMock).toHaveBeenCalledWith({
-        name: 'system',
+        name: 'borealis',
         darkMode: false,
       });
     });
@@ -321,7 +325,7 @@ describe('bootstrapRenderer', () => {
       });
     });
 
-    it('does not call uiSettingsClient.get', async () => {
+    it('does not call uiSettingsClient.get with `theme:darkMode`', async () => {
       const request = httpServerMock.createKibanaRequest();
 
       await renderer({
@@ -329,7 +333,7 @@ describe('bootstrapRenderer', () => {
         uiSettingsClient,
       });
 
-      expect(uiSettingsClient.get).not.toHaveBeenCalled();
+      expect(uiSettingsClient.get).not.toHaveBeenCalledWith('theme:darkMode');
     });
 
     it('calls getThemeTag with the default parameters', async () => {
@@ -342,7 +346,32 @@ describe('bootstrapRenderer', () => {
 
       expect(getThemeTagMock).toHaveBeenCalledTimes(1);
       expect(getThemeTagMock).toHaveBeenCalledWith({
-        name: 'v8',
+        name: 'borealis',
+        darkMode: false,
+      });
+    });
+
+    it('calls getThemeTag with `v8` theme name when buildFlavor is `serverless`', async () => {
+      renderer = bootstrapRendererFactory({
+        auth,
+        packageInfo: {
+          ...packageInfo,
+          buildFlavor: 'serverless',
+        },
+        uiPlugins,
+        baseHref: `/base-path/${packageInfo.buildShaShort}`, // the base href as provided by static assets module
+      });
+
+      const request = httpServerMock.createKibanaRequest();
+
+      await renderer({
+        request,
+        uiSettingsClient,
+      });
+
+      expect(getThemeTagMock).toHaveBeenCalledTimes(1);
+      expect(getThemeTagMock).toHaveBeenCalledWith({
+        name: 'borealis',
         darkMode: false,
       });
     });

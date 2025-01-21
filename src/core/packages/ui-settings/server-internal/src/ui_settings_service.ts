@@ -18,6 +18,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
 import type {
   ReadonlyModeType,
+  ThemeName,
   UiSettingsParams,
   UiSettingsScope,
 } from '@kbn/core-ui-settings-common';
@@ -75,6 +76,7 @@ export class UiSettingsService
       getCoreSettings({
         isDist: this.isDist,
         isThemeSwitcherEnabled: experimental?.themeSwitcherEnabled,
+        defaultTheme: experimental?.defaultTheme as ThemeName,
       })
     );
 

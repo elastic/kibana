@@ -136,35 +136,33 @@ node x-pack/solutions/observability/plugins/apm/scripts/test/dat --runner --stat
 
 The E2E tests are located in [`x-pack/solutions/observability/plugins/apm/ftr_e2e`](../ftr_e2e).
 
-When PR is labeled with `apm:cypress-record`, test runs are recorded to the [Cypress Dashboard](https://dashboard.cypress.io).
-
-Tests run on buildkite PR pipeline are parallelized (4 parallel jobs) and are orchestrated by the Cypress dashboard service. It can be configured in [.buildkite/pipelines/pull_request/apm_cypress.yml](https://github.com/elastic/kibana/blob/main/.buildkite/pipelines/pull_request/apm_cypress.yml) with the property `parallelism`.
+Tests run on buildkite PR pipeline are parallelized (8 parallel jobs) and are orchestrated by the Cypress dashboard service. It can be configured in [.buildkite/pipelines/pull_request/apm_cypress.yml](https://github.com/elastic/kibana/blob/main/.buildkite/pipelines/pull_request/apm_cypress.yml) with the property `parallelism`.
 
 ```yml
     ...
     depends_on: build
-    parallelism: 4
+    parallelism: 3
     ...
 ```
 
 [Test tips and best practices](../ftr_e2e/README.md)
 
-#### Start test server
+#### Start Cypress dashboard
 
 ```
-node x-pack/solutions/observability/plugins/apm/scripts/test/e2e --server
+node x-pack/solutions/observability/plugins/apm/scripts/test/e2e --open
 ```
 
 #### Run tests
 
 ```
-node x-pack/solutions/observability/plugins/apm/scripts/test/e2e --runner --open
+node x-pack/solutions/observability/plugins/apm/scripts/test/e2e
 ```
 
-### Run tests multiple times to check for flakiness
+#### Run tests in headed mode
 
 ```
-node x-pack/solutions/observability/plugins/apm/scripts/test/e2e --runner --times <NUMBER> [--spec <FILE_NAME>]
+node x-pack/solutions/observability/plugins/apm/scripts/test/e2e --headed
 ```
 
 ### A11y checks

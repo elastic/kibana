@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit } from 'lodash';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
@@ -69,9 +68,9 @@ export const getSearchEmbeddableFactory = ({
     },
     buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {
       /** One Discover context awareness */
-      const solutionNavId = await firstValueFrom(
-        discoverServices.core.chrome.getActiveSolutionNavId$()
-      );
+      const solutionNavId =
+        initialState.nonPersistedDisplayOptions?.solutionNavIdOverride ??
+        (await firstValueFrom(discoverServices.core.chrome.getActiveSolutionNavId$()));
       const { getRenderAppWrapper } = await discoverServices.profilesManager.resolveRootProfile({
         solutionNavId,
       });
@@ -120,6 +119,16 @@ export const getSearchEmbeddableFactory = ({
         stateManager: searchEmbeddable.stateManager,
       });
 
+      const serialize = (savedObjectId?: string) =>
+        serializeState({
+          uuid,
+          initialState,
+          savedSearch: searchEmbeddable.api.savedSearch$.getValue(),
+          serializeTitles,
+          serializeTimeRange: timeRange.serialize,
+          savedObjectId,
+        });
+
       const api: SearchEmbeddableApi = buildApi(
         {
           ...titlesApi,
@@ -137,15 +146,6 @@ export const getSearchEmbeddableFactory = ({
           savedObjectId: savedObjectId$,
           defaultPanelTitle: defaultPanelTitle$,
           defaultPanelDescription: defaultPanelDescription$,
-          getByValueRuntimeSnapshot: () => {
-            const savedSearch = searchEmbeddable.api.savedSearch$.getValue();
-            return {
-              ...serializeTitles(),
-              ...timeRange.serialize(),
-              ...omit(savedSearch, 'searchSource'),
-              serializedSearchSource: savedSearch.searchSource.getSerializedFields(),
-            };
-          },
           hasTimeRange: () => {
             const fetchContext = fetchContext$.getValue();
             return fetchContext?.timeslice !== undefined || fetchContext?.timeRange !== undefined;
@@ -160,14 +160,12 @@ export const getSearchEmbeddableFactory = ({
             );
           },
           canUnlinkFromLibrary: async () => Boolean(savedObjectId$.getValue()),
-          libraryId$: savedObjectId$,
           saveToLibrary: async (title: string) => {
             const savedObjectId = await save({
               ...api.savedSearch$.getValue(),
               title,
             });
             defaultPanelTitle$.next(title);
-            savedObjectId$.next(savedObjectId!);
             return savedObjectId!;
           },
           checkForDuplicateTitle: (newTitle, isTitleDuplicateConfirmed, onTitleDuplicate) =>
@@ -176,26 +174,9 @@ export const getSearchEmbeddableFactory = ({
               isTitleDuplicateConfirmed,
               onTitleDuplicate,
             }),
-          unlinkFromLibrary: () => {
-            savedObjectId$.next(undefined);
-            if ((titlesApi.panelTitle.getValue() ?? '').length === 0) {
-              titlesApi.setPanelTitle(defaultPanelTitle$.getValue());
-            }
-            if ((titlesApi.panelDescription.getValue() ?? '').length === 0) {
-              titlesApi.setPanelDescription(defaultPanelDescription$.getValue());
-            }
-            defaultPanelTitle$.next(undefined);
-            defaultPanelDescription$.next(undefined);
-          },
-          serializeState: () =>
-            serializeState({
-              uuid,
-              initialState,
-              savedSearch: searchEmbeddable.api.savedSearch$.getValue(),
-              serializeTitles,
-              serializeTimeRange: timeRange.serialize,
-              savedObjectId: savedObjectId$.getValue(),
-            }),
+          getSerializedStateByValue: () => serialize(undefined),
+          getSerializedStateByReference: (newId: string) => serialize(newId),
+          serializeState: () => serialize(savedObjectId$.getValue()),
           getInspectorAdapters: () => searchEmbeddable.stateManager.inspectorAdapters.getValue(),
         },
         {

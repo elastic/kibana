@@ -13,18 +13,17 @@ import {
   SiemMigrationTaskStatus,
 } from '../../../../../common/siem_migrations/constants';
 import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
-import type {
-  RuleMigrationDataStats,
-  RuleMigrationFilters,
-} from '../data/rule_migrations_data_rules_client';
+import type { RuleMigrationDataStats } from '../data/rule_migrations_data_rules_client';
+import type { SiemRuleMigrationsClientDependencies } from '../types';
 import { getRuleMigrationAgent } from './agent';
 import type { MigrateRuleState } from './agent/types';
 import { RuleMigrationsRetriever } from './retrievers';
 import type {
   MigrationAgent,
-  RuleMigrationTaskStartParams,
   RuleMigrationTaskCreateAgentParams,
+  RuleMigrationTaskStartParams,
   RuleMigrationTaskStartResult,
   RuleMigrationTaskStopResult,
 } from './types';
@@ -40,7 +39,8 @@ export class RuleMigrationsTaskClient {
     private migrationsRunning: MigrationsRunning,
     private logger: Logger,
     private data: RuleMigrationsDataClient,
-    private currentUser: AuthenticatedUser
+    private currentUser: AuthenticatedUser,
+    private dependencies: SiemRuleMigrationsClientDependencies
   ) {}
 
   /** Starts a rule migration task */
@@ -169,7 +169,7 @@ export class RuleMigrationsTaskClient {
         this.logger.info(`Abort signal received, stopping migration ID:${migrationId}`);
         return;
       } else {
-        this.logger.error(`Error processing migration ID:${migrationId}`, error);
+        this.logger.error(`Error processing migration ID:${migrationId} ${error}`);
       }
     } finally {
       this.migrationsRunning.delete(migrationId);
@@ -180,12 +180,10 @@ export class RuleMigrationsTaskClient {
   private async createAgent({
     migrationId,
     connectorId,
-    inferenceClient,
-    actionsClient,
-    rulesClient,
-    soClient,
     abortController,
   }: RuleMigrationTaskCreateAgentParams): Promise<MigrationAgent> {
+    const { inferenceClient, actionsClient, rulesClient, savedObjectsClient } = this.dependencies;
+
     const actionsClientChat = new ActionsClientChat(connectorId, actionsClient, this.logger);
     const model = await actionsClientChat.createModel({
       signal: abortController.signal,
@@ -195,7 +193,7 @@ export class RuleMigrationsTaskClient {
     const ruleMigrationsRetriever = new RuleMigrationsRetriever(migrationId, {
       data: this.data,
       rules: rulesClient,
-      savedObjects: soClient,
+      savedObjects: savedObjectsClient,
     });
 
     await ruleMigrationsRetriever.initialize();
@@ -212,16 +210,15 @@ export class RuleMigrationsTaskClient {
   /** Updates all the rules in a migration to be re-executed */
   public async updateToRetry(
     migrationId: string,
-    filter: RuleMigrationFilters = {}
+    filter: RuleMigrationFilters
   ): Promise<{ updated: boolean }> {
     if (this.migrationsRunning.has(migrationId)) {
       return { updated: false };
     }
-    // Update all the rules in the migration to pending
+
     await this.data.rules.updateStatus(migrationId, filter, SiemMigrationStatus.PENDING, {
       refresh: true,
     });
-    // await this.data.rules.updateRetry(migrationId);
     return { updated: true };
   }
 

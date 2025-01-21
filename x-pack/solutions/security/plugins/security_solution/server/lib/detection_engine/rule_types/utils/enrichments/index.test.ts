@@ -60,6 +60,23 @@ const userEnrichmentResponse = [
   },
 ];
 
+const serviceEnrichmentResponse = [
+  {
+    fields: {
+      'service.name': ['service name 1'],
+      'service.risk.calculated_level': ['Moderate'],
+      'service.risk.calculated_score_norm': [50],
+    },
+  },
+  {
+    fields: {
+      'service.name': ['service name 2'],
+      'service.risk.calculated_level': ['Critical'],
+      'service.risk.calculated_score_norm': [90],
+    },
+  },
+];
+
 const assetCriticalityUserResponse = [
   {
     fields: {
@@ -80,6 +97,15 @@ const assetCriticalityHostResponse = [
     fields: {
       id_value: ['host name 1'],
       criticality_level: ['low'],
+    },
+  },
+];
+
+const assetCriticalityServiceResponse = [
+  {
+    fields: {
+      id_value: ['service name 1'],
+      criticality_level: ['high'],
     },
   },
 ];
@@ -132,7 +158,8 @@ describe('enrichEvents', () => {
   it('return enriched events with risk score', async () => {
     mockSearchEnrichments
       .mockReturnValueOnce(hostEnrichmentResponse)
-      .mockReturnValueOnce(userEnrichmentResponse);
+      .mockReturnValueOnce(userEnrichmentResponse)
+      .mockReturnValueOnce(serviceEnrichmentResponse);
     mockIsIndexExist.mockImplementation(() => true);
 
     const enrichedEvents = await enrichEvents({
@@ -142,8 +169,9 @@ describe('enrichEvents', () => {
         createAlert('1', {
           ...createEntity('host', 'host name 1'),
           ...createEntity('user', 'user name 1'),
+          ...createEntity('service', 'service name 1'),
         }),
-        createAlert('2', createEntity('user', 'user name 2')),
+        createAlert('2', createEntity('service', 'service name 2')),
       ],
       spaceId: 'default',
     });
@@ -164,10 +192,17 @@ describe('enrichEvents', () => {
             calculated_score_norm: 50,
           },
         },
+        service: {
+          name: 'service name 1',
+          risk: {
+            calculated_level: 'Moderate',
+            calculated_score_norm: 50,
+          },
+        },
       }),
       createAlert('2', {
-        user: {
-          name: 'user name 2',
+        service: {
+          name: 'service name 2',
           risk: {
             calculated_level: 'Critical',
             calculated_score_norm: 90,
@@ -180,11 +215,10 @@ describe('enrichEvents', () => {
   it('return enriched events with asset criticality', async () => {
     mockSearchEnrichments
       .mockReturnValueOnce(assetCriticalityUserResponse)
-      .mockReturnValueOnce(assetCriticalityHostResponse);
+      .mockReturnValueOnce(assetCriticalityHostResponse)
+      .mockReturnValueOnce(assetCriticalityServiceResponse);
 
     // disable risk score enrichments
-    mockIsIndexExist.mockImplementationOnce(() => false);
-    mockIsIndexExist.mockImplementationOnce(() => false);
     mockIsIndexExist.mockImplementationOnce(() => false);
     // enable for asset criticality
     mockIsIndexExist.mockImplementation(() => true);
@@ -196,6 +230,7 @@ describe('enrichEvents', () => {
         createAlert('1', {
           ...createEntity('host', 'host name 1'),
           ...createEntity('user', 'user name 1'),
+          ...createEntity('service', 'service name 1'),
         }),
         createAlert('2', createEntity('host', 'user name 1')),
       ],
@@ -207,9 +242,10 @@ describe('enrichEvents', () => {
       createAlert('1', {
         ...createEntity('user', 'user name 1'),
         ...createEntity('host', 'host name 1'),
-
+        ...createEntity('service', 'service name 1'),
         'host.asset.criticality': 'low',
         'user.asset.criticality': 'important',
+        'service.asset.criticality': 'high',
       }),
       createAlert('2', {
         ...createEntity('host', 'user name 1'),
@@ -223,7 +259,6 @@ describe('enrichEvents', () => {
         throw new Error('1');
       })
       .mockImplementationOnce(() => userEnrichmentResponse);
-    mockIsIndexExist.mockImplementation(() => true);
     mockIsIndexExist.mockImplementation(() => true);
 
     const enrichedEvents = await enrichEvents({

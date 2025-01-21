@@ -56,13 +56,6 @@ export const ACTIONS_INSTALL_LABEL = i18n.translate(
   }
 );
 
-export const ACTIONS_RESTART_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.tableColumn.actionsRestartLabel',
-  {
-    defaultMessage: 'Restart',
-  }
-);
-
 export const COLUMN_NAME = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.tableColumn.nameLabel',
   {
@@ -102,5 +95,19 @@ export const COLUMN_INTEGRATIONS = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.tableColumn.integrationsLabel',
   {
     defaultMessage: 'Integrations',
+  }
+);
+
+export const STATUS_TOOLTIP_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.tableColumn.statusTooltipTitle',
+  {
+    defaultMessage: 'Translation Status legend',
+  }
+);
+
+export const INSTALLED_STATUS_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.tableColumn.installedStatusTitle',
+  {
+    defaultMessage: 'Installed',
   }
 );
