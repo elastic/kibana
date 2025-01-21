@@ -84,6 +84,7 @@ export interface GridLayoutStateManager {
   activeRowEvent$: BehaviorSubject<ActiveRowEvent | undefined>;
   interactionEvent$: BehaviorSubject<PanelInteractionEvent | undefined>;
 
+  layoutRef: React.MutableRefObject<HTMLDivElement | null>;
   rowRefs: React.MutableRefObject<{ [rowId: string]: HTMLDivElement | null }>;
   headerRefs: React.MutableRefObject<{ [rowId: string]: HTMLDivElement | null }>;
   panelRefs: React.MutableRefObject<{
@@ -119,7 +120,7 @@ export interface PanelInteractionEvent {
    * The pixel offsets from where the mouse was at drag start to the
    * edges of the panel
    */
-  pointerOffsets: {
+  sensorOffsets: {
     top: number;
     left: number;
     right: number;

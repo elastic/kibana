@@ -13,7 +13,7 @@ import { MutableRefObject } from 'react';
 
 import { GridLayoutStateManager } from '../types';
 import { getRowKeysInOrder } from '../utils/resolve_grid_row';
-import { getPointerPosition } from './sensors';
+import { getSensorPosition } from './sensors';
 import { PointerPosition, UserInteractionEvent } from './types';
 
 export const startAction = (
@@ -26,7 +26,7 @@ export const startAction = (
   if (!headerRef) return;
 
   const startingPosition = pick(headerRef.getBoundingClientRect(), ['top', 'left']);
-  startingPointer.current = getPointerPosition(e);
+  startingPointer.current = getSensorPosition(e);
   gridLayoutStateManager.activeRowEvent$.next({
     id: rowId,
     startingPosition,
