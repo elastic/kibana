@@ -16,7 +16,7 @@ export function findInheritedLifecycle(
     [...ancestors, definition],
     (parent) => parent.name.split('.').length,
     'asc'
-  ).findLast((definition) => definition.stream.ingest.lifecycle);
+  ).findLast(({ stream }) => stream.ingest.lifecycle);
 
   if (!originDefinition) {
     return undefined;
