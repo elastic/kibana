@@ -9,7 +9,7 @@ import { ASSET_VERSION } from '../../../../common/constants';
 import { getProcessingPipelineName } from '../ingest_pipelines/name';
 import { getIndexTemplateName } from './name';
 
-export function generateIndexTemplate(id: string) {
+export function generateIndexTemplate(id: string, isServerless: boolean) {
   const composedOf = id.split('.').reduce((acc, _, index, array) => {
     const parent = array.slice(0, index + 1).join('.');
     return [...acc, `${parent}@stream.layer`];
@@ -27,7 +27,7 @@ export function generateIndexTemplate(id: string) {
     },
     data_stream: {
       hidden: false,
-      failure_store: true,
+      failure_store: isServerless ? undefined : true, // TODO: Enable failure store for serverless once it is rolled out
     },
     template: {
       settings: {
