@@ -64,6 +64,9 @@ export const streamGraph = async ({
 
   let didEnd = false;
   const handleStreamEnd = (finalResponse: string, isError = false) => {
+    if(didEnd){
+      return;
+    }
     if (onLlmResponse) {
       onLlmResponse(
         finalResponse,
@@ -77,7 +80,7 @@ export const streamGraph = async ({
     streamEnd();
     didEnd = true;
     if ((streamingSpan && !streamingSpan?.outcome) || streamingSpan?.outcome === 'unknown') {
-      streamingSpan.outcome = 'success';
+      streamingSpan.outcome = isError ? 'failure' : 'success';
     }
     streamingSpan?.end();
   };
@@ -124,10 +127,6 @@ export const streamGraph = async ({
     }
 
     pushStreamUpdate().catch((err) => {
-      if (streamingSpan) {
-        streamingSpan.outcome = 'failure';
-        streamingSpan.end();
-      }
       logger.error(`Error streaming graph: ${err}`);
       handleStreamEnd(err.message, true);
     });
@@ -184,10 +183,6 @@ export const streamGraph = async ({
   }
 
   pushStreamUpdate().catch((err) => {
-    if (streamingSpan) {
-      streamingSpan.outcome = 'failure';
-      streamingSpan.end();
-    }
     logger.error(`Error streaming graph: ${err}`);
     handleStreamEnd(err.message, true);
   });
