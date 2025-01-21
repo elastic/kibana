@@ -87,10 +87,15 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
 
   const { isLoading, data: endpoints, resendRequest } = useLoadInferenceEndpoints();
 
-  const onSubmitSuccess = useCallback(() => {
-    resendRequest();
-    setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
-  }, [isInferenceFlyoutVisible, resendRequest]);
+  const onSubmitSuccess = useCallback(
+    (newEndpointId: string) => {
+      resendRequest();
+      setValue(newEndpointId);
+
+      setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
+    },
+    [isInferenceFlyoutVisible, resendRequest, setValue]
+  );
 
   const options: EuiSelectableOption[] = useMemo(() => {
     const filteredEndpoints = endpoints?.filter(

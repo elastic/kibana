@@ -16,7 +16,11 @@ export const useAddEndpoint = () => {
     useMLModelNotificationToasts();
 
   const addInferenceEndpoint = useCallback(
-    async (inferenceEndpoint: InferenceEndpoint, onSuccess?: () => void, onError?: () => void) => {
+    async (
+      inferenceEndpoint: InferenceEndpoint,
+      onSuccess?: (inferenceId: string) => void,
+      onError?: () => void
+    ) => {
       const { error } = await createInferenceEndpoint(
         inferenceEndpoint.config.taskType,
         inferenceEndpoint.config.inferenceId,
@@ -31,7 +35,7 @@ export const useAddEndpoint = () => {
       } else {
         showInferenceSuccessToast();
         if (onSuccess) {
-          onSuccess();
+          onSuccess(inferenceEndpoint.config.inferenceId);
         }
       }
     },

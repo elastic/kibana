@@ -30,12 +30,12 @@ interface InferenceFlyoutWrapperProps {
   onFlyoutClose: (state: boolean) => void;
   addInferenceEndpoint: (
     inferenceEndpoint: InferenceEndpoint,
-    onSuccess: () => void,
+    onSuccess: (inferenceId: string) => void,
     onError: () => void
   ) => Promise<void>;
   http: HttpSetup;
   toasts: IToasts;
-  onSubmitSuccess?: () => void;
+  onSubmitSuccess?: (inferenceId: string) => void;
   isEdit?: boolean;
 }
 
@@ -52,10 +52,13 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
   });
   const closeFlyout = () => onFlyoutClose(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const onSuccess = useCallback(() => {
-    setIsLoading(false);
-    onSubmitSuccess?.();
-  }, [onSubmitSuccess]);
+  const onSuccess = useCallback(
+    (inferenceId: string) => {
+      setIsLoading(false);
+      onSubmitSuccess?.(inferenceId);
+    },
+    [onSubmitSuccess]
+  );
   const onError = useCallback(() => {
     setIsLoading(false);
   }, []);

@@ -67,7 +67,7 @@ export function useMLModelNotificationToasts() {
   const showInferenceSuccessToast = () => {
     return toasts.addSuccess({
       title: i18n.translate('xpack.idxMgmt.mappingsEditor.createField.endpointAddedSuccess', {
-        defaultMessage: 'Endpoint added',
+        defaultMessage: 'Inference endpoint added',
       }),
     });
   };
