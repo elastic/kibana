@@ -48,6 +48,9 @@ export const getCountMetricAgg = () =>
       if (value === 0 && agg.params.emptyAsNull) {
         return null;
       }
+      if (value == null && !agg.params.emptyAsNull) {
+        return 0;
+      }
       return value;
     },
     isScalable() {
