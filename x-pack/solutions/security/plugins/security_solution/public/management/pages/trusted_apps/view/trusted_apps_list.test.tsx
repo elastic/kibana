@@ -61,9 +61,10 @@ describe('When on the trusted applications page', () => {
 
   it('should search using expected exception item fields', async () => {
     const expectedFilterString = parseQueryFilterToKQL('fooFooFoo', SEARCHABLE_FIELDS);
-    const { findAllByTestId } = render();
+    const { getAllByTestId } = render();
+
     await waitFor(async () => {
-      await expect(findAllByTestId('trustedAppsListPage-card')).resolves.toHaveLength(10);
+      expect(getAllByTestId('trustedAppsListPage-card')).toHaveLength(10);
     });
 
     apiMocks.responseProvider.exceptionsFind.mockClear();

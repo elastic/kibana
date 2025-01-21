@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
-
-export const DefaultSort: SortCombinations[] = [
-  {
-    '@timestamp': {
-      order: 'desc',
-    },
-  },
-];
+export class DetectedMappingFailure extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'DetectedMappingFailure';
+  }
+}
