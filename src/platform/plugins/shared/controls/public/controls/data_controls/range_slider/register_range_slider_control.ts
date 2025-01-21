@@ -14,7 +14,7 @@ import { registerControlFactory } from '../../../control_factory_registry';
 export function registerRangeSliderControl() {
   registerControlFactory(RANGE_SLIDER_CONTROL, async () => {
     const [{ getRangesliderControlFactory }] = await Promise.all([
-      import('./get_range_slider_control_factory'),
+      import('../../../controls_module'),
       untilPluginStartServicesReady(),
     ]);
 
