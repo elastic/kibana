@@ -18,6 +18,7 @@ import type {
 } from '@kbn/core/server';
 import type {
   AggregationsAggregate,
+  IlmExplainLifecycleRequest,
   OpenPointInTimeResponse,
   SearchRequest,
   SearchResponse,
@@ -38,6 +39,10 @@ import type {
   SearchHit,
   SearchRequest as ESSearchRequest,
   SortResults,
+  IndicesGetDataStreamRequest,
+  IndicesStatsRequest,
+  IlmGetLifecycleRequest,
+  IndicesGetRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { AgentPolicy, Installation } from '@kbn/fleet-plugin/common';
@@ -87,6 +92,16 @@ import { ENDPOINT_METRICS_INDEX } from '../../../common/constants';
 import { PREBUILT_RULES_PACKAGE_NAME } from '../../../common/detection_engine/constants';
 import { DEFAULT_DIAGNOSTIC_INDEX } from './constants';
 import type { TelemetryLogger } from './telemetry_logger';
+import type {
+  DataStream,
+  IlmPhase,
+  IlmPhases,
+  IlmPolicy,
+  IlmStats,
+  Index,
+  IndexStats,
+} from './indices.metadata.types';
+import { chunkStringsByMaxLength } from './collections_helpers';
 
 export interface ITelemetryReceiver {
   start(
@@ -238,6 +253,12 @@ export interface ITelemetryReceiver {
   setMaxPageSizeBytes(bytes: number): void;
 
   setNumDocsToSample(n: number): void;
+
+  getIndices(): Promise<string[]>;
+  getDataStreams(): Promise<DataStream[]>;
+  getIndicesStats(indices: string[]): AsyncGenerator<IndexStats, void, unknown>;
+  getIlmsStats(indices: string[]): AsyncGenerator<IlmStats, void, unknown>;
+  getIlmsPolicies(ilms: string[]): AsyncGenerator<IlmPolicy, void, unknown>;
 }
 
 export class TelemetryReceiver implements ITelemetryReceiver {
@@ -532,7 +553,6 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         const buckets = endpointMetadataResponse?.aggregations?.endpoint_metadata?.buckets ?? [];
 
         return buckets.reduce((cache, endpointAgentId) => {
-          // const id = endpointAgentId.latest_metadata.hits.hits[0]._id;
           const doc = endpointAgentId.latest_metadata.hits.hits[0]._source;
           cache.set(endpointAgentId.key, doc);
           return cache;
@@ -541,7 +561,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   }
 
   public async *fetchDiagnosticAlertsBatch(executeFrom: string, executeTo: string) {
-    this.logger.debug('Searching diagnostic alerts', {
+    this.logger.l('Searching diagnostic alerts', {
       from: executeFrom,
       to: executeTo,
     } as LogMeta);
@@ -585,10 +605,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           fetchMore = false;
         }
 
-        this.logger.debug('Diagnostic alerts to return', { numOfHits } as LogMeta);
+        this.logger.l('Diagnostic alerts to return', { numOfHits } as LogMeta);
         fetchMore = numOfHits > 0 && numOfHits < telemetryConfiguration.telemetry_max_buffer_size;
       } catch (e) {
-        this.logger.l('Error fetching alerts', { error: JSON.stringify(e) });
+        this.logger.warn('Error fetching alerts', { error_message: e.message } as LogMeta);
         fetchMore = false;
       }
 
@@ -761,7 +781,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     executeFrom: string,
     executeTo: string
   ) {
-    this.logger.debug('Searching prebuilt rule alerts from', {
+    this.logger.l('Searching prebuilt rule alerts from', {
       executeFrom,
       executeTo,
     } as LogMeta);
@@ -899,14 +919,14 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           pitId = response?.pit_id;
         }
 
-        this.logger.debug('Prebuilt rule alerts to return', { alerts: alerts.length } as LogMeta);
+        this.logger.l('Prebuilt rule alerts to return', { alerts: alerts.length } as LogMeta);
 
         yield alerts;
       }
     } catch (e) {
       // to keep backward compatibility with the previous implementation, silent return
       // once we start using `paginate` this error should be managed downstream
-      this.logger.l('Error fetching alerts', { error: JSON.stringify(e) });
+      this.logger.warn('Error fetching alerts', { error_message: e.message } as LogMeta);
       return;
     } finally {
       await this.closePointInTime(pitId);
@@ -930,10 +950,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     try {
       await this.esClient().closePointInTime({ id: pitId });
     } catch (error) {
-      this.logger.l('Error trying to close point in time', {
+      this.logger.warn('Error trying to close point in time', {
         pit: pitId,
-        error: JSON.stringify(error),
-      });
+        error_message: error.message,
+      } as LogMeta);
     }
   }
 
@@ -1019,7 +1039,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
         fetchMore = numOfHits > 0;
       } catch (e) {
-        this.logger.l('Error fetching alerts', { error: JSON.stringify(e) });
+        this.logger.warn('Error fetching alerts', { error_message: e.message } as LogMeta);
         fetchMore = false;
       }
 
@@ -1034,11 +1054,11 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     try {
       await this.esClient().closePointInTime({ id: pitId });
     } catch (error) {
-      this.logger.l('Error trying to close point in time', {
+      this.logger.warn('Error trying to close point in time', {
         pit: pitId,
-        error: JSON.stringify(error),
+        error_message: error.message,
         keepAlive,
-      });
+      } as LogMeta);
     }
 
     this.logger.l('Timeline alerts to return', { alerts: alertsToReturn.length });
@@ -1232,7 +1252,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
       return ret.license;
     } catch (err) {
-      this.logger.l('failed retrieving license', { error: JSON.stringify(err) });
+      this.logger.warn('failed retrieving license', { error_message: err.message } as LogMeta);
       return undefined;
     }
   }
@@ -1293,7 +1313,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         yield data;
       } while (esQuery.search_after !== undefined);
     } catch (e) {
-      this.logger.l('Error running paginated query', { error: JSON.stringify(e) });
+      this.logger.warn('Error running paginated query', { error_message: e.message } as LogMeta);
       throw e;
     } finally {
       await this.closePointInTime(pit.id);
@@ -1319,5 +1339,199 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       throw Error('elasticsearch client is unavailable');
     }
     return this._esClient;
+  }
+
+  public async getIndices(): Promise<string[]> {
+    const es = this.esClient();
+
+    this.logger.l('Fetching indices');
+
+    const request: IndicesGetRequest = {
+      index: '*',
+      expand_wildcards: ['open', 'hidden'],
+      filter_path: ['*.settings.index.provided_name'],
+    };
+
+    return es.indices
+      .get(request)
+      .then((indices) => Array.from(Object.keys(indices)))
+      .catch((error) => {
+        this.logger.warn('Error fetching indices', { error_message: error } as LogMeta);
+        throw error;
+      });
+  }
+
+  public async getDataStreams(): Promise<DataStream[]> {
+    const es = this.esClient();
+
+    this.logger.l('Fetching datstreams');
+
+    const request: IndicesGetDataStreamRequest = {
+      name: '*',
+      expand_wildcards: ['open', 'hidden'],
+      filter_path: ['data_streams.name', 'data_streams.indices'],
+    };
+
+    return es.indices
+      .getDataStream(request)
+      .then((response) =>
+        response.data_streams.map((ds) => {
+          return {
+            datastream_name: ds.name,
+            indices:
+              ds.indices?.map((index) => {
+                return {
+                  index_name: index.index_name,
+                  ilm_policy: index.ilm_policy,
+                } as Index;
+              }) ?? [],
+          } as DataStream;
+        })
+      )
+      .catch((error) => {
+        this.logger.warn('Error fetching datastreams', { error_message: error } as LogMeta);
+        throw error;
+      });
+  }
+
+  public async *getIndicesStats(indices: string[]) {
+    const es = this.esClient();
+
+    this.logger.l('Fetching indices stats');
+
+    const groupedIndices = chunkStringsByMaxLength(indices);
+
+    this.logger.l('Splitted indices into groups', {
+      groups: groupedIndices.length,
+      indices: indices.length,
+    } as LogMeta);
+
+    for (const group of groupedIndices) {
+      const request: IndicesStatsRequest = {
+        index: group,
+        level: 'indices',
+        metric: ['docs', 'search', 'store'],
+        expand_wildcards: ['open', 'hidden'],
+        filter_path: [
+          'indices.*.total.search.query_total',
+          'indices.*.total.search.query_time_in_millis',
+          'indices.*.total.docs.count',
+          'indices.*.total.docs.deleted',
+          'indices.*.total.store.size_in_bytes',
+        ],
+      };
+
+      try {
+        const response = await es.indices.stats(request);
+        for (const [indexName, stats] of Object.entries(response.indices ?? {})) {
+          yield {
+            index_name: indexName,
+            query_total: stats.total?.search?.query_total,
+            query_time_in_millis: stats.total?.search?.query_time_in_millis,
+            docs_count: stats.total?.docs?.count,
+            docs_deleted: stats.total?.docs?.deleted,
+            docs_total_size_in_bytes: stats.total?.store?.size_in_bytes,
+          } as IndexStats;
+        }
+      } catch (error) {
+        this.logger.warn('Error fetching indices stats', { error_message: error } as LogMeta);
+        throw error;
+      }
+    }
+  }
+
+  public async *getIlmsStats(indices: string[]) {
+    const es = this.esClient();
+
+    const groupedIndices = chunkStringsByMaxLength(indices);
+
+    this.logger.l('Splitted ilms into groups', {
+      groups: groupedIndices.length,
+      indices: indices.length,
+    } as LogMeta);
+
+    for (const group of groupedIndices) {
+      const request: IlmExplainLifecycleRequest = {
+        index: group.join(','),
+        only_managed: false,
+        filter_path: ['indices.*.phase', 'indices.*.age', 'indices.*.policy'],
+      };
+
+      const data = await es.ilm.explainLifecycle(request);
+
+      try {
+        for (const [indexName, stats] of Object.entries(data.indices ?? {})) {
+          const entry = {
+            index_name: indexName,
+            phase: ('phase' in stats && stats.phase) || undefined,
+            age: ('age' in stats && stats.age) || undefined,
+            policy_name: ('policy' in stats && stats.policy) || undefined,
+          } as IlmStats;
+
+          yield entry;
+        }
+      } catch (error) {
+        this.logger.warn('Error fetching ilm stats', { error_message: error } as LogMeta);
+        throw error;
+      }
+    }
+  }
+
+  public async *getIlmsPolicies(ilms: string[]) {
+    const es = this.esClient();
+
+    const phase = (obj: unknown): Nullable<IlmPhase> => {
+      let value: Nullable<IlmPhase>;
+      if (obj !== null && obj !== undefined && typeof obj === 'object' && 'min_age' in obj) {
+        value = {
+          min_age: obj.min_age,
+        } as IlmPhase;
+      }
+      return value;
+    };
+
+    const groupedIlms = chunkStringsByMaxLength(ilms);
+
+    this.logger.l('Splitted ilms into groups', {
+      groups: groupedIlms.length,
+      ilms: ilms.length,
+    } as LogMeta);
+
+    for (const group of groupedIlms) {
+      this.logger.l('Fetching ilm policies');
+      const request: IlmGetLifecycleRequest = {
+        name: group.join(','),
+        filter_path: [
+          '*.policy.phases.cold.min_age',
+          '*.policy.phases.delete.min_age',
+          '*.policy.phases.frozen.min_age',
+          '*.policy.phases.hot.min_age',
+          '*.policy.phases.warm.min_age',
+          '*.modified_date',
+        ],
+      };
+
+      const response = await es.ilm.getLifecycle(request);
+      try {
+        for (const [policyName, stats] of Object.entries(response ?? {})) {
+          yield {
+            policy_name: policyName,
+            modified_date: stats.modified_date,
+            phases: {
+              cold: phase(stats.policy.phases.cold),
+              delete: phase(stats.policy.phases.delete),
+              frozen: phase(stats.policy.phases.frozen),
+              hot: phase(stats.policy.phases.hot),
+              warm: phase(stats.policy.phases.warm),
+            } as IlmPhases,
+          } as IlmPolicy;
+        }
+      } catch (error) {
+        this.logger.warn('Error fetching ilm policies', {
+          error_message: error.message,
+        } as LogMeta);
+        throw error;
+      }
+    }
   }
 }

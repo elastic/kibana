@@ -52,4 +52,12 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
     buildkite-agent artifact upload 'target/test_failures/**/*'
     ts-node .buildkite/scripts/lifecycle/annotate_test_failures.ts
   fi
+
+fi
+
+if [[ $BUILDKITE_COMMAND_EXIT_STATUS -ne 0 ]]; then
+  # If the slack team environment variable is set, ping the team in slack
+  if [ -n "${PING_SLACK_TEAM:-}" ]; then
+    buildkite-agent meta-data set 'slack:ping_team:body' "${PING_SLACK_TEAM}, can you please take a look at the test failures?"
+  fi
 fi

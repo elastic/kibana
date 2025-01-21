@@ -33,6 +33,7 @@ Use one of the editors to create visualizations of your data. Each editor offers
 | <<add-image,Image>>
 | Personalize your dashboard with custom images
 
+
 | <<dashboard-links,Links>>
 | Add links to other dashboards or to external websites
 
@@ -278,7 +279,14 @@ For detailed information about writing on GitHub, click *Help* on the top-right 
 [[add-image]]
 == Image panels
 
-To personalize your dashboards, add your own logos and graphics with the *Image* panel. You can upload images from your computer, select previously uploaded images, or add images from an external link.
+To personalize your dashboards, add your own logos and graphics with the *Image* panel.
+
+[IMPORTANT]
+====
+Image uploads are limited to 10 MiB. 
+====
+
+You can upload images from your computer, select previously uploaded images, or add images from an external link.
 
 . From your dashboard, select *Add panel*.
 
@@ -291,7 +299,6 @@ image::images/dashboard_addImageEditor_8.7.0.png[Add image editor]
 
 To manage your uploaded image files, go to the *Files* management page using the navigation menu or the 
 <<kibana-navigation-search,global search field>>.
-
 
 [WARNING]
 ============================================================================

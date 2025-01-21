@@ -10,6 +10,8 @@ import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/a
 import React from 'react';
 import type { AssistantAvailability } from '@kbn/elastic-assistant';
 import { AssistantProvider } from '@kbn/elastic-assistant';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import { of } from 'rxjs';
 import type { UserProfileService } from '@kbn/core/public';
 import { BASE_SECURITY_CONVERSATIONS } from '../../assistant/content/conversations';
 
@@ -38,6 +40,13 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
     isAssistantEnabled: true,
   };
 
+  const mockUserProfileService = {
+    getCurrent: jest.fn(() => Promise.resolve({ avatar: 'avatar' })),
+  } as unknown as UserProfileService;
+
+  const chrome = chromeServiceMock.createStartContract();
+  chrome.getChromeStyle$.mockReturnValue(of('classic'));
+
   return (
     <AssistantProvider
       actionTypeRegistry={actionTypeRegistry}
@@ -53,7 +62,8 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
       navigateToApp={mockNavigateToApp}
       baseConversations={BASE_SECURITY_CONVERSATIONS}
       currentAppId={'test'}
-      userProfileService={jest.fn() as unknown as UserProfileService}
+      userProfileService={mockUserProfileService}
+      chrome={chrome}
     >
       {children}
     </AssistantProvider>

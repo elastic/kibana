@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.16.3>>
 * <<release-notes-8.16.2>>
 * <<release-notes-8.16.1>>
 * <<release-notes-8.16.0>>
@@ -82,6 +83,29 @@ Review important information about the {kib} 8.x releases.
 
 include::upgrade-notes.asciidoc[]
 
+[[release-notes-8.16.3]]
+== {kib} 8.16.3
+The 8.16.3 release includes the following bug fixes.
+[float]
+[[fixes-v8.16.3]]
+=== Bug fixes
+Alerting::
+* Updates handling of invalid RRule params and prevents infinite looping ({kibana-pull}205650[#205650]).
+* Fixes an issue with saving ECS group by fields at the root level for query DSL rules ({kibana-pull}203769[#203769]).
+* Fixes race condition in alerting rules data view selector ({kibana-pull}203654[#203654]).
+Data ingestion and Fleet::
+* Fixes an issue with showing all agent tags when agent list is filtered ({kibana-pull}205163[#205163]).
+Elastic Observability solution::
+* Preserves `kuery` filters when switching between Universal Profiling pages in new solution navigation ({kibana-pull}203545[#203545]).
+Elastic Search solution::
+* Adds ML as required plugin to Search Assistant ({kibana-pull}204009[#204009]).
+* Fixes web crawler name inconsistencies ({kibana-pull}202738[#202738]).
+Elastic Security solution::
+For the Elastic Security 8.16.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana security::
+* Fixes Integration and Datastream name validation ({kibana-pull}204943[#204943]).
+* Adds RBAC to the Automatic Import APIs ({kibana-pull}203882[#203882]).
+
 [[release-notes-8.16.2]]
 == {kib} 8.16.2
 
@@ -130,6 +154,28 @@ Machine Learning::
 
 [[release-notes-8.16.1]]
 == {kib} 8.16.1
+
+For information about the {kib} 8.16.1 release, review the following information.
+
+The 8.16.1 release includes the following known issues.
+
+[float]
+[[known-issues-8.16.1]]
+=== Known issues
+
+[discrete]
+[[known-201115]]
+.Kibana `Dev Tools > Console` incorrectly splits a request string that contains concatenated JSON objects, resulting in errors when submitting the requests to Elasticsearch.
+[%collapsible]
+====
+*Details* +
+The Console takes the body of the request and splits it into several JSON objects to send to Elasticsearch.  It is incorrectly parsing the concatenated JSON objects when braces appear within string values.
+
+*Workaround* +
+Send the request to Elasticsearch using other tools like curl.  This `Dev Tools > Console` bug is fixed in 8.16.2 and above.
+
+For more information, refer to {kibana-issue}200201[#200201] and {kibana-issue}201965[#201965].
+====
 
 The 8.16.1 release includes the following bug fixes.
 
@@ -195,6 +241,20 @@ More information can be found in the {observability-guide}/apm-collect-applicati
 For information about how to create APM API keys, please check the {observability-guide}/apm-api-key.html#apm-create-an-api-key[API key documentation].
 
 For more information, refer to {kibana-issue}199891[#199891] and {kibana-issue}199892[#199892].
+====
+
+[discrete]
+[[known-201115-2]]
+.Kibana `Dev Tools > Console` incorrectly splits a request string that contains concatenated JSON objects, resulting in errors when submitting the requests to Elasticsearch.
+[%collapsible]
+====
+*Details* +
+The Console takes the body of the request and splits it into several JSON objects to send to Elasticsearch.  It is incorrectly parsing the concatenated JSON objects when braces appear within string values.
+
+*Workaround* +
+Send the request to Elasticsearch using other tools like curl.  This `Dev Tools > Console` bug is fixed in 8.16.2 and above.
+
+For more information, refer to {kibana-issue}200201[#200201] and {kibana-issue}201965[#201965].
 ====
 
 [float]

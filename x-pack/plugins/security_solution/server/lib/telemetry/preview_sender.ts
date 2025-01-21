@@ -7,7 +7,7 @@
 
 import type { AxiosInstance, AxiosResponse } from 'axios';
 import axios, { AxiosHeaders } from 'axios';
-import type { Logger } from '@kbn/core/server';
+import type { EventTypeOpts, Logger } from '@kbn/core/server';
 import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
@@ -36,6 +36,9 @@ export class PreviewTelemetryEventsSender implements ITelemetryEventsSender {
 
   /** Last sent message */
   private sentMessages: string[] = [];
+
+  /** Last sent EBT events */
+  private ebtEventsSent: Array<{ eventType: string; eventData: object }> = [];
 
   /** Logger for this class  */
   private logger: Logger;
@@ -85,6 +88,10 @@ export class PreviewTelemetryEventsSender implements ITelemetryEventsSender {
 
   public getSentMessages() {
     return this.sentMessages;
+  }
+
+  public getEbtEventsSent(): Array<{ eventType: string; eventData: object }> {
+    return this.ebtEventsSent;
   }
 
   public setup(
@@ -173,5 +180,13 @@ export class PreviewTelemetryEventsSender implements ITelemetryEventsSender {
 
   public updateDefaultQueueConfig(config: QueueConfig): void {
     this.composite.updateDefaultQueueConfig(config);
+  }
+
+  public reportEBT<T>(eventTypeOpts: EventTypeOpts<T>, eventData: T): void {
+    this.ebtEventsSent.push({
+      eventType: eventTypeOpts.eventType,
+      eventData: eventData as object,
+    });
+    this.composite.reportEBT(eventTypeOpts, eventData);
   }
 }

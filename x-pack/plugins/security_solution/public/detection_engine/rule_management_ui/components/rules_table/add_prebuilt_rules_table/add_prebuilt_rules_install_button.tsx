@@ -19,7 +19,10 @@ import React, { useCallback, useMemo } from 'react';
 import { useBoolean } from 'react-use';
 import type { Rule } from '../../../../rule_management/logic';
 import type { RuleSignatureId } from '../../../../../../common/api/detection_engine';
-import { type AddPrebuiltRulesTableActions } from './add_prebuilt_rules_table_context';
+import {
+  useAddPrebuiltRulesTableContext,
+  type AddPrebuiltRulesTableActions,
+} from './add_prebuilt_rules_table_context';
 import * as i18n from './translations';
 
 export interface PrebuiltRulesInstallButtonProps {
@@ -28,7 +31,6 @@ export interface PrebuiltRulesInstallButtonProps {
   installOneRule: AddPrebuiltRulesTableActions['installOneRule'];
   loadingRules: RuleSignatureId[];
   isDisabled: boolean;
-  isInstallingAllRules: boolean;
 }
 
 export const PrebuiltRulesInstallButton = ({
@@ -37,8 +39,10 @@ export const PrebuiltRulesInstallButton = ({
   installOneRule,
   loadingRules,
   isDisabled,
-  isInstallingAllRules,
 }: PrebuiltRulesInstallButtonProps) => {
+  const {
+    state: { isInstallingAllRules },
+  } = useAddPrebuiltRulesTableContext();
   const isRuleInstalling = loadingRules.includes(ruleId) || isInstallingAllRules;
   const isInstallButtonDisabled = isRuleInstalling || isDisabled;
   const [isPopoverOpen, setPopover] = useBoolean(false);

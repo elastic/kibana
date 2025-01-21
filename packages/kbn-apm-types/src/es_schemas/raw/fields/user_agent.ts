@@ -12,7 +12,7 @@ export interface UserAgent {
     name: string;
   };
   name?: string;
-  original: string;
+  original?: string;
   os?: {
     name: string;
     version?: string;

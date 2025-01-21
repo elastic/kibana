@@ -49,7 +49,6 @@ function getLayoutOptions({
 
   return {
     animationDuration: animationOptions.duration,
-    // @ts-expect-error upgrade typescript v5.1.6
     animationEasing: animationOptions.easing,
     fit,
     name: 'dagre',
@@ -61,7 +60,7 @@ function getLayoutOptions({
     rankSep: 128,
     rankDir: 'LR',
     ranker: 'network-simplex',
-  };
+  } as cytoscape.LayoutOptions;
 }
 
 function setCursor(cursor: string, event: cytoscape.EventObjectCore) {
@@ -201,19 +200,18 @@ export function useCytoscapeEventHandlers({
       if (cy) {
         cy.removeListener(
           'custom:data drag dragfree layoutstop select tapstart tapend unselect',
-          undefined,
           debugHandler
         );
-        cy.removeListener('custom:data', undefined, dataHandler);
-        cy.removeListener('layoutstop', undefined, layoutstopHandler);
+        cy.removeListener('custom:data', dataHandler);
+        cy.removeListener('layoutstop', layoutstopHandler);
         cy.removeListener('mouseover', 'edge, node', mouseoverHandler);
         cy.removeListener('mouseout', 'edge, node', mouseoutHandler);
         cy.removeListener('select', 'node', selectHandler);
         cy.removeListener('unselect', 'node', unselectHandler);
         cy.removeListener('drag', 'node', dragHandler);
         cy.removeListener('dragfree', 'node', dragfreeHandler);
-        cy.removeListener('tapstart', undefined, tapstartHandler);
-        cy.removeListener('tapend', undefined, tapendHandler);
+        cy.removeListener('tapstart', tapstartHandler);
+        cy.removeListener('tapend', tapendHandler);
       }
     };
   }, [cy, serviceName, trackApmEvent, theme]);
