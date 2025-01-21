@@ -264,13 +264,12 @@ function changeActiveMatchInState(
 type AllCellsProps = Pick<
   UseInTableSearchMatchesProps,
   'renderCellValue' | 'visibleColumns' | 'inTableSearchTerm'
-> & { rowsCount: number };
+> & {
+  rowsCount: number;
+  onFinish: (params: { matchesList: RowMatches[]; totalMatchesCount: number }) => void;
+};
 
-function AllCellsHighlightsCounter(
-  props: AllCellsProps & {
-    onFinish: (params: { matchesList: RowMatches[]; totalMatchesCount: number }) => void;
-  }
-) {
+function AllCellsHighlightsCounter(props: AllCellsProps) {
   const [container] = useState(() => document.createDocumentFragment());
   const containerRef = useRef<DocumentFragment>();
   containerRef.current = container;
@@ -286,15 +285,8 @@ function AllCellsHighlightsCounter(
   return createPortal(<AllCells {...props} />, container);
 }
 
-function AllCells({
-  inTableSearchTerm,
-  visibleColumns,
-  renderCellValue,
-  rowsCount,
-  onFinish,
-}: AllCellsProps & {
-  onFinish: (params: { matchesList: RowMatches[]; totalMatchesCount: number }) => void;
-}) {
+function AllCells(props: AllCellsProps) {
+  const { inTableSearchTerm, visibleColumns, renderCellValue, rowsCount, onFinish } = props;
   const matchesListRef = useRef<RowMatches[]>([]);
   const totalMatchesCountRef = useRef<number>(0);
   const [rowIndex, setRowIndex] = useState<number>(0);
@@ -320,7 +312,8 @@ function AllCells({
     [setRowIndex, rowIndex, rowsCount, onFinish]
   );
 
-  // iterating through rows one at the time to avoid blocking the main thread
+  // Iterating through rows one at the time to avoid blocking the main thread.
+  // If user changes inTableSearchTerm, this component would unmount and the processing would be interrupted right away.
   return (
     <RowCells
       key={rowIndex}
@@ -341,7 +334,7 @@ function RowCells({
   visibleColumns,
   renderCellValue,
   onRowHighlightsCountFound,
-}: Omit<AllCellsProps, 'rowsCount'> & {
+}: Omit<AllCellsProps, 'rowsCount' | 'onFinish'> & {
   rowIndex: number;
   onRowHighlightsCountFound: (rowMatch: RowMatches) => void;
 }) {
