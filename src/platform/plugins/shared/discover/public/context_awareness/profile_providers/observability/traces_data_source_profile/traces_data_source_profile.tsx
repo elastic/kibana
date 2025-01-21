@@ -22,7 +22,7 @@ export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvid
   indexPattern?: string;
 }> => ({
   profileId: 'traces-data-source-profile',
-  // isExperimental: true,
+  isExperimental: true,
   profile: {
     getDefaultAppState: () => () => ({
       columns: [
