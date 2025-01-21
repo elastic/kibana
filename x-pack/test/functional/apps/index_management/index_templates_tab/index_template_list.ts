@@ -26,8 +26,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('shows warning callout when deleting a managed index template', async () => {
-      // Open the flyout for the first index template
-      await pageObjects.indexManagement.clickIndexTemplateNameLinkByIndex(0);
+      // Open the flyout for any managed index template
+      await pageObjects.indexManagement.clickIndexTemplateNameLink('ilm-history-7');
 
       // Open the manage context menu
       await testSubjects.click('manageTemplateButton');
