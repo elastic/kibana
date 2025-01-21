@@ -10,7 +10,8 @@
   ],
   "kbn_references": [
     "@kbn/esql-validation-autocomplete",
-    "@kbn/core"
+    "@kbn/core",
+    "@kbn/presentation-publishing"
   ],
   "exclude": [
     "target/**/*",

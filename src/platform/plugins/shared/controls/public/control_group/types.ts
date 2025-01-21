@@ -10,7 +10,7 @@
 import type { Observable } from 'rxjs';
 
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { PublishesESQLVariables } from '@kbn/esql-variables/common';
+import { PublishesESQLVariables } from '@kbn/esql-variables/public';
 import { Filter } from '@kbn/es-query';
 import {
   HasSaveNotification,

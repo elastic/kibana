@@ -190,6 +190,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             const esQueryConfigs = getEsQueryConfig(
               uiSettings as Parameters<typeof getEsQueryConfig>[0]
             );
+
             const namedParams = getNamedParams(query, input.timeRange, input.esqlVariables);
 
             if (namedParams.length) {

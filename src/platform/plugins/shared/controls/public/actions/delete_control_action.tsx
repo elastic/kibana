@@ -16,7 +16,6 @@ import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/pub
 
 import { ACTION_DELETE_CONTROL } from '.';
 import { coreServices } from '../services/kibana_services';
-import { isVariablesControl } from '../controls/esql_control/types';
 
 export class DeleteControlAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_DELETE_CONTROL;
@@ -79,7 +78,6 @@ export class DeleteControlAction implements Action<EmbeddableApiContext> {
       .then((confirmed) => {
         if (confirmed) {
           embeddable.parentApi.removePanel(embeddable.uuid);
-          if (isVariablesControl(embeddable)) embeddable.clearVariables();
         }
       });
   }

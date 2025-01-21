@@ -11,7 +11,6 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { StateComparators } from '@kbn/presentation-publishing';
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import { esqlVariablesService } from '@kbn/esql-variables/common';
 import { getMockedControlGroupApi } from '../mocks/control_mocks';
 import type { ControlApiRegistration } from '../types';
 import { getESQLControlFactory } from './get_esql_control_factory';
@@ -49,9 +48,12 @@ describe('ESQLControlApi', () => {
       esqlQuery: 'FROM foo | WHERE column = ?variable1',
       controlType: 'STATIC_VALUES',
     } as ESQLControlState;
-    await factory.buildControl(initialState, buildApiMock, uuid, controlGroupApi);
-    expect(esqlVariablesService.getVariables().length).toBe(1);
-    expect(esqlVariablesService.getVariables()[0].key).toBe('variable1');
+    const { api } = await factory.buildControl(initialState, buildApiMock, uuid, controlGroupApi);
+    expect(api.esqlVariable$.value).toStrictEqual({
+      key: 'variable1',
+      type: 'values',
+      value: 'option1',
+    });
   });
 
   test('Should get the serialized state correctly', async () => {
@@ -80,21 +82,6 @@ describe('ESQLControlApi', () => {
     });
   });
 
-  test('calling the clear variables from the api should clear the variables from the ES|QL service', async () => {
-    const initialState = {
-      selectedOptions: ['option1'],
-      availableOptions: ['option1', 'option2'],
-      variableName: 'variable1',
-      variableType: 'values',
-      esqlQuery: 'FROM foo | WHERE column = ?variable1',
-      controlType: 'STATIC_VALUES',
-    } as ESQLControlState;
-    const { api } = await factory.buildControl(initialState, buildApiMock, uuid, controlGroupApi);
-    expect(esqlVariablesService.getVariables().length).toBe(1);
-    api.clearVariables();
-    expect(esqlVariablesService.getVariables().length).toBe(0);
-  });
-
   test('changing the dropdown should update the corresponding variable from the ES|QL service ', async () => {
     const initialState = {
       selectedOptions: ['option1'],
@@ -104,21 +91,29 @@ describe('ESQLControlApi', () => {
       esqlQuery: 'FROM foo | WHERE column = ?variable1',
       controlType: 'STATIC_VALUES',
     } as ESQLControlState;
-    const { Component } = await factory.buildControl(
+    const { Component, api } = await factory.buildControl(
       initialState,
       buildApiMock,
       uuid,
       controlGroupApi
     );
-    expect(esqlVariablesService.getVariables().length).toBe(1);
-    expect(esqlVariablesService.getVariables()[0].value).toBe('option1');
+
+    expect(api.esqlVariable$.value).toStrictEqual({
+      key: 'variable1',
+      type: 'values',
+      value: 'option1',
+    });
 
     const { findByTestId, findByTitle } = render(<Component className="" />);
     fireEvent.click(await findByTestId('comboBoxSearchInput'));
     fireEvent.click(await findByTitle('option2'));
 
     await waitFor(() => {
-      expect(esqlVariablesService.getVariables()[0].value).toBe('option2');
+      expect(api.esqlVariable$.value).toStrictEqual({
+        key: 'variable1',
+        type: 'values',
+        value: 'option2',
+      });
     });
   });
 });

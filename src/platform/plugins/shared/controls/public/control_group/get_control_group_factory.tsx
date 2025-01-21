@@ -10,7 +10,7 @@
 import { DataView } from '@kbn/data-views-plugin/common';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
-import { PublishesESQLVariable, apiPublishesESQLVariable } from '@kbn/esql-variables/common';
+import { PublishesESQLVariable, apiPublishesESQLVariable } from '@kbn/esql-variables/public';
 import { i18n } from '@kbn/i18n';
 import {
   apiHasSaveNotification,
