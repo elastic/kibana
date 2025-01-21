@@ -29,7 +29,7 @@ import {
 import type { DiscoverServices } from '../../build_services';
 import { createObservabilityRootProfileProvider } from './observability/observability_root_profile';
 import { createDeprecationLogsDataSourceProfileProvider } from './common/deprecation_logs';
-import { createTracesDataSourceProfileProvider } from './observability/traces';
+import { createTracesDataSourceProfileProvider } from './observability/traces_data_source_profile';
 
 /**
  * Register profile providers for root, data source, and document contexts to the profile profile services
