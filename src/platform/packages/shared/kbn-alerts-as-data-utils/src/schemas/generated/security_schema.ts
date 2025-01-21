@@ -212,6 +212,9 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.workflow_tags': schemaStringArray,
   'kibana.alert.workflow_user': schemaString,
   'kibana.version': schemaString,
+  'service.asset.criticality': schemaString,
+  'service.risk.calculated_level': schemaString,
+  'service.risk.calculated_score_norm': schemaNumber,
   tags: schemaStringArray,
   'user.asset.criticality': schemaString,
 });

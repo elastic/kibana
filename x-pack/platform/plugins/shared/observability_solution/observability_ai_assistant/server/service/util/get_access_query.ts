@@ -25,9 +25,7 @@ export function getAccessQuery({
             bool: {
               should: [
                 {
-                  term: {
-                    namespace,
-                  },
+                  term: { namespace },
                 },
                 {
                   bool: {
@@ -47,7 +45,7 @@ export function getAccessQuery({
   ];
 }
 
-function getUserAccessFilters(user?: { name: string; id?: string }) {
+export function getUserAccessFilters(user?: { name: string; id?: string }) {
   if (!user) {
     return [];
   }
