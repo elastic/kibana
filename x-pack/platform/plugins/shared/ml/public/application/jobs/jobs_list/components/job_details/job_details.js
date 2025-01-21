@@ -177,19 +177,23 @@ export class JobDetailsUI extends Component {
             </>
           ),
         },
-        {
-          id: 'counts',
-          'data-test-subj': 'mlJobListTab-counts',
-          name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.countsLabel', {
-            defaultMessage: 'Counts',
-          }),
-          content: (
-            <JobDetailsPane
-              data-test-subj="mlJobDetails-counts"
-              sections={[counts, modelSizeStats, jobTimingStats]}
-            />
-          ),
-        },
+        ...(this.props.mode !== 'flyout'
+          ? [
+              {
+                id: 'counts',
+                'data-test-subj': 'mlJobListTab-counts',
+                name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.countsLabel', {
+                  defaultMessage: 'Counts',
+                }),
+                content: (
+                  <JobDetailsPane
+                    data-test-subj="mlJobDetails-counts"
+                    sections={[counts, modelSizeStats, jobTimingStats]}
+                  />
+                ),
+              },
+            ]
+          : []),
         {
           id: 'json',
           'data-test-subj': 'mlJobListTab-json',

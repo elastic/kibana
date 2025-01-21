@@ -11,6 +11,7 @@ import type { IdBadgesProps } from './id_badges';
 import { IdBadges } from './id_badges';
 
 const props: IdBadgesProps = {
+  page: 'jobs',
   limit: 2,
   selectedGroups: [
     {
