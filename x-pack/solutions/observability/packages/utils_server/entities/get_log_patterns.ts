@@ -193,7 +193,6 @@ export async function runCategorizeTextAggregation({
         random_sampler: {
           probability: samplingProbability,
         },
-        // @ts-expect-error aggs.changes.change_point does not have compatible types
         aggs,
       },
     },
@@ -203,14 +202,11 @@ export async function runCategorizeTextAggregation({
     return [];
   }
 
-  // @ts-expect-error Due to the expect-error above, the type inferrence is broken here
   const fieldAggregates = omit(response.aggregations.sampler, 'seed', 'doc_count', 'probability');
 
   return Object.entries(fieldAggregates).flatMap(([fieldName, aggregate]) => {
-    // @ts-expect-error Due to the expect-error above, the type inferrence is broken here
     const buckets = aggregate.buckets;
 
-    // @ts-expect-error Due to the expect-error above, the type inferrence is broken here
     return buckets.map((bucket) => {
       return {
         field: fieldName,
@@ -224,7 +220,6 @@ export async function runCategorizeTextAggregation({
         lastOccurrence: new Date(bucket.maxTimestamp.value!).toISOString(),
         ...('timeseries' in bucket
           ? {
-              // @ts-expect-error Due to the expect-error above, the type inferrence is broken here
               timeseries: bucket.timeseries.buckets.map((dateBucket) => ({
                 x: dateBucket.key,
                 y: dateBucket.doc_count,
@@ -234,17 +229,12 @@ export async function runCategorizeTextAggregation({
                   return {
                     type: changePointType as ChangePointType,
                     significance:
-                      // @ts-expect-error Due to the expect-error above, the type inferrence is broken here
                       change.p_value !== undefined ? pValueToLabel(change.p_value) : null,
-                    // @ts-expect-error Due to the expect-error above, the type inferrence is broken here
                     change_point: change.change_point,
-                    // @ts-expect-error Due to the expect-error above, the type inferrence is broken here
                     p_value: change.p_value,
                     timestamp:
-                      // @ts-expect-error Due to the expect-error above, the type inferrence is broken here
                       change.change_point !== undefined
-                        ? // @ts-expect-error Due to the expect-error above, the type inferrence is broken here
-                          bucket.timeseries.buckets[change.change_point].key_as_string
+                        ? bucket.timeseries.buckets[change.change_point].key_as_string
                         : undefined,
                   };
                 }
