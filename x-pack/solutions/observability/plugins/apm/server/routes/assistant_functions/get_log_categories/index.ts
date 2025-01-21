@@ -9,7 +9,7 @@ import datemath from '@elastic/datemath';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import { flattenObject } from '@kbn/key-value-metadata-table';
+import { getFlattenedKeyValuePairs } from '@kbn/key-value-metadata-table';
 import type { KeyValuePair } from '@kbn/key-value-metadata-table';
 import { maybe } from '../../../../common/utils/maybe';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
@@ -153,6 +153,6 @@ export async function getLogCategories({
 
   return {
     logCategories: await Promise.all(promises ?? []),
-    entities: flattenObject(sampleDoc),
+    entities: getFlattenedKeyValuePairs(sampleDoc),
   };
 }

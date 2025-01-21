@@ -8,7 +8,7 @@
 import { EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { KeyValueTable, flattenObject } from '@kbn/key-value-metadata-table';
+import { KeyValueTable, getFlattenedKeyValuePairs } from '@kbn/key-value-metadata-table';
 import { Stackframe } from '@kbn/apm-types';
 import styled from '@emotion/styled';
 
@@ -27,7 +27,7 @@ export function Variables({ vars }: Props) {
   if (!vars) {
     return null;
   }
-  const flattenedVariables = flattenObject(vars);
+  const flattenedVariables = getFlattenedKeyValuePairs(vars);
   return (
     <React.Fragment>
       <VariablesContainer>

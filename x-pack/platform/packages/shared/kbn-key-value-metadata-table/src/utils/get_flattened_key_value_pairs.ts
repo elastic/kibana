@@ -14,7 +14,7 @@ export interface KeyValuePair {
   value: unknown;
 }
 
-export const flattenObject = (
+export const getFlattenedKeyValuePairs = (
   item: Maybe<Record<string, any | any[]>>,
   parentKey?: string
 ): KeyValuePair[] => {
@@ -29,7 +29,7 @@ export const flattenObject = (
         // @ts-expect-error upgrade typescript v5.1.6
         if (isObject(item[key])) {
           // @ts-expect-error upgrade typescript v5.1.6
-          return acc.concat(flattenObject(item[key], currentKey));
+          return acc.concat(getFlattenedKeyValuePairs(item[key], currentKey));
         } else {
           // @ts-expect-error upgrade typescript v5.1.6
           acc.push({ key: currentKey, value: item[key] });

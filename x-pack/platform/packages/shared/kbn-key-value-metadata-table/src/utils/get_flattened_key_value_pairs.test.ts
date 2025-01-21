@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { flattenObject } from './flatten_object';
+import { getFlattenedKeyValuePairs } from './get_flattened_key_value_pairs';
 
 describe('FlattenObject', () => {
   it('flattens multi level item', () => {
@@ -22,7 +22,7 @@ describe('FlattenObject', () => {
       },
     };
 
-    const flatten = flattenObject(data);
+    const flatten = getFlattenedKeyValuePairs(data);
     expect(flatten).toEqual([
       { key: 'bar.item3.itemA.itemAB', value: 'value AB' },
       { key: 'bar.item4', value: 'value 4' },
@@ -35,8 +35,8 @@ describe('FlattenObject', () => {
     ]);
   });
   it('returns an empty array if no valid object is provided', () => {
-    expect(flattenObject({})).toEqual([]);
-    expect(flattenObject(null)).toEqual([]);
-    expect(flattenObject(undefined)).toEqual([]);
+    expect(getFlattenedKeyValuePairs({})).toEqual([]);
+    expect(getFlattenedKeyValuePairs(null)).toEqual([]);
+    expect(getFlattenedKeyValuePairs(undefined)).toEqual([]);
   });
 });

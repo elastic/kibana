@@ -6,5 +6,5 @@
  */
 
 export { KeyValueTable } from './src';
-export { flattenObject } from './src/utils/flatten_object';
-export type { KeyValuePair } from './src/utils/flatten_object';
+export { getFlattenedKeyValuePairs } from './src/utils/get_flattened_key_value_pairs';
+export type { KeyValuePair } from './src/utils/get_flattened_key_value_pairs';
