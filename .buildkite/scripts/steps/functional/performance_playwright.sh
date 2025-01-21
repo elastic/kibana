@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
-
-echo "Manually fetching Kibana with SHA=$BUILDKITE_COMMIT"
-wget -q "https://github.com/elastic/kibana/archive/$BUILDKITE_COMMIT.tar.gz" -O "kibana.tar.gz"
-tar -xzf kibana.tar.gz
-cd "kibana-$BUILDKITE_COMMIT"
-
 echo "Running Kibana setup scripts"
 
 source .buildkite/scripts/common/util.sh

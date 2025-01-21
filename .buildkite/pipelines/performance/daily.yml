@@ -23,7 +23,13 @@ steps:
     plugins:
       - custom-checkout#v1.0.0:
           skip_checkout: true
-    command: .buildkite/scripts/steps/functional/performance_playwright.sh
+    command:
+      - echo "Manually fetching Kibana with SHA=$BUILDKITE_COMMIT..."
+      - wget -q "https://github.com/elastic/kibana/archive/$BUILDKITE_COMMIT.tar.gz" -O "kibana.tar.gz"
+      - echo "Extracting Kibana archive..."
+      - tar -xvzf kibana.tar.gz
+      - echo "Running Performance Playwright script..."
+      - ./kibana-$BUILDKITE_COMMIT/.buildkite/scripts/steps/functional/performance_playwright.sh
     env:
       PERFORMANCE_ENABLE_TELEMETRY: true
     agents:
