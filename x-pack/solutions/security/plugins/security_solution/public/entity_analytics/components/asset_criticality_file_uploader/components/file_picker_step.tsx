@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, useI18n } from '@kbn/i18n-react';
 
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -46,17 +47,15 @@ const listStyle = css`
 
 export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePickerStepProps> =
   React.memo(({ onFileChange, errorMessage, isLoading }) => {
-    const i18n = useI18n();
+    const { formatListToParts } = useI18n();
 
     const formatBytes = useFormatBytes();
     const { euiTheme } = useEuiTheme();
     const entityTypes = useAssetCriticalityEntityTypes();
     const i18nOrList = (items: string[]) =>
-      i18n
-        .formatListToParts(items, {
-          type: 'disjunction',
-        })
-        .map(({ type, value }) => (type === 'element' ? <b>{value}</b> : value)); // bolded list items
+      formatListToParts(items, {
+        type: 'disjunction',
+      }).map(({ type, value }) => (type === 'element' ? <b>{value}</b> : value)); // bolded list items
 
     return (
       <>
@@ -167,6 +166,12 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
           onChange={onFileChange}
           isInvalid={!!errorMessage}
           isLoading={isLoading}
+          aria-label={i18n.translate(
+            'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.filePickerAriaLabel',
+            {
+              defaultMessage: 'Asset criticality file picker',
+            }
+          )}
         />
         <br />
         {errorMessage && (
