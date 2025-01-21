@@ -26,6 +26,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const log = getService('log');
   const ml = getService('ml');
   const es = getService('es');
+  const retry = getService('retry');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   describe('when calling summarize function', function () {
@@ -37,7 +38,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     before(async () => {
       await importTinyElserModel(ml);
       await setupKnowledgeBase(observabilityAIAssistantAPIClient);
-      await waitForKnowledgeBaseReady(getService);
+      await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
 
       proxy = await createLlmProxy(log);
       connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({

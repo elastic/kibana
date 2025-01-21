@@ -8,8 +8,9 @@
 import expect from '@kbn/expect';
 import { Client } from '@elastic/elasticsearch';
 import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/server/service/inference_endpoint';
+import { ToolingLog } from '@kbn/tooling-log';
+import { RetryService } from '@kbn/ftr-common-functional-services';
 import type { ObservabilityAIAssistantApiClient } from '../../../../services/observability_ai_assistant_api';
-import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { MachineLearningProvider } from '../../../../../services/ml';
 import { SUPPORTED_TRAINED_MODELS } from '../../../../../../functional/services/ml/api';
 
@@ -44,13 +45,15 @@ export async function setupKnowledgeBase(
   expect(status).to.be(200);
 }
 
-export async function waitForKnowledgeBaseReady(
-  getService: DeploymentAgnosticFtrProviderContext['getService']
-) {
-  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
-  const log = getService('log');
-  const retry = getService('retry');
-
+export async function waitForKnowledgeBaseReady({
+  observabilityAIAssistantAPIClient,
+  log,
+  retry,
+}: {
+  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient;
+  log: ToolingLog;
+  retry: RetryService;
+}) {
   await retry.try(async () => {
     log.debug(`Waiting for knowledge base to be ready...`);
     const res = await observabilityAIAssistantAPIClient.editor({

@@ -47,6 +47,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const es = getService('es');
   const ml = getService('ml');
   const retry = getService('retry');
+  const log = getService('log');
 
   const archive =
     'x-pack/test/functional/es_archives/observability/ai_assistant/knowledge_base_8_15';
@@ -77,7 +78,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await esArchiver.load(archive);
       await importTinyElserModel(ml);
       await setupKnowledgeBase(observabilityAIAssistantAPIClient);
-      await waitForKnowledgeBaseReady(getService);
+      await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
     });
 
     after(async () => {

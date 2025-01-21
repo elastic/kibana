@@ -20,6 +20,8 @@ import {
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const ml = getService('ml');
   const es = getService('es');
+  const log = getService('log');
+  const retry = getService('retry');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   describe('Knowledge base', function () {
@@ -28,7 +30,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     before(async () => {
       await importTinyElserModel(ml);
       await setupKnowledgeBase(observabilityAIAssistantAPIClient);
-      await waitForKnowledgeBaseReady(getService);
+      await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
     });
 
     after(async () => {
