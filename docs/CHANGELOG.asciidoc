@@ -129,12 +129,13 @@ For information about the {kib} 8.17.0 release, review the following information
 === Known issues
 
 // tag::known-issue-206400[]
-.Upgrade Assistant displays configured source mode in mappings as critical deprecation issue
+.Upgrade Assistant displays configured source mode in mappings as critical deprecation issue.
 [%collapsible]
 ====
 *Details* +
 When upgrading to a newer version, the Upgrade Assistant displays critical warnings for the deprecation of configuring source mode in mappings. These warnings can safely be ignored.
-For more information, refer to https://github.com/elastic/kibana/issues/206400[#206400]
+
+For more information, refer to https://github.com/elastic/kibana/issues/206400[#206400].
 ====
 // end::known-issue-206400[]
 
