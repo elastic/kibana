@@ -30,17 +30,10 @@ export const storybookAliases = {
   discover: 'src/plugins/discover/.storybook',
   embeddable: 'src/plugins/embeddable/.storybook',
   esql_ast_inspector: 'examples/esql_ast_inspector/.storybook',
-<<<<<<< HEAD
   es_ui_shared: 'src/plugins/es_ui_shared/.storybook',
   expandable_flyout: 'packages/kbn-expandable-flyout/.storybook',
   expression_error: 'src/plugins/expression_error/.storybook',
   expression_image: 'src/plugins/expression_image/.storybook',
-=======
-  es_ui_shared: 'src/platform/plugins/shared/es_ui_shared/.storybook',
-  expandable_flyout: 'x-pack/solutions/security/packages/expandable-flyout/.storybook',
-  expression_error: 'src/platform/plugins/shared/expression_error/.storybook',
-  expression_image: 'src/platform/plugins/shared/expression_image/.storybook',
->>>>>>> ddcf076ff40 (Fixes for storybook aliases (#204842))
   expression_metric_vis: 'src/plugins/chart_expressions/expression_legacy_metric/.storybook',
   expression_metric: 'src/plugins/expression_metric/.storybook',
   expression_partition_vis: 'src/plugins/chart_expressions/expression_partition_vis/.storybook',
