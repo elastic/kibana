@@ -33,11 +33,13 @@ const globalState: {
   registered: boolean;
   currentTest: Test | null;
   snapshotStates: Record<string, ISnapshotState>;
+  deploymentAgnostic: boolean;
 } = {
   updateSnapshot: 'none',
   registered: false,
   currentTest: null,
   snapshotStates: {},
+  deploymentAgnostic: false,
 };
 
 const modifyStackTracePrepareOnce = once(() => {
@@ -125,7 +127,7 @@ export function decorateSnapshotUi({
       const snapshotState = globalState.snapshotStates[file];
 
       if (snapshotState && !test.isPassed()) {
-        snapshotState.markSnapshotsAsCheckedForTest(test.fullTitle());
+        snapshotState.markSnapshotsAsCheckedForTest(getTestTitle(test));
       }
     });
 
@@ -194,7 +196,7 @@ export function expectSnapshot(received: any) {
 
   const context: SnapshotContext = {
     snapshotState,
-    currentTestName: test.fullTitle(),
+    currentTestName: getTestTitle(test),
   };
 
   return {
@@ -202,6 +204,18 @@ export function expectSnapshot(received: any) {
     // use bind to support optional 3rd argument (actual)
     toMatchInline: expectToMatchInlineSnapshot.bind(null, context, received),
   };
+}
+
+function getTestTitle(test: Test) {
+  return (
+    test
+      .fullTitle()
+      // remove deployment type from test title so that a single snapshot can be used for all deployment types
+      .replace(
+        /^(Serverless|Stateful)\s+([^\-]+)\s*-?\s*Deployment-agnostic/g,
+        'Deployment-agnostic'
+      )
+  );
 }
 
 function expectToMatchSnapshot(snapshotContext: SnapshotContext, received: any) {

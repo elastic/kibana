@@ -218,6 +218,10 @@ export function AddCisIntegrationFormPageProvider({
     await testSubjects.click('integrationNameLink');
   };
 
+  const navigateToEditAgentlessIntegrationPage = async () => {
+    await testSubjects.click('agentlessIntegrationNameLink');
+  };
+
   const navigateToAddIntegrationKspmPage = async (space?: string) => {
     const options = space
       ? {
@@ -485,7 +489,7 @@ export function AddCisIntegrationFormPageProvider({
     await navigateToIntegrationCspList();
     await PageObjects.header.waitUntilLoadingHasFinished();
 
-    await navigateToEditIntegrationPage();
+    await navigateToEditAgentlessIntegrationPage();
     await PageObjects.header.waitUntilLoadingHasFinished();
 
     // Fill out form to edit an agentless integration
@@ -498,7 +502,7 @@ export function AddCisIntegrationFormPageProvider({
     // Check if the Direct Access Key is updated package policy api with successful toast
     expect(await testSubjects.exists('policyUpdateSuccessToast')).to.be(true);
 
-    await navigateToEditIntegrationPage();
+    await navigateToEditAgentlessIntegrationPage();
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
@@ -511,8 +515,19 @@ export function AddCisIntegrationFormPageProvider({
     return await integration.getVisibleText();
   };
 
+  const getFirstCspmIntegrationPageAgentlessIntegration = async () => {
+    const integration = await testSubjects.find('agentlessIntegrationNameLink');
+    return await integration.getVisibleText();
+  };
+
   const getFirstCspmIntegrationPageAgent = async () => {
     const agent = await testSubjects.find('agentPolicyNameLink');
+    // this is assuming that the agent was just created therefor should be the first element
+    return await agent.getVisibleText();
+  };
+
+  const getFirstCspmIntegrationPageAgentlessStatus = async () => {
+    const agent = await testSubjects.find('agentlessStatusBadge');
     // this is assuming that the agent was just created therefor should be the first element
     return await agent.getVisibleText();
   };
@@ -568,10 +583,13 @@ export function AddCisIntegrationFormPageProvider({
     testSubjectIds,
     inputIntegrationName,
     getFirstCspmIntegrationPageIntegration,
+    getFirstCspmIntegrationPageAgentlessIntegration,
     getFirstCspmIntegrationPageAgent,
+    getFirstCspmIntegrationPageAgentlessStatus,
     getAgentBasedPolicyValue,
     showSuccessfulToast,
     showSetupTechnologyComponent,
     navigateToEditIntegrationPage,
+    navigateToEditAgentlessIntegrationPage,
   };
 }

@@ -14,7 +14,7 @@
       "tags": [],
       "label": "DatasetQualityPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/dataset_quality/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/dataset_quality/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -28,7 +28,7 @@
       "tags": [],
       "label": "DatasetQualityPluginStart",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/dataset_quality/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/dataset_quality/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -46,7 +46,7 @@
             "DatasetQualityProps",
             ">"
           ],
-          "path": "x-pack/plugins/observability_solution/dataset_quality/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/dataset_quality/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -64,7 +64,7 @@
             "DatasetQualityController",
             ">"
           ],
-          "path": "x-pack/plugins/observability_solution/dataset_quality/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/dataset_quality/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -81,7 +81,7 @@
                 "DatasetQualityPublicState",
                 "> | undefined; }"
               ],
-              "path": "x-pack/plugins/observability_solution/dataset_quality/public/controller/dataset_quality/create_controller.ts",
+              "path": "x-pack/platform/plugins/shared/dataset_quality/public/controller/dataset_quality/create_controller.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -101,7 +101,7 @@
             "DatasetQualityDetailsProps",
             ">"
           ],
-          "path": "x-pack/plugins/observability_solution/dataset_quality/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/dataset_quality/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -119,7 +119,7 @@
             "DatasetQualityDetailsController",
             ">"
           ],
-          "path": "x-pack/plugins/observability_solution/dataset_quality/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/dataset_quality/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -136,7 +136,7 @@
                 "DatasetQualityDetailsPublicStateUpdate",
                 "; }"
               ],
-              "path": "x-pack/plugins/observability_solution/dataset_quality/public/controller/dataset_quality_details/create_controller.ts",
+              "path": "x-pack/platform/plugins/shared/dataset_quality/public/controller/dataset_quality_details/create_controller.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -168,7 +168,7 @@
         "signature": [
           "(dataStreamName: string) => { type: \"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\"; dataset: string; namespace: string; }"
         ],
-        "path": "x-pack/plugins/observability_solution/dataset_quality/common/utils/dataset_name.ts",
+        "path": "x-pack/platform/plugins/shared/dataset_quality/common/utils/dataset_name.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -182,7 +182,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/plugins/observability_solution/dataset_quality/common/utils/dataset_name.ts",
+            "path": "x-pack/platform/plugins/shared/dataset_quality/common/utils/dataset_name.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -200,7 +200,7 @@
         "tags": [],
         "label": "DatasetQualityConfig",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/dataset_quality/common/plugin_config.ts",
+        "path": "x-pack/platform/plugins/shared/dataset_quality/common/plugin_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -311,6 +311,24 @@
           "DatasetQualityRouteHandlerResources",
           ", { isFieldLimitIssue: boolean; fieldCount: number; totalFieldLimit: number; } & { ignoreMalformed?: boolean | undefined; nestedFieldLimit?: number | undefined; fieldMapping?: { type?: string | undefined; ignore_above?: number | undefined; } | undefined; defaultPipeline?: string | undefined; }, ",
           "DatasetQualityRouteCreateOptions",
+          ">; \"GET /internal/dataset_quality/data_streams/{dataStream}/integration/check\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/dataset_quality/data_streams/{dataStream}/integration/check\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ dataStream: ",
+          "StringC",
+          "; }>; }>, ",
+          "DatasetQualityRouteHandlerResources",
+          ", { isIntegration: false; areAssetsAvailable: boolean; } | { isIntegration: true; areAssetsAvailable: true; integration: { name: string; } & { title?: string | undefined; version?: string | undefined; icons?: ({ src: string; } & { path?: string | undefined; size?: string | undefined; title?: string | undefined; type?: string | undefined; })[] | undefined; datasets?: { [x: string]: string; } | undefined; }; }, ",
+          "DatasetQualityRouteCreateOptions",
           ">; \"GET /internal/dataset_quality/data_streams/{dataStream}/settings\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
@@ -457,6 +475,32 @@
           "DatasetQualityRouteHandlerResources",
           ", { aggregatable: boolean; datasets: string[]; }, ",
           "DatasetQualityRouteCreateOptions",
+          ">; \"GET /internal/dataset_quality/data_streams/total_docs\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/dataset_quality/data_streams/total_docs\", ",
+          "TypeC",
+          "<{ query: ",
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ start: ",
+          "Type",
+          "<number, string, unknown>; end: ",
+          "Type",
+          "<number, string, unknown>; }>, ",
+          "TypeC",
+          "<{ type: ",
+          "KeyofC",
+          "<{ logs: null; metrics: null; traces: null; synthetics: null; profiling: null; }>; }>]>; }>, ",
+          "DatasetQualityRouteHandlerResources",
+          ", { totalDocs: { dataset: string; count: number; }[]; }, ",
+          "DatasetQualityRouteCreateOptions",
           ">; \"GET /internal/dataset_quality/data_streams/degraded_docs\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
@@ -477,15 +521,15 @@
           "Type",
           "<number, string, unknown>; }>, ",
           "TypeC",
-          "<{ type: ",
-          "KeyofC",
-          "<{ logs: null; metrics: null; traces: null; synthetics: null; profiling: null; }>; }>, ",
+          "<{ types: ",
+          "Type",
+          "<(\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[], (\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[], unknown>; }>, ",
           "PartialC",
           "<{ datasetQuery: ",
           "StringC",
           "; }>]>; }>, ",
           "DatasetQualityRouteHandlerResources",
-          ", { degradedDocs: { dataset: string; count: number; docsCount: number; percentage: number; }[]; }, ",
+          ", { degradedDocs: { dataset: string; count: number; }[]; }, ",
           "DatasetQualityRouteCreateOptions",
           ">; \"GET /internal/dataset_quality/data_streams/stats\": ",
           {
@@ -535,7 +579,7 @@
             "section": "def-common.ServerRouteCreateOptions",
             "text": "ServerRouteCreateOptions"
           },
-          "> ? TRouteParamsRT extends ",
+          " | undefined> ? TRouteParamsRT extends ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -545,7 +589,7 @@
           },
           " ? ClientRequestParamsOfType<TRouteParamsRT> : TRouteParamsRT extends undefined ? {} : never : never"
         ],
-        "path": "x-pack/plugins/observability_solution/dataset_quality/common/rest/create_call_dataset_quality_api.ts",
+        "path": "x-pack/platform/plugins/shared/dataset_quality/common/rest/create_call_dataset_quality_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -652,6 +696,24 @@
           "DatasetQualityRouteHandlerResources",
           ", { isFieldLimitIssue: boolean; fieldCount: number; totalFieldLimit: number; } & { ignoreMalformed?: boolean | undefined; nestedFieldLimit?: number | undefined; fieldMapping?: { type?: string | undefined; ignore_above?: number | undefined; } | undefined; defaultPipeline?: string | undefined; }, ",
           "DatasetQualityRouteCreateOptions",
+          ">; \"GET /internal/dataset_quality/data_streams/{dataStream}/integration/check\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/dataset_quality/data_streams/{dataStream}/integration/check\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ dataStream: ",
+          "StringC",
+          "; }>; }>, ",
+          "DatasetQualityRouteHandlerResources",
+          ", { isIntegration: false; areAssetsAvailable: boolean; } | { isIntegration: true; areAssetsAvailable: true; integration: { name: string; } & { title?: string | undefined; version?: string | undefined; icons?: ({ src: string; } & { path?: string | undefined; size?: string | undefined; title?: string | undefined; type?: string | undefined; })[] | undefined; datasets?: { [x: string]: string; } | undefined; }; }, ",
+          "DatasetQualityRouteCreateOptions",
           ">; \"GET /internal/dataset_quality/data_streams/{dataStream}/settings\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
@@ -798,6 +860,32 @@
           "DatasetQualityRouteHandlerResources",
           ", { aggregatable: boolean; datasets: string[]; }, ",
           "DatasetQualityRouteCreateOptions",
+          ">; \"GET /internal/dataset_quality/data_streams/total_docs\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/dataset_quality/data_streams/total_docs\", ",
+          "TypeC",
+          "<{ query: ",
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ start: ",
+          "Type",
+          "<number, string, unknown>; end: ",
+          "Type",
+          "<number, string, unknown>; }>, ",
+          "TypeC",
+          "<{ type: ",
+          "KeyofC",
+          "<{ logs: null; metrics: null; traces: null; synthetics: null; profiling: null; }>; }>]>; }>, ",
+          "DatasetQualityRouteHandlerResources",
+          ", { totalDocs: { dataset: string; count: number; }[]; }, ",
+          "DatasetQualityRouteCreateOptions",
           ">; \"GET /internal/dataset_quality/data_streams/degraded_docs\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
@@ -818,15 +906,15 @@
           "Type",
           "<number, string, unknown>; }>, ",
           "TypeC",
-          "<{ type: ",
-          "KeyofC",
-          "<{ logs: null; metrics: null; traces: null; synthetics: null; profiling: null; }>; }>, ",
+          "<{ types: ",
+          "Type",
+          "<(\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[], (\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[], unknown>; }>, ",
           "PartialC",
           "<{ datasetQuery: ",
           "StringC",
           "; }>]>; }>, ",
           "DatasetQualityRouteHandlerResources",
-          ", { degradedDocs: { dataset: string; count: number; docsCount: number; percentage: number; }[]; }, ",
+          ", { degradedDocs: { dataset: string; count: number; }[]; }, ",
           "DatasetQualityRouteCreateOptions",
           ">; \"GET /internal/dataset_quality/data_streams/stats\": ",
           {
@@ -860,35 +948,15 @@
             "section": "def-common.ServerRoute",
             "text": "ServerRoute"
           },
-          "<any, any, any, infer TReturnType extends ServerRouteHandlerReturnType, ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.ServerRouteCreateOptions",
-            "text": "ServerRouteCreateOptions"
-          },
-          "> ? TReturnType extends ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IKibanaResponse",
-            "text": "IKibanaResponse"
-          },
+          "<any, any, any, infer TReturnType extends ServerRouteHandlerReturnType, any> ? TReturnType extends ",
+          "IKibanaResponse",
           "<infer TWrappedResponseType extends string | Record<string, any> | Error | Buffer | ",
           "Stream",
           " | { message: string | Error; attributes?: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.ResponseErrorAttributes",
-            "text": "ResponseErrorAttributes"
-          },
+          "ResponseErrorAttributes",
           " | undefined; } | undefined> ? TWrappedResponseType : TReturnType : never"
         ],
-        "path": "x-pack/plugins/observability_solution/dataset_quality/common/rest/create_call_dataset_quality_api.ts",
+        "path": "x-pack/platform/plugins/shared/dataset_quality/common/rest/create_call_dataset_quality_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -902,16 +970,10 @@
         "description": [],
         "signature": [
           "Omit<",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpFetchOptions",
-            "text": "HttpFetchOptions"
-          },
+          "HttpFetchOptions",
           ", \"body\"> & { pathname: string; method?: string | undefined; body?: any; }"
         ],
-        "path": "x-pack/plugins/observability_solution/dataset_quality/common/fetch_options.ts",
+        "path": "x-pack/platform/plugins/shared/dataset_quality/common/fetch_options.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

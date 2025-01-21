@@ -40,28 +40,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         (await pageObjects.infraHostsView.isKPIChartsLoaded())
     );
 
-  // failing feature flag test, see https://github.com/elastic/kibana/issues/191810
-  describe.skip('Hosts Page', function () {
+  describe('Hosts Page', function () {
     before(async () => {
-      await Promise.all([
-        esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
-      ]);
+      await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       await pageObjects.svlCommonPage.loginAsViewer();
-      await browser.setWindowSize(1600, 1200);
+
+      await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      await browser.setWindowSize(1600, 1400);
     });
 
     after(async () => {
-      await Promise.all([
-        esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
-      ]);
+      await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
     });
 
     describe('#Single Host Flyout', () => {
-      before(async () => {
-        await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
-        await pageObjects.header.waitUntilLoadingHasFinished();
-      });
-
       describe('Tabs', () => {
         before(async () => {
           await pageObjects.timePicker.setAbsoluteRange(
@@ -100,10 +94,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           it('should show alerts', async () => {
             await pageObjects.header.waitUntilLoadingHasFinished();
             await pageObjects.assetDetails.overviewAlertsTitleExists();
-            const CreateRuleButtonExist = await testSubjects.exists(
-              'infraAssetDetailsCreateAlertsRuleButton'
-            );
-            expect(CreateRuleButtonExist).to.be(true);
+            await pageObjects.assetDetails.overviewOpenAlertsFlyoutExist();
           });
         });
 
@@ -123,7 +114,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should show processes title', async () => {
-            await await testSubjects.existOrFail('infraAssetDetailsTopProcessesTitle');
+            await testSubjects.existOrFail('infraAssetDetailsTopProcessesTitle');
           });
         });
 
@@ -175,7 +166,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         describe('Metrics Tab', () => {
           before(async () => {
-            await browser.scrollTop();
             await pageObjects.infraHostsView.visitMetricsTab();
           });
 
@@ -191,7 +181,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         describe('Logs Tab', () => {
           before(async () => {
-            await browser.scrollTop();
             await pageObjects.infraHostsView.visitLogsTab();
           });
 
@@ -206,7 +195,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         describe('Alerts Tab', () => {
           before(async () => {
-            await browser.scrollTop();
             await pageObjects.infraHostsView.visitAlertTab();
           });
 

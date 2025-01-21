@@ -1,0 +1,26 @@
+{
+  "enrich.stats": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_enrich/_stats"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/enrich-stats-api.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

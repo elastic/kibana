@@ -15,3 +15,19 @@ export function setupConfig(allowAccess: boolean = false) {
   } as SavedObjectConfig;
   return config;
 }
+
+export const deprecationMock = {
+  documentationUrl: 'http://elastic.co',
+  severity: 'warning' as const,
+  reason: {
+    type: 'deprecate' as const,
+  },
+};
+
+export const legacyDeprecationMock = {
+  documentationUrl: 'http://elastic.co',
+  severity: 'warning' as const,
+  reason: {
+    type: 'remove' as const,
+  },
+};

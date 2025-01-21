@@ -11,13 +11,14 @@ import { navigateToCasesApp } from '../../../../../../shared/lib/cases';
 
 export default function ({ getPageObject, getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'header', 'svlCommonPage', 'svlCommonNavigation']);
+  const retry = getService('retry');
   const svlCases = getService('svlCases');
   const svlCommonScreenshots = getService('svlCommonScreenshots');
   const screenshotDirectories = ['response_ops_docs', 'security_cases'];
   const testSubjects = getService('testSubjects');
   const owner = SECURITY_SOLUTION_OWNER;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/188997
+  // Failing: See https://github.com/elastic/kibana/issues/188997
   describe.skip('security case settings', function () {
     after(async () => {
       await svlCases.api.deleteAllCaseItems();
@@ -29,8 +30,14 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
 
     it('case settings screenshot', async () => {
       await navigateToCasesApp(getPageObject, getService, owner);
+      await retry.waitFor('configure-case-button exist', async () => {
+        return await testSubjects.exists('configure-case-button');
+      });
       await testSubjects.click('configure-case-button');
       await pageObjects.header.waitUntilLoadingHasFinished();
+      await retry.waitFor('add-custom-field exist', async () => {
+        return await testSubjects.exists('add-custom-field');
+      });
       await testSubjects.click('add-custom-field');
       await svlCommonScreenshots.takeScreenshot(
         'security-cases-custom-fields',
@@ -38,9 +45,18 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
         1400,
         700
       );
+      await retry.waitFor('custom-field-label-input exist', async () => {
+        return await testSubjects.exists('custom-field-label-input');
+      });
       await testSubjects.setValue('custom-field-label-input', 'my-field');
+      await retry.waitFor('common-flyout-save exist', async () => {
+        return await testSubjects.exists('common-flyout-save');
+      });
       await testSubjects.click('common-flyout-save');
       await svlCommonScreenshots.takeScreenshot('security-cases-settings', screenshotDirectories);
+      await retry.waitFor('add-template to exist', async () => {
+        return await testSubjects.exists('add-template');
+      });
       await testSubjects.click('add-template');
       await svlCommonScreenshots.takeScreenshot(
         'security-cases-templates',
@@ -48,11 +64,10 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
         1400,
         1000
       );
+      await retry.waitFor('common-flyout-cancel to exist', async () => {
+        return await testSubjects.exists('common-flyout-cancel');
+      });
       await testSubjects.click('common-flyout-cancel');
-      await testSubjects.click('dropdown-connectors');
-      await testSubjects.click('dropdown-connector-add-connector');
-      await svlCommonScreenshots.takeScreenshot('security-cases-connectors', screenshotDirectories);
-      await testSubjects.click('euiFlyoutCloseButton');
     });
   });
 }

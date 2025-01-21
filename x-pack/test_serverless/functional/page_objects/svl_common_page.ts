@@ -135,6 +135,21 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     /**
+     *
+     * Login to Kibana using SAML authentication with Editor role (observability, security)
+     */
+    async loginAsEditor() {
+      await this.loginWithRole('editor');
+    },
+
+    /**
+     * Login to Kibana using SAML authentication with Developer role (search)
+     */
+    async loginAsDeveloper() {
+      await this.loginWithRole('developer');
+    },
+
+    /**
      * Login to Kibana using SAML authentication with Editor/Developer role
      */
     async loginWithPrivilegedRole() {

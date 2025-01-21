@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-export interface ArtifactManifest {
-  formatVersion: string;
-  productName: string;
-  productVersion: string;
-}
+import type { ArtifactManifest, ProductName } from '@kbn/product-doc-common';
 
 export const getArtifactManifest = ({
   productName,
   stackVersion,
+  formatVersion,
 }: {
-  productName: string;
+  productName: ProductName;
   stackVersion: string;
+  formatVersion: string;
 }): ArtifactManifest => {
   return {
-    formatVersion: '1.0.0',
+    formatVersion,
     productName,
     productVersion: stackVersion,
   };

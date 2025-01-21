@@ -35,59 +35,57 @@ export default function apiTest({ getService }: FtrProviderContext) {
   }
 
   registry.when('ML jobs', { config: 'trial', archives: [] }, () => {
-    (['writeUser', 'apmReadPrivilegesWithWriteSettingsUser'] as ApmApiClientKey[]).forEach(
-      (user) => {
-        describe(`when ${user} has write access to ML`, () => {
-          before(async () => {
-            const res = await getJobs({ user });
-            const jobIds = res.body.jobs.map((job: any) => job.jobId);
-            await deleteJobs(jobIds);
-          });
+    (['apmReadPrivilegesWithWriteSettingsUser'] as ApmApiClientKey[]).forEach((user) => {
+      describe(`when ${user} has write access to ML`, () => {
+        before(async () => {
+          const res = await getJobs({ user });
+          const jobIds = res.body.jobs.map((job: any) => job.jobId);
+          await deleteJobs(jobIds);
+        });
 
-          after(async () => {
-            const res = await getJobs({ user });
-            const jobIds = res.body.jobs.map((job: any) => job.jobId);
-            await deleteJobs(jobIds);
-          });
+        after(async () => {
+          const res = await getJobs({ user });
+          const jobIds = res.body.jobs.map((job: any) => job.jobId);
+          await deleteJobs(jobIds);
+        });
 
-          describe('when calling the endpoint for listing jobs', () => {
-            it('returns a list of jobs', async () => {
-              const { body } = await getJobs({ user });
-              expect(body.jobs.length).to.be(0);
-              expect(body.hasLegacyJobs).to.be(false);
+        describe('when calling the endpoint for listing jobs', () => {
+          it('returns a list of jobs', async () => {
+            const { body } = await getJobs({ user });
+            expect(body.jobs.length).to.be(0);
+            expect(body.hasLegacyJobs).to.be(false);
+          });
+        });
+
+        describe('when calling create endpoint', () => {
+          it('creates two jobs', async () => {
+            await createJobs(['production', 'staging'], { user });
+
+            const { body } = await getJobs({ user });
+            expect(body.hasLegacyJobs).to.be(false);
+            expect(countBy(body.jobs, 'environment')).to.eql({
+              production: 1,
+              staging: 1,
             });
           });
 
-          describe('when calling create endpoint', () => {
-            it('creates two jobs', async () => {
+          describe('with existing ML jobs', () => {
+            before(async () => {
               await createJobs(['production', 'staging'], { user });
+            });
+            it('skips duplicate job creation', async () => {
+              await createJobs(['production', 'test'], { user });
 
               const { body } = await getJobs({ user });
-              expect(body.hasLegacyJobs).to.be(false);
               expect(countBy(body.jobs, 'environment')).to.eql({
                 production: 1,
                 staging: 1,
-              });
-            });
-
-            describe('with existing ML jobs', () => {
-              before(async () => {
-                await createJobs(['production', 'staging'], { user });
-              });
-              it('skips duplicate job creation', async () => {
-                await createJobs(['production', 'test'], { user });
-
-                const { body } = await getJobs({ user });
-                expect(countBy(body.jobs, 'environment')).to.eql({
-                  production: 1,
-                  staging: 1,
-                  test: 1,
-                });
+                test: 1,
               });
             });
           });
         });
-      }
-    );
+      });
+    });
   });
 }

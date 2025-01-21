@@ -27,9 +27,9 @@ export function k8sNodeEntity({
 }) {
   if (schema === 'ecs') {
     return new K8sEntity(schema, {
+      'entity.definition_id': 'node',
       'entity.type': 'node',
       'kubernetes.node.name': name,
-      'kubernetes.node.uid': uid,
       'kubernetes.namespace': clusterName,
       'entity.id': entityId,
       ...others,
@@ -37,6 +37,7 @@ export function k8sNodeEntity({
   }
 
   return new K8sEntity(schema, {
+    'entity.definition_id': 'node',
     'entity.type': 'node',
     'k8s.node.uid': uid,
     'k8s.cluster.name': clusterName,

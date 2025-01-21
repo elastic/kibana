@@ -59,5 +59,16 @@ export function SvlManagementPageProvider({ getService }: FtrProviderContext) {
     async clickSpacesManagementCard() {
       await testSubjects.click('app-card-spaces');
     },
+
+    // Data Usage card
+    async assertDataUsageManagementCardExists() {
+      await testSubjects.existOrFail('app-card-data_usage');
+    },
+    async assertDataUsageManagementCardDoesNotExist() {
+      await testSubjects.missingOrFail('app-card-data_usage');
+    },
+    async clickDataUsageManagementCard() {
+      await testSubjects.click('app-card-data_usage');
+    },
   };
 }

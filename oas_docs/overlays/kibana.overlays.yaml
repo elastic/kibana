@@ -4,6 +4,17 @@ info:
   title: Overlays for the Kibana API document
   version: 0.0.1
 actions:
+# Clean up server definitions
+  - target: '$.servers.*'
+    description: Remove all servers so we can add our own.
+    remove: true
+  - target: '$.servers'
+    description: Add server into the now empty server array.
+    update:
+      - url: https://{kibana_url}
+        variables:
+          kibana_url:
+            default: localhost:5601
 # Add an introduction to spaces
   - target: '$'
     description: Add an extra page about spaces

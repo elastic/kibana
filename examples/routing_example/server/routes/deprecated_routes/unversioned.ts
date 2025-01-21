@@ -14,6 +14,28 @@ import { DEPRECATED_ROUTES } from '../../../common';
 export const registerDeprecatedRoute = (router: IRouter) => {
   router.get(
     {
+      path: DEPRECATED_ROUTES.DEPRECATED_ROUTE,
+      validate: false,
+      options: {
+        access: 'public',
+        deprecated: {
+          documentationUrl: 'https://elastic.co/',
+          severity: 'warning',
+          message:
+            'This deprecation message will be surfaced in UA. use `i18n.translate` to internationalize this message.',
+          reason: { type: 'deprecate' },
+        },
+      },
+    },
+    async (ctx, req, res) => {
+      return res.ok({
+        body: { result: 'Called deprecated route. Check UA to see the deprecation.' },
+      });
+    }
+  );
+
+  router.get(
+    {
       path: DEPRECATED_ROUTES.REMOVED_ROUTE,
       validate: false,
       options: {
@@ -27,7 +49,7 @@ export const registerDeprecatedRoute = (router: IRouter) => {
     },
     async (ctx, req, res) => {
       return res.ok({
-        body: { result: 'Called deprecated route. Check UA to see the deprecation.' },
+        body: { result: 'Called to be removed route. Check UA to see the deprecation.' },
       });
     }
   );
@@ -55,7 +77,7 @@ export const registerDeprecatedRoute = (router: IRouter) => {
     },
     async (ctx, req, res) => {
       return res.ok({
-        body: { result: 'Called deprecated route. Check UA to see the deprecation.' },
+        body: { result: 'Called to be migrated route. Check UA to see the deprecation.' },
       });
     }
   );

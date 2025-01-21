@@ -51,6 +51,7 @@ const createStartContractMock = (): jest.Mocked<ApplicationStart> => {
     navigateToApp: jest.fn(),
     navigateToUrl: jest.fn(),
     getUrlForApp: jest.fn(),
+    isAppRegistered: jest.fn(),
   };
 };
 
@@ -92,6 +93,7 @@ const createInternalStartContractMock = (
     currentActionMenu$: new BehaviorSubject<MountPoint | undefined>(undefined),
     getComponent: jest.fn(),
     getUrlForApp: jest.fn(),
+    isAppRegistered: jest.fn(),
     navigateToApp: jest.fn().mockImplementation((appId) => currentAppId$.next(appId)),
     navigateToUrl: jest.fn(),
     history: createHistoryMock(),

@@ -6,24 +6,40 @@
  */
 
 import { kbnTestConfig } from '@kbn/test';
+
 const password = kbnTestConfig.getUrlParts().password!;
 
+export const UNAUTHORIZED_USERNAME = 'unauthorized_user';
+export const UNAUTHORIZED_USER_PASSWORD = 'unauthorized_password';
+
 export interface User {
-  username: 'elastic' | 'editor' | 'viewer';
+  username: 'elastic' | 'editor' | 'viewer' | 'secondary_editor' | 'unauthorized_user';
   password: string;
   roles: string[];
 }
 
-export const editorUser: User = {
+export const editor: User = {
   username: 'editor',
   password,
   roles: ['editor'],
 };
 
-export const viewerUser: User = {
+export const secondaryEditor: User = {
+  username: 'secondary_editor',
+  password,
+  roles: ['editor'],
+};
+
+export const viewer: User = {
   username: 'viewer',
   password,
   roles: ['viewer'],
 };
 
-export const allUsers = [editorUser, viewerUser];
+export const unauthorizedUser: User = {
+  username: UNAUTHORIZED_USERNAME,
+  password: UNAUTHORIZED_USER_PASSWORD,
+  roles: [],
+};
+
+export const allUsers = [editor, secondaryEditor, viewer, unauthorizedUser];

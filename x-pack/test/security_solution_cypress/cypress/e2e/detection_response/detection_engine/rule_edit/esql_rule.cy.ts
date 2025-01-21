@@ -18,9 +18,10 @@ import {
 
 import {
   ESQL_QUERY_BAR,
-  ALERT_SUPPRESSION_DURATION_INPUT,
   ALERT_SUPPRESSION_FIELDS,
   ALERT_SUPPRESSION_MISSING_FIELDS_SUPPRESS,
+  ALERT_SUPPRESSION_DURATION_VALUE_INPUT,
+  ALERT_SUPPRESSION_DURATION_UNIT_INPUT,
 } from '../../../../screens/create_new_rule';
 
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -136,9 +137,8 @@ describe.skip(
         editFirstRule();
 
         // check saved suppression settings
-        cy.get(ALERT_SUPPRESSION_DURATION_INPUT).eq(0).should('be.enabled').should('have.value', 3);
-        cy.get(ALERT_SUPPRESSION_DURATION_INPUT)
-          .eq(1)
+        cy.get(ALERT_SUPPRESSION_DURATION_VALUE_INPUT).should('be.enabled').should('have.value', 3);
+        cy.get(ALERT_SUPPRESSION_DURATION_UNIT_INPUT)
           .should('be.enabled')
           .should('have.value', 'h');
         cy.get(ALERT_SUPPRESSION_FIELDS).should('contain', SUPPRESS_BY_FIELDS.join(''));

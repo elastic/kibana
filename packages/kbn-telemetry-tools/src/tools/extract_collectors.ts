@@ -37,7 +37,8 @@ export async function getProgramPaths({
   );
 
   if (filePaths.length === 0) {
-    throw Error(`No files found in ${root}`);
+    return []; // Temporarily accept empty directories while https://github.com/elastic/kibana-team/issues/1066 is completed
+    // throw Error(`No files found in ${root}`);
   }
 
   const fullPaths = filePaths

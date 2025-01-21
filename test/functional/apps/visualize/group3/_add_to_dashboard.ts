@@ -13,6 +13,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardExpect = getService('dashboardExpect');
   const dashboardPanelActions = getService('dashboardPanelActions');
+  const dashboardCustomizePanel = getService('dashboardCustomizePanel');
   const testSubjects = getService('testSubjects');
   const listingTable = getService('listingTable');
 
@@ -286,6 +287,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(panelCount).to.eql(2);
 
       await dashboardPanelActions.expectLinkedToLibrary('Neat Saved Vis 2 Copy');
+    });
+
+    it('should persist correctly panel title on a by reference visualization', async () => {
+      await dashboard.navigateToApp();
+
+      await dashboard.clickNewDashboard();
+      await dashboard.addVisualizations(['Visualization AreaChart']);
+
+      await dashboardPanelActions.customizePanel();
+      await dashboardCustomizePanel.setCustomPanelTitle('My New panel title');
+      await dashboardCustomizePanel.clickSaveButton();
+
+      await dashboard.saveDashboard('My Very Entitled Dashboard');
+
+      await dashboard.gotoDashboardLandingPage();
+      await listingTable.clickItemLink('dashboard', 'My Very Entitled Dashboard');
+
+      const [newPanelTitle] = await dashboard.getPanelTitles();
+      expect(newPanelTitle).to.equal('My New panel title');
     });
   });
 }

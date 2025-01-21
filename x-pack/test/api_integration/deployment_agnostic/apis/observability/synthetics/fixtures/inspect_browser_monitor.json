@@ -1,0 +1,85 @@
+{
+  "type": "browser",
+  "form_monitor_type": "multistep",
+  "enabled": true,
+  "alert": {
+    "status": {
+      "enabled": true
+    }
+  },
+  "schedule": {
+    "number": "10",
+    "unit": "m"
+  },
+  "service.name": "",
+  "config_id": "0088b13c-9bb0-4fc6-a0b5-63b9b024eabb",
+  "tags": [],
+  "timeout": null,
+  "name": "check if title is present",
+  "locations": [
+    {
+      "id": "dev",
+      "label": "Dev Service",
+      "geo": {
+        "lat": 0,
+        "lon": 0
+      },
+      "isServiceManaged": true
+    }
+  ],
+  "namespace": "default",
+  "origin": "project",
+  "journey_id": "bb82f7de-d832-4b14-8097-38a464d5fe49",
+  "hash": "ekrjelkjrelkjre",
+  "id": "bb82f7de-d832-4b14-8097-38a464d5fe49-test-project-cb47c83a-45e7-416a-9301-cb476b5bff01-default",
+  "params": "",
+  "project_id": "test-project-cb47c83a-45e7-416a-9301-cb476b5bff01",
+  "playwright_options": "{\"headless\":true,\"chromiumSandbox\":false}",
+  "__ui": {
+    "script_source": {
+      "is_generated_script": false,
+      "file_name": ""
+    }
+  },
+  "url.port": null,
+  "source.inline.script": "",
+  "source.project.content": "UEsDBBQACAAIAON5qVQAAAAAAAAAAAAAAAAfAAAAZXhhbXBsZXMvdG9kb3MvYmFzaWMuam91cm5leS50c22Q0WrDMAxF3/sVF7MHB0LMXlc6RvcN+wDPVWNviW0sdUsp/fe5SSiD7UFCWFfHujIGlpnkybwxFTZfoY/E3hsaLEtwhs9RPNWKDU12zAOxkXRIbN4tB9d9pFOJdO6EN2HMqQguWN9asFBuQVMmJ7jiWNII9fIXrbabdUYr58l9IhwhQQZCYORCTFFUC31Btj21NRc7Mq4Nds+4bDD/pNVgT9F52Jyr2Fa+g75LAPttg8yErk+S9ELpTmVotlVwnfNCuh2lepl3+JflUmSBJ3uggt1v9INW/lHNLKze9dJe1J3QJK8pSvWkm6aTtCet5puq+x63+AFQSwcIAPQ3VfcAAACcAQAAUEsBAi0DFAAIAAgA43mpVAD0N1X3AAAAnAEAAB8AAAAAAAAAAAAgAKSBAAAAAGV4YW1wbGVzL3RvZG9zL2Jhc2ljLmpvdXJuZXkudHNQSwUGAAAAAAEAAQBNAAAARAEAAAAA",
+  "playwright_text_assertion": "",
+  "urls": "",
+  "screenshots": "on",
+  "synthetics_args": [],
+  "filter_journeys.match": "check if title is present",
+  "filter_journeys.tags": [],
+  "ignore_https_errors": false,
+  "throttling": {
+    "value": {
+      "download": "5",
+      "upload": "3",
+      "latency": "20"
+    },
+    "id": "default",
+    "label": "Default"
+  },
+  "ssl.certificate_authorities": "",
+  "ssl.certificate": "",
+  "ssl.key": "",
+  "ssl.key_passphrase": "",
+  "ssl.verification_mode": "full",
+  "ssl.supported_protocols": [
+    "TLSv1.1",
+    "TLSv1.2",
+    "TLSv1.3"
+  ],
+  "original_space": "default",
+  "custom_heartbeat_id": "bb82f7de-d832-4b14-8097-38a464d5fe49-test-project-cb47c83a-45e7-416a-9301-cb476b5bff01-default",
+  "revision": 1,
+  "source.inline": {
+    "type": "inline",
+    "script": "",
+    "fileName": ""
+  },
+  "service": {
+    "name": ""
+  },
+  "max_attempts": 2
+}

@@ -80,6 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
           health: 'green',
           indexTemplateName: testDataStreamName,
           hidden: false,
+          indexMode: 'standard',
         });
       });
 
@@ -121,6 +122,7 @@ export default function ({ getService }: FtrProviderContext) {
           meteringDocsCount: 0,
           meteringStorageSize: '0b',
           meteringStorageSizeBytes: 0,
+          indexMode: 'standard',
         });
       });
     });
@@ -133,11 +135,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('updates the data retention of a DS', async () => {
         const { body, status } = await supertestWithoutAuth
-          .put(`${API_BASE_PATH}/data_streams/${testDataStreamName}/data_retention`)
+          .put(`${API_BASE_PATH}/data_streams/data_retention`)
           .set(internalReqHeader)
           .set(roleAuthc.apiKeyHeader)
           .send({
             dataRetention: '7d',
+            dataStreams: [testDataStreamName],
           });
         svlCommonApi.assertResponseStatusCode(200, status, body);
 
@@ -146,10 +149,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('sets data retention to infinite', async () => {
         const { body, status } = await supertestWithoutAuth
-          .put(`${API_BASE_PATH}/data_streams/${testDataStreamName}/data_retention`)
+          .put(`${API_BASE_PATH}/data_streams/data_retention`)
           .set(internalReqHeader)
           .set(roleAuthc.apiKeyHeader)
-          .send({});
+          .send({
+            dataStreams: [testDataStreamName],
+          });
         svlCommonApi.assertResponseStatusCode(200, status, body);
 
         // Providing an infinite retention might not be allowed for a given project,

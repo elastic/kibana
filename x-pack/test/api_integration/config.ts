@@ -30,9 +30,6 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
         '--xpack.ruleRegistry.write.enabled=true',
         '--xpack.ruleRegistry.write.enabled=true',
         '--xpack.ruleRegistry.write.cache.enabled=false',
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'assistantKnowledgeBaseByDefault',
-        ])}`,
         '--monitoring_collection.opentelemetry.metrics.prometheus.enabled=true',
       ],
     },

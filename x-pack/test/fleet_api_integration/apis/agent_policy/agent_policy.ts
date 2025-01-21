@@ -160,7 +160,8 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('POST /api/fleet/agent_policies', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/203346
+    describe.skip('POST /api/fleet/agent_policies', () => {
       let systemPkgVersion: string;
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
@@ -1534,6 +1535,98 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(updatedPolicy.global_data_tags).to.eql([{ name: 'newTag', value: 'newValue' }]);
+      });
+
+      it('should allow to set required_versions', async () => {
+        const {
+          body: { item: originalPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Override Test ${Date.now()}`,
+            description: 'Initial description',
+            namespace: 'default',
+          })
+          .expect(200);
+        agentPolicyId = originalPolicy.id;
+        createdPolicyIds.push(agentPolicyId as string);
+        const {
+          body: { item: updatedPolicy },
+        } = await supertest
+          .put(`/api/fleet/agent_policies/${agentPolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: originalPolicy.name,
+            description: originalPolicy.description,
+            namespace: 'default',
+            required_versions: [
+              {
+                version: '9.0.0',
+                percentage: 10,
+              },
+            ],
+          })
+          .expect(200);
+
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const { id, updated_at, version, ...newPolicy } = updatedPolicy;
+
+        expect(newPolicy).to.eql({
+          status: 'active',
+          name: originalPolicy.name,
+          description: originalPolicy.description,
+          namespace: 'default',
+          is_managed: false,
+          revision: 2,
+          schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
+          updated_by: 'elastic',
+          inactivity_timeout: 1209600,
+          package_policies: [],
+          is_protected: false,
+          space_ids: [],
+          required_versions: [
+            {
+              version: '9.0.0',
+              percentage: 10,
+            },
+          ],
+        });
+      });
+
+      it('should not allow to set invalid required_versions', async () => {
+        const {
+          body: { item: originalPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Override Test ${Date.now()}`,
+            description: 'Initial description',
+            namespace: 'default',
+          })
+          .expect(200);
+        agentPolicyId = originalPolicy.id;
+        createdPolicyIds.push(agentPolicyId as string);
+        await supertest
+          .put(`/api/fleet/agent_policies/${agentPolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Override Test ${Date.now()}`,
+            description: 'Updated description',
+            namespace: 'default',
+            required_versions: [
+              {
+                version: '9.0.0',
+                percentage: 50,
+              },
+              {
+                version: '9.1.0',
+                percentage: 60,
+              },
+            ],
+          })
+          .expect(400);
       });
     });
 

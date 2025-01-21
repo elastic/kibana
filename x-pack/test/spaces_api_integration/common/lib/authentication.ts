@@ -90,10 +90,6 @@ export const AUTHENTICATION = {
     username: 'a_kibana_rbac_space_1_saved_objects_read_user',
     password: 'password',
   },
-  APM_USER: {
-    username: 'a_apm_user',
-    password: 'password',
-  },
   MACHINE_LEARING_ADMIN: {
     username: 'a_machine_learning_admin',
     password: 'password',

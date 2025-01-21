@@ -134,7 +134,7 @@ The tool throws an exception if `formats` object is missing in locale file.
 ### Usage
 
 ```bash
-node scripts/i18n_integrate --source path/to/locale.json --target x-pack/plugins/translations/translations/locale.json
+node scripts/i18n_integrate --source path/to/locale.json --target x-pack/platform/plugins/private/translations/translations/locale.json
 ```
 
 * `--source` path to the JSON file with translations that should be integrated.

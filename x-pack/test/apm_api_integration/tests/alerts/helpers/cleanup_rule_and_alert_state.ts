@@ -9,12 +9,11 @@ import { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { Agent as SuperTestAgent } from 'supertest';
 import {
-  clearKibanaApmEventLog,
-  deleteApmRules,
-  deleteApmAlerts,
   deleteActionConnectorIndex,
-  deleteAllActionConnectors,
+  clearKibanaApmEventLog,
+  deleteApmAlerts,
 } from './alerting_api_helper';
+import { deleteApmRules, deleteAllActionConnectors } from './alerting_api_helper';
 
 export async function cleanupRuleAndAlertState({
   es,

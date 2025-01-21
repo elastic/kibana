@@ -181,14 +181,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should reset columns if available fields or index pattern are different in transformational query', async () => {
-      await monacoEditor.setCodeEditorValue('from logstash-* | keep ip, @timestamp');
+      await monacoEditor.setCodeEditorValue('from logstash-* | keep ip, @timestamp | limit 500');
       await testSubjects.click('querySubmitButton');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
       expect(await dataGrid.getHeaderFields()).to.eql(['ip', '@timestamp']);
 
       // reset columns if available fields are different
-      await monacoEditor.setCodeEditorValue('from logstash-* | keep ip, @timestamp, bytes');
+      await monacoEditor.setCodeEditorValue(
+        'from logstash-* | keep ip, @timestamp, bytes | limit 500'
+      );
       await testSubjects.click('querySubmitButton');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
@@ -209,6 +211,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // reset columns if index pattern is different
       await monacoEditor.setCodeEditorValue('from logs* | keep ip, @timestamp, bytes | limit 1');
+      await testSubjects.click('querySubmitButton');
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+      expect(await dataGrid.getHeaderFields()).to.eql(['ip', '@timestamp', 'bytes']);
+    });
+
+    it('should recover from an error and reset columns correctly when a transformational query is used', async () => {
+      await monacoEditor.setCodeEditorValue('from not_an_index');
+      await testSubjects.click('querySubmitButton');
+      await header.waitUntilLoadingHasFinished();
+      await discover.showsErrorCallout();
+      await browser.refresh();
+      await header.waitUntilLoadingHasFinished();
+      await discover.showsErrorCallout();
+      await monacoEditor.setCodeEditorValue(
+        'from logstash-* | keep ip, @timestamp, bytes | limit 10'
+      );
       await testSubjects.click('querySubmitButton');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();

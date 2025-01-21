@@ -26,7 +26,6 @@ spec:
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/serverless_deployment/project-build-and-deploy-pr.yml
-      skip_intermediate_builds: true
       provider_settings:
         build_pull_requests: true
         prefix_pull_request_fork_branch_names: false

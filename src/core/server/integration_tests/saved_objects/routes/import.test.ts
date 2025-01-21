@@ -13,7 +13,6 @@ import supertest from 'supertest';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
-import type { Logger, LogLevelId } from '@kbn/logging';
 import {
   coreUsageStatsClientMock,
   coreUsageDataServiceMock,
@@ -28,6 +27,7 @@ import {
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 import { setupServer, createExportableType } from '@kbn/core-test-helpers-test-utils';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -41,6 +41,7 @@ describe(`POST ${URL}`, () => {
   let httpSetup: SetupServerReturn['httpSetup'];
   let handlerContext: SetupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
+  let mockLogger: MockedLogger;
 
   const emptyResponse = { saved_objects: [], total: 0, per_page: 0, page: 0 };
   const mockIndexPattern = {
@@ -57,20 +58,10 @@ describe(`POST ${URL}`, () => {
     references: [],
     managed: false,
   };
-  const mockLogger: jest.Mocked<Logger> = {
-    debug: jest.fn(),
-    info: jest.fn(),
-    error: jest.fn(),
-    warn: jest.fn(),
-    trace: jest.fn(),
-    fatal: jest.fn(),
-    log: jest.fn(),
-    isLevelEnabled: jest.fn((level: LogLevelId) => true),
-    get: jest.fn(() => mockLogger),
-  };
 
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
+    mockLogger = loggerMock.create();
     handlerContext.savedObjects.typeRegistry.getImportableAndExportableTypes.mockReturnValue(
       allowedTypes.map(createExportableType)
     );

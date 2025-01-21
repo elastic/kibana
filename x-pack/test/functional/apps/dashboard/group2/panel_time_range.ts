@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('by reference', () => {
       it('can add a custom time range to panel', async () => {
-        await dashboardPanelActions.legacySaveToLibrary('My by reference visualization');
+        await dashboardPanelActions.saveToLibrary('My by reference visualization');
         await dashboardPanelActions.customizePanel();
         await dashboardCustomizePanel.enableCustomTimeRange();
         await dashboardCustomizePanel.openDatePickerQuickMenu();

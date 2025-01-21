@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/security-authorization-core-common",
+  "owner": [
+    "@elastic/kibana-security"
+  ],
+  "group": "platform",
+  "visibility": "private"
+}

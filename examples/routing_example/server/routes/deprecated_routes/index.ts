@@ -10,8 +10,10 @@
 import { IRouter } from '@kbn/core/server';
 import { registerDeprecatedRoute } from './unversioned';
 import { registerVersionedDeprecatedRoute } from './versioned';
+import { registerInternalDeprecatedRoute } from './internal';
 
 export function registerDeprecatedRoutes(router: IRouter) {
   registerDeprecatedRoute(router);
   registerVersionedDeprecatedRoute(router);
+  registerInternalDeprecatedRoute(router);
 }

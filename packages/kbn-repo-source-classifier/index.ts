@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export type { ModuleId } from './src/module_id';
 export type { ModuleType } from './src/module_type';
 export { RepoSourceClassifier } from './src/repo_source_classifier';

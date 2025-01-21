@@ -60,6 +60,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
     });
 
+    it('should not show duplicate suggestions', async () => {
+      await PageObjects.console.enterText(`POST _ingest/pipeline/_simulate
+{
+  "pipeline": {
+    "processors": [
+      {
+        "script": {`);
+      await PageObjects.console.pressEnter();
+      await PageObjects.console.sleepForDebouncePeriod();
+      await PageObjects.console.enterText(`"`);
+      expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
+
+      // Iterate on the first 10 suggestions (the ones that are only visible without scrolling)
+      const suggestions = [];
+      for (let i = 0; i < 10; i++) {
+        suggestions.push(await PageObjects.console.getAutocompleteSuggestion(i));
+      }
+
+      // and expect the array to not have duplicates
+      expect(suggestions).to.eql(_.uniq(suggestions));
+    });
+
     describe('Autocomplete behavior', () => {
       beforeEach(async () => {
         await PageObjects.console.clearEditorText();
@@ -351,7 +373,8 @@ GET _search
       });
     });
 
-    describe('index fields autocomplete', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/198109
+    describe.skip('index fields autocomplete', () => {
       const indexName = `index_field_test-${Date.now()}-${Math.random()}`;
 
       before(async () => {
@@ -374,6 +397,42 @@ GET _search
 
         expect(await PageObjects.console.getAutocompleteSuggestion(0)).to.be.eql('test');
         expect(await PageObjects.console.getAutocompleteSuggestion(1)).to.be.eql(undefined);
+      });
+    });
+
+    describe('Autocomplete shouldnt trigger within', () => {
+      beforeEach(async () => {
+        await PageObjects.console.skipTourIfExists();
+        await PageObjects.console.clearEditorText();
+      });
+
+      it('a hash comment', async () => {
+        await PageObjects.console.enterText(`# GET /`);
+        await PageObjects.console.sleepForDebouncePeriod();
+
+        expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
+      });
+
+      it('a simple double slash comment', async () => {
+        await PageObjects.console.enterText(`// GET /`);
+        await PageObjects.console.sleepForDebouncePeriod();
+
+        expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
+      });
+
+      it('a single line block comment', async () => {
+        await PageObjects.console.enterText(`/* GET /`);
+        await PageObjects.console.sleepForDebouncePeriod();
+
+        expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
+      });
+
+      it('a multiline block comment', async () => {
+        await PageObjects.console.enterText(`/*
+          GET /`);
+        await PageObjects.console.sleepForDebouncePeriod();
+
+        expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
       });
     });
   });

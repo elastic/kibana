@@ -1,12 +1,12 @@
 steps:
-  - group: "Cypress MKI - Detection Engine"
+  - group: 'Cypress MKI - Detection Engine'
     key: cypress_test_detections_engine
     steps:
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:detection_engine
-        label: "Cypress MKI - Detection Engine"
+        label: 'Cypress MKI - Detection Engine'
         key: test_detection_engine
         env:
-          BK_TEST_SUITE_KEY: "serverless-cypress-detection-engine"
+          BK_TEST_SUITE_KEY: 'serverless-cypress-detection-engine'
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
@@ -17,10 +17,10 @@ steps:
         parallelism: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:detection_engine:exceptions
-        label: "Cypress MKI - Detection Engine - Exceptions"
+        label: 'Cypress MKI - Detection Engine - Exceptions'
         key: test_detection_engine_exceptions
         env:
-          BK_TEST_SUITE_KEY: "serverless-cypress-detection-engine"
+          BK_TEST_SUITE_KEY: 'serverless-cypress-detection-engine'
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
@@ -30,7 +30,7 @@ steps:
         timeout_in_minutes: 300
         parallelism: 1
 
-  - group: "API MKI - Detection Engine"
+  - group: 'API MKI - Detection Engine'
     key: api_test_detections_engine
     steps:
       - label: Running exception_lists_items:qa:serverless:release
@@ -44,7 +44,49 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
+              limit: 2
+
+      - label: Running exception_lists:auth:lists:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists:auth:lists:qa:serverless:release
+        key: exception_lists:auth:lists:qa:serverless:release
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: '1'
+              limit: 2
+
+      - label: Running exception_lists:auth:common:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists:auth:common:qa:serverless:release
+        key: exception_lists:auth:common:qa:serverless:release
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: '1'
+              limit: 2
+
+      - label: Running exception_lists:auth:items:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists:auth:items:qa:serverless
+        key: exception_lists:auth:items:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: '1'
               limit: 2
 
       - label: Running lists_items:qa:serverless:release
@@ -58,7 +100,7 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
       - label: Running user_roles:qa:serverless:release
@@ -72,7 +114,7 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
       - label: Running telemetry:qa:serverless:release
@@ -86,7 +128,7 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
       - label: Running exception_workflows:essentials:qa:serverless:release
@@ -100,12 +142,12 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
-      - label: Running exception_operators_date_numeric_types:essentials:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_date_numeric_types:essentials:qa:serverless:release
-        key: exception_operators_date_numeric_types:essentials:qa:serverless:release
+      - label: Running exception_operators_date_types:essentials:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_date_types:essentials:qa:serverless:release
+        key: exception_operators_date_types:essentials:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
@@ -115,6 +157,48 @@ steps:
         retry:
           automatic:
             - exit_status: "1"
+              limit: 2
+
+      - label: Running exception_operators_double:essentials:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_double:essentials:qa:serverless:release
+        key: exception_operators_double:essentials:qa:serverless:release
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+
+      - label: Running exception_operators_float:essentials:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_float:essentials:qa:serverless:release
+        key: exception_operators_float:essentials:qa:serverless:release
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+
+      - label: Running exception_operators_integer:essentials:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_integer:essentials:qa:serverless:release
+        key: exception_operators_integer:essentials:qa:serverless:release
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: '1'
               limit: 2
 
       - label: Running exception_operators_keyword:essentials:qa:serverless:release
@@ -128,7 +212,7 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
       - label: Running exception_operators_ips:essentials:qa:serverless:release
@@ -142,7 +226,7 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
       - label: Running exception_operators_long:essentials:qa:serverless:release
@@ -156,7 +240,7 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
       - label: Running exception_operators_text:essentials:qa:serverless:release
@@ -170,7 +254,7 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
       - label: Running actions:qa:serverless:release
@@ -184,7 +268,7 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
       - label: Running alerts:qa:serverless:release
@@ -198,7 +282,7 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
       - label: Running alerts:essentials:qa:serverless:release
@@ -212,12 +296,12 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
-      - label: Running rule_execution_logic:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:qa:serverless:release
-        key: rule_execution_logic:qa:serverless:release
+      - label: Running rule_execution_logic:eql:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:eql:qa:serverless:release
+        key: rule_execution_logic:eql:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
@@ -227,4 +311,102 @@ steps:
         retry:
           automatic:
             - exit_status: "1"
+              limit: 2
+
+      - label: Running rule_execution_logic:esql:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:esql:qa:serverless:release
+        key: rule_execution_logic:esql:qa:serverless:release
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+
+      - label: Running rule_execution_logic:general_logic:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:general_logic:qa:serverless:release
+        key: rule_execution_logic:general_logic:qa:serverless:release
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+
+      - label: Running rule_execution_logic:indicator_match:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:indicator_match:qa:serverless:release
+        key: rule_execution_logic:indicator_match:qa:serverless:release
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+
+      - label: Running rule_execution_logic:machine_learning:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:machine_learning:qa:serverless:release
+        key: rule_execution_logic:machine_learning:qa:serverless:release
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+
+      - label: Running rule_execution_logic:new_terms:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:new_terms:qa:serverless:release
+        key: rule_execution_logic:new_terms:qa:serverless:release
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+
+      - label: Running rule_execution_logic:query:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:query:qa:serverless:release
+        key: rule_execution_logic:query:qa:serverless:release
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+
+      - label: Running rule_execution_logic:threshold:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:threshold:qa:serverless:release
+        key: rule_execution_logic:threshold:qa:serverless:release
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: '1'
               limit: 2

@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Ensure documents are still returned for the successful shards
       await retry.try(async function tryingForTime() {
-        const hitCount = await discover.getHitCount();
+        const hitCount = await discover.getHitCount({ isPartial: true });
         expect(hitCount).to.be('9,247');
       });
 

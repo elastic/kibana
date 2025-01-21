@@ -154,7 +154,7 @@ Kibana provides both public and internal APIs, each requiring authentication wit
 Recommendations:
 - use `roleScopedSupertest` service to create a supertest instance scoped to a specific role and predefined request headers
 - `roleScopedSupertest.getSupertestWithRoleScope(<role>)` authenticates requests with an API key by default
-- pass `withCookieHeader: true` to use Cookie header for request authentication
+- pass `useCookieHeader: true` to use Cookie header for request authentication
 - don't forget to invalidate API keys by using `destroy()` on the supertest scoped instance in the `after` hook
 
 ```
@@ -183,7 +183,7 @@ describe("my internal APIs test suite", async function() {
     before(async () => {
       supertestViewerWithCookieCredentials =
         await roleScopedSupertest.getSupertestWithRoleScope('admin', {
-          withCookieHeader: true, // to avoid generating API key and use Cookie header instead
+          useCookieHeader: true, // to avoid generating API key and use Cookie header instead
           withInternalHeaders: true,
         });
     });

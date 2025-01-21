@@ -198,14 +198,19 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     },
 
     async waitUntilSummaryPanelLoaded(isStateful: boolean = true) {
-      await testSubjects.missingOrFail(`datasetQuality-${texts.activeDatasets}-loading`);
+      await testSubjects.missingOrFail(`datasetQuality-${texts.activeDatasets}-loading`, {
+        timeout: 5 * 1000, // Increasing timeout since tests were flaky
+      });
       if (isStateful) {
         await testSubjects.missingOrFail(`datasetQuality-${texts.estimatedData}-loading`);
       }
     },
 
     async waitUntilPossibleMitigationsLoaded() {
-      await find.waitForDeletedByCssSelector('.euiFlyoutBody .euiSkeletonRectangle', 20 * 1000);
+      await find.waitForDeletedByCssSelector(
+        '.euiFlyoutBody .datasetQualityDetailsFlyoutManualMitigationsLoading',
+        20 * 1000
+      );
     },
 
     async waitUntilDegradedFieldFlyoutLoaded() {

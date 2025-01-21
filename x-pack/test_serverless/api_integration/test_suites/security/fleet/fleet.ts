@@ -17,6 +17,7 @@ export default function (ctx: FtrProviderContext) {
   const svlCommonApi = ctx.getService('svlCommonApi');
   const supertestWithoutAuth = ctx.getService('supertestWithoutAuth');
   const svlUserManager = ctx.getService('svlUserManager');
+  const es = ctx.getService('es');
   let roleAuthc: RoleCredentials;
 
   describe('fleet', function () {
@@ -111,6 +112,131 @@ export default function (ctx: FtrProviderContext) {
         }),
       });
       expect(status).toBe(200);
+    });
+
+    describe('datastreams API', () => {
+      before(async () => {
+        await es.index({
+          refresh: 'wait_for',
+          index: 'logs-nginx.access-default',
+          document: {
+            agent: {
+              name: 'docker-fleet-agent',
+              id: 'ef5e274d-4b53-45e6-943a-a5bcf1a6f523',
+              ephemeral_id: '34369a4a-4f24-4a39-9758-85fc2429d7e2',
+              type: 'filebeat',
+              version: '8.5.0',
+            },
+            nginx: {
+              access: {
+                remote_ip_list: ['127.0.0.1'],
+              },
+            },
+            log: {
+              file: {
+                path: '/tmp/service_logs/access.log',
+              },
+              offset: 0,
+            },
+            elastic_agent: {
+              id: 'ef5e274d-4b53-45e6-943a-a5bcf1a6f523',
+              version: '8.5.0',
+              snapshot: false,
+            },
+            source: {
+              address: '127.0.0.1',
+              ip: '127.0.0.1',
+            },
+            url: {
+              path: '/server-status',
+              original: '/server-status',
+            },
+            tags: ['nginx-access'],
+            input: {
+              type: 'log',
+            },
+            '@timestamp': new Date().toISOString(),
+            _tmp: {},
+            ecs: {
+              version: '8.11.0',
+            },
+            related: {
+              ip: ['127.0.0.1'],
+            },
+            data_stream: {
+              namespace: 'default',
+              type: 'logs',
+              dataset: 'nginx.access',
+            },
+            host: {
+              hostname: 'docker-fleet-agent',
+              os: {
+                kernel: '5.15.49-linuxkit',
+                codename: 'focal',
+                name: 'Ubuntu',
+                family: 'debian',
+                type: 'linux',
+                version: '20.04.5 LTS (Focal Fossa)',
+                platform: 'ubuntu',
+              },
+              containerized: false,
+              ip: ['172.18.0.7'],
+              name: 'docker-fleet-agent',
+              id: '66392b0697b84641af8006d87aeb89f1',
+              mac: ['02-42-AC-12-00-07'],
+              architecture: 'x86_64',
+            },
+            http: {
+              request: {
+                method: 'GET',
+              },
+              response: {
+                status_code: 200,
+                body: {
+                  bytes: 97,
+                },
+              },
+              version: '1.1',
+            },
+            event: {
+              agent_id_status: 'verified',
+              ingested: '2022-12-09T10:39:40Z',
+              created: '2022-12-09T10:39:38.896Z',
+              kind: 'event',
+              timezone: '+00:00',
+              category: ['web'],
+              type: ['access'],
+              dataset: 'nginx.access',
+              outcome: 'success',
+            },
+            user_agent: {
+              original: 'curl/7.64.0',
+              name: 'curl',
+              device: {
+                name: 'Other',
+              },
+              version: '7.64.0',
+            },
+          },
+        });
+      });
+
+      after(async () => {
+        await es.transport.request({
+          path: `/_data_stream/logs-nginx.access-default`,
+          method: 'delete',
+        });
+      });
+
+      it('it works', async () => {
+        const { body, status } = await supertestWithoutAuth
+          .get('/api/fleet/data_streams')
+          .set(svlCommonApi.getInternalRequestHeader())
+          .set(roleAuthc.apiKeyHeader);
+
+        expect(status).toBe(200);
+        expect(body.data_streams?.[0]?.index).toBe('logs-nginx.access-default');
+      });
     });
   });
 }

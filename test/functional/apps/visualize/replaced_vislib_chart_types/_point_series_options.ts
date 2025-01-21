@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     log.debug('Average memory value axis - ValueAxis-2');
     await visEditor.setSeriesAxis(1, 'ValueAxis-2');
     await visChart.waitForVisualizationRenderingStabilized();
-    await visEditor.clickGo(true);
+    await visEditor.clickGo();
   }
 
   describe('point series', function describeIndexTests() {
@@ -121,7 +121,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('multiple chart types', function () {
       it('should change average series type to histogram', async function () {
         await visEditor.setSeriesType(1, 'histogram');
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
         const length = await visChart.getHistogramSeriesCount(xyChartSelector);
         expect(length).to.be(1);
       });
@@ -134,7 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show category grid lines', async function () {
         await visEditor.toggleGridCategoryLines();
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
         const gridLines = await visChart.getGridLines(xyChartSelector);
         // FLAKY relaxing as depends on chart size/browser size and produce differences between local and CI
         // The objective here is to check whenever the grid lines are rendered, not the exact quantity
@@ -147,7 +147,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show value axis grid lines', async function () {
         await visEditor.setGridValueAxis('ValueAxis-2');
         await visEditor.toggleGridCategoryLines();
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
         const gridLines = await visChart.getGridLines(xyChartSelector);
         // FLAKY relaxing as depends on chart size/browser size and produce differences between local and CI
         // The objective here is to check whenever the grid lines are rendered, not the exact quantity
@@ -169,21 +169,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.selectAggregation('Terms');
         log.debug('Field = geo.src');
         await visEditor.selectField('geo.src');
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
         log.debug('Open Options tab');
         await visEditor.clickOptionsTab();
       });
 
       it('should show values on bar chart', async () => {
         await visEditor.toggleValuesOnChart();
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
         const values = await visChart.getChartValues(xyChartSelector);
         expect(values).to.eql(['2,592', '2,373', '1,194', '489', '415']);
       });
 
       it('should hide values on bar chart', async () => {
         await visEditor.toggleValuesOnChart();
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
         const values = await visChart.getChartValues(xyChartSelector);
         expect(values.length).to.be(0);
       });
@@ -198,7 +198,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualize.clickLineChart();
         await visualize.clickNewSearch();
         await visEditor.selectYAxisAggregation('Average', 'bytes', customLabel, 1);
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
         await visEditor.clickMetricsAndAxes();
         await visEditor.clickYAxisOptions('ValueAxis-1');
       });
@@ -210,7 +210,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should render a custom axis title when one is set, overriding the custom label', async function () {
         await visEditor.setAxisTitle(axisTitle);
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
         const title = await visChart.getYAxisTitle(xyChartSelector);
         expect(title).to.be(axisTitle);
       });
@@ -223,7 +223,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.clickDataTab();
         await visEditor.toggleOpenEditor(1);
         await visEditor.setCustomLabel('test', 1);
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
         await visEditor.clickMetricsAndAxes();
         await visEditor.clickYAxisOptions('ValueAxis-1');
         const title = await visChart.getYAxisTitle(xyChartSelector);
@@ -331,7 +331,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.refresh();
         // wait some time before trying to check for rendering count
         await header.awaitKibanaChrome();
-        await visualize.clickRefresh(true);
+        await visualize.clickRefresh();
         await visChart.waitForRenderingCount();
         log.debug('getXAxisLabels');
 

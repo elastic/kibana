@@ -1,0 +1,22 @@
+{
+  "sql.translate": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "POST",
+      "GET"
+    ],
+    "patterns": [
+      "_sql/translate"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/sql-translate-api.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

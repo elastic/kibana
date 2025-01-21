@@ -20,6 +20,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const security = getService('security');
   const synthtrace = getService('logSynthtraceEsClient');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
+
   const to = new Date(new Date().setDate(new Date().getDate() - 1)).toISOString();
 
   const apacheAccessDatasetName = 'apache.access';
@@ -144,15 +146,16 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           const datasetWithMonitorPrivilege = apacheAccessDatasetHumanName;
           const datasetWithoutMonitorPrivilege = 'synth.1';
 
-          // "Size" should be available for `apacheAccessDatasetName`
-          await testSubjects.missingOrFail(
-            `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-sizeBytes-${datasetWithMonitorPrivilege}`
-          );
-
-          // "Size" should not be available for `datasetWithoutMonitorPrivilege`
-          await testSubjects.existOrFail(
-            `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-sizeBytes-${datasetWithoutMonitorPrivilege}`
-          );
+          await retry.tryForTime(10000, async () => {
+            // "Size" should be available for `apacheAccessDatasetName`
+            await testSubjects.missingOrFail(
+              `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-sizeBytes-${datasetWithMonitorPrivilege}`
+            );
+            // "Size" should not be available for `datasetWithoutMonitorPrivilege`
+            await testSubjects.existOrFail(
+              `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-sizeBytes-${datasetWithoutMonitorPrivilege}`
+            );
+          });
         });
 
         it('Details page shows insufficient privileges warning for underprivileged data stream', async () => {

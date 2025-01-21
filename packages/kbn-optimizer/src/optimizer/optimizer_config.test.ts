@@ -8,10 +8,10 @@
  */
 
 jest.mock('@kbn/repo-packages');
+jest.mock('@kbn/core-ui-settings-common');
 jest.mock('./assign_bundles_to_workers');
 jest.mock('./kibana_platform_plugins');
 jest.mock('./get_plugin_bundles');
-jest.mock('../common/theme_tags');
 jest.mock('./filter_by_id');
 jest.mock('./focus_bundles');
 jest.mock('../limits');
@@ -29,7 +29,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
 import { OptimizerConfig, ParsedOptions } from './optimizer_config';
-import { parseThemeTags } from '../common';
+import { parseThemeTags } from '@kbn/core-ui-settings-common';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
@@ -98,6 +98,7 @@ describe('OptimizerConfig::parseOptions()', () => {
           "testPlugins": false,
         },
         "profileWebpack": false,
+        "reactVersion": "17",
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -126,6 +127,7 @@ describe('OptimizerConfig::parseOptions()', () => {
           "testPlugins": false,
         },
         "profileWebpack": false,
+        "reactVersion": "17",
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -154,6 +156,7 @@ describe('OptimizerConfig::parseOptions()', () => {
           "testPlugins": false,
         },
         "profileWebpack": false,
+        "reactVersion": "17",
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -181,6 +184,7 @@ describe('OptimizerConfig::parseOptions()', () => {
           "testPlugins": false,
         },
         "profileWebpack": false,
+        "reactVersion": "17",
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -209,6 +213,7 @@ describe('OptimizerConfig::parseOptions()', () => {
           "testPlugins": false,
         },
         "profileWebpack": false,
+        "reactVersion": "17",
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -237,6 +242,7 @@ describe('OptimizerConfig::parseOptions()', () => {
           "testPlugins": false,
         },
         "profileWebpack": false,
+        "reactVersion": "17",
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -265,6 +271,7 @@ describe('OptimizerConfig::parseOptions()', () => {
           "testPlugins": false,
         },
         "profileWebpack": false,
+        "reactVersion": "17",
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -294,6 +301,7 @@ describe('OptimizerConfig::parseOptions()', () => {
           "testPlugins": false,
         },
         "profileWebpack": false,
+        "reactVersion": "17",
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -323,6 +331,7 @@ describe('OptimizerConfig::parseOptions()', () => {
           "testPlugins": false,
         },
         "profileWebpack": false,
+        "reactVersion": "17",
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -385,6 +394,7 @@ describe('OptimizerConfig::create()', () => {
         focus: [],
         includeCoreBundle: false,
         pluginSelector: Symbol('plugin selector'),
+        reactVersion: 17,
       })
     );
   });
@@ -408,6 +418,7 @@ describe('OptimizerConfig::create()', () => {
           Symbol(plugin2),
         ],
         "profileWebpack": Symbol(parsed profile webpack),
+        "reactVersion": 17,
         "repoRoot": Symbol(parsed repo root),
         "themeTags": Symbol(theme tags),
         "watch": Symbol(parsed watch),

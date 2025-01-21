@@ -24,6 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
     updateTemplate,
     cleanUpTemplates,
     simulateTemplate,
+    simulateTemplateByName,
   } = templatesApi(getService);
 
   describe('index templates', () => {
@@ -91,6 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedKeys = [
           'name',
           'indexPatterns',
+          'indexMode',
           'hasSettings',
           'hasAliases',
           'hasMappings',
@@ -114,6 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedLegacyKeys = [
           'name',
           'indexPatterns',
+          'indexMode',
           'hasSettings',
           'hasAliases',
           'hasMappings',
@@ -137,6 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedWithDSLKeys = [
           'name',
           'indexPatterns',
+          'indexMode',
           'lifecycle',
           'hasSettings',
           'hasAliases',
@@ -162,6 +166,7 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedWithILMKeys = [
           'name',
           'indexPatterns',
+          'indexMode',
           'ilmPolicy',
           'hasSettings',
           'hasAliases',
@@ -189,6 +194,7 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedKeys = [
           'name',
           'indexPatterns',
+          'indexMode',
           'template',
           'composedOf',
           'ignoreMissingComponentTemplates',
@@ -212,6 +218,7 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedKeys = [
           'name',
           'indexPatterns',
+          'indexMode',
           'template',
           'order',
           'version',
@@ -374,6 +381,7 @@ export default function ({ getService }: FtrProviderContext) {
           _kbnMeta: { hasDatastream: false, type: 'default' },
           name: templateName,
           indexPatterns: [getRandomString()],
+          indexMode: 'standard',
           template: {},
           deprecated: true,
           allowAutoCreate: 'TRUE',
@@ -451,6 +459,18 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { body } = await simulateTemplate(payload).expect(200);
         expect(body.template).to.be.ok();
+      });
+
+      it('should simulate an index template by name', async () => {
+        const templateName = `template-${getRandomString()}`;
+        const payload = getTemplatePayload(templateName, [getRandomString()]);
+
+        await createTemplate(payload).expect(200);
+
+        await simulateTemplateByName(templateName).expect(200);
+
+        // cleanup
+        await deleteTemplates([{ name: templateName }]);
       });
     });
   });
