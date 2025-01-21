@@ -466,7 +466,7 @@ export function createInferenceEndpoint(
   inferenceEndpoint: InferenceEndpoint
 ) {
   return sendRequest<InferenceAPIConfigResponse>({
-    path: `${API_BASE_PATH}/inference/${taskType}/${inferenceId}`,
+    path: `/internal/inference_endpoint/endpoints/${taskType}/${inferenceId}`,
     method: 'put',
     body: JSON.stringify(inferenceEndpoint),
   });

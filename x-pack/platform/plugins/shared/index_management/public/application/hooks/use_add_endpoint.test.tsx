@@ -55,7 +55,7 @@ describe('useAddEndpoint', () => {
     const { result } = renderHook(() => useAddEndpoint());
 
     await act(async () => {
-      await result.current.addInferenceEndpoint(mockInferenceEndpoint);
+      await result.current.addInferenceEndpoint(mockInferenceEndpoint, mockOnSuccess, mockOnError);
     });
 
     expect(createInferenceEndpoint).toHaveBeenCalledWith(
@@ -76,7 +76,7 @@ describe('useAddEndpoint', () => {
     const { result } = renderHook(() => useAddEndpoint());
 
     await act(async () => {
-      await result.current.addInferenceEndpoint(mockInferenceEndpoint);
+      await result.current.addInferenceEndpoint(mockInferenceEndpoint, mockOnSuccess, mockOnError);
     });
 
     expect(createInferenceEndpoint).toHaveBeenCalledWith(

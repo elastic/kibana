@@ -35,6 +35,11 @@ jest.mock('../../../public/application/app_context', () => ({
         },
       },
     },
+    services: {
+      notificationService: {
+        toasts: {},
+      },
+    },
     docLinks: {
       links: {
         inferenceManagement: {

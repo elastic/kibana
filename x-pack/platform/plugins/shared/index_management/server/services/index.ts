@@ -7,4 +7,3 @@
 
 export type { Enricher } from './index_data_enricher';
 export { IndexDataEnricher } from './index_data_enricher';
-export { unflattenObject } from './unflatten_object';
