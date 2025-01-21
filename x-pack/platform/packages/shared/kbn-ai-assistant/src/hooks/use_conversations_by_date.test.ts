@@ -26,13 +26,13 @@ const getDisplayedConversation = (conversation: Conversation) => {
 
 describe('useConversationsByDate', () => {
   const now = new Date();
-  const todayStart = new Date('2025-01-21T00:00:00Z').valueOf();
-  const yesterdayStart = new Date('2025-01-20T00:00:00Z').valueOf();
-  const thisWeekStart = new Date('2025-01-19T00:00:00Z').valueOf();
-  const lastWeekStart = new Date('2025-01-12T00:00:00Z').valueOf();
-  const thisMonthStart = new Date('2025-01-01T00:00:00Z').valueOf();
-  const lastMonthStart = new Date('2024-12-01T00:00:00Z').valueOf();
-  const thisYearStart = new Date('2025-01-01T00:00:00Z').valueOf();
+  const startOfToday = new Date('2025-01-21T00:00:00Z').valueOf();
+  const startOfYesterday = new Date('2025-01-20T00:00:00Z').valueOf();
+  const startOfThisWeek = new Date('2025-01-19T00:00:00Z').valueOf();
+  const startOfLastWeek = new Date('2025-01-12T00:00:00Z').valueOf();
+  const startOfThisMonth = new Date('2025-01-01T00:00:00Z').valueOf();
+  const startOfLastMonth = new Date('2024-12-01T00:00:00Z').valueOf();
+  const startOfThisYear = new Date('2025-01-01T00:00:00Z').valueOf();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -42,19 +42,19 @@ describe('useConversationsByDate', () => {
     (getAbsoluteTime as jest.Mock).mockImplementation((range: string) => {
       switch (range) {
         case 'now/d':
-          return todayStart;
+          return startOfToday;
         case 'now-1d/d':
-          return yesterdayStart;
+          return startOfYesterday;
         case 'now/w':
-          return thisWeekStart;
+          return startOfThisWeek;
         case 'now-1w/w':
-          return lastWeekStart;
+          return startOfLastWeek;
         case 'now/M':
-          return thisMonthStart;
+          return startOfThisMonth;
         case 'now-1M/M':
-          return lastMonthStart;
+          return startOfLastMonth;
         case 'now/y':
-          return thisYearStart;
+          return startOfThisYear;
         default:
           return undefined;
       }
@@ -62,10 +62,10 @@ describe('useConversationsByDate', () => {
 
     (isValidDateMath as jest.Mock).mockImplementation((value: string) => {
       const validTimestamps = [
-        new Date(todayStart + 5 * 60 * 60 * 1000).toISOString(),
-        new Date(yesterdayStart + 5 * 60 * 60 * 1000).toISOString(),
-        new Date(lastWeekStart + 5 * 60 * 60 * 1000).toISOString(),
-        new Date(lastMonthStart + 5 * 60 * 60 * 1000).toISOString(),
+        new Date(startOfToday + 5 * 60 * 60 * 1000).toISOString(),
+        new Date(startOfYesterday + 5 * 60 * 60 * 1000).toISOString(),
+        new Date(startOfLastWeek + 5 * 60 * 60 * 1000).toISOString(),
+        new Date(startOfLastMonth + 5 * 60 * 60 * 1000).toISOString(),
         '2024-05-01T10:00:00Z',
       ];
       return validTimestamps.includes(value);
@@ -81,9 +81,9 @@ describe('useConversationsByDate', () => {
       conversation: {
         id: '1',
         title: `Today's Conversation`,
-        last_updated: new Date(todayStart + 5 * 60 * 60 * 1000).toISOString(),
+        last_updated: new Date(startOfToday + 5 * 60 * 60 * 1000).toISOString(),
       },
-      '@timestamp': new Date(todayStart + 5 * 60 * 60 * 1000).toISOString(),
+      '@timestamp': new Date(startOfToday + 5 * 60 * 60 * 1000).toISOString(),
       labels: {},
       numeric_labels: {},
       messages: [],
@@ -94,9 +94,9 @@ describe('useConversationsByDate', () => {
       conversation: {
         id: '2',
         title: `Yesterday's Conversation`,
-        last_updated: new Date(yesterdayStart + 5 * 60 * 60 * 1000).toISOString(),
+        last_updated: new Date(startOfYesterday + 5 * 60 * 60 * 1000).toISOString(),
       },
-      '@timestamp': new Date(yesterdayStart + 5 * 60 * 60 * 1000).toISOString(),
+      '@timestamp': new Date(startOfYesterday + 5 * 60 * 60 * 1000).toISOString(),
       labels: {},
       numeric_labels: {},
       messages: [],
@@ -107,9 +107,9 @@ describe('useConversationsByDate', () => {
       conversation: {
         id: '3',
         title: `Last Week's Conversation`,
-        last_updated: new Date(lastWeekStart + 5 * 60 * 60 * 1000).toISOString(),
+        last_updated: new Date(startOfLastWeek + 5 * 60 * 60 * 1000).toISOString(),
       },
-      '@timestamp': new Date(lastWeekStart + 5 * 60 * 60 * 1000).toISOString(),
+      '@timestamp': new Date(startOfLastWeek + 5 * 60 * 60 * 1000).toISOString(),
       labels: {},
       numeric_labels: {},
       messages: [],
