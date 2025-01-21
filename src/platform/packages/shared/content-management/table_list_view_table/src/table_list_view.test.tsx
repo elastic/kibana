@@ -592,6 +592,9 @@ describe('TableListView', () => {
       component.update();
       const filterOptions = find('sortSelect').find('li');
 
+      // Check that the second option is 'Name Z-A'
+      expect(filterOptions.at(1).text()).toBe('Name Z-A ');
+
       // Click 'Name Z-A'
       act(() => {
         filterOptions.at(1).simulate('click');
@@ -787,7 +790,10 @@ describe('TableListView', () => {
       component.update();
       const filterOptions = find('sortSelect').find('li');
 
-      // Click 'Name Z-A'
+      // Check that the fourth option is 'Type Z-A'
+      expect(filterOptions.at(3).text()).toBe('Type Z-A ');
+
+      // Click 'Type Z-A'
       act(() => {
         filterOptions.at(3).simulate('click');
       });
@@ -1764,6 +1770,9 @@ describe('TableListView', () => {
       // Change sort with dropdown
       openSortSelect();
       const filterOptions = find('sortSelect').find('li');
+
+      // Check that the second option is 'Name Z-A'
+      expect(filterOptions.at(1).text()).toBe('Name Z-A ');
 
       // Click 'Name Z-A'
       act(() => {
