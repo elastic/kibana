@@ -12,7 +12,7 @@ export const useAccordionStyling = () => {
   const paddingSmall = useEuiPaddingSize('s');
 
   return useMemo(
-    () => ({ 'padding-bottom': paddingLarge, 'padding-top': paddingSmall }),
+    () => ({ paddingBottom: paddingLarge, paddingTop: paddingSmall }),
     [paddingLarge, paddingSmall]
   );
 };

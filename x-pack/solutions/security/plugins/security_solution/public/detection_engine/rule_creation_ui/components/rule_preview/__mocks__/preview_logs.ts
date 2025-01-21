@@ -91,3 +91,30 @@ export const previewLogs: RulePreviewLogs[] = [
     ],
   },
 ];
+
+export const queryRuleTypePreviewLogs: RulePreviewLogs[] = [
+  {
+    errors: [],
+    warnings: [
+      'This rule reached the maximum alert limit for the rule execution. Some alerts were not created.',
+    ],
+    startedAt: '2025-01-21T16:48:50.891Z',
+    duration: 1103,
+    requests: [
+      {
+        request:
+          'POST /apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-*,very-unique/_search?allow_no_indices=true&ignore_unavailable=true\n{\n  "size": 100,\n  "query": {\n    "bool": {\n      "filter": [\n        {\n          "bool": {\n            "must": [],\n            "filter": [\n              {\n                "query_string": {\n                  "query": "*"\n                }\n              }\n            ],\n            "should": [],\n            "must_not": []\n          }\n        },\n        {\n          "range": {\n            "@timestamp": {\n              "lte": "2025-01-21T16:48:50.891Z",\n              "gte": "2025-01-21T15:17:50.891Z",\n              "format": "strict_date_optional_time"\n            }\n          }\n        }\n      ]\n    }\n  },\n  "fields": [\n    {\n      "field": "*",\n      "include_unmapped": true\n    },\n    {\n      "field": "@timestamp",\n      "format": "strict_date_optional_time"\n    }\n  ],\n  "runtime_mappings": {},\n  "sort": [\n    {\n      "@timestamp": {\n        "order": "asc",\n        "unmapped_type": "date"\n      }\n    }\n  ]\n}',
+        description: 'Find documents',
+        request_type: 'findDocuments',
+        duration: 137,
+      },
+      {
+        request:
+          'POST /apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-*,very-unique/_search?allow_no_indices=true&ignore_unavailable=true\n{\n  "size": 100,\n  "query": {\n    "bool": {\n      "filter": [\n        {\n          "bool": {\n            "must": [],\n            "filter": [\n              {\n                "query_string": {\n                  "query": "*"\n                }\n              }\n            ],\n            "should": [],\n            "must_not": []\n          }\n        },\n        {\n          "range": {\n            "@timestamp": {\n              "lte": "2025-01-21T16:48:50.891Z",\n              "gte": "2025-01-21T15:17:50.891Z",\n              "format": "strict_date_optional_time"\n            }\n          }\n        }\n      ]\n    }\n  },\n  "fields": [\n    {\n      "field": "*",\n      "include_unmapped": true\n    },\n    {\n      "field": "@timestamp",\n      "format": "strict_date_optional_time"\n    }\n  ],\n  "runtime_mappings": {},\n  "sort": [\n    {\n      "@timestamp": {\n        "order": "asc",\n        "unmapped_type": "date"\n      }\n    }\n  ],\n  "search_after": [\n    1737472675562\n  ]\n}',
+        description: 'Find documents after cursor [1737472675562]',
+        request_type: 'findDocuments',
+        duration: 192,
+      },
+    ],
+  },
+];

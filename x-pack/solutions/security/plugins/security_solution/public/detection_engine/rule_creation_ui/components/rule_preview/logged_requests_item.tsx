@@ -46,7 +46,7 @@ const LoggedRequestsItemComponent: FC<PropsWithChildren<RulePreviewLogs & { rule
       }
       id={`ruleExecution-${startedAt}`}
       css={{
-        'margin-left': paddingLarge,
+        marginLeft: paddingLarge,
         ...cssStyles,
       }}
     >

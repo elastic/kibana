@@ -8,14 +8,16 @@
 import type { FC } from 'react';
 import React from 'react';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useEuiPaddingSize } from '@elastic/eui';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine';
 import { OptimizedAccordion } from './optimized_accordion';
 import { useAccordionStyling } from './use_accordion_styling';
 import { LoggedRequestsQuery } from './logged_requests_query';
 
-const ruleRequestsTypesMap: Partial<Record<Type, Record<string, unknown>>> = {
+const ruleRequestsTypesMap = {
   query: {
     findDocuments: 'pageDelimiter',
   },
@@ -30,11 +32,20 @@ const ruleRequestsTypesMap: Partial<Record<Type, Record<string, unknown>>> = {
   },
 };
 
-export const isPageViewSupported = (ruleType: Type) => Boolean(ruleRequestsTypesMap[ruleType]);
+type RuleTypesWithPages = keyof typeof ruleRequestsTypesMap;
+
+export const isPageViewSupported = (ruleType: Type): ruleType is RuleTypesWithPages =>
+  ruleType in ruleRequestsTypesMap;
+
+const hasRequestType = (
+  ruleType: RuleTypesWithPages,
+  requestType: string
+): requestType is keyof (typeof ruleRequestsTypesMap)[typeof ruleType] =>
+  requestType in ruleRequestsTypesMap[ruleType];
 
 const transformRequestsToPages = (
   requests: RulePreviewLoggedRequest[],
-  ruleType: Type
+  ruleType: RuleTypesWithPages
 ): RulePreviewLoggedRequest[][] => {
   const pages: RulePreviewLoggedRequest[][] = [];
   requests.forEach((request) => {
@@ -42,7 +53,8 @@ const transformRequestsToPages = (
       pages.push([request]);
     } else if (
       request.request_type &&
-      ruleRequestsTypesMap[ruleType]?.[request.request_type] === 'pageDelimiter'
+      hasRequestType(ruleType, request.request_type) &&
+      ruleRequestsTypesMap[ruleType][request.request_type] === 'pageDelimiter'
     ) {
       pages.push([request]);
     } else {
@@ -55,7 +67,7 @@ const transformRequestsToPages = (
 
 const LoggedRequestsPagesComponent: FC<{
   requests: RulePreviewLoggedRequest[];
-  ruleType: Type;
+  ruleType: RuleTypesWithPages;
 }> = ({ requests, ruleType }) => {
   const cssStyles = useAccordionStyling();
   const paddingLarge = useEuiPaddingSize('l');
@@ -65,12 +77,19 @@ const LoggedRequestsPagesComponent: FC<{
     <>
       {pages.map((pageRequests, key) => (
         <OptimizedAccordion
+          key={key}
           id={`preview-logged-requests-page-accordion-${key}`}
           data-test-subj="preview-logged-requests-page-accordion"
-          buttonContent={`Page ${key + 1} of search queries`}
+          buttonContent={
+            <FormattedMessage
+              id="xpack.securitySolution.detectionEngine.queryPreview.loggedRequestPageLabel"
+              defaultMessage="Page {pageNumber} of search queries"
+              values={{ pageNumber: key + 1 }}
+            />
+          }
           borders="horizontal"
           css={{
-            'margin-left': paddingLarge,
+            marginLeft: paddingLarge,
             ...cssStyles,
           }}
         >
