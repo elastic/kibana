@@ -9,13 +9,14 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { render, waitFor } from '@testing-library/react';
+import type { MountRendererProps, ReactWrapper } from 'enzyme';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { mount, MountRendererProps, ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import enzymeToJson from 'enzyme-to-json';
-import { Location } from 'history';
+import type { Location } from 'history';
 import moment from 'moment';
-import { Moment } from 'moment-timezone';
+import type { Moment } from 'moment-timezone';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';

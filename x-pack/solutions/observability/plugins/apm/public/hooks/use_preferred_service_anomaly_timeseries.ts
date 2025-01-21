@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AnomalyDetectorType } from '../../common/anomaly_detection/apm_ml_detectors';
+import type { AnomalyDetectorType } from '../../common/anomaly_detection/apm_ml_detectors';
 import { getPreferredServiceAnomalyTimeseries } from '../../common/anomaly_detection/get_preferred_service_anomaly_timeseries';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 import { useEnvironmentsContext } from '../context/environments_context/use_environments_context';

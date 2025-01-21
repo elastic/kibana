@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
-import { ContainerMetricTypes } from '../charts/types';
+import type { ContainerMetricTypes } from '../charts/types';
 import { useChartSeriesColor } from './use_chart_series_color';
 
 const getSubtitleFromFormula = (value: string) =>

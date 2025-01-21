@@ -217,7 +217,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * import ReactDOM from 'react-dom';
    *
    * import { AppMountParameters } from 'src/core/public';
-   * import { wrapWithTheme } from 'src/plugins/kibana_react';
+   * import { wrapWithTheme } from 'src/platform/plugins/shared/kibana_react';
    * import { MyApp } from './app';
    *
    * export renderApp = ({ element, theme$ }: AppMountParameters) => {

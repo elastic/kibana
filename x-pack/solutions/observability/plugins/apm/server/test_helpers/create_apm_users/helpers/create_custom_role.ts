@@ -7,9 +7,10 @@
 
 import { Client } from '@elastic/elasticsearch';
 import { omit } from 'lodash';
-import { Elasticsearch, Kibana } from '../create_apm_users';
+import type { Elasticsearch, Kibana } from '../create_apm_users';
 import { callKibana } from './call_kibana';
-import { customRoles, ApmCustomRolename } from '../authentication';
+import type { ApmCustomRolename } from '../authentication';
+import { customRoles } from '../authentication';
 
 export async function createCustomRole({
   elasticsearch,
@@ -37,6 +38,9 @@ export async function createCustomRole({
       url: `/api/security/role/${roleName}`,
       data: {
         ...omit(role, 'applications'),
+      },
+      headers: {
+        'elastic-api-version': '2023-10-31',
       },
     },
   });

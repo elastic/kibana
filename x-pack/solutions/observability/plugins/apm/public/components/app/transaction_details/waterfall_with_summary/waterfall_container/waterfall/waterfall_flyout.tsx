@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { History } from 'history';
+import type { History } from 'history';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../../../hooks/use_time_range';
 import { SpanFlyout } from './span_flyout';
 import { TransactionFlyout } from './transaction_flyout';
-import { IWaterfall } from './waterfall_helpers/waterfall_helpers';
+import type { IWaterfall } from './waterfall_helpers/waterfall_helpers';
 
 interface Props {
   waterfallItemId?: string;

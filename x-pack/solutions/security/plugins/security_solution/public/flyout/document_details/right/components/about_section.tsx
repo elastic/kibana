@@ -20,6 +20,7 @@ import { isEcsAllowedValue } from '../utils/event_utils';
 import { EventCategoryDescription } from './event_category_description';
 import { EventKindDescription } from './event_kind_description';
 import { EventRenderer } from './event_renderer';
+import { AlertStatus } from './alert_status';
 
 const KEY = 'about';
 
@@ -42,6 +43,7 @@ export const AboutSection = memo(() => {
         <AlertDescription />
         <Reason />
         <MitreAttack />
+        <AlertStatus />
       </>
     ) : (
       <>

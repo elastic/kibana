@@ -84,7 +84,7 @@ const ELV2_LICENSE_HEADER = `
 const SAFER_LODASH_SET_HEADER = `
 /*
  * Elasticsearch B.V licenses this file to you under the MIT License.
- * See \`packages/kbn-safer-lodash-set/LICENSE\` for more information.
+ * See \`src/platform/packages/shared/kbn-safer-lodash-set/LICENSE\` for more information.
  */
 `;
 
@@ -93,7 +93,7 @@ const SAFER_LODASH_SET_LODASH_HEADER = `
  * This file is forked from the lodash project (https://lodash.com/),
  * and may include modifications made by Elasticsearch B.V.
  * Elasticsearch B.V. licenses this file to you under the MIT License.
- * See \`packages/kbn-safer-lodash-set/LICENSE\` for more information.
+ * See \`src/platform/packages/shared/kbn-safer-lodash-set/LICENSE\` for more information.
  */
 `;
 
@@ -102,14 +102,14 @@ const SAFER_LODASH_SET_DEFINITELYTYPED_HEADER = `
  * This file is forked from the DefinitelyTyped project (https://github.com/DefinitelyTyped/DefinitelyTyped),
  * and may include modifications made by Elasticsearch B.V.
  * Elasticsearch B.V. licenses this file to you under the MIT License.
- * See \`packages/kbn-safer-lodash-set/LICENSE\` for more information.
+ * See \`src/platform/packages/shared/kbn-safer-lodash-set/LICENSE\` for more information.
  */
 `;
 
 const KBN_HANDLEBARS_HEADER = `
 /*
  * Elasticsearch B.V licenses this file to you under the MIT License.
- * See \`packages/kbn-handlebars/LICENSE\` for more information.
+ * See \`src/platform/packages/private/kbn-handlebars/LICENSE\` for more information.
  */
 `;
 
@@ -118,7 +118,7 @@ const KBN_HANDLEBARS_HANDLEBARS_HEADER = `
   * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),
   * and may include modifications made by Elasticsearch B.V.
   * Elasticsearch B.V. licenses this file to you under the MIT License.
-  * See \`packages/kbn-handlebars/LICENSE\` for more information.
+  * See \`src/platform/packages/private/kbn-handlebars/LICENSE\` for more information.
   */
 `;
 
@@ -127,7 +127,7 @@ const VENN_DIAGRAM_HEADER = `
   * This file is forked from the venn.js project (https://github.com/benfred/venn.js/),
   * and may include modifications made by Elasticsearch B.V.
   * Elasticsearch B.V. licenses this file to you under the MIT License.
-  * See \`x-pack/plugins/graph/public/components/venn_diagram/vennjs/LICENSE\` for more information.
+  * See \`x-pack/platform/plugins/private/graph/public/components/venn_diagram/vennjs/LICENSE\` for more information.
   */
 `;
 
@@ -183,7 +183,7 @@ const DEV_PATTERNS = [
   ...DEV_PACKAGE_DIRS.map((pkg) => `${pkg}/**/*`),
   ...DEV_DIRECTORIES.map((dir) => `{packages,src,x-pack}/**/${dir}/**/*`),
   ...DEV_FILE_PATTERNS.map((file) => `{packages,src,x-pack}/**/${file}`),
-  'packages/kbn-interpreter/tasks/**/*',
+  'src/platform/packages/shared/kbn-interpreter/tasks/**/*',
   'src/dev/**/*',
   'x-pack/{dev-tools,tasks,test,test_serverless,build_chromium}/**/*',
   'x-pack/performance/**/*',
@@ -271,6 +271,10 @@ const RESTRICTED_IMPORTS = [
     message:
       'Please, use rxjs instead: rxjs/operators is just a subset, unnecessarily duplicating the package import.',
   },
+  {
+    name: '@testing-library/react-hooks',
+    message: 'Please use @testing-library/react instead',
+  },
 ];
 
 module.exports = {
@@ -283,14 +287,14 @@ module.exports = {
      * Temporarily disable some react rules for specific plugins, remove in separate PRs
      */
     {
-      files: ['src/plugins/kibana_react/**/*.{js,mjs,ts,tsx}'],
+      files: ['src/platform/plugins/shared/kibana_react/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/rules-of-hooks': 'off',
         'react-hooks/exhaustive-deps': 'off',
       },
     },
     {
-      files: ['src/plugins/kibana_utils/**/*.{js,mjs,ts,tsx}'],
+      files: ['src/platform/plugins/shared/kibana_utils/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
       },
@@ -441,7 +445,7 @@ module.exports = {
      * safer-lodash-set package requires special license headers
      */
     {
-      files: ['packages/kbn-safer-lodash-set/**/*.{js,mjs,ts,tsx}'],
+      files: ['src/platform/packages/shared/kbn-safer-lodash-set/**/*.{js,mjs,ts,tsx}'],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',
@@ -471,7 +475,7 @@ module.exports = {
     },
 
     {
-      files: ['packages/kbn-safer-lodash-set/test/*.{js,mjs,ts,tsx}'],
+      files: ['src/platform/packages/shared/kbn-safer-lodash-set/test/*.{js,mjs,ts,tsx}'],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',
@@ -500,7 +504,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/kbn-safer-lodash-set/**/*.d.ts'],
+      files: ['src/platform/packages/shared/kbn-safer-lodash-set/**/*.d.ts'],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',
@@ -533,7 +537,7 @@ module.exports = {
      * @kbn/handlebars package requires special license headers
      */
     {
-      files: ['packages/kbn-handlebars/**/*.{js,mjs,ts,tsx}'],
+      files: ['src/platform/packages/private/kbn-handlebars/**/*.{js,mjs,ts,tsx}'],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',
@@ -562,7 +566,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/kbn-handlebars/src/spec/**/*.{js,mjs,ts,tsx}'],
+      files: ['src/platform/packages/private/kbn-handlebars/src/spec/**/*.{js,mjs,ts,tsx}'],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',
@@ -595,7 +599,9 @@ module.exports = {
      * venn.js fork requires special license headers
      */
     {
-      files: ['x-pack/plugins/graph/public/components/venn_diagram/vennjs/**/*.{js,mjs,ts,tsx}'],
+      files: [
+        'x-pack/platform/plugins/private/graph/public/components/venn_diagram/vennjs/**/*.{js,mjs,ts,tsx}',
+      ],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',
@@ -778,7 +784,7 @@ module.exports = {
      * Harden specific rules
      */
     {
-      files: ['test/harden/*.js', 'packages/kbn-safer-lodash-set/test/*.js'],
+      files: ['test/harden/*.js', 'src/platform/packages/shared/kbn-safer-lodash-set/test/*.js'],
       rules: {
         'mocha/handle-done-callback': 'off',
       },
@@ -986,10 +992,9 @@ module.exports = {
     },
     {
       files: [
-        'x-pack/plugins/observability_solution/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/plugins/{streams,streams_app}/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/solutions/observability/plugins/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/solutions/observability/packages/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'src/plugins/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/platform/packages/shared/observability/logs_overview/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
       ],
       rules: {
         '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
@@ -1022,6 +1027,20 @@ module.exports = {
             paths: RESTRICTED_IMPORTS,
           },
         ],
+      },
+    },
+    {
+      files: [
+        'x-pack/solutions/observability/plugins/apm/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/apm_data_access/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/infra/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/inventory/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/metrics_data_access/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/profiling/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/profiling_data_access/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
       },
     },
 
@@ -1567,7 +1586,7 @@ module.exports = {
      * Lens overrides
      */
     {
-      files: ['x-pack/plugins/lens/**/*.{ts,tsx}'],
+      files: ['x-pack/platform/plugins/shared/lens/**/*.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
@@ -1783,7 +1802,7 @@ module.exports = {
      * TSVB overrides
      */
     {
-      files: ['src/plugins/vis_types/timeseries/**/*.{js,mjs,ts,tsx}'],
+      files: ['src/platform/plugins/shared/vis_types/timeseries/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'import/no-default-export': 'error',
       },
@@ -1840,24 +1859,24 @@ module.exports = {
      */
     {
       files: [
-        'src/plugins/interactive_setup/**/*.{js,mjs,ts,tsx}',
+        'src/platform/plugins/private/interactive_setup/**/*.{js,mjs,ts,tsx}',
         'test/interactive_setup_api_integration/**/*.{js,mjs,ts,tsx}',
         'test/interactive_setup_functional/**/*.{js,mjs,ts,tsx}',
 
         'packages/kbn-mock-idp-plugin/**/*.{js,mjs,ts,tsx}',
         'packages/kbn-mock-idp-utils/**/*.{js,mjs,ts,tsx}',
-        'packages/kbn-security-hardening/**/*.{js,mjs,ts,tsx}',
-        'packages/kbn-user-profile-components/**/*.{js,mjs,ts,tsx}',
+        'src/platform/packages/shared/kbn-security-hardening/**/*.{js,mjs,ts,tsx}',
+        'src/platform/packages/shared/kbn-user-profile-components/**/*.{js,mjs,ts,tsx}',
 
-        'x-pack/plugins/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/shared/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
         'x-pack/test/encrypted_saved_objects_api_integration/**/*.{js,mjs,ts,tsx}',
 
-        'x-pack/plugins/security/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/shared/security/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/security/**/*.{js,mjs,ts,tsx}',
         'x-pack/test/security_api_integration/**/*.{js,mjs,ts,tsx}',
         'x-pack/test/security_functional/**/*.{js,mjs,ts,tsx}',
 
-        'x-pack/plugins/spaces/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/shared/spaces/**/*.{js,mjs,ts,tsx}',
         'x-pack/test/spaces_api_integration/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
@@ -1907,14 +1926,14 @@ module.exports = {
      */
     {
       files: [
-        'packages/kbn-analytics/**',
+        'src/platform/packages/shared/kbn-analytics/**',
         // 'packages/kbn-telemetry-tools/**',
-        'src/plugins/kibana_usage_collection/**',
-        'src/plugins/usage_collection/**',
-        'src/plugins/telemetry/**',
-        'src/plugins/telemetry_collection_manager/**',
-        'src/plugins/telemetry_management_section/**',
-        'x-pack/plugins/telemetry_collection_xpack/**',
+        'src/platform/plugins/private/kibana_usage_collection/**',
+        'src/platform/plugins/shared/usage_collection/**',
+        'src/platform/plugins/shared/telemetry/**',
+        'src/platform/plugins/shared/telemetry_collection_manager/**',
+        'src/platform/plugins/shared/telemetry_management_section/**',
+        'x-pack/platform/plugins/private/telemetry_collection_xpack/**',
       ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
@@ -1924,21 +1943,21 @@ module.exports = {
       files: [
         // core-team owned code
         'src/core/**',
-        'x-pack/plugins/features/**',
-        'x-pack/plugins/licensing/**',
-        'x-pack/plugins/global_search/**',
-        'x-pack/plugins/cloud/**',
-        'packages/kbn-config-schema',
+        'x-pack/platform/plugins/shared/features/**',
+        'x-pack/platform/plugins/shared/licensing/**',
+        'x-pack/platform/plugins/shared/global_search/**',
+        'x-pack/platform/plugins/shared/cloud/**',
+        'src/platform/packages/shared/kbn-config-schema',
         'src/plugins/status_page/**',
-        'src/plugins/saved_objects_management/**',
-        'packages/kbn-analytics/**',
+        'src/platform/plugins/shared/saved_objects_management/**',
+        'src/platform/packages/shared/kbn-analytics/**',
         'packages/kbn-telemetry-tools/**',
-        'src/plugins/kibana_usage_collection/**',
-        'src/plugins/usage_collection/**',
-        'src/plugins/telemetry/**',
-        'src/plugins/telemetry_collection_manager/**',
-        'src/plugins/telemetry_management_section/**',
-        'x-pack/plugins/telemetry_collection_xpack/**',
+        'src/platform/plugins/private/kibana_usage_collection/**',
+        'src/platform/plugins/shared/usage_collection/**',
+        'src/platform/plugins/shared/telemetry/**',
+        'src/platform/plugins/shared/telemetry_collection_manager/**',
+        'src/platform/plugins/shared/telemetry_management_section/**',
+        'x-pack/platform/plugins/private/telemetry_collection_xpack/**',
       ],
       rules: {
         '@typescript-eslint/prefer-ts-expect-error': 'error',

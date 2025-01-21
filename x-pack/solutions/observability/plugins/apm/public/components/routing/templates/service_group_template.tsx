@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import {
-  EuiPageHeaderProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSkeletonTitle,
-  EuiIcon,
-} from '@elastic/eui';
+import type { EuiPageHeaderProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSkeletonTitle, EuiIcon } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';

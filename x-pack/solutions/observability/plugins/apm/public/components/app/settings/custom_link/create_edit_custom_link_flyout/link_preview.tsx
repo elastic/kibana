@@ -19,8 +19,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
-import { Filter } from '../../../../../../common/custom_link/custom_link_types';
-import { Transaction } from '../../../../../../typings/es_schemas/ui/transaction';
+import type { Filter } from '../../../../../../common/custom_link/custom_link_types';
+import type { Transaction } from '../../../../../../typings/es_schemas/ui/transaction';
 import { callApmApi } from '../../../../../services/rest/create_call_apm_api';
 import { replaceTemplateVariables, convertFiltersToQuery } from './helper';
 

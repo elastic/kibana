@@ -7,19 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 import { termQuery } from '@kbn/observability-plugin/server';
-import { euiLightVars as theme } from '@kbn/ui-theme';
 import { isEmpty } from 'lodash';
-import { APMConfig } from '../../..';
-import { ApmTransactionDocumentType } from '../../../../common/document_type';
+import type { APMConfig } from '../../..';
+import type { ApmTransactionDocumentType } from '../../../../common/document_type';
 import { FAAS_BILLED_DURATION, FAAS_ID, METRICSET_NAME } from '../../../../common/es_fields/apm';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import { RollupInterval } from '../../../../common/rollup';
+import type { RollupInterval } from '../../../../common/rollup';
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
-import { getVizColorForIndex } from '../../../../common/viz_colors';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getLatencyTimeseries } from '../../transactions/get_latency_charts';
-import { fetchAndTransformMetrics, GenericMetricsChart } from '../fetch_and_transform_metrics';
-import { ChartBase } from '../types';
+import type { GenericMetricsChart } from '../fetch_and_transform_metrics';
+import { fetchAndTransformMetrics } from '../fetch_and_transform_metrics';
+import type { ChartBase } from '../types';
 
 const billedDurationAvg = {
   title: i18n.translate('xpack.apm.agentMetrics.serverless.billedDurationAvg', {
@@ -85,7 +84,6 @@ async function getServerlessLatencySeries({
       }),
       key: 'transaction_duration',
       type: 'linemark',
-      color: getVizColorForIndex(1, theme),
       overallValue: transactionLatency.overallAvgDuration ?? 0,
       data: transactionLatency.latencyTimeseries,
     },

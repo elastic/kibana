@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { INVALID_LICENSE } from '../../../../../common/custom_link';
-import { CustomLink } from '../../../../../common/custom_link/custom_link_types';
+import type { CustomLink } from '../../../../../common/custom_link/custom_link_types';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { LicensePrompt } from '../../../shared/license_prompt';

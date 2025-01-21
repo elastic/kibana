@@ -46,7 +46,7 @@
             "text": "FieldSpec"
           }
         ],
-        "path": "packages/kbn-data-view-utils/src/utils/convert_to_data_view_field_spec.ts",
+        "path": "src/platform/packages/shared/kbn-data-view-utils/src/utils/convert_to_data_view_field_spec.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -66,7 +66,7 @@
                 "text": "DatatableColumn"
               }
             ],
-            "path": "packages/kbn-data-view-utils/src/utils/convert_to_data_view_field_spec.ts",
+            "path": "src/platform/packages/shared/kbn-data-view-utils/src/utils/convert_to_data_view_field_spec.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -83,9 +83,9 @@
         "label": "createRegExpPatternFrom",
         "description": [],
         "signature": [
-          "(basePatterns: string | string[]) => RegExp"
+          "(basePatterns: string | string[], selector: Selector) => RegExp"
         ],
-        "path": "packages/kbn-data-view-utils/src/utils/create_regexp_pattern_from.ts",
+        "path": "src/platform/packages/shared/kbn-data-view-utils/src/utils/create_regexp_pattern_from.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -99,7 +99,22 @@
             "signature": [
               "string | string[]"
             ],
-            "path": "packages/kbn-data-view-utils/src/utils/create_regexp_pattern_from.ts",
+            "path": "src/platform/packages/shared/kbn-data-view-utils/src/utils/create_regexp_pattern_from.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/data-view-utils",
+            "id": "def-common.createRegExpPatternFrom.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "selector",
+            "description": [],
+            "signature": [
+              "Selector"
+            ],
+            "path": "src/platform/packages/shared/kbn-data-view-utils/src/utils/create_regexp_pattern_from.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -118,7 +133,7 @@
         "signature": [
           "(allowedList: (string | RegExp)[]) => (value: string) => boolean"
         ],
-        "path": "packages/kbn-data-view-utils/src/utils/test_pattern_against_allowed_list.ts",
+        "path": "src/platform/packages/shared/kbn-data-view-utils/src/utils/test_pattern_against_allowed_list.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -132,7 +147,7 @@
             "signature": [
               "(string | RegExp)[]"
             ],
-            "path": "packages/kbn-data-view-utils/src/utils/test_pattern_against_allowed_list.ts",
+            "path": "src/platform/packages/shared/kbn-data-view-utils/src/utils/test_pattern_against_allowed_list.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -157,7 +172,7 @@
         "signature": [
           "\"esql\""
         ],
-        "path": "packages/kbn-data-view-utils/src/constants.ts",
+        "path": "src/platform/packages/shared/kbn-data-view-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

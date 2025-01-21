@@ -8,7 +8,7 @@
 import { deepFreeze } from '@kbn/std';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 
-const SECURITY_SOLUTION_APP_ID = 'siem';
+const SECURITY_SOLUTION_APP_ID = 'siemV2';
 
 export interface PrivilegeMapObject {
   appId: string;
@@ -167,6 +167,18 @@ export const ENDPOINT_PRIVILEGES: Record<string, PrivilegeMapObject> = deepFreez
     privilegeSplit: '-',
     privilegeType: 'api',
     privilegeName: 'writeScanOperations',
+  },
+  writeWorkflowInsights: {
+    appId: DEFAULT_APP_CATEGORIES.security.id,
+    privilegeSplit: '-',
+    privilegeType: 'api',
+    privilegeName: 'writeWorkflowInsights',
+  },
+  readWorkflowInsights: {
+    appId: DEFAULT_APP_CATEGORIES.security.id,
+    privilegeSplit: '-',
+    privilegeType: 'api',
+    privilegeName: 'readWorkflowInsights',
   },
 });
 

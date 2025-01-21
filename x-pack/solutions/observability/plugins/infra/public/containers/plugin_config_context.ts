@@ -6,7 +6,7 @@
  */
 
 import { createContext, useContext } from 'react';
-import { InfraPublicConfig } from '../../common/plugin_config_types';
+import type { InfraPublicConfig } from '../../common/plugin_config_types';
 
 const PluginConfigContext = createContext<InfraPublicConfig | undefined>(undefined);
 

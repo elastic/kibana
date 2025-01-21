@@ -39,7 +39,7 @@
         "signature": [
           "{ services: { fetchFlamechartData: ({ core, esClient, indices, stacktraceIdsField, query, totalSeconds, }: ",
           "FetchFlamechartParams",
-          ") => Promise<{ TotalSeconds: number; Size: number; Edges: number[][]; FileID: string[]; FrameType: number[]; Inline: boolean[]; ExeFilename: string[]; AddressOrLine: number[]; FunctionName: string[]; FunctionOffset: number[]; SourceFilename: string[]; SourceLine: number[]; CountInclusive: number[]; CountExclusive: number[]; SamplingRate: number; TotalSamples: number; TotalCPU: number; SelfCPU: number; AnnualCO2TonsExclusive: number[]; AnnualCO2TonsInclusive: number[]; AnnualCostsUSDInclusive: number[]; AnnualCostsUSDExclusive: number[]; }>; getStatus: ({ esClient, soClient, spaceId }: ",
+          ") => Promise<{ TotalSeconds: number; Size: number; Edges: number[][]; FileID: string[]; FrameType: number[]; Inline: boolean[]; ExeFilename: string[]; AddressOrLine: number[]; FunctionName: string[]; FunctionOffset: number[]; SourceFilename: string[]; SourceLine: number[]; CountInclusive: number[]; CountExclusive: number[]; SamplingRate: number; TotalSamples: number; SelfCPU: number; AnnualCO2TonsExclusive: number[]; AnnualCO2TonsInclusive: number[]; AnnualCostsUSDInclusive: number[]; AnnualCostsUSDExclusive: number[]; }>; getStatus: ({ esClient, soClient, spaceId }: ",
           "HasSetupParams",
           ") => Promise<",
           {
@@ -65,7 +65,7 @@
             "section": "def-common.TopNFunctions",
             "text": "TopNFunctions"
           },
-          ">; fetchESFunctions: ({ core, esClient, indices, stacktraceIdsField, query, aggregationField, limit, totalSeconds, }: ",
+          ">; fetchESFunctions: ({ core, esClient, indices, stacktraceIdsField, query, aggregationFields, limit, totalSeconds, }: ",
           "FetchFunctionsParams",
           ") => Promise<",
           {
@@ -121,13 +121,7 @@
             "text": "PackagePolicyClient"
           },
           "; soClient: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsClientContract",
-            "text": "SavedObjectsClientContract"
-          },
+          "SavedObjectsClientContract",
           "; }) => Promise<",
           {
             "pluginId": "fleet",
@@ -181,13 +175,7 @@
                 "label": "soClient",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsClientContract",
-                    "text": "SavedObjectsClientContract"
-                  }
+                  "SavedObjectsClientContract"
                 ],
                 "path": "x-pack/solutions/observability/plugins/profiling_data_access/common/get_apm_policy.ts",
                 "deprecated": false,
@@ -216,13 +204,7 @@
             "text": "PackagePolicyClient"
           },
           "; soClient: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsClientContract",
-            "text": "SavedObjectsClientContract"
-          },
+          "SavedObjectsClientContract",
           "; }) => Promise<",
           {
             "pluginId": "fleet",
@@ -276,13 +258,7 @@
                 "label": "soClient",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsClientContract",
-                    "text": "SavedObjectsClientContract"
-                  }
+                  "SavedObjectsClientContract"
                 ],
                 "path": "x-pack/solutions/observability/plugins/profiling_data_access/common/fleet_policies.ts",
                 "deprecated": false,
@@ -311,13 +287,7 @@
             "text": "PackagePolicyClient"
           },
           "; soClient: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsClientContract",
-            "text": "SavedObjectsClientContract"
-          },
+          "SavedObjectsClientContract",
           "; }) => Promise<",
           {
             "pluginId": "fleet",
@@ -371,13 +341,7 @@
                 "label": "soClient",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsClientContract",
-                    "text": "SavedObjectsClientContract"
-                  }
+                  "SavedObjectsClientContract"
                 ],
                 "path": "x-pack/solutions/observability/plugins/profiling_data_access/common/fleet_policies.ts",
                 "deprecated": false,

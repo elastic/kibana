@@ -18,13 +18,7 @@
             "text": "Plugin"
           },
           " implements ",
-          {
-            "pluginId": "@kbn/core-plugins-browser",
-            "scope": "public",
-            "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-public.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<",
           {
             "pluginId": "triggersActionsUi",
@@ -83,13 +77,7 @@
                 "label": "ctx",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-plugins-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCorePluginsBrowserPluginApi",
-                    "section": "def-public.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
+                  "PluginInitializerContext",
                   "<object>"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
@@ -109,14 +97,8 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
-              "<object, unknown>, plugins: PluginsSetup) => ",
+              "CoreSetup",
+              "<{}, unknown>, plugins: PluginsSetup) => ",
               {
                 "pluginId": "triggersActionsUi",
                 "scope": "public",
@@ -137,14 +119,8 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-public.CoreSetup",
-                    "text": "CoreSetup"
-                  },
-                  "<object, unknown>"
+                  "CoreSetup",
+                  "<{}, unknown>"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
                 "deprecated": false,
@@ -178,13 +154,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ", plugins: PluginsStart) => ",
               {
                 "pluginId": "triggersActionsUi",
@@ -206,13 +176,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-public.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
                 "deprecated": false,
@@ -492,13 +456,7 @@
         "description": [],
         "signature": [
           "({\n  id,\n  params,\n  http,\n  signal,\n}: { id: string; http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           "; params: Record<string, unknown>; signal?: AbortSignal | undefined; }) => Promise<",
           {
             "pluginId": "actions",
@@ -543,13 +501,7 @@
                 "label": "http",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpSetup",
-                    "text": "HttpSetup"
-                  }
+                  "HttpSetup"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/action_connector_api/execute.ts",
                 "deprecated": false,
@@ -598,13 +550,7 @@
         "description": [],
         "signature": [
           "({ http, featureId, includeSystemActions, }: { http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           "; featureId?: string | undefined; includeSystemActions?: boolean | undefined; }) => Promise<",
           {
             "pluginId": "@kbn/actions-types",
@@ -638,13 +584,7 @@
                 "label": "http",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpSetup",
-                    "text": "HttpSetup"
-                  }
+                  "HttpSetup"
                 ],
                 "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/apis/fetch_connector_types/fetch_connector_types.ts",
                 "deprecated": false,
@@ -760,13 +700,7 @@
         "description": [],
         "signature": [
           "(http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           ", indexes: string[]) => Promise<",
           "FieldOption",
           "[]>"
@@ -783,13 +717,7 @@
             "label": "http",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
+              "HttpSetup"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/index_controls/index.ts",
             "deprecated": false,
@@ -824,13 +752,7 @@
         "description": [],
         "signature": [
           "(http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           ", pattern: string) => Promise<",
           "IOption",
           "[]>"
@@ -847,13 +769,7 @@
             "label": "http",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
+              "HttpSetup"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/index_controls/index.ts",
             "deprecated": false,
@@ -1176,13 +1092,7 @@
         "description": [],
         "signature": [
           "({\n  http,\n  ruleId,\n}: { http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           "; ruleId: string; }) => Promise<",
           {
             "pluginId": "triggersActionsUi",
@@ -1224,13 +1134,7 @@
                 "label": "http",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpSetup",
-                    "text": "HttpSetup"
-                  }
+                  "HttpSetup"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/rule_api/get_rule.ts",
                 "deprecated": false,
@@ -1299,13 +1203,7 @@
         "description": [],
         "signature": [
           "({\n  http,\n  ruleId,\n  numberOfExecutions,\n}: { http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           "; ruleId: string; numberOfExecutions?: number | undefined; }) => Promise<",
           {
             "pluginId": "alerting",
@@ -1339,13 +1237,7 @@
                 "label": "http",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpSetup",
-                    "text": "HttpSetup"
-                  }
+                  "HttpSetup"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/rule_api/rule_summary.ts",
                 "deprecated": false,
@@ -1391,13 +1283,7 @@
         "description": [],
         "signature": [
           "({ http }: { http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           "; }) => Promise<",
           {
             "pluginId": "@kbn/triggers-actions-ui-types",
@@ -1431,13 +1317,7 @@
                 "label": "http",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpSetup",
-                    "text": "HttpSetup"
-                  }
+                  "HttpSetup"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/rule_api/rule_types.ts",
                 "deprecated": false,
@@ -1818,13 +1698,7 @@
         "description": [],
         "signature": [
           "({\n  http,\n  connector,\n  id,\n}: { http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           "; connector: Pick<",
           "ActionConnectorWithoutId",
           "<Record<string, unknown>, Record<string, unknown>>, \"config\" | \"secrets\" | \"name\">; id: string; }) => Promise<",
@@ -1860,13 +1734,7 @@
                 "label": "http",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpSetup",
-                    "text": "HttpSetup"
-                  }
+                  "HttpSetup"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/action_connector_api/update.ts",
                 "deprecated": false,
@@ -2042,13 +1910,7 @@
             "text": "KibanaReactContextValue"
           },
           "<Partial<",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           "> & ",
           {
             "pluginId": "triggersActionsUi",
@@ -2308,13 +2170,7 @@
             "description": [],
             "signature": [
               "(key: string, value: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectAttribute",
-                "text": "SavedObjectAttribute"
-              },
+              "SavedObjectAttribute",
               ", index: number) => void"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
@@ -2344,13 +2200,7 @@
                 "label": "value",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                    "section": "def-common.SavedObjectAttribute",
-                    "text": "SavedObjectAttribute"
-                  }
+                  "SavedObjectAttribute"
                 ],
                 "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
                 "deprecated": false,
@@ -2723,6 +2573,20 @@
             "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionType.subFeature",
+            "type": "string",
+            "tags": [],
+            "label": "subFeature",
+            "description": [],
+            "signature": [
+              "\"endpointSecurity\" | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3069,6 +2933,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionTypeModel.subFeature",
+            "type": "string",
+            "tags": [],
+            "label": "subFeature",
+            "description": [],
+            "signature": [
+              "\"endpointSecurity\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
             "deprecated": false,
@@ -4741,13 +4619,7 @@
             "description": [],
             "signature": [
               "string | ((docLinks: ",
-              {
-                "pluginId": "@kbn/core-doc-links-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreDocLinksBrowserPluginApi",
-                "section": "def-public.DocLinksStart",
-                "text": "DocLinksStart"
-              },
+              "DocLinksStart",
               ") => string) | null"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
@@ -5335,13 +5207,7 @@
             "text": "TriggersAndActionsUiServices"
           },
           " extends ",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          }
+          "CoreStart"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
         "deprecated": false,
@@ -5574,13 +5440,7 @@
             "description": [],
             "signature": [
               "(crumbs: ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeBreadcrumb",
-                "text": "ChromeBreadcrumb"
-              },
+              "ChromeBreadcrumb",
               "[]) => void"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
@@ -5595,13 +5455,7 @@
                 "label": "crumbs",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-chrome-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreChromeBrowserPluginApi",
-                    "section": "def-public.ChromeBreadcrumb",
-                    "text": "ChromeBreadcrumb"
-                  },
+                  "ChromeBreadcrumb",
                   "[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
@@ -5794,13 +5648,7 @@
             "label": "i18n",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-i18n-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreI18nBrowserPluginApi",
-                "section": "def-public.I18nStart",
-                "text": "I18nStart"
-              }
+              "I18nStart"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
             "deprecated": false,
@@ -5814,13 +5662,7 @@
             "label": "theme",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.ThemeServiceSetup",
-                "text": "ThemeServiceSetup"
-              }
+              "ThemeServiceSetup"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
             "deprecated": false,
@@ -5957,7 +5799,7 @@
         "tags": [],
         "label": "ValidationResult",
         "description": [],
-        "path": "packages/response-ops/rule_form/src/types.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5971,7 +5813,7 @@
             "signature": [
               "{ [x: string]: any; }"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6381,13 +6223,7 @@
         "signature": [
           "BulkOperationAttributesWithoutHttp",
           " & { http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           "; }"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",

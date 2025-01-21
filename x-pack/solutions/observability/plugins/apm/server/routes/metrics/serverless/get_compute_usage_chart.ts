@@ -8,8 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { euiLightVars as theme } from '@kbn/ui-theme';
-import { APMConfig } from '../../..';
+import type { APMConfig } from '../../..';
 import {
   FAAS_BILLED_DURATION,
   FAAS_ID,
@@ -19,8 +18,8 @@ import {
 } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getMetricsDateHistogramParams } from '../../../lib/helpers/metrics';
-import { GenericMetricsChart } from '../fetch_and_transform_metrics';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { GenericMetricsChart } from '../fetch_and_transform_metrics';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { convertComputeUsageToGbSec } from './helper';
 
 export const computeUsageAvgScript = {
@@ -115,7 +114,6 @@ export async function getComputeUsageChart({
                   computeUsageBytesMs: aggregations?.avgComputeUsageBytesMs.value,
                   countInvocations: aggregations?.countInvocations.value,
                 }) ?? 0,
-              color: theme.euiColorVis0,
               data: timeseriesData.buckets.map((bucket) => {
                 const computeUsage =
                   convertComputeUsageToGbSec({

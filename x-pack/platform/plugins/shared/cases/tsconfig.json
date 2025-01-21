@@ -38,7 +38,6 @@
     "@kbn/licensing-plugin",
     "@kbn/user-profile-components",
     "@kbn/rule-data-utils",
-    "@kbn/ui-theme",
     "@kbn/std",
     "@kbn/test-jest-helpers",
     "@kbn/config-schema",
@@ -79,6 +78,9 @@
     "@kbn/cloud-plugin",
     "@kbn/core-http-server-mocks",
     "@kbn/core-http-server-utils",
+    "@kbn/code-editor-mock",
+    "@kbn/monaco",
+    "@kbn/code-editor",
   ],
   "exclude": [
     "target/**/*",

@@ -23,6 +23,7 @@ import {
   AppStatus,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { FleetStart } from '@kbn/fleet-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -42,7 +43,6 @@ import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   ANALYTICS_PLUGIN,
   APPLICATIONS_PLUGIN,
-  APP_SEARCH_PLUGIN,
   ELASTICSEARCH_PLUGIN,
   AI_SEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
@@ -50,20 +50,14 @@ import {
   SEARCH_EXPERIENCES_PLUGIN,
   SEARCH_PRODUCT_NAME,
   VECTOR_SEARCH_PLUGIN,
-  WORKPLACE_SEARCH_PLUGIN,
   SEMANTIC_SEARCH_PLUGIN,
 } from '../common/constants';
 import { registerLocators } from '../common/locators';
 import { ClientConfigType, InitialAppData } from '../common/types';
 import { hasEnterpriseLicense } from '../common/utils/licensing';
 
-import { ENGINES_PATH } from './applications/app_search/routes';
 import { SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';
-import {
-  CONNECTORS_PATH,
-  SEARCH_INDICES_PATH,
-  CRAWLERS_PATH,
-} from './applications/enterprise_search_content/routes';
+import { CONNECTORS_PATH, CRAWLERS_PATH } from './applications/enterprise_search_content/routes';
 
 import { docLinks } from './applications/shared/doc_links';
 import type { DynamicSideNavItems } from './navigation_tree';
@@ -90,6 +84,7 @@ export interface PluginsStart {
   cloud?: CloudSetup & CloudStart;
   console?: ConsolePluginStart;
   data?: DataPublicPluginStart;
+  fleet?: FleetStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
   indexManagement?: IndexManagementPluginStart;
   lens?: LensPublicStart;
@@ -119,13 +114,6 @@ const contentLinks: AppDeepLink[] = [
     }),
   },
   {
-    id: 'searchIndices',
-    path: `/${SEARCH_INDICES_PATH}`,
-    title: i18n.translate('xpack.enterpriseSearch.navigation.contentIndicesLinkLabel', {
-      defaultMessage: 'Indices',
-    }),
-  },
-  {
     id: 'webCrawlers',
     path: `/${CRAWLERS_PATH}`,
     title: i18n.translate('xpack.enterpriseSearch.navigation.contentWebcrawlersLinkLabel', {
@@ -145,16 +133,6 @@ const applicationsLinks: AppDeepLink[] = [
       }
     ),
     visibleIn: ['globalSearch'],
-  },
-];
-
-const appSearchLinks: AppDeepLink[] = [
-  {
-    id: 'engines',
-    path: `/${ENGINES_PATH}`,
-    title: i18n.translate('xpack.enterpriseSearch.navigation.appSearchEnginesLinkLabel', {
-      defaultMessage: 'Engines',
-    }),
   },
 ];
 
@@ -442,50 +420,19 @@ export class EnterpriseSearchPlugin implements Plugin {
     registerLocators(share!);
 
     core.application.register({
-      appRoute: APP_SEARCH_PLUGIN.URL,
+      appRoute: '/app/enterprise_search',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      deepLinks: appSearchLinks,
-      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
-      id: APP_SEARCH_PLUGIN.ID,
+      id: 'enterpriseSearchRedirect',
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
-        const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(APP_SEARCH_PLUGIN.NAME);
-
-        await this.getInitialData(http);
         const pluginData = this.getPluginData();
 
         const { renderApp } = await import('./applications');
-        const { AppSearch } = await import('./applications/app_search');
+        const { ApplicationRedirect } = await import('./applications/enterprise_search_redirect');
 
-        return renderApp(AppSearch, kibanaDeps, pluginData);
+        return renderApp(ApplicationRedirect, kibanaDeps, pluginData);
       },
-      title: APP_SEARCH_PLUGIN.NAME,
-      visibleIn: [],
-    });
-
-    core.application.register({
-      appRoute: WORKPLACE_SEARCH_PLUGIN.URL,
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
-      id: WORKPLACE_SEARCH_PLUGIN.ID,
-      mount: async (params: AppMountParameters) => {
-        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
-        const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(WORKPLACE_SEARCH_PLUGIN.NAME);
-
-        // The Workplace Search Personal dashboard needs the chrome hidden. We hide it globally
-        // here first to prevent a flash of chrome on the Personal dashboard and unhide it for admin routes.
-        if (this.config.host) chrome.setIsVisible(false);
-        await this.getInitialData(http);
-        const pluginData = this.getPluginData();
-
-        const { renderApp } = await import('./applications');
-        const { WorkplaceSearch } = await import('./applications/workplace_search');
-
-        return renderApp(WorkplaceSearch, kibanaDeps, pluginData);
-      },
-      title: WORKPLACE_SEARCH_PLUGIN.NAME,
+      title: 'EnterpriseSearchRedirect',
       visibleIn: [],
     });
 
@@ -507,26 +454,6 @@ export class EnterpriseSearchPlugin implements Plugin {
         path: ANALYTICS_PLUGIN.URL,
         showOnHomePage: false,
         title: ANALYTICS_PLUGIN.NAME,
-      });
-
-      plugins.home.featureCatalogue.register({
-        category: 'data',
-        description: APP_SEARCH_PLUGIN.DESCRIPTION,
-        icon: 'appSearchApp',
-        id: APP_SEARCH_PLUGIN.ID,
-        path: APP_SEARCH_PLUGIN.URL,
-        showOnHomePage: false,
-        title: APP_SEARCH_PLUGIN.NAME,
-      });
-
-      plugins.home.featureCatalogue.register({
-        category: 'data',
-        description: WORKPLACE_SEARCH_PLUGIN.DESCRIPTION,
-        icon: 'workplaceSearchApp',
-        id: WORKPLACE_SEARCH_PLUGIN.ID,
-        path: WORKPLACE_SEARCH_PLUGIN.URL,
-        showOnHomePage: false,
-        title: WORKPLACE_SEARCH_PLUGIN.NAME,
       });
 
       plugins.home.featureCatalogue.register({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BaseFlameGraph } from '@kbn/profiling-utils';
+import type { BaseFlameGraph } from '@kbn/profiling-utils';
 
 export const baseFlamegraph: BaseFlameGraph = {
   Edges: [
@@ -287,7 +287,6 @@ export const baseFlamegraph: BaseFlameGraph = {
   Size: 35,
   SamplingRate: 1,
   SelfCPU: 7,
-  TotalCPU: 245,
   TotalSamples: 7,
   TotalSeconds: 4.980000019073486,
 };

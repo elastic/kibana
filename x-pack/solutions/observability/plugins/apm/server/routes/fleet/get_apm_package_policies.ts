@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
-import { APMPluginStartDependencies } from '../../types';
+import type { CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
+import type { APMPluginStartDependencies } from '../../types';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 
 export async function getApmPackagePolicies({
@@ -16,11 +16,11 @@ export async function getApmPackagePolicies({
   coreStart: CoreStart;
   fleetPluginStart: NonNullable<APMPluginStartDependencies['fleet']>;
 }) {
-  // @ts-ignore
   const savedObjectsClient: SavedObjectsClientContract = await getInternalSavedObjectsClient(
     coreStart
   );
   return await fleetPluginStart.packagePolicyService.list(savedObjectsClient, {
     kuery: 'ingest-package-policies.package.name:apm',
+    spaceId: '*',
   });
 }

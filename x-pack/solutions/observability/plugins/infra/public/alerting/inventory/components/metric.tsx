@@ -24,15 +24,17 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
-import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { HOST_METRICS_DOC_HREF } from '../../../common/visualizations';
 import { useMetricsDataViewContext } from '../../../containers/metrics_source';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
-import {
+import type {
   SnapshotCustomAggregation,
-  SnapshotCustomAggregationRT,
   SnapshotCustomMetricInput,
+} from '../../../../common/http_api/snapshot_api';
+import {
+  SnapshotCustomAggregationRT,
   SnapshotCustomMetricInputRT,
   SNAPSHOT_CUSTOM_AGGREGATIONS,
 } from '../../../../common/http_api/snapshot_api';

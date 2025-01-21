@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getSuggestionsWithTermsAggregation } from './get_suggestions_with_terms_aggregation';
 
 const mockSearch = jest.fn();

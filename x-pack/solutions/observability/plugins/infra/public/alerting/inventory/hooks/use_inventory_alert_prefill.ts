@@ -6,8 +6,8 @@
  */
 
 import { useState } from 'react';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import {
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type {
   SnapshotMetricInput,
   SnapshotCustomMetricInput,
 } from '../../../../common/http_api/snapshot_api';

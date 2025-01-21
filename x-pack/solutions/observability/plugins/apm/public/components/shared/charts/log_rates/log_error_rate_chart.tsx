@@ -13,7 +13,7 @@ import { SERVICE_NAME } from '@kbn/observability-shared-plugin/common';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { asDecimalOrInteger } from '../../../../../common/utils/formatters';
 import { TooltipContent } from './tooltip_content';
 import { Popover } from './popover';

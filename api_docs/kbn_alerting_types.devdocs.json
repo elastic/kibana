@@ -400,13 +400,7 @@
             "text": "AlertDelay"
           },
           " extends ",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectAttributes",
-            "text": "SavedObjectAttributes"
-          }
+          "SavedObjectAttributes"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
         "deprecated": false,
@@ -498,13 +492,7 @@
             "text": "AlertsFilter"
           },
           " extends ",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectAttributes",
-            "text": "SavedObjectAttributes"
-          }
+          "SavedObjectAttributes"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
         "deprecated": false,
@@ -572,13 +560,7 @@
             "text": "AlertsFilterTimeframe"
           },
           " extends ",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectAttributes",
-            "text": "SavedObjectAttributes"
-          }
+          "SavedObjectAttributes"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
         "deprecated": false,
@@ -973,13 +955,7 @@
             "text": "Flapping"
           },
           " extends ",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectAttributes",
-            "text": "SavedObjectAttributes"
-          }
+          "SavedObjectAttributes"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
         "deprecated": false,
@@ -1026,13 +1002,7 @@
             "text": "IntervalSchedule"
           },
           " extends ",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectAttributes",
-            "text": "SavedObjectAttributes"
-          }
+          "SavedObjectAttributes"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
         "deprecated": false,
@@ -1721,13 +1691,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectAttributes",
-                "text": "SavedObjectAttributes"
-              }
+              "SavedObjectAttributes"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
             "deprecated": false,
@@ -1808,13 +1772,7 @@
             "text": "RuleActionFrequency"
           },
           " extends ",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectAttributes",
-            "text": "SavedObjectAttributes"
-          }
+          "SavedObjectAttributes"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
         "deprecated": false,
@@ -2129,13 +2087,7 @@
             "text": "RuleMonitoringCalculatedMetrics"
           },
           " extends ",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectAttributes",
-            "text": "SavedObjectAttributes"
-          }
+          "SavedObjectAttributes"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
         "deprecated": false,
@@ -2213,13 +2165,7 @@
             "text": "RuleMonitoringHistory"
           },
           " extends ",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectAttributes",
-            "text": "SavedObjectAttributes"
-          }
+          "SavedObjectAttributes"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
         "deprecated": false,
@@ -2294,13 +2240,7 @@
             "text": "RuleMonitoringLastRun"
           },
           " extends ",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectAttributes",
-            "text": "SavedObjectAttributes"
-          }
+          "SavedObjectAttributes"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
         "deprecated": false,
@@ -2356,13 +2296,7 @@
             "text": "RuleMonitoringLastRunMetrics"
           },
           " extends ",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectAttributes",
-            "text": "SavedObjectAttributes"
-          }
+          "SavedObjectAttributes"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
         "deprecated": false,
@@ -3002,13 +2936,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectAttributes",
-                "text": "SavedObjectAttributes"
-              }
+              "SavedObjectAttributes"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
             "deprecated": false,
@@ -3543,13 +3471,7 @@
         "label": "MappedParams",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectAttributes",
-            "text": "SavedObjectAttributes"
-          },
+          "SavedObjectAttributes",
           " & ",
           {
             "pluginId": "@kbn/alerting-types",
@@ -3604,13 +3526,7 @@
             "text": "SanitizedRuleAction"
           },
           "[]; } & Omit<",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsResolveResponse",
-            "text": "SavedObjectsResolveResponse"
-          },
+          "SavedObjectsResolveResponse",
           "<unknown>, \"saved_object\"> & { outcome: string; alias_target_id?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
@@ -3658,7 +3574,13 @@
         "description": [],
         "signature": [
           "Omit<",
-          "Options",
+          {
+            "pluginId": "@kbn/rrule",
+            "scope": "common",
+            "docId": "kibKbnRrulePluginApi",
+            "section": "def-common.Options",
+            "text": "Options"
+          },
           ", \"dtstart\" | \"until\" | \"byweekday\" | \"wkst\"> & { dtstart: string; byweekday?: (string | number)[] | null | undefined; wkst?: ",
           {
             "pluginId": "@kbn/rrule",
@@ -3682,21 +3604,9 @@
         "label": "RuleActionParam",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectAttributeSingle",
-            "text": "SavedObjectAttributeSingle"
-          },
+          "SavedObjectAttributeSingle",
           " | ",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectAttributeSingle",
-            "text": "SavedObjectAttributeSingle"
-          },
+          "SavedObjectAttributeSingle",
           "[]"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
@@ -3712,13 +3622,7 @@
         "label": "RuleActionParams",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectAttributes",
-            "text": "SavedObjectAttributes"
-          }
+          "SavedObjectAttributes"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
         "deprecated": false,

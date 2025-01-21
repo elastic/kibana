@@ -13,8 +13,8 @@ import {
   SYMBOLIZER_PACKAGE_POLICY_NAME,
 } from '@kbn/profiling-data-access-plugin/common';
 import { omit } from 'lodash';
-import { PackageInputType } from '../..';
-import { ProfilingCloudSetupOptions } from './types';
+import type { PackageInputType } from '../..';
+import type { ProfilingCloudSetupOptions } from './types';
 
 const CLOUD_AGENT_POLICY_ID = 'policy-elastic-agent-on-cloud';
 

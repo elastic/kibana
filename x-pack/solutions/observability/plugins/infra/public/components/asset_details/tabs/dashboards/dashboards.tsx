@@ -18,11 +18,8 @@ import {
 } from '@elastic/eui';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import {
-  DashboardApi,
-  DashboardCreationOptions,
-  DashboardRenderer,
-} from '@kbn/dashboard-plugin/public';
+import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
+import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 
 import type { DashboardSearchOut } from '@kbn/dashboard-plugin/server/content_management';
 import type { SerializableRecord } from '@kbn/utility-types';

@@ -8,21 +8,23 @@
 import React, { useMemo } from 'react';
 import { flatten } from 'lodash';
 
+import type {
+  BrushEndListener,
+  LineAnnotationDatum,
+  LineAnnotationStyle,
+  TickFormatter,
+} from '@elastic/charts';
 import {
   AnnotationDomainType,
   AreaSeries,
   Axis,
-  BrushEndListener,
   Chart,
   CurveType,
   LineAnnotation,
-  LineAnnotationDatum,
-  LineAnnotationStyle,
   Position,
   RectAnnotation,
   ScaleType,
   Settings,
-  TickFormatter,
 } from '@elastic/charts';
 
 import { euiPaletteColorBlind, useEuiTheme } from '@elastic/eui';
@@ -36,7 +38,7 @@ import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import type { HistogramItem } from '../../../../../common/correlations/types';
 import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/correlations/constants';
 
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
 import { ChartContainer } from '../chart_container';
 

@@ -11,6 +11,7 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
@@ -116,6 +117,7 @@ export const observabilityPublicPluginsStartMock = {
       dataViews: dataViewPluginMocks.createStartContract(),
       discover: null,
       lens: lensPluginMock.createStartContract(),
+      observabilityAIAssistant: observabilityAIAssistantPluginMock.createStartContract(),
       share: sharePluginMock.createStartContract(),
       spaces: spacesPluginMock.createStartContract(),
       triggersActionsUi: triggersActionsUiStartMock.createStart(),

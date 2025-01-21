@@ -6,10 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ArtifactsSchema, TutorialsCategory, TutorialSchema } from '@kbn/home-plugin/server';
-import { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { ArtifactsSchema, TutorialSchema } from '@kbn/home-plugin/server';
+import { TutorialsCategory } from '@kbn/home-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
-import { APMConfig } from '..';
+import type { APMConfig } from '..';
 import { createElasticCloudInstructions } from './envs/elastic_cloud';
 import { onPremInstructions } from './envs/on_prem';
 
