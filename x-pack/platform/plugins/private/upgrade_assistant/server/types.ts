@@ -8,6 +8,7 @@
 import { IRouter, Logger, SavedObjectsServiceStart } from '@kbn/core/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import SemVer from 'semver/classes/semver';
 import { CredentialStore } from './lib/reindexing/credential_store';
 import { handleEsError } from './shared_imports';
 import type { FeatureSet } from '../common/types';
@@ -26,4 +27,7 @@ export interface RouteDependencies {
     featureSet: FeatureSet;
     isSecurityEnabled: () => boolean;
   };
+  // @TINA still on the fence about using versionService rather than string
+  current: SemVer;
+  defaultTarget: number;
 }

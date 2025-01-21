@@ -16,8 +16,11 @@ export async function getESUpgradeStatus(
 ): Promise<ESUpgradeStatus> {
   const getCombinedDeprecations = async () => {
     const healthIndicators = await getHealthIndicators(dataClient);
-    const enrichedDeprecations = await getEnrichedDeprecations(dataClient);
+    const enrichedHealthIndicators = healthIndicators.filter(({ status }) => {
+      return status !== 'green';
+    }) as EnrichedDeprecationInfo[];
 
+    const enrichedDeprecations = await getEnrichedDeprecations(dataClient);
     const toggledMigrationsDeprecations = enrichedDeprecations.filter(
       ({ type, correctiveAction }) => {
         /**
@@ -52,18 +55,25 @@ export async function getESUpgradeStatus(
       }
     );
 
-    const enrichedHealthIndicators = healthIndicators.filter(({ status }) => {
-      return status !== 'green';
-    }) as EnrichedDeprecationInfo[];
+    // return [...enrichedHealthIndicators, ...toggledMigrationsDeprecations];
 
-    return [...enrichedHealthIndicators, ...toggledMigrationsDeprecations];
+    return {
+      enrichedHealthIndicators,
+      migrationsDeprecations: toggledMigrationsDeprecations,
+    };
   };
-
-  const combinedDeprecations = await getCombinedDeprecations();
-  const criticalWarnings = combinedDeprecations.filter(({ isCritical }) => isCritical === true);
+  const { enrichedHealthIndicators, migrationsDeprecations } = await getCombinedDeprecations();
 
   return {
-    totalCriticalDeprecations: criticalWarnings.length,
-    deprecations: combinedDeprecations,
+    // deprecations
+    totalCriticalDeprecations: migrationsDeprecations.filter(
+      ({ isCritical }) => isCritical === true
+    ).length,
+    migrationsDeprecations,
+    // health
+    totalCriticalHealthIssues: enrichedHealthIndicators.filter(
+      ({ isCritical }) => isCritical === true
+    ).length,
+    enrichedHealthIndicators, //
   };
 }

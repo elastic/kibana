@@ -86,6 +86,7 @@ const systemIndicesNoMigrationResponse = {
   features: [],
 };
 
+// @TINA see x-pack/platform/plugins/private/upgrade_assistant/server/lib/es_version_precheck.test.ts for using versionService in tests
 describe('Status API', () => {
   const registerRoutes = (featureSetOverrides: Partial<FeatureSet> = {}) => {
     const mockRouter = createMockRouter();
@@ -100,6 +101,7 @@ describe('Status API', () => {
       },
       router: mockRouter,
       lib: { handleEsError },
+      // versionService:
     };
 
     registerUpgradeStatusRoute(routeDependencies);
