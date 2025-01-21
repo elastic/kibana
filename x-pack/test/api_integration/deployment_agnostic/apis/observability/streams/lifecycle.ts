@@ -52,8 +52,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('inherits lifecycle', async () => {
-      const rootStream = await getStream(apiClient, 'logs');
-
       const putBody = {
         ingest: {
           routing: [],
@@ -66,6 +64,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await putStream(apiClient, 'logs.inherits.lifecycle', putBody);
       await putStream(apiClient, 'logs.overrides.lifecycle', putBody);
 
+      const rootStream = await getStream(apiClient, 'logs');
       await putStream(apiClient, 'logs', {
         ingest: {
           ...rootStream.stream.ingest,
