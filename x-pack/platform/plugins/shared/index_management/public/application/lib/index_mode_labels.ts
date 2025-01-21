@@ -10,6 +10,7 @@ import {
   STANDARD_INDEX_MODE,
   LOGSDB_INDEX_MODE,
   TIME_SERIES_MODE,
+  LOOKUP_INDEX_MODE,
 } from '../../../common/constants';
 
 export const indexModeLabels = {
@@ -21,6 +22,9 @@ export const indexModeLabels = {
   }),
   [TIME_SERIES_MODE]: i18n.translate('xpack.idxMgmt.indexModeLabels.timeSeriesIndexModeLabel', {
     defaultMessage: 'Time series',
+  }),
+  [LOOKUP_INDEX_MODE]: i18n.translate('xpack.idxMgmt.indexModeLabels.lookupIndexModeLabel', {
+    defaultMessage: 'Lookup',
   }),
 };
 
@@ -43,6 +47,12 @@ export const indexModeDescriptions = {
     'xpack.idxMgmt.indexModeDescriptions.timeSeriesIndexModeDescription',
     {
       defaultMessage: 'Optimized for metrics data with reduced storage',
+    }
+  ),
+  [LOOKUP_INDEX_MODE]: i18n.translate(
+    'xpack.idxMgmt.indexModeDescriptions.lookupIndexModeDescription',
+    {
+      defaultMessage: 'Optimized for ES|QL join operations',
     }
   ),
 };
