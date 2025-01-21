@@ -45,6 +45,10 @@ import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import { retryTransientEsErrors } from '../utils/retry_transient_es_errors';
 import { RiskScoreAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
+import {
+  createEventIngestedFromTimestamp,
+  getIngestPipelineName,
+} from '../utils/create_ingest_pipeline';
 
 interface RiskScoringDataClientOpts {
   logger: Logger;
@@ -100,6 +104,9 @@ export class RiskScoreDataClient {
       options: {
         index: getRiskScoreLatestIndex(this.options.namespace),
         mappings: mappingFromFieldMap(riskScoreFieldMap, false),
+        settings: {
+          'index.default_pipeline': getIngestPipelineName(this.options.namespace),
+        },
       },
     });
   };
@@ -130,9 +137,10 @@ export class RiskScoreDataClient {
 
   public async init() {
     const namespace = this.options.namespace;
+    const esClient = this.options.esClient;
 
     try {
-      const esClient = this.options.esClient;
+      await createEventIngestedFromTimestamp(esClient, namespace);
 
       const indexPatterns = getIndexPatternDataStream(namespace);
 
@@ -161,22 +169,21 @@ export class RiskScoreDataClient {
         esClient,
         template: {
           name: indexPatterns.template,
-          body: {
-            data_stream: { hidden: true },
-            index_patterns: [indexPatterns.alias],
-            composed_of: [nameSpaceAwareMappingsComponentName(namespace)],
-            template: {
-              lifecycle: {},
-              settings: {
-                'index.mapping.total_fields.limit': totalFieldsLimit,
-              },
-              mappings: {
-                dynamic: false,
-                _meta: indexMetadata,
-              },
+          data_stream: { hidden: true },
+          index_patterns: [indexPatterns.alias],
+          composed_of: [nameSpaceAwareMappingsComponentName(namespace)],
+          template: {
+            lifecycle: {},
+            settings: {
+              'index.mapping.total_fields.limit': totalFieldsLimit,
+              'index.default_pipeline': getIngestPipelineName(namespace),
             },
-            _meta: indexMetadata,
+            mappings: {
+              dynamic: false,
+              _meta: indexMetadata,
+            },
           },
+          _meta: indexMetadata,
         },
       });
 
@@ -339,6 +346,38 @@ export class RiskScoreDataClient {
       body: oldComponentTemplate.component_template,
     });
   }
+
+  public copyTimestampToEventIngestedForRiskScore = (abortSignal?: AbortSignal) => {
+    return this.options.esClient.updateByQuery(
+      {
+        index: getRiskScoreLatestIndex(this.options.namespace),
+        conflicts: 'proceed',
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        body: {
+          query: {
+            bool: {
+              must_not: {
+                exists: {
+                  field: 'event.ingested',
+                },
+              },
+            },
+          },
+          script: {
+            source: 'ctx._source.event.ingested = ctx._source.@timestamp',
+            lang: 'painless',
+          },
+        },
+      },
+      {
+        requestTimeout: '5m',
+        retryOnTimeout: true,
+        maxRetries: 2,
+        signal: abortSignal,
+      }
+    );
+  };
 
   public async reinstallTransform() {
     const esClient = this.options.esClient;

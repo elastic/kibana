@@ -39,8 +39,10 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { type CriticalityLevelWithUnassigned } from '../../../common/entity_analytics/asset_criticality/types';
 import { useKibana } from '../../common/lib/kibana';
 
+import { AssetCriticalityBadge } from '../../entity_analytics/components/asset_criticality/asset_criticality_badge';
 import { EmptyState } from '../components/empty_state';
 import { AdditionalControls } from '../components/additional_controls';
+import { AssetInventorySearchBar } from '../components/search_bar';
 
 import { useDataViewContext } from '../hooks/data_view_context';
 import { useStyles } from '../hooks/use_styles';
@@ -96,7 +98,7 @@ const customCellRenderer = (rows: DataTableRecord[]) => ({
     const criticality = rows[rowIndex].flattened[
       'asset.criticality'
     ] as CriticalityLevelWithUnassigned;
-    return criticality;
+    return <AssetCriticalityBadge criticalityLevel={criticality} />;
   },
 });
 
@@ -365,6 +367,11 @@ const AllAssets = ({
 
   return (
     <I18nProvider>
+      <AssetInventorySearchBar
+        query={getDefaultQuery({ query: { query: '', language: '' }, filters: [] })}
+        setQuery={setUrlQuery}
+        loading={loadingState === DataLoadingState.loading}
+      />
       <EuiPageTemplate.Section>
         <EuiTitle size="l">
           <h1>
