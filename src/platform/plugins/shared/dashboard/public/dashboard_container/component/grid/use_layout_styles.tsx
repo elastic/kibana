@@ -24,11 +24,6 @@ export const useLayoutStyles = () => {
               )`;
     };
 
-    /**
-     * TODO: We are currently using `euiTheme.colors.vis.euiColorVis0` for grid layout styles because it
-     * is the best choice available; however, once https://github.com/elastic/platform-ux-team/issues/586
-     * is resolved, we should swap these out for the drag-specific colour tokens
-     */
     return css`
       &.kbnGrid {
         // remove margin top + bottom on grid in favour of padding in row
