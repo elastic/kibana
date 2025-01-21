@@ -143,10 +143,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await spacesService.delete('foo-space');
         await browser.refresh();
 
-        // The tour still does not appear after refresh, even with 1 space with a solution set
-        log.info('check if solution tour shows after second refresh');
-        await testSubjects.missingOrFail('spaceSolutionTour', { timeout: 3000 });
-        log.info('solution tour does not show after second refresh');
+        // The tour still does not appear after refresh, even with 1 space with a solution set.
+        // Due to caching, sometimes the ui setting value is not reflected correctly.
+        await retry.tryForTime(5000, async () => {
+          log.info('check if solution tour shows after second refresh');
+          await testSubjects.missingOrFail('spaceSolutionTour', { timeout: 3000 });
+          log.info('solution tour does not show after second refresh');
+        });
       });
     });
   });
