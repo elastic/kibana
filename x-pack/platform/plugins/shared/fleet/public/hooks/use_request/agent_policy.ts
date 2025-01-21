@@ -153,6 +153,18 @@ export const sendUpdateAgentPolicy = (
   });
 };
 
+export const sendUpdateAgentPolicyForRq = (
+  agentPolicyId: string,
+  body: UpdateAgentPolicyRequest['body']
+) => {
+  return sendRequestForRq<UpdateAgentPolicyResponse>({
+    path: agentPolicyRouteService.getUpdatePath(agentPolicyId),
+    method: 'put',
+    body: JSON.stringify(body),
+    version: API_VERSIONS.public.v1,
+  });
+};
+
 export const sendCopyAgentPolicy = (
   agentPolicyId: string,
   body: CopyAgentPolicyRequest['body']
