@@ -39,7 +39,8 @@ export class UpdateSLO {
     private scopedClusterClient: IScopedClusterClient,
     private logger: Logger,
     private spaceId: string,
-    private basePath: IBasePath
+    private basePath: IBasePath,
+    private userId: string
   ) {}
 
   public async execute(sloId: string, params: UpdateSLOParams): Promise<UpdateSLOResponse> {
@@ -58,6 +59,7 @@ export class UpdateSLO {
 
     updatedSlo = Object.assign(updatedSlo, {
       updatedAt: new Date(),
+      updatedBy: this.userId,
       revision: requireRevisionBump ? originalSlo.revision + 1 : originalSlo.revision,
     });
 

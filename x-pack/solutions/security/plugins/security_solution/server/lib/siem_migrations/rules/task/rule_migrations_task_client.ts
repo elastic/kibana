@@ -8,12 +8,12 @@
 import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import { AbortError, abortSignalToPromise } from '@kbn/kibana-utils-plugin/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
-import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
 import {
   SiemMigrationStatus,
   SiemMigrationTaskStatus,
 } from '../../../../../common/siem_migrations/constants';
 import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
 import type { RuleMigrationDataStats } from '../data/rule_migrations_data_rules_client';
 import type { SiemRuleMigrationsClientDependencies } from '../types';
@@ -22,8 +22,8 @@ import type { MigrateRuleState } from './agent/types';
 import { RuleMigrationsRetriever } from './retrievers';
 import type {
   MigrationAgent,
-  RuleMigrationTaskStartParams,
   RuleMigrationTaskCreateAgentParams,
+  RuleMigrationTaskStartParams,
   RuleMigrationTaskStartResult,
   RuleMigrationTaskStopResult,
 } from './types';
@@ -169,7 +169,7 @@ export class RuleMigrationsTaskClient {
         this.logger.info(`Abort signal received, stopping migration ID:${migrationId}`);
         return;
       } else {
-        this.logger.error(`Error processing migration ID:${migrationId}`, error);
+        this.logger.error(`Error processing migration ID:${migrationId} ${error}`);
       }
     } finally {
       this.migrationsRunning.delete(migrationId);

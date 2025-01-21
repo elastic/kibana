@@ -22,7 +22,9 @@ export function HttpStatusBadge({ status }: HttpStatusBadgeProps) {
   return (
     <EuiToolTip content={label}>
       <EuiBadge color={httpStatusCodeToColor(status) || 'default'}>
-        {status} {statusCodes[status.toString()]}
+        <span data-test-subj="apmHttpStatusBadge">
+          {status} {statusCodes[status.toString()]}
+        </span>
       </EuiBadge>
     </EuiToolTip>
   );
