@@ -22,6 +22,7 @@ interface Props {
   id: string;
   mlSavedObjectType: MlSavedObjectType;
   refresh(): void;
+  disabled?: boolean;
 }
 
 const ALL_SPACES_ID = '*';
@@ -40,6 +41,7 @@ export const MLSavedObjectsSpacesList: FC<Props> = ({
   id,
   mlSavedObjectType,
   refresh,
+  disabled = true,
 }) => {
   const {
     savedObjects: { updateJobsSpaces, updateModelsSpaces },
@@ -108,6 +110,7 @@ export const MLSavedObjectsSpacesList: FC<Props> = ({
   return (
     <>
       <EuiButtonEmpty
+        disabled={disabled}
         onClick={() => setShowFlyout(true)}
         style={{ height: 'auto' }}
         data-test-subj="mlJobListRowManageSpacesButton"

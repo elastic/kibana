@@ -342,6 +342,10 @@ export class JobsListUI extends Component {
               render: (item) => {
                 return (
                   <MLSavedObjectsSpacesList
+                    disabled={
+                      !this.props.kibana.services.application?.capabilities?.savedObjectsManagement
+                        ?.shareIntoSpace
+                    }
                     spacesApi={this.props.kibana.services.spaces}
                     spaceIds={item.spaces}
                     id={item.id}

@@ -168,7 +168,7 @@ export const useColumns = (
   refresh: () => void = () => {}
 ) => {
   const {
-    services: { spaces },
+    services: { spaces, application },
   } = useMlKibana();
   const { actions, modals } = useActions();
   function toggleDetails(item: DataFrameAnalyticsListRow) {
@@ -185,6 +185,9 @@ export const useColumns = (
   }
 
   const canManageSpacesAndSavedObjects = useCanManageSpacesAndSavedObjects();
+  const shouldDisableSpacesColumn =
+    !canManageSpacesAndSavedObjects ||
+    !application.capabilities.savedObjectsManagement?.shareIntoSpace;
 
   // update possible column types to something like (FieldDataColumn | ComputedColumn | ActionsColumn)[] when they have been added to EUI
   const columns: any[] = [
@@ -302,9 +305,11 @@ export const useColumns = (
             truncateText: true,
             align: 'right',
             width: '10%',
+            disabled: shouldDisableSpacesColumn,
             render: (item: DataFrameAnalyticsListRow) => {
               return (
                 <MLSavedObjectsSpacesList
+                  disabled={shouldDisableSpacesColumn}
                   spacesApi={spaces}
                   spaceIds={item.spaces}
                   id={item.id}
