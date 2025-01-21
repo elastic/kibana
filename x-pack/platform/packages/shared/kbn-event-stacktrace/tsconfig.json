@@ -13,7 +13,7 @@
     "**/*.ts",
     "**/*.tsx",
     "src/**/*.json",
-    "emotion.d.ts"
+    "../../../../../typings/emotion.d.ts"
   ],
   "exclude": [
     "target/**/*"

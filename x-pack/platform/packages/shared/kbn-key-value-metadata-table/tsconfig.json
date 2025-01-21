@@ -10,7 +10,7 @@
     ]
   },
   "include": [
-    "**/*.ts", "**/*.tsx", "emotion.d.ts"
+    "**/*.ts", "**/*.tsx", "../../../../../typings/emotion.d.ts"
   ],
   "exclude": [
     "target/**/*"
