@@ -63,8 +63,8 @@ export function serializeTemplate(templateDeserialized: TemplateDeserialized): T
 
 export function deserializeTemplate(
   templateEs: TemplateSerialized & { name: string },
-  isLogsdbEnabled: boolean,
-  cloudManagedTemplatePrefix?: string
+  cloudManagedTemplatePrefix?: string,
+  isLogsdbEnabled?: boolean
 ): TemplateDeserialized {
   const {
     name,
@@ -128,16 +128,11 @@ export function deserializeTemplate(
 
 export function deserializeTemplateList(
   indexTemplates: Array<{ name: string; index_template: TemplateSerialized }>,
-  isLogsdbEnabled: boolean,
   cloudManagedTemplatePrefix?: string
 ): TemplateListItem[] {
   return indexTemplates.map(({ name, index_template: templateSerialized }) => {
     const { template: { mappings, settings, aliases } = {}, ...deserializedTemplate } =
-      deserializeTemplate(
-        { name, ...templateSerialized },
-        isLogsdbEnabled,
-        cloudManagedTemplatePrefix
-      );
+      deserializeTemplate({ name, ...templateSerialized }, cloudManagedTemplatePrefix);
 
     return {
       ...deserializedTemplate,
@@ -174,15 +169,15 @@ export function serializeLegacyTemplate(template: TemplateDeserialized): LegacyT
 
 export function deserializeLegacyTemplate(
   templateEs: LegacyTemplateSerialized & { name: string },
-  isLogsdbEnabled: boolean,
-  cloudManagedTemplatePrefix?: string
+  cloudManagedTemplatePrefix?: string,
+  isLogsdbEnabled?: boolean
 ): TemplateDeserialized {
   const { settings, aliases, mappings, ...rest } = templateEs;
 
   const deserializedTemplate = deserializeTemplate(
     { ...rest, template: { aliases, settings, mappings } },
-    isLogsdbEnabled,
-    cloudManagedTemplatePrefix
+    cloudManagedTemplatePrefix,
+    isLogsdbEnabled
   );
 
   return {
@@ -197,16 +192,11 @@ export function deserializeLegacyTemplate(
 
 export function deserializeLegacyTemplateList(
   indexTemplatesByName: { [key: string]: LegacyTemplateSerialized },
-  isLogsdbEnabled: boolean,
   cloudManagedTemplatePrefix?: string
 ): TemplateListItem[] {
   return Object.entries(indexTemplatesByName).map(([name, templateSerialized]) => {
     const { template: { mappings, settings, aliases } = {}, ...deserializedTemplate } =
-      deserializeLegacyTemplate(
-        { name, ...templateSerialized },
-        isLogsdbEnabled,
-        cloudManagedTemplatePrefix
-      );
+      deserializeLegacyTemplate({ name, ...templateSerialized }, cloudManagedTemplatePrefix);
 
     return {
       ...deserializedTemplate,

@@ -36,14 +36,11 @@ describe('Template serialization', () => {
       allowAutoCreateSerializedValues.forEach((value, index) => {
         test(`correctly deserializes ${value} allow_auto_create value`, () => {
           expect(
-            deserializeTemplate(
-              {
-                ...defaultSerializedTemplate,
-                name: 'my_template',
-                allow_auto_create: value,
-              },
-              true
-            )
+            deserializeTemplate({
+              ...defaultSerializedTemplate,
+              name: 'my_template',
+              allow_auto_create: value,
+            })
           ).toHaveProperty('allowAutoCreate', allowAutoCreateRadioOptions[index]);
         });
       });
@@ -51,20 +48,17 @@ describe('Template serialization', () => {
       indexModeValues.forEach((value) => {
         test(`correctly deserializes ${value} index mode settings value`, () => {
           expect(
-            deserializeTemplate(
-              {
-                ...defaultSerializedTemplate,
-                name: 'my_template',
-                template: {
-                  settings: {
-                    index: {
-                      mode: value,
-                    },
+            deserializeTemplate({
+              ...defaultSerializedTemplate,
+              name: 'my_template',
+              template: {
+                settings: {
+                  index: {
+                    mode: value,
                   },
                 },
               },
-              true
-            )
+            })
           ).toHaveProperty('indexMode', value ?? STANDARD_INDEX_MODE);
         });
       });
@@ -78,6 +72,7 @@ describe('Template serialization', () => {
                 index_patterns: ['logs-*-*'],
                 name: 'my_template',
               },
+              undefined,
               true
             )
           ).toHaveProperty('indexMode', LOGSDB_INDEX_MODE);
@@ -91,6 +86,7 @@ describe('Template serialization', () => {
                 index_patterns: ['logs-*-*'],
                 name: 'my_template',
               },
+              undefined,
               false
             )
           ).toHaveProperty('indexMode', STANDARD_INDEX_MODE);

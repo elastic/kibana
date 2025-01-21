@@ -37,16 +37,9 @@ export function registerGetAllRoute({ router, config, lib: { handleEsError } }: 
         const { index_templates: templatesEs } =
           await client.asCurrentUser.indices.getIndexTemplate();
 
-        const { persistent, defaults } = await client.asInternalUser.cluster.getSettings({
-          include_defaults: true,
-        });
-        const isLogsdbEnabled =
-          persistent?.cluster?.logsdb?.enabled ?? defaults?.cluster?.logsdb?.enabled;
-
         const templates = deserializeTemplateList(
           // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
           templatesEs,
-          isLogsdbEnabled,
           cloudManagedTemplatePrefix
         );
 
@@ -60,7 +53,6 @@ export function registerGetAllRoute({ router, config, lib: { handleEsError } }: 
 
         const legacyTemplates = deserializeLegacyTemplateList(
           legacyTemplatesEs,
-          isLogsdbEnabled,
           cloudManagedTemplatePrefix
         );
 
@@ -124,8 +116,8 @@ export function registerGetOneRoute({ router, config, lib: { handleEsError } }: 
             return response.ok({
               body: deserializeLegacyTemplate(
                 { ...indexTemplateByName[name], name },
-                isLogsdbEnabled,
-                cloudManagedTemplatePrefix
+                cloudManagedTemplatePrefix,
+                isLogsdbEnabled
               ),
             });
           }
@@ -138,8 +130,8 @@ export function registerGetOneRoute({ router, config, lib: { handleEsError } }: 
               body: deserializeTemplate(
                 // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
                 { ...indexTemplates[0].index_template, name },
-                isLogsdbEnabled,
-                cloudManagedTemplatePrefix
+                cloudManagedTemplatePrefix,
+                isLogsdbEnabled
               ),
             });
           }
