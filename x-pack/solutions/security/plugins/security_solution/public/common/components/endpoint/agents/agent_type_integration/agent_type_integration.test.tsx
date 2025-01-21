@@ -12,6 +12,7 @@ import type { AgentTypeIntegrationProps } from './agent_type_integration';
 import { AgentTypeIntegration, INTEGRATION_SECTION_LABEL } from './agent_type_integration';
 import { getAgentTypeName } from '../../../../translations';
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { isAgentTypeInTechPreview } from '../../../../../../common/endpoint/service/response_actions/is_agent_type_in_tech_preview';
 
 describe('AgentTypeIntegration component', () => {
   let props: AgentTypeIntegrationProps;
@@ -52,10 +53,18 @@ describe('AgentTypeIntegration component', () => {
       expect(getByTestId('test-tooltipAnchor'));
     });
 
-    it('should NOT display tech preview badge', () => {
-      const { queryByTestId } = render();
+    if (isAgentTypeInTechPreview(agentType)) {
+      it('should display tech preview badge', () => {
+        const { getByTestId } = render();
 
-      expect(queryByTestId('test-betaBadge')).toBeNull();
-    });
+        expect(getByTestId('test-betaBadge')).not.toBeNull();
+      });
+    } else {
+      it('should NOT display tech preview badge', () => {
+        const { queryByTestId } = render();
+
+        expect(queryByTestId('test-betaBadge')).toBeNull();
+      });
+    }
   });
 });
