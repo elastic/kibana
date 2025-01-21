@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { uniq } from 'lodash/fp';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { DirectionBadge } from '../direction';
 import { DefaultDraggable, DraggableBadge } from '../../../../common/components/draggables';
