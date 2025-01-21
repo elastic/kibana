@@ -16,6 +16,7 @@ import {
 } from './create_prebuilt_rule_saved_objects';
 import { patchRule } from '../patch_rule';
 import { installPrebuiltRules } from './install_prebuilt_rules';
+import { deleteAllPrebuiltRuleAssets } from './delete_all_prebuilt_rule_assets';
 
 interface SetUpRuleUpgradeDeps {
   supertest: SuperTest.Agent;
@@ -33,10 +34,15 @@ interface RuleUpgradeAssets {
 
 interface SetUpRuleUpgradeParams {
   assets: RuleUpgradeAssets;
+  removeInstalledAssets?: boolean;
   deps: SetUpRuleUpgradeDeps;
 }
 
-export async function setUpRuleUpgrade({ assets, deps }: SetUpRuleUpgradeParams): Promise<void> {
+export async function setUpRuleUpgrade({
+  assets,
+  removeInstalledAssets,
+  deps,
+}: SetUpRuleUpgradeParams): Promise<void> {
   await createHistoricalPrebuiltRuleAssetSavedObjects(deps.es, [
     createRuleAssetSavedObjectOfType(assets.installed.type, {
       rule_id: 'rule-1',
@@ -49,6 +55,10 @@ export async function setUpRuleUpgrade({ assets, deps }: SetUpRuleUpgradeParams)
     rule_id: 'rule-1',
     ...assets.patch,
   });
+
+  if (removeInstalledAssets) {
+    await deleteAllPrebuiltRuleAssets(deps.es, deps.log);
+  }
 
   await createHistoricalPrebuiltRuleAssetSavedObjects(deps.es, [
     createRuleAssetSavedObjectOfType(assets.upgrade.type, {
