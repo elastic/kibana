@@ -33,6 +33,7 @@ export const TopNavMenuBadges = ({ badges }: { badges: TopNavMenuBadgeProps[] | 
       css={css`
         margin-right: ${euiTheme.size.m};
       `}
+      data-test-subj="kbn-top-nav-menu-badge-group"
     >
       {badges.map(createBadge)}
     </EuiBadgeGroup>

@@ -86,6 +86,7 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
       <TopNavMenuItems
         config={config}
         className={props.className}
+        data-test-subj="kbn-top-nav-menu-wrapper"
         css={css`
           button:last-child {
             margin-right: 0;
@@ -137,7 +138,7 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
     } else {
       return (
         <>
-          <span css={visible === false && styles.hidden}>{renderMenu()}</span>
+          <span css={[visible === false && styles.hidden]}>{renderMenu()}</span>
           {renderSearchBar()}
         </>
       );
