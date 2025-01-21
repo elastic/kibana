@@ -51,7 +51,7 @@ export const useLayoutStyles = () => {
       }
 
       .kbnGridPanel--dragPreview {
-        background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};
+        background-color: ${transparentize(euiTheme.colors.accentSecondary, 0.2)};
       }
 
       .kbnGridPanel--resizeHandle {
@@ -73,17 +73,17 @@ export const useLayoutStyles = () => {
         &:hover,
         &:focus-visible {
           &:after {
-            background-color: ${euiTheme.colors.vis.euiColorVis0};
+            background-color: ${euiTheme.colors.accentSecondary};
           }
         }
       }
 
       .kbnGridPanel--active {
         .embPanel {
-          outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.vis.euiColorVis0} !important;
+          outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.accentSecondary} !important;
         }
         .embPanel__hoverActions {
-          border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.vis.euiColorVis0} !important;
+          border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.accentSecondary} !important;
           border-bottom: 0px solid !important;
         }
       }

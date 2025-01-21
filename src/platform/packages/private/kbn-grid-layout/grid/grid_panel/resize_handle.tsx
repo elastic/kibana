@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-theme';
 import React from 'react';
-import { UserInteractionEvent, PanelInteractionEvent } from '../types';
+import { PanelInteractionEvent, UserInteractionEvent } from '../types';
 
 export const ResizeHandle = ({
   interactionStart,
 }: {
   interactionStart: (type: PanelInteractionEvent['type'] | 'drop', e: UserInteractionEvent) => void;
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <button
       className="kbnGridPanel--resizeHandle"
@@ -41,11 +43,11 @@ export const ResizeHandle = ({
         bottom: 0;
         margin: -2px;
         position: absolute;
-        width: ${euiThemeVars.euiSizeL};
+        width: ${euiTheme.size.l};
         max-width: 100%;
         max-height: 100%;
-        height: ${euiThemeVars.euiSizeL};
-        z-index: ${euiThemeVars.euiZLevel9};
+        height: ${euiTheme.size.l};
+        z-index: ${euiTheme.levels.toast};
         &:hover,
         &:focus {
           cursor: se-resize;
