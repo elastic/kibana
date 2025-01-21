@@ -82,6 +82,7 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
 
   const {
     infiniteCaseUserActions,
+    infiniteLatestAttachments,
     isLoadingInfiniteUserActions,
     hasNextPage,
     fetchNextPage,
@@ -95,11 +96,12 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
 
   const { euiTheme } = useEuiTheme();
 
-  const { isLoadingLastPageUserActions, lastPageUserActions } = useLastPageUserActions({
-    userActivityQueryParams,
-    caseId: caseData.id,
-    lastPage,
-  });
+  const { isLoadingLastPageUserActions, lastPageUserActions, lastPageAttachments } =
+    useLastPageUserActions({
+      userActivityQueryParams,
+      caseId: caseData.id,
+      lastPage,
+    });
 
   const alertIdsWithoutRuleInfo = useMemo(
     () => getManualAlertIdsWithNoRuleId(caseData.comments),
@@ -180,6 +182,7 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
         <UserActionsList
           {...props}
           caseUserActions={infiniteCaseUserActions}
+          attachments={infiniteLatestAttachments}
           loadingAlertData={loadingAlertData}
           manualAlertsData={manualAlertsData}
           commentRefs={commentRefs}
@@ -203,6 +206,7 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
             <UserActionsList
               {...props}
               caseUserActions={lastPageUserActions}
+              attachments={lastPageAttachments}
               loadingAlertData={loadingAlertData}
               manualAlertsData={manualAlertsData}
               bottomActions={bottomActions}
