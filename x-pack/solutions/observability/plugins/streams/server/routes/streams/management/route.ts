@@ -139,7 +139,7 @@ export const sampleStreamRoute = createServerRoute({
       condition: z.optional(conditionSchema),
       start: z.optional(z.number()),
       end: z.optional(z.number()),
-      number: z.optional(z.number()),
+      size: z.optional(z.number()),
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<{ documents: unknown[] }> => {
@@ -150,18 +150,20 @@ export const sampleStreamRoute = createServerRoute({
       if (!read) {
         throw new DefinitionNotFound(`Stream definition for ${params.path.id} not found.`);
       }
+
+      const { condition, start, end, size } = params.body;
       const searchBody = {
         query: {
           bool: {
             must: [
-              isCompleteCondition(params.body.condition)
-                ? conditionToQueryDsl(params.body.condition)
+              Boolean(condition && isCompleteCondition(condition))
+                ? conditionToQueryDsl(condition)
                 : { match_all: {} },
               {
                 range: {
                   '@timestamp': {
-                    gte: params.body.start,
-                    lte: params.body.end,
+                    gte: start,
+                    lte: end,
                     format: 'epoch_millis',
                   },
                 },
@@ -174,12 +176,14 @@ export const sampleStreamRoute = createServerRoute({
         // ingest in the painless condition checks.
         // This is less efficient than it could be - in some cases, these fields _are_ indexed with the right type and we could use them directly.
         // This can be optimized in the future.
-        runtime_mappings: Object.fromEntries(
-          getFields(params.body.condition).map((field) => [
-            field.name,
-            { type: field.type === 'string' ? 'keyword' : 'double' },
-          ])
-        ),
+        runtime_mappings: condition
+          ? Object.fromEntries(
+              getFields(condition).map((field) => [
+                field.name,
+                { type: field.type === 'string' ? 'keyword' : 'double' },
+              ])
+            )
+          : undefined,
         sort: [
           {
             '@timestamp': {
@@ -187,7 +191,7 @@ export const sampleStreamRoute = createServerRoute({
             },
           },
         ],
-        size: params.body.number,
+        size,
       };
       const results = await scopedClusterClient.asCurrentUser.search({
         index: params.path.id,
