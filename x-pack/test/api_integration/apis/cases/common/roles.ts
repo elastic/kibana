@@ -575,7 +575,7 @@ export const casesV3ReadAndAssignee: Role = {
         spaces: ['*'],
         base: [],
         feature: {
-          generalCasesV3: ['read', 'assign'],
+          generalCasesV3: ['read', 'cases_assign'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },

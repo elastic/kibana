@@ -38,7 +38,6 @@ export const createUICapabilities = (): CasesUiCapabilities => ({
     UPDATE_CASES_CAPABILITY,
     PUSH_CASES_CAPABILITY,
     CASES_CONNECTORS_CAPABILITY,
-    ASSIGN_CASE_CAPABILITY,
   ] as const,
   read: [READ_CASES_CAPABILITY, CASES_CONNECTORS_CAPABILITY] as const,
   delete: [DELETE_CASES_CAPABILITY] as const,

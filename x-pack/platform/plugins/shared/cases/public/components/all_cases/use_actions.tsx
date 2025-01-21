@@ -84,7 +84,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
 
   const canDelete = deleteAction.canDelete;
   const canUpdate = statusAction.canUpdateStatus;
-  const canAssign = permissions.assign;
+  const canAssign = permissions.assignCases;
 
   const panels = useMemo((): EuiContextMenuPanelDescriptor[] => {
     const mainPanelItems: EuiContextMenuPanelItemDescriptor[] = [];
@@ -249,7 +249,7 @@ interface UseBulkActionsProps {
 export const useActions = ({ disableActions }: UseBulkActionsProps): UseBulkActionsReturnValue => {
   const { permissions } = useCasesContext();
   const shouldShowActions =
-    permissions.update || permissions.delete || permissions.reopenCase || permissions.assign;
+    permissions.update || permissions.delete || permissions.reopenCase || permissions.assignCases;
 
   return {
     actions: shouldShowActions

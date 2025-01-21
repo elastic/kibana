@@ -62,7 +62,7 @@ export const getCasesFeatureV2 = (
         minimal: [
           {
             feature: casesFeatureIdV3,
-            privileges: ['minimal_all', 'create_comment', 'case_reopen', 'assign'],
+            privileges: ['minimal_all', 'create_comment', 'case_reopen', 'cases_assign'],
           },
         ],
       },

@@ -34,8 +34,8 @@ export const canUseCases =
     const aggregatedPermissions = owners.reduce<CasesPermissions>(
       // eslint-disable-next-line complexity
       (acc, owner) => {
+        console.log(capabilities);
         const userCapabilitiesForOwner = getUICapabilities(capabilities[getFeatureID(owner)]);
-
         acc.create = acc.create || userCapabilitiesForOwner.create;
         acc.read = acc.read || userCapabilitiesForOwner.read;
         acc.update = acc.update || userCapabilitiesForOwner.update;
@@ -45,7 +45,7 @@ export const canUseCases =
         acc.settings = acc.settings || userCapabilitiesForOwner.settings;
         acc.reopenCase = acc.reopenCase || userCapabilitiesForOwner.reopenCase;
         acc.createComment = acc.createComment || userCapabilitiesForOwner.createComment;
-        acc.assign = acc.assign || userCapabilitiesForOwner.assign;
+        acc.assignCases = acc.assignCases || userCapabilitiesForOwner.assignCases;
 
         const allFromAcc =
           acc.create &&
@@ -57,7 +57,7 @@ export const canUseCases =
           acc.settings &&
           acc.reopenCase &&
           acc.createComment &&
-          acc.assign;
+          acc.assignCases;
 
         acc.all = acc.all || userCapabilitiesForOwner.all || allFromAcc;
 
@@ -74,7 +74,7 @@ export const canUseCases =
         settings: false,
         reopenCase: false,
         createComment: false,
-        assign: false,
+        assignCases: false,
       }
     );
 

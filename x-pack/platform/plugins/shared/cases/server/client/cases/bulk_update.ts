@@ -355,7 +355,7 @@ export function getOperationsToAuthorize({
   if (!onlyAssigneeOperations && !onlyReopenOperations) {
     operations.push(Operations.updateCase);
   }
-  console.log(operations);
+
   return operations;
 }
 

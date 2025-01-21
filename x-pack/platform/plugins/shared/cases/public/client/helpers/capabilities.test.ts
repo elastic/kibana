@@ -12,7 +12,7 @@ describe('getUICapabilities', () => {
     expect(getUICapabilities(undefined)).toMatchInlineSnapshot(`
       Object {
         "all": false,
-        "assignCase": false,
+        "assign": false,
         "connectors": false,
         "create": false,
         "createComment": false,
@@ -30,7 +30,7 @@ describe('getUICapabilities', () => {
     expect(getUICapabilities()).toMatchInlineSnapshot(`
       Object {
         "all": false,
-        "assignCase": false,
+        "assign": false,
         "connectors": false,
         "create": false,
         "createComment": false,
@@ -48,7 +48,7 @@ describe('getUICapabilities', () => {
     expect(getUICapabilities({ create_cases: true })).toMatchInlineSnapshot(`
       Object {
         "all": false,
-        "assignCase": false,
+        "assign": false,
         "connectors": false,
         "create": true,
         "createComment": false,
@@ -75,7 +75,7 @@ describe('getUICapabilities', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "all": false,
-        "assignCase": false,
+        "assign": false,
         "connectors": false,
         "create": false,
         "createComment": false,
@@ -93,7 +93,7 @@ describe('getUICapabilities', () => {
     expect(getUICapabilities({})).toMatchInlineSnapshot(`
       Object {
         "all": false,
-        "assignCase": false,
+        "assign": false,
         "connectors": false,
         "create": false,
         "createComment": false,
@@ -120,7 +120,7 @@ describe('getUICapabilities', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "all": false,
-        "assignCase": false,
+        "assign": false,
         "connectors": true,
         "create": false,
         "createComment": false,
@@ -148,7 +148,7 @@ describe('getUICapabilities', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "all": false,
-        "assignCase": false,
+        "assign": false,
         "connectors": false,
         "create": true,
         "createComment": false,
@@ -176,7 +176,7 @@ describe('getUICapabilities', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "all": false,
-        "assignCase": false,
+        "assign": false,
         "connectors": true,
         "create": true,
         "createComment": false,
@@ -194,7 +194,7 @@ describe('getUICapabilities', () => {
     expect(getUICapabilities({ cases_settings: true })).toMatchInlineSnapshot(`
       Object {
         "all": false,
-        "assignCase": false,
+        "assign": false,
         "connectors": false,
         "create": false,
         "createComment": false,

@@ -175,7 +175,7 @@ export const getCasesSubFeaturesMapV3 = ({
         groupType: 'independent',
         privileges: [
           {
-            id: 'assign',
+            id: 'cases_assign',
             name: i18n.translate('securitySolutionPackages.features.assignUsersSubFeatureName', {
               defaultMessage: 'Assign users to cases',
             }),

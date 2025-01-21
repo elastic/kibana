@@ -213,7 +213,7 @@ describe('Severity form field', () => {
     appMockRender = createAppMockRenderer({
       permissions: {
         ...noCasesPermissions(),
-        assign: true,
+        assignCases: true,
       },
     });
     appMockRender.render(<CasesTableUtilityBar {...props} />);
@@ -225,7 +225,7 @@ describe('Severity form field', () => {
     appMockRender = createAppMockRenderer({
       permissions: {
         ...noCasesPermissions(),
-        assign: true,
+        assignCases: true,
         update: true,
       },
     });
@@ -238,7 +238,7 @@ describe('Severity form field', () => {
     appMockRender = createAppMockRenderer({
       permissions: {
         ...noCasesPermissions(),
-        assign: true,
+        assignCases: true,
         delete: true,
       },
     });
