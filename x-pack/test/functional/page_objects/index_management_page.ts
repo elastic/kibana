@@ -158,7 +158,7 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       await testSubjects.click('nextButton');
     },
 
-    async clickIndexTemplateNameLink(index: number) {
+    async clickIndexTemplateNameLinkByIndex(index: number) {
       const links = await testSubjects.findAll('templateDetailsLink');
       await links.at(index)?.click();
     },

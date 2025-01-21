@@ -27,7 +27,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('shows warning callout when deleting a managed index template', async () => {
       // Open the flyout for the first index template
-      await pageObjects.indexManagement.clickIndexTemplateNameLink(0);
+      await pageObjects.indexManagement.clickIndexTemplateNameLinkByIndex(0);
 
       // Open the manage context menu
       await testSubjects.click('manageTemplateButton');
