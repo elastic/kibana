@@ -3010,6 +3010,21 @@ Presentation::
 IMPORTANT: {kib} 8.10.0 has been withdrawn.
 
 For information about the {kib} 8.10.0 release, review the following information.
+[float]
+[[known-issues-8.10.0]]
+=== Known issues
+
+// tag::known-issue-187254[]
+.Errors when loading Observability Infrastructure inventory views after upgrading to version 8.10.0 or higher.
+[%collapsible]
+====
+*Details* +
+After upgrading to version 8.10.0 or higher, you may encounter errors when loading inventory views. 
+
+For more information, refer to https://github.com/elastic/kibana/issues/187254[#187254].
+====
+// end::known-issue-187254[]
+
 
 [float]
 [[security-updates-v8.10.0]]
