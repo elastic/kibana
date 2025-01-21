@@ -182,33 +182,6 @@ export default function ({ getService }: FtrProviderContext) {
           await deleteDataStream(logsdbDataStreamName);
         });
 
-        // In stateful Kibana, the cluster.logsdb.enabled setting is false by default
-        it('returns standard index mode for logs-*-* data stream if logsdg.enabled setting is not set', async () => {
-          await es.cluster.putSettings({
-            body: {
-              persistent: {
-                cluster: {
-                  logsdb: {
-                    enabled: null,
-                  },
-                },
-              },
-            },
-          });
-
-          const logsdbDataStreamName = 'logs-test-1';
-          await createDataStream(logsdbDataStreamName);
-
-          const { body: dataStream } = await supertest
-            .get(`${API_BASE_PATH}/data_streams/${logsdbDataStreamName}`)
-            .set('kbn-xsrf', 'xxx')
-            .expect(200);
-
-          expect(dataStream.indexMode).to.eql('standard');
-
-          await deleteDataStream(logsdbDataStreamName);
-        });
-
         it('returns logsdb index mode for logs-*-* data stream if logsdg.enabled setting is true', async () => {
           await es.cluster.putSettings({
             body: {
@@ -222,7 +195,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           });
 
-          const logsdbDataStreamName = 'logs-test-2';
+          const logsdbDataStreamName = 'logs-test-1';
           await createDataStream(logsdbDataStreamName);
 
           const { body: dataStream } = await supertest
@@ -242,6 +215,33 @@ export default function ({ getService }: FtrProviderContext) {
                 cluster: {
                   logsdb: {
                     enabled: false,
+                  },
+                },
+              },
+            },
+          });
+
+          const logsdbDataStreamName = 'logs-test-2';
+          await createDataStream(logsdbDataStreamName);
+
+          const { body: dataStream } = await supertest
+            .get(`${API_BASE_PATH}/data_streams/${logsdbDataStreamName}`)
+            .set('kbn-xsrf', 'xxx')
+            .expect(200);
+
+          expect(dataStream.indexMode).to.eql('standard');
+
+          await deleteDataStream(logsdbDataStreamName);
+        });
+
+        // In stateful Kibana, the cluster.logsdb.enabled setting is false by default
+        it('returns standard index mode for logs-*-* data stream if logsdg.enabled setting is not set', async () => {
+          await es.cluster.putSettings({
+            body: {
+              persistent: {
+                cluster: {
+                  logsdb: {
+                    enabled: null,
                   },
                 },
               },

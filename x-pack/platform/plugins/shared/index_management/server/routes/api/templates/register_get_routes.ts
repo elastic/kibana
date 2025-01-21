@@ -105,7 +105,7 @@ export function registerGetOneRoute({ router, config, lib: { handleEsError } }: 
           include_defaults: true,
         });
         const isLogsdbEnabled =
-          persistent?.cluster?.logsdb?.enabled ?? defaults?.cluster?.logsdb?.enabled;
+          (persistent?.cluster?.logsdb?.enabled ?? defaults?.cluster?.logsdb?.enabled) === 'true';
 
         if (isLegacy) {
           const indexTemplateByName = await client.asCurrentUser.indices.getTemplate({

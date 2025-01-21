@@ -181,7 +181,7 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
           include_defaults: true,
         });
         const isLogsdbEnabled =
-          persistent?.cluster?.logsdb?.enabled ?? defaults?.cluster?.logsdb?.enabled;
+          (persistent?.cluster?.logsdb?.enabled ?? defaults?.cluster?.logsdb?.enabled) === 'true';
 
         // Only take the lifecycle of the first data stream since all data streams have the same global retention period
         const lifecycle = await getDataStreamLifecycle(client, dataStreams[0].name);
@@ -275,7 +275,7 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
             include_defaults: true,
           });
           const isLogsdbEnabled =
-            persistent?.cluster?.logsdb?.enabled ?? defaults?.cluster?.logsdb?.enabled;
+            (persistent?.cluster?.logsdb?.enabled ?? defaults?.cluster?.logsdb?.enabled) === 'true';
 
           const body = deserializeDataStream(enhancedDataStreams[0], isLogsdbEnabled);
           return response.ok({ body });

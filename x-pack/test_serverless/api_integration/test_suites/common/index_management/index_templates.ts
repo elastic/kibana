@@ -135,25 +135,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           after(async () => {
-            await deleteTemplates([logsdbTemplateName]);
-          });
-
-          // In serverless Kibana, the cluster.logsdb.enabled setting is true by default
-          it('returns logsdb index mode if logsdg.enabled setting is not set', async () => {
-            await es.cluster.putSettings({
-              body: {
-                persistent: {
-                  cluster: {
-                    logsdb: {
-                      enabled: null,
-                    },
-                  },
-                },
-              },
-            });
-
-            const { body } = await getOneTemplate(logsdbTemplateName).expect(200);
-            expect(body.indexMode).to.equal('logsdb');
+            await deleteTemplates([{ name: logsdbTemplateName }]);
           });
 
           it('returns logsdb index mode if logsdg.enabled setting is true', async () => {
@@ -188,6 +170,24 @@ export default function ({ getService }: FtrProviderContext) {
 
             const { body } = await getOneTemplate(logsdbTemplateName).expect(200);
             expect(body.indexMode).to.equal('standard');
+          });
+
+          // In serverless Kibana, the cluster.logsdb.enabled setting is true by default
+          it('returns logsdb index mode if logsdg.enabled setting is not set', async () => {
+            await es.cluster.putSettings({
+              body: {
+                persistent: {
+                  cluster: {
+                    logsdb: {
+                      enabled: null,
+                    },
+                  },
+                },
+              },
+            });
+
+            const { body } = await getOneTemplate(logsdbTemplateName).expect(200);
+            expect(body.indexMode).to.equal('logsdb');
           });
         });
       });
