@@ -21,7 +21,7 @@ interface Props {
 
 export const DefaultLayout: React.FC<Props> = memo(
   ({ section, children, notificationsBySection }) => {
-    const { automaticImport: automaticImport } = useStartServices();
+    const { automaticImport } = useStartServices();
     const { getHref } = useLink();
     const tabs = [
       {

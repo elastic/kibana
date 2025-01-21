@@ -25,7 +25,7 @@ import type { ProductTier } from '../common/product';
 
 import type { ServerlessSecurityConfig } from './config';
 import type { UsageReportingService } from './common/services/usage_reporting_service';
-import type { AutomaticImportPluginSetup } from '@kbn/automatic-import-plugin/public';
+import type { AutomaticImportPluginSetup } from '@kbn/automatic-import-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SecuritySolutionServerlessPluginSetup {}

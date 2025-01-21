@@ -30,7 +30,7 @@ export const CreateIntegration = React.memo<CreateIntegrationProps>(({ services 
 CreateIntegration.displayName = 'CreateIntegration';
 
 const CreateIntegrationRouter = React.memo(() => {
-  const { canUseAutomaticImport: canUseAutomaticImport, canUseIntegrationUpload } = useRoutesAuthorization();
+  const { canUseAutomaticImport, canUseIntegrationUpload } = useRoutesAuthorization();
   const isAvailable = useIsAvailable();
   return (
     <Routes>

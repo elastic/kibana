@@ -10,7 +10,7 @@ import React from 'react';
 import { useStartServices, useBreadcrumbs } from '../../../../hooks';
 
 export const CreateIntegration = React.memo(() => {
-  const { automaticImport: automaticImport } = useStartServices();
+  const { automaticImport } = useStartServices();
   useBreadcrumbs('integration_create');
 
   const CreateAutomaticImport = automaticImport?.components.CreateIntegration;
