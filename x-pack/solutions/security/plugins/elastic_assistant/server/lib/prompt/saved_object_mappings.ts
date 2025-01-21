@@ -15,7 +15,13 @@ export const promptSavedObjectMappings: SavedObjectsType['mappings'] = {
       type: 'text',
     },
     name: {
-      type: 'text',
+      type: 'keyword',
+    },
+    llm: {
+      type: 'keyword',
+    },
+    model: {
+      type: 'keyword',
     },
     version: {
       type: 'long',
