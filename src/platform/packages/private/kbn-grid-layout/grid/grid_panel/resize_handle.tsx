@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -21,7 +20,7 @@ export const ResizeHandle = ({
 }) => {
   return (
     <button
-      className="kbnGridPanel__resizeHandle"
+      className="kbnGridPanel--resizeHandle"
       onMouseDown={(e) => {
         interactionStart('resize', e);
       }}
@@ -40,7 +39,6 @@ export const ResizeHandle = ({
       css={css`
         right: 0;
         bottom: 0;
-        opacity: 0;
         margin: -2px;
         position: absolute;
         width: ${euiThemeVars.euiSizeL};
@@ -48,27 +46,13 @@ export const ResizeHandle = ({
         max-height: 100%;
         height: ${euiThemeVars.euiSizeL};
         z-index: ${euiThemeVars.euiZLevel9};
-        transition: opacity 0.2s, border 0.2s;
-        border-radius: 7px 0 7px 0;
-        border-bottom: 2px solid ${euiThemeVars.euiColorSuccess};
-        border-right: 2px solid ${euiThemeVars.euiColorSuccess};
         &:hover,
         &:focus {
-          outline-style: none !important;
-          opacity: 1;
-          background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.05)};
           cursor: se-resize;
         }
         .kbnGrid--static &,
         .kbnGridPanel--expanded & {
-          opacity: 0 !important;
           display: none;
-        }
-        .kbnGridPanel__dragHandle:has(~ &:hover) {
-          opacity: 0 !important;
-        }
-        .kbnGridPanel__dragHandle:has(~ &:focus) {
-          opacity: 0 !important;
         }
       `}
     />

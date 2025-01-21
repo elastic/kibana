@@ -10,7 +10,6 @@
 import React, { useEffect, useRef } from 'react';
 import { combineLatest, skip } from 'rxjs';
 
-import { transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 
@@ -59,12 +58,10 @@ export const DragPreview = ({
   return (
     <div
       ref={dragPreviewRef}
+      className={'kbnGridPanel--dragPreview'}
       css={css`
         display: none;
         pointer-events: none;
-        border-radius: ${euiThemeVars.euiBorderRadius};
-        background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.2)};
-        transition: opacity 100ms linear;
       `}
     />
   );
