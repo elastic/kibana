@@ -7,13 +7,20 @@
 
 import React from 'react';
 import { useController } from 'react-hook-form';
-import { EuiFormRow, EuiSwitch, htmlIdGenerator } from '@elastic/eui';
+import { EuiFormRow, EuiFormRowProps, EuiSwitch, htmlIdGenerator } from '@elastic/eui';
+import { ProcessorFormState } from '../types';
+
+type ExtractBooleanFields<TInput> = NonNullable<
+  {
+    [K in keyof TInput]: boolean extends TInput[K] ? K : never;
+  }[keyof TInput]
+>;
 
 interface ToggleFieldProps {
-  helpText?: string;
+  helpText?: EuiFormRowProps['helpText'];
   id?: string;
   label: string;
-  name: string;
+  name: ExtractBooleanFields<ProcessorFormState>;
 }
 
 export const ToggleField = ({
@@ -23,14 +30,16 @@ export const ToggleField = ({
   name,
   ...rest
 }: ToggleFieldProps) => {
-  const { field } = useController({ name });
+  const { field } = useController<ProcessorFormState, ToggleFieldProps['name']>({
+    name,
+  });
 
   return (
     <EuiFormRow helpText={helpText} fullWidth describedByIds={id ? [id] : undefined} {...rest}>
       <EuiSwitch
         id={id}
         label={label}
-        checked={field.value}
+        checked={field.value ?? false}
         onChange={(e) => field.onChange(e.target.checked)}
       />
     </EuiFormRow>

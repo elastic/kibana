@@ -164,6 +164,36 @@ paths:
             items:
               description: The rule migration id
               $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        - name: is_prebuilt
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: is_installed
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: is_fully_translated
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: is_partially_translated
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: is_untranslatable
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: is_failed
+          in: query
+          required: false
+          schema:
+            type: boolean
 
       responses:
         200:
@@ -207,8 +237,6 @@ paths:
           application/json:
             schema:
               type: object
-              required:
-                - ids
               properties:
                 ids:
                   type: array
@@ -229,37 +257,8 @@ paths:
                   - installed
                 properties:
                   installed:
-                    type: boolean
-                    description: Indicates rules migrations have been installed.
-
-  /internal/siem_migrations/rules/{migration_id}/install_translated:
-    post:
-      summary: Installs all translated migration rules
-      operationId: InstallTranslatedMigrationRules
-      x-codegen-enabled: true
-      description: Installs all translated migration rules
-      tags:
-        - SIEM Rule Migrations
-      parameters:
-        - name: migration_id
-          in: path
-          required: true
-          schema:
-            description: The migration id to install translated rules for
-            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
-      responses:
-        200:
-          description: Indicates rules migrations have been installed correctly.
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - installed
-                properties:
-                  installed:
-                    type: boolean
-                    description: Indicates rules migrations have been installed.
+                    type: number
+                    description: Indicates the number of successfully installed migration rules.
 
   /internal/siem_migrations/rules/{migration_id}/start:
     put:
@@ -290,6 +289,9 @@ paths:
                   $ref: '../../common.schema.yaml#/components/schemas/ConnectorId'
                 langsmith_options:
                   $ref: '../../common.schema.yaml#/components/schemas/LangSmithOptions'
+                retry:
+                  $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationRetryFilter'
+                  description: The optional indicator to retry the rule translation based on this filter criteria
       responses:
         200:
           description: Indicates the migration start request has been processed successfully.
@@ -303,57 +305,6 @@ paths:
                   started:
                     type: boolean
                     description: Indicates the migration has been started. `false` means the migration does not need to be started.
-        204:
-          description: Indicates the migration id was not found.
-
-  /internal/siem_migrations/rules/{migration_id}/retry:
-    put:
-      summary: Retries a rule migration
-      operationId: RetryRuleMigration
-      x-codegen-enabled: true
-      x-internal: true
-      description: Retries a SIEM rules migration using the migration id provided
-      tags:
-        - SIEM Rule Migrations
-      parameters:
-        - name: migration_id
-          in: path
-          required: true
-          schema:
-            description: The migration id to retry
-            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - connector_id
-              properties:
-                connector_id:
-                  $ref: '../../common.schema.yaml#/components/schemas/ConnectorId'
-                langsmith_options:
-                  $ref: '../../common.schema.yaml#/components/schemas/LangSmithOptions'
-                failed:
-                  type: boolean
-                  description: The indicator to retry only failed rules
-                not_fully_translated:
-                  type: boolean
-                  description: The indicator to retry only not fully translated rules
-      responses:
-        200:
-          description: Indicates the migration retry request has been processed successfully.
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - started
-                properties:
-                  started:
-                    type: boolean
-                    description: Indicates the migration retry has been started. `false` means the migration does not need to be retried.
         204:
           description: Indicates the migration id was not found.
 

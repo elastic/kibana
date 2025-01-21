@@ -7,6 +7,7 @@
 
 import React, { useRef, memo, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import {
   EuiForm,
   EuiFieldText,
@@ -116,7 +117,14 @@ export const ProfileQueryEditor = memo(() => {
   );
 
   return (
-    <EuiFlexGroup responsive={false} gutterSize="none" direction="column">
+    <EuiFlexGroup
+      responsive={false}
+      gutterSize="none"
+      direction="column"
+      css={css`
+        height: 100%;
+      `}
+    >
       {/* Form */}
       <EuiFlexItem grow={false}>
         <EuiForm>
@@ -144,7 +152,12 @@ export const ProfileQueryEditor = memo(() => {
       </EuiFlexItem>
 
       {/* Editor */}
-      <EuiFlexItem grow={10}>
+      <EuiFlexItem
+        grow={1}
+        css={css`
+          overflow: hidden;
+        `}
+      >
         <Editor
           onEditorReady={onEditorReady}
           setEditorValue={setEditorValue}

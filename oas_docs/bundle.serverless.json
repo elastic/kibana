@@ -9279,6 +9279,30 @@
                             },
                             "type": "array"
                           },
+                          "agentless": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "resources": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "requests": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "cpu": {
+                                        "type": "string"
+                                      },
+                                      "memory": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "type": "object"
+                                  }
+                                },
+                                "type": "object"
+                              }
+                            },
+                            "type": "object"
+                          },
                           "agents": {
                             "type": "number"
                           },
@@ -9848,6 +9872,30 @@
                               }
                             ]
                           },
+                          "required_versions": {
+                            "items": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "percentage": {
+                                  "description": "Target percentage of agents to auto upgrade",
+                                  "maximum": 100,
+                                  "minimum": 0,
+                                  "type": "number"
+                                },
+                                "version": {
+                                  "description": "Target version for automatic agent upgrade",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "version",
+                                "percentage"
+                              ],
+                              "type": "object"
+                            },
+                            "nullable": true,
+                            "type": "array"
+                          },
                           "revision": {
                             "type": "number"
                           },
@@ -10038,6 +10086,30 @@
                     },
                     "type": "array"
                   },
+                  "agentless": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "resources": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "requests": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "cpu": {
+                                "type": "string"
+                              },
+                              "memory": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          }
+                        },
+                        "type": "object"
+                      }
+                    },
+                    "type": "object"
+                  },
                   "data_output_id": {
                     "nullable": true,
                     "type": "string"
@@ -10204,6 +10276,30 @@
                     "nullable": true,
                     "type": "object"
                   },
+                  "required_versions": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "percentage": {
+                          "description": "Target percentage of agents to auto upgrade",
+                          "maximum": 100,
+                          "minimum": 0,
+                          "type": "number"
+                        },
+                        "version": {
+                          "description": "Target version for automatic agent upgrade",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "version",
+                        "percentage"
+                      ],
+                      "type": "object"
+                    },
+                    "nullable": true,
+                    "type": "array"
+                  },
                   "space_ids": {
                     "items": {
                       "type": "string"
@@ -10291,6 +10387,30 @@
                             "type": "object"
                           },
                           "type": "array"
+                        },
+                        "agentless": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "resources": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "requests": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "cpu": {
+                                      "type": "string"
+                                    },
+                                    "memory": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "type": "object"
+                                }
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "type": "object"
                         },
                         "agents": {
                           "type": "number"
@@ -10861,6 +10981,30 @@
                             }
                           ]
                         },
+                        "required_versions": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "percentage": {
+                                "description": "Target percentage of agents to auto upgrade",
+                                "maximum": 100,
+                                "minimum": 0,
+                                "type": "number"
+                              },
+                              "version": {
+                                "description": "Target version for automatic agent upgrade",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "version",
+                              "percentage"
+                            ],
+                            "type": "object"
+                          },
+                          "nullable": true,
+                          "type": "array"
+                        },
                         "revision": {
                           "type": "number"
                         },
@@ -11076,6 +11220,30 @@
                               "type": "object"
                             },
                             "type": "array"
+                          },
+                          "agentless": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "resources": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "requests": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "cpu": {
+                                        "type": "string"
+                                      },
+                                      "memory": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "type": "object"
+                                  }
+                                },
+                                "type": "object"
+                              }
+                            },
+                            "type": "object"
                           },
                           "agents": {
                             "type": "number"
@@ -11645,6 +11813,30 @@
                                 "type": "array"
                               }
                             ]
+                          },
+                          "required_versions": {
+                            "items": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "percentage": {
+                                  "description": "Target percentage of agents to auto upgrade",
+                                  "maximum": 100,
+                                  "minimum": 0,
+                                  "type": "number"
+                                },
+                                "version": {
+                                  "description": "Target version for automatic agent upgrade",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "version",
+                                "percentage"
+                              ],
+                              "type": "object"
+                            },
+                            "nullable": true,
+                            "type": "array"
                           },
                           "revision": {
                             "type": "number"
@@ -12098,6 +12290,30 @@
                           },
                           "type": "array"
                         },
+                        "agentless": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "resources": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "requests": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "cpu": {
+                                      "type": "string"
+                                    },
+                                    "memory": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "type": "object"
+                                }
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "type": "object"
+                        },
                         "agents": {
                           "type": "number"
                         },
@@ -12666,6 +12882,30 @@
                               "type": "array"
                             }
                           ]
+                        },
+                        "required_versions": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "percentage": {
+                                "description": "Target percentage of agents to auto upgrade",
+                                "maximum": 100,
+                                "minimum": 0,
+                                "type": "number"
+                              },
+                              "version": {
+                                "description": "Target version for automatic agent upgrade",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "version",
+                              "percentage"
+                            ],
+                            "type": "object"
+                          },
+                          "nullable": true,
+                          "type": "array"
                         },
                         "revision": {
                           "type": "number"
@@ -12855,6 +13095,30 @@
                     },
                     "type": "array"
                   },
+                  "agentless": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "resources": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "requests": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "cpu": {
+                                "type": "string"
+                              },
+                              "memory": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          }
+                        },
+                        "type": "object"
+                      }
+                    },
+                    "type": "object"
+                  },
                   "data_output_id": {
                     "nullable": true,
                     "type": "string"
@@ -13021,6 +13285,30 @@
                     "nullable": true,
                     "type": "object"
                   },
+                  "required_versions": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "percentage": {
+                          "description": "Target percentage of agents to auto upgrade",
+                          "maximum": 100,
+                          "minimum": 0,
+                          "type": "number"
+                        },
+                        "version": {
+                          "description": "Target version for automatic agent upgrade",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "version",
+                        "percentage"
+                      ],
+                      "type": "object"
+                    },
+                    "nullable": true,
+                    "type": "array"
+                  },
                   "space_ids": {
                     "items": {
                       "type": "string"
@@ -13108,6 +13396,30 @@
                             "type": "object"
                           },
                           "type": "array"
+                        },
+                        "agentless": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "resources": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "requests": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "cpu": {
+                                      "type": "string"
+                                    },
+                                    "memory": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "type": "object"
+                                }
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "type": "object"
                         },
                         "agents": {
                           "type": "number"
@@ -13677,6 +13989,30 @@
                               "type": "array"
                             }
                           ]
+                        },
+                        "required_versions": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "percentage": {
+                                "description": "Target percentage of agents to auto upgrade",
+                                "maximum": 100,
+                                "minimum": 0,
+                                "type": "number"
+                              },
+                              "version": {
+                                "description": "Target version for automatic agent upgrade",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "version",
+                              "percentage"
+                            ],
+                            "type": "object"
+                          },
+                          "nullable": true,
+                          "type": "array"
                         },
                         "revision": {
                           "type": "number"
@@ -13894,6 +14230,30 @@
                           },
                           "type": "array"
                         },
+                        "agentless": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "resources": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "requests": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "cpu": {
+                                      "type": "string"
+                                    },
+                                    "memory": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "type": "object"
+                                }
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "type": "object"
+                        },
                         "agents": {
                           "type": "number"
                         },
@@ -14462,6 +14822,30 @@
                               "type": "array"
                             }
                           ]
+                        },
+                        "required_versions": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "percentage": {
+                                "description": "Target percentage of agents to auto upgrade",
+                                "maximum": 100,
+                                "minimum": 0,
+                                "type": "number"
+                              },
+                              "version": {
+                                "description": "Target version for automatic agent upgrade",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "version",
+                              "percentage"
+                            ],
+                            "type": "object"
+                          },
+                          "nullable": true,
+                          "type": "array"
                         },
                         "revision": {
                           "type": "number"
@@ -14786,6 +15170,7 @@
                                 "monitoring": {
                                   "additionalProperties": false,
                                   "properties": {
+                                    "apm": {},
                                     "enabled": {
                                       "type": "boolean"
                                     },
@@ -14809,7 +15194,8 @@
                                     "enabled",
                                     "metrics",
                                     "logs",
-                                    "traces"
+                                    "traces",
+                                    "apm"
                                   ],
                                   "type": "object"
                                 },
@@ -15406,10 +15792,16 @@
                         "online": {
                           "type": "number"
                         },
+                        "orphaned": {
+                          "type": "number"
+                        },
                         "other": {
                           "type": "number"
                         },
                         "unenrolled": {
+                          "type": "number"
+                        },
+                        "uninstalled": {
                           "type": "number"
                         },
                         "updating": {
@@ -15946,7 +16338,9 @@
                               "unenrolling",
                               "unenrolled",
                               "updating",
-                              "degraded"
+                              "degraded",
+                              "uninstalled",
+                              "orphaned"
                             ],
                             "type": "string"
                           },
@@ -17959,7 +18353,9 @@
                             "unenrolling",
                             "unenrolled",
                             "updating",
-                            "degraded"
+                            "degraded",
+                            "uninstalled",
+                            "orphaned"
                           ],
                           "type": "string"
                         },
@@ -18439,7 +18835,9 @@
                             "unenrolling",
                             "unenrolled",
                             "updating",
-                            "degraded"
+                            "degraded",
+                            "uninstalled",
+                            "orphaned"
                           ],
                           "type": "string"
                         },
