@@ -19,8 +19,8 @@ import type {
   ALERT_SERVICE_RISK_SCORE_CALCULATED_SCORE_NORM,
 } from '../../../../../field_maps/field_names';
 
-/* DO NOT MODIFY THIS SCHEMA TO ADD NEW FIELDS. These types represent the alerts that shipped in 8.12.0.
-Any changes to these types should be bug fixes so the types more accurately represent the alerts from 8.12.0.
+/* DO NOT MODIFY THIS SCHEMA TO ADD NEW FIELDS. These types represent the alerts that shipped in 8.18.0.
+Any changes to these types should be bug fixes so the types more accurately represent the alerts from 8.18.0.
 If you are adding new fields for a new release of Kibana, create a new sibling folder to this one
 for the version to be released and add the field(s) to the schema in that folder.
 Then, update `../index.ts` to import from the new folder that has the latest schemas, add the
