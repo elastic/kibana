@@ -139,11 +139,7 @@ export const createFilterESQL = async (
   rowIndex: number
 ) => {
   if (
-    !table ||
-    !table.columns ||
-    !table.columns[columnIndex] ||
-    !table.columns[columnIndex].meta ||
-    !table.columns[columnIndex].meta.sourceParams?.sourceField ||
+    !table?.columns?.[columnIndex]?.meta?.sourceParams?.sourceField ||
     table.columns[columnIndex].meta.sourceParams?.sourceField === '___records___'
   ) {
     return;
@@ -158,32 +154,20 @@ export const createFilterESQL = async (
   };
 
   const value = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
-  if (value === null || value === undefined) {
+  if (value == null) {
     return;
   }
 
   const filters: Filter[] = [];
 
-  if (operationType === 'date_histogram') {
+  if (operationType === ['date_histogram', 'histogram'].includes(operationType)) {
     filters.push(
       buildSimpleNumberRangeFilter(
         sourceField,
         {
           gte: value,
           lt: value + interval,
-          format: 'strict_date_optional_time',
-        },
-        indexPattern,
-        value
-      )
-    );
-  } else if (operationType === 'histogram') {
-    filters.push(
-      buildSimpleNumberRangeFilter(
-        sourceField,
-        {
-          gte: value,
-          lt: value + interval,
+          (...operationType === 'date_hisotgram' ? { format: 'strict_date_optional_time'} : {}),
         },
         indexPattern,
         value

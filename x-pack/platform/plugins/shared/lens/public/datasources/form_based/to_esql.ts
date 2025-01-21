@@ -175,7 +175,7 @@ export function getESQLForLayer(
         : `col_${index}_${aggId}`;
 
       let interval: number | undefined;
-      if (col.operationType === 'date_histogram') {
+      if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
         const dateHistogramColumn = col as DateHistogramIndexPatternColumn;
         const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
 
@@ -233,8 +233,8 @@ export function getESQLForLayer(
         },
       ];
 
-      if (col.operationType === 'date_histogram') {
-        const column = col as DateHistogramIndexPatternColumn;
+      if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
+        const column = col;
         if (
           column.params?.dropPartials &&
           // set to false when detached from time picker
@@ -282,8 +282,8 @@ export function getESQLForLayer(
           ? `col_${index + (col.isBucketed ? 0 : 1)}-${aggId}`
           : `col_${index}_${aggId}`;
 
-        if (col.operationType === 'date_histogram') {
-          esAggsId = (col as DateHistogramIndexPatternColumn).sourceField;
+        if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
+          esAggsId = col.sourceField;
         }
 
         return `${esAggsId} ASC`;
