@@ -27,7 +27,6 @@ import { useEnableRiskEngineMutation } from '../api/hooks/use_enable_risk_engine
 import { useDisableRiskEngineMutation } from '../api/hooks/use_disable_risk_engine_mutation';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_risk_engine_privileges';
-import {RISK_ENGINE_STATUS_SWITCH, RISK_ENGINE_STATUS_SWITCH_LABEL} from "../translations";
 
 const MIN_WIDTH_TO_PREVENT_LABEL_FROM_MOVING = '50px';
 const toastOptions = {
