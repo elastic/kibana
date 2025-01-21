@@ -60,16 +60,10 @@ export const getCategoryCountMSearchRequest = (
   from: number | undefined,
   to: number | undefined
 ): estypes.MsearchRequestItem[] =>
-  categories.flatMap((category) => [
-    { index: params.index },
-    getCategoryCountRequest(
-      params,
-      fieldName,
-      category,
-      from,
-      to
-    ) as estypes.MsearchMultisearchBody,
-  ]);
+  categories.flatMap((category) => {
+    const { index, ...body } = getCategoryCountRequest(params, fieldName, category, from, to);
+    return [{ index }, body];
+  });
 
 export const fetchCategoryCounts = async (
   esClient: ElasticsearchClient,

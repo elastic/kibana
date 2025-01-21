@@ -91,7 +91,7 @@ export const getCategoryRequest = (
   // In this case we're only interested in the aggregation which
   // `createCategoryRequest` returns, so we're re-applying the original
   // query we create via `getQueryWithParams` here.
-  request.body.query = query;
+  request.query = query;
 
   return request;
 };
@@ -117,10 +117,10 @@ export const fetchCategories = async (
 
   const result: FetchCategoriesResponse[] = [];
 
-  const searches: estypes.MsearchRequestItem[] = fieldNames.flatMap((fieldName) => [
-    { index: params.index },
-    getCategoryRequest(params, fieldName, randomSamplerWrapper) as estypes.MsearchMultisearchBody,
-  ]);
+  const searches: estypes.MsearchRequestItem[] = fieldNames.flatMap((fieldName) => {
+    const { index, ...body } = getCategoryRequest(params, fieldName, randomSamplerWrapper);
+    return [{ index }, body];
+  });
 
   let mSearchResponse;
 
