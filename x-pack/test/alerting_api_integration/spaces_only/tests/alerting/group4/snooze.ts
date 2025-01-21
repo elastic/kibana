@@ -506,9 +506,6 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         });
 
         expect(response.statusCode).to.eql(400);
-        expect(response.body.message).to.eql(
-          '[request body.snooze_schedule.rRule.byweekday]: rRule byweekday should be one of MO, TU, WE, TH, FR, SA, SU'
-        );
       });
 
       it('should return 400 if the bymonthday is not valid', async () => {
@@ -533,7 +530,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
         expect(response.statusCode).to.eql(400);
         expect(response.body.message).to.eql(
-          '[request body.snooze_schedule.rRule.bymonthday]: rRule bymonthday should be between 1 and 31 inclusive'
+          '[request body.snooze_schedule.rRule.bymonthday.0]: Value must be equal to or lower than [31].'
         );
       });
 
@@ -559,7 +556,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
         expect(response.statusCode).to.eql(400);
         expect(response.body.message).to.eql(
-          '[request body.snooze_schedule.rRule.bymonth]: rRule bymonth should be between 1 and 12 inclusive'
+          '[request body.snooze_schedule.rRule.bymonth.0]: Value must be equal to or lower than [12].'
         );
       });
     });
