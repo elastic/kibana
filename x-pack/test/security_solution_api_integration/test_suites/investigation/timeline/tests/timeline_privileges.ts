@@ -241,7 +241,11 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       canWriteUsers.forEach((user) => {
         it(`user "${user.username}" can copy timeline`, async () => {
           const superTest = await utils.createSuperTestWithUser(user);
-          const timeline = getTimeline();
+          const {
+            data: {
+              persistTimeline: { timeline },
+            },
+          } = getTimeline();
           await copyTimeline(superTest, timeline.savedObjectId, timeline).expect(200);
         });
       });
@@ -249,7 +253,11 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       cannotWriteUsers.forEach((user) => {
         it(`user "${user.username}" cannot copy timeline`, async () => {
           const superTest = await utils.createSuperTestWithUser(user);
-          const timeline = getTimeline();
+          const {
+            data: {
+              persistTimeline: { timeline },
+            },
+          } = getTimeline();
           await copyTimeline(superTest, timeline.savedObjectId, timeline).expect(403);
         });
       });
