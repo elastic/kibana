@@ -52,22 +52,10 @@ describe('AgentTypeIntegration component', () => {
       expect(getByTestId('test-tooltipAnchor'));
     });
 
-    if (
-      agentType === 'sentinel_one' ||
-      agentType === 'crowdstrike' ||
-      agentType === 'microsoft_defender_endpoint'
-    ) {
-      it('should display tech preview badge', () => {
-        const { getByTestId } = render();
+    it('should NOT display tech preview badge', () => {
+      const { queryByTestId } = render();
 
-        expect(getByTestId('test-betaBadge')).not.toBeNull();
-      });
-    } else {
-      it('should NOT display tech preview badge', () => {
-        const { queryByTestId } = render();
-
-        expect(queryByTestId('test-betaBadge')).toBeNull();
-      });
-    }
+      expect(queryByTestId('test-betaBadge')).toBeNull();
+    });
   });
 });
