@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { Logger } from '@kbn/core/server';
 import { chunk } from 'lodash';
 import { getRequestBase } from '@kbn/apm-data-access-plugin/server/lib/helpers/create_es_client/create_apm_event_client/get_request_base';
@@ -88,30 +87,17 @@ async function getConnectionData({
       indices: esqlClient.indices,
     });
 
-    const chunkedResponses = await withApmSpan('get_service_paths_from_all_trace_ids', () =>
-      Promise.all(
-        chunks.map((traceIdsChunk) =>
-          getServiceMapFromTraceIds({
-            index,
-            filters,
-            traceIds: traceIdsChunk,
-            start,
-            end,
-            terminateAfter: config.serviceMapTerminateAfter,
-            logger,
-            esqlClient,
-          })
-        )
-      )
-    );
-
-    logger.debug('Received chunk responses');
-
-    const mergedResponses = chunkedResponses.reduce((prev, current) => {
-      return {
-        connections: prev.connections.concat(current.connections),
-        discoveredServices: prev.discoveredServices.concat(current.discoveredServices),
-      };
+    const mergedResponses = await withApmSpan('get_service_paths_from_all_trace_ids', async () => {
+      return getServiceMapFromTraceIds({
+        index,
+        filters,
+        traceIdChunks: chunks,
+        start,
+        end,
+        terminateAfter: config.serviceMapTerminateAfter,
+        logger,
+        esqlClient,
+      });
     });
 
     logger.debug('Merged responses');

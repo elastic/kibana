@@ -42,7 +42,7 @@ export function getConnections({ paths }: { paths: ConnectionNode[][] | undefine
 }
 
 export async function getServiceMapFromTraceIds({
-  traceIds,
+  traceIdChunks,
   start,
   end,
   index,
@@ -51,7 +51,7 @@ export async function getServiceMapFromTraceIds({
   esqlClient,
   terminateAfter,
 }: {
-  traceIds: string[];
+  traceIdChunks: string[][];
   start: number;
   end: number;
   logger: Logger;
@@ -61,7 +61,7 @@ export async function getServiceMapFromTraceIds({
   filters: QueryDslQueryContainer[];
 }) {
   const serviceMapFromTraceIdsScriptResponse = await fetchServicePathsFromTraceIds({
-    traceIds,
+    traceIdChunks,
     start,
     end,
     esqlClient,

@@ -5,14 +5,27 @@
  * 2.0.
  */
 
+/* eslint-disable no-bitwise */
+import {
+  from,
+  observeOn,
+  asyncScheduler,
+  of,
+  lastValueFrom,
+  delay,
+  concatMap,
+  mergeMap,
+  scan,
+  last,
+  map,
+} from 'rxjs';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { getRequestBase } from '@kbn/apm-data-access-plugin/server/lib/helpers/create_es_client/create_apm_event_client/get_request_base';
 import { chunk } from 'lodash';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import { TIMESTAMP_US } from '../../../common/es_fields/apm';
-import { PROCESSOR_EVENT, SPAN_DURATION, SPAN_NAME } from '../../../common/es_fields/apm';
+
 import {
   TRACE_ID,
   AGENT_NAME,
@@ -25,6 +38,10 @@ import {
   TRANSACTION_ID,
   PARENT_ID,
   TRANSACTION_DURATION,
+  AT_TIMESTAMP,
+  PROCESSOR_EVENT,
+  SPAN_DURATION,
+  SPAN_NAME,
 } from '../../../common/es_fields/apm';
 import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import type { EsClient } from '../../lib/helpers/get_esql_client';
@@ -51,10 +68,9 @@ type QueryResult = {
   'event.name': string;
   'event.type': string;
   'event.duration': number;
-  [TRACE_ID]: string;
   [PARENT_ID]?: string;
   [SERVICE_NAME]: string;
-  [TIMESTAMP_US]: number;
+  [AT_TIMESTAMP]: string;
   [AGENT_NAME]: AgentName;
 } & (
   | {
@@ -65,7 +81,6 @@ type QueryResult = {
 );
 
 interface Event {
-  traceId: string;
   id: string;
   parentId?: string;
   processorEvent: ProcessorEvent;
@@ -87,6 +102,60 @@ export interface CriticalPathResponse {
   nodes: Record<NodeId, NodeId[]>;
   rootNodes: NodeId[];
   operationIdByNodeId: Record<NodeId, OperationId>;
+}
+
+const hashCache = new Map<string, string>();
+
+const FNV_32_INIT = 0x811c9dc5;
+const FNV_32_PRIME = 0x01000193;
+
+function fnv1a(str: string): number {
+  let hash = FNV_32_INIT;
+  const len = str.length;
+
+  for (let i = 0; i < len - 3; i += 4) {
+    const byte1 = str.charCodeAt(i) & 0xff;
+    const byte2 = str.charCodeAt(i + 1) & 0xff;
+    const byte3 = str.charCodeAt(i + 2) & 0xff;
+    const byte4 = str.charCodeAt(i + 3) & 0xff;
+
+    hash ^= byte1;
+    hash = (hash * FNV_32_PRIME) >>> 0;
+
+    hash ^= byte2;
+    hash = (hash * FNV_32_PRIME) >>> 0;
+
+    hash ^= byte3;
+    hash = (hash * FNV_32_PRIME) >>> 0;
+
+    hash ^= byte4;
+    hash = (hash * FNV_32_PRIME) >>> 0;
+  }
+
+  for (let i = len - 4; i < len; i++) {
+    const byte = str.charCodeAt(i) & 0xff;
+    hash ^= byte;
+    hash = (hash * FNV_32_PRIME) >>> 0;
+  }
+
+  return hash >>> 0; // Ensure a positive 32-bit result
+}
+
+function toHash(item: any): string {
+  const str = Array.isArray(item)
+    ? item.map((p) => p).join('|')
+    : typeof item === 'object'
+    ? JSON.stringify(item)
+    : item;
+
+  const cached = hashCache.get(str);
+  if (cached) {
+    return cached;
+  }
+
+  const result = fnv1a(str).toString(16);
+  hashCache.set(str, result);
+  return result;
 }
 
 export async function getAggregatedCriticalPath({
@@ -112,23 +181,30 @@ export async function getAggregatedCriticalPath({
   });
 
   const chunks = chunk(traceIds, 50);
-  const groupEventsChunked = await Promise.all(
-    chunks.map(async (traceIdChunks) => {
+  const groupEventsChunked$ = from(chunks).pipe(
+    // fechtches from the db in chunks of 50. We need to control the number of parallel operations
+    mergeMap((traceIdChunks) => {
       const now = performance.now();
-      const response = await fetchCriticalPath({
-        traceIds: traceIdChunks,
-        start,
-        end,
-        index,
-        filters,
-        esqlClient,
-      });
+      const response = from(
+        fetchCriticalPath({
+          traceIds: traceIdChunks,
+          start,
+          end,
+          index,
+          filters,
+          esqlClient,
+        })
+      );
 
       logger.debug(
         `Retrieved critical path in ${performance.now() - now}ms for ${traceIds.length} traces`
       );
 
+      return response;
+    }, 2),
+    map((response) => {
       const { eventsById, metadataByOperationId } = groupEvents(response.hits);
+
       const entryIds = getEntryIds({
         eventsById,
         metadataByOperationId,
@@ -139,27 +215,54 @@ export async function getAggregatedCriticalPath({
       const eventTrees = getEventTrees({
         eventsById,
         entryIds,
+        metadataByOperationId,
       });
 
       return { eventTrees, metadataByOperationId };
-    })
+    }),
+    // after ALL requests and trees are built, we merge all chunks
+    scan(
+      (acc, { eventTrees, metadataByOperationId }) => {
+        acc.eventTrees.push(...eventTrees);
+
+        for (const [key, value] of metadataByOperationId) {
+          if (!acc.metadataByOperationId.has(key)) {
+            acc.metadataByOperationId.set(key, value);
+          }
+        }
+
+        return acc;
+      },
+      {
+        eventTrees: [] as Event[],
+        metadataByOperationId: new Map<OperationId, OperationMetadata>(),
+      }
+    ),
+    last(),
+    // after the chunks have been merged we build the critical path
+    concatMap(({ eventTrees, metadataByOperationId }) =>
+      buildCriticalPath$({
+        eventTrees,
+      }).pipe(
+        map((criticalPath) => ({
+          ...criticalPath,
+          metadataByOperationId,
+        }))
+      )
+    )
   );
 
-  const now = performance.now();
-
-  const { eventTrees, metadataByOperationId } = mergeChunks(groupEventsChunked);
-  const { timeByNodeId, nodes, rootNodes, operationIdByNodeId } = buildCriticalPath({
-    eventTrees,
-    metadataByOperationId,
-  });
-
-  logger.debug(`Built critical path in ${performance.now() - now}ms`);
+  const { metadataByOperationId, timeByNodeId, nodes, rootNodes, operationIdByNodeId } =
+    await lastValueFrom(groupEventsChunked$);
 
   return {
     criticalPath: {
       metadata: Object.fromEntries(metadataByOperationId),
       timeByNodeId: Object.fromEntries(timeByNodeId),
-      nodes: Object.fromEntries(nodes),
+      nodes: Array.from(nodes.entries()).reduce<Record<string, string[]>>((acc, [key, value]) => {
+        acc[key] = Array.from(value);
+        return acc;
+      }, {}),
       rootNodes: Array.from(rootNodes),
       operationIdByNodeId: Object.fromEntries(operationIdByNodeId),
     },
@@ -195,36 +298,21 @@ const fetchCriticalPath = async ({
     {
       query: `
         FROM ${index.join(',')}
-          | EVAL event.id = CASE(processor.event == "span", ${SPAN_ID}, ${TRANSACTION_ID}),
-              event.name = CONCAT(${TIMESTAMP_US}::string, "|",CASE(processor.event == "span", ${SPAN_NAME}, ${TRANSACTION_NAME})),
-              event.type = CONCAT(${TIMESTAMP_US}::string, "|",CASE(processor.event == "span", ${SPAN_TYPE}, ${TRANSACTION_TYPE})),
-              event.duration = CONCAT(${TIMESTAMP_US}::string, "|", CASE(processor.event == "span", ${SPAN_DURATION}, ${TRANSACTION_DURATION})::string),
-              ${AGENT_NAME} = CONCAT(${TIMESTAMP_US}::string, "|", ${AGENT_NAME}),
-              ${SERVICE_NAME} = CONCAT(${TIMESTAMP_US}::string, "|", ${SERVICE_NAME}),
-              ${PARENT_ID} = CONCAT(${TIMESTAMP_US}::string, "|", ${PARENT_ID})
           | LIMIT 10000
-          | STATS ${SPAN_SUBTYPE} = MAX(${SPAN_SUBTYPE}),
-              ${PROCESSOR_EVENT} = MAX(${PROCESSOR_EVENT}),
-              ${TIMESTAMP_US} = MAX(${TIMESTAMP_US}),
-              ${PARENT_ID} = MAX(${PARENT_ID}),
-              ${AGENT_NAME} = MAX(${AGENT_NAME}),
-              ${SERVICE_NAME} = MAX(${SERVICE_NAME}),
-              ${TRACE_ID} = MAX(${TRACE_ID}),
-              event.name = MAX(event.name),
-              event.type = MAX(event.type),
-              event.duration = MAX(event.duration) BY event.id
-          | EVAL event.duration = SPLIT(event.duration, "|"),
-              event.name = SPLIT(event.name, "|"),
-              event.type = SPLIT(event.type, "|"),
-              ${PARENT_ID} = SPLIT(${PARENT_ID}, "|"),
-              ${AGENT_NAME} = SPLIT(${AGENT_NAME}, "|"),
-              ${SERVICE_NAME} = SPLIT(${SERVICE_NAME}, "|")
-          | EVAL event.duration = TO_LONG(MV_LAST(event.duration)),
-              event.name = TO_STRING(MV_LAST(event.name)),
-              event.type = TO_STRING(MV_LAST(event.type)),
-              ${PARENT_ID} = TO_STRING(MV_LAST(${PARENT_ID})),
-              ${AGENT_NAME} = TO_STRING(MV_LAST(${AGENT_NAME})),
-              ${SERVICE_NAME} = TO_STRING(MV_LAST(${SERVICE_NAME}))
+          | EVAL event.id = CASE(processor.event == "span", ${SPAN_ID}, ${TRANSACTION_ID}),
+              event.duration = CASE(processor.event == "span", ${SPAN_DURATION}, ${TRANSACTION_DURATION}),
+              event.name = CASE(processor.event == "span", ${SPAN_NAME}, ${TRANSACTION_NAME}),
+              event.type = CASE(processor.event == "span", ${SPAN_TYPE}, ${TRANSACTION_TYPE})
+          | KEEP ${AT_TIMESTAMP},
+              event.id,
+              event.duration,
+              event.name,
+              event.type,
+              ${SPAN_SUBTYPE},
+              ${PROCESSOR_EVENT},
+              ${AGENT_NAME},
+              ${SERVICE_NAME},
+              ${PARENT_ID}
         `,
       filter: {
         bool: {
@@ -271,9 +359,11 @@ function getEntryIds({
 function getEventTrees({
   eventsById,
   entryIds,
+  metadataByOperationId,
 }: {
   eventsById: Map<string, Event>;
   entryIds: Set<string>;
+  metadataByOperationId: Map<string, OperationMetadata>;
 }) {
   const eventTrees = new Map<string, Event>();
   const events = Array.from(eventsById.values());
@@ -295,16 +385,27 @@ function getEventTrees({
       continue;
     }
 
-    const stack: Event[] = [treeRoot];
+    const stack: Array<{ node: Event; parent?: Event }> = [{ node: treeRoot }];
 
     while (stack.length > 0) {
-      const node = stack.pop()!;
+      const { node, parent } = stack.pop()!;
       visited.add(node.id);
+
+      const { end, offset, skew } = calculateOffsetsAndSkews({
+        metadataByOperationId,
+        parent,
+        event: node,
+        startOfTrace: treeRoot.timestamp,
+      });
+
+      node.end = end;
+      node.offset = offset;
+      node.skew = skew;
 
       const children = childrenByParentId.get(node.id) || [];
       for (const child of children) {
         if (!visited.has(child.id)) {
-          stack.push(child);
+          stack.push({ node: child, parent: node });
           node.children.push(child);
         }
       }
@@ -312,191 +413,26 @@ function getEventTrees({
 
     eventTrees.set(treeRoot.id, treeRoot);
   }
-  return eventTrees;
+  return Array.from(eventTrees.values());
 }
-
-function buildCriticalPath({
-  eventTrees,
-  metadataByOperationId,
-}: {
-  eventTrees: Map<string, Event>;
-  metadataByOperationId: Map<OperationId, OperationMetadata>;
-}) {
-  const timeByNodeId = new Map<NodeId, number>();
-  const nodes = new Map<NodeId, NodeId[]>();
-  const rootNodes = new Set<NodeId>();
-  const operationIdByNodeId = new Map<NodeId, OperationId>();
-
-  for (const treeRoot of eventTrees.values()) {
-    calculateOffsetsAndSkews({
-      event: treeRoot,
-      metadataByOperationId,
-      startOfTrace: treeRoot.timestamp,
-    });
-
-    const path = buildPathToRoot({ treeRoot });
-    const nodeId = toHash(path);
-
-    spanGraph({
-      treeRoot,
-      path,
-      nodes,
-      operationIdByNodeId,
-      timeByNodeId,
-    });
-
-    if (!rootNodes.has(nodeId)) {
-      rootNodes.add(nodeId);
-    }
-  }
-
-  return {
-    timeByNodeId,
-    nodes,
-    rootNodes,
-    operationIdByNodeId,
-  };
-}
-
-const mergeChunks = (
-  groupedEventsChunks: Array<{
-    eventTrees: Map<string, Event>;
-    metadataByOperationId: Map<OperationId, OperationMetadata>;
-  }>
-) =>
-  groupedEventsChunks.reduce(
-    (acc, curr) => {
-      for (const [key, value] of curr.eventTrees) {
-        if (!acc.eventTrees.has(key)) {
-          acc.eventTrees.set(key, value);
-        }
-      }
-
-      for (const [key, value] of curr.metadataByOperationId) {
-        if (!acc.metadataByOperationId.has(key)) {
-          acc.metadataByOperationId.set(key, value);
-        }
-      }
-
-      return acc;
-    },
-    {
-      eventTrees: new Map<string, Event>(),
-      metadataByOperationId: new Map<OperationId, OperationMetadata>(),
-    }
-  );
-
-const hashCache = new Map<string, string>();
-function toHash(item: any): string {
-  const FNV_32_INIT = 0x811c9dc5;
-  const FNV_32_PRIME = 0x01000193;
-
-  function deterministicSerialize(value: any): string {
-    if (Array.isArray(value)) {
-      return `[${value.map(deterministicSerialize).join(',')}]`;
-    } else if (value && typeof value === 'object') {
-      const keys = Object.keys(value).sort();
-      return `{${keys.map((key) => `"${key}":${deterministicSerialize(value[key])}`).join(',')}}`;
-    }
-    return value;
-  }
-
-  const str = deterministicSerialize(item);
-  if (hashCache.has(str)) {
-    return hashCache.get(str)!;
-  }
-
-  let rv = FNV_32_INIT;
-
-  for (let i = 0; i < str.length; i++) {
-    // eslint-disable-next-line no-bitwise
-    const bt = str.charCodeAt(i) & 0xff;
-    // eslint-disable-next-line no-bitwise
-    rv ^= bt;
-    rv *= FNV_32_PRIME;
-  }
-
-  const result = rv.toString(16);
-  hashCache.set(str, result);
-  return result;
-}
-
-const groupEvents = (response: QueryResult[]) => {
-  const eventsById = new Map<string, Event>();
-  const metadataByOperationId = new Map<OperationId, OperationMetadata>();
-
-  response.forEach((hit) => {
-    const eventId = hit['event.id'];
-
-    const metadata: OperationMetadata = {
-      [SERVICE_NAME]: hit[SERVICE_NAME],
-      [AGENT_NAME]: hit[AGENT_NAME] as AgentName,
-      ...(hit[PROCESSOR_EVENT] === ProcessorEvent.span
-        ? {
-            [PROCESSOR_EVENT]: ProcessorEvent.span,
-            [SPAN_NAME]: hit['event.name'],
-            [SPAN_TYPE]: hit['event.type'],
-            [SPAN_SUBTYPE]: hit[SPAN_SUBTYPE],
-          }
-        : {
-            [PROCESSOR_EVENT]: ProcessorEvent.transaction,
-            [TRANSACTION_NAME]: hit['event.name'],
-            [TRANSACTION_TYPE]: hit['event.type'],
-          }),
-    };
-    const operationId = toHash(metadata);
-
-    eventsById.set(eventId, {
-      traceId: hit[TRACE_ID],
-      id: eventId,
-      operationId,
-      parentId: hit[PARENT_ID],
-      processorEvent: hit[PROCESSOR_EVENT],
-      timestamp: hit[TIMESTAMP_US],
-      duration: hit['event.duration'],
-      skew: 0,
-      offset: 0,
-      end: 0,
-      children: [],
-    });
-
-    if (!metadataByOperationId.has(operationId)) {
-      metadataByOperationId.set(operationId, metadata);
-    }
-  });
-
-  return { eventsById, metadataByOperationId };
-};
 
 function calculateOffsetsAndSkews({
   metadataByOperationId,
   event,
+  parent,
   startOfTrace,
 }: {
+  parent?: Event;
   event: Event;
   metadataByOperationId: Map<string, OperationMetadata>;
   startOfTrace: number;
 }) {
-  const visited = new Set<string>();
-  const stack: Array<{ currentEvent: Event; parent?: Event }> = [
-    { currentEvent: event, parent: undefined },
-  ];
-
-  while (stack.length > 0) {
-    const { currentEvent, parent } = stack.pop()!;
-
-    visited.add(currentEvent.id);
-
-    currentEvent.skew = calculateClockSkew({ metadataByOperationId, event: currentEvent, parent });
-    currentEvent.offset = currentEvent.timestamp - startOfTrace;
-    currentEvent.end = currentEvent.offset + currentEvent.skew + currentEvent.duration;
-
-    for (const child of currentEvent.children) {
-      if (!visited.has(child.id)) {
-        stack.push({ currentEvent: child, parent: currentEvent });
-      }
-    }
-  }
+  const offset = event.timestamp - startOfTrace;
+  return {
+    skew: calculateClockSkew({ metadataByOperationId, event, parent }),
+    offset,
+    end: offset + event.skew + event.duration,
+  };
 }
 
 function calculateClockSkew({
@@ -528,36 +464,137 @@ function calculateClockSkew({
   return 0;
 }
 
-function spanGraph({
-  treeRoot: treeRoot,
-  path,
-  nodes,
-  operationIdByNodeId,
-  timeByNodeId,
+const groupEvents = (response: QueryResult[]) => {
+  const eventsById = new Map<string, Event>();
+  const metadataByOperationId = new Map<OperationId, OperationMetadata>();
+
+  response.forEach((hit) => {
+    const eventId = hit['event.id'];
+
+    const metadata: OperationMetadata = {
+      [SERVICE_NAME]: hit[SERVICE_NAME],
+      [AGENT_NAME]: hit[AGENT_NAME] as AgentName,
+      ...(hit[PROCESSOR_EVENT] === ProcessorEvent.span
+        ? {
+            [PROCESSOR_EVENT]: ProcessorEvent.span,
+            [SPAN_NAME]: hit['event.name'],
+            [SPAN_TYPE]: hit['event.type'],
+            [SPAN_SUBTYPE]: hit[SPAN_SUBTYPE],
+          }
+        : {
+            [PROCESSOR_EVENT]: ProcessorEvent.transaction,
+            [TRANSACTION_NAME]: hit['event.name'],
+            [TRANSACTION_TYPE]: hit['event.type'],
+          }),
+    };
+    const operationId = toHash(metadata);
+
+    eventsById.set(eventId, {
+      id: eventId,
+      operationId,
+      parentId: hit[PARENT_ID],
+      processorEvent: hit[PROCESSOR_EVENT],
+      timestamp: new Date(hit[AT_TIMESTAMP]).getTime(),
+      duration: hit['event.duration'],
+      skew: 0,
+      offset: 0,
+      end: 0,
+      children: [],
+    });
+
+    if (!metadataByOperationId.has(operationId)) {
+      metadataByOperationId.set(operationId, metadata);
+    }
+  });
+
+  return { eventsById, metadataByOperationId };
+};
+
+function buildCriticalPath$({ eventTrees }: { eventTrees: Event[] }) {
+  const initialState = {
+    timeByNodeId: new Map<NodeId, number>(),
+    nodes: new Map<NodeId, Set<NodeId>>(),
+    rootNodes: new Set<NodeId>(),
+    operationIdByNodeId: new Map<NodeId, OperationId>(),
+  };
+
+  return from(eventTrees).pipe(
+    observeOn(asyncScheduler),
+    concatMap((treeRoot) => of(treeRoot).pipe(delay(0))),
+    concatMap((treeRoot) => {
+      const path = buildPathToRoot({ treeRoot });
+      const nodeId = toHash(path);
+
+      // Process the tree and mutate the state
+      return from(
+        new Promise<ReturnType<typeof processTree>>((resolve) => {
+          const result = processTree({ treeRoot, nodeId, state: initialState });
+          return resolve(result);
+        })
+      ).pipe(map((state) => ({ ...state, nodeId })));
+    }),
+    scan((state, { timeByNodeId, nodes, operationIdByNodeId, nodeId }) => {
+      state.timeByNodeId = timeByNodeId;
+      state.nodes = nodes;
+      state.operationIdByNodeId = operationIdByNodeId;
+
+      if (!state.rootNodes.has(nodeId)) {
+        state.rootNodes.add(nodeId);
+      }
+
+      return state;
+    }, initialState)
+  );
+}
+
+function processTree({
+  treeRoot,
+  nodeId,
+  state,
 }: {
   treeRoot: Event;
-  path: string[];
-  nodes: Map<NodeId, NodeId[]>;
-  operationIdByNodeId: Map<NodeId, OperationId>;
-  timeByNodeId: Map<NodeId, number>;
+  nodeId: string;
+  state: {
+    timeByNodeId: Map<NodeId, number>;
+    nodes: Map<NodeId, Set<NodeId>>;
+    operationIdByNodeId: Map<NodeId, OperationId>;
+  };
 }) {
   const stack: Array<{
     currentNode: Event;
-    currentPath: string[];
+    currentNodeId: string;
     startEvent: number;
     endEvent: number;
-  }> = [{ currentNode: treeRoot, currentPath: path, startEvent: 0, endEvent: treeRoot.duration }];
+  }> = [
+    {
+      currentNode: treeRoot,
+      currentNodeId: nodeId,
+      startEvent: 0,
+      endEvent: treeRoot.duration,
+    },
+  ];
+  const processedNodes = new Set<string>();
+
+  const { timeByNodeId, nodes, operationIdByNodeId } = {
+    timeByNodeId: new Map(state.timeByNodeId),
+    nodes: new Map(state.nodes),
+    operationIdByNodeId: new Map(state.operationIdByNodeId),
+  };
 
   while (stack.length > 0) {
-    const { currentNode: currentEvent, currentPath, startEvent, endEvent } = stack.pop()!;
-    const nodeId = toHash(currentPath);
+    const { currentNode: currentEvent, currentNodeId, startEvent, endEvent } = stack.pop()!;
 
-    const childNodes = nodes.get(nodeId) || [];
-    nodes.set(nodeId, childNodes);
-    operationIdByNodeId.set(nodeId, currentEvent.operationId);
+    processedNodes.add(currentNodeId);
+
+    const childNodes = new Set(nodes.get(currentNodeId) || []);
+    nodes.set(currentNodeId, childNodes);
+    operationIdByNodeId.set(currentNodeId, currentEvent.operationId);
 
     if (currentEvent.children.length === 0) {
-      timeByNodeId.set(nodeId, (timeByNodeId.get(nodeId) || 0) + (endEvent - startEvent));
+      timeByNodeId.set(
+        currentNodeId,
+        (timeByNodeId.get(currentNodeId) || 0) + (endEvent - startEvent)
+      );
       continue;
     }
 
@@ -577,31 +614,35 @@ function spanGraph({
         continue;
       }
 
-      const childPath = [...currentPath, child.operationId];
+      const childPath = `${currentNodeId}|${child.operationId}`;
       const childId = toHash(childPath);
 
-      if (!childNodes.includes(childId)) {
-        childNodes.push(childId);
+      if (!childNodes.has(childId)) {
+        childNodes.add(childId);
       }
 
       if (normalizedChildEnd < scanTime - 1000) {
         timeByNodeId.set(nodeId, (timeByNodeId.get(nodeId) || 0) + (scanTime - normalizedChildEnd));
       }
 
-      stack.push({
-        currentNode: child,
-        currentPath: childPath,
-        startEvent: normalizedChildStart,
-        endEvent: childEnd,
-      });
-
       scanTime = normalizedChildStart;
+
+      if (!processedNodes.has(childId)) {
+        stack.push({
+          currentNode: child,
+          currentNodeId: childId,
+          startEvent: normalizedChildStart,
+          endEvent: childEnd,
+        });
+      }
     }
 
     if (scanTime > startEvent) {
       timeByNodeId.set(nodeId, (timeByNodeId.get(nodeId) || 0) + (scanTime - startEvent));
     }
   }
+
+  return { timeByNodeId, nodes, operationIdByNodeId };
 }
 
 function buildPathToRoot({ treeRoot }: { treeRoot: Event }): string[] {
