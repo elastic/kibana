@@ -17,7 +17,6 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { setUnifiedDocViewerServices } from '../../plugin';
 import { mockUnifiedDocViewerServices } from '../../__mocks__';
 import { merge } from 'lodash';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -149,18 +148,14 @@ setUnifiedDocViewerServices(
 const renderLogsOverview = (props: Partial<DocViewRenderProps> = {}) => {
   const { rerender: baseRerender, ...tools } = render(
     <EuiProvider>
-      <IntlProvider locale="en">
-        <LogsOverview dataView={dataView} hit={fullHit} {...props} />
-      </IntlProvider>
+      <LogsOverview dataView={dataView} hit={fullHit} {...props} />
     </EuiProvider>
   );
 
   const rerender = (rerenderProps: Partial<DocViewRenderProps>) =>
     baseRerender(
       <EuiProvider>
-        <IntlProvider locale="en">
-          <LogsOverview dataView={dataView} hit={fullHit} {...props} {...rerenderProps} />
-        </IntlProvider>
+        <LogsOverview dataView={dataView} hit={fullHit} {...props} {...rerenderProps} />
       </EuiProvider>
     );
 
