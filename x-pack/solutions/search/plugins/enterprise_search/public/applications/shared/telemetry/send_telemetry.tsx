@@ -27,23 +27,3 @@ export const SendEnterpriseSearchTelemetry: React.FC<SendTelemetryHelper> = ({
 
   return null;
 };
-
-export const SendAppSearchTelemetry: React.FC<SendTelemetryHelper> = ({ action, metric }) => {
-  const { sendTelemetry } = useActions(TelemetryLogic);
-
-  useEffect(() => {
-    sendTelemetry({ action, metric, product: 'app_search' });
-  }, [action, metric]);
-
-  return null;
-};
-
-export const SendWorkplaceSearchTelemetry: React.FC<SendTelemetryHelper> = ({ action, metric }) => {
-  const { sendTelemetry } = useActions(TelemetryLogic);
-
-  useEffect(() => {
-    sendTelemetry({ action, metric, product: 'workplace_search' });
-  }, [action, metric]);
-
-  return null;
-};
