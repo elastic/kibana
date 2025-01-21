@@ -6,24 +6,16 @@
  */
 
 import { z } from '@kbn/zod';
-import {
-  IngestStreamDefinition,
-  IngestStreamGetResponse,
-  IngestStreamUpsertRequest,
-  ingestStreamDefinitionSchema,
-  ingestStreamUpsertRequestSchema,
-} from './ingest';
-import { createIsSchema } from '../helpers';
+import { IngestStreamDefinition, ingestStreamDefinitionSchema } from './ingest';
+import { createIsNarrowSchema } from '../helpers';
 
 export * from './ingest';
+export * from './legacy';
 
 export type StreamDefinition = IngestStreamDefinition;
-export type StreamGetResponse = IngestStreamGetResponse;
-export type StreamUpsertRequest = IngestStreamUpsertRequest;
+
+export * from './api';
 
 export const streamDefinitionSchema: z.Schema<StreamDefinition> = ingestStreamDefinitionSchema;
 
-export const isStreamDefinition = createIsSchema(streamDefinitionSchema);
-
-export const streamUpsertRequestSchema: z.Schema<StreamUpsertRequest> =
-  ingestStreamUpsertRequestSchema;
+export const isStreamDefinition = createIsNarrowSchema(z.unknown(), streamDefinitionSchema);

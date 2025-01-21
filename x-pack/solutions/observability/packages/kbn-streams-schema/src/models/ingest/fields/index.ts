@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { nonEmptyStringSchema } from '../common';
 
 export const FIELD_DEFINITION_TYPES = [
   'keyword',
@@ -19,45 +20,46 @@ export const FIELD_DEFINITION_TYPES = [
 
 export type FieldDefinitionType = (typeof FIELD_DEFINITION_TYPES)[number];
 
-export interface FieldDefinition {
+export interface FieldDefinitionConfig {
   type: FieldDefinitionType;
   format?: string;
 }
 
-export const fieldDefinitionSchema: z.Schema<FieldDefinition> = z.object({
+export const fieldDefinitionConfigSchema: z.Schema<FieldDefinitionConfig> = z.object({
   type: z.enum(FIELD_DEFINITION_TYPES),
-  format: z.optional(z.string()),
+  format: z.optional(nonEmptyStringSchema),
 });
 
-export interface FieldDefinitionConfig {
-  [x: string]: FieldDefinition;
+export interface FieldDefinition {
+  [x: string]: FieldDefinitionConfig;
 }
 
-export const fieldDefinitionConfigSchema: z.Schema<FieldDefinitionConfig> = z.record(
+export const fieldDefinitionSchema: z.Schema<FieldDefinition> = z.record(
   z.string(),
-  fieldDefinitionSchema
+  fieldDefinitionConfigSchema
 );
 
-export interface InheritedFieldDefinition extends FieldDefinition {
+export interface InheritedFieldDefinitionConfig extends FieldDefinitionConfig {
   from: string;
 }
 
-export interface InheritedFields {
-  [x: string]: InheritedFieldDefinition;
+export interface InheritedFieldDefinition {
+  [x: string]: InheritedFieldDefinitionConfig;
 }
 
-export const inheritedFieldsSchema: z.Schema<InheritedFields> = z.record(
+export const inheritedFieldDefinitionSchema: z.Schema<InheritedFieldDefinition> = z.record(
   z.string(),
-  z.intersection(fieldDefinitionSchema, z.object({ from: z.string() }))
+  z.intersection(fieldDefinitionConfigSchema, z.object({ from: nonEmptyStringSchema }))
 );
 
-export interface NamedFieldDefinition extends FieldDefinition {
+export interface NamedFieldDefinitionConfig extends FieldDefinitionConfig {
   name: string;
 }
 
-export const namedFieldDefinitionSchema: z.Schema<NamedFieldDefinition> = z.intersection(
-  fieldDefinitionSchema,
-  z.object({
-    name: z.string(),
-  })
-);
+export const namedFieldDefinitionConfigSchema: z.Schema<NamedFieldDefinitionConfig> =
+  z.intersection(
+    fieldDefinitionConfigSchema,
+    z.object({
+      name: nonEmptyStringSchema,
+    })
+  );

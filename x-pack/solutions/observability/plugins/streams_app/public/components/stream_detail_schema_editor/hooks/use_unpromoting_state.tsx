@@ -43,7 +43,7 @@ export const useUnpromotingState = ({
     }
     toggleIsUnpromotingField(true);
     try {
-      await streamsRepositoryClient.fetch(`PUT /api/streams/{id}`, {
+      await streamsRepositoryClient.fetch(`PUT /api/streams/{id}/_ingest`, {
         signal: abortController.signal,
         params: {
           path: {

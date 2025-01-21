@@ -14,6 +14,7 @@ const ELASTICSEARCH_ASSET_TYPES = [
 ] as const;
 
 type ElasticsearchAssetType = (typeof ELASTICSEARCH_ASSET_TYPES)[number];
+export const nonEmptyStringSchema = z.string().trim().min(1);
 
 export interface ElasticsearchAsset {
   type: ElasticsearchAssetType;
@@ -22,7 +23,7 @@ export interface ElasticsearchAsset {
 
 export const elasticsearchAssetSchema: z.Schema<ElasticsearchAsset> = z.object({
   type: z.enum(['ingest_pipeline', 'component_template', 'index_template', 'data_stream']),
-  id: z.string(),
+  id: nonEmptyStringSchema,
 });
 
 export interface IngestStreamLifecycleDLM {
@@ -40,7 +41,7 @@ export type IngestStreamLifecycle = IngestStreamLifecycleDLM | IngestStreamLifec
 export const ingestStreamLifecycleSchema: z.Schema<IngestStreamLifecycle> = z.discriminatedUnion(
   'type',
   [
-    z.object({ type: z.literal('dlm'), data_retention: z.optional(z.string()) }),
-    z.object({ type: z.literal('ilm'), policy: z.string() }),
+    z.object({ type: z.literal('dlm'), data_retention: z.optional(nonEmptyStringSchema) }),
+    z.object({ type: z.literal('ilm'), policy: nonEmptyStringSchema }),
   ]
 );

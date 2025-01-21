@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import { ProcessingDefinition, getProcessorType } from '@kbn/streams-schema';
-import { get } from 'lodash';
+import { ProcessorDefinition, getProcessorConfig, getProcessorType } from '@kbn/streams-schema';
 import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import { conditionToPainless } from './condition_to_painless';
 
 export function formatToIngestProcessors(
-  processing: ProcessingDefinition[]
+  processing: ProcessorDefinition[]
 ): IngestProcessorContainer[] {
   return processing.map((processor) => {
+    const config = getProcessorConfig(processor);
     const type = getProcessorType(processor);
-    const config = get(processor.config, type);
     return {
       [type]: {
         ...config,
-        if: processor.condition ? conditionToPainless(processor.condition) : undefined,
+        if: conditionToPainless(config.if),
       },
     };
   });

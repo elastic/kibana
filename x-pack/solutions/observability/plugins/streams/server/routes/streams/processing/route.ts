@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { notFound, internal, badRequest } from '@hapi/boom';
-import { FieldDefinitionConfig, processingDefinitionSchema } from '@kbn/streams-schema';
+import { FieldDefinitionConfig, processorDefinitionSchema } from '@kbn/streams-schema';
 import { calculateObjectDiff, flattenObject } from '@kbn/object-utils';
 import {
   IngestSimulateResponse,
@@ -36,7 +36,7 @@ export const simulateProcessorRoute = createServerRoute({
   params: z.object({
     path: z.object({ id: z.string() }),
     body: z.object({
-      processing: z.array(processingDefinitionSchema),
+      processing: z.array(processorDefinitionSchema),
       documents: z.array(z.record(z.unknown())),
     }),
   }),

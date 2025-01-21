@@ -13,14 +13,17 @@ import {
   UnaryFilterCondition,
   isAndCondition,
   isFilterCondition,
+  isNeverCondition,
   isOrCondition,
+  isUnaryFilterCondition,
 } from '@kbn/streams-schema';
 
 function safePainlessField(conditionOrField: FilterCondition | string) {
-  if (isFilterCondition(conditionOrField)) {
-    return `ctx.${conditionOrField.field.split('.').join('?.')}`;
+  if (typeof conditionOrField === 'string') {
+    return `ctx.${conditionOrField.split('.').join('?.')}`;
   }
-  return `ctx.${conditionOrField.split('.').join('?.')}`;
+
+  return `ctx.${conditionOrField.field.split('.').join('?.')}`;
 }
 
 function encodeValue(value: string | number | boolean) {
@@ -101,10 +104,6 @@ function unaryToPainless(condition: UnaryFilterCondition) {
   }
 }
 
-function isUnaryFilterCondition(subject: FilterCondition): subject is UnaryFilterCondition {
-  return !('value' in subject);
-}
-
 function extractAllFields(condition: Condition, fields: string[] = []): string[] {
   if (isFilterCondition(condition) && !isUnaryFilterCondition(condition)) {
     return uniq([...fields, condition.field]);
@@ -116,7 +115,7 @@ function extractAllFields(condition: Condition, fields: string[] = []): string[]
   return uniq(fields);
 }
 
-export function conditionToStatement(condition?: Condition, nested = false): string {
+export function conditionToStatement(condition: Condition, nested = false): string {
   if (isFilterCondition(condition)) {
     if (isUnaryFilterCondition(condition)) {
       return unaryToPainless(condition);
@@ -131,12 +130,12 @@ export function conditionToStatement(condition?: Condition, nested = false): str
     const or = condition.or.map((filter) => conditionToStatement(filter, true)).join(' || ');
     return nested ? `(${or})` : or;
   }
-  return 'false';
+  return 'return false';
 }
 
-export function conditionToPainless(condition?: Condition): string {
-  if (!condition) {
-    return 'false';
+export function conditionToPainless(condition: Condition): string {
+  if (isNeverCondition(condition)) {
+    return `return false`;
   }
   const fields = extractAllFields(condition);
   let fieldCheck = '';

@@ -6,55 +6,169 @@
  */
 
 import { z } from '@kbn/zod';
-import { IngestStreamDefinition, UnwiredStreamDefinition, WiredStreamDefinition } from '.';
-import { ElasticsearchAsset } from './common';
-import { unwiredStreamDefinitionSchemaBase, wiredStreamDefinitionSchemaBase } from './base';
+import { InheritedFieldDefinition, inheritedFieldDefinitionSchema } from '.';
+import {
+  StreamGetResponseBase,
+  StreamUpsertRequestBase,
+  streamGetResponseSchemaBase,
+  streamUpsertRequestSchemaBase,
+} from '../base/api';
+import {
+  UnwiredIngest,
+  UnwiredStreamDefinition,
+  WiredIngest,
+  WiredStreamDefinition,
+  unwiredIngestSchema,
+  unwiredStreamDefinitionSchemaBase,
+  wiredIngestSchema,
+  wiredStreamDefinitionSchemaBase,
+} from './base';
+import {
+  ElasticsearchAsset,
+  IngestStreamLifecycle,
+  elasticsearchAssetSchema,
+  ingestStreamLifecycleSchema,
+} from './common';
+import { createIsNarrowSchema } from '../../helpers';
 
-interface IngestStreamGetResponseBase<TStreamDefinition extends IngestStreamDefinition> {
-  dashboards: string[];
+/**
+ * Ingest get response
+ */
+
+interface WiredIngestResponse {
+  ingest: WiredIngest;
+}
+
+interface UnwiredIngestResponse {
+  ingest: UnwiredIngest;
+}
+
+type IngestGetResponse = WiredIngestResponse | UnwiredIngestResponse;
+
+interface WiredIngestUpsertRequest {
+  ingest: WiredIngest;
+}
+
+interface UnwiredIngestUpsertRequest {
+  ingest: UnwiredIngest;
+}
+
+type IngestUpsertRequest = WiredIngestUpsertRequest | UnwiredIngestUpsertRequest;
+
+const wiredIngestUpsertRequestSchema: z.Schema<WiredIngestUpsertRequest> = z.strictObject({
+  ingest: wiredIngestSchema,
+});
+
+const unwiredIngestUpsertRequestSchema: z.Schema<UnwiredIngestUpsertRequest> = z.strictObject({
+  ingest: unwiredIngestSchema,
+});
+
+const ingestUpsertRequestSchema: z.Schema<IngestUpsertRequest> = z.union([
+  wiredIngestUpsertRequestSchema,
+  unwiredIngestUpsertRequestSchema,
+]);
+
+/**
+ * Stream get response
+ */
+interface IngestStreamGetResponseBase extends StreamGetResponseBase {
+  lifecycle: IngestStreamLifecycle;
+}
+
+interface WiredStreamGetResponse extends IngestStreamGetResponseBase {
+  stream: Omit<WiredStreamDefinition, 'name'>;
+  inherited_fields: InheritedFieldDefinition;
+}
+
+interface UnwiredStreamGetResponse extends IngestStreamGetResponseBase {
+  stream: Omit<UnwiredStreamDefinition, 'name'>;
   elasticsearch_assets: ElasticsearchAsset[];
-  stream: Omit<TStreamDefinition, 'name'>;
 }
-
-interface IngestStreamUpsertRequestBase<TStreamDefinition extends IngestStreamDefinition> {
-  dashboards: string[];
-  stream: Omit<TStreamDefinition, 'name'>;
-}
-
-type WiredStreamGetResponse = IngestStreamGetResponseBase<WiredStreamDefinition>;
-
-type UnwiredStreamGetResponse = IngestStreamGetResponseBase<UnwiredStreamDefinition>;
 
 type IngestStreamGetResponse = WiredStreamGetResponse | UnwiredStreamGetResponse;
 
-type WiredStreamUpsertRequest = IngestStreamUpsertRequestBase<WiredStreamDefinition>;
-type UnwiredStreamUpsertRequest = IngestStreamUpsertRequestBase<UnwiredStreamDefinition>;
+/**
+ * Ingest stream upsert request
+ */
 
-const wiredStreamUpsertRequestSchema: z.Schema<WiredStreamUpsertRequest> = z.strictObject({
-  stream: wiredStreamDefinitionSchemaBase,
-  dashboards: z.array(z.string()),
-});
+interface UnwiredStreamUpsertRequest extends StreamUpsertRequestBase {
+  stream: UnwiredIngestUpsertRequest;
+}
 
-const unwiredStreamUpsertRequestSchema: z.Schema<UnwiredStreamUpsertRequest> = z.strictObject({
-  stream: unwiredStreamDefinitionSchemaBase,
-  dashboards: z.array(z.string()),
-});
+interface WiredStreamUpsertRequest extends StreamUpsertRequestBase {
+  stream: WiredIngestUpsertRequest;
+}
+
+type IngestStreamUpsertRequest = WiredStreamUpsertRequest | UnwiredStreamUpsertRequest;
+
+const unwiredStreamUpsertRequestSchema: z.Schema<UnwiredStreamUpsertRequest> = z.intersection(
+  streamUpsertRequestSchemaBase,
+  z.strictObject({
+    stream: unwiredStreamDefinitionSchemaBase,
+  })
+);
+
+const wiredStreamUpsertRequestSchema: z.Schema<WiredStreamUpsertRequest> = z.intersection(
+  streamUpsertRequestSchemaBase,
+  z.strictObject({
+    stream: wiredStreamDefinitionSchemaBase,
+  })
+);
 
 const ingestStreamUpsertRequestSchema: z.Schema<IngestStreamUpsertRequest> = z.union([
   wiredStreamUpsertRequestSchema,
   unwiredStreamUpsertRequestSchema,
 ]);
 
-type IngestStreamUpsertRequest = WiredStreamUpsertRequest | UnwiredStreamUpsertRequest;
+const ingestStreamGetResponseSchemaBase: z.Schema<IngestStreamGetResponseBase> = z.intersection(
+  streamGetResponseSchemaBase,
+  z.strictObject({
+    lifecycle: ingestStreamLifecycleSchema,
+  })
+);
+
+const wiredStreamGetResponseSchema: z.Schema<WiredStreamGetResponse> = z.intersection(
+  ingestStreamGetResponseSchemaBase,
+  z.strictObject({
+    stream: wiredStreamDefinitionSchemaBase,
+    inherited_fields: inheritedFieldDefinitionSchema,
+  })
+);
+
+const unwiredStreamGetResponseSchema: z.Schema<UnwiredStreamGetResponse> = z.intersection(
+  ingestStreamGetResponseSchemaBase,
+  z.strictObject({
+    stream: unwiredStreamDefinitionSchemaBase,
+    elasticsearch_assets: z.array(elasticsearchAssetSchema),
+  })
+);
+
+const ingestStreamGetResponseSchema: z.Schema<IngestStreamGetResponse> = z.union([
+  wiredStreamGetResponseSchema,
+  unwiredStreamGetResponseSchema,
+]);
+
+const isWiredStreamGetResponse = createIsNarrowSchema(
+  ingestStreamGetResponseSchema,
+  wiredStreamGetResponseSchema
+);
+
+const isUnWiredStreamGetResponse = createIsNarrowSchema(
+  ingestStreamGetResponseSchema,
+  wiredStreamGetResponseSchema
+);
 
 export {
+  ingestStreamUpsertRequestSchema,
+  ingestUpsertRequestSchema,
+  isWiredStreamGetResponse,
+  isUnWiredStreamGetResponse,
+  type IngestGetResponse,
   type IngestStreamGetResponse,
   type IngestStreamUpsertRequest,
-  ingestStreamUpsertRequestSchema,
-  type WiredStreamGetResponse,
-  type WiredStreamUpsertRequest,
-  wiredStreamUpsertRequestSchema,
+  type IngestUpsertRequest,
   type UnwiredStreamGetResponse,
-  type UnwiredStreamUpsertRequest,
-  unwiredStreamUpsertRequestSchema,
+  type WiredStreamGetResponse,
+  type UnwiredIngestUpsertRequest,
+  type WiredIngestUpsertRequest,
 };

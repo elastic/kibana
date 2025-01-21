@@ -84,7 +84,7 @@ export function ConditionForm(props: {
         >
           <EuiButton
             size={'xs' as 's'} // TODO: remove this cast when EUI is updated - EuiButton takes xs, but the type is wrong
-            onClick={() => props.onConditionChange(undefined)}
+            onClick={() => props.onConditionChange({ never: {} })}
             disabled={props.condition === undefined}
           >
             {i18n.translate('xpack.streams.conditionEditor.disable', {

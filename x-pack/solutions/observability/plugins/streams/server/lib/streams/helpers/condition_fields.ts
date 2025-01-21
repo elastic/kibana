@@ -66,12 +66,3 @@ function getFieldTypeForFilterCondition(condition: FilterCondition): 'number' | 
       return 'string';
   }
 }
-
-export function validateCondition(condition: Condition) {
-  if (isFilterCondition(condition)) {
-    // check whether a field is specified
-    if (!condition.field.trim()) {
-      throw new Error('Field is required in conditions');
-    }
-  }
-}

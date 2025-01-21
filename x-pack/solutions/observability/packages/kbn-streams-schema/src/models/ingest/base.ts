@@ -7,52 +7,74 @@
 
 import { z } from '@kbn/zod';
 import { StreamDefinitionBase } from '../base';
-import { FieldDefinitionConfig, fieldDefinitionSchema } from './fields';
+import { FieldDefinition, fieldDefinitionSchema } from './fields';
 import { ProcessorDefinition, processorDefinitionSchema } from './processors';
-import { RoutingDefiniition, routingDefinitionSchema } from './routing';
+import { RoutingDefinition, routingDefinitionSchema } from './routing';
+import { createIsNarrowSchema } from '../../helpers';
+import { nonEmptyStringSchema } from './common';
+import { streamDefinitionSchema } from '..';
 
-interface IngestStreamDefinitionBase extends StreamDefinitionBase {
-  ingest: {
-    processors: ProcessorDefinition[];
-    routing: RoutingDefiniition[];
+interface IngestBase {
+  processing: ProcessorDefinition[];
+  routing: RoutingDefinition[];
+}
+
+interface WiredIngest extends IngestBase {
+  wired: {
+    fields: FieldDefinition;
   };
 }
 
-interface WiredStreamDefinition extends IngestStreamDefinitionBase {
-  ingest: IngestStreamDefinitionBase['ingest'] & {
-    wired: {
-      fields: FieldDefinitionConfig;
-    };
-  };
+interface UnwiredIngest extends IngestBase {
+  unwired: {};
 }
 
-interface UnwiredStreamDefinition extends IngestStreamDefinitionBase {
-  ingest: IngestStreamDefinitionBase['ingest'] & {
-    unwired: {};
-  };
+interface WiredStreamDefinitionBase {
+  ingest: WiredIngest;
+}
+
+interface UnwiredStreamDefinitionBase {
+  ingest: UnwiredIngest;
+}
+
+interface WiredStreamDefinition extends StreamDefinitionBase {
+  ingest: WiredIngest;
+}
+
+interface UnwiredStreamDefinition extends StreamDefinitionBase {
+  ingest: UnwiredIngest;
 }
 
 type IngestStreamDefinition = WiredStreamDefinition | UnwiredStreamDefinition;
 
-const unwiredStreamDefinitionSchemaBase: z.Schema<Omit<UnwiredStreamDefinition, 'name'>> =
-  z.strictObject({
-    ingest: z.strictObject({
-      processors: z.array(processorDefinitionSchema),
-      routing: z.array(routingDefinitionSchema),
-      unwired: z.strictObject({}),
-    }),
-  });
+const ingestBaseSchema: z.Schema<IngestBase> = z.strictObject({
+  processing: z.array(processorDefinitionSchema),
+  routing: z.array(routingDefinitionSchema),
+});
 
-const wiredStreamDefinitionSchemaBase: z.Schema<Omit<WiredStreamDefinition, 'name'>> =
+const unwiredIngestSchema: z.Schema<UnwiredIngest> = z.intersection(
+  ingestBaseSchema,
   z.strictObject({
-    ingest: z.object({
-      processors: z.array(processorDefinitionSchema),
-      routing: z.array(routingDefinitionSchema),
-      wired: z.strictObject({
-        fields: z.record(fieldDefinitionSchema),
-      }),
+    unwired: z.strictObject({}),
+  })
+);
+
+const wiredIngestSchema: z.Schema<WiredIngest> = z.intersection(
+  ingestBaseSchema,
+  z.strictObject({
+    wired: z.strictObject({
+      fields: fieldDefinitionSchema,
     }),
-  });
+  })
+);
+
+const unwiredStreamDefinitionSchemaBase: z.Schema<UnwiredStreamDefinitionBase> = z.strictObject({
+  ingest: unwiredIngestSchema,
+});
+
+const wiredStreamDefinitionSchemaBase: z.Schema<WiredStreamDefinitionBase> = z.strictObject({
+  ingest: wiredIngestSchema,
+});
 
 const wiredStreamDefinitionSchema: z.Schema<WiredStreamDefinition> = z.intersection(
   z.strictObject({
@@ -63,7 +85,7 @@ const wiredStreamDefinitionSchema: z.Schema<WiredStreamDefinition> = z.intersect
 
 const unwiredStreamDefinitionSchema: z.Schema<UnwiredStreamDefinition> = z.intersection(
   z.strictObject({
-    name: z.string(),
+    name: nonEmptyStringSchema,
   }),
   unwiredStreamDefinitionSchemaBase
 );
@@ -72,6 +94,33 @@ const ingestStreamDefinitionSchema: z.Schema<IngestStreamDefinition> = z.union([
   wiredStreamDefinitionSchema,
   unwiredStreamDefinitionSchema,
 ]);
+
+const ingestStreamDefinitionSchemaBase: z.Schema<Omit<IngestStreamDefinition, 'name'>> = z.union([
+  wiredStreamDefinitionSchemaBase,
+  unwiredStreamDefinitionSchemaBase,
+]);
+
+const isIngestStreamDefinition = createIsNarrowSchema(
+  streamDefinitionSchema,
+  ingestStreamDefinitionSchema
+);
+
+const isWiredStreamDefinition = createIsNarrowSchema(
+  streamDefinitionSchema,
+  wiredStreamDefinitionSchema
+);
+
+const isUnwiredStreamDefinition = createIsNarrowSchema(
+  streamDefinitionSchema,
+  unwiredStreamDefinitionSchema
+);
+
+const isRootStreamDefinition = createIsNarrowSchema(
+  streamDefinitionSchema,
+  wiredStreamDefinitionSchema.refine((stream) => {
+    return stream.name.split('.').length === 1;
+  })
+);
 
 export {
   type WiredStreamDefinition,
@@ -82,4 +131,13 @@ export {
   unwiredStreamDefinitionSchemaBase,
   type IngestStreamDefinition,
   ingestStreamDefinitionSchema,
+  ingestStreamDefinitionSchemaBase,
+  isIngestStreamDefinition,
+  isWiredStreamDefinition,
+  isUnwiredStreamDefinition,
+  isRootStreamDefinition,
+  type WiredIngest,
+  wiredIngestSchema,
+  type UnwiredIngest,
+  unwiredIngestSchema,
 };

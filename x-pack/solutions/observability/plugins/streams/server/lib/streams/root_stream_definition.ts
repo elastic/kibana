@@ -9,24 +9,22 @@ import { WiredStreamDefinition } from '@kbn/streams-schema';
 
 export const rootStreamDefinition: WiredStreamDefinition = {
   name: 'logs',
-  stream: {
-    ingest: {
-      processing: [],
-      routing: [],
-      wired: {
-        fields: {
-          '@timestamp': {
-            type: 'date',
-          },
-          message: {
-            type: 'match_only_text',
-          },
-          'host.name': {
-            type: 'keyword',
-          },
-          'log.level': {
-            type: 'keyword',
-          },
+  ingest: {
+    processing: [],
+    routing: [],
+    wired: {
+      fields: {
+        '@timestamp': {
+          type: 'date',
+        },
+        message: {
+          type: 'match_only_text',
+        },
+        'host.name': {
+          type: 'keyword',
+        },
+        'log.level': {
+          type: 'keyword',
         },
       },
     },

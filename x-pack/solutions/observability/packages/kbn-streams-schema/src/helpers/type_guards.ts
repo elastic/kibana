@@ -7,15 +7,32 @@
 
 import { ZodSchema, output, z } from '@kbn/zod';
 
-export function createIsSchema<TSchema extends z.Schema>(schema: TSchema) {
-  return (value: unknown): value is z.input<TSchema> => {
-    return isSchema(schema, value);
+export function createIsNarrowSchema<TBaseSchema extends z.Schema, TNarrowSchema extends z.Schema>(
+  base: TBaseSchema,
+  narrow: TNarrowSchema
+) {
+  return <TValue extends z.input<TBaseSchema>>(
+    value: TValue
+  ): value is Extract<TValue, z.input<TNarrowSchema>> => {
+    return isSchema(narrow, value);
   };
 }
 
 export function createAssertsSchema<TSchema extends z.Schema>(schema: TSchema) {
   return (value: unknown): asserts value is z.input<TSchema> => {
     return assertsSchema(schema, value);
+  };
+}
+
+export function createIsOrThrowSchema<TBaseSchema extends z.Schema, TNarrowSchema extends z.Schema>(
+  base: TBaseSchema,
+  narrow: TNarrowSchema
+) {
+  return <TValue extends z.input<TBaseSchema>>(
+    value: TValue
+  ): Extract<TValue, z.input<TNarrowSchema>> => {
+    narrow.parse(value);
+    return value;
   };
 }
 

@@ -9,7 +9,11 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { css } from '@emotion/css';
 import { ILM_LOCATOR_ID, IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
-import { ReadStreamDefinition, StreamLifecycle, isIngestStream } from '@kbn/streams-schema';
+import {
+  IngestStreamLifecycle,
+  ReadStreamDefinition,
+  isUnwiredStreamDefinition,
+} from '@kbn/streams-schema';
 import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { EntityOverviewTabList } from '../entity_overview_tab_list';
@@ -103,7 +107,7 @@ export function EntityDetailViewWithoutParams({
               title={
                 <EuiFlexGroup gutterSize="s" alignItems="center">
                   {entity.displayName}
-                  {definition && isIngestStream(definition) ? (
+                  {definition && isUnwiredStreamDefinition(definition.stream) ? (
                     <>
                       {' '}
                       <EuiBadge>
@@ -137,7 +141,7 @@ export function EntityDetailViewWithoutParams({
   );
 }
 
-function LifecycleBadge({ lifecycle }: { lifecycle: StreamLifecycle }) {
+function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamLifecycle }) {
   const {
     dependencies: {
       start: { share },

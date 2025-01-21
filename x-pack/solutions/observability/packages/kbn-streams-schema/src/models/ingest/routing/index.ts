@@ -7,13 +7,14 @@
 
 import { z } from '@kbn/zod';
 import { Condition, conditionSchema } from '../conditions';
+import { nonEmptyStringSchema } from '../common';
 
-export interface RoutingDefiniition {
-  to: string;
+export interface RoutingDefinition {
+  destination: string;
   if: Condition;
 }
 
-export const routingDefinitionSchema: z.Schema<RoutingDefiniition> = z.object({
-  to: z.string(),
+export const routingDefinitionSchema: z.Schema<RoutingDefinition> = z.object({
+  destination: nonEmptyStringSchema,
   if: conditionSchema,
 });
