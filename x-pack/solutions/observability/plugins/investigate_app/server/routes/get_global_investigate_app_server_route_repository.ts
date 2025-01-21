@@ -8,6 +8,7 @@
 import {
   GetEntitiesResponse,
   GetEventsResponse,
+  attacheFileParamsSchema,
   createInvestigationItemParamsSchema,
   createInvestigationNoteParamsSchema,
   createInvestigationParamsSchema,
@@ -27,6 +28,7 @@ import {
   updateInvestigationParamsSchema,
 } from '@kbn/investigation-shared';
 import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
+
 import { createEntitiesESClient } from '../clients/create_entities_es_client';
 import { createInvestigation } from '../services/create_investigation';
 import { createInvestigationItem } from '../services/create_investigation_item';
@@ -387,6 +389,18 @@ const getEntitiesRoute = createInvestigateAppServerRoute({
   },
 });
 
+const postAttacheFileRoute = createInvestigateAppServerRoute({
+  endpoint: 'POST /api/observability/investigation/files 2023-10-31',
+  options: {
+    tags: [],
+  },
+  params: attacheFileParamsSchema,
+  handler: async ({ params, context, request }): Promise<{ ok: boolean }> => {
+    const core = await context.core;
+    return { ok: true };
+  },
+});
+
 export function getGlobalInvestigateAppServerRouteRepository() {
   return {
     ...createInvestigationRoute,
@@ -407,6 +421,7 @@ export function getGlobalInvestigateAppServerRouteRepository() {
     ...getAllInvestigationStatsRoute,
     ...getAllInvestigationTagsRoute,
     ...rootCauseAnalysisRoute,
+    ...postAttacheFileRoute,
   };
 }
 
