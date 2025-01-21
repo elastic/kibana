@@ -31,7 +31,7 @@ describe('getTimelineRowTypeIndicator', () => {
       const rowIndicator = getTimelineRowTypeIndicator(row, mockEuiTheme);
       expect(rowIndicator).toEqual({
         color: 'accent',
-        label: 'EQL Non Sequence',
+        label: 'EQL Sequence',
       });
     });
     it('should return correct label and color for non-EQL Event', () => {
@@ -59,7 +59,7 @@ describe('getTimelineRowTypeIndicator', () => {
       const rowIndicator = getTimelineRowTypeIndicator(row, mockEuiTheme);
       expect(rowIndicator).toEqual({
         color: 'accent',
-        label: 'EQL Non Sequence',
+        label: 'EQL Sequence',
       });
     });
     it('should return correct label and color for non-EQL Event', () => {
@@ -98,7 +98,7 @@ describe('getTimelineRowTypeIndicator', () => {
       const rowIndicator = getTimelineRowTypeIndicator(row, mockEuiTheme);
       expect(rowIndicator).toEqual({
         color: 'accent',
-        label: 'EQL Non Sequence',
+        label: 'EQL Sequence',
       });
     });
   });
