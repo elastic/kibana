@@ -457,19 +457,21 @@ describe('reindexService', () => {
       // The more intricate details of how the settings are chosen are test separately.
       it('creates new index with settings and mappings and updates lastCompletedStep', async () => {
         actions.getFlatSettings.mockResolvedValueOnce(settingsMappings);
-        clusterClient.asCurrentUser.indices.create.mockResponse(
-          // @ts-expect-error not full interface
-          { acknowledged: true }
-        );
+        clusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({ acknowledged: true });
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.newIndexCreated);
-        expect(clusterClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
-          index: 'myIndex-reindex-0',
-          // index.blocks.write should be removed from the settings for the new index.
-          // index.number_of_replicas and index.refresh_interval are stored to be set at a later stage.
-          // Setting to 0 and -1, respectively, right now.
-          settings: { 'index.number_of_replicas': 0, 'index.refresh_interval': -1 },
-          mappings: settingsMappings.mappings,
+        expect(clusterClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+          method: 'POST',
+          path: `_create_from/myIndex/myIndex-reindex-0`,
+          body: {
+            settings_override: {
+              'index.blocks.read_only': null,
+              'index.blocks.read_only_allow_delete': null,
+              'index.blocks.write': null,
+              'index.number_of_replicas': 0,
+              'index.refresh_interval': -1,
+            },
+          },
         });
       });
 
