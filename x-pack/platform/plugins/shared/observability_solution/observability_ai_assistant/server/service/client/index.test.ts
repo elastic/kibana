@@ -19,7 +19,10 @@ import {
   MessageAddEvent,
   StreamingChatResponseEventType,
 } from '../../../common/conversation_complete';
-import { ChatCompletionEventType as InferenceChatCompletionEventType } from '@kbn/inference-common';
+import {
+  ChatCompletionEventType as InferenceChatCompletionEventType,
+  ChatCompleteResponse,
+} from '@kbn/inference-common';
 import { InferenceClient } from '@kbn/inference-plugin/server';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
@@ -88,7 +91,10 @@ function createLlmSimulator(subscriber: any) {
         tool_calls: msg.function_call ? [{ function: msg.function_call }] : [],
       });
     },
-    complete: async () => {
+    complete: async (chatCompleteResponse?: ChatCompleteResponse) => {
+      if (chatCompleteResponse) {
+        subscriber.next(chatCompleteResponse);
+      }
       subscriber.complete();
     },
     error: (error: Error) => {
@@ -245,10 +251,25 @@ describe('Observability AI Assistant client', () => {
             titleLlmPromiseResolve = (title: string) => {
               const titleLlmSimulator = createLlmSimulator(subscriber);
               titleLlmSimulator
-                .chunk({ content: title })
-                .then(() => titleLlmSimulator.next({ content: title }))
-                .then(() => titleLlmSimulator.tokenCount({ completion: 0, prompt: 0, total: 0 }))
-                .then(() => titleLlmSimulator.complete())
+                .complete({
+                  content: '',
+                  toolCalls: [
+                    {
+                      toolCallId: 'test_id',
+                      function: {
+                        name: 'title_conversation',
+                        arguments: {
+                          title,
+                        },
+                      },
+                    },
+                  ],
+                  tokens: {
+                    completion: 0,
+                    prompt: 0,
+                    total: 0,
+                  },
+                })
                 .catch((error) => titleLlmSimulator.error(error));
             };
             titleLlmPromiseReject = (error: Error) => {
@@ -291,7 +312,7 @@ describe('Observability AI Assistant client', () => {
         expect(inferenceClientMock.chatComplete.mock.calls[0]).toEqual([
           expect.objectContaining({
             connectorId: 'foo',
-            stream: true,
+            stream: false,
             functionCalling: 'native',
             toolChoice: expect.objectContaining({
               function: 'title_conversation',
