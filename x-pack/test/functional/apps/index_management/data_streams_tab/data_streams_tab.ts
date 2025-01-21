@@ -282,6 +282,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // Click update template
         await pageObjects.indexManagement.clickNextButton();
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
         // Verify index mode and close detail tab
         expect(await testSubjects.getVisibleText('indexModeValue')).to.be(indexModeName);
@@ -322,11 +323,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await changeIndexMode('index_mode_logsdb');
         // Navigate to the last step of the wizard
-        await testSubjects.click('nextButton');
-        await testSubjects.click('nextButton');
-        await testSubjects.click('nextButton');
-        await testSubjects.click('nextButton');
-        await testSubjects.click('nextButton');
+        await testSubjects.click('formWizardStep-5');
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
         await verifyModeHasBeenChanged(INDEX_MODE.LOGSDB);
       });
@@ -339,11 +337,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await changeIndexMode('index_mode_standard');
         // Navigate to the last step of the wizard
-        await testSubjects.click('nextButton');
-        await testSubjects.click('nextButton');
-        await testSubjects.click('nextButton');
-        await testSubjects.click('nextButton');
-        await testSubjects.click('nextButton');
+        await testSubjects.click('formWizardStep-5');
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
         await verifyModeHasBeenChanged(INDEX_MODE.STANDARD);
       });
@@ -357,16 +352,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await changeIndexMode('index_mode_logsdb');
 
-        await testSubjects.click('nextButton');
-        await testSubjects.click('nextButton');
+        await testSubjects.click('formWizardStep-2');
+        await pageObjects.header.waitUntilLoadingHasFinished();
         // Modify Index settings
         await testSubjects.setValue('kibanaCodeEditor', '{}', {
           clearWithKeyboard: true,
         });
         // Navigate to the last step of the wizard
-        await testSubjects.click('nextButton');
-        await testSubjects.click('nextButton');
-        await testSubjects.click('nextButton');
+        await testSubjects.click('formWizardStep-5');
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
         await verifyModeHasBeenChanged(INDEX_MODE.LOGSDB);
       });
@@ -379,8 +373,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await changeIndexMode('index_mode_time_series');
 
-        await testSubjects.click('nextButton');
-        await testSubjects.click('nextButton');
+        await testSubjects.click('formWizardStep-2');
+        await pageObjects.header.waitUntilLoadingHasFinished();
         // Modify Index settings
         await testSubjects.setValue(
           'kibanaCodeEditor',
@@ -390,9 +384,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           }
         );
         // Navigate to the last step of the wizard
-        await testSubjects.click('nextButton');
-        await testSubjects.click('nextButton');
-        await testSubjects.click('nextButton');
+        await testSubjects.click('formWizardStep-5');
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
         await verifyModeHasBeenChanged(INDEX_MODE.TIME_SERIES);
       });

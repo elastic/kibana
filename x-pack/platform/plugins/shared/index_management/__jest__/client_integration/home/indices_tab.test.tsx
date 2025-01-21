@@ -8,22 +8,9 @@
 /*
  * Mocking EuiSearchBar because its onChange is not firing during tests
  */
-import { EuiSearchBoxProps } from '@elastic/eui/src/components/search_bar/search_box';
-
-import { applicationServiceMock } from '@kbn/core/public/mocks';
-jest.mock('@elastic/eui/lib/components/search_bar/search_box', () => {
-  return {
-    EuiSearchBox: (props: EuiSearchBoxProps) => (
-      <input
-        data-test-subj={props['data-test-subj'] || 'mockSearchBox'}
-        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-          props.onSearch(event.target.value);
-        }}
-      />
-    ),
-  };
-});
 import React from 'react';
+import { EuiSearchBoxProps } from '@elastic/eui/src/components/search_bar/search_box';
+import { applicationServiceMock } from '@kbn/core/public/mocks';
 import { act } from 'react-dom/test-utils';
 
 import { API_BASE_PATH, Index, INTERNAL_API_BASE_PATH } from '../../../common';
@@ -40,6 +27,20 @@ import {
   breadcrumbService,
   IndexManagementBreadcrumb,
 } from '../../../public/application/services/breadcrumbs';
+
+jest.mock('@elastic/eui/lib/components/search_bar/search_box', () => {
+  return {
+    EuiSearchBox: (props: EuiSearchBoxProps) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockSearchBox'}
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+          props.onSearch(event.target.value);
+        }}
+      />
+    ),
+  };
+});
+jest.mock('react-use/lib/useObservable', () => () => jest.fn());
 
 describe('<IndexManagementHome />', () => {
   let testBed: IndicesTestBed;
@@ -334,38 +335,6 @@ describe('<IndexManagementHome />', () => {
         `${API_BASE_PATH}/indices/reload`,
         expect.anything()
       );
-    });
-
-    test('should be able to unfreeze a frozen index', async () => {
-      const { actions, exists, find } = testBed;
-
-      httpRequestsMockHelpers.setReloadIndicesResponse([{ ...indexMockA, isFrozen: false }]);
-
-      // Open context menu
-      await actions.clickManageContextMenuButton();
-      // Check that the unfreeze action exists for the current index and unfreeze it
-      expect(exists('unfreezeIndexMenuButton')).toBe(true);
-      await actions.clickContextMenuOption('unfreezeIndexMenuButton');
-
-      // After the index is unfrozen, we imediately do a reload. So we need to expect to see
-      // a reload server call also.
-      expect(httpSetup.post).toHaveBeenCalledWith(
-        `${API_BASE_PATH}/indices/unfreeze`,
-        expect.anything()
-      );
-      expect(httpSetup.post).toHaveBeenCalledWith(
-        `${API_BASE_PATH}/indices/reload`,
-        expect.anything()
-      );
-
-      find('indexTableRowCheckbox')
-        .at(0)
-        .simulate('change', { target: { checked: true } });
-
-      // Open context menu once again, since clicking an action will close it.
-      await actions.clickManageContextMenuButton();
-      // The unfreeze action should not be present anymore
-      expect(exists('unfreezeIndexMenuButton')).toBe(false);
     });
 
     test('should be able to force merge an index', async () => {

@@ -12,39 +12,34 @@ import { EmbeddablePublicPlugin } from './plugin';
 
 export { useAddFromLibraryTypes } from './add_from_library/registry';
 export { openAddFromLibraryFlyout } from './add_from_library/open_add_from_library_flyout';
+export { PanelNotFoundError, PanelIncompatibleError } from './react_embeddable_system';
+export { EmbeddableStateTransfer } from './state_transfer';
 export {
   cellValueTrigger,
   CELL_VALUE_TRIGGER,
   contextMenuTrigger,
   CONTEXT_MENU_TRIGGER,
-  EmbeddableStateTransfer,
   isMultiValueClickTriggerContext,
   isRangeSelectTriggerContext,
   isRowClickTriggerContext,
   isValueClickTriggerContext,
   MULTI_VALUE_CLICK_TRIGGER,
   panelBadgeTrigger,
-  panelHoverTrigger,
-  PanelNotFoundError,
-  PanelIncompatibleError,
   panelNotificationTrigger,
   PANEL_BADGE_TRIGGER,
-  PANEL_HOVER_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
-  ViewMode,
-} from './lib';
+} from './ui_actions/triggers';
+export { ViewMode } from '../common/types';
 export type {
   CellValueContext,
   ChartActionContext,
-  EmbeddableEditorState,
-  EmbeddablePackageState,
   MultiValueClickContext,
-  PropertySpec,
   RangeSelectContext,
   ValueClickContext,
-} from './lib';
+} from './ui_actions/triggers';
+export type { EmbeddableEditorState, EmbeddablePackageState } from './state_transfer';
 export type { EmbeddableSetup, EmbeddableStart } from './types';
 export type { EnhancementRegistryDefinition } from './enhancements/types';
 
@@ -58,4 +53,8 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);
 }
 
-export { COMMON_EMBEDDABLE_GROUPING } from './lib/embeddables/common/constants';
+export {
+  ADD_PANEL_ANNOTATION_GROUP,
+  ADD_PANEL_OTHER_GROUP,
+  ADD_PANEL_LEGACY_GROUP,
+} from './ui_actions/add_panel_groups';

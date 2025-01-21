@@ -4,17 +4,40 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiTab,
+  EuiTabs,
+  EuiText,
+} from '@elastic/eui';
 import { calculateAuto } from '@kbn/calculate-auto';
 import { i18n } from '@kbn/i18n';
-import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import moment from 'moment';
 import React, { useMemo } from 'react';
-import { ReadStreamDefinition } from '@kbn/streams-schema';
+import { css } from '@emotion/css';
+import { ReadStreamDefinition, isWiredReadStream, isWiredStream } from '@kbn/streams-schema';
+import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
+import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { ControlledEsqlChart } from '../esql_chart/controlled_esql_chart';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
+import { getIndexPatterns } from '../../util/hierarchy_helpers';
+import { StreamsList } from '../streams_list';
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
+import { DashboardsTable } from '../stream_detail_dashboards_view/dashboard_table';
+import { AssetImage } from '../asset_image';
+
+const formatNumber = (val: number) => {
+  return Number(val).toLocaleString('en', {
+    maximumFractionDigits: 1,
+  });
+};
 
 export function StreamDetailOverview({ definition }: { definition?: ReadStreamDefinition }) {
   const {
@@ -35,18 +58,8 @@ export function StreamDetailOverview({ definition }: { definition?: ReadStreamDe
   } = useDateRange({ data });
 
   const indexPatterns = useMemo(() => {
-    if (!definition?.name) {
-      return undefined;
-    }
-
-    const isRoot = definition.name.indexOf('.') === -1;
-
-    const dataStreamOfDefinition = definition.name;
-
-    return isRoot
-      ? [dataStreamOfDefinition, `${dataStreamOfDefinition}.*`]
-      : [`${dataStreamOfDefinition}*`];
-  }, [definition?.name]);
+    return getIndexPatterns(definition);
+  }, [definition]);
 
   const discoverLocator = useMemo(
     () => share.url.locators.get('DISCOVER_APP_LOCATOR'),
@@ -111,16 +124,75 @@ export function StreamDetailOverview({ definition }: { definition?: ReadStreamDe
     [indexPatterns, dataViews, streamsRepositoryClient, queries?.histogramQuery, start, end]
   );
 
+  const docCountFetch = useStreamsAppFetch(
+    async ({ signal }) => {
+      if (!definition) {
+        return undefined;
+      }
+      return streamsRepositoryClient.fetch('GET /api/streams/{id}/_details', {
+        signal,
+        params: {
+          path: {
+            id: definition.name as string,
+          },
+          query: {
+            start: String(start),
+            end: String(end),
+          },
+        },
+      });
+    },
+    [definition, dataViews, streamsRepositoryClient, start, end]
+  );
+
+  const [selectedTab, setSelectedTab] = React.useState<string | undefined>(undefined);
+
+  const tabs = [
+    ...(definition && isWiredReadStream(definition)
+      ? [
+          {
+            id: 'streams',
+            name: i18n.translate('xpack.streams.entityDetailOverview.tabs.streams', {
+              defaultMessage: 'Streams',
+            }),
+            content: <ChildStreamList stream={definition} />,
+          },
+        ]
+      : []),
+    {
+      id: 'quicklinks',
+      name: i18n.translate('xpack.streams.entityDetailOverview.tabs.quicklinks', {
+        defaultMessage: 'Quick Links',
+      }),
+      content: <QuickLinks stream={definition} />,
+    },
+  ];
+
   return (
     <>
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="row" gutterSize="s">
+          <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+            <EuiFlexItem>
+              {docCountFetch.loading ? (
+                <EuiLoadingSpinner size="m" />
+              ) : (
+                docCountFetch.value && (
+                  <EuiText>
+                    {i18n.translate('xpack.streams.entityDetailOverview.docCount', {
+                      defaultMessage: '{docCount} documents',
+                      values: { docCount: formatNumber(docCountFetch.value.details.count) },
+                    })}
+                  </EuiText>
+                )
+              )}
+            </EuiFlexItem>
             <EuiFlexItem grow>
               <StreamsAppSearchBar
                 onQuerySubmit={({ dateRange }, isUpdate) => {
                   if (!isUpdate) {
                     histogramQueryFetch.refresh();
+                    docCountFetch.refresh();
                     return;
                   }
 
@@ -166,7 +238,119 @@ export function StreamDetailOverview({ definition }: { definition?: ReadStreamDe
             </EuiFlexGroup>
           </EuiPanel>
         </EuiFlexItem>
+        <EuiFlexItem grow>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {definition && (
+              <>
+                <EuiTabs>
+                  {tabs.map((tab, index) => (
+                    <EuiTab
+                      isSelected={(!selectedTab && index === 0) || selectedTab === tab.id}
+                      onClick={() => setSelectedTab(tab.id)}
+                      key={tab.id}
+                    >
+                      {tab.name}
+                    </EuiTab>
+                  ))}
+                </EuiTabs>
+                {
+                  tabs.find((tab, index) => (!selectedTab && index === 0) || selectedTab === tab.id)
+                    ?.content
+                }
+              </>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </>
   );
+}
+
+const EMPTY_DASHBOARD_LIST: SanitizedDashboardAsset[] = [];
+
+function QuickLinks({ stream }: { stream?: ReadStreamDefinition }) {
+  const dashboardsFetch = useDashboardsFetch(stream?.name);
+
+  return (
+    <DashboardsTable
+      dashboards={dashboardsFetch.value?.dashboards ?? EMPTY_DASHBOARD_LIST}
+      loading={dashboardsFetch.loading}
+    />
+  );
+}
+
+function ChildStreamList({ stream }: { stream?: ReadStreamDefinition }) {
+  const {
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
+  } = useKibana();
+  const router = useStreamsAppRouter();
+
+  const streamsListFetch = useStreamsAppFetch(
+    ({ signal }) => {
+      return streamsRepositoryClient.fetch('GET /api/streams', {
+        signal,
+      });
+    },
+    [streamsRepositoryClient]
+  );
+
+  const childDefinitions = useMemo(() => {
+    if (!stream) {
+      return [];
+    }
+    return streamsListFetch.value?.streams.filter(
+      (d) => isWiredStream(d) && d.name.startsWith(stream.name as string)
+    );
+  }, [stream, streamsListFetch.value?.streams]);
+
+  if (stream && childDefinitions?.length === 1) {
+    return (
+      <EuiFlexItem grow>
+        <EuiFlexGroup alignItems="center" justifyContent="center">
+          <EuiFlexItem
+            grow={false}
+            className={css`
+              max-width: 350px;
+            `}
+          >
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <AssetImage type="welcome" />
+              <EuiText size="m" textAlign="center">
+                {i18n.translate('xpack.streams.entityDetailOverview.noChildStreams', {
+                  defaultMessage: 'Create streams for your logs',
+                })}
+              </EuiText>
+              <EuiText size="xs" textAlign="center">
+                {i18n.translate('xpack.streams.entityDetailOverview.noChildStreams', {
+                  defaultMessage:
+                    'Create sub streams to split out data with different retention policies, schemas, and more.',
+                })}
+              </EuiText>
+              <EuiFlexGroup justifyContent="center">
+                <EuiButton
+                  iconType="plusInCircle"
+                  href={router.link('/{key}/management/{subtab}', {
+                    path: {
+                      key: stream?.name as string,
+                      subtab: 'route',
+                    },
+                  })}
+                >
+                  {i18n.translate('xpack.streams.entityDetailOverview.createChildStream', {
+                    defaultMessage: 'Create child stream',
+                  })}
+                </EuiButton>
+              </EuiFlexGroup>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    );
+  }
+
+  return <StreamsList definitions={childDefinitions} showControls={false} />;
 }

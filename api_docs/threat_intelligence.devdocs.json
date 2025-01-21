@@ -182,6 +182,19 @@
           },
           {
             "parentPluginId": "threatIntelligence",
+            "id": "def-public.SecuritySolutionPluginContext.hasAccessToTimeline",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasAccessToTimeline",
+            "description": [
+              "\nWhether the current user has access to timeline"
+            ],
+            "path": "x-pack/solutions/security/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "threatIntelligence",
             "id": "def-public.SecuritySolutionPluginContext.useQuery",
             "type": "Function",
             "tags": [],
