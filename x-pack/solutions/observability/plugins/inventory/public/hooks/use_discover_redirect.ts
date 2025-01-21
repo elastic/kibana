@@ -6,17 +6,17 @@
  */
 import { useCallback } from 'react';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common/app_locator';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import type { InventoryEntity } from '../../common/entities';
 import { useKibana } from './use_kibana';
 import { useUnifiedSearchContext } from './use_unified_search_context';
-
 export const useDiscoverRedirect = (entity: InventoryEntity) => {
   const {
     services: { share, application, entityManager },
   } = useKibana();
   const { discoverDataview } = useUnifiedSearchContext();
   const { dataView } = discoverDataview;
-  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR');
+  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
   const getDiscoverEntitiesRedirectUrl = useCallback(() => {
     const entityKqlFilter = entity
