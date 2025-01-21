@@ -96,6 +96,7 @@ export const JobDetailsFlyout = () => {
           <EuiText>
             {jobDetails ? (
               <JobDetails
+                mode="flyout"
                 jobId={jobId}
                 job={jobDetails}
                 addYourself={() => {}}
