@@ -25,7 +25,12 @@ export const DeleteManagedAssetsCallout = ({
   ...overrideCalloutProps
 }: DeleteManagedAssetsCalloutProps) => {
   return (
-    <EuiCallOut color="warning" iconType="warning" {...overrideCalloutProps}>
+    <EuiCallOut
+      color="warning"
+      iconType="warning"
+      data-test-subj="deleteManagedAssetsCallout"
+      {...overrideCalloutProps}
+    >
       <p>
         {overrideBody ??
           i18n.translate('management.deleteManagedAssetsCallout.body', {

@@ -80,6 +80,7 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
         defaultMessage: 'Delete',
       }),
       icon: <EuiIcon type="trash" />,
+      'data-test-subj': 'deletePipelineButton',
       onClick: () => {
         setShowPopover(false);
         onDeleteClick([pipeline]);

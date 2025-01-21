@@ -311,6 +311,7 @@ export const TemplateDetailsContent = ({
                             setTemplateToDelete([
                               { name: templateName, isLegacy, type: templateType },
                             ]),
+                          'data-test-subj': 'deleteIndexTemplateButton',
                           disabled: isCloudManaged,
                         },
                       ],

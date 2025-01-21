@@ -77,6 +77,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(url).not.to.contain(`pipeline=${pipelinesList[0]}`);
       });
 
+      it('shows warning callout when deleting a managed pipeline', async () => {
+        // Filter results by managed pipelines
+        await testSubjects.click('filtersDropdown');
+        await testSubjects.click('managedFilter');
+
+        // Open the flyout for the first pipeline
+        await pageObjects.ingestPipelines.clickPipelineLink(0);
+
+        // Open the manage context menu
+        await testSubjects.click('managePipelineButton');
+        // Click the delete button
+        await testSubjects.click('deletePipelineButton');
+
+        // Check if the callout is displayed
+        const calloutExists = await testSubjects.exists('deleteManagedAssetsCallout');
+        expect(calloutExists).to.be(true);
+      });
+
       it('sets query params for search and filters when changed', async () => {
         // Set the search input with a test search
         await testSubjects.setValue('pipelineTableSearch', 'test');
