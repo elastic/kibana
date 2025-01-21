@@ -104,7 +104,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityFiltersContainer: 'datasetQualityFiltersContainer',
     datasetQualityExpandButton: 'datasetQualityExpandButton',
     datasetQualityDetailsDegradedFieldsExpandButton:
-      'datasetQualityDetailsDegradedFieldsExpandButton',
+      'datasetQualityDetailsQualityIssuesExpandButton',
     datasetQualityDetailsDegradedFieldFlyout: 'datasetQualityDetailsDegradedFieldFlyout',
     datasetDetailsContainer: 'datasetDetailsContainer',
     datasetQualityDetailsTitle: 'datasetQualityDetailsTitle',
@@ -328,7 +328,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     async parseDegradedFieldTable() {
       await this.waitUntilTableLoaded();
       const table = await this.getDatasetQualityDetailsDegradedFieldTable();
-      return this.parseTable(table, ['0', 'Field', 'Docs count', 'Last Occurrence']);
+      return this.parseTable(table, ['0', 'Issue', 'Docs count', 'Last Occurrence']);
     },
 
     async filterForIntegrations(integrations: string[]) {
@@ -447,9 +447,11 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     async openDegradedFieldFlyout(fieldName: string) {
       await this.waitUntilTableLoaded();
       const cols = await this.parseDegradedFieldTable();
-      const fieldNameCol = cols.Field;
+      const fieldNameCol = cols.Issue;
       const fieldNameColCellTexts = await fieldNameCol.getCellTexts();
-      const testDatasetRowIndex = fieldNameColCellTexts.findIndex((dName) => dName === fieldName);
+      const testDatasetRowIndex = fieldNameColCellTexts.findIndex(
+        (dName) => dName === `${fieldName} field ignored`
+      );
 
       expect(testDatasetRowIndex).to.be.greaterThan(-1);
 

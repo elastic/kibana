@@ -172,6 +172,7 @@ export type DatasetQualityDetailsControllerTypeState =
     }
   | {
       value:
+        | 'initializing.dataStreamSettings.doneFetchingQualityIssues'
         | 'initializing.dataStreamSettings.qualityIssues.dataStreamDegradedFields.fetchingDataStreamDegradedFields'
         | 'initializing.dataStreamSettings.qualityIssues.dataStreamDegradedFields.errorFetchingDegradedFields'
         | 'initializing.dataStreamSettings.qualityIssues.dataStreamFailedDocs.fetchingFailedDocs'

@@ -187,7 +187,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                             src: 'loadDegradedFields',
                             onDone: {
                               target: 'doneFetchingDegradedFields',
-                              actions: ['storeDegradedFields', 'raiseDegradedFieldsLoaded'],
+                              actions: ['storeDegradedFields'],
                             },
                             onError: [
                               {
@@ -202,12 +202,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                         },
                         errorFetchingDegradedFields: {},
                         doneFetchingDegradedFields: {
-                          on: {
-                            TOGGLE_CURRENT_QUALITY_ISSUES: {
-                              target: 'fetchingDataStreamDegradedFields',
-                              actions: ['toggleCurrentQualityIssues'],
-                            },
-                          },
+                          type: 'final',
                         },
                       },
                     },
@@ -219,7 +214,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                             src: 'loadFailedDocsDetails',
                             onDone: {
                               target: 'doneFetchingFailedDocs',
-                              actions: ['storeFailedDocsDetails', 'raiseDegradedFieldsLoaded'],
+                              actions: ['storeFailedDocsDetails'],
                             },
                             onError: [
                               {
@@ -233,21 +228,33 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                           },
                         },
                         errorFetchingFailedDocs: {},
-                        doneFetchingFailedDocs: {},
+                        doneFetchingFailedDocs: {
+                          type: 'final',
+                        },
                       },
                     },
-                    done: {
-                      on: {
-                        UPDATE_QUALITY_ISSUES_TABLE_CRITERIA: {
-                          target: 'done',
-                          actions: ['storeQualityIssuesTableOptions'],
-                        },
-                        OPEN_QUALITY_ISSUE_FLYOUT: {
-                          target:
-                            '#DatasetQualityDetailsController.initializing.qualityIssueFlyout.open',
-                          actions: ['storeExpandedQualityIssue', 'resetFieldLimitServerResponse'],
-                        },
-                      },
+                  },
+                  onDone: {
+                    target:
+                      '#DatasetQualityDetailsController.initializing.dataStreamSettings.doneFetchingQualityIssues',
+                  },
+                },
+                doneFetchingQualityIssues: {
+                  entry: ['raiseDegradedFieldsLoaded'],
+                  on: {
+                    UPDATE_QUALITY_ISSUES_TABLE_CRITERIA: {
+                      target: 'doneFetchingQualityIssues',
+                      actions: ['storeQualityIssuesTableOptions'],
+                    },
+                    OPEN_QUALITY_ISSUE_FLYOUT: {
+                      target:
+                        '#DatasetQualityDetailsController.initializing.qualityIssueFlyout.open',
+                      actions: ['storeExpandedQualityIssue', 'resetFieldLimitServerResponse'],
+                    },
+                    TOGGLE_CURRENT_QUALITY_ISSUES: {
+                      target:
+                        '#DatasetQualityDetailsController.initializing.dataStreamSettings.qualityIssues.dataStreamDegradedFields.fetchingDataStreamDegradedFields',
+                      actions: ['toggleCurrentQualityIssues'],
                     },
                   },
                 },
@@ -709,18 +716,13 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
           );
         },
         shouldOpenFlyout: (context, _event, meta) => {
-          const hasFinalizedFetchingData = meta.state.matches(
-            'initializing.dataStreamSettings.qualityIssues.dataStreamDegradedFields.doneFetchingDataStreamDegradedFields' &&
-              'initializing.dataStreamSettings.qualityIssues.dataStreamFailedDocs.doneFetchingFailedDocs'
-          );
           return (
             Boolean(context.expandedQualityIssue) &&
-            (!hasFinalizedFetchingData ||
-              Boolean(
-                context.qualityIssues.data?.some(
-                  (field) => field.name === context.expandedQualityIssue?.name
-                )
-              ))
+            Boolean(
+              context.qualityIssues.data?.some(
+                (field) => field.name === context.expandedQualityIssue?.name
+              )
+            )
           );
         },
         isDegradedFieldFlyout: (context) => {

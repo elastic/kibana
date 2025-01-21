@@ -54,17 +54,12 @@ export const useDatasetQualityDetailsState = () => {
     state.matches(
       'initializing.dataStreamSettings.qualityIssues.dataStreamDegradedFields.fetchingDataStreamDegradedFields'
     ) ||
-    state.matches(
-      'initializing.dataStreamSettings.qualityIssues.dataStreamDegradedFields.doneFetchingDegradedFields'
-    ) ||
+    state.matches('initializing.dataStreamSettings.doneFetchingQualityIssues') ||
     state.matches(
       'initializing.dataStreamSettings.qualityIssues.dataStreamDegradedFields.errorFetchingDegradedFields'
     ) ||
     state.matches(
       'initializing.dataStreamSettings.qualityIssues.dataStreamFailedDocs.fetchingFailedDocs'
-    ) ||
-    state.matches(
-      'initializing.dataStreamSettings.qualityIssues.dataStreamFailedDocs.doneFetchingFailedDocs'
     ) ||
     state.matches(
       'initializing.dataStreamSettings.qualityIssues.dataStreamFailedDocs.errorFetchingFailedDocs'
