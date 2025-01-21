@@ -8,11 +8,12 @@
 import type { FC } from 'react';
 import React from 'react';
 import type { EuiStepStatus } from '@elastic/eui';
-import { EuiProgress, EuiSteps } from '@elastic/eui';
+import { EuiSpacer, EuiSteps } from '@elastic/eui';
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import type { AnalyzedFile } from './file_manager/file_wrapper';
 import { STATUS } from './file_manager/file_manager';
 import { type UploadStatus } from './file_manager/file_manager';
+import { FileStatus } from './file_status';
 
 interface Props {
   uploadStatus: UploadStatus;
@@ -40,9 +41,9 @@ export const OverallUploadStatus: FC<Props> = ({ filesStatus, uploadStatus }) =>
     }
   };
 
-  const overallProgress =
-    filesStatus.map((file) => file.importProgress).reduce((acc, progress) => acc + progress, 0) /
-    filesStatus.length;
+  const css = {
+    '.euiStep__content': { paddingBlockEnd: '0px' },
+  };
 
   const steps: EuiContainedStepProps[] = [
     ...(uploadStatus.modelDeployed === STATUS.NA
@@ -63,7 +64,16 @@ export const OverallUploadStatus: FC<Props> = ({ filesStatus, uploadStatus }) =>
       title: 'Uploading files',
       children: (
         <>
-          <EuiProgress value={overallProgress} max={100} size="s" />
+          {filesStatus.map((status, i) => (
+            <FileStatus
+              uploadStatus={uploadStatus}
+              fileStatus={status}
+              key={i}
+              deleteFile={() => {}}
+              index={i}
+            />
+          ))}
+          <EuiSpacer />
         </>
       ),
       status: generateStatus([uploadStatus.fileImport]),
@@ -73,11 +83,16 @@ export const OverallUploadStatus: FC<Props> = ({ filesStatus, uploadStatus }) =>
       children: <></>,
       status: generateStatus([uploadStatus.dataViewCreated]),
     },
+    {
+      title: 'Upload complete',
+      children: <></>,
+      status: uploadStatus.overallImportStatus === STATUS.COMPLETED ? 'complete' : 'incomplete',
+    },
   ];
 
   return (
     <>
-      <EuiSteps steps={steps} titleSize="xxs" />
+      <EuiSteps steps={steps} titleSize="xxs" css={css} />
     </>
   );
 };

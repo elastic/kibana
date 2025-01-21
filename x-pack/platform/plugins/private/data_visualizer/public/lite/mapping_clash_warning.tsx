@@ -30,7 +30,7 @@ export const MappingClashWarning: FC<Props> = ({ uploadStatus, filesStatus }) =>
             defaultMessage="Incompatible mappings"
           />
         }
-        color="warning"
+        color="danger"
       >
         <p>
           <FormattedMessage

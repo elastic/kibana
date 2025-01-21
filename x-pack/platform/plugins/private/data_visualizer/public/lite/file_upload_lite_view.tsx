@@ -11,12 +11,25 @@ import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiFilePicker, EuiSpacer, EuiFieldText, EuiFormRow } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFilePicker,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import type {
   EuiFilePickerClass,
   EuiFilePickerProps,
 } from '@elastic/eui/src/components/form/file_picker/file_picker';
 import useObservable from 'react-use/lib/useObservable';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ResultLinks } from '../../common/app';
 import type { GetAdditionalLinks } from '../application/common/components/results_links';
 import type { FileUploadResults } from './flyout/create_flyout';
@@ -25,6 +38,8 @@ import { STATUS } from './file_manager/file_manager';
 import { FileStatus } from './file_status';
 import { OverallUploadStatus } from './overall_upload_status';
 import { MappingClashWarning } from './mapping_clash_warning';
+import { IndexInput } from './index_input';
+// import { OverallUploadProgress } from './overall_upload_progress';
 
 interface Props {
   dataStart: DataPublicPluginStart;
@@ -35,6 +50,7 @@ interface Props {
   getAdditionalLinks?: GetAdditionalLinks;
   setUploadResults?: (results: FileUploadResults) => void;
   autoAddSemanticTextField?: boolean;
+  onClose?: () => void;
 }
 
 // enum MODE {
@@ -48,10 +64,12 @@ export const FileUploadLiteView: FC<Props> = ({
   dataStart,
   setUploadResults,
   autoAddSemanticTextField,
+  onClose,
 }) => {
   // const [mode, setMode] = useState<MODE>(MODE.ANALYZE);
   const [indexName, setIndexName] = useState<string>('');
-  const [showErrors] = useState<boolean>(false);
+  const [indexValidationStatus, setIndexValidationStatus] = useState<STATUS>(STATUS.NOT_STARTED);
+  // const [showErrors] = useState<boolean>(false);
   const filePickerRef = useRef<EuiFilePickerClass>(null);
   const fm = useMemo(
     () => new FileManager(fileUpload, http, dataStart.dataViews, autoAddSemanticTextField),
@@ -84,6 +102,10 @@ export const FileUploadLiteView: FC<Props> = ({
     };
   }, [fm]);
 
+  const uploadInProgress =
+    uploadStatus.overallImportStatus === STATUS.STARTED ||
+    uploadStatus.overallImportStatus === STATUS.COMPLETED;
+
   // const onNextClick = useCallback(() => {
   //   // eslint-disable-next-line no-console
   //   console.log('next');
@@ -109,83 +131,143 @@ export const FileUploadLiteView: FC<Props> = ({
 
   return (
     <>
-      <>
-        <EuiFilePicker
-          ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
-          id="filePicker"
-          fullWidth
-          display="large"
-          compressed
-          multiple
-          disabled={uploadStatus.overallImportStatus !== STATUS.NOT_STARTED}
-          initialPromptText={i18n.translate(
-            'xpack.dataVisualizer.file.aboutPanel.selectOrDragAndDropFileDescription',
-            {
-              defaultMessage: 'Select or drag and drop a file',
-            }
-          )}
-          onChange={(files) => onFilePickerChange(files)}
-        />
-
-        <EuiSpacer />
-
-        <>
-          {filesStatus.map((status, i) => (
-            <FileStatus
-              uploadStatus={uploadStatus}
-              fileStatus={status}
-              key={i}
-              deleteFile={() => deleteFile(i)}
-              index={i}
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="s">
+          <h3>
+            <FormattedMessage
+              id="xpack.ml.embeddables.newJobFromPatternAnalysisFlyout.title"
+              defaultMessage="Upload a file"
             />
-          ))}
+          </h3>
+        </EuiTitle>
+        {/* <EuiSpacer size="m" />
+    <EuiText size="s">
+      <FormattedMessage
+        id="xpack.ml.embeddables.newJobFromPatternAnalysisFlyout.secondTitle"
+        defaultMessage="Upload a file"
+      />
+    </EuiText> */}
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <>
+          <>
+            <EuiFilePicker
+              ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
+              id="filePicker"
+              fullWidth
+              display="large"
+              compressed
+              multiple
+              disabled={uploadStatus.overallImportStatus !== STATUS.NOT_STARTED}
+              initialPromptText={i18n.translate(
+                'xpack.dataVisualizer.file.aboutPanel.selectOrDragAndDropFileDescription',
+                {
+                  defaultMessage: 'Select or drag and drop a file',
+                }
+              )}
+              onChange={(files) => onFilePickerChange(files)}
+            />
+            <EuiSpacer />
+
+            {uploadStatus.overallImportStatus === STATUS.NOT_STARTED ? (
+              <>
+                {filesStatus.map((status, i) => (
+                  <FileStatus
+                    uploadStatus={uploadStatus}
+                    fileStatus={status}
+                    key={i}
+                    deleteFile={() => deleteFile(i)}
+                    index={i}
+                  />
+                ))}
+
+                {fileClashes ? (
+                  <MappingClashWarning uploadStatus={uploadStatus} filesStatus={filesStatus} />
+                ) : null}
+              </>
+            ) : null}
+
+            <EuiSpacer />
+
+            {uploadStatus.overallImportStatus === STATUS.NOT_STARTED &&
+            filesStatus.length > 0 &&
+            filesOk ? (
+              <>
+                <IndexInput
+                  setIndexName={setIndexName}
+                  setIndexValidationStatus={setIndexValidationStatus}
+                  fileUpload={fileUpload}
+                />
+                {/* <EuiSpacer />
+
+                <EuiSpacer />
+                <EuiButton
+                  disabled={
+                    indexName === '' || indexValidationStatus !== STATUS.COMPLETED
+                    // uploadStatus.overallImportStatus === STATUS.STARTED ||
+                    // uploadStatus.overallImportStatus === STATUS.COMPLETED
+                  }
+                  onClick={onImportClick}
+                >
+                  Import
+                </EuiButton> */}
+              </>
+            ) : null}
+            {uploadInProgress ? (
+              <>
+                {/* <EuiSpacer size="s" /> */}
+                {/* {uploadStatus.fileImport === STATUS.STARTED ? (
+              <OverallUploadProgress filesStatus={filesStatus} />
+            ) : (
+              <EuiSpacer size="s" />
+            )} */}
+
+                <EuiSpacer size="s" />
+
+                <OverallUploadStatus uploadStatus={uploadStatus} filesStatus={filesStatus} />
+              </>
+            ) : null}
+          </>
         </>
-
-        {fileClashes ? (
-          <MappingClashWarning uploadStatus={uploadStatus} filesStatus={filesStatus} />
-        ) : null}
-
-        <EuiSpacer />
-
-        {uploadStatus.overallImportStatus === STATUS.NOT_STARTED &&
-        filesStatus.length > 0 &&
-        filesOk ? (
-          <>
-            <EuiFormRow label="Index name" isInvalid={showErrors}>
-              <EuiFieldText
-                value={indexName}
-                // disabled={
-                //   uploadStatus.overallImportStatus === STATUS.STARTED ||
-                //   uploadStatus.overallImportStatus === STATUS.COMPLETED
-                // }
-                onChange={(e) => setIndexName(e.target.value)}
-                placeholder="Index name"
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+              <FormattedMessage
+                id="xpack.ml.embeddables.newJobFromPatternAnalysisFlyout.closeButton"
+                defaultMessage="Close"
               />
-            </EuiFormRow>
-
-            <EuiSpacer />
-
-            <EuiSpacer />
-            <EuiButton
-              disabled={
-                indexName === ''
-                // uploadStatus.overallImportStatus === STATUS.STARTED ||
-                // uploadStatus.overallImportStatus === STATUS.COMPLETED
-              }
-              onClick={onImportClick}
-            >
-              Import
-            </EuiButton>
-          </>
-        ) : null}
-
-        {uploadStatus.overallImportStatus === STATUS.STARTED ||
-        uploadStatus.overallImportStatus === STATUS.COMPLETED ? (
-          <>
-            <OverallUploadStatus uploadStatus={uploadStatus} filesStatus={filesStatus} />
-          </>
-        ) : null}
-      </>
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={true} />
+          <EuiFlexItem grow={false}>
+            {uploadStatus.overallImportStatus === STATUS.STARTED ? (
+              <EuiFlexGroup gutterSize="none" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="m" />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButtonEmpty onClick={onClose} disabled={true}>
+                    <FormattedMessage
+                      id="xpack.ml.embeddables.newJobFromPatternAnalysisFlyout.closeButton"
+                      defaultMessage="Importing"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : null}
+            {uploadStatus.overallImportStatus === STATUS.NOT_STARTED ? (
+              <EuiButton
+                disabled={indexName === '' || indexValidationStatus !== STATUS.COMPLETED}
+                onClick={onImportClick}
+              >
+                Import
+              </EuiButton>
+            ) : null}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
     </>
   );
 };

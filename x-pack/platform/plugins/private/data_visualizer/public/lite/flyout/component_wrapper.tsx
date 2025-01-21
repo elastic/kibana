@@ -17,13 +17,15 @@ export const FileDataVisualizerLiteWrapper: FC<{
   resultLinks?: ResultLinks;
   setUploadResults?: (results: FileUploadResults) => void;
   autoAddSemanticTextField?: boolean;
-}> = ({ resultLinks, setUploadResults, autoAddSemanticTextField }) => {
+  onClose?: () => void;
+}> = ({ resultLinks, setUploadResults, autoAddSemanticTextField, onClose }) => {
   return (
     <React.Suspense fallback={<div />}>
       <FileDataVisualizerLiteComponent
         resultLinks={resultLinks}
         setUploadResults={setUploadResults}
         autoAddSemanticTextField={autoAddSemanticTextField}
+        onClose={onClose}
       />
     </React.Suspense>
   );
@@ -33,13 +35,15 @@ export const FileDataVisualizerLiteWrapper: FC<{
 export function getFileDataVisualizerLiteWrapper(
   resultLinks?: ResultLinks,
   setUploadResults?: (results: FileUploadResults) => void,
-  autoAddSemanticTextField?: boolean
+  autoAddSemanticTextField?: boolean,
+  onClose?: () => void
 ) {
   return (
     <FileDataVisualizerLiteWrapper
       resultLinks={resultLinks}
       setUploadResults={setUploadResults}
       autoAddSemanticTextField={autoAddSemanticTextField}
+      onClose={onClose}
     />
   );
 }

@@ -52,7 +52,10 @@ export const FileStatus: FC<Props> = ({ fileStatus, uploadStatus, deleteFile, in
             {uploadStatus.overallImportStatus === STATUS.STARTED ||
             uploadStatus.overallImportStatus === STATUS.COMPLETED ? (
               <EuiFlexItem grow={true}>
-                <EuiProgress value={fileStatus.importProgress} max={100} size="s" />
+                {fileStatus.importStatus === STATUS.STARTED ||
+                fileStatus.importStatus === STATUS.COMPLETED ? (
+                  <EuiProgress value={fileStatus.importProgress} max={100} size="s" />
+                ) : null}
               </EuiFlexItem>
             ) : (
               <>

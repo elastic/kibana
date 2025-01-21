@@ -7,18 +7,6 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  EuiFlyoutBody,
-  EuiTitle,
-  // EuiSpacer,
-  // EuiText,
-} from '@elastic/eui';
 
 import type { FileUploadResults } from './create_flyout';
 import { getFileDataVisualizerLiteWrapper } from './component_wrapper';
@@ -42,43 +30,8 @@ export const FileUploadLiteFlyoutContents: FC<Props> = ({
   const Wrapper = getFileDataVisualizerLiteWrapper(
     undefined,
     setUploadResults,
-    autoAddSemanticTextField
+    autoAddSemanticTextField,
+    onClose
   );
-  return (
-    <>
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
-          <h3>
-            <FormattedMessage
-              id="xpack.ml.embeddables.newJobFromPatternAnalysisFlyout.title"
-              defaultMessage="Upload a file"
-            />
-          </h3>
-        </EuiTitle>
-        {/* <EuiSpacer size="m" />
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.ml.embeddables.newJobFromPatternAnalysisFlyout.secondTitle"
-            defaultMessage="Upload a file"
-          />
-        </EuiText> */}
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        {/* <CreateJob dataView={dataView} field={field} query={query} timeRange={timeRange} /> */}
-        {Wrapper}
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
-              <FormattedMessage
-                id="xpack.ml.embeddables.newJobFromPatternAnalysisFlyout.closeButton"
-                defaultMessage="Close"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    </>
-  );
+  return <>{Wrapper}</>;
 };

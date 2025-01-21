@@ -19,6 +19,7 @@ export interface Props {
   getAdditionalLinks?: GetAdditionalLinks;
   setUploadResults?: (results: FileUploadResults) => void;
   autoAddSemanticTextField?: boolean;
+  onClose?: () => void;
 }
 
 export type FileDataVisualizerLiteSpec = typeof FileDataVisualizerLite;
@@ -28,6 +29,7 @@ export const FileDataVisualizerLite: FC<Props> = ({
   resultLinks,
   setUploadResults,
   autoAddSemanticTextField,
+  onClose,
 }) => {
   const coreStart = getCoreStart();
   const { data, maps, embeddable, share, fileUpload, cloud, fieldFormats } = getPluginsStart();
@@ -57,6 +59,7 @@ export const FileDataVisualizerLite: FC<Props> = ({
             capabilities={coreStart.application.capabilities}
             setUploadResults={setUploadResults}
             autoAddSemanticTextField={autoAddSemanticTextField}
+            onClose={onClose}
           />
         </CloudContext>
       </KibanaContextProvider>
