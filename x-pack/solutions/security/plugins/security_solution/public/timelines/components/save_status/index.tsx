@@ -53,7 +53,7 @@ export const TimelineSaveStatus = React.memo<TimelineSaveStatusProps>(({ timelin
 
   const isDraft = status === TimelineStatusEnum.draft;
 
-  const badgeColor = useMemo(() => (show ? 'warning' : 'hollow'), [show]);
+  const badgeColor = useMemo(() => (show ? 'warning' : 'default'), [show]);
 
   let statusContent: React.ReactNode;
   if (isDraft || !updated) {
