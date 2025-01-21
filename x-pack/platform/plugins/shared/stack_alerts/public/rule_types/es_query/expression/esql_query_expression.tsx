@@ -151,9 +151,9 @@ export const EsqlQueryExpression: React.FC<
 
   const refreshTimeFields = useCallback(
     async (q: AggregateQuery) => {
-      const fetchTimeFieldsData = async (q: AggregateQuery) => {
+      const fetchTimeFieldsData = async (query: AggregateQuery) => {
         try {
-          const esqlDataView = await getESQLAdHocDataview(q.esql, dataViews);
+          const esqlDataView = await getESQLAdHocDataview(query.esql, dataViews);
           const indexPattern: string = esqlDataView.getIndexPattern();
           const currentEsFields = await getFields(http, [indexPattern]);
           const newTimeFieldOptions = getTimeFieldOptions(currentEsFields);
@@ -171,7 +171,7 @@ export const EsqlQueryExpression: React.FC<
       }
       setDetectedTimestamp(timestampField);
     },
-    [timeField, setParam]
+    [timeField, setParam, dataViews, http]
   );
 
   return (
