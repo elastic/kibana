@@ -7,101 +7,57 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PublishingSubject } from '../publishing_subject';
+import { SerializedPanelState } from './has_serializable_state';
 
-interface DuplicateTitleCheck {
+/**
+ * APIs that inherit this interface can be linked to and unlinked from the library.
+ */
+export interface HasLibraryTransforms<
+  ByReferenceSerializedState extends object = object,
+  ByValueSerializedState extends object = object
+> {
   checkForDuplicateTitle: (
     newTitle: string,
     isTitleDuplicateConfirmed: boolean,
     onTitleDuplicate: () => void
   ) => Promise<void>;
-}
-interface LibraryTransformGuards {
+
   /**
    *
    * @returns {Promise<boolean>}
-   *   True when embeddable is by-value and can be converted to by-reference
+   * Returns true when this API is by-value and can be converted to by-reference
    */
   canLinkToLibrary: () => Promise<boolean>;
+
   /**
    *
    * @returns {Promise<boolean>}
-   *   True when embeddable is by-reference and can be converted to by-value
+   * Returns true when this API is by-reference and can be converted to by-value
    */
   canUnlinkFromLibrary: () => Promise<boolean>;
-}
-
-/**
- * APIs that inherit this interface can be linked to and unlinked from the library in place without
- * re-initialization.
- */
-export interface HasInPlaceLibraryTransforms<RuntimeState extends object = object>
-  extends Partial<LibraryTransformGuards>,
-    DuplicateTitleCheck {
-  /**
-   * The id of the library item that this embeddable is linked to.
-   */
-  libraryId$: PublishingSubject<string | undefined>;
 
   /**
-   * Save embeddable to library
+   * Save the state of this API to the library. This will return the ID of the persisted library item.
    *
    * @returns {Promise<string>} id of persisted library item
    */
   saveToLibrary: (title: string) => Promise<string>;
 
   /**
-   * gets a snapshot of this embeddable's runtime state without any state that links it to a library item.
+   *
+   * @returns {ByReferenceSerializedState}
+   * get by-reference serialized state from this API.
    */
-  getByValueRuntimeSnapshot: () => RuntimeState;
+  getSerializedStateByReference: (
+    newId: string
+  ) => SerializedPanelState<ByReferenceSerializedState>;
 
   /**
-   * Un-links this embeddable from the library. This method is optional, and only needed if the Embeddable
-   * is not meant to be re-initialized as part of the unlink operation. If the embeddable needs to be re-initialized
-   * after unlinking, the getByValueState method should be used instead.
-   */
-  unlinkFromLibrary: () => void;
-}
-
-export const apiHasInPlaceLibraryTransforms = (
-  unknownApi: null | unknown
-): unknownApi is HasInPlaceLibraryTransforms => {
-  return Boolean(
-    unknownApi &&
-      Boolean((unknownApi as HasInPlaceLibraryTransforms)?.libraryId$) &&
-      typeof (unknownApi as HasInPlaceLibraryTransforms).saveToLibrary === 'function' &&
-      typeof (unknownApi as HasInPlaceLibraryTransforms).unlinkFromLibrary === 'function'
-  );
-};
-
-/**
- * @deprecated use HasInPlaceLibraryTransforms instead
- * APIs that inherit this interface can be linked to and unlinked from the library. After the save or unlink
- * operation, the embeddable will be reinitialized.
- */
-export interface HasLibraryTransforms<StateT extends object = object>
-  extends LibraryTransformGuards,
-    DuplicateTitleCheck {
-  /**
-   * Save embeddable to library
    *
-   * @returns {Promise<string>} id of persisted library item
+   * @returns {ByValueSerializedState}
+   * get by-value serialized state from this API
    */
-  saveToLibrary: (title: string) => Promise<string>;
-  /**
-   *
-   * @returns {StateT}
-   * by-reference embeddable state replacing by-value embeddable state. After
-   * the save operation, the embeddable will be reinitialized with the results of this method.
-   */
-  getByReferenceState: (libraryId: string) => StateT;
-  /**
-   *
-   * @returns {StateT}
-   * by-value embeddable state replacing by-reference embeddable state. After
-   * the unlink operation, the embeddable will be reinitialized with the results of this method.
-   */
-  getByValueState: () => StateT;
+  getSerializedStateByValue: () => SerializedPanelState<ByValueSerializedState>;
 }
 
 export const apiHasLibraryTransforms = <StateT extends object = object>(
@@ -112,34 +68,10 @@ export const apiHasLibraryTransforms = <StateT extends object = object>(
       typeof (unknownApi as HasLibraryTransforms<StateT>).canLinkToLibrary === 'function' &&
       typeof (unknownApi as HasLibraryTransforms<StateT>).canUnlinkFromLibrary === 'function' &&
       typeof (unknownApi as HasLibraryTransforms<StateT>).saveToLibrary === 'function' &&
-      typeof (unknownApi as HasLibraryTransforms<StateT>).getByReferenceState === 'function' &&
-      typeof (unknownApi as HasLibraryTransforms<StateT>).getByValueState === 'function' &&
+      typeof (unknownApi as HasLibraryTransforms<StateT>).getSerializedStateByReference ===
+        'function' &&
+      typeof (unknownApi as HasLibraryTransforms<StateT>).getSerializedStateByValue ===
+        'function' &&
       typeof (unknownApi as HasLibraryTransforms<StateT>).checkForDuplicateTitle === 'function'
-  );
-};
-
-/**
- * @deprecated use HasLibraryTransforms instead
- */
-export type HasLegacyLibraryTransforms = Pick<
-  HasLibraryTransforms,
-  'canLinkToLibrary' | 'canUnlinkFromLibrary'
-> & {
-  linkToLibrary: () => Promise<void>;
-  unlinkFromLibrary: () => Promise<void>;
-};
-
-/**
- * @deprecated use apiHasLibraryTransforms instead
- */
-export const apiHasLegacyLibraryTransforms = (
-  unknownApi: null | unknown
-): unknownApi is HasLegacyLibraryTransforms => {
-  return Boolean(
-    unknownApi &&
-      typeof (unknownApi as HasLegacyLibraryTransforms).canLinkToLibrary === 'function' &&
-      typeof (unknownApi as HasLegacyLibraryTransforms).canUnlinkFromLibrary === 'function' &&
-      typeof (unknownApi as HasLegacyLibraryTransforms).linkToLibrary === 'function' &&
-      typeof (unknownApi as HasLegacyLibraryTransforms).unlinkFromLibrary === 'function'
   );
 };
