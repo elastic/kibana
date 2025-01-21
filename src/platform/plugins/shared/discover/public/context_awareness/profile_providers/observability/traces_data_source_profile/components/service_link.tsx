@@ -14,17 +14,19 @@ import { css } from '@emotion/react';
 import { AgentIcon } from '@kbn/custom-icons';
 import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
 
-interface Props {
+interface ServiceLinkProps {
   serviceName: string;
   agentName: string;
 }
 
-export const ServiceNameLink: React.FC<Props> = ({ serviceName, agentName }: Props) => {
+export const ServiceLink: React.FC<ServiceLinkProps> = ({
+  serviceName,
+  agentName,
+}: ServiceLinkProps) => {
   const { share } = useDiscoverServices();
   const serviceLocator = share?.url.locators.get<{ serviceName: string }>('SERVICE_ENTITY_LOCATOR');
   const { euiTheme } = useEuiTheme();
 
-  // TODO add agent icon
   return (
     <EuiLink href={serviceLocator?.getRedirectUrl({ serviceName })} target="_blank">
       {agentName && (

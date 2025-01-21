@@ -13,7 +13,7 @@ import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { isDataSourceType, DataSourceType } from '../../../../../common/data_sources';
 import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
-import { ServiceNameLink } from './components/service_name_link';
+import { ServiceLink } from './components/service_link';
 import { SpanLink } from './components/span_link';
 import { TransactionLink } from './components/transaction_link';
 
@@ -83,7 +83,7 @@ export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvid
                         <EuiText color="subdued" size="xs">
                           Service
                         </EuiText>
-                        <ServiceNameLink
+                        <ServiceLink
                           serviceName={serviceName as string}
                           agentName={agentName as string}
                         />
