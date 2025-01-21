@@ -25,19 +25,19 @@ run_tests() {
 EXIT_CODE=0
 
 # Discovery Enhanced parallel run
-for run_mode in "--stateful" "--serverless=es"; do
-  run_tests "Discovery Enhanced Parallel" "x-pack/platform/plugins/private/discover_enhanced/ui_tests/parallel.playwright.config.ts" "$run_mode"
+for run_mode in "--stateful" "--serverless=es" "--serverless=oblt" "--serverless=security"; do
+  run_tests "Discovery Enhanced" "x-pack/platform/plugins/private/discover_enhanced/ui_tests/parallel.playwright.config.ts" "$run_mode"
 done
 
 # Discovery Enhanced
-for run_mode in "--stateful" "--serverless=es"; do
+for run_mode in "--stateful" "--serverless=es" "--serverless=oblt" "--serverless=security"; do
   run_tests "Discovery Enhanced" "x-pack/platform/plugins/private/discover_enhanced/ui_tests/playwright.config.ts" "$run_mode"
 done
 
 # Observability Onboarding
-# for run_mode in "--stateful" "--serverless=oblt"; do
-#   run_tests "Observability Onboarding" "x-pack/solutions/observability/plugins/observability_onboarding/ui_tests/playwright.config.ts" "$run_mode"
-# done
+for run_mode in "--stateful" "--serverless=oblt"; do
+  run_tests "Observability Onboarding" "x-pack/solutions/observability/plugins/observability_onboarding/ui_tests/playwright.config.ts" "$run_mode"
+done
 
 
 exit $EXIT_CODE
