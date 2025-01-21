@@ -35,7 +35,6 @@
     "@kbn/std",
     "@kbn/safer-lodash-set",
     "@kbn/streams-schema",
-    "@kbn/es-errors",
-    "@kbn/streams-plugin"
+    "@kbn/es-errors"
   ]
 }
