@@ -105,6 +105,7 @@ export const PresentationPanelInternal = <
     [setDragHandles]
   );
 
+  console.log('styles', styles);
   return (
     <PresentationPanelHoverActions
       {...{
@@ -188,7 +189,7 @@ const styles = {
     position: 'relative',
   }),
   embPanelContent: css({
-    '&.embPanelContent': {
+    '&.embPanel__content': {
       display: 'flex',
       flex: '1 1 100%',
       zIndex: 1,
