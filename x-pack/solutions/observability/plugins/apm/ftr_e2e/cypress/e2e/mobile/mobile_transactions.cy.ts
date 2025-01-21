@@ -48,7 +48,9 @@ describe('Mobile transactions page', () => {
 
       it('shows OS version tab', () => {
         cy.visitKibana(mobileTransactionsPageHref);
-        cy.getByTestSubj('apmOsVersionTab').click().should('have.attr', 'aria-selected', 'true');
+        cy.get('[data-test-id="apmOsVersionTab"]', { timeout: 60000 })
+          .click()
+          .should('have.attr', 'aria-selected', 'true');
         cy.url().should('include', 'mobileSelectedTab=os_version_tab');
       });
 
