@@ -173,8 +173,11 @@ export const eqlExecutor = async ({
       const { events, sequences } = response.hits;
 
       if (shardFailures) {
-        ruleExecutionLogger.warn(`shard failures, ${JSON.stringify(shardFailures)}`);
-        result.warningMessages.push(`shard failures, ${JSON.stringify(shardFailures)}`);
+        const shardFailureMessage = `The EQL event query was only executed on the available shards. The query failed to run successfully on the following shards: ${JSON.stringify(
+          shardFailures
+        )}`;
+        ruleExecutionLogger.error(shardFailureMessage);
+        result.errors.push(shardFailureMessage);
       }
 
       if (events) {
