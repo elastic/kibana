@@ -128,13 +128,13 @@ createServerRouteFactory<{}, { tags: string[] }>()({
   handler: async (resources) => {},
 });
 
-// handler return, respects the responseValidation
+// handler return, respects the responses
 createServerRouteFactory<{}, { tags: string[] }>()({
   endpoint: 'GET /api/endpoint_with_response_validation 2023-10-31',
   options: {
     tags: [],
   },
-  responseValidation: {
+  responses: {
     200: {
       body: z.object({
         success: z.literal(true),
@@ -148,13 +148,13 @@ createServerRouteFactory<{}, { tags: string[] }>()({
   },
 });
 
-// handler return, respects the responseValidation with IKibanaResponseFactory
+// handler return, respects the responses with IKibanaResponseFactory
 createServerRouteFactory<{}, { tags: string[] }>()({
   endpoint: 'GET /api/endpoint_with_response_validation 2023-10-31',
   options: {
     tags: [],
   },
-  responseValidation: {
+  responses: {
     200: {
       body: z.object({
         success: z.literal(true),
@@ -277,7 +277,7 @@ const repository = {
         start: z.string(),
       }),
     }),
-    responseValidation: {
+    responses: {
       200: {
         body: z.object({
           success: z.literal(true),
@@ -474,15 +474,17 @@ client
     timeout: 1,
   })
   .then((res) => {
-    assertType<{
-      success: true;
-      data: Array<{ id: number }>;
-    }>(res);
-
-    assertType<{
-      success: false;
-      error: string;
-    }>(res);
+    if (res.success) {
+      assertType<{
+        success: true;
+        data: Array<{ id: number }>;
+      }>(res);
+    } else {
+      assertType<{
+        success: false;
+        error: string;
+      }>(res);
+    }
   });
 
 client

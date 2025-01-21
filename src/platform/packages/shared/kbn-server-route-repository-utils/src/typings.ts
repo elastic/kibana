@@ -154,19 +154,17 @@ type ServerRouteHandler<
   TRouteHandlerResources extends ServerRouteHandlerResources,
   TRouteParamsRT extends RouteParamsRT | undefined,
   TReturnType extends ServerRouteHandlerReturnType,
-  TResponseValidation extends TRouteResponse | undefined = undefined
+  TResponses extends TRouteResponse | undefined = undefined
 > = (
   options: TRouteHandlerResources &
     (TRouteParamsRT extends RouteParamsRT ? DecodedRequestParamsOfType<TRouteParamsRT> : {})
 ) => Promise<
-  TResponseValidation extends TRouteResponse
-    ? ExtractResponseStatusBodyTypes<TResponseValidation> extends
-        | HttpResponsePayload
-        | ResponseError
+  TResponses extends TRouteResponse
+    ? ExtractResponseStatusBodyTypes<TResponses> extends HttpResponsePayload | ResponseError
       ?
-          | ExtractResponseStatusBodyTypes<TResponseValidation>
-          | IKibanaResponse<ExtractResponseStatusBodyTypes<TResponseValidation>>
-      : ExtractResponseStatusBodyTypes<TResponseValidation>
+          | ExtractResponseStatusBodyTypes<TResponses>
+          | IKibanaResponse<ExtractResponseStatusBodyTypes<TResponses>>
+      : ExtractResponseStatusBodyTypes<TResponses>
     : TReturnType extends ServerRouteHandlerReturnTypeWithoutRecord
     ? TReturnType
     : GuardAgainstInvalidRecord<TReturnType>
@@ -180,18 +178,13 @@ export type CreateServerRouteFactory<
   TReturnType extends ServerRouteHandlerReturnType,
   TRouteParamsRT extends RouteParamsRT | undefined = undefined,
   TRouteAccess extends RouteAccess | undefined = undefined,
-  TResponseValidation extends TRouteResponse | undefined = undefined
+  TResponses extends TRouteResponse | undefined = undefined
 >(
   options: {
     endpoint: ValidateEndpoint<TEndpoint, TRouteAccess> extends true ? TEndpoint : never;
-    handler: ServerRouteHandler<
-      TRouteHandlerResources,
-      TRouteParamsRT,
-      TReturnType,
-      TResponseValidation
-    >;
+    handler: ServerRouteHandler<TRouteHandlerResources, TRouteParamsRT, TReturnType, TResponses>;
     params?: TRouteParamsRT;
-    responseValidation?: TResponseValidation;
+    responses?: TResponses;
     security?: RouteSecurity;
   } & Required<
     {
@@ -210,7 +203,7 @@ export type CreateServerRouteFactory<
     TRouteHandlerResources,
     Awaited<TReturnType>,
     TRouteCreateOptions,
-    TResponseValidation
+    TResponses
   >
 >;
 
@@ -220,21 +213,16 @@ export type ServerRoute<
   TRouteHandlerResources extends ServerRouteHandlerResources,
   TReturnType extends ServerRouteHandlerReturnType,
   TRouteCreateOptions extends DefaultRouteCreateOptions | undefined,
-  TResponseValidation extends TRouteResponse | undefined = undefined
+  TResponses extends TRouteResponse | undefined = undefined
 > = {
   endpoint: TEndpoint;
-  handler: ServerRouteHandler<
-    TRouteHandlerResources,
-    TRouteParamsRT,
-    TReturnType,
-    TResponseValidation
-  >;
+  handler: ServerRouteHandler<TRouteHandlerResources, TRouteParamsRT, TReturnType, TResponses>;
   security?: RouteSecurity;
 } & (TRouteParamsRT extends RouteParamsRT ? { params: TRouteParamsRT } : {}) &
   (TRouteCreateOptions extends DefaultRouteCreateOptions
     ? { options: TRouteCreateOptions }
     : {}) & {
-    responseValidation?: TRouteResponse;
+    responses?: TRouteResponse;
   };
 
 export type ServerRouteRepository = Record<
@@ -277,8 +265,17 @@ export type EndpointOf<TServerRouteRepository extends ServerRouteRepository> =
 export type ReturnOf<
   TServerRouteRepository extends ServerRouteRepository,
   TEndpoint extends keyof TServerRouteRepository
-> = TServerRouteRepository[TEndpoint] extends ServerRoute<any, any, any, infer TReturnType, any>
-  ? TReturnType extends IKibanaResponse<infer TWrappedResponseType>
+> = TServerRouteRepository[TEndpoint] extends ServerRoute<
+  any,
+  any,
+  any,
+  infer TReturnType,
+  any,
+  infer TResponseType
+>
+  ? TResponseType extends TRouteResponse
+    ? ExtractResponseStatusBodyTypes<TResponseType>
+    : TReturnType extends IKibanaResponse<infer TWrappedResponseType>
     ? TWrappedResponseType
     : TReturnType
   : never;

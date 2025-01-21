@@ -21,7 +21,7 @@ export function makeZodValidationObject(params: ZodParamsObject) {
   };
 }
 
-export function makeZodResponseValidationObject<
+export function makeZodResponsesValidationObject<
   T extends TRouteResponse,
   TReturnType = ExtractResponseStatusBodyTypes<T>
 >(responseSchema: T): RouteValidatorFullConfigResponse<TReturnType> {

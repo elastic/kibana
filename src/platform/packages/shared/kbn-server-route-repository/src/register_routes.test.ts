@@ -288,7 +288,7 @@ describe('registerRoutes', () => {
 
     const makeZodResponseValidationObjectSpy = jest.spyOn(
       makeZodValidationObject,
-      'makeZodResponseValidationObject'
+      'makeZodResponsesValidationObject'
     );
 
     const zodParamsRt = z.object({
@@ -316,7 +316,7 @@ describe('registerRoutes', () => {
         'POST /internal/route': {
           endpoint: 'POST /internal/route',
           params: zodParamsRt,
-          responseValidation: zodResponseRt,
+          responses: zodResponseRt,
           handler: jest.fn(),
         },
       });
@@ -339,7 +339,7 @@ describe('registerRoutes', () => {
         'POST /internal/route': {
           endpoint: 'POST /internal/route',
           params: zodParamsRt,
-          responseValidation: zodResponseRt,
+          responses: zodResponseRt,
           handler,
         },
       });

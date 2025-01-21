@@ -27,7 +27,7 @@ import { isZod } from '@kbn/zod';
 import { merge, omit } from 'lodash';
 import { Observable, isObservable } from 'rxjs';
 import {
-  makeZodResponseValidationObject,
+  makeZodResponsesValidationObject,
   makeZodValidationObject,
 } from './make_zod_validation_object';
 import { validateAndDecodeParams } from './validate_and_decode_params';
@@ -166,8 +166,8 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
           security,
           validate: {
             request: validationObject,
-            response: route.responseValidation
-              ? makeZodResponseValidationObject(route.responseValidation)
+            response: route.responses
+              ? makeZodResponsesValidationObject(route.responses)
               : undefined,
           },
         },
@@ -185,8 +185,8 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
           version,
           validate: {
             request: validationObject,
-            response: route.responseValidation
-              ? makeZodResponseValidationObject(route.responseValidation)
+            response: route.responses
+              ? makeZodResponsesValidationObject(route.responses)
               : undefined,
           },
         },
