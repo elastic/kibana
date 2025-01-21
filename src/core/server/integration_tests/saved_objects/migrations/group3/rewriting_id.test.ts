@@ -96,7 +96,6 @@ function createRoot() {
 
 const willRunESv9 = EsVersion.getDefault({ integrationTest: true }).matchRange('9');
 
-// FAILING: https://github.com/elastic/kibana/issues/98351
 describe('migration v2', () => {
   let esServer: TestElasticsearchUtils;
   let root: Root;
