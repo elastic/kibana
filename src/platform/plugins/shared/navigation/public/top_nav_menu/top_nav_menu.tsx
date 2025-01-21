@@ -8,7 +8,7 @@
  */
 
 import React, { ReactElement } from 'react';
-import classNames from 'classnames';
+import { css } from '@emotion/react';
 
 import type { MountPoint } from '@kbn/core/public';
 import { MountPointPortal } from '@kbn/react-kibana-mount';
@@ -81,11 +81,16 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
     return <TopNavMenuBadges badges={badges} />;
   }
 
-  function renderMenu(className: string): ReactElement | null {
+  function renderMenu(): ReactElement | null {
     return (
       <TopNavMenuItems
         config={config}
-        className={className}
+        className={props.className}
+        css={css`
+          button:last-child {
+            margin-right: 0;
+          }
+        `}
         popoverBreakpoints={props.popoverBreakpoints}
       />
     );
@@ -100,18 +105,26 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
 
   function renderLayout() {
     const { setMenuMountPoint, visible } = props;
-    const menuClassName = classNames('kbnTopNavMenu', props.className);
-    const wrapperClassName = classNames('kbnTopNavMenu__wrapper', {
-      'kbnTopNavMenu__wrapper--hidden': visible === false,
-    });
+    const styles = {
+      withElements: css`
+        display: flex;
+        align-items: center;
+      `,
+      hidden: css`
+        display: none;
+      `,
+    };
     if (setMenuMountPoint) {
       const badgesEl = renderBadges();
-      const menuEl = renderMenu(menuClassName);
+      const menuEl = renderMenu();
       return (
         <>
           {(badgesEl || menuEl) && (
             <MountPointPortal setMountPoint={setMenuMountPoint}>
-              <span className={`${wrapperClassName} kbnTopNavMenu__badgeWrapper`}>
+              <span
+                className="kbnTopNavMenu__wrapper"
+                css={[styles.withElements, visible === false && styles.hidden]}
+              >
                 {badgesEl}
                 {menuEl}
               </span>
@@ -124,7 +137,7 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
     } else {
       return (
         <>
-          <span className={wrapperClassName}>{renderMenu(menuClassName)}</span>
+          <span css={visible === false && styles.hidden}>{renderMenu()}</span>
           {renderSearchBar()}
         </>
       );
