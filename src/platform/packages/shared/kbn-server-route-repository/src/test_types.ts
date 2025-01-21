@@ -290,10 +290,10 @@ const repository = {
           data: z.array(z.object({ id: z.number() })).length(0),
         }),
       },
-      400: {
+      204: {
         body: z.object({
           success: z.literal(false),
-          error: z.string(),
+          message: z.string(),
         }),
       },
     },
@@ -316,7 +316,7 @@ const repository = {
         });
       }
 
-      return { success: false as const, error: 'Example error' };
+      return { success: false as const, message: 'No change!' };
     },
   }),
 };
@@ -482,7 +482,7 @@ client
     } else {
       assertType<{
         success: false;
-        error: string;
+        message: string;
       }>(res);
     }
   });
