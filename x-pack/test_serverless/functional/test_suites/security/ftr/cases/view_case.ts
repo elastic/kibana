@@ -38,6 +38,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   // https://github.com/elastic/kibana/pull/190690
   // fails after missing `awaits` were added
   describe('Case View', function () {
+    // see details: https://github.com/elastic/kibana/issues/207385
+    this.tags(['failsOnMKI']);
     before(async () => {
       await svlCommonPage.loginWithPrivilegedRole();
     });
