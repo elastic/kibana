@@ -69,18 +69,17 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             isPublic: false,
           },
           {
-            username: 'secondary_editor' as const,
+            username: 'admin' as const,
             isPublic: true,
           },
           {
-            username: 'secondary_editor' as const,
+            username: 'admin' as const,
             isPublic: false,
           },
         ].map(async ({ username, isPublic }) => {
           const visibility = isPublic ? 'Public' : 'Private';
-          const user = username === 'editor' ? 'editor' : 'admin';
 
-          const { status } = await observabilityAIAssistantAPIClient[user]({
+          const { status } = await observabilityAIAssistantAPIClient[username]({
             endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
             params: {
               body: {
@@ -95,6 +94,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         await Promise.all(promises);
       });
+
       it('"editor" can retrieve their own private instructions and the public instruction', async () => {
         await retry.try(async () => {
           const res = await observabilityAIAssistantAPIClient.editor({
@@ -119,9 +119,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
                 text: 'Public user instruction from "editor"',
               },
               {
-                id: 'public-doc-from-secondary_editor',
+                id: 'public-doc-from-admin',
                 public: true,
-                text: 'Public user instruction from "secondary_editor"',
+                text: 'Public user instruction from "admin"',
               },
             ])
           );
@@ -147,14 +147,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
                 text: 'Public user instruction from "editor"',
               },
               {
-                id: 'public-doc-from-secondary_editor',
+                id: 'public-doc-from-admin',
                 public: true,
-                text: 'Public user instruction from "secondary_editor"',
+                text: 'Public user instruction from "admin"',
               },
               {
-                id: 'private-doc-from-secondary_editor',
+                id: 'private-doc-from-admin',
                 public: false,
-                text: 'Private user instruction from "secondary_editor"',
+                text: 'Private user instruction from "admin"',
               },
             ])
           );
@@ -213,9 +213,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       const userInstructionText =
         'Be polite and use language that is easy to understand. Never disagree with the user.';
 
-      async function getConversationForUser(username: string) {
-        const user = username === 'editor' ? 'editor' : 'admin';
-
+      async function getConversationForUser(username: 'editor' | 'admin') {
         // the user instruction is always created by "editor" user
         const { status } = await observabilityAIAssistantAPIClient.editor({
           endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
@@ -251,7 +249,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           },
         ];
 
-        const createResponse = await observabilityAIAssistantAPIClient[user]({
+        const createResponse = await observabilityAIAssistantAPIClient[username]({
           endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
           params: {
             body: {
@@ -269,7 +267,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const conversationCreatedEvent = getConversationCreatedEvent(createResponse.body);
         const conversationId = conversationCreatedEvent.conversation.id;
 
-        const res = await observabilityAIAssistantAPIClient[user]({
+        const res = await observabilityAIAssistantAPIClient[username]({
           endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
           params: {
             path: {
@@ -323,7 +321,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('does not add the instruction conversation for other users', async () => {
-        const conversation = await getConversationForUser('secondary_editor');
+        const conversation = await getConversationForUser('admin');
         const systemMessage = conversation.messages.find(
           (message) => message.message.role === MessageRole.System
         )!;
