@@ -32,6 +32,8 @@ import {
   StorageClientExistsIndex,
   StorageDocumentOf,
   StorageClientSearchResponse,
+  StorageClientDeleteByQuery,
+  StorageClientDeleteByQueryResponse,
 } from '..';
 import { getSchemaVersion } from '../get_schema_version';
 import { StorageMappingProperty } from '../types';
@@ -446,6 +448,21 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings> 
     });
   };
 
+  private deleteByQuery: StorageClientDeleteByQuery = async ({
+    ...request
+  }): Promise<StorageClientDeleteByQueryResponse> => {
+    await wrapEsCall(
+      this.esClient.deleteByQuery({
+        refresh: true,
+        ...request,
+        index: this.getSearchIndexPattern(),
+        allow_no_indices: true,
+      })
+    );
+
+    return { acknowledged: true };
+  };
+
   private delete: StorageClientDelete = async ({
     id,
     refresh = 'wait_for',
@@ -546,6 +563,7 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings> 
     return {
       bulk: this.bulk,
       delete: this.delete,
+      deleteByQuery: this.deleteByQuery,
       index: this.index,
       search: this.search,
       get: this.get,

@@ -8,6 +8,7 @@ import type {
   BulkRequest,
   BulkResponse,
   DeleteRequest,
+  DeleteByQueryRequest,
   GetRequest,
   GetResponse,
   IndexRequest,
@@ -62,9 +63,15 @@ export type StorageClientBulkResponse = BulkResponse;
 
 export type StorageClientDeleteRequest = Omit<DeleteRequest, 'index'>;
 
+export type StorageClientDeleteByQueryRequest = Omit<DeleteByQueryRequest, 'index'>;
+
 export interface StorageClientDeleteResponse {
   acknowledged: boolean;
   result: Extract<Result, 'deleted' | 'not_found'>;
+}
+
+export interface StorageClientDeleteByQueryResponse {
+  acknowledged: boolean;
 }
 
 export type StorageClientIndexRequest<TDocument = unknown> = Omit<
@@ -96,6 +103,10 @@ export type StorageClientDelete = (
   request: StorageClientDeleteRequest
 ) => Promise<StorageClientDeleteResponse>;
 
+export type StorageClientDeleteByQuery = (
+  request: StorageClientDeleteByQueryRequest
+) => Promise<StorageClientDeleteByQueryResponse>;
+
 export type StorageClientGet<TStorageSettings extends StorageSettings = never> = (
   request: StorageClientGetRequest
 ) => Promise<StorageClientGetResponse<StorageDocumentOf<TStorageSettings>>>;
@@ -107,6 +118,7 @@ export interface IStorageClient<TStorageSettings extends StorageSettings = never
   bulk: StorageClientBulk<TStorageSettings>;
   index: StorageClientIndex<TStorageSettings>;
   delete: StorageClientDelete;
+  deleteByQuery: StorageClientDeleteByQuery;
   get: StorageClientGet<TStorageSettings>;
   existsIndex: StorageClientExistsIndex;
 }

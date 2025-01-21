@@ -178,6 +178,10 @@ describe('StorageIndexAdapter', () => {
       });
     });
 
+    it('deletes the document', async () => {
+      await verifyDeleteByQuery();
+    });
+
     // FLAKY: https://github.com/elastic/kibana/issues/206482
     // FLAKY: https://github.com/elastic/kibana/issues/206483
     describe.skip('after rolling over the index manually and indexing the same document', () => {
@@ -316,6 +320,10 @@ describe('StorageIndexAdapter', () => {
       it('deletes the document from the rolled over index', async () => {
         await verifyDocumentDeletedInRolledOverIndex();
       });
+
+      it('deletes the documents', async () => {
+        await verifyDeleteByQuery();
+      });
     });
   });
 
@@ -348,6 +356,10 @@ describe('StorageIndexAdapter', () => {
       expect(indices).toEqual([writeIndexName]);
 
       expect(getIndicesResponse[writeIndexName].mappings?._meta?.version).toEqual('next_version');
+    });
+
+    it('deletes the documents', async () => {
+      await verifyDeleteByQuery();
     });
   });
 
@@ -386,6 +398,10 @@ describe('StorageIndexAdapter', () => {
         	Root causes:
         		illegal_argument_exception: mapper [foo] cannot be changed from type [keyword] to [text]"
       `);
+    });
+
+    it('deletes the documents', async () => {
+      await verifyDeleteByQuery();
     });
   });
 
@@ -566,5 +582,17 @@ describe('StorageIndexAdapter', () => {
         },
       },
     });
+  }
+
+  async function verifyDeleteByQuery() {
+    await client.deleteByQuery({ query: { match_all: {} } });
+    const searchResponse = await client.search({
+      track_total_hits: true,
+      size: 1,
+      query: {
+        match_all: {},
+      },
+    });
+    expect(searchResponse.hits.total.value).toBe(0);
   }
 });

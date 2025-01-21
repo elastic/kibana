@@ -139,6 +139,9 @@ export class StreamsClient {
 
     await this.deleteStreamFromDefinition(definition);
 
+    const { assetClient } = this.dependencies;
+    await assetClient.removeAllAssetLinks();
+
     return { acknowledged: true, result: 'deleted' };
   }
 
