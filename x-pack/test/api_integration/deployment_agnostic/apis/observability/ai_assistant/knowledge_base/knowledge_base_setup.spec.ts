@@ -12,6 +12,7 @@ import {
   importTinyElserModel,
   TINY_ELSER,
   deleteInferenceEndpoint,
+  setupKnowledgeBase,
 } from './helpers';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -27,16 +28,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     it('returns model info when successful', async () => {
       await importTinyElserModel(ml);
-      const res = await observabilityAIAssistantAPIClient.admin({
-        endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-        params: {
-          query: {
-            model_id: TINY_ELSER.id,
-          },
-        },
-      });
-
-      expect(res.status).to.be(200);
+      const res = await setupKnowledgeBase(observabilityAIAssistantAPIClient);
 
       expect(res.body.service_settings.model_id).to.be('pt_tiny_elser');
       expect(res.body.inference_id).to.be('obs_ai_assistant_kb_inference');
@@ -46,15 +38,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     it('returns error message if model is not deployed', async () => {
-      const res = await observabilityAIAssistantAPIClient.admin({
-        endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-        params: {
-          query: {
-            model_id: TINY_ELSER.id,
-          },
-        },
-      });
-
+      const res = await setupKnowledgeBase(observabilityAIAssistantAPIClient);
       expect(res.status).to.be(500);
 
       // @ts-expect-error

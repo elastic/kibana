@@ -34,7 +34,7 @@ export async function importTinyElserModel(ml: ReturnType<typeof MachineLearning
 export async function setupKnowledgeBase(
   observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient
 ) {
-  const { status } = await observabilityAIAssistantAPIClient.admin({
+  const { status, body } = await observabilityAIAssistantAPIClient.admin({
     endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
     params: {
       query: {
@@ -42,7 +42,8 @@ export async function setupKnowledgeBase(
       },
     },
   });
-  expect(status).to.be(200);
+
+  return { status, body };
 }
 
 export async function waitForKnowledgeBaseReady({
