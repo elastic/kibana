@@ -134,7 +134,6 @@ export const getKibanaContextFn = (
         esqlVariables: input?.esqlVariables,
         filters: uniqFilters(filters.filter((f: Filter) => !f.meta?.disabled)),
         timeRange,
-        esqlVariables: input?.esqlVariables,
       };
     },
   };
