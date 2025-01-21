@@ -163,5 +163,24 @@ describe('inferenceAdapter', () => {
         }),
       });
     });
+
+    it('propagates the modelName parameter', () => {
+      inferenceAdapter.chatComplete({
+        logger,
+        executor: executorMock,
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        modelName: 'gpt-4o',
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(executorMock.invoke).toHaveBeenCalledWith({
+        subAction: 'unified_completion_stream',
+        subActionParams: expect.objectContaining({
+          body: expect.objectContaining({
+            model: 'gpt-4o',
+          }),
+        }),
+      });
+    });
   });
 });

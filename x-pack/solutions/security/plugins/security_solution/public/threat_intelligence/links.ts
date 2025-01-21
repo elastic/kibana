@@ -7,7 +7,7 @@
 
 import { getSecuritySolutionLink } from '@kbn/threat-intelligence-plugin/public';
 import type { SecurityPageName } from '../../common/constants';
-import { SERVER_APP_ID } from '../../common/constants';
+import { SECURITY_FEATURE_ID } from '../../common/constants';
 import type { LinkItem } from '../common/links';
 
 /**
@@ -18,5 +18,5 @@ import type { LinkItem } from '../common/links';
 export const indicatorsLinks: LinkItem = {
   ...getSecuritySolutionLink<SecurityPageName>('indicators'),
   globalNavPosition: 8,
-  capabilities: [`${SERVER_APP_ID}.threat-intelligence`],
+  capabilities: [`${SECURITY_FEATURE_ID}.threat-intelligence`],
 };

@@ -27,6 +27,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
     tools,
     temperature = 0,
     functionCalling,
+    modelName,
     logger,
     abortSignal,
   }) => {
@@ -43,12 +44,14 @@ export const openAIAdapter: InferenceConnectorAdapter = {
       request = {
         stream: true,
         temperature,
+        model: modelName,
         messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
       };
     } else {
       request = {
         stream: true,
         temperature,
+        model: modelName,
         messages: messagesToOpenAI({ system, messages }),
         tool_choice: toolChoiceToOpenAI(toolChoice),
         tools: toolsToOpenAI(tools),

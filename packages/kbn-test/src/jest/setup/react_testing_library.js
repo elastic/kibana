@@ -80,6 +80,8 @@ console.error = (...args) => {
  * Tracking issue to clean this up https://github.com/elastic/kibana/issues/199100
  */
 if (REACT_VERSION.startsWith('18.')) {
-  console.warn('Running with React@18 and muting the legacy ReactDOM.render warning');
+  if (!process.env.CI) {
+    console.warn('Running with React@18 and muting the legacy ReactDOM.render warning');
+  }
   muteLegacyRootWarning();
 }
