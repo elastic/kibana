@@ -7,9 +7,12 @@
 
 import { useMemo } from 'react';
 import { type Conversation } from '@kbn/observability-ai-assistant-plugin/public';
-import { getAbsoluteTime } from '../utils/date';
+import { getAbsoluteTime, isValidDateMath } from '../utils/date';
 
-export function useConversationsByDate(conversations: Conversation[] = []) {
+export function useConversationsByDate(
+  conversations: Conversation[] = [],
+  getConversationHref?: (id: string) => string
+) {
   return useMemo(() => {
     const now = new Date();
 
@@ -21,7 +24,10 @@ export function useConversationsByDate(conversations: Conversation[] = []) {
     const startOfLastMonth = getAbsoluteTime('now-1M/M', { forceNow: now }) ?? 0;
     const startOfThisYear = getAbsoluteTime('now/y', { forceNow: now }) ?? 0;
 
-    const categories: Record<string, Conversation[]> = {
+    const categorizedConversations: Record<
+      string,
+      Array<{ id: string; label: string; lastUpdated: string; href?: string }>
+    > = {
       TODAY: [],
       YESTERDAY: [],
       THIS_WEEK: [],
@@ -33,31 +39,37 @@ export function useConversationsByDate(conversations: Conversation[] = []) {
     };
 
     conversations.forEach((conversation) => {
-      const lastUpdated = new Date(conversation.conversation.last_updated).valueOf();
-
-      if (isNaN(lastUpdated)) {
+      if (!isValidDateMath(conversation.conversation.last_updated)) {
         return;
       }
 
+      const lastUpdated = new Date(conversation.conversation.last_updated).valueOf();
+      const displayedConversation = {
+        id: conversation.conversation.id,
+        label: conversation.conversation.title,
+        lastUpdated: conversation.conversation.last_updated,
+        href: getConversationHref ? getConversationHref(conversation.conversation.id) : undefined,
+      };
+
       if (lastUpdated >= startOfToday) {
-        categories.TODAY.push(conversation);
+        categorizedConversations.TODAY.push(displayedConversation);
       } else if (lastUpdated >= startOfYesterday) {
-        categories.YESTERDAY.push(conversation);
+        categorizedConversations.YESTERDAY.push(displayedConversation);
       } else if (lastUpdated >= startOfThisWeek) {
-        categories.THIS_WEEK.push(conversation);
+        categorizedConversations.THIS_WEEK.push(displayedConversation);
       } else if (lastUpdated >= startOfLastWeek) {
-        categories.LAST_WEEK.push(conversation);
+        categorizedConversations.LAST_WEEK.push(displayedConversation);
       } else if (lastUpdated >= startOfThisMonth) {
-        categories.THIS_MONTH.push(conversation);
+        categorizedConversations.THIS_MONTH.push(displayedConversation);
       } else if (lastUpdated >= startOfLastMonth) {
-        categories.LAST_MONTH.push(conversation);
+        categorizedConversations.LAST_MONTH.push(displayedConversation);
       } else if (lastUpdated >= startOfThisYear) {
-        categories.THIS_YEAR.push(conversation);
+        categorizedConversations.THIS_YEAR.push(displayedConversation);
       } else {
-        categories.OLDER.push(conversation);
+        categorizedConversations.OLDER.push(displayedConversation);
       }
     });
 
-    return categories;
-  }, [conversations]);
+    return categorizedConversations;
+  }, [conversations, getConversationHref]);
 }

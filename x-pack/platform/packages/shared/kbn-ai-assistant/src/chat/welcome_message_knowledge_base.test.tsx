@@ -18,6 +18,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
   });
   type StatusType = NonNullable<UseKnowledgeBaseResult['status']['value']>;
   type EndpointType = StatusType['endpoint'];
+
   const endpoint: EndpointType = {
     inference_id: 'obs_ai_assistant_kb_inference',
     task_type: 'sparse_embedding',
@@ -31,6 +32,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
       },
     },
   };
+
   const initKnowledgeBase: UseKnowledgeBaseResult = {
     isInstalling: false,
     install: jest.fn(),
@@ -45,6 +47,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
       refresh: jest.fn(),
     },
   };
+
   const defaultConnectors: UseGenAIConnectorsResult = {
     connectors: [
       {
@@ -63,13 +66,8 @@ describe('WelcomeMessageKnowledgeBase', () => {
     selectConnector: jest.fn(),
     reloadConnectors: jest.fn(),
   };
-  function renderComponent({
-    knowledgeBase,
-    connectors,
-  }: {
-    knowledgeBase: Partial<UseKnowledgeBaseResult>;
-    connectors: Partial<UseGenAIConnectorsResult>;
-  }) {
+
+  function renderComponent({ knowledgeBase }: { knowledgeBase: Partial<UseKnowledgeBaseResult> }) {
     const mergedKnowledgeBase: UseKnowledgeBaseResult = {
       ...initKnowledgeBase,
       ...knowledgeBase,
@@ -92,7 +90,6 @@ describe('WelcomeMessageKnowledgeBase', () => {
       knowledgeBase: {
         isInstalling: true,
       },
-      connectors: defaultConnectors,
     });
 
     expect(
@@ -101,6 +98,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
 
     expect(screen.getByText('Setting up Knowledge base', { exact: false })).toBeInTheDocument();
   });
+
   it('renders "Setting up Knowledge base" message while model is being deployed without deployment or allocation state yet being reported', () => {
     renderComponent({
       knowledgeBase: {
@@ -116,12 +114,12 @@ describe('WelcomeMessageKnowledgeBase', () => {
           refresh: jest.fn(),
         },
       },
-      connectors: defaultConnectors,
     });
     expect(
       screen.getByText('We are setting up your knowledge base', { exact: false })
     ).toBeInTheDocument();
   });
+
   it('renders "Setting up Knowledge base" message while model is being deployed and starting', () => {
     renderComponent({
       knowledgeBase: {
@@ -140,13 +138,13 @@ describe('WelcomeMessageKnowledgeBase', () => {
           refresh: jest.fn(),
         },
       },
-      connectors: defaultConnectors,
     });
 
     expect(
       screen.getByText('We are setting up your knowledge base', { exact: false })
     ).toBeInTheDocument();
   });
+
   it('displays success message after installation and hides it after timeout', async () => {
     jest.useFakeTimers();
 
@@ -155,7 +153,6 @@ describe('WelcomeMessageKnowledgeBase', () => {
       knowledgeBase: {
         isInstalling: true,
       },
-      connectors: defaultConnectors,
     });
 
     // Step 2: Now it's ready
@@ -204,7 +201,6 @@ describe('WelcomeMessageKnowledgeBase', () => {
           },
         },
       },
-      connectors: defaultConnectors,
     });
     expect(screen.queryByText(/We are setting up your knowledge base/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Your Knowledge base hasn't been set up./i)).not.toBeInTheDocument();
@@ -216,7 +212,6 @@ describe('WelcomeMessageKnowledgeBase', () => {
         isInstalling: false,
         installError: new Error('inference endpoint failed to install'),
       },
-      connectors: defaultConnectors,
     });
     expect(
       screen.getByText("Your Knowledge base hasn't been set up", { exact: false })
@@ -232,7 +227,6 @@ describe('WelcomeMessageKnowledgeBase', () => {
       knowledgeBase: {
         isInstalling: false,
       },
-      connectors: defaultConnectors,
     });
     expect(
       screen.getByText("Your Knowledge base hasn't been set up", { exact: false })
@@ -255,7 +249,6 @@ describe('WelcomeMessageKnowledgeBase', () => {
           },
         },
       },
-      connectors: defaultConnectors,
     });
     expect(
       screen.getByText("Your Knowledge base hasn't been set up", { exact: false })

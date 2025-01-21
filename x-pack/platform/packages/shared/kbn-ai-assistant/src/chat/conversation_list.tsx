@@ -91,20 +91,20 @@ export function ConversationList({
   };
 
   // Categorize conversations by date
-  const conversationsCategorizedByDate = useConversationsByDate(conversations.value?.conversations);
-
-  const displayedConversations = Object.entries(conversationsCategorizedByDate).reduce(
-    (acc, [category, conversationList]) => {
-      acc[category] = conversationList?.map(({ conversation }) => ({
-        id: conversation.id,
-        label: conversation.title,
-        lastUpdated: conversation.last_updated,
-        href: getConversationHref ? getConversationHref(conversation.id) : undefined,
-      }));
-      return acc;
-    },
-    {} as Record<string, Array<{ id: string; label: string; lastUpdated: string; href?: string }>>
+  const conversationsCategorizedByDate = useConversationsByDate(
+    conversations.value?.conversations,
+    getConversationHref
   );
+
+  const onClickConversation = (
+    e: MouseEvent<HTMLButtonElement> | MouseEvent<HTMLAnchorElement>,
+    conversationId?: string
+  ) => {
+    if (onConversationSelect) {
+      e.preventDefault();
+      onConversationSelect(conversationId);
+    }
+  };
 
   return (
     <>
@@ -152,18 +152,13 @@ export function ConversationList({
                     label={newConversation.label}
                     href={newConversation.href}
                     size="s"
-                    onClick={(event) => {
-                      if (onConversationSelect) {
-                        event.preventDefault();
-                        onConversationSelect(newConversation.id);
-                      }
-                    }}
+                    onClick={(event) => onClickConversation(event, newConversation.id)}
                   />
                 </EuiListGroup>
               ) : null}
 
               {/* Render conversations categorized by date */}
-              {Object.entries(displayedConversations).map(([category, conversationList]) =>
+              {Object.entries(conversationsCategorizedByDate).map(([category, conversationList]) =>
                 conversationList.length ? (
                   <EuiFlexItem grow={false} key={category}>
                     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
@@ -185,12 +180,7 @@ export function ConversationList({
                           wrapText
                           showToolTip
                           href={conversation.href}
-                          onClick={(event) => {
-                            if (onConversationSelect) {
-                              event.preventDefault();
-                              onConversationSelect(conversation.id);
-                            }
-                          }}
+                          onClick={(event) => onClickConversation(event, conversation.id)}
                           extraAction={{
                             iconType: 'trash',
                             'aria-label': i18n.translate(
@@ -224,14 +214,7 @@ export function ConversationList({
                 <EuiFlexItem grow className={newChatButtonWrapperClassName}>
                   <NewChatButton
                     href={newConversationHref}
-                    onClick={(
-                      event: MouseEvent<HTMLButtonElement> | MouseEvent<HTMLAnchorElement>
-                    ) => {
-                      if (onConversationSelect) {
-                        event.preventDefault();
-                        onConversationSelect(undefined);
-                      }
-                    }}
+                    onClick={(event) => onClickConversation(event)}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
