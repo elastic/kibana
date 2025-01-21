@@ -18,7 +18,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import assert from 'assert';
-import type { Stored } from '../types';
+import type { Stored, SiemRuleMigrationsClientDependencies } from '../types';
 import type { IndexNameProvider } from './rule_migrations_data_client';
 
 const DEFAULT_PIT_KEEP_ALIVE: Duration = '30s' as const;
@@ -30,7 +30,8 @@ export class RuleMigrationsDataBaseClient {
     protected getIndexName: IndexNameProvider,
     protected currentUser: AuthenticatedUser,
     protected esScopedClient: IScopedClusterClient,
-    protected logger: Logger
+    protected logger: Logger,
+    protected dependencies: SiemRuleMigrationsClientDependencies
   ) {
     this.esClient = esScopedClient.asInternalUser;
   }
