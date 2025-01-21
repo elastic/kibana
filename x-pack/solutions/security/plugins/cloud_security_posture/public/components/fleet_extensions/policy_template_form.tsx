@@ -765,11 +765,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     );
 
     const inputName = `${input.policy_template}-${input.type}`;
-    const isConditionallyRequired =
-      validationResults?.inputs &&
-      // validationResults.inputs[inputName] &&
-      // validationResults.inputs[inputName].required_vars &&
-      Object.entries(validationResults.inputs[inputName].required_vars ?? {}).length > 0;
+    const hasInvalidRequiredVars = !!validationResults?.inputs?.[inputName]?.required_vars;
 
     const [isLoading, setIsLoading] = useState(validationResultsNonNullFields.length > 0);
     const [canFetchIntegration, setCanFetchIntegration] = useState(true);
@@ -1017,7 +1013,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           disabled={isEditPage}
           setupTechnology={setupTechnology}
           isEditPage={isEditPage}
-          isConditionallyRequired={isConditionallyRequired}
+          hasInvalidRequiredVars={hasInvalidRequiredVars}
         />
         <EuiSpacer />
       </>

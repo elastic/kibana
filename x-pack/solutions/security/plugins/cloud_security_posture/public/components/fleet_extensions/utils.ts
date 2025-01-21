@@ -395,6 +395,9 @@ export const findVariableDef = (packageInfo: PackageInfo, key: string) => {
     .find((vars) => vars?.name === key);
 };
 
+export const fieldIsInvalid = (value: string | undefined, hasInvalidRequiredVars: boolean) =>
+  hasInvalidRequiredVars && !value;
+
 export const POLICY_TEMPLATE_FORM_DTS = {
   LOADER: 'policy-template-form-loader',
 };

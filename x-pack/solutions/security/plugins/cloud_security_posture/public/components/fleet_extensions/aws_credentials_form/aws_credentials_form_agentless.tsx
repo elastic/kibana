@@ -37,7 +37,6 @@ import {
   AwsCredentialTypeSelector,
   ReadDocumentation,
 } from './aws_credentials_form';
-
 const CLOUD_FORMATION_EXTERNAL_DOC_URL =
   'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html';
 
@@ -179,6 +178,7 @@ export const AwsCredentialsFormAgentless = ({
   newPolicy,
   packageInfo,
   updatePolicy,
+  hasInvalidRequiredVars,
 }: AwsFormProps) => {
   const awsCredentialsType = getAwsCredentialsType(input) || DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE;
   const options = getAwsCredentialsFormOptions();
@@ -282,6 +282,7 @@ export const AwsCredentialsFormAgentless = ({
         onChange={(key, value) => {
           updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }));
         }}
+        hasInvalidRequiredVars={hasInvalidRequiredVars}
       />
       <ReadDocumentation url={documentationLink} />
     </>

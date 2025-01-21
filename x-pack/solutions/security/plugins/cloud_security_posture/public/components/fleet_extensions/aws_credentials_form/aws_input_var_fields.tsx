@@ -11,13 +11,13 @@ import { PackageInfo } from '@kbn/fleet-plugin/common';
 import { css } from '@emotion/react';
 import { LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
 import { AwsOptions } from './get_aws_credentials_form_options';
-import { findVariableDef } from '../utils';
+import { findVariableDef, fieldIsInvalid } from '../utils';
 
 export const AwsInputVarFields = ({
   fields,
   onChange,
   packageInfo,
-  isConditionallyRequired,
+  hasInvalidRequiredVars,
 }: {
   fields: Array<
     AwsOptions[keyof AwsOptions]['fields'][number] & {
@@ -28,74 +28,74 @@ export const AwsInputVarFields = ({
   >;
   onChange: (key: string, value: string) => void;
   packageInfo: PackageInfo;
-  isConditionallyRequired: boolean;
+  hasInvalidRequiredVars: boolean;
 }) => {
   return (
     <div>
-      {fields.map((field, index) => (
-        <div key={index}>
-          {field.type === 'password' && field.isSecret === true && (
-            <>
-              <EuiSpacer size="m" />
-              <div
-                css={css`
-                  width: 100%;
-                  .euiFormControlLayout,
-                  .euiFormControlLayout__childrenWrapper,
-                  .euiFormRow,
-                  input {
-                    max-width: 100%;
+      {fields.map((field, index) => {
+        const invalid = fieldIsInvalid(field.value, hasInvalidRequiredVars);
+        const invalidError = `${field.label} is required`;
+        return (
+          <div key={index}>
+            {field.type === 'password' && field.isSecret === true && (
+              <>
+                <EuiSpacer size="m" />
+                <div
+                  css={css`
                     width: 100%;
-                  }
-                `}
-              >
-                <Suspense fallback={<EuiLoadingSpinner size="l" />}>
-                  <LazyPackagePolicyInputVarField
-                    varDef={{
-                      ...findVariableDef(packageInfo, field.id)!,
-                      required: true,
-                      type: 'password',
-                    }}
-                    value={field.value || ''}
-                    onChange={(value) => {
-                      onChange(field.id, value);
-                    }}
-                    errors={
-                      isConditionallyRequired && !field.value ? [`${field.label} is required`] : []
+                    .euiFormControlLayout,
+                    .euiFormControlLayout__childrenWrapper,
+                    .euiFormRow,
+                    input {
+                      max-width: 100%;
+                      width: 100%;
                     }
-                    forceShowErrors={isConditionallyRequired && !field.value}
-                    isEditPage={true}
-                    data-test-subj={field.dataTestSubj}
-                  />
-                </Suspense>
-              </div>
-              <EuiSpacer size="m" />
-            </>
-          )}
-          {field.type === 'text' && (
-            <EuiFormRow
-              key={field.id}
-              label={field.label}
-              isInvalid={isConditionallyRequired && !field.value}
-              error={
-                isConditionallyRequired && !field.value ? `${field.label} is required` : undefined
-              }
-              fullWidth
-              hasChildLabel={true}
-              id={field.id}
-            >
-              <EuiFieldText
-                id={field.id}
+                  `}
+                >
+                  <Suspense fallback={<EuiLoadingSpinner size="l" />}>
+                    <LazyPackagePolicyInputVarField
+                      varDef={{
+                        ...findVariableDef(packageInfo, field.id)!,
+                        required: true,
+                        type: 'password',
+                      }}
+                      value={field.value || ''}
+                      onChange={(value) => {
+                        onChange(field.id, value);
+                      }}
+                      errors={invalid ? [invalidError] : []}
+                      forceShowErrors={invalid}
+                      isEditPage={true}
+                      data-test-subj={field.dataTestSubj}
+                    />
+                  </Suspense>
+                </div>
+                <EuiSpacer size="m" />
+              </>
+            )}
+            {field.type === 'text' && (
+              <EuiFormRow
+                key={field.id}
+                label={field.label}
+                isInvalid={invalid}
+                error={invalid ? invalidError : undefined}
                 fullWidth
-                value={field.value || ''}
-                isInvalid={isConditionallyRequired && !field.value}
-                onChange={(event) => onChange(field.id, event.target.value)}
-                data-test-subj={field.dataTestSubj}
-              />
-            </EuiFormRow>
-          )}
-        </div>
-      ))}
+                hasChildLabel={true}
+                id={field.id}
+              >
+                <EuiFieldText
+                  id={field.id}
+                  fullWidth
+                  value={field.value || ''}
+                  isInvalid={invalid}
+                  onChange={(event) => onChange(field.id, event.target.value)}
+                  data-test-subj={field.dataTestSubj}
+                />
+              </EuiFormRow>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };
