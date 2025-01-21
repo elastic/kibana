@@ -15,7 +15,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provi
 import {
   clearConversations,
   clearKnowledgeBase,
-  createKnowledgeBaseModel,
+  importTinyElserModel,
   deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
   setupKnowledgeBase,
@@ -41,7 +41,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     this.tags(['failsOnMKI']);
 
     before(async () => {
-      await createKnowledgeBaseModel(ml);
+      await importTinyElserModel(ml);
       await setupKnowledgeBase(observabilityAIAssistantAPIClient);
       await waitForKnowledgeBaseReady(getService);
     });

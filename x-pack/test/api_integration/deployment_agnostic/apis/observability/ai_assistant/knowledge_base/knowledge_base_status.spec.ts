@@ -10,7 +10,7 @@ import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-pl
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   deleteKnowledgeBaseModel,
-  createKnowledgeBaseModel,
+  importTinyElserModel,
   TINY_ELSER,
   deleteInferenceEndpoint,
   setupKnowledgeBase,
@@ -24,7 +24,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('/internal/observability_ai_assistant/kb/status', function () {
     beforeEach(async () => {
-      await createKnowledgeBaseModel(ml);
+      await importTinyElserModel(ml);
       await setupKnowledgeBase(observabilityAIAssistantAPIClient);
       await waitForKnowledgeBaseReady(getService);
     });

@@ -10,7 +10,7 @@ import { type KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   clearKnowledgeBase,
-  createKnowledgeBaseModel,
+  importTinyElserModel,
   deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
   setupKnowledgeBase,
@@ -26,7 +26,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
 
     before(async () => {
-      await createKnowledgeBaseModel(ml);
+      await importTinyElserModel(ml);
       await setupKnowledgeBase(observabilityAIAssistantAPIClient);
       await waitForKnowledgeBaseReady(getService);
     });

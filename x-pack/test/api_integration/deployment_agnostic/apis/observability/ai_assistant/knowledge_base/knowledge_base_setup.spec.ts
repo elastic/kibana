@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   deleteKnowledgeBaseModel,
-  createKnowledgeBaseModel,
+  importTinyElserModel,
   TINY_ELSER,
   deleteInferenceEndpoint,
 } from './helpers';
@@ -26,7 +26,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     it('returns model info when successful', async () => {
-      await createKnowledgeBaseModel(ml);
+      await importTinyElserModel(ml);
       const res = await observabilityAIAssistantAPIClient.admin({
         endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
         params: {
