@@ -218,7 +218,6 @@ export class EntityStoreDataClient {
     const { experimentalFeatures } = this.options;
     const enabledEntityTypes = getEnabledStoreEntityTypes(experimentalFeatures);
 
-    // TODO ADD TEST
     // entityTypes param is defined only enable the engines that are provided
     const enginesTypes = entityTypes
       ? (entityTypes as EntityType[]).filter((type) => enabledEntityTypes.includes(type))
