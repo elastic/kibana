@@ -61,7 +61,7 @@ For Elastic Security solution release information, refer to {security-guide}/rel
 * `DELETE /api/detection_engine/rules/_bulk_delete` has been replaced by `POST /api/detection_engine/rules/_bulk_action`
 * `POST api/detection_engine/rules/_bulk_delete` has been replaced by `POST /api/detection_engine/rules/_bulk_action`
 --
-These changes were introduced in PR {kibana-pull}#197422[#197422].
+These changes were introduced in PR {kibana-pull}#197422[#197422]
 
 *Impact* +
 Deprecated endpoints will fail with a 404 status code starting from version 9.0.0
