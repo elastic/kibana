@@ -14,7 +14,6 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
-
 import { ControlsPluginStartDeps } from '../types';
 
 export let coreServices: CoreStart;
