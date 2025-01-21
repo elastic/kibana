@@ -8,12 +8,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type {
-  ESQLColumn,
-  ESQLCommand,
-  ESQLAstItem,
-  ESQLMessage,
-  ESQLFunction,
+import {
+  type ESQLColumn,
+  type ESQLCommand,
+  type ESQLAstItem,
+  type ESQLMessage,
+  type ESQLFunction,
+  isFunctionExpression,
+  isWhereExpression,
+  isFieldExpression,
+  Walker,
 } from '@kbn/esql-ast';
 import {
   getFunctionDefinition,
@@ -61,7 +65,13 @@ const statsValidator = (command: ESQLCommand) => {
   // until an agg function is detected
   // in the long run this might be integrated into the validation function
   const statsArg = command.args
-    .flatMap((arg) => (isAssignment(arg) ? arg.args[1] : arg))
+    .flatMap((arg) => {
+      if (isWhereExpression(arg) && isFunctionExpression(arg.args[0])) {
+        arg = arg.args[0] as ESQLFunction;
+      }
+
+      return isAssignment(arg) ? arg.args[1] : arg;
+    })
     .filter(isFunctionItem);
 
   if (statsArg.length) {
@@ -73,14 +83,31 @@ const statsValidator = (command: ESQLCommand) => {
     }
 
     function checkAggExistence(arg: ESQLFunction): boolean {
+      if (isWhereExpression(arg)) {
+        return checkAggExistence(arg.args[0] as ESQLFunction);
+      }
+
+      if (isFieldExpression(arg)) {
+        const agg = arg.args[1];
+        const firstFunction = Walker.match(agg, { type: 'function' });
+
+        if (!firstFunction) {
+          return false;
+        }
+
+        return checkAggExistence(firstFunction as ESQLFunction);
+      }
+
       // TODO the grouping function check may not
       // hold true for all future cases
       if (isAggFunction(arg) || isFunctionOperatorParam(arg)) {
         return true;
       }
+
       if (isOtherFunction(arg)) {
         return (arg as ESQLFunction).args.filter(isFunctionItem).some(checkAggExistence);
       }
+
       return false;
     }
     // first check: is there an agg function somewhere?
@@ -153,6 +180,7 @@ const statsValidator = (command: ESQLCommand) => {
       }
     }
   }
+
   return messages;
 };
 export const commandDefinitions: Array<CommandDefinition<any>> = [
