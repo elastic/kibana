@@ -20,6 +20,8 @@ export default function ({ getService }: FtrProviderContext) {
   let roleAuthc: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
   const svlDatastreamsHelpers = getService('svlDatastreamsHelpers');
+  const supertest = getService('supertest');
+  const es = getService('es');
 
   describe('Data streams', function () {
     // see details: https://github.com/elastic/kibana/issues/187372
@@ -131,7 +133,7 @@ export default function ({ getService }: FtrProviderContext) {
           const logsdbDataStreamName = 'logsdb-test-data-stream';
           const indexMode = 'logsdb';
 
-          await createDataStream(logsdbDataStreamName, indexMode);
+          await svlDatastreamsHelpers.createDataStream(logsdbDataStreamName, indexMode);
 
           const { body: dataStream } = await supertest
             .get(`${API_BASE_PATH}/data_streams/${logsdbDataStreamName}`)
@@ -140,7 +142,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(dataStream.indexMode).to.eql(indexMode);
 
-          await deleteDataStream(logsdbDataStreamName);
+          await svlDatastreamsHelpers.deleteDataStream(logsdbDataStreamName);
         });
 
         it('returns logsdb index mode for logs-*-* data stream if logsdg.enabled setting is true', async () => {
@@ -157,7 +159,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           const logsdbDataStreamName = 'logs-test-1';
-          await createDataStream(logsdbDataStreamName);
+          await svlDatastreamsHelpers.createDataStream(logsdbDataStreamName);
 
           const { body: dataStream } = await supertest
             .get(`${API_BASE_PATH}/data_streams/${logsdbDataStreamName}`)
@@ -166,7 +168,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(dataStream.indexMode).to.eql('logsdb');
 
-          await deleteDataStream(logsdbDataStreamName);
+          await svlDatastreamsHelpers.deleteDataStream(logsdbDataStreamName);
         });
 
         it('returns standard index mode for logs-*-* data stream if logsdg.enabled setting is false', async () => {
@@ -183,7 +185,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           const logsdbDataStreamName = 'logs-test-2';
-          await createDataStream(logsdbDataStreamName);
+          await svlDatastreamsHelpers.createDataStream(logsdbDataStreamName);
 
           const { body: dataStream } = await supertest
             .get(`${API_BASE_PATH}/data_streams/${logsdbDataStreamName}`)
@@ -192,7 +194,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(dataStream.indexMode).to.eql('standard');
 
-          await deleteDataStream(logsdbDataStreamName);
+          await svlDatastreamsHelpers.deleteDataStream(logsdbDataStreamName);
         });
 
         // In serverless Kibana, the cluster.logsdb.enabled setting is true by default
@@ -210,7 +212,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           const logsdbDataStreamName = 'logs-test-3';
-          await createDataStream(logsdbDataStreamName);
+          await svlDatastreamsHelpers.createDataStream(logsdbDataStreamName);
 
           const { body: dataStream } = await supertest
             .get(`${API_BASE_PATH}/data_streams/${logsdbDataStreamName}`)
@@ -219,7 +221,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(dataStream.indexMode).to.eql('logsdb');
 
-          await deleteDataStream(logsdbDataStreamName);
+          await svlDatastreamsHelpers.deleteDataStream(logsdbDataStreamName);
         });
       });
     });

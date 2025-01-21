@@ -130,12 +130,14 @@ export default function ({ getService }: FtrProviderContext) {
         describe('with logs-*-* index pattern', () => {
           const logsdbTemplateName = 'logs';
           before(async () => {
-            const template = getTemplatePayload(logsdbTemplateName, ['logs-*-*']);
-            await createTemplate(template).expect(200);
+            const template = svlTemplatesHelpers.getTemplatePayload(logsdbTemplateName, [
+              'logs-*-*',
+            ]);
+            await svlTemplatesApi.createTemplate(template).expect(200);
           });
 
           after(async () => {
-            await deleteTemplates([{ name: logsdbTemplateName }]);
+            await svlTemplatesApi.deleteTemplates([{ name: logsdbTemplateName }]);
           });
 
           it('returns logsdb index mode if logsdg.enabled setting is true', async () => {
@@ -151,7 +153,11 @@ export default function ({ getService }: FtrProviderContext) {
               },
             });
 
-            const { body } = await getOneTemplate(logsdbTemplateName).expect(200);
+            const { body, status } = await supertestWithoutAuth
+              .get(`${API_BASE_PATH}/index_templates/${logsdbTemplateName}`)
+              .set(internalReqHeader)
+              .set(roleAuthc.apiKeyHeader);
+            expect(status).to.eql(200);
             expect(body.indexMode).to.equal('logsdb');
           });
 
@@ -168,7 +174,11 @@ export default function ({ getService }: FtrProviderContext) {
               },
             });
 
-            const { body } = await getOneTemplate(logsdbTemplateName).expect(200);
+            const { body, status } = await supertestWithoutAuth
+              .get(`${API_BASE_PATH}/index_templates/${logsdbTemplateName}`)
+              .set(internalReqHeader)
+              .set(roleAuthc.apiKeyHeader);
+            expect(status).to.eql(200);
             expect(body.indexMode).to.equal('standard');
           });
 
@@ -186,7 +196,11 @@ export default function ({ getService }: FtrProviderContext) {
               },
             });
 
-            const { body } = await getOneTemplate(logsdbTemplateName).expect(200);
+            const { body, status } = await supertestWithoutAuth
+              .get(`${API_BASE_PATH}/index_templates/${logsdbTemplateName}`)
+              .set(internalReqHeader)
+              .set(roleAuthc.apiKeyHeader);
+            expect(status).to.eql(200);
             expect(body.indexMode).to.equal('logsdb');
           });
         });
