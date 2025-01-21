@@ -141,7 +141,7 @@ describe('Search search provider', () => {
             mockSearchProviderContext
           )
         ).toBe('(a|)', {
-          a: [{ score: 80 }],
+          a: expect.arrayContaining([{ ...mongoResult, score: 80 }]),
         });
       });
     });
@@ -265,7 +265,6 @@ describe('Search search provider', () => {
           )
         ).toBe('(a|)', {
           a: expect.arrayContaining([
-            { score: 80 },
             { ...nativeMongoResult, score: 80 },
             { ...customizedConnectorResult, score: 80 },
           ]),
