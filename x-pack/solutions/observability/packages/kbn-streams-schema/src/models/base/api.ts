@@ -16,10 +16,10 @@ export interface StreamUpsertRequestBase {
   dashboards: string[];
 }
 
-export const streamUpsertRequestSchemaBase: z.Schema<StreamUpsertRequestBase> = z.strictObject({
+export const streamUpsertRequestSchemaBase: z.Schema<StreamUpsertRequestBase> = z.object({
   dashboards: z.array(nonEmptyStringSchema),
 });
 
-export const streamGetResponseSchemaBase: z.Schema<StreamGetResponseBase> = z.strictObject({
+export const streamGetResponseSchemaBase: z.Schema<StreamGetResponseBase> = z.object({
   dashboards: z.array(nonEmptyStringSchema),
 });

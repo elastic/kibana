@@ -35,13 +35,13 @@ export interface UnaryFilterCondition {
   operator: UnaryOperator;
 }
 
-export const binaryFilterConditionSchema: z.Schema<BinaryFilterCondition> = z.strictObject({
+export const binaryFilterConditionSchema: z.Schema<BinaryFilterCondition> = z.object({
   field: nonEmptyStringSchema,
   operator: z.enum(['eq', 'neq', 'lt', 'lte', 'gt', 'gte', 'contains', 'startsWith', 'endsWith']),
   value: stringOrNumberOrBoolean,
 });
 
-export const unaryFilterConditionSchema: z.Schema<UnaryFilterCondition> = z.strictObject({
+export const unaryFilterConditionSchema: z.Schema<UnaryFilterCondition> = z.object({
   field: nonEmptyStringSchema,
   operator: z.enum(['exists', 'notExists']),
 });
@@ -86,10 +86,10 @@ export const conditionSchema: z.Schema<Condition> = z.lazy(() =>
   ])
 );
 
-export const andConditionSchema = z.strictObject({ and: z.array(conditionSchema) });
-export const orConditionSchema = z.strictObject({ or: z.array(conditionSchema) });
-export const neverConditionSchema = z.strictObject({ never: z.strictObject({}) });
-export const alwaysConditionSchema = z.strictObject({ always: z.strictObject({}) });
+export const andConditionSchema = z.object({ and: z.array(conditionSchema) });
+export const orConditionSchema = z.object({ or: z.array(conditionSchema) });
+export const neverConditionSchema = z.object({ never: z.strictObject({}) });
+export const alwaysConditionSchema = z.object({ always: z.strictObject({}) });
 
 export const isBinaryFilterCondition = createIsNarrowSchema(
   conditionSchema,

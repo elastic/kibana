@@ -47,44 +47,44 @@ interface UnwiredStreamDefinition extends StreamDefinitionBase {
 
 type IngestStreamDefinition = WiredStreamDefinition | UnwiredStreamDefinition;
 
-const ingestBaseSchema: z.Schema<IngestBase> = z.strictObject({
+const ingestBaseSchema: z.Schema<IngestBase> = z.object({
   processing: z.array(processorDefinitionSchema),
   routing: z.array(routingDefinitionSchema),
 });
 
 const unwiredIngestSchema: z.Schema<UnwiredIngest> = z.intersection(
   ingestBaseSchema,
-  z.strictObject({
-    unwired: z.strictObject({}),
+  z.object({
+    unwired: z.object({}),
   })
 );
 
 const wiredIngestSchema: z.Schema<WiredIngest> = z.intersection(
   ingestBaseSchema,
-  z.strictObject({
-    wired: z.strictObject({
+  z.object({
+    wired: z.object({
       fields: fieldDefinitionSchema,
     }),
   })
 );
 
-const unwiredStreamDefinitionSchemaBase: z.Schema<UnwiredStreamDefinitionBase> = z.strictObject({
+const unwiredStreamDefinitionSchemaBase: z.Schema<UnwiredStreamDefinitionBase> = z.object({
   ingest: unwiredIngestSchema,
 });
 
-const wiredStreamDefinitionSchemaBase: z.Schema<WiredStreamDefinitionBase> = z.strictObject({
+const wiredStreamDefinitionSchemaBase: z.Schema<WiredStreamDefinitionBase> = z.object({
   ingest: wiredIngestSchema,
 });
 
 const wiredStreamDefinitionSchema: z.Schema<WiredStreamDefinition> = z.intersection(
-  z.strictObject({
+  z.object({
     name: z.string(),
   }),
   wiredStreamDefinitionSchemaBase
 );
 
 const unwiredStreamDefinitionSchema: z.Schema<UnwiredStreamDefinition> = z.intersection(
-  z.strictObject({
+  z.object({
     name: nonEmptyStringSchema,
   }),
   unwiredStreamDefinitionSchemaBase

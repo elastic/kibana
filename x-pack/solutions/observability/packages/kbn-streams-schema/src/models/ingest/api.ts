@@ -29,7 +29,7 @@ import {
   elasticsearchAssetSchema,
   ingestStreamLifecycleSchema,
 } from './common';
-import { createIsNarrowSchema } from '../../helpers';
+import { createIsNarrowSchema, createIsOrThrowSchema } from '../../helpers';
 
 /**
  * Ingest get response
@@ -55,11 +55,11 @@ interface UnwiredIngestUpsertRequest {
 
 type IngestUpsertRequest = WiredIngestUpsertRequest | UnwiredIngestUpsertRequest;
 
-const wiredIngestUpsertRequestSchema: z.Schema<WiredIngestUpsertRequest> = z.strictObject({
+const wiredIngestUpsertRequestSchema: z.Schema<WiredIngestUpsertRequest> = z.object({
   ingest: wiredIngestSchema,
 });
 
-const unwiredIngestUpsertRequestSchema: z.Schema<UnwiredIngestUpsertRequest> = z.strictObject({
+const unwiredIngestUpsertRequestSchema: z.Schema<UnwiredIngestUpsertRequest> = z.object({
   ingest: unwiredIngestSchema,
 });
 
@@ -103,14 +103,14 @@ type IngestStreamUpsertRequest = WiredStreamUpsertRequest | UnwiredStreamUpsertR
 
 const unwiredStreamUpsertRequestSchema: z.Schema<UnwiredStreamUpsertRequest> = z.intersection(
   streamUpsertRequestSchemaBase,
-  z.strictObject({
+  z.object({
     stream: unwiredStreamDefinitionSchemaBase,
   })
 );
 
 const wiredStreamUpsertRequestSchema: z.Schema<WiredStreamUpsertRequest> = z.intersection(
   streamUpsertRequestSchemaBase,
-  z.strictObject({
+  z.object({
     stream: wiredStreamDefinitionSchemaBase,
   })
 );
@@ -122,14 +122,14 @@ const ingestStreamUpsertRequestSchema: z.Schema<IngestStreamUpsertRequest> = z.u
 
 const ingestStreamGetResponseSchemaBase: z.Schema<IngestStreamGetResponseBase> = z.intersection(
   streamGetResponseSchemaBase,
-  z.strictObject({
+  z.object({
     lifecycle: ingestStreamLifecycleSchema,
   })
 );
 
 const wiredStreamGetResponseSchema: z.Schema<WiredStreamGetResponse> = z.intersection(
   ingestStreamGetResponseSchemaBase,
-  z.strictObject({
+  z.object({
     stream: wiredStreamDefinitionSchemaBase,
     inherited_fields: inheritedFieldDefinitionSchema,
   })
@@ -137,7 +137,7 @@ const wiredStreamGetResponseSchema: z.Schema<WiredStreamGetResponse> = z.interse
 
 const unwiredStreamGetResponseSchema: z.Schema<UnwiredStreamGetResponse> = z.intersection(
   ingestStreamGetResponseSchemaBase,
-  z.strictObject({
+  z.object({
     stream: unwiredStreamDefinitionSchemaBase,
     elasticsearch_assets: z.array(elasticsearchAssetSchema),
   })
@@ -158,11 +158,23 @@ const isUnWiredStreamGetResponse = createIsNarrowSchema(
   wiredStreamGetResponseSchema
 );
 
+const wiredStreamGetResponseOrThrow = createIsOrThrowSchema(
+  ingestStreamGetResponseSchema,
+  wiredStreamGetResponseSchema
+);
+
+const unwiredStreamGetResponseOrThrow = createIsOrThrowSchema(
+  ingestStreamGetResponseSchema,
+  unwiredStreamGetResponseSchema
+);
+
 export {
   ingestStreamUpsertRequestSchema,
   ingestUpsertRequestSchema,
   isWiredStreamGetResponse,
   isUnWiredStreamGetResponse,
+  wiredStreamGetResponseOrThrow,
+  unwiredStreamGetResponseOrThrow,
   type IngestGetResponse,
   type IngestStreamGetResponse,
   type IngestStreamUpsertRequest,

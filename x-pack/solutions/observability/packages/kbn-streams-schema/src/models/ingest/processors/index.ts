@@ -26,11 +26,11 @@ export interface GrokProcessorDefinition {
   grok: GrokProcessorConfig;
 }
 
-const processorBaseSchema = z.strictObject({
+const processorBaseSchema = z.object({
   if: conditionSchema,
 });
 
-export const grokProcessorDefinitionSchema: z.Schema<GrokProcessorDefinition> = z.object({
+export const grokProcessorDefinitionSchema: z.Schema<GrokProcessorDefinition> = z.strictObject({
   grok: z.intersection(
     processorBaseSchema,
     z.object({
@@ -55,18 +55,19 @@ export interface DissectProcessorDefinition {
   dissect: DissectProcessorConfig;
 }
 
-export const dissectProcessorDefinitionSchema: z.Schema<DissectProcessorDefinition> = z.object({
-  dissect: z.intersection(
-    processorBaseSchema,
-    z.object({
-      field: nonEmptyStringSchema,
-      pattern: nonEmptyStringSchema,
-      append_separator: z.optional(nonEmptyStringSchema),
-      ignore_failure: z.optional(z.boolean()),
-      ignore_missing: z.optional(z.boolean()),
-    })
-  ),
-});
+export const dissectProcessorDefinitionSchema: z.Schema<DissectProcessorDefinition> =
+  z.strictObject({
+    dissect: z.intersection(
+      processorBaseSchema,
+      z.object({
+        field: nonEmptyStringSchema,
+        pattern: nonEmptyStringSchema,
+        append_separator: z.optional(nonEmptyStringSchema),
+        ignore_failure: z.optional(z.boolean()),
+        ignore_missing: z.optional(z.boolean()),
+      })
+    ),
+  });
 
 export type ProcessorDefinition = DissectProcessorDefinition | GrokProcessorDefinition;
 

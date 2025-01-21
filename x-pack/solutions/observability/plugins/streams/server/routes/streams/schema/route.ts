@@ -105,7 +105,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     path: z.object({ id: z.string() }),
     body: z.object({
       field_definitions: z.array(
-        z.intersection(fieldDefinitionConfigSchema, z.strictObject({ name: z.string() }))
+        z.intersection(fieldDefinitionConfigSchema, z.object({ name: z.string() }))
       ),
     }),
   }),

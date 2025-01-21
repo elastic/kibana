@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { WiredStreamConfigDefinition, WiredStreamDefinition } from '@kbn/streams-schema';
+import { IngestStreamUpsertRequest, WiredStreamDefinition } from '@kbn/streams-schema';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { disableStreams, enableStreams, putStream } from './helpers/requests';
 import {
@@ -16,24 +16,22 @@ import {
 
 const rootStreamDefinition: WiredStreamDefinition = {
   name: 'logs',
-  stream: {
-    ingest: {
-      processing: [],
-      routing: [],
-      wired: {
-        fields: {
-          '@timestamp': {
-            type: 'date',
-          },
-          message: {
-            type: 'match_only_text',
-          },
-          'host.name': {
-            type: 'keyword',
-          },
-          'log.level': {
-            type: 'keyword',
-          },
+  ingest: {
+    processing: [],
+    routing: [],
+    wired: {
+      fields: {
+        '@timestamp': {
+          type: 'date',
+        },
+        message: {
+          type: 'match_only_text',
+        },
+        'host.name': {
+          type: 'keyword',
+        },
+        'log.level': {
+          type: 'keyword',
         },
       },
     },
@@ -55,21 +53,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('Should not allow processing changes', async () => {
-      const body: WiredStreamConfigDefinition = {
-        ingest: {
-          ...rootStreamDefinition.stream.ingest,
-          processing: [
-            {
-              config: {
+      const body: IngestStreamUpsertRequest = {
+        dashboards: [],
+        stream: {
+          ingest: {
+            ...rootStreamDefinition.ingest,
+            processing: [
+              {
                 grok: {
                   field: 'message',
                   patterns: [
                     '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
                   ],
+                  if: { always: {} },
                 },
               },
-            },
-          ],
+            ],
+          },
         },
       };
       const response = await putStream(apiClient, 'logs', body, 400);
@@ -80,14 +80,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('Should not allow fields changes', async () => {
-      const body: WiredStreamConfigDefinition = {
-        ingest: {
-          ...rootStreamDefinition.stream.ingest,
-          wired: {
-            fields: {
-              ...rootStreamDefinition.stream.ingest.wired.fields,
-              'log.level': {
-                type: 'boolean',
+      const body: IngestStreamUpsertRequest = {
+        dashboards: [],
+        stream: {
+          ingest: {
+            ...rootStreamDefinition.ingest,
+            wired: {
+              fields: {
+                ...rootStreamDefinition.ingest.wired.fields,
+                'log.level': {
+                  type: 'boolean',
+                },
               },
             },
           },
@@ -98,19 +101,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('Should allow routing changes', async () => {
-      const body: WiredStreamConfigDefinition = {
-        ingest: {
-          ...rootStreamDefinition.stream.ingest,
-          routing: [
-            {
-              name: 'logs.gcpcloud',
-              condition: {
-                field: 'cloud.provider',
-                operator: 'eq',
-                value: 'gcp',
+      const body: IngestStreamUpsertRequest = {
+        dashboards: [],
+        stream: {
+          ingest: {
+            ...rootStreamDefinition.ingest,
+            routing: [
+              {
+                destination: 'logs.gcpcloud',
+                if: {
+                  field: 'cloud.provider',
+                  operator: 'eq',
+                  value: 'gcp',
+                },
               },
-            },
-          ],
+            ],
+          },
         },
       };
       const response = await putStream(apiClient, 'logs', body);

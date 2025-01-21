@@ -45,7 +45,7 @@ interface UnwiredReadStreamDefinition extends ReadStreamDefinitionBase {
 
 type ReadStreamDefinition = WiredReadStreamDefinition | UnwiredReadStreamDefinition;
 
-const readStreamDefinitionSchemaBase: z.Schema<ReadStreamDefinitionBase> = z.strictObject({
+const readStreamDefinitionSchemaBase: z.Schema<ReadStreamDefinitionBase> = z.object({
   name: z.string(),
   dashboards: z.array(nonEmptyStringSchema),
   elasticsearch_assets: z.array(elasticsearchAssetSchema),
@@ -55,14 +55,14 @@ const readStreamDefinitionSchemaBase: z.Schema<ReadStreamDefinitionBase> = z.str
 
 const wiredReadStreamDefinitionSchema: z.Schema<WiredReadStreamDefinition> = z.intersection(
   readStreamDefinitionSchemaBase,
-  z.strictObject({
+  z.object({
     stream: wiredStreamDefinitionSchema,
   })
 );
 
 const unwiredReadStreamDefinitionSchema: z.Schema<UnwiredReadStreamDefinition> = z.intersection(
   readStreamDefinitionSchemaBase,
-  z.strictObject({
+  z.object({
     stream: unwiredStreamDefinitionSchema,
   })
 );

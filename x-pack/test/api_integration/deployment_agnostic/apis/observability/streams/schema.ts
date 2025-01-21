@@ -93,7 +93,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.nginx',
           },
-          condition: {
+          if: {
             field: 'log.logger',
             operator: 'eq' as const,
             value: 'nginx',

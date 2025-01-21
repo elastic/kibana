@@ -11,6 +11,7 @@ import {
   Condition,
   FilterCondition,
   UnaryFilterCondition,
+  isAlwaysCondition,
   isAndCondition,
   isFilterCondition,
   isNeverCondition,
@@ -130,13 +131,26 @@ export function conditionToStatement(condition: Condition, nested = false): stri
     const or = condition.or.map((filter) => conditionToStatement(filter, true)).join(' || ');
     return nested ? `(${or})` : or;
   }
-  return 'return false';
+  if (isAlwaysCondition(condition)) {
+    return `true;`;
+  }
+
+  if (isNeverCondition(condition)) {
+    return `false;`;
+  }
+
+  throw new Error('Unsupported condition');
 }
 
 export function conditionToPainless(condition: Condition): string {
   if (isNeverCondition(condition)) {
     return `return false`;
   }
+
+  if (isAlwaysCondition(condition)) {
+    return `return true`;
+  }
+
   const fields = extractAllFields(condition);
   let fieldCheck = '';
   if (fields.length !== 0) {
