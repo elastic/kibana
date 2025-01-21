@@ -9,20 +9,22 @@
 
 import { Page, test as base } from '@playwright/test';
 import { ScoutPage } from '.';
-import { KibanaUrl } from '../../worker';
+import { KibanaUrl, ToolingLog } from '../../worker';
 import { ScoutSpaceParallelFixture } from '../../worker/scout_space';
 import { extendPlaywrightPage } from './single_thread';
+import { serviceLoadedMsg } from '../../../utils';
 
 export const scoutPageParallelFixture = base.extend<
-  {},
-  { kbnUrl: KibanaUrl; scoutSpace: ScoutSpaceParallelFixture }
+  { page: ScoutPage },
+  { log: ToolingLog; kbnUrl: KibanaUrl; scoutSpace: ScoutSpaceParallelFixture }
 >({
   page: async (
     {
+      log,
       page,
       kbnUrl,
       scoutSpace,
-    }: { page: Page; kbnUrl: KibanaUrl; scoutSpace: ScoutSpaceParallelFixture },
+    }: { log: ToolingLog; page: Page; kbnUrl: KibanaUrl; scoutSpace: ScoutSpaceParallelFixture },
     use: (extendedPage: ScoutPage) => Promise<void>
   ) => {
     const extendedPage = extendPlaywrightPage({ page, kbnUrl });
@@ -31,6 +33,7 @@ export const scoutPageParallelFixture = base.extend<
     extendedPage.gotoApp = (appName: string) =>
       page.goto(kbnUrl.app(appName, { space: scoutSpace.id }));
     // Method to wait for global loading indicator to be hidden
+    log.debug(serviceLoadedMsg(`scoutPageParallel`));
     await use(extendedPage);
   },
 });
