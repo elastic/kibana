@@ -63,12 +63,12 @@ export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvid
                         <EuiText color="subdued" size="xs">
                           Name
                         </EuiText>
-                      {isRootSpan ? (
+                        {isRootSpan ? (
                           <TransactionLink
                             traceId={traceId as string}
                             transactionName={transactionName as string}
                           />
-                      ) : (
+                        ) : (
                           <SpanLink
                             spanId={spanId as string}
                             spanName={spanName as string}
