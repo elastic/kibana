@@ -80,7 +80,7 @@ export const similar = async (
     const paramArgs = decodeWithExcessOrThrow(SimilarCasesSearchRequestRt)(params);
     const retrievedCase = await caseService.getCase({ id: caseId });
 
-    const availableObservableTypesSet = await getAvailableObservableTypesMap(
+    const availableObservableTypesMap = await getAvailableObservableTypesMap(
       casesClient,
       retrievedCase.attributes.owner
     );
