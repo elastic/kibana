@@ -31,6 +31,11 @@ export function isDescendantOf(parent: string, child: string) {
   return false;
 }
 
+export function isRoot(name: string) {
+  const streamName = parseStreamName(name);
+  return streamName.type === 'wired' && streamName.segments.length === 1;
+}
+
 export function isChildOf(parent: string, child: string) {
   const parentStreamName = parseStreamName(parent);
   const childStreamName = parseStreamName(child);

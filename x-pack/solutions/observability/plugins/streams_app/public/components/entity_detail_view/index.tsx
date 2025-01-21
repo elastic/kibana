@@ -164,7 +164,10 @@ function LifecycleBadge({ lifecycle }: { lifecycle: StreamLifecycle }) {
     <EuiBadge color="hollow">
       {i18n.translate('xpack.streams.entityDetailViewWithoutParams.dlmBadgeLabel', {
         defaultMessage: 'Retention: {retention}',
-        values: { retention: lifecycle.data_retention || '∞' },
+        values: {
+          retention:
+            lifecycle.type === 'error' ? lifecycle.message : lifecycle.data_retention || '∞',
+        },
       })}
     </EuiBadge>
   );

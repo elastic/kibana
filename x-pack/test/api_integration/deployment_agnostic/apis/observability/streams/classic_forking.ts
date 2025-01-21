@@ -295,7 +295,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       ).to.be(true);
     });
 
-    it.only('Validates whether an unwired root exists before creating substreams', async () => {
+    it('Validates whether an unwired root exists before creating substreams', async () => {
       await putStream(
         apiClient,
         'logs-woopy.doopy-default',
