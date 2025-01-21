@@ -27,13 +27,13 @@ interface MeteringStatsResponse {
   datastreams: MeteringStats[];
 }
 const enhanceDataStreams = ({
-                              dataStreams,
-                              dataStreamsStats,
-                              meteringStats,
-                              dataStreamsPrivileges,
-                              globalMaxRetention,
-                              indexTemplates,
-                            }: {
+  dataStreams,
+  dataStreamsStats,
+  meteringStats,
+  dataStreamsPrivileges,
+  globalMaxRetention,
+  indexTemplates,
+}: {
   dataStreams: IndicesDataStream[];
   dataStreamsStats?: IndicesDataStreamsStatsDataStreamsStatsItem[];
   meteringStats?: MeteringStats[];
@@ -198,10 +198,7 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
         });
 
         return response.ok({
-          body: deserializeDataStreamList(
-            enhancedDataStreams,
-            isLogsdbEnabled
-          ),
+          body: deserializeDataStreamList(enhancedDataStreams, isLogsdbEnabled),
         });
       } catch (error) {
         return handleEsError({ error, response });
@@ -280,10 +277,7 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
           const isLogsdbEnabled =
             persistent?.cluster?.logsdb?.enabled ?? defaults?.cluster?.logsdb?.enabled;
 
-          const body = deserializeDataStream(
-            enhancedDataStreams[0],
-            isLogsdbEnabled
-          );
+          const body = deserializeDataStream(enhancedDataStreams[0], isLogsdbEnabled);
           return response.ok({ body });
         }
 

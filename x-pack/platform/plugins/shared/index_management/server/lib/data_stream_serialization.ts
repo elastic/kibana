@@ -45,11 +45,11 @@ export function deserializeDataStream(
     timeStampField,
     indices: indices.map(
       ({
-         index_name: indexName,
-         index_uuid: indexUuid,
-         prefer_ilm: preferILM = false,
-         managed_by: managedBy,
-       }: {
+        index_name: indexName,
+        index_uuid: indexUuid,
+        prefer_ilm: preferILM = false,
+        managed_by: managedBy,
+      }: {
         index_name: string;
         index_uuid: string;
         prefer_ilm?: boolean;
