@@ -48,7 +48,6 @@ describe('EntityStoreDataClient', () => {
   const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
   const esClientMock = clusterClientMock.asCurrentUser;
   const loggerMock = loggingSystemMock.createLogger();
-
   const dataClient = new EntityStoreDataClient({
     clusterClient: clusterClientMock,
     logger: loggerMock,

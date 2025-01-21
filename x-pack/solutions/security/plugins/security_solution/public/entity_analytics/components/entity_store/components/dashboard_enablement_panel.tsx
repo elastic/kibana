@@ -84,6 +84,18 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
     [storeEnablement, initRiskEngine]
   );
 
+  const installedTypes = engines?.map((engine) => engine.type);
+  const uninstalledTypes = enabledEntityTypes.filter(
+    (type) => !(installedTypes || []).includes(type)
+  );
+
+  const enableUninstalledEntityStore = useCallback(
+    () => () => {
+      storeEnablement.mutate({ entityTypes: uninstalledTypes });
+    },
+    [storeEnablement, uninstalledTypes]
+  );
+
   if (storeEnablement.error) {
     return (
       <EuiCallOut
@@ -131,11 +143,6 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
     );
   }
 
-  const installedTypes = engines?.map((engine) => engine.type);
-  const uninstalledTypes = enabledEntityTypes.filter(
-    (type) => !(installedTypes || []).includes(type)
-  );
-
   if (entityStoreStatus === 'running' && uninstalledTypes.length > 0) {
     const title = i18n.translate(
       'xpack.securitySolution.entityAnalytics.entityStore.enablement.moreEntityTypesTitle',
@@ -154,9 +161,7 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
             <EuiButton
               color="primary"
               fill
-              onClick={() => {
-                storeEnablement.mutate({ entityTypes: uninstalledTypes });
-              }}
+              onClick={enableUninstalledEntityStore}
               data-test-subj={`entityStoreEnablementButton`}
             >
               <FormattedMessage
