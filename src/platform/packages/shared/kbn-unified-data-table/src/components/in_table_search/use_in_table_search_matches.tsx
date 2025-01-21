@@ -313,7 +313,7 @@ function AllCells(props: AllCellsProps) {
   );
 
   // Iterating through rows one at the time to avoid blocking the main thread.
-  // If user changes inTableSearchTerm, this component would unmount and the processing would be interrupted right away.
+  // If user changes inTableSearchTerm, this component would unmount and the processing would be interrupted right away. Next time it would start from rowIndex 0.
   return (
     <RowCells
       key={rowIndex}
@@ -407,6 +407,7 @@ function RowCells({
               setCellProps={() => {}}
               inTableSearchTerm={inTableSearchTerm}
               onHighlightsCountFound={(count) => {
+                // you can comment out the next line to observe that the row timeout is working as expected.
                 onCellHighlightsCountFound(columnId, count);
               }}
             />
