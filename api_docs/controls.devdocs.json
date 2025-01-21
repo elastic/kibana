@@ -1060,7 +1060,7 @@
         "signature": [
           "\"clearControl\""
         ],
-        "path": "src/platform/plugins/shared/controls/public/actions/index.ts",
+        "path": "src/platform/plugins/shared/controls/public/actions/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1075,7 +1075,7 @@
         "signature": [
           "\"deleteControl\""
         ],
-        "path": "src/platform/plugins/shared/controls/public/actions/index.ts",
+        "path": "src/platform/plugins/shared/controls/public/actions/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1090,7 +1090,7 @@
         "signature": [
           "\"editDataControl\""
         ],
-        "path": "src/platform/plugins/shared/controls/public/actions/index.ts",
+        "path": "src/platform/plugins/shared/controls/public/actions/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
