@@ -72,7 +72,7 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
       switchMap((response) => {
         if (response.status === 'error') {
           return throwError(() =>
-            createInferenceInternalError('Error calling the inference API', {
+            createInferenceInternalError(`Error calling connector: ${response.serviceMessage}`, {
               rootError: response.serviceMessage,
             })
           );

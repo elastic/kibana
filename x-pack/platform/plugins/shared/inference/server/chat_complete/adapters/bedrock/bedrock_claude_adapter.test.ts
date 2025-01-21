@@ -7,6 +7,7 @@
 
 import { PassThrough } from 'stream';
 import { loggerMock } from '@kbn/logging-mocks';
+import { lastValueFrom, toArray } from 'rxjs';
 import type { InferenceExecutor } from '../../utils/inference_executor';
 import { MessageRole, ToolChoiceType } from '@kbn/inference-common';
 import { bedrockClaudeAdapter } from './bedrock_claude_adapter';
@@ -463,6 +464,31 @@ describe('bedrockClaudeAdapter', () => {
           model: 'claude-opus-3.5',
         }),
       });
+    });
+
+    it('throws an error if the connector response is in error', async () => {
+      executorMock.invoke.mockImplementation(async () => {
+        return {
+          actionId: 'actionId',
+          status: 'error',
+          serviceMessage: 'something went wrong',
+          data: undefined,
+        };
+      });
+
+      await expect(
+        lastValueFrom(
+          bedrockClaudeAdapter
+            .chatComplete({
+              logger,
+              executor: executorMock,
+              messages: [{ role: MessageRole.User, content: 'Hello' }],
+            })
+            .pipe(toArray())
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Error calling connector: something went wrong"`
+      );
     });
   });
 });
