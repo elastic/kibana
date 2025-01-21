@@ -140,10 +140,24 @@ export const ALERTS_HEADERS_HOST_CRITICALITY = i18n.translate(
   }
 );
 
+export const ALERTS_HEADERS_SERVICE_RISK_LEVEL = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.serviceRiskLevel',
+  {
+    defaultMessage: 'Service Risk Level',
+  }
+);
+
 export const ALERTS_HEADERS_USER_CRITICALITY = i18n.translate(
   'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.userCriticality',
   {
     defaultMessage: 'User Criticality',
+  }
+);
+
+export const ALERTS_HEADERS_SERVICE_CRITICALITY = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.serviceCriticality',
+  {
+    defaultMessage: 'Service Criticality',
   }
 );
 

@@ -26,11 +26,7 @@ import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { i18n } from '@kbn/i18n';
 import { tracksOverlays } from '@kbn/presentation-containers';
-import {
-  apiHasInPlaceLibraryTransforms,
-  apiHasUniqueId,
-  useBatchedOptionalPublishingSubjects,
-} from '@kbn/presentation-publishing';
+import { apiHasUniqueId, useBatchedOptionalPublishingSubjects } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React, { useState } from 'react';
 import { serializeBookAttributes } from './book_state';
@@ -74,7 +70,7 @@ export const openSavedBookEditor = ({
           onSubmit={async (addToLibrary: boolean) => {
             const savedBookId = addToLibrary
               ? await saveBookAttributes(
-                  apiHasInPlaceLibraryTransforms(api) ? api.libraryId$.value : undefined,
+                  api?.getSavedBookId(),
                   serializeBookAttributes(attributesManager)
                 )
               : undefined;
@@ -114,15 +110,13 @@ export const SavedBookEditor = ({
   onCancel: () => void;
   api?: BookApi;
 }) => {
-  const [libraryId, authorName, synopsis, bookTitle, numberOfPages] =
-    useBatchedOptionalPublishingSubjects(
-      api?.libraryId$,
-      attributesManager.authorName,
-      attributesManager.bookSynopsis,
-      attributesManager.bookTitle,
-      attributesManager.numberOfPages
-    );
-  const [addToLibrary, setAddToLibrary] = useState(Boolean(libraryId));
+  const [authorName, synopsis, bookTitle, numberOfPages] = useBatchedOptionalPublishingSubjects(
+    attributesManager.authorName,
+    attributesManager.bookSynopsis,
+    attributesManager.bookTitle,
+    attributesManager.numberOfPages
+  );
+  const [addToLibrary, setAddToLibrary] = useState(Boolean(api?.getSavedBookId()));
   const [saving, setSaving] = useState(false);
 
   return (

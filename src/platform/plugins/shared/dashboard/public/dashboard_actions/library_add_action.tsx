@@ -9,11 +9,10 @@
 
 import React from 'react';
 
-import { PresentationContainer } from '@kbn/presentation-containers';
+import { PanelPackage, PresentationContainer } from '@kbn/presentation-containers';
 import {
   CanAccessViewMode,
   EmbeddableApiContext,
-  HasInPlaceLibraryTransforms,
   HasLibraryTransforms,
   HasParentApi,
   HasType,
@@ -21,7 +20,6 @@ import {
   HasUniqueId,
   PublishesPanelTitle,
   apiCanAccessViewMode,
-  apiHasInPlaceLibraryTransforms,
   apiHasLibraryTransforms,
   apiHasParentApi,
   apiHasType,
@@ -44,14 +42,14 @@ import { ACTION_ADD_TO_LIBRARY, DASHBOARD_ACTION_GROUP } from './constants';
 export type AddPanelToLibraryActionApi = CanAccessViewMode &
   HasType &
   HasUniqueId &
-  (HasLibraryTransforms | HasInPlaceLibraryTransforms) &
+  HasLibraryTransforms &
   HasParentApi<Pick<PresentationContainer, 'replacePanel'>> &
   Partial<PublishesPanelTitle & HasTypeDisplayName>;
 
 const isApiCompatible = (api: unknown | null): api is AddPanelToLibraryActionApi =>
   Boolean(
     apiCanAccessViewMode(api) &&
-      (apiHasLibraryTransforms(api) || apiHasInPlaceLibraryTransforms(api)) &&
+      apiHasLibraryTransforms(api) &&
       apiHasType(api) &&
       apiHasUniqueId(api) &&
       apiHasParentApi(api) &&
@@ -76,27 +74,37 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) return false;
-    return getInheritedViewMode(embeddable) === 'edit' && (await this.canLinkToLibrary(embeddable));
+    return getInheritedViewMode(embeddable) === 'edit' && (await embeddable.canLinkToLibrary());
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    const title = getPanelTitle(embeddable);
-
+    const lastTitle = getPanelTitle(embeddable);
     try {
-      const byRefState = await new Promise<object | undefined>((resolve, reject) => {
-        const onSave = async (props: OnSaveProps): Promise<SaveResult> => {
+      const { byRefPackage, libraryTitle } = await new Promise<{
+        byRefPackage: PanelPackage;
+        libraryTitle: string;
+      }>((resolve, reject) => {
+        const onSave = async ({
+          newTitle,
+          isTitleDuplicateConfirmed,
+          onTitleDuplicate,
+        }: OnSaveProps): Promise<SaveResult> => {
           await embeddable.checkForDuplicateTitle(
-            props.newTitle,
-            props.isTitleDuplicateConfirmed,
-            props.onTitleDuplicate
+            newTitle,
+            isTitleDuplicateConfirmed,
+            onTitleDuplicate
           );
           try {
-            const libraryId = await embeddable.saveToLibrary(props.newTitle);
-            if (apiHasLibraryTransforms(embeddable)) {
-              resolve({ ...embeddable.getByReferenceState(libraryId), title: props.newTitle });
-            }
-            resolve(undefined);
+            const libraryId = await embeddable.saveToLibrary(newTitle);
+            const { rawState, references } = embeddable.getSerializedStateByReference(libraryId);
+            resolve({
+              byRefPackage: {
+                serializedState: { rawState: { ...rawState, title: newTitle }, references },
+                panelType: embeddable.type,
+              },
+              libraryTitle: newTitle,
+            });
             return { id: libraryId };
           } catch (error) {
             reject(error);
@@ -107,7 +115,7 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
           <SavedObjectSaveModal
             onSave={onSave}
             onClose={() => {}}
-            title={title ?? ''}
+            title={lastTitle ?? ''}
             showCopyOnSave={false}
             objectType={
               typeof embeddable.getTypeDisplayName === 'function'
@@ -118,35 +126,17 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
           />
         );
       });
-      /**
-       * If byRefState is defined, this embeddable type must be re-initialized with the
-       * newly provided state.
-       */
-      if (byRefState) {
-        await embeddable.parentApi.replacePanel(embeddable.uuid, {
-          panelType: embeddable.type,
-          initialState: byRefState,
-        });
-      }
+
+      await embeddable.parentApi.replacePanel(embeddable.uuid, byRefPackage);
       coreServices.notifications.toasts.addSuccess({
-        title: dashboardAddToLibraryActionStrings.getSuccessMessage(title ? `'${title}'` : ''),
+        title: dashboardAddToLibraryActionStrings.getSuccessMessage(`'${libraryTitle}'`),
         'data-test-subj': 'addPanelToLibrarySuccess',
       });
     } catch (e) {
       coreServices.notifications.toasts.addDanger({
-        title: dashboardAddToLibraryActionStrings.getErrorMessage(title),
+        title: dashboardAddToLibraryActionStrings.getErrorMessage(lastTitle),
         'data-test-subj': 'addPanelToLibraryError',
       });
     }
-  }
-
-  private async canLinkToLibrary(api: AddPanelToLibraryActionApi) {
-    if (apiHasLibraryTransforms(api)) {
-      return api.canLinkToLibrary?.();
-    } else if (apiHasInPlaceLibraryTransforms(api)) {
-      const canLink = api.canLinkToLibrary ? await api.canLinkToLibrary() : true;
-      return api.libraryId$.value === undefined && canLink;
-    }
-    throw new IncompatibleActionError();
   }
 }
