@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './_presentation_panel.scss';
-
 import { EuiErrorBoundary, EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { PanelLoader } from '@kbn/panel-loader';
 import {
   apiHasParentApi,
@@ -129,6 +128,14 @@ export const PresentationPanelInternal = <
         aria-labelledby={headerId}
         data-test-subj="embeddablePanel"
         {...contentAttrs}
+        css={css`
+          z-index: auto;
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+          position: relative;
+        `}
       >
         {!hideHeader && api && (
           <PresentationPanelHeader
@@ -156,7 +163,24 @@ export const PresentationPanelInternal = <
           </EuiFlexGroup>
         )}
         {!initialLoadComplete && <PanelLoader />}
-        <div className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}>
+        <div
+          className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}
+          css={css`
+            &.embPanelContent {
+              display: flex;
+              flex: 1 1 100%;
+              z-index: 1;
+              min-height: 0; // Absolute must for Firefox to scroll contents
+              border-radius: 4px;
+              overflow: hidden;
+            }
+
+            &.embPanel__content--hidden,
+            &[data-error] {
+              display: none;
+            }
+          `}
+        >
           <EuiErrorBoundary>
             <Component
               {...(componentProps as React.ComponentProps<typeof Component>)}
