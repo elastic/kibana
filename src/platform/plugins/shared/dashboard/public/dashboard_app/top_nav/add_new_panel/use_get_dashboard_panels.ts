@@ -10,7 +10,7 @@
 import { useCallback, useMemo, useRef } from 'react';
 import { AsyncSubject, defer, from, lastValueFrom, map, type Subscription } from 'rxjs';
 
-import { COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
+import { ADD_PANEL_ANNOTATION_GROUP, ADD_PANEL_LEGACY_GROUP } from '@kbn/embeddable-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { VisGroups, type BaseVisType, type VisTypeAlias } from '@kbn/visualizations-plugin/public';
@@ -155,7 +155,7 @@ export const useGetDashboardPanels = ({ api, createNewVisType }: UseGetDashboard
                       ),
                     };
                   }
-                  case COMMON_EMBEDDABLE_GROUPING.legacy.id: {
+                  case ADD_PANEL_LEGACY_GROUP.id: {
                     return {
                       ...panelGroup,
                       items: sortGroupPanelsByOrder<PanelSelectionMenuItem>(
@@ -165,7 +165,7 @@ export const useGetDashboardPanels = ({ api, createNewVisType }: UseGetDashboard
                       ),
                     };
                   }
-                  case COMMON_EMBEDDABLE_GROUPING.annotation.id: {
+                  case ADD_PANEL_ANNOTATION_GROUP.id: {
                     return {
                       ...panelGroup,
                       items: sortGroupPanelsByOrder<PanelSelectionMenuItem>(

@@ -3574,7 +3574,13 @@
         "description": [],
         "signature": [
           "Omit<",
-          "Options",
+          {
+            "pluginId": "@kbn/rrule",
+            "scope": "common",
+            "docId": "kibKbnRrulePluginApi",
+            "section": "def-common.Options",
+            "text": "Options"
+          },
           ", \"dtstart\" | \"until\" | \"byweekday\" | \"wkst\"> & { dtstart: string; byweekday?: (string | number)[] | null | undefined; wkst?: ",
           {
             "pluginId": "@kbn/rrule",

@@ -26,7 +26,11 @@ import { setExtensionsService } from '../../public/application/store/selectors/e
 import { ExtensionsService } from '../../public/services';
 import { kibanaVersion } from '../client_integration/helpers';
 
-import { notificationServiceMock, executionContextServiceMock } from '@kbn/core/public/mocks';
+import {
+  notificationServiceMock,
+  executionContextServiceMock,
+  chromeServiceMock,
+} from '@kbn/core/public/mocks';
 
 let store = null;
 const indices = [];
@@ -43,6 +47,8 @@ const getBaseFakeIndex = (isOpen) => {
     primary_size: '156kb',
   };
 };
+
+jest.mock('react-use/lib/useObservable', () => () => jest.fn());
 
 for (let i = 0; i < 105; i++) {
   indices.push({
@@ -159,6 +165,7 @@ describe('index table', () => {
       core: {
         getUrlForApp: () => {},
         executionContext: executionContextServiceMock.createStartContract(),
+        chrome: chromeServiceMock.createStartContract(),
       },
       plugins: {},
       url: urlServiceMock,
@@ -492,7 +499,6 @@ describe('index table', () => {
       expect(findTestSubject(rendered, 'refreshIndexMenuButton').length).toBe(0);
       expect(findTestSubject(rendered, 'clearCacheIndexMenuButton').length).toBe(0);
       expect(findTestSubject(rendered, 'flushIndexMenuButton').length).toBe(0);
-      expect(findTestSubject(rendered, 'unfreezeIndexMenuButton').length).toBe(0);
     });
   });
 });
