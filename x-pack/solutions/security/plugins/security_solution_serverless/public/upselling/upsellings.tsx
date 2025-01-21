@@ -141,9 +141,9 @@ export const upsellingSections: UpsellingSections = [
   },
   {
     id: 'automatic_import',
-    pli: ProductFeatureKey.integrationAssistant,
+    pli: ProductFeatureKey.automaticImport,
     component: () => (
-      <AutomaticImportLazy requiredPLI={ProductFeatureKey.integrationAssistant} />
+      <AutomaticImportLazy requiredPLI={ProductFeatureKey.automaticImport} />
     ),
   },
 ];

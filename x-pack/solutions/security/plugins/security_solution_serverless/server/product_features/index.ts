@@ -53,8 +53,8 @@ export const registerProductFeatures = (
   });
 
   // set availability for the automatic import plugin based on the product features
-  pluginsSetup.integrationAssistant?.setIsAvailable(
-    enabledProductFeatureKeys.includes(ProductFeatureKey.integrationAssistant)
+  pluginsSetup.automaticImport?.setIsAvailable(
+    enabledProductFeatureKeys.includes(ProductFeatureKey.automaticImport)
   );
 };
 

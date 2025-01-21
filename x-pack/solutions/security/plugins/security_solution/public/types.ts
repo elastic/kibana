@@ -157,7 +157,7 @@ export interface StartPlugins {
   savedSearch: SavedSearchPublicPluginStart;
   alerting: PluginStartContract;
   core: CoreStart;
-  integrationAssistant?: AutomaticImportPluginStart;
+  automaticImport?: AutomaticImportPluginStart;
   serverless?: ServerlessPluginStart;
   productDocBase: ProductDocBasePluginStart;
 }
