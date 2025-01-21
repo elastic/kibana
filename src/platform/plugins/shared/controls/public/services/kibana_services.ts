@@ -12,7 +12,8 @@ import { BehaviorSubject } from 'rxjs';
 import { CoreStart } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+
 
 import { ControlsPluginStartDeps } from '../types';
 
