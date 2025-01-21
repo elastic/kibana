@@ -15,7 +15,7 @@ import {
   createRootWithCorePlugins,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { MIN_SAVED_OBJECT_TYPES_COUNT } from '@kbn/core-saved-objects-server-internal';
+import { SAVED_OBJECT_TYPES_COUNT } from '@kbn/core-saved-objects-server-internal';
 
 describe('checking migration metadata changes on all registered SO types', () => {
   let esServer: TestElasticsearchUtils;
@@ -188,6 +188,6 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "workplace_search_telemetry": "52b32b47ee576f554ac77cb1d5896dfbcfe9a1fb",
       }
     `);
-    expect(Object.keys(hashMap).length).toEqual(MIN_SAVED_OBJECT_TYPES_COUNT);
+    expect(Object.keys(hashMap).length).toEqual(SAVED_OBJECT_TYPES_COUNT);
   });
 });
