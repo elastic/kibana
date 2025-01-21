@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenu,
@@ -17,6 +17,7 @@ import {
 import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
+  EuiDataGridColumnSortingConfig,
   EuiDataGridProps,
   Query,
 } from '@elastic/eui';
@@ -174,7 +175,18 @@ interface FieldsTableProps {
 }
 
 const FieldsTable = ({ definition, fields, editingState, unpromotingState }: FieldsTableProps) => {
+  // Column visibility
   const [visibleColumns, setVisibleColumns] = useState(Object.keys(COLUMNS));
+
+  // Column sorting
+  const [sortingColumns, setSortingColumns] = useState<EuiDataGridColumnSortingConfig[]>([]);
+
+  const onSort = useCallback(
+    (nextSortingColumns: EuiDataGridColumnSortingConfig[]) => {
+      setSortingColumns(nextSortingColumns);
+    },
+    [setSortingColumns]
+  );
 
   const trailingColumns = useMemo(() => {
     return !isRootStream(definition)
@@ -185,6 +197,8 @@ const FieldsTable = ({ definition, fields, editingState, unpromotingState }: Fie
             headerCellRender: () => null,
             rowCellRender: ({ rowIndex }) => {
               const field = fields[rowIndex];
+
+              if (!field) return null;
 
               let actions: ActionsCellActionsDescriptor[] = [];
 
@@ -293,19 +307,22 @@ const FieldsTable = ({ definition, fields, editingState, unpromotingState }: Fie
           defaultMessage: 'Preview',
         }
       )}
-      columns={visibleColumns.map((columnId) => ({
+      columns={Object.entries(COLUMNS).map(([columnId, value]) => ({
         id: columnId,
-        ...COLUMNS[columnId as keyof typeof COLUMNS],
+        ...value,
       }))}
       columnVisibility={{
         visibleColumns,
         setVisibleColumns,
         canDragAndDropColumns: false,
       }}
-      toolbarVisibility={false}
+      sorting={{ columns: sortingColumns, onSort }}
+      toolbarVisibility={true}
       rowCount={fields.length}
       renderCellValue={({ rowIndex, columnId }) => {
         const field = fields[rowIndex];
+        if (!field) return null;
+
         if (columnId === 'type') {
           const fieldType = field.type;
           if (!fieldType) return EMPTY_CONTENT;
@@ -326,6 +343,7 @@ const FieldsTable = ({ definition, fields, editingState, unpromotingState }: Fie
         rowHover: 'none',
         header: 'underline',
       }}
+      inMemory={{ level: 'sorting' }}
     />
   );
 };
