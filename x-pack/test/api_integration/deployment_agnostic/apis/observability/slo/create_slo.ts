@@ -29,6 +29,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let transformHelper: TransformHelper;
 
   describe('Create SLOs', function () {
+    // see details: https://github.com/elastic/kibana/issues/207354
+    this.tags(['failsOnMKI']);
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       transformHelper = createTransformHelper(getService);
