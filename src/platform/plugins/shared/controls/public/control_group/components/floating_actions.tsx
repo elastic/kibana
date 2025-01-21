@@ -12,16 +12,13 @@ import React, { FC, ReactElement, useEffect, useState } from 'react';
 import { v4 } from 'uuid';
 import { Subscription } from 'rxjs';
 
-import {
-  PANEL_HOVER_TRIGGER,
-  panelHoverTrigger,
-  type ViewMode,
-} from '@kbn/embeddable-plugin/public';
+import { type ViewMode } from '@kbn/embeddable-plugin/public';
 import { apiHasUniqueId } from '@kbn/presentation-publishing';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { AnyApiAction } from '@kbn/presentation-panel-plugin/public/panel_actions/types';
 import { uiActionsService } from '../../services/kibana_services';
 import './floating_actions.scss';
+import { CONTROL_HOVER_TRIGGER, controlHoverTrigger } from '../../actions/controls_hover_trigger';
 
 export interface FloatingActionsProps {
   children: ReactElement;
@@ -53,7 +50,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
     let canceled = false;
     const context = {
       embeddable: api,
-      trigger: panelHoverTrigger,
+      trigger: controlHoverTrigger,
     };
 
     const sortByOrder = (a: Action | FloatingActionItem, b: Action | FloatingActionItem) => {
@@ -62,7 +59,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
 
     const getActions: () => Promise<FloatingActionItem[]> = async () => {
       const actions = (
-        await uiActionsService.getTriggerCompatibleActions(PANEL_HOVER_TRIGGER, context)
+        await uiActionsService.getTriggerCompatibleActions(CONTROL_HOVER_TRIGGER, context)
       )
         .filter((action) => {
           return action.MenuItem !== undefined && (disabledActions ?? []).indexOf(action.id) === -1;
@@ -92,7 +89,10 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
       setFloatingActions(actions);
 
       const frequentlyChangingActions =
-        await uiActionsService.getFrequentlyChangingActionsForTrigger(PANEL_HOVER_TRIGGER, context);
+        await uiActionsService.getFrequentlyChangingActionsForTrigger(
+          CONTROL_HOVER_TRIGGER,
+          context
+        );
       if (canceled) return;
 
       for (const action of frequentlyChangingActions) {

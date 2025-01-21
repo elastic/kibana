@@ -69,7 +69,7 @@ export const storybookAliases = {
   esql_editor: 'src/platform/packages/private/kbn-esql-editor/.storybook',
   // Skipped, please check and fix https://github.com/elastic/kibana/issues/207227
   // security_solution: 'x-pack/solutions/security/plugins/security_solution/.storybook',
-  security_solution_packages: 'x-pack/solutions/security/packages/storybook/config',
+  // security_solution_packages: 'x-pack/solutions/security/packages/storybook/config',
   serverless: 'packages/serverless/storybook/config',
   shared_ux: 'src/platform/packages/private/shared-ux/storybook/config',
   threat_intelligence: 'x-pack/solutions/security/plugins/threat_intelligence/.storybook',
