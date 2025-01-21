@@ -186,7 +186,7 @@ export class KnowledgeBaseService {
       () => `Recalling entries from KB for queries: "${JSON.stringify(queries)}"`
     );
 
-    const [documentsFromKb, documentsFromConnectors, documentsromProductDoc] = await Promise.all([
+    const [documentsFromKb, documentsFromConnectors, documentsFromProductDoc] = await Promise.all([
       this.recallFromKnowledgeBase({
         user,
         queries,
@@ -220,7 +220,7 @@ export class KnowledgeBaseService {
     );
 
     const sortedEntries = orderBy(
-      [...documentsFromKb, ...documentsFromConnectors, ...documentsromProductDoc],
+      [...documentsFromKb, ...documentsFromConnectors, ...documentsFromProductDoc],
       'score',
       'desc'
     ).slice(0, limit.size ?? 20);
