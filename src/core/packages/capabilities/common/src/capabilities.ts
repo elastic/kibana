@@ -29,6 +29,8 @@ export type Capabilities = {
   /** Custom capabilities, registered by plugins. */
   [key: string]: Record<string, boolean | Record<string, boolean>>;
 } & {
+  // These capabilities have been replaced by discover_v2, dashboard_v2 etc.
+  // The purpose of these types is to avoid anyone accidentally depending on the removed capabilities.
   discover?: {};
   dashboard?: {};
   maps?: {};
