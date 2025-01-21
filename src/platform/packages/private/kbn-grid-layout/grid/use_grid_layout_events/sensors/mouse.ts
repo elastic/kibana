@@ -19,10 +19,12 @@ const MOUSE_BUTTON_LEFT = 0;
 
 export const startMouseInteraction = ({
   e,
+  onStart,
   onMove,
   onEnd,
 }: {
   e: UserMouseEvent;
+  onStart: () => void;
   onMove: (e: Event) => void;
   onEnd: () => void;
 }) => {
@@ -43,4 +45,5 @@ export const startMouseInteraction = ({
   document.addEventListener('scroll', handleMove);
   document.addEventListener('mousemove', handleMove);
   document.addEventListener('mouseup', handleEnd, { once: true });
+  onStart();
 };

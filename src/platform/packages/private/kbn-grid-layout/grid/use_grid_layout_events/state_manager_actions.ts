@@ -23,14 +23,13 @@ export const startAction = (
   if (!panelRef) return;
 
   const panelRect = panelRef.getBoundingClientRect();
-  const pointerOffsets = getPointerOffsets(e, panelRect);
 
   gridLayoutStateManager.interactionEvent$.next({
     type,
     id: panelId,
     panelDiv: panelRef,
     targetRowIndex: rowIndex,
-    pointerOffsets,
+    pointerOffsets: getPointerOffsets(e, panelRect),
   });
 };
 

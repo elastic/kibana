@@ -17,8 +17,10 @@ export const startTouchInteraction = ({
   e,
   onMove,
   onEnd,
+  onStart,
 }: {
   e: UserTouchEvent;
+  onStart: () => void;
   onMove: (e: Event) => void;
   onEnd: () => void;
 }) => {
@@ -31,4 +33,5 @@ export const startTouchInteraction = ({
 
   e.target!.addEventListener('touchmove', onMove, { passive: false });
   e.target!.addEventListener('touchend', handleEnd, { once: true });
+  onStart();
 };

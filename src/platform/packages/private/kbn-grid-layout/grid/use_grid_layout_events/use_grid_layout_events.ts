@@ -77,9 +77,9 @@ export const useGridLayoutEvents = ({
         pointerPixel.current = getPointerPosition(e);
       }
 
-      const currentRuntimeSettings = runtimeSettings$.value;
+      const runtimeSettings = runtimeSettings$.value;
 
-      const { columnCount, gutterSize, rowHeight, columnPixelWidth } = currentRuntimeSettings;
+      const { columnCount, gutterSize, rowHeight, columnPixelWidth } = runtimeSettings;
 
       const isResize = interactionEvent?.type === 'resize';
 
@@ -183,27 +183,50 @@ export const useGridLayoutEvents = ({
   const startInteraction = useCallback(
     (e: UserInteractionEvent) => {
       if (!isLayoutInteractive(gridLayoutStateManager)) return;
-      e.stopPropagation();
+
+      const onStart = () => {
+        startAction(gridLayoutStateManager, e, interactionType, rowIndex, panelId);
+      };
+      const onEnd = () => {
+        commitAction(gridLayoutStateManager);
+      };
+      const onBlur = () => {
+        const {
+          interactionEvent$: { value: { id, targetRowIndex, type } = {} },
+        } = gridLayoutStateManager;
+        if (id === panelId && rowIndex === targetRowIndex && type === interactionType) {
+          commitAction(gridLayoutStateManager);
+        }
+      };
 
       if (isMouseEvent(e)) {
+        e.stopPropagation();
         startMouseInteraction({
           e,
+          onStart,
           onMove: onPointerMove,
-          onEnd: () => {
-            commitAction(gridLayoutStateManager);
-          },
+          onEnd,
         });
       } else if (isTouchEvent(e)) {
         startTouchInteraction({
           e,
+          onStart,
           onMove: onPointerMove,
-          onEnd: () => {
-            commitAction(gridLayoutStateManager);
+          onEnd,
+        });
+      } else if (isKeyboardEvent(e)) {
+        onKeyDown({
+          e,
+          gridLayoutStateManager,
+          onMove: onPointerMove,
+          onStart,
+          onCancel: () => {
+            cancelAction(gridLayoutStateManager);
           },
+          onEnd,
+          onBlur,
         });
       }
-
-      startAction(gridLayoutStateManager, e, interactionType, rowIndex, panelId);
     },
     [gridLayoutStateManager, onPointerMove, rowIndex, panelId, interactionType]
   );
