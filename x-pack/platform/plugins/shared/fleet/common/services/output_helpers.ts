@@ -26,31 +26,6 @@ const sameClusterRestrictedPackages = [
   FLEET_APM_PACKAGE,
 ];
 
-export function getAllowedOutputTypes(options: {
-  agentPolicy?: AgentPolicy;
-  packagePolicy?: Pick<PackagePolicy, 'supports_agentless'>;
-  packageName?: string;
-}): string[] {
-  let allowedOutputTypes = Object.values(outputType);
-
-  if (options.agentPolicy) {
-    const forAgentPolicy = getAllowedOutputTypesForAgentPolicy(options.agentPolicy);
-    allowedOutputTypes = allowedOutputTypes.filter((type) => forAgentPolicy.includes(type));
-  }
-
-  if (options.packagePolicy) {
-    const forPackagePolicy = getAllowedOutputTypesForPackagePolicy(options.packagePolicy);
-    allowedOutputTypes = allowedOutputTypes.filter((type) => forPackagePolicy.includes(type));
-  }
-
-  if (options.packageName) {
-    const forIntegration = getAllowedOutputTypesForIntegration(options.packageName);
-    allowedOutputTypes = allowedOutputTypes.filter((type) => forIntegration.includes(type));
-  }
-
-  return allowedOutputTypes;
-}
-
 /**
  * Return allowed output type for a given agent policy,
  * Fleet Server and APM cannot use anything else than same cluster ES

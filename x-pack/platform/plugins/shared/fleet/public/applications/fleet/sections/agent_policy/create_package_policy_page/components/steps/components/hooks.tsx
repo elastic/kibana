@@ -10,7 +10,7 @@ import { useHistory } from 'react-router-dom';
 
 import { LICENCE_FOR_OUTPUT_PER_INTEGRATION } from '../../../../../../../../../common/constants';
 import type { PackagePolicy } from '../../../../../../../../../common/types';
-import { getAllowedOutputTypes } from '../../../../../../../../../common/services/output_helpers';
+import { getAllowedOutputTypesForPackagePolicy } from '../../../../../../../../../common/services/output_helpers';
 import { useGetOutputs, useLicense } from '../../../../../../hooks';
 
 export function useDataStreamId() {
@@ -29,7 +29,7 @@ export function useOutputs(
   const licenseService = useLicense();
   const canUseOutputPerIntegration = licenseService.hasAtLeast(LICENCE_FOR_OUTPUT_PER_INTEGRATION);
   const { data: outputsData, isLoading } = useGetOutputs();
-  const allowedOutputTypes = getAllowedOutputTypes({ packagePolicy, packageName });
+  const allowedOutputTypes = getAllowedOutputTypesForPackagePolicy(packagePolicy);
   const allowedOutputs = useMemo(() => {
     if (!outputsData || !canUseOutputPerIntegration) {
       return [];

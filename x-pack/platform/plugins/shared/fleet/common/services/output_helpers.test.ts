@@ -22,8 +22,7 @@ describe('getAllowedOutputTypesForAgentPolicy', () => {
       ],
     } as any);
 
-    expect(res).toContain('elasticsearch');
-    expect(res).toContain('logstash');
+    expect(res).toHaveLength(4);
   });
 
   it('should return only elasticsearch for an agent policy with APM', () => {
@@ -46,6 +45,32 @@ describe('getAllowedOutputTypesForAgentPolicy', () => {
         },
       ],
     } as any);
+
+    expect(res).toEqual(['elasticsearch']);
+  });
+
+  it('should return only elasticsearch for an agentless agent policy', () => {
+    const res = getAllowedOutputTypesForAgentPolicy({ supports_agentless: true } as any);
+
+    expect(res).toEqual(['elasticsearch']);
+  });
+});
+
+describe('getAllowedOutputTypesForPackagePolicy', () => {
+  it('should return all available output type for a package policy without agentless support', () => {
+    const res = getAllowedOutputTypesForAgentPolicy({
+      package_policies: [
+        {
+          package: { name: 'nginx' },
+        },
+      ],
+    } as any);
+
+    expect(res).toHaveLength(4);
+  });
+
+  it('should return only elasticsearch for a package policy with agentless support', () => {
+    const res = getAllowedOutputTypesForAgentPolicy({ supports_agentless: true } as any);
 
     expect(res).toEqual(['elasticsearch']);
   });
