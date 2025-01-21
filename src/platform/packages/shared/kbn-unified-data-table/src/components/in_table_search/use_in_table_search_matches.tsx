@@ -333,6 +333,8 @@ function AllCells({
   );
 }
 
+const TIMEOUT_PER_ROW = 2000; // 2 sec per row max
+
 function RowCells({
   rowIndex,
   inTableSearchTerm,
@@ -344,7 +346,8 @@ function RowCells({
   onRowHighlightsCountFound: (rowMatch: RowMatches) => void;
 }) {
   const UnifiedDataTableRenderCellValue = renderCellValue;
-  const resultsMapRef = useRef<Record<string, number>>({});
+  const timerRef = useRef<NodeJS.Timeout>();
+  const matchesCountPerColumnIdRef = useRef<Record<string, number>>({});
   const rowMatchesCountRef = useRef<number>(0);
   const remainingNumberOfResultsRef = useRef<number>(visibleColumns.length);
 
@@ -352,16 +355,18 @@ function RowCells({
     onRowHighlightsCountFound({
       rowIndex,
       rowMatchesCount: rowMatchesCountRef.current,
-      matchesCountPerColumnId: resultsMapRef.current,
+      matchesCountPerColumnId: matchesCountPerColumnIdRef.current,
     });
   }, [rowIndex, onRowHighlightsCountFound]);
+  const onCompleteRef = useRef<() => void>();
+  onCompleteRef.current = onComplete;
 
   const onCellHighlightsCountFound = useCallback(
     (columnId: string, count: number) => {
       remainingNumberOfResultsRef.current = remainingNumberOfResultsRef.current - 1;
 
       if (count > 0) {
-        resultsMapRef.current[columnId] = count;
+        matchesCountPerColumnIdRef.current[columnId] = count;
         rowMatchesCountRef.current += count;
       }
 
@@ -371,6 +376,23 @@ function RowCells({
     },
     [onComplete]
   );
+
+  // don't let it run longer than TIMEOUT_PER_ROW
+  useEffect(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+
+    timerRef.current = setTimeout(() => {
+      onCompleteRef.current?.();
+    }, TIMEOUT_PER_ROW);
+
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
 
   return (
     <>
