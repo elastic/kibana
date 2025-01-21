@@ -18,7 +18,7 @@ export const TemplateDeleteModal = ({
   templatesToDelete,
   callback,
 }: {
-  templatesToDelete: Array<{ name: string; isLegacy?: boolean; type?: string; }>;
+  templatesToDelete: Array<{ name: string; isLegacy?: boolean; type?: string }>;
   callback: (data?: { hasDeletedTemplates: boolean }) => void;
 }) => {
   const [isDeleteConfirmed, setIsDeleteConfirmed] = useState<boolean>(false);
@@ -26,7 +26,9 @@ export const TemplateDeleteModal = ({
   const numTemplatesToDelete = templatesToDelete.length;
 
   const hasSystemTemplate = Boolean(templatesToDelete.find(({ name }) => name.startsWith('.')));
-  const managedTemplatesToDelete = templatesToDelete.filter(({ type }) => type === 'managed').length;
+  const managedTemplatesToDelete = templatesToDelete.filter(
+    ({ type }) => type === 'managed'
+  ).length;
 
   const handleDeleteTemplates = () => {
     deleteTemplates(templatesToDelete).then(({ data: { templatesDeleted, errors }, error }) => {

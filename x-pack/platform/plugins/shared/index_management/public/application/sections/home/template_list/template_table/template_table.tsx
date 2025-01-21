@@ -42,7 +42,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
   const { uiMetricService } = useServices();
   const [selection, setSelection] = useState<TemplateListItem[]>([]);
   const [templatesToDelete, setTemplatesToDelete] = useState<
-    Array<{ name: string; isLegacy?: boolean; type?: string; }>
+    Array<{ name: string; isLegacy?: boolean; type?: string }>
   >([]);
 
   const columns: Array<EuiBasicTableColumn<TemplateListItem>> = [

@@ -25,16 +25,13 @@ export const DeleteManagedAssetsCallout = ({
   ...overrideCalloutProps
 }: DeleteManagedAssetsCalloutProps) => {
   return (
-    <EuiCallOut
-      color="warning"
-      iconType="warning"
-      {...overrideCalloutProps}
-    >
+    <EuiCallOut color="warning" iconType="warning" {...overrideCalloutProps}>
       <p>
-        {overrideBody ?? i18n.translate('management.deleteManagedAssetsCallout.body', {
-          defaultMessage: `When a managed {assetName} is deleted, it will be automatically re-created by Elasticsearch if it is missing. This might make it seem like the deletion didn't work, but the {assetName} was deleted and then immediately recreated.`,
-          values: { assetName },
-        })}
+        {overrideBody ??
+          i18n.translate('management.deleteManagedAssetsCallout.body', {
+            defaultMessage: `When a managed {assetName} is deleted, it will be automatically re-created by Elasticsearch if it is missing. This might make it seem like the deletion didn't work, but the {assetName} was deleted and then immediately recreated.`,
+            values: { assetName },
+          })}
       </p>
     </EuiCallOut>
   );
