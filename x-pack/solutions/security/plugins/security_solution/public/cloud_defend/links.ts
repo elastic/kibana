@@ -7,13 +7,13 @@
 import { getSecuritySolutionLink } from '@kbn/cloud-defend-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { SecurityPageName } from '../../common/constants';
-import { SERVER_APP_ID } from '../../common/constants';
+import { SECURITY_FEATURE_ID } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
 import { IconCloudDefend } from '../common/icons/cloud_defend';
 
 const commonLinkProperties: Partial<LinkItem> = {
   hideTimeline: true,
-  capabilities: [`${SERVER_APP_ID}.show`],
+  capabilities: [`${SECURITY_FEATURE_ID}.show`],
 };
 
 export const cloudDefendLink: LinkItem = {
