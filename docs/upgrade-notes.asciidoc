@@ -75,12 +75,12 @@ Update your implementations to use the new endpoints:
    - Alternatively, create rules individually using `POST /api/detection_engine/rules` (link:https://www.elastic.co/docs/api/doc/kibana/v8/operation/operation-createrule[API documentation]).
 
 2. **For bulk updates of rules:**
-   - Use `POST /api/detection_engine/rules/_bulk_action` (link:https://www.elastic.co/docs/api/doc/kibana/v8/operation/operation-bulkaction[API documentation]) to update fields in multiple rules simultaneously.
+   - Use `POST /api/detection_engine/rules/_bulk_action` (link:https://www.elastic.co/docs/api/doc/kibana/v8/operation/operation-performrulesbulkaction[API documentation]) to update fields in multiple rules simultaneously.
    - Alternatively, update rules individually using `PUT /api/detection_engine/rules` (link:https://www.elastic.co/docs/api/doc/kibana/v8/operation/operation-updaterule[API documentation]).
 
 3. **For bulk deletion of rules:**
    - Use `POST /api/detection_engine/rules/_bulk_action` (link:https://www.elastic.co/docs/api/doc/kibana/v8/operation/operation-performrulesbulkaction[API documentation]) to delete multiple rules by IDs or query.
-   - Alternatively, delete rules individually using `DELETE /api/detection_engine/rules/{id}` (link:https://www.elastic.co/docs/api/doc/kibana/v8/operation/operation-deleterule[API documentation]).
+   - Alternatively, delete rules individually using `DELETE /api/detection_engine/rules` (link:https://www.elastic.co/docs/api/doc/kibana/v8/operation/operation-deleterule[API documentation]).
 --
 ====
 
