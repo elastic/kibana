@@ -5269,8 +5269,8 @@ components:
           type: integer
         request:
           $ref: '#/components/schemas/NonEmptyString'
-      required:
-        - request
+        request_type:
+          $ref: '#/components/schemas/NonEmptyString'
     RulePreviewLogs:
       type: object
       properties:

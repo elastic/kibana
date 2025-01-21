@@ -7,30 +7,15 @@ It manages its own state and data fetching, and can easily be dropped into pages
 
 ```tsx
 // Import the container component
-import {
-  UnifiedHistogramContainer,
-} from '@kbn/unified-histogram-plugin/public';
+import { UnifiedHistogramContainer } from '@kbn/unified-histogram-plugin/public';
 
 // Import modules required for your application
-import {
-  useServices,
-  useResizeRef,
-  useRequestParams,
-  MyLayout,
-  MyButton,
-} from './my-modules';
+import { useServices, useResizeRef, useRequestParams, MyLayout, MyButton } from './my-modules';
 
 const services = useServices();
 const resizeRef = useResizeRef();
-const {
-  dataView,
-  query,
-  filters,
-  timeRange,
-  relativeTimeRange,
-  searchSessionId,
-  requestAdapter,
-} = useRequestParams();
+const { dataView, query, filters, timeRange, relativeTimeRange, searchSessionId, requestAdapter } =
+  useRequestParams();
 
 return (
   <UnifiedHistogramContainer
@@ -71,7 +56,7 @@ import {
   useCallbacks,
   useRequestParams,
   useStateParams,
-  useManualRefetch,
+  useFetch,
   MyLayout,
   MyButton,
 } from './my-modules';
@@ -97,20 +82,13 @@ const getCreationOptions = useCallback(() => ({
   // Optionally provide a local storage key prefix to save parts of the state,
   // such as the chart hidden state and top panel height, to local storage
   localStorageKeyPrefix: 'myApp',
-  // By default Unified Histogram will automatically refetch based on certain
-  // state changes, such as chart hidden and request params, but this can be
-  // disabled in favour of manual fetching if preferred. Note that an initial
-  // request is always triggered when first initialized, and when the chart
-  // changes from hidden to visible, Lens will automatically trigger a refetch
-  // regardless of what this property is set to
-  disableAutoFetching: true,
   // Customize the initial state in order to override the defaults
   initialState: { chartHidden, breakdownField },
 }), [...]);
 
-// Manually refetch if disableAutoFetching is true
-useManualRefetch(() => {
-  unifiedHistogram?.refetch();
+// Trigger a fetch, must be called on init to render the chart
+useFetch(() => {
+  unifiedHistogram?.fetch();
 });
 
 // Update the Unified Histogram state when our state params change

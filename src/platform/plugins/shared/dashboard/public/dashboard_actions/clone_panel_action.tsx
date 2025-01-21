@@ -20,10 +20,8 @@ import {
   HasUniqueId,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { DASHBOARD_ACTION_GROUP } from '.';
 import { dashboardClonePanelActionStrings } from './_dashboard_actions_strings';
-
-export const ACTION_CLONE_PANEL = 'clonePanel';
+import { ACTION_CLONE_PANEL, DASHBOARD_ACTION_GROUP } from './constants';
 
 export type ClonePanelActionApi = CanAccessViewMode &
   HasUniqueId &
