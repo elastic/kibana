@@ -11,6 +11,7 @@ import { BrowserAuthFixture, LoginFunction } from '.';
 import { PROJECT_DEFAULT_ROLES } from '../../../../common';
 import { serviceLoadedMsg } from '../../../utils';
 import { coreWorkerFixtures } from '../../worker';
+import { ScoutSpaceParallelFixture } from '../../worker/scout_space';
 
 /**
  * The "browserAuth" fixture simplifies the process of logging into Kibana with
@@ -19,9 +20,9 @@ import { coreWorkerFixtures } from '../../worker';
  */
 export const browserAuthParallelFixture = coreWorkerFixtures.extend<
   { browserAuth: BrowserAuthFixture },
-  {}
+  { scoutSpace: ScoutSpaceParallelFixture }
 >({
-  browserAuth: async ({ log, context, samlAuth, config }, use) => {
+  browserAuth: async ({ log, context, samlAuth, config, scoutSpace }, use) => {
     const setSessionCookie = async (cookieValue: string) => {
       await context.clearCookies();
       await context.addCookies([
@@ -35,9 +36,8 @@ export const browserAuthParallelFixture = coreWorkerFixtures.extend<
     };
 
     const loginAs: LoginFunction = async (role) => {
-      const cookie = await samlAuth.getInteractiveUserSessionCookieWithRoleScope(role, {
-        forceNewSession: true,
-      });
+      const spaceId = scoutSpace.id;
+      const cookie = await samlAuth.getInteractiveUserSessionCookieWithRoleScope(role, { spaceId });
       await setSessionCookie(cookie);
     };
 

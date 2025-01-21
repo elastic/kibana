@@ -8,4 +8,4 @@
  */
 
 export * from './single_thread_fixtures';
-export * from './parallel_workers_fixtures';
+export * from './parallel_run_fixtures';

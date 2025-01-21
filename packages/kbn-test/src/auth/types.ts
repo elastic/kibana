@@ -65,4 +65,5 @@ export interface RetryParams {
 export interface GetSessionByRole {
   role: string;
   forceNewSession: boolean;
+  spaceId?: string;
 }

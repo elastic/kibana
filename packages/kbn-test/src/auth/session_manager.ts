@@ -41,7 +41,8 @@ export interface SupportedRoles {
 }
 
 export interface GetCookieOptions {
-  forceNewSession: boolean;
+  forceNewSession?: boolean;
+  spaceId?: string;
 }
 
 /**
@@ -120,18 +121,20 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
   };
 
   private getSessionByRole = async (options: GetSessionByRole): Promise<Session> => {
-    const { role, forceNewSession } = options;
+    const { role, forceNewSession, spaceId } = options;
 
     // Validate role before creating SAML session
     this.validateRole(role);
 
+    const cacheKey = spaceId ? `${role}:${spaceId}` : role;
+
     // Check if session is cached and not forced to create the new one
-    if (!forceNewSession && this.sessionCache.has(role)) {
-      return this.sessionCache.get(role)!;
+    if (!forceNewSession && this.sessionCache.has(cacheKey)) {
+      return this.sessionCache.get(cacheKey)!;
     }
 
     const session = await this.createSessionForRole(role);
-    this.sessionCache.set(role, session);
+    this.sessionCache.set(cacheKey, session);
 
     if (forceNewSession) {
       this.log.debug(`Session for role '${role}' was force updated.`);
@@ -181,13 +184,20 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
 
   async getApiCredentialsForRole(role: string, options?: GetCookieOptions) {
     const { forceNewSession } = options || { forceNewSession: false };
-    const session = await this.getSessionByRole({ role, forceNewSession });
+    const session = await this.getSessionByRole({
+      role,
+      forceNewSession: forceNewSession ?? false,
+    });
     return { Cookie: `sid=${session.getCookieValue()}` };
   }
 
   async getInteractiveUserSessionCookieWithRoleScope(role: string, options?: GetCookieOptions) {
-    const { forceNewSession } = options || { forceNewSession: false };
-    const session = await this.getSessionByRole({ role, forceNewSession });
+    const forceNewSession = options?.forceNewSession ?? false;
+    const session = await this.getSessionByRole({
+      role,
+      forceNewSession,
+      spaceId: options?.spaceId,
+    });
     return session.getCookieValue();
   }
 
