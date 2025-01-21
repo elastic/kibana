@@ -269,9 +269,9 @@ export function useModelActions({
                 displayErrorToast(
                   e,
                   i18n.translate('xpack.ml.trainedModels.modelsList.startFailed', {
-                    defaultMessage: 'Failed to start "{modelId}"',
+                    defaultMessage: 'Failed to start "{deploymentId}"',
                     values: {
-                      modelId: item.model_id,
+                      deploymentId: modelDeploymentParams.deployment_id,
                     },
                   })
                 );
@@ -284,9 +284,9 @@ export function useModelActions({
                   text: i18n.translate(
                     'xpack.ml.trainedModels.modelsList.startSuccessDescription',
                     {
-                      defaultMessage: 'Deployment for "{modelId}" has been started successfully.',
+                      defaultMessage: '"{deploymentId}" has started successfully.',
                       values: {
-                        modelId: item.model_id,
+                        deploymentId: modelDeploymentParams.deployment_id,
                       },
                     }
                   ),
