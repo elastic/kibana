@@ -36,6 +36,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { CoreStart, OverlayStart } from '@kbn/core/public';
 import { css } from '@emotion/react';
@@ -684,6 +685,8 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
 
   const isModelNotDownloaded = isModelDownloadItem(model);
 
+  const { euiTheme } = useEuiTheme();
+
   const getDefaultParams = useCallback((): DeploymentParamsUI => {
     const defaultVCPUUsage: DeploymentParamsUI['vCPUUsage'] = showNodeInfo ? 'medium' : 'low';
 
@@ -738,9 +741,10 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
 
   return (
     <EuiModal onClose={onClose} data-test-subj="mlModelsStartDeploymentModal" maxWidth={640}>
-      <EuiModalHeader>
+      {/* Override padding to allow progress bar to take full width */}
+      <EuiModalHeader css={{ paddingInline: `${euiTheme.size.l} 0px` }}>
         <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem>
+          <EuiFlexItem css={{ paddingInline: `0px ${euiTheme.size.xxl}` }}>
             <EuiModalHeaderTitle size="s">
               {isUpdate ? (
                 <FormattedMessage
@@ -757,8 +761,11 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
               )}
             </EuiModalHeaderTitle>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem css={{ paddingInline: `0px ${euiTheme.size.l}` }}>
             <ModelStatusIndicator modelId={model.model_id} />
+          </EuiFlexItem>
+          <EuiFlexItem css={{ paddingInline: `0px ${euiTheme.size.l}` }}>
+            <EuiHorizontalRule margin="none" />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalHeader>
