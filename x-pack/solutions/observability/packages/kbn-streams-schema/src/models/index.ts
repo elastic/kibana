@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { IngestStreamDefinition, ingestStreamDefinitionSchema } from './ingest';
-import { createIsNarrowSchema } from '../helpers';
-
 export * from './ingest';
 export * from './legacy';
 
-export type StreamDefinition = IngestStreamDefinition;
-
 export * from './api';
-
-export const streamDefinitionSchema: z.Schema<StreamDefinition> = ingestStreamDefinitionSchema;
-
-export const isStreamDefinition = createIsNarrowSchema(z.unknown(), streamDefinitionSchema);
+export * from './core';
+export * from './helpers';

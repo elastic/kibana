@@ -10,9 +10,7 @@ import { StreamDefinitionBase } from '../base';
 import { FieldDefinition, fieldDefinitionSchema } from './fields';
 import { ProcessorDefinition, processorDefinitionSchema } from './processors';
 import { RoutingDefinition, routingDefinitionSchema } from './routing';
-import { createIsNarrowSchema } from '../../helpers';
 import { nonEmptyStringSchema } from './common';
-import { streamDefinitionSchema } from '..';
 
 interface IngestBase {
   processing: ProcessorDefinition[];
@@ -100,28 +98,6 @@ const ingestStreamDefinitionSchemaBase: z.Schema<Omit<IngestStreamDefinition, 'n
   unwiredStreamDefinitionSchemaBase,
 ]);
 
-const isIngestStreamDefinition = createIsNarrowSchema(
-  streamDefinitionSchema,
-  ingestStreamDefinitionSchema
-);
-
-const isWiredStreamDefinition = createIsNarrowSchema(
-  streamDefinitionSchema,
-  wiredStreamDefinitionSchema
-);
-
-const isUnwiredStreamDefinition = createIsNarrowSchema(
-  streamDefinitionSchema,
-  unwiredStreamDefinitionSchema
-);
-
-const isRootStreamDefinition = createIsNarrowSchema(
-  streamDefinitionSchema,
-  wiredStreamDefinitionSchema.refine((stream) => {
-    return stream.name.split('.').length === 1;
-  })
-);
-
 export {
   type WiredStreamDefinition,
   wiredStreamDefinitionSchema,
@@ -132,10 +108,6 @@ export {
   type IngestStreamDefinition,
   ingestStreamDefinitionSchema,
   ingestStreamDefinitionSchemaBase,
-  isIngestStreamDefinition,
-  isWiredStreamDefinition,
-  isUnwiredStreamDefinition,
-  isRootStreamDefinition,
   type WiredIngest,
   wiredIngestSchema,
   type UnwiredIngest,
