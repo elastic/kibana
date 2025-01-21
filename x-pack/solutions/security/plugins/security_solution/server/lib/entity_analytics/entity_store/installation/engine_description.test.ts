@@ -62,6 +62,7 @@ describe('getUnitedEntityDefinition', () => {
         namespace: 'test',
         filter: '',
       });
+
       expect(entityManagerDefinition).toMatchSnapshot();
     });
   });
@@ -90,6 +91,7 @@ describe('getUnitedEntityDefinition', () => {
         namespace: 'test',
         filter: '',
       });
+
       expect(entityManagerDefinition).toMatchSnapshot();
     });
   });

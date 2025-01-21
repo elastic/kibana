@@ -191,7 +191,7 @@ export class CoreKibanaRequest<
       enumerable: false,
     });
 
-    this.httpVersion = isRealReq ? request.raw.req.httpVersion : '1.0';
+    this.httpVersion = isRealReq ? getHttpVersionFromRequest(request) : '1.0';
     this.apiVersion = undefined;
     this.protocol = getProtocolFromHttpVersion(this.httpVersion);
 
@@ -417,4 +417,12 @@ function sanitizeRequest(req: Request): { query: unknown; params: unknown; body:
 
 function getProtocolFromHttpVersion(httpVersion: string): HttpProtocol {
   return httpVersion.split('.')[0] === '2' ? 'http2' : 'http1';
+}
+
+function getHttpVersionFromRequest(request: Request) {
+  return request.raw.req.httpVersion;
+}
+
+export function getProtocolFromRequest(request: Request) {
+  return getProtocolFromHttpVersion(getHttpVersionFromRequest(request));
 }
