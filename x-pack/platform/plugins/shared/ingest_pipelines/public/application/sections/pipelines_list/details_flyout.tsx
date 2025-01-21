@@ -39,7 +39,7 @@ export interface Props {
   pipeline: Pipeline;
   onEditClick: (pipelineName: string) => void;
   onCloneClick: (pipelineName: string) => void;
-  onDeleteClick: (pipelineName: string[]) => void;
+  onDeleteClick: (pipelineName: Pipeline[]) => void;
   onClose: () => void;
 }
 
@@ -82,7 +82,7 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
       icon: <EuiIcon type="trash" />,
       onClick: () => {
         setShowPopover(false);
-        onDeleteClick([pipeline.name]);
+        onDeleteClick([pipeline]);
       },
     },
   ];

@@ -57,7 +57,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
   const [showFlyout, setShowFlyout] = useState<boolean>(false);
   const [showPopover, setShowPopover] = useState<boolean>(false);
 
-  const [pipelinesToDelete, setPipelinesToDelete] = useState<string[]>([]);
+  const [pipelinesToDelete, setPipelinesToDelete] = useState<Pipeline[]>([]);
 
   const { data, isLoading, error, resendRequest } = services.api.useLoadPipelines();
 
