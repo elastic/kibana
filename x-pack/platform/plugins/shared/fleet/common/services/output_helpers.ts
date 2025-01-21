@@ -30,7 +30,7 @@ const sameClusterRestrictedPackages = [
  * Return allowed output type for a given agent policy,
  * Fleet Server and APM cannot use anything else than same cluster ES
  */
-export function getAllowedOutputTypesForAgentPolicy(agentPolicy: AgentPolicy): string[] {
+export function getAllowedOutputTypesForAgentPolicy(agentPolicy: Partial<AgentPolicy>): string[] {
   const isRestrictedToSameClusterES =
     agentPolicy.package_policies &&
     agentPolicy.package_policies.some(

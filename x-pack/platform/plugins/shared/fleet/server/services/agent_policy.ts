@@ -412,7 +412,12 @@ class AgentPolicyService {
       spaceId: soClient.getCurrentNamespace(),
       namespace: agentPolicy.namespace,
     });
-    await validateOutputForPolicy(soClient, agentPolicy);
+    await validateOutputForPolicy(
+      soClient,
+      agentPolicy,
+      {},
+      getAllowedOutputTypesForAgentPolicy(agentPolicy)
+    );
     validateRequiredVersions(agentPolicy.name, agentPolicy.required_versions);
 
     const newSo = await soClient.create<AgentPolicySOAttributes>(
