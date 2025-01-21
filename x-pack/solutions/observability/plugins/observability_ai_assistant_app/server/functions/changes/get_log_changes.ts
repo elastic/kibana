@@ -65,7 +65,6 @@ export async function getLogChanges({
                 auto_date_histogram: dateHistogram,
               },
               changes: {
-                // @ts-expect-error change_point is not in the types
                 change_point: {
                   buckets_path: 'over_time>_count',
                 },
@@ -78,12 +77,10 @@ export async function getLogChanges({
   });
 
   return (
-    // @ts-expect-error change_point is not in the types
     response.aggregations?.sampler.groups.buckets.map((group) => {
       return {
         key: group.key,
         pattern: group.regex,
-        // @ts-expect-error change_point is not in the types
         over_time: group.over_time.buckets.map((bucket) => ({
           x: new Date(bucket.key).getTime(),
           y: bucket.doc_count,
@@ -94,7 +91,6 @@ export async function getLogChanges({
             : {
                 time: new Date(group.changes.bucket.key).toISOString(),
                 type: Object.keys(group.changes.type)[0] as keyof typeof group.changes.type,
-                // @ts-expect-error change_point is not in the types
                 ...Object.values(group.changes.type)[0],
               },
       };
