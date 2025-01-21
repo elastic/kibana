@@ -17,7 +17,6 @@ export const enableAssetInventoryRoute = (
   logger: Logger,
   config: AssetInventoryRoutesDeps['config']
 ) => {
-  // For now the API is not in use, but we need to keep it for future use once we wil ladd backend logic such as data views
   router.versioned
     .post({
       access: 'public',

@@ -56,7 +56,7 @@ export class AssetInventoryDataClient {
   private async asyncSetup() {
     const { logger } = this.options;
     try {
-      logger.debug('this is a placeholder');
+      logger.debug('Initializing asset inventory');
     } catch (err) {
       logger.error(`Error initializing asset inventory: ${err.message}`);
       await this.delete();
