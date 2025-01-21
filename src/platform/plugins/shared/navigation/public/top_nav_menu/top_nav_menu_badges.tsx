@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { css } from '@emotion/react';
+import React, { Fragment, ReactElement } from 'react';
+
 import {
   EuiBadge,
   EuiBadgeGroup,
@@ -15,8 +18,6 @@ import {
   EuiToolTipProps,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { Fragment, ReactElement } from 'react';
-import { css } from '@emotion/react';
 
 export type TopNavMenuBadgeProps = EuiBadgeProps & {
   badgeText: string;

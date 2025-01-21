@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useState, useMemo, useEffect } from 'react';
 import { css } from '@emotion/react';
 import classNames from 'classnames';
+import React, { FC, useState, useMemo, useEffect } from 'react';
+
 import {
   EuiAvatarProps,
   EuiCollapsibleNavGroup,

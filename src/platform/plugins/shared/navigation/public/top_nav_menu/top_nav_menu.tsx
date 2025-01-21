@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactElement } from 'react';
 import { css } from '@emotion/react';
+import React, { ReactElement } from 'react';
 
 import type { MountPoint } from '@kbn/core/public';
 import { MountPointPortal } from '@kbn/react-kibana-mount';

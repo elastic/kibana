@@ -8,8 +8,10 @@
  */
 
 import { upperFirst, isFunction, omit } from 'lodash';
-import React, { MouseEvent } from 'react';
+
 import { css } from '@emotion/react';
+import React, { MouseEvent } from 'react';
+
 import {
   EuiToolTip,
   EuiButton,
