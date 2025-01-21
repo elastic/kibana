@@ -60,7 +60,7 @@ function insertHighlighting(result: FormattedQuestionAnsweringResult, inputText:
 const ResultBadge: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const { euiTheme } = useEuiTheme();
   const euiFontSizeXS = useEuiFontSize('xs').fontSize;
-  const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
+  const isAmsterdam = euiTheme.themeName === 'EUI_THEME_AMSTERDAM';
 
   // For Amsterdam, use a `behindText` variant. Borealis doesn't need it because of updated contrasts.
   const badgeColor = isAmsterdam
