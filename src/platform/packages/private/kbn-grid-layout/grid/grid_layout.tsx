@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import classNames from 'classnames';
 import { cloneDeep } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest, distinctUntilChanged, filter, map, pairwise, skip } from 'rxjs';
@@ -30,6 +31,7 @@ export interface GridLayoutProps {
   onLayoutChange: (newLayout: GridLayoutData) => void;
   expandedPanelId?: string;
   accessMode?: GridAccessMode;
+  className?: string; // this makes it so that custom CSS can be passed via Emotion
 }
 
 export const GridLayout = ({
@@ -39,15 +41,16 @@ export const GridLayout = ({
   onLayoutChange,
   expandedPanelId,
   accessMode = 'EDIT',
+  className,
 }: GridLayoutProps) => {
+  const layoutRef = useRef<HTMLDivElement | null>(null);
   const { gridLayoutStateManager, setDimensionsRef } = useGridLayoutState({
     layout,
+    layoutRef,
     gridSettings,
     expandedPanelId,
     accessMode,
   });
-
-  const layoutRef = useRef<HTMLDivElement | null>(null);
 
   const [rowCount, setRowCount] = useState<number>(
     gridLayoutStateManager.gridLayout$.getValue().length
@@ -166,8 +169,10 @@ export const GridLayout = ({
           layoutRef.current = divElement;
           setDimensionsRef(divElement);
         }}
-        className="kbnGrid"
+        className={classNames('kbnGrid', className)}
         css={css`
+          padding: calc(var(--kbnGridGutterSize) * 1px);
+
           &:has(.kbnGridPanel--expanded) {
             ${expandedPanelStyles}
           }

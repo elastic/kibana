@@ -7,4 +7,5 @@
 
 export enum APIRoutes {
   SYNONYM_SETS = '/internal/search_synonyms/synonyms',
+  SYNONYM_SET_ID = '/internal/search_synonyms/synonyms/{synonymsSetId}',
 }

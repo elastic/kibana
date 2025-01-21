@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-import type { GenericFtrProviderContext } from '@kbn/test';
-
-export type FtrProviderContext = GenericFtrProviderContext<{}, {}>;
+import type { AlertsFieldMap8180 } from './alerts';
+import { alertsFieldMap8180 } from './alerts';
+export type { AlertsFieldMap8180 };
+export { alertsFieldMap8180 };

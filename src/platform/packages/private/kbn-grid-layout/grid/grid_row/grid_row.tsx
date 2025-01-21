@@ -9,9 +9,7 @@
 
 import { cloneDeep } from 'lodash';
 import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
-import { combineLatest, map, pairwise, skip } from 'rxjs';
-
-import { transparentize, useEuiTheme } from '@elastic/eui';
+import { map, pairwise, skip } from 'rxjs';
 import { css } from '@emotion/react';
 
 import { DragPreview } from '../drag_preview';
@@ -40,17 +38,13 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
     const [rowTitle, setRowTitle] = useState<string>(currentRow.title);
     const [isCollapsed, setIsCollapsed] = useState<boolean>(currentRow.isCollapsed);
 
-    const { euiTheme } = useEuiTheme();
-
     const rowContainer = useRef<HTMLDivElement | null>(null);
 
     /** Set initial styles based on state at mount to prevent styles from "blipping" */
     const initialStyles = useMemo(() => {
-      const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
-      const { columnCount, rowHeight } = runtimeSettings;
-
+      const { columnCount } = gridLayoutStateManager.runtimeSettings$.getValue();
       return css`
-        grid-auto-rows: ${rowHeight}px;
+        grid-auto-rows: calc(var(--kbnGridRowHeight) * 1px);
         grid-template-columns: repeat(${columnCount}, minmax(0, 1fr));
         gap: calc(var(--kbnGridGutterSize) * 1px);
       `;
@@ -59,40 +53,17 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
     useEffect(
       () => {
         /** Update the styles of the grid row via a subscription to prevent re-renders */
-        const interactionStyleSubscription = combineLatest([
-          gridLayoutStateManager.interactionEvent$,
-          gridLayoutStateManager.runtimeSettings$,
-          gridLayoutStateManager.gridLayout$,
-        ])
+        const interactionStyleSubscription = gridLayoutStateManager.interactionEvent$
           .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
-          .subscribe(([interactionEvent, runtimeSettings]) => {
+          .subscribe((interactionEvent) => {
             const rowRef = gridLayoutStateManager.rowRefs.current[rowIndex];
             if (!rowRef) return;
 
-            const { gutterSize, rowHeight, columnPixelWidth } = runtimeSettings;
-
             const targetRow = interactionEvent?.targetRowIndex;
             if (rowIndex === targetRow && interactionEvent) {
-              // apply "targetted row" styles
-              const gridColor = euiTheme.colors.backgroundLightAccentSecondary;
-              rowRef.style.backgroundPosition = `top -${gutterSize / 2}px left -${
-                gutterSize / 2
-              }px`;
-              rowRef.style.backgroundSize = ` ${columnPixelWidth + gutterSize}px ${
-                rowHeight + gutterSize
-              }px`;
-              rowRef.style.backgroundImage = `linear-gradient(to right, ${gridColor} 1px, transparent 1px),
-        linear-gradient(to bottom, ${gridColor} 1px, transparent 1px)`;
-              rowRef.style.backgroundColor = `${transparentize(
-                euiTheme.colors.backgroundLightAccentSecondary,
-                0.25
-              )}`;
+              rowRef.classList.add('kbnGridRow--targeted');
             } else {
-              // undo any "targetted row" styles
-              rowRef.style.backgroundPosition = ``;
-              rowRef.style.backgroundSize = ``;
-              rowRef.style.backgroundImage = ``;
-              rowRef.style.backgroundColor = `transparent`;
+              rowRef.classList.remove('kbnGridRow--targeted');
             }
           });
 

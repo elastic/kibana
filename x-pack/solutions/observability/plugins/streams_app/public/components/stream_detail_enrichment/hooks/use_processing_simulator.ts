@@ -5,23 +5,31 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import { ReadStreamDefinition, ProcessingDefinition, Condition } from '@kbn/streams-schema';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
-import { APIReturnType } from '@kbn/streams-plugin/public/api';
+import { APIReturnType, StreamsAPIClientRequestParamsOf } from '@kbn/streams-plugin/public/api';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
+import { DetectedField } from '../types';
 
 type Simulation = APIReturnType<'POST /api/streams/{id}/processing/_simulate'>;
+type SimulationRequestBody =
+  StreamsAPIClientRequestParamsOf<'POST /api/streams/{id}/processing/_simulate'>['params']['body'];
 
 export interface UseProcessingSimulatorReturnType {
   error?: IHttpFetchError<ResponseErrorBody>;
   isLoading: boolean;
   refreshSamples: () => void;
   samples: Array<Record<PropertyKey, unknown>>;
-  simulate: (processing: ProcessingDefinition) => Promise<Simulation | null>;
+  simulate: (
+    processing: ProcessingDefinition,
+    detectedFields?: DetectedField[]
+  ) => Promise<Simulation | null>;
   simulation?: Simulation | null;
 }
 
@@ -64,7 +72,7 @@ export const useProcessingSimulator = ({
             condition,
             start: start?.valueOf(),
             end: end?.valueOf(),
-            number: 100,
+            size: 100,
           },
         },
       });
@@ -76,10 +84,16 @@ export const useProcessingSimulator = ({
   const sampleDocs = (samples?.documents ?? []) as Array<Record<PropertyKey, unknown>>;
 
   const [{ loading: isLoadingSimulation, error, value }, simulate] = useAsyncFn(
-    (processingDefinition: ProcessingDefinition) => {
+    (processingDefinition: ProcessingDefinition, detectedFields?: DetectedField[]) => {
       if (!definition) {
         return Promise.resolve(null);
       }
+
+      const detected_fields = detectedFields
+        ? (detectedFields.filter(
+            (field) => field.type !== 'unmapped'
+          ) as SimulationRequestBody['detected_fields'])
+        : undefined;
 
       return streamsRepositoryClient.fetch('POST /api/streams/{id}/processing/_simulate', {
         signal: abortController.signal,
@@ -88,6 +102,7 @@ export const useProcessingSimulator = ({
           body: {
             documents: sampleDocs,
             processing: [processingDefinition],
+            detected_fields,
           },
         },
       });
