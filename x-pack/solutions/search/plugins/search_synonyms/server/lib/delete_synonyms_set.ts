@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export enum APIRoutes {
-  SYNONYM_SETS = '/internal/search_synonyms/synonyms',
-  SYNONYM_SET_ID = '/internal/search_synonyms/synonyms/{synonymsSetId}',
-}
+import { ElasticsearchClient } from '@kbn/core/server';
+
+export const deleteSynonymsSet = async (client: ElasticsearchClient, synonymsSetId: string) => {
+  return await client.synonyms.deleteSynonym({ id: synonymsSetId });
+};
