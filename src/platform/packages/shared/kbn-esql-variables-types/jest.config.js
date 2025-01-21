@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/kbn-es-types'],
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-esql-variable-types'],
 };
