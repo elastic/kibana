@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
+import { nonEmptyStringSchema } from '../common';
 
 const ELASTICSEARCH_ASSET_TYPES = [
   'ingest_pipeline',
@@ -14,7 +15,6 @@ const ELASTICSEARCH_ASSET_TYPES = [
 ] as const;
 
 type ElasticsearchAssetType = (typeof ELASTICSEARCH_ASSET_TYPES)[number];
-export const nonEmptyStringSchema = z.string().trim().min(1);
 
 export interface ElasticsearchAsset {
   type: ElasticsearchAssetType;

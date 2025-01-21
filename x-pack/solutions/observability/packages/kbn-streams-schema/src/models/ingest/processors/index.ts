@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod';
 import { Condition, conditionSchema } from '../conditions';
 import { createIsNarrowSchema } from '../../../helpers';
-import { nonEmptyStringSchema } from '../common';
+import { nonEmptyStringSchema } from '../../common';
 
 export interface ProcessorBase {
   if: Condition;

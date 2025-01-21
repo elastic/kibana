@@ -10,7 +10,7 @@ import { StreamDefinitionBase } from '../base';
 import { FieldDefinition, fieldDefinitionSchema } from './fields';
 import { ProcessorDefinition, processorDefinitionSchema } from './processors';
 import { RoutingDefinition, routingDefinitionSchema } from './routing';
-import { nonEmptyStringSchema } from './common';
+import { nonEmptyStringSchema } from '../common';
 
 interface IngestBase {
   processing: ProcessorDefinition[];
@@ -76,7 +76,7 @@ const wiredStreamDefinitionSchemaBase: z.Schema<WiredStreamDefinitionBase> = z.o
 
 const wiredStreamDefinitionSchema: z.Schema<WiredStreamDefinition> = z.intersection(
   z.object({
-    name: z.string(),
+    name: nonEmptyStringSchema,
   }),
   wiredStreamDefinitionSchemaBase
 );

@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { nonEmptyStringSchema } from '../ingest';
+import { nonEmptyStringSchema } from '../common';
 
 export interface StreamGetResponseBase {
   dashboards: string[];

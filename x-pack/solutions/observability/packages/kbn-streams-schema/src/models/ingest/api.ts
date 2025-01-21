@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { InheritedFieldDefinition, inheritedFieldDefinitionSchema } from '.';
+import { InheritedFieldDefinition, inheritedFieldDefinitionSchema } from './fields';
 import {
   StreamGetResponseBase,
   StreamUpsertRequestBase,

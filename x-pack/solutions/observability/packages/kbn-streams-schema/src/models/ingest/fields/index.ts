@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { nonEmptyStringSchema } from '../common';
+import { nonEmptyStringSchema } from '../../common';
 
 export const FIELD_DEFINITION_TYPES = [
   'keyword',

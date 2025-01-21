@@ -19,9 +19,9 @@ import {
   IngestStreamLifecycle,
   elasticsearchAssetSchema,
   ingestStreamLifecycleSchema,
-  nonEmptyStringSchema,
 } from './ingest/common';
 import { createIsNarrowSchema } from '../helpers';
+import { nonEmptyStringSchema } from './common';
 
 /**
  * These are deprecated types, they should be migrated to the updated types
@@ -87,4 +87,5 @@ export {
   isReadStream,
   isWiredReadStream,
   isUnwiredReadStream,
+  wiredReadStreamDefinitionSchema,
 };
