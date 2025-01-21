@@ -984,7 +984,7 @@ x-pack/solutions/security/packages/kbn-securitysolution-list-hooks @elastic/secu
 x-pack/solutions/security/packages/kbn-securitysolution-list-utils @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-lists-common @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-t-grid @elastic/security-detection-engine
-x-pack/solutions/security/packages/kbn-securitysolution-utils @elastic/security-detection-engine
+x-pack/solutions/security/packages/kbn-securitysolution-utils @elastic/security-detection-engine @elastic/security-detection-rule-management
 x-pack/solutions/security/packages/navigation @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/side_nav @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting-explore
@@ -1247,7 +1247,6 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 
 
 # Observability UI
-/x-pack/test/api_integration/apis/streams @elastic/observability-ui # Assigned per https://github.com/elastic/kibana/pull/201293
 /x-pack/test_serverless/api_integration/test_suites/observability/config.ts @elastic/observability-ui @elastic/appex-qa
 /x-pack/test_serverless/api_integration/test_suites/observability/index.ts @elastic/observability-ui
 
@@ -1449,6 +1448,9 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 
 # Observability settings
 /x-pack/plugins/observability_solution/observability/server/ui_settings.ts @elastic/obs-docs
+
+# Streams
+/x-pack/test/api_integration/deployment_agnostic/apis/observability/streams @elastic/streams-program-team
 
 ### END Observability Plugins
 
@@ -2187,6 +2189,7 @@ x-pack/test/security_solution_api_integration/test_suites/detections_response/te
 x-pack/test/security_solution_api_integration/test_suites/detections_response/user_roles @elastic/security-detections-response
 x-pack/test/security_solution_api_integration/test_suites/explore @elastic/security-threat-hunting-explore
 x-pack/test/security_solution_api_integration/test_suites/investigations @elastic/security-threat-hunting-investigations
+x-pack/test/security_solution_api_integration/test_suites/siem_migrations @elastic/security-threat-hunting
 x-pack/test/security_solution_api_integration/test_suites/sources @elastic/security-detections-response
 /x-pack/test/common/utils/security_solution/detections_response @elastic/security-detections-response
 /x-pack/test/functional/es_archives/signals @elastic/security-detections-response
@@ -2513,6 +2516,9 @@ x-pack/solutions/security/plugins/security_solution/public/common/components/ses
 x-pack/solutions/security/plugins/security_solution/public/cloud_defend @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/security_solution/public/kubernetes @elastic/kibana-cloud-security-posture
+x-pack/test/security_solution_api_integration/test_suites/asset_inventory @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory @elastic/kibana-cloud-security-posture
+
 ## Fleet plugin (co-owned with Fleet team)
 x-pack/platform/plugins/shared/fleet/public/components/cloud_security_posture @elastic/fleet @elastic/kibana-cloud-security-posture
 x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/components/cloud_security_posture @elastic/fleet @elastic/kibana-cloud-security-posture
@@ -2579,6 +2585,9 @@ x-pack/solutions/security/plugins/security_solution/server/lib/security_integrat
 
 # Changes to translation files should not ping code reviewers
 x-pack/platform/plugins/private/translations/translations
+
+# Profiling cypress tests
+x-pack/test/profiling_cypress @elastic/obs-ux-infra_services-team
 
 # Profiling api integration testing
 x-pack/test/profiling_api_integration @elastic/obs-ux-infra_services-team
