@@ -15,7 +15,7 @@ import {
 } from './helpers';
 import { authenticatedUser } from '../../__mocks__/user';
 import { getCreateKnowledgeBaseEntrySchemaMock } from '../../__mocks__/knowledge_base_entry_schema.mock';
-import { contentReferencesStoreFactory, IndexEntry } from '@kbn/elastic-assistant-common';
+import { ContentReferencesStore, contentReferencesStoreFactoryMock, EsqlContentReference, IndexEntry } from '@kbn/elastic-assistant-common';
 
 // Mock dependencies
 jest.mock('@elastic/elasticsearch');
@@ -144,7 +144,7 @@ describe('getStructuredToolForIndexEntry', () => {
   const mockEsClient = {} as ElasticsearchClient;
 
   const mockIndexEntry = getCreateKnowledgeBaseEntrySchemaMock({ type: 'index' }) as IndexEntry;
-  const contentReferencesStore = contentReferencesStoreFactory();
+  const contentReferencesStore = contentReferencesStoreFactoryMock();
 
   it('should return a DynamicStructuredTool with correct name and schema', () => {
     const tool = getStructuredToolForIndexEntry({
@@ -169,6 +169,8 @@ describe('getStructuredToolForIndexEntry', () => {
       hits: {
         hits: [
           {
+            "_index": "exampleIndex",
+            "_id": "exampleId",
             _source: {
               field1: 'value1',
               field2: 2,
@@ -190,11 +192,19 @@ describe('getStructuredToolForIndexEntry', () => {
       contentReferencesStore,
     });
 
+    (contentReferencesStore.add as jest.Mock).mockImplementation((creator: Parameters<ContentReferencesStore['add']>[0]) => {
+      const reference = creator({ id: "exampleContentReferenceId" })
+      expect(reference.type).toEqual("EsqlQuery")
+      expect((reference as EsqlContentReference).label).toEqual("exampleIndex")
+      expect((reference as EsqlContentReference).query).toEqual('FROM exampleIndex METADATA _id\n | WHERE _id == "exampleId"')
+      return reference
+    })
+
     const input = { query: 'testQuery', field1: 'value1', field2: 2 };
     const result = await tool.invoke(input, {});
 
     expect(result).toContain('Below are all relevant documents in JSON format');
-    expect(result).toContain('"text":"Inner text 1\\n --- \\nInner text 2"');
+    expect(result).toContain('"text":"Inner text 1\\n --- \\nInner text 2","citation":"{reference(exampleContentReferenceId)}"');
   });
 
   it('should log an error and return error message on Elasticsearch error', async () => {

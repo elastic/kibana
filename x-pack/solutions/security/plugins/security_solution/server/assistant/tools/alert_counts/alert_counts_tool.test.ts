@@ -12,7 +12,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { ALERT_COUNTS_TOOL } from './alert_counts_tool';
 import type { RetrievalQAChain } from 'langchain/chains';
 import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
-import { contentReferencesStoreFactory } from '@kbn/elastic-assistant-common';
+import { ContentReferencesStore, contentReferencesStoreFactoryMock } from '@kbn/elastic-assistant-common';
 
 describe('AlertCountsTool', () => {
   const alertsIndexPattern = 'alerts-index';
@@ -31,7 +31,7 @@ describe('AlertCountsTool', () => {
   const isEnabledKnowledgeBase = true;
   const chain = {} as unknown as RetrievalQAChain;
   const logger = loggerMock.create();
-  const contentReferencesStore = contentReferencesStoreFactory();
+  const contentReferencesStore = contentReferencesStoreFactoryMock()
   const rest = {
     isEnabledKnowledgeBase,
     chain,
@@ -159,6 +159,26 @@ describe('AlertCountsTool', () => {
         },
         size: 0,
       });
+    });
+
+    it('includes citations', async () => {
+      const tool: DynamicTool = ALERT_COUNTS_TOOL.getTool({
+        alertsIndexPattern,
+        esClient,
+        replacements,
+        request,
+        ...rest,
+      }) as DynamicTool;
+
+      (contentReferencesStore.add as jest.Mock).mockImplementation((creator: Parameters<ContentReferencesStore['add']>[0]) => {
+        const reference = creator({ id: "exampleContentReferenceId" })
+        expect(reference.type).toEqual("SecurityAlertsPage")
+        return reference
+      })
+
+      const result = await tool.func('');
+
+      expect(result).toContain("Citation: {reference(exampleContentReferenceId)}")
     });
 
     it('returns null when the alertsIndexPattern is undefined', () => {

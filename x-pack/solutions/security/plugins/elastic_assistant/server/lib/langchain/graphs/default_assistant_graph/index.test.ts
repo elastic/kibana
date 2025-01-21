@@ -18,7 +18,7 @@ import {
   createStructuredChatAgent,
   createToolCallingAgent,
 } from 'langchain/agents';
-import { contentReferencesStoreFactory } from '@kbn/elastic-assistant-common';
+import { contentReferencesStoreFactoryMock } from '@kbn/elastic-assistant-common';
 jest.mock('./graph');
 jest.mock('./helpers');
 jest.mock('langchain/agents');
@@ -67,7 +67,7 @@ describe('callAssistantGraph', () => {
     telemetryParams: {},
     traceOptions: {},
     responseLanguage: 'English',
-    contentReferencesStore: contentReferencesStoreFactory()
+    contentReferencesStore: contentReferencesStoreFactoryMock()
   } as unknown as AgentExecutorParams<boolean>;
 
   beforeEach(() => {
