@@ -169,7 +169,7 @@ export class RuleMigrationsTaskClient {
         this.logger.info(`Abort signal received, stopping migration ID:${migrationId}`);
         return;
       } else {
-        this.logger.error(`Error processing migration ID:${migrationId} ${error}`, error);
+        this.logger.error(`Error processing migration ID:${migrationId} ${error}`);
       }
     } finally {
       this.migrationsRunning.delete(migrationId);

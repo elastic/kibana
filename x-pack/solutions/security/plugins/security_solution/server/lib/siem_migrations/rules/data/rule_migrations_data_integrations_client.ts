@@ -27,14 +27,14 @@ export class RuleMigrationsDataIntegrationsClient extends RuleMigrationsDataBase
     const index = await this.getIndexName();
     const packages = await this.dependencies.packageService?.asInternalUser.getPackages();
     if (packages) {
-      const ragIntegrations = packages.map((pkg) => ({
+      const ragIntegrations = packages.map<RuleMigrationIntegration>((pkg) => ({
         title: pkg.title,
         id: pkg.name,
-        description: pkg.description,
+        description: pkg?.description || '',
         data_streams:
           pkg.data_streams?.map((stream) => ({
             dataset: stream.dataset,
-            index_pattern: `logs-${stream.dataset}-*`,
+            index_pattern: `${stream.type}-${stream.dataset}-*`,
             title: stream.title,
           })) || [],
         elser_embedding: [
@@ -42,7 +42,7 @@ export class RuleMigrationsDataIntegrationsClient extends RuleMigrationsDataBase
           pkg.description,
           ...(pkg.data_streams?.map((stream) => stream.title) || []),
         ].join(' - '),
-      })) as RuleMigrationIntegration[];
+      }));
       await this.esClient
         .bulk(
           {
@@ -63,11 +63,11 @@ export class RuleMigrationsDataIntegrationsClient extends RuleMigrationsDataBase
           { requestTimeout: 10 * 60 * 1000 }
         )
         .catch((error) => {
-          this.logger.error(`Error preparing integrations for SIEM migration ${error.message}`);
+          this.logger.error(`Error populating integrations for migration ${error.message}`);
           throw error;
         });
     } else {
-      this.logger.error('Error retrieving packages for SIEM migration');
+      this.logger.warn('Package service not available, not able not populate integrations index');
     }
   }
 
