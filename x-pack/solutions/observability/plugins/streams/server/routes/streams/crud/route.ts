@@ -18,11 +18,12 @@ import {
   InheritedFieldDefinition,
 } from '@kbn/streams-schema';
 import { isResponseError } from '@kbn/es-errors';
-import { MalformedStreamId } from '../../../lib/streams/errors/malformed_stream_id';
 import {
   DefinitionNotFound,
   ForkConditionMissing,
   IndexTemplateNotFound,
+  MalformedStream,
+  MalformedStreamId,
   RootStreamImmutabilityException,
   SecurityException,
 } from '../../../lib/streams/errors';
@@ -230,6 +231,7 @@ export const editStreamRoute = createServerRoute({
       if (
         e instanceof SecurityException ||
         e instanceof ForkConditionMissing ||
+        e instanceof MalformedStream ||
         e instanceof MalformedStreamId ||
         e instanceof RootStreamImmutabilityException
       ) {

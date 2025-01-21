@@ -17,7 +17,8 @@ import { getComponentTemplateName } from './name';
 
 export function generateLayer(
   id: string,
-  definition: WiredStreamDefinition
+  definition: WiredStreamDefinition,
+  isServerless: boolean
 ): ClusterPutComponentTemplateRequest {
   const properties: Record<string, MappingProperty> = {};
   Object.entries(definition.stream.ingest.wired.fields).forEach(([field, props]) => {
@@ -37,8 +38,8 @@ export function generateLayer(
   return {
     name: getComponentTemplateName(id),
     template: {
-      lifecycle: getTemplateLifecycle(definition),
-      settings: getTemplateSettings(definition),
+      lifecycle: getTemplateLifecycle(definition, isServerless),
+      settings: getTemplateSettings(definition, isServerless),
       mappings: {
         subobjects: false,
         dynamic: false,
@@ -53,29 +54,42 @@ export function generateLayer(
   };
 }
 
-function getTemplateLifecycle(definition: WiredStreamDefinition) {
-  if (!definition.stream.ingest.lifecycle || definition.stream.ingest.lifecycle.type === 'ilm') {
-    return undefined;
+function getTemplateLifecycle(definition: WiredStreamDefinition, isServerless: boolean) {
+  if (isServerless) {
+    // dlm cannot be disabled in serverless
+    const lifecycle = definition.stream.ingest.lifecycle;
+    return { data_retention: lifecycle?.type === 'dlm' ? lifecycle.data_retention : undefined };
   }
 
-  return { data_retention: definition.stream.ingest.lifecycle.data_retention };
+  if (!definition.stream.ingest.lifecycle || definition.stream.ingest.lifecycle.type === 'ilm') {
+    return { enabled: false };
+  }
+
+  return { enabled: true, data_retention: definition.stream.ingest.lifecycle.data_retention };
 }
 
-function getTemplateSettings(definition: WiredStreamDefinition) {
-  if (isRoot(definition.name)) {
-    return logsSettings;
+function getTemplateSettings(definition: WiredStreamDefinition, isServerless: boolean) {
+  const baseSettings = isRoot(definition.name) ? logsSettings : {};
+
+  if (isServerless) {
+    return baseSettings;
   }
 
   if (!definition.stream.ingest.lifecycle) {
-    return undefined;
+    return baseSettings;
   }
 
-  if (definition.stream.ingest.lifecycle?.type === 'ilm') {
+  if (definition.stream.ingest.lifecycle.type === 'ilm') {
     return {
+      ...baseSettings,
       'index.lifecycle.prefer_ilm': true,
       'index.lifecycle.name': definition.stream.ingest.lifecycle.policy,
     };
   }
 
-  return { 'index.lifecycle.prefer_ilm': false, 'index.lifecycle.name': undefined };
+  return {
+    ...baseSettings,
+    'index.lifecycle.prefer_ilm': false,
+    'index.lifecycle.name': undefined,
+  };
 }

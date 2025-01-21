@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { WiredStreamConfigDefinition, WiredStreamDefinition } from '@kbn/streams-schema';
+import { WiredReadStreamDefinition, WiredStreamConfigDefinition } from '@kbn/streams-schema';
 import { disableStreams, enableStreams, putStream, getStream } from './helpers/requests';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
@@ -15,10 +15,20 @@ import {
 } from './helpers/repository_client';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const config = getService('config');
   const roleScopedSupertest = getService('roleScopedSupertest');
+
+  const isServerless = !!config.get('serverless');
   let apiClient: StreamsSupertestRepositoryClient;
 
   describe('Lifecycle', () => {
+    const wiredPutBody: WiredStreamConfigDefinition = {
+      ingest: {
+        routing: [],
+        processing: [],
+        wired: { fields: {} },
+      },
+    };
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
@@ -29,51 +39,44 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('updates lifecycle', async () => {
-      const rootStream = await getStream(apiClient, 'logs');
+      const rootDefinition = await getStream(apiClient, 'logs');
 
       const response = await putStream(apiClient, 'logs', {
         ingest: {
-          ...rootStream.stream.ingest,
+          ...rootDefinition.stream.ingest,
           lifecycle: { type: 'dlm', data_retention: '999d' },
         },
       } as WiredStreamConfigDefinition);
       expect(response).to.have.property('acknowledged', true);
 
-      const updatedRootStream = await getStream(apiClient, 'logs');
-      expect((updatedRootStream as WiredStreamDefinition).stream.ingest.lifecycle).to.eql({
+      const updatedRootDefinition = await getStream(apiClient, 'logs');
+      expect((updatedRootDefinition as WiredReadStreamDefinition).stream.ingest.lifecycle).to.eql({
         type: 'dlm',
         data_retention: '999d',
       });
-      expect(updatedRootStream.effective_lifecycle).to.eql({
+      expect(updatedRootDefinition.effective_lifecycle).to.eql({
         type: 'dlm',
         data_retention: '999d',
         from: 'logs',
       });
     });
 
-    it('inherits lifecycle', async () => {
-      const putBody = {
-        ingest: {
-          routing: [],
-          processing: [],
-          wired: { fields: {} },
-        },
-      };
+    it('inherits dlm', async () => {
       // create two branches, one that inherits from root and
       // another one that overrides the root lifecycle
-      await putStream(apiClient, 'logs.inherits.lifecycle', putBody);
-      await putStream(apiClient, 'logs.overrides.lifecycle', putBody);
+      await putStream(apiClient, 'logs.inherits.lifecycle', wiredPutBody);
+      await putStream(apiClient, 'logs.overrides.lifecycle', wiredPutBody);
 
-      const rootStream = await getStream(apiClient, 'logs');
+      const rootDefinition = await getStream(apiClient, 'logs');
       await putStream(apiClient, 'logs', {
         ingest: {
-          ...rootStream.stream.ingest,
+          ...rootDefinition.stream.ingest,
           lifecycle: { type: 'dlm', data_retention: '10m' },
         },
       } as WiredStreamConfigDefinition);
       await putStream(apiClient, 'logs.overrides', {
         ingest: {
-          ...putBody.ingest,
+          ...wiredPutBody.ingest,
           routing: [{ name: 'logs.overrides.lifecycle' }],
           lifecycle: { type: 'dlm', data_retention: '1d' },
         },
@@ -82,9 +85,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await Promise.all([
         getStream(apiClient, 'logs.inherits'),
         getStream(apiClient, 'logs.inherits.lifecycle'),
-      ]).then((streams) => {
-        for (const stream of streams) {
-          expect(stream.effective_lifecycle).to.eql({
+      ]).then((definitions) => {
+        for (const definition of definitions) {
+          expect(definition.effective_lifecycle).to.eql({
             type: 'dlm',
             data_retention: '10m',
             from: 'logs',
@@ -95,9 +98,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await Promise.all([
         getStream(apiClient, 'logs.overrides'),
         getStream(apiClient, 'logs.overrides.lifecycle'),
-      ]).then((streams) => {
-        for (const stream of streams) {
-          expect(stream.effective_lifecycle).to.eql({
+      ]).then((definitions) => {
+        for (const definition of definitions) {
+          expect(definition.effective_lifecycle).to.eql({
             type: 'dlm',
             data_retention: '1d',
             from: 'logs.overrides',
@@ -105,5 +108,51 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         }
       });
     });
+
+    if (isServerless) {
+      it('does not support ilm', async () => {
+        await putStream(
+          apiClient,
+          'logs.ilm',
+          {
+            ingest: {
+              ...wiredPutBody.ingest,
+              lifecycle: {
+                type: 'ilm',
+                policy: 'my-policy',
+              },
+            },
+          },
+          400
+        );
+      });
+    } else {
+      it('inherits ilm', async () => {
+        await putStream(apiClient, 'logs.ilm.stream', wiredPutBody);
+        await putStream(apiClient, 'logs.ilm', {
+          ingest: {
+            ...wiredPutBody.ingest,
+            routing: [{ name: 'logs.ilm.stream' }],
+            lifecycle: {
+              type: 'ilm',
+              policy: 'my-policy',
+            },
+          },
+        });
+
+        await Promise.all([
+          getStream(apiClient, 'logs.ilm'),
+          getStream(apiClient, 'logs.ilm.stream'),
+        ]).then((definitions) => {
+          for (const definition of definitions) {
+            expect(definition.effective_lifecycle).to.eql({
+              type: 'ilm',
+              policy: 'my-policy',
+              from: 'logs.ilm',
+            });
+          }
+        });
+      });
+    }
   });
 }

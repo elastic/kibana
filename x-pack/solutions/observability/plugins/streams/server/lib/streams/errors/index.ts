@@ -13,3 +13,5 @@ export * from './index_template_not_found';
 export * from './fork_condition_missing';
 export * from './component_template_not_found';
 export * from './root_stream_immutability_exception';
+export * from './malformed_stream';
+export * from './malformed_stream_id';
