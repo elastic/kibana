@@ -216,15 +216,14 @@ const getStateDataView = async (
     return await getEsqlDataView(query, dataView, services);
   }
 
-  const result = await loadAndResolveDataView(
-    {
-      id: dataViewId,
-      dataViewSpec,
-      savedSearch,
-      isEsqlMode: isEsqlQuery,
-    },
-    { services, internalStateContainer }
-  );
+  const result = await loadAndResolveDataView({
+    dataViewId,
+    dataViewSpec,
+    savedSearch,
+    isEsqlMode: isEsqlQuery,
+    services,
+    internalStateContainer,
+  });
 
   return result.dataView;
 };

@@ -47,7 +47,7 @@ export async function changeDataView(
   try {
     nextDataView = typeof id === 'string' ? await dataViews.get(id, false) : id;
   } catch (e) {
-    //
+    // Swallow the error and keep the current data view
   }
 
   if (nextDataView && dataView) {
