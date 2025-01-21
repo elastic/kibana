@@ -18,7 +18,7 @@ export const OTHER_CATEGORY_LABEL = i18n.translate(
   }
 );
 
-export const OTHER_CATEGORY_DEFAULT_COLOR = '#516381'; // euiTheme.colors.textSubdued
+export const OTHER_CATEGORY_DEFAULT_COLOR = '#cad3e2'; // Defaulting to a light grey color that works in both dark and light mode
 
 export function getComputedFieldName(styleName: VECTOR_STYLES, fieldName: string) {
   return `${getComputedFieldNamePrefix(fieldName)}__${styleName as string}`;
