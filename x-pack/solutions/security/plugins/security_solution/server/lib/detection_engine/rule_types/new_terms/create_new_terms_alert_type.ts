@@ -343,7 +343,7 @@ export const createNewTermsAlertType = (
           });
           loggedRequests.push(...(bulkCreateResult?.loggedRequests ?? []));
 
-          if (bulkCreateResult?.alertsWereTruncated) {
+          if (bulkCreateResult && 'alertsWereTruncated' in bulkCreateResult) {
             break;
           }
         } else {

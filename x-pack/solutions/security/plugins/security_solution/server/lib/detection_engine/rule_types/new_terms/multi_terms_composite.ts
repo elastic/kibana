@@ -62,6 +62,16 @@ interface MultiTermsCompositeArgs extends MultiTermsCompositeArgsBase {
   batchSize: number;
 }
 
+interface LoggedRequestsProps {
+  loggedRequests?: RulePreviewLoggedRequest[];
+}
+
+type MultiTermsCompositeResult =
+  | (Omit<GenericBulkCreateResponse<NewTermsFieldsLatest>, 'suppressedItemsCount'> &
+      LoggedRequestsProps)
+  | LoggedRequestsProps
+  | undefined;
+
 /**
  * This helper does phase2/phase3(look README) got multiple new terms
  * It takes full page of results from phase 1 (10,000)
@@ -83,12 +93,7 @@ const multiTermsCompositeNonRetryable = async ({
   batchSize,
   isAlertSuppressionActive,
   isLoggedRequestsEnabled,
-}: MultiTermsCompositeArgs): Promise<
-  | (Omit<GenericBulkCreateResponse<NewTermsFieldsLatest>, 'suppressedItemsCount'> & {
-      loggedRequests?: RulePreviewLoggedRequest;
-    })
-  | undefined
-> => {
+}: MultiTermsCompositeArgs): Promise<MultiTermsCompositeResult> => {
   const {
     ruleExecutionLogger,
     tuple,
@@ -224,15 +229,11 @@ const multiTermsCompositeNonRetryable = async ({
 
       const bulkCreateResult = await createAlertsHook(docFetchResultWithAggs);
 
-      if (isLoggedRequestsEnabled) {
-        bulkCreateResult.loggedRequests = loggedRequests;
-      }
-
       if (bulkCreateResult.alertsWereTruncated) {
         result.warningMessages.push(
           isAlertSuppressionActive ? getSuppressionMaxSignalsWarning() : getMaxSignalsWarning()
         );
-        return bulkCreateResult;
+        return isLoggedRequestsEnabled ? { ...bulkCreateResult, loggedRequests } : bulkCreateResult;
       }
     }
 
@@ -249,9 +250,7 @@ const multiTermsCompositeNonRetryable = async ({
  */
 export const multiTermsComposite = async (
   args: MultiTermsCompositeArgsBase
-): Promise<
-  Omit<GenericBulkCreateResponse<NewTermsFieldsLatest>, 'suppressedItemsCount'> | undefined
-> => {
+): Promise<MultiTermsCompositeResult> => {
   let retryBatchSize = BATCH_SIZE;
   const ruleExecutionLogger = args.runOpts.ruleExecutionLogger;
   return pRetry(

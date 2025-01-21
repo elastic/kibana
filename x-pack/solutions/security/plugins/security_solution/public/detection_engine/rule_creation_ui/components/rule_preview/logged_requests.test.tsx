@@ -16,13 +16,13 @@ import { previewLogs } from './__mocks__/preview_logs';
 
 describe('LoggedRequests', () => {
   it('should not render component if logs are empty', () => {
-    render(<LoggedRequests logs={[]} />, { wrapper: TestProviders });
+    render(<LoggedRequests logs={[]} ruleType="esql" />, { wrapper: TestProviders });
 
     expect(screen.queryByTestId('preview-logged-requests-accordion')).toBeNull();
   });
 
   it('should open accordion on click and render list of request items', async () => {
-    render(<LoggedRequests logs={previewLogs} />, { wrapper: TestProviders });
+    render(<LoggedRequests logs={previewLogs} ruleType="esql" />, { wrapper: TestProviders });
 
     expect(screen.queryByTestId('preview-logged-requests-accordion')).toBeInTheDocument();
 
@@ -32,7 +32,7 @@ describe('LoggedRequests', () => {
   });
 
   it('should render code content on logged request item accordion click', async () => {
-    render(<LoggedRequests logs={previewLogs} />, { wrapper: TestProviders });
+    render(<LoggedRequests logs={previewLogs} ruleType="esql" />, { wrapper: TestProviders });
 
     expect(screen.queryByTestId('preview-logged-requests-accordion')).toBeInTheDocument();
 

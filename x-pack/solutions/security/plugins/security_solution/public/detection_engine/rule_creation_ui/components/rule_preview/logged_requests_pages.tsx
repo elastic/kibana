@@ -15,7 +15,7 @@ import { OptimizedAccordion } from './optimized_accordion';
 import { useAccordionStyling } from './use_accordion_styling';
 import { LoggedRequestsQuery } from './logged_requests_query';
 
-const ruleRequestsTypesMap: Record<Type, Record<string, unknown>> = {
+const ruleRequestsTypesMap: Partial<Record<Type, Record<string, unknown>>> = {
   query: {
     findDocuments: 'pageDelimiter',
   },
@@ -42,7 +42,7 @@ const transformRequestsToPages = (
       pages.push([request]);
     } else if (
       request.request_type &&
-      ruleRequestsTypesMap[ruleType][request.request_type] === 'pageDelimiter'
+      ruleRequestsTypesMap[ruleType]?.[request.request_type] === 'pageDelimiter'
     ) {
       pages.push([request]);
     } else {
