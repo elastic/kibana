@@ -19,6 +19,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 
+export const INPUT_TEST_SUBJ = 'inTableSearchInput';
+
 export interface InTableSearchInputProps {
   matchesCount: number | null;
   activeMatchPosition: number | null;
@@ -88,6 +90,7 @@ export const InTableSearchInput: React.FC<InTableSearchInputProps> = React.memo(
         autoFocus
         compressed
         className="unifiedDataTable__inTableSearchInput"
+        data-test-subj={INPUT_TEST_SUBJ}
         isClearable={!isProcessing}
         isLoading={isProcessing}
         append={
