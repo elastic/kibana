@@ -24,11 +24,13 @@ export class DatasetQualityPlugin
   implements Plugin<DatasetQualityPluginSetup, DatasetQualityPluginStart>
 {
   private telemetry = new TelemetryService();
+  private isServerless = false;
 
-  constructor(context: PluginInitializerContext) {}
+  constructor(private context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: DatasetQualitySetupDeps) {
     this.telemetry.setup({ analytics: core.analytics });
+    this.isServerless = this.context.env.packageInfo.buildFlavor === 'serverless';
 
     return {};
   }
@@ -48,17 +50,20 @@ export class DatasetQualityPlugin
       core,
       plugins,
       telemetryClient,
+      isServerless: this.isServerless,
     });
 
     const createDatasetQualityController = createDatasetQualityControllerLazyFactory({
       core,
       dataStreamStatsService,
+      isServerless: this.isServerless,
     });
 
     const DatasetQualityDetails = createDatasetQualityDetails({
       core,
       plugins,
       telemetryClient,
+      isServerless: this.isServerless,
     });
 
     const createDatasetQualityDetailsController = createDatasetQualityDetailsControllerLazyFactory({
@@ -66,6 +71,7 @@ export class DatasetQualityPlugin
       plugins,
       dataStreamStatsService,
       dataStreamDetailsService,
+      isServerless: this.isServerless,
     });
 
     return {

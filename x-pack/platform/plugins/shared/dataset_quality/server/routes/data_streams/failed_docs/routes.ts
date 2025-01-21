@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { notImplemented } from '@hapi/boom';
 import { DataStreamDocsStat, FailedDocsDetails } from '../../../../common/api_types';
 import { rangeRt, typesRt } from '../../../types/default_api_types';
 import { createDatasetQualityServerRoute } from '../../create_datasets_quality_server_route';
@@ -30,8 +31,13 @@ const failedDocsRoute = createDatasetQualityServerRoute({
   async handler(resources): Promise<{
     failedDocs: DataStreamDocsStat[];
   }> {
-    const { context, params, logger } = resources;
+    const { context, params, logger, getEsCapabilities } = resources;
     const coreContext = await context.core;
+    const isServerless = (await getEsCapabilities()).serverless;
+
+    if (isServerless) {
+      throw notImplemented('Failure store is not available in serverless mode');
+    }
 
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
@@ -66,9 +72,14 @@ const failedDocsDetailsRoute = createDatasetQualityServerRoute({
     tags: [],
   },
   async handler(resources): Promise<FailedDocsDetails> {
-    const { context, params } = resources;
-    const { dataStream } = params.path;
+    const { context, params, getEsCapabilities } = resources;
     const coreContext = await context.core;
+    const { dataStream } = params.path;
+    const isServerless = (await getEsCapabilities()).serverless;
+
+    if (isServerless) {
+      throw notImplemented('Failure store is not available in serverless mode');
+    }
 
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
@@ -92,9 +103,14 @@ const failedDocsErrorsRoute = createDatasetQualityServerRoute({
     tags: [],
   },
   async handler(resources): Promise<{ errors: Array<{ type: string; message: string }> }> {
-    const { context, params } = resources;
+    const { context, params, getEsCapabilities } = resources;
     const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
+    const isServerless = (await getEsCapabilities()).serverless;
+
+    if (isServerless) {
+      throw notImplemented('Failure store is not available in serverless mode');
+    }
 
     return await getFailedDocsErrors({
       esClient,

@@ -45,7 +45,8 @@ import {
 } from './notifications';
 
 export const createPureDatasetQualityDetailsControllerStateMachine = (
-  initialContext: DatasetQualityDetailsControllerContext
+  initialContext: DatasetQualityDetailsControllerContext,
+  isServerless: boolean
 ) =>
   createMachine<
     DatasetQualityDetailsControllerContext,
@@ -206,33 +207,37 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                         },
                       },
                     },
-                    dataStreamFailedDocs: {
-                      initial: 'fetchingFailedDocs',
-                      states: {
-                        fetchingFailedDocs: {
-                          invoke: {
-                            src: 'loadFailedDocsDetails',
-                            onDone: {
-                              target: 'doneFetchingFailedDocs',
-                              actions: ['storeFailedDocsDetails'],
+                    ...(isServerless
+                      ? {}
+                      : {
+                          dataStreamFailedDocs: {
+                            initial: 'fetchingFailedDocs',
+                            states: {
+                              fetchingFailedDocs: {
+                                invoke: {
+                                  src: 'loadFailedDocsDetails',
+                                  onDone: {
+                                    target: 'doneFetchingFailedDocs',
+                                    actions: ['storeFailedDocsDetails'],
+                                  },
+                                  onError: [
+                                    {
+                                      target: '#DatasetQualityDetailsController.indexNotFound',
+                                      cond: 'isIndexNotFoundError',
+                                    },
+                                    {
+                                      target: 'errorFetchingFailedDocs',
+                                    },
+                                  ],
+                                },
+                              },
+                              errorFetchingFailedDocs: {},
+                              doneFetchingFailedDocs: {
+                                type: 'final',
+                              },
                             },
-                            onError: [
-                              {
-                                target: '#DatasetQualityDetailsController.indexNotFound',
-                                cond: 'isIndexNotFoundError',
-                              },
-                              {
-                                target: 'errorFetchingFailedDocs',
-                              },
-                            ],
                           },
-                        },
-                        errorFetchingFailedDocs: {},
-                        doneFetchingFailedDocs: {
-                          type: 'final',
-                        },
-                      },
-                    },
+                        }),
                   },
                   onDone: {
                     target:
@@ -759,6 +764,7 @@ export interface DatasetQualityDetailsControllerStateMachineDependencies {
   toasts: IToasts;
   dataStreamStatsClient: IDataStreamsStatsClient;
   dataStreamDetailsClient: IDataStreamDetailsClient;
+  isServerless: boolean;
 }
 
 export const createDatasetQualityDetailsControllerStateMachine = ({
@@ -767,8 +773,9 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
   toasts,
   dataStreamStatsClient,
   dataStreamDetailsClient,
+  isServerless,
 }: DatasetQualityDetailsControllerStateMachineDependencies) =>
-  createPureDatasetQualityDetailsControllerStateMachine(initialContext).withConfig({
+  createPureDatasetQualityDetailsControllerStateMachine(initialContext, isServerless).withConfig({
     actions: {
       notifyFailedFetchForAggregatableDatasets: (_context, event: DoneInvokeEvent<Error>) =>
         fetchNonAggregatableDatasetsFailedNotifier(toasts, event.data),

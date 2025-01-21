@@ -179,6 +179,7 @@ export const getDatasetQualityTableColumns = ({
   isActiveDataset,
   timeRange,
   urlService,
+  failureStoreEnabled,
 }: {
   fieldFormats: FieldFormatsStart;
   canUserMonitorDataset: boolean;
@@ -191,6 +192,7 @@ export const getDatasetQualityTableColumns = ({
   isActiveDataset: (lastActivity: number) => boolean;
   timeRange: TimeRangeConfig;
   urlService: BrowserUrlService;
+  failureStoreEnabled: boolean;
 }): Array<EuiBasicTableColumn<DataStreamStat>> => {
   return [
     {
@@ -333,39 +335,48 @@ export const getDatasetQualityTableColumns = ({
       ),
       width: '140px',
     },
-    {
-      name: (
-        <EuiTableHeader data-test-subj="datasetQualityFailedPercentageColumn">
-          <EuiToolTip content={failedDocsColumnTooltip}>
-            <span>
-              {`${failedDocsColumnName} `}
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-            </span>
-          </EuiToolTip>
-        </EuiTableHeader>
-      ),
-      field: 'failedDocs.percentage',
-      sortable: true,
-      render: (_, dataStreamStat: DataStreamStat) => (
-        <QualityStatPercentageLink
-          isLoading={loadingFailedStats}
-          dataStreamStat={dataStreamStat}
-          timeRange={timeRange}
-          accessor="failedDocs"
-          selector={FAILURE_STORE_SELECTOR}
-          fewDocStatsTooltip={(failedDocsCount: number) =>
-            i18n.translate('xpack.datasetQuality.fewFailedDocsTooltip', {
-              defaultMessage: '{failedDocsCount} failed docs in this data set.',
-              values: {
-                failedDocsCount,
-              },
-            })
-          }
-          dataTestSubj="datasetQualityFailedDocsPercentageLink"
-        />
-      ),
-      width: '140px',
-    },
+    ...(failureStoreEnabled
+      ? [
+          {
+            name: (
+              <EuiTableHeader data-test-subj="datasetQualityFailedPercentageColumn">
+                <EuiToolTip content={failedDocsColumnTooltip}>
+                  <span>
+                    {`${failedDocsColumnName} `}
+                    <EuiIcon
+                      size="s"
+                      color="subdued"
+                      type="questionInCircle"
+                      className="eui-alignTop"
+                    />
+                  </span>
+                </EuiToolTip>
+              </EuiTableHeader>
+            ),
+            field: 'failedDocs.percentage',
+            sortable: true,
+            render: (_: any, dataStreamStat: DataStreamStat) => (
+              <QualityStatPercentageLink
+                isLoading={loadingFailedStats}
+                dataStreamStat={dataStreamStat}
+                timeRange={timeRange}
+                accessor="failedDocs"
+                selector={FAILURE_STORE_SELECTOR}
+                fewDocStatsTooltip={(failedDocsCount: number) =>
+                  i18n.translate('xpack.datasetQuality.fewFailedDocsTooltip', {
+                    defaultMessage: '{failedDocsCount} failed docs in this data set.',
+                    values: {
+                      failedDocsCount,
+                    },
+                  })
+                }
+                dataTestSubj="datasetQualityFailedDocsPercentageLink"
+              />
+            ),
+            width: '140px',
+          },
+        ]
+      : []),
     ...(canUserMonitorDataset && canUserMonitorAnyDataStream
       ? [
           {

@@ -9,6 +9,7 @@ import {
   EuiAccordion,
   EuiButtonGroup,
   EuiButtonIcon,
+  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -25,13 +26,15 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram-plugin/public';
 import React, { useCallback } from 'react';
-import { QualityIssueType } from '../../../../state_machines/dataset_quality_details_controller';
 import {
   discoverAriaText,
   openInDiscoverText,
+  overviewPanelDatasetQualityIndicatorDegradedDocs,
   overviewTrendsDocsText,
 } from '../../../../../common/translations';
 import { useDatasetQualityDetailsState, useQualityIssuesDocsChart } from '../../../../hooks';
+import { QualityIssueType } from '../../../../state_machines/dataset_quality_details_controller';
+import { useDatasetQualityDetailsContext } from '../../context';
 import { TrendDocsChart } from './trend_docs_chart';
 
 const trendDocsTooltip = (
@@ -41,9 +44,24 @@ const trendDocsTooltip = (
   />
 );
 
+const degradedDocsTooltip = (
+  <FormattedMessage
+    id="xpack.datasetQuality.details.degradedDocsTooltip"
+    defaultMessage="The number of degraded documents —documents with the {ignoredProperty} property— in your data set."
+    values={{
+      ignoredProperty: (
+        <EuiCode language="json" transparentBackground>
+          _ignored
+        </EuiCode>
+      ),
+    }}
+  />
+);
+
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: number }) {
+  const { isServerless } = useDatasetQualityDetailsContext();
   const { timeRange, updateTimeRange, docsTrendChart } = useDatasetQualityDetailsState();
   const {
     dataView,
@@ -64,7 +82,23 @@ export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: num
     [updateTimeRange, timeRange.refresh]
   );
 
-  const accordionTitle = (
+  const accordionTitle = isServerless ? (
+    <EuiFlexItem
+      css={css`
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: flex-start;
+        gap: 4px;
+      `}
+    >
+      <EuiTitle size={'xxs'}>
+        <h5>{overviewPanelDatasetQualityIndicatorDegradedDocs}</h5>
+      </EuiTitle>
+      <EuiToolTip content={degradedDocsTooltip}>
+        <EuiIcon size="m" color="subdued" type="questionInCircle" className="eui-alignTop" />
+      </EuiToolTip>
+    </EuiFlexItem>
+  ) : (
     <EuiFlexItem
       css={css`
         flex-direction: row;
@@ -94,28 +128,30 @@ export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: num
         <EuiSpacer size="m" />
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem>
-            <EuiButtonGroup
-              data-test-subj="datasetQualityDetailsChartTypeButtonGroup"
-              legend={i18n.translate('xpack.datasetQuality.details.chartTypeLegend', {
-                defaultMessage: 'Quality chart type',
-              })}
-              onChange={(id) => handleDocsTrendChartChange(id as QualityIssueType)}
-              options={[
-                {
-                  id: 'degraded',
-                  label: i18n.translate('xpack.datasetQuality.details.chartType.degradedDocs', {
-                    defaultMessage: 'Ignored fields',
-                  }),
-                },
-                {
-                  id: 'failed',
-                  label: i18n.translate('xpack.datasetQuality.details.chartType.failedDocs', {
-                    defaultMessage: 'Failed docs',
-                  }),
-                },
-              ]}
-              idSelected={docsTrendChart}
-            />
+            {!isServerless && (
+              <EuiButtonGroup
+                data-test-subj="datasetQualityDetailsChartTypeButtonGroup"
+                legend={i18n.translate('xpack.datasetQuality.details.chartTypeLegend', {
+                  defaultMessage: 'Quality chart type',
+                })}
+                onChange={(id) => handleDocsTrendChartChange(id as QualityIssueType)}
+                options={[
+                  {
+                    id: 'degraded',
+                    label: i18n.translate('xpack.datasetQuality.details.chartType.degradedDocs', {
+                      defaultMessage: 'Ignored fields',
+                    }),
+                  },
+                  {
+                    id: 'failed',
+                    label: i18n.translate('xpack.datasetQuality.details.chartType.failedDocs', {
+                      defaultMessage: 'Failed docs',
+                    }),
+                  },
+                ]}
+                idSelected={docsTrendChart}
+              />
+            )}
           </EuiFlexItem>
           <EuiSkeletonRectangle width={160} height={32} isLoading={!dataView}>
             <UnifiedBreakdownFieldSelector
