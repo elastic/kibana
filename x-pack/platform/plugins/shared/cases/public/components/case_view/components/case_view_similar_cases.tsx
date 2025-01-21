@@ -28,6 +28,7 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
     caseId: caseData.id,
     page: pageIndex + 1,
     perPage: pageSize,
+    enabled: true,
   });
 
   const tableOnChangeCallback = useCallback(({ page, sort }: EuiBasicTableOnChange) => {
