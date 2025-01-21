@@ -38,12 +38,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
-        'bfetch:disable': true,
-        enableESQL: true,
       });
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await common.navigateToApp('discover');
-      await header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
@@ -68,11 +65,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               .getEntries()
               .filter((entry: any) => ['fetch', 'xmlhttprequest'].includes(entry.initiatorType))
           );
-
           const result = requests.filter((entry) =>
             entry.name.endsWith(`/internal/search/${endpoint}`)
           );
-
           const count = result.length;
           if (count !== searchCount) {
             log.warning('Request count differs:', result);
@@ -83,16 +78,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     };
 
-    const waitForLoadingToFinish = async () => {
-      await header.waitUntilLoadingHasFinished();
-      await discover.waitForDocTableLoadingComplete();
-      await elasticChart.canvasExists();
-    };
-
     const expectSearches = async (type: 'ese' | 'esql', expected: number, cb: Function) => {
       await expectSearchCount(type, 0);
       await cb();
       await expectSearchCount(type, expected);
+    };
+
+    const waitForLoadingToFinish = async () => {
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitForDocTableLoadingComplete();
+      await elasticChart.canvasExists();
     };
 
     const getSharedTests = ({
@@ -102,7 +97,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       query2,
       savedSearchesRequests,
       setQuery,
-      expectedRequests = 2,
     }: {
       type: 'ese' | 'esql';
       savedSearch: string;
@@ -110,47 +104,71 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       query2: string;
       savedSearchesRequests?: number;
       setQuery: (query: string) => Promise<void>;
-      expectedRequests?: number;
-      expectedRefreshRequest?: number;
     }) => {
-      it(`should send no more than ${expectedRequests} search requests (documents + chart) on page load`, async () => {
-        await browser.refresh();
+      it(`should send 2 search requests (documents + chart) on page load`, async () => {
+        if (type === 'ese') {
+          await browser.refresh();
+        }
         await browser.execute(async () => {
           performance.setResourceTimingBufferSize(Number.MAX_SAFE_INTEGER);
         });
-        await waitForLoadingToFinish();
-        // one more requests for fields in ESQL mode
-        const actualExpectedRequests = type === 'esql' ? expectedRequests + 1 : expectedRequests;
-        await expectSearchCount(type, actualExpectedRequests);
+        if (type === 'esql') {
+          await expectSearches(type, 2, async () => {
+            await queryBar.clickQuerySubmitButton();
+          });
+        } else {
+          await expectSearchCount(type, 2);
+        }
       });
 
-      it(`should send no more than ${expectedRequests} requests (documents + chart) when refreshing`, async () => {
-        await expectSearches(type, expectedRequests, async () => {
+      it(`should send 2 requests (documents + chart) when refreshing`, async () => {
+        await expectSearches(type, 2, async () => {
           await queryBar.clickQuerySubmitButton();
         });
       });
 
-      it(`should send no more than ${expectedRequests} requests (documents + chart) when changing the query`, async () => {
-        await expectSearches(type, expectedRequests, async () => {
+      it(`should send 2 requests (documents + chart) when changing the query`, async () => {
+        await expectSearches(type, 2, async () => {
           await setQuery(query1);
           await queryBar.clickQuerySubmitButton();
         });
       });
 
-      it(`should send no more than ${expectedRequests} requests (documents + chart) when changing the time range`, async () => {
-        await expectSearches(
-          type,
-          type === 'esql' ? expectedRequests + 1 : expectedRequests,
-          async () => {
-            await timePicker.setAbsoluteRange(
-              'Sep 21, 2015 @ 06:31:44.000',
-              'Sep 23, 2015 @ 00:00:00.000'
-            );
-          }
-        );
+      it(`should send 2 requests (documents + chart) when changing the time range`, async () => {
+        await expectSearches(type, 2, async () => {
+          await timePicker.setAbsoluteRange(
+            'Sep 21, 2015 @ 06:31:44.000',
+            'Sep 23, 2015 @ 00:00:00.000'
+          );
+        });
       });
 
-      it(`should send ${savedSearchesRequests} requests for saved search changes`, async () => {
+      it(`should send no requests (documents + chart) when toggling the chart visibility`, async () => {
+        await expectSearches(type, 0, async () => {
+          // hide chart
+          await discover.toggleChartVisibility();
+          // show chart
+          await discover.toggleChartVisibility();
+        });
+      });
+
+      it(`should send a request for chart data when toggling the chart visibility after a time range change`, async () => {
+        // hide chart
+        await discover.toggleChartVisibility();
+        await timePicker.setAbsoluteRange(
+          'Sep 21, 2015 @ 06:31:44.000',
+          'Sep 24, 2015 @ 00:00:00.000'
+        );
+        await waitForLoadingToFinish();
+        await expectSearches(type, 1, async () => {
+          // show chart, we expect a request for the chart data, since the time range changed
+          await discover.toggleChartVisibility();
+        });
+      });
+
+      const actualSavedSearchRequests = savedSearchesRequests ?? 2;
+
+      it(`should send no more than ${actualSavedSearchRequests} requests for saved search changes`, async () => {
         await setQuery(query1);
         await queryBar.clickQuerySubmitButton();
         await timePicker.setAbsoluteRange(
@@ -158,39 +176,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Sep 23, 2015 @ 00:00:00.000'
         );
         await waitForLoadingToFinish();
-        const actualExpectedRequests = savedSearchesRequests ?? expectedRequests;
         log.debug('Creating saved search');
-        await expectSearches(
-          type,
-          type === 'esql' ? actualExpectedRequests + 2 : actualExpectedRequests,
-          async () => {
-            await discover.saveSearch(savedSearch);
-          }
-        );
+        await expectSearches(type, actualSavedSearchRequests, async () => {
+          await discover.saveSearch(savedSearch);
+        });
         log.debug('Resetting saved search');
         await setQuery(query2);
         await queryBar.clickQuerySubmitButton();
         await waitForLoadingToFinish();
-        await expectSearches(type, actualExpectedRequests, async () => {
+        await expectSearches(type, 2, async () => {
           await discover.revertUnsavedChanges();
         });
         log.debug('Clearing saved search');
-        await expectSearches(
-          type,
-          type === 'esql' ? actualExpectedRequests + 2 : actualExpectedRequests,
-          async () => {
-            await testSubjects.click('discoverNewButton');
-            await waitForLoadingToFinish();
+        await expectSearches(type, actualSavedSearchRequests, async () => {
+          await testSubjects.click('discoverNewButton');
+          if (type === 'esql') {
+            await queryBar.clickQuerySubmitButton();
           }
-        );
+          await waitForLoadingToFinish();
+        });
         log.debug('Loading saved search');
-        await expectSearches(
-          type,
-          type === 'esql' ? actualExpectedRequests + 2 : actualExpectedRequests,
-          async () => {
-            await discover.loadSavedSearch(savedSearch);
-          }
-        );
+        await expectSearches(type, actualSavedSearchRequests, async () => {
+          await discover.loadSavedSearch(savedSearch);
+        });
       });
     };
 
@@ -210,16 +218,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         setQuery: (query) => queryBar.setQuery(query),
       });
 
-      it(`should send no more than 2 requests (documents + chart) when toggling the chart visibility`, async () => {
-        await expectSearches(type, 2, async () => {
-          await discover.toggleChartVisibility();
-        });
-        await expectSearches(type, 2, async () => {
-          await discover.toggleChartVisibility();
-        });
-      });
-
-      it('should send no more than 2 requests (documents + chart) when adding a filter', async () => {
+      it('should send 2 requests (documents + chart) when adding a filter', async () => {
         await expectSearches(type, 2, async () => {
           await filterBar.addFilter({
             field: 'extension',
@@ -229,52 +228,51 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should send no more than 2 requests (documents + chart) when sorting', async () => {
+      it('should send 2 requests (documents + chart) when sorting', async () => {
         await expectSearches(type, 2, async () => {
           await discover.clickFieldSort('@timestamp', 'Sort Old-New');
         });
       });
 
-      it('should send no more than 2 requests (documents + chart) when changing to a breakdown field without an other bucket', async () => {
+      it('should send 2 requests (documents + chart) when changing to a breakdown field without an other bucket', async () => {
         await expectSearches(type, 2, async () => {
           await discover.chooseBreakdownField('type');
         });
       });
 
-      it('should send no more than 3 requests (documents + chart + other bucket) when changing to a breakdown field with an other bucket', async () => {
+      it('should send 3 requests (documents + chart + other bucket) when changing to a breakdown field with an other bucket', async () => {
         await testSubjects.click('discoverNewButton');
         await expectSearches(type, 3, async () => {
           await discover.chooseBreakdownField('extension.raw');
         });
       });
 
-      it('should send no more than 2 requests (documents + chart) when changing the chart interval', async () => {
+      it('should send 2 requests (documents + chart) when changing the chart interval', async () => {
         await expectSearches(type, 2, async () => {
           await discover.setChartInterval('Day');
         });
       });
 
-      it('should send no more than 2 requests (documents + chart) when changing the data view', async () => {
+      it('should send 2 requests (documents + chart) when changing the data view', async () => {
         await expectSearches(type, 2, async () => {
           await discover.selectIndexPattern('long-window-logstash-*');
         });
       });
     });
-    // Currently ES|QL checks are disabled due to various flakiness
-    // Note that ES|QL also checks for different number of requests due to the fields request triggered
-    // by the ES|QL Editor
-    describe.skip('ES|QL mode', () => {
+
+    describe('ES|QL mode', () => {
       const type = 'esql';
+
       before(async () => {
+        await kibanaServer.uiSettings.update({
+          'discover:searchOnPageLoad': false,
+        });
         await common.navigateToApp('discover');
-        await header.waitUntilLoadingHasFinished();
         await discover.selectTextBaseLang();
       });
 
       beforeEach(async () => {
         await monacoEditor.setCodeEditorValue('from logstash-* | where bytes > 1000 ');
-        await queryBar.clickQuerySubmitButton();
-        await waitForLoadingToFinish();
       });
 
       getSharedTests({
@@ -282,18 +280,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         savedSearch: 'esql test',
         query1: 'from logstash-* | where bytes > 1000 ',
         query2: 'from logstash-* | where bytes < 2000 ',
-        savedSearchesRequests: 2,
+        savedSearchesRequests: 3,
         setQuery: (query) => monacoEditor.setCodeEditorValue(query),
-        expectedRequests: 2,
-      });
-
-      it(`should send requests (documents + chart) when toggling the chart visibility`, async () => {
-        await expectSearches(type, 1, async () => {
-          await discover.toggleChartVisibility();
-        });
-        await expectSearches(type, 3, async () => {
-          await discover.toggleChartVisibility();
-        });
       });
     });
   });

@@ -130,7 +130,6 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
       }
       try {
         extendedFields = await data.dataViews.getFieldsForIndexPattern(dv, {
-          pattern: '',
           includeUnmapped: true,
           fields,
         });
