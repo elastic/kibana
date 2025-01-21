@@ -8,6 +8,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { isEmpty } from 'lodash';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { v4 as uuidV4 } from 'uuid';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
 import { SyntheticsRestApiRouteFactory } from '../../types';
@@ -77,10 +78,9 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
       });
     }
 
-    const formattedLocation = toSavedObjectContract({
-      ...location,
-      id: location.agentPolicyId,
-    });
+    const newId = uuidV4();
+
+    const formattedLocation = toSavedObjectContract({ ...location, id: newId });
 
     const agentPolicy = agentPolicies?.find((policy) => policy.id === location.agentPolicyId);
     if (!agentPolicy) {
@@ -98,6 +98,7 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
         privateLocationSavedObjectName,
         formattedLocation,
         {
+          id: newId,
           initialNamespaces: isEmpty(spaces) || spaces?.includes('*') ? ['*'] : spaces,
         }
       );

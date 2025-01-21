@@ -65,7 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      // await kibanaServer.savedObjects.cleanStandardList();
     });
     let monitorId = 'test-id';
 

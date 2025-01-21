@@ -217,10 +217,9 @@ export const getMonitorLocations = ({
     }) || [];
   const privateLocs =
     monitorLocations.privateLocations?.map((locationName) => {
+      const loc = locationName.toLowerCase();
       const locationFound = allPrivateLocations.find(
-        (location) =>
-          location.label.toLowerCase() === locationName.toLowerCase() ||
-          location.id.toLowerCase() === locationName.toLowerCase()
+        (location) => location.label.toLowerCase() === loc || location.id.toLowerCase() === loc
       );
       if (locationFound) {
         return locationFound;
