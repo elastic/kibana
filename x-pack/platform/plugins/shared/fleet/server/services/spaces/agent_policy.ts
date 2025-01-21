@@ -11,7 +11,6 @@ import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
 import {
   AGENTS_INDEX,
-  AGENT_ACTIONS_INDEX,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
