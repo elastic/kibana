@@ -14,7 +14,13 @@ import { isBaseNLPModelItem } from '../../../common/types/trained_models';
 import { getModelStateColor } from './get_model_state';
 import { useTrainedModelsService } from './hooks/use_trained_models_service';
 
-export const ModelStatusIndicator = ({ modelId }: { modelId: string }) => {
+export const ModelStatusIndicator = ({
+  modelId,
+  isModalEmbedded,
+}: {
+  modelId: string;
+  isModalEmbedded?: boolean;
+}) => {
   const trainedModelsService = useTrainedModelsService();
 
   const currentModel = useObservable(
@@ -30,6 +36,10 @@ export const ModelStatusIndicator = ({ modelId }: { modelId: string }) => {
   const config = getModelStateColor(state);
 
   if (!config) {
+    return null;
+  }
+
+  if (isModalEmbedded && state !== MODEL_STATE.DOWNLOADING && state !== MODEL_STATE.DOWNLOADED) {
     return null;
   }
 

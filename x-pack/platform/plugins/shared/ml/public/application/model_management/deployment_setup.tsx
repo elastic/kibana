@@ -762,10 +762,10 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
             </EuiModalHeaderTitle>
           </EuiFlexItem>
           <EuiFlexItem css={{ paddingInline: `0px ${euiTheme.size.l}` }}>
-            <ModelStatusIndicator modelId={model.model_id} />
+            <ModelStatusIndicator modelId={model.model_id} isModalEmbedded />
           </EuiFlexItem>
           <EuiFlexItem css={{ paddingInline: `0px ${euiTheme.size.l}` }}>
-            <EuiHorizontalRule margin="none" />
+            <EuiHorizontalRule margin="xs" />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalHeader>
