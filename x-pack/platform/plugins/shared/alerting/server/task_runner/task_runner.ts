@@ -699,11 +699,9 @@ export class TaskRunner<
           .map((lastRunError) => lastRunError.message)
           .join(',');
         const errorMessage = `Executing Rule ${this.ruleType.id}:${ruleId} has resulted in the following error(s): ${lasRunErrorMessages}`;
-        if (errorSource !== TaskErrorSource.USER) {
-          this.logger.error(errorMessage, {
-            tags: [this.ruleType.id, ruleId, 'rule-run-failed', `${errorSource}-error`],
-          });
-        }
+        this.logger.error(errorMessage, {
+          tags: [this.ruleType.id, ruleId, 'rule-run-failed', `${errorSource}-error`],
+        });
         return {
           taskRunError: createTaskRunError(new Error(errorMessage), errorSource),
         };

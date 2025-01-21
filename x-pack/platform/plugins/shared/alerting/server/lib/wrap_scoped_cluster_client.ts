@@ -281,16 +281,14 @@ function getWrappedEqlSearchFn(opts: WrapEsClientOpts) {
       if (opts.abortController.signal.aborted) {
         throw new Error('EQL search has been aborted due to cancelled execution');
       }
-      const isVerificationException = e.message && e.message.includes('verification_exception');
-      if (!isVerificationException) {
-        opts.logger.warn(
-          `executing eql query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
-            opts.rule.spaceId
-          } - ${JSON.stringify(params)} - with options ${JSON.stringify(searchOptions)}${
-            requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
-          }`
-        );
-      }
+
+      opts.logger.warn(
+        `executing eql query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
+          opts.rule.spaceId
+        } - ${JSON.stringify(params)} - with options ${JSON.stringify(searchOptions)}${
+          requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
+        }`
+      );
       throw e;
     }
   }
