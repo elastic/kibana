@@ -69,17 +69,17 @@ export const useGridLayoutEvents = ({
 
       const previewRect = (() => {
         return isResize
-        ? getResizePreviewRect({
-            interactionEvent,
-            pointerPixel: pointerPixel.current,
-            runtimeSettings,
-          }): getDragPreviewRect({
-            interactionEvent,
-            pointerPixel: pointerPixel.current,
-          })
-        })();
+          ? getResizePreviewRect({
+              interactionEvent,
+              pointerPixel: pointerPixel.current,
+              runtimeSettings,
+            })
+          : getDragPreviewRect({
+              interactionEvent,
+              pointerPixel: pointerPixel.current,
+            });
+      })();
 
-   
       activePanel$.next({ id: interactionEvent.id, position: previewRect });
 
       const { columnCount, gutterSize, rowHeight, columnPixelWidth } = runtimeSettings;
@@ -184,15 +184,6 @@ export const useGridLayoutEvents = ({
 
       const onEnd = () => commitAction(gridLayoutStateManager);
 
-      const onBlur = () => {
-        const {
-          interactionEvent$: { value: { id, targetRowIndex, type } = {} },
-        } = gridLayoutStateManager;
-        if (id === panelId && rowIndex === targetRowIndex && type === interactionType) {
-          commitAction(gridLayoutStateManager);
-        }
-      };
-
 
       const onMove = (ev: Event) => {
         if (isMouseEvent(ev) || isTouchEvent(ev)) {
@@ -215,18 +206,6 @@ export const useGridLayoutEvents = ({
           onStart,
           onMove,
           onEnd,
-        });
-      } else if (isKeyboardEvent(e)) {
-        onKeyDown({
-          e,
-          gridLayoutStateManager,
-          onMove,
-          onStart,
-          onCancel: () => {
-            cancelAction(gridLayoutStateManager);
-          },
-          onEnd,
-          onBlur,
         });
       }
     },
