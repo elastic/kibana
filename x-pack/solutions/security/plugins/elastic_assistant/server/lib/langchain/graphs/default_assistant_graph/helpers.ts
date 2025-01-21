@@ -102,24 +102,36 @@ export const streamGraph = async ({
         : undefined
     );
 
-    for await (const { event, data, tags } of stream) {
-      if ((tags || []).includes(AGENT_NODE_TAG)) {
-        if (event === 'on_chat_model_stream') {
-          const msg = data.chunk as AIMessageChunk;
-          if (!didEnd && !msg.tool_call_chunks?.length && msg.content.length) {
-            push({ payload: msg.content as string, type: 'content' });
+    const pushStreamUpdate = async () => {
+      for await (const { event, data, tags } of stream) {
+        if ((tags || []).includes(AGENT_NODE_TAG)) {
+          if (event === 'on_chat_model_stream') {
+            const msg = data.chunk as AIMessageChunk;
+            if (!didEnd && !msg.tool_call_chunks?.length && msg.content.length) {
+              push({ payload: msg.content as string, type: 'content' });
+            }
           }
-        }
 
-        if (
-          event === 'on_chat_model_end' &&
-          !data.output.lc_kwargs?.tool_calls?.length &&
-          !didEnd
-        ) {
-          handleStreamEnd(data.output.content);
+          if (
+            event === 'on_chat_model_end' &&
+            !data.output.lc_kwargs?.tool_calls?.length &&
+            !didEnd
+          ) {
+            handleStreamEnd(data.output.content);
+          }
         }
       }
     }
+
+    pushStreamUpdate().catch((err) => {
+      if (streamingSpan) {
+        streamingSpan.outcome = 'failure';
+        streamingSpan.end();
+      }
+      logger.error(`Error streaming graph: ${err}`);
+      handleStreamEnd(err.message, true);
+    });
+    
     return responseWithHeaders;
   }
 
@@ -137,37 +149,48 @@ export const streamGraph = async ({
     version: 'v1',
   });
 
-  for await (const { event, data, tags } of stream) {
-    if ((tags || []).includes(AGENT_NODE_TAG)) {
-      if (event === 'on_llm_stream') {
-        const chunk = data?.chunk;
-        const msg = chunk.message;
-        if (msg?.tool_call_chunks && msg?.tool_call_chunks.length > 0) {
-          // I don't think we hit this anymore because of our check for AGENT_NODE_TAG
-          // however, no harm to keep it in
-          /* empty */
-        } else if (!didEnd) {
-          push({ payload: msg.content, type: 'content' });
-          finalMessage += msg.content;
+  const pushStreamUpdate = async () => {
+    for await (const { event, data, tags } of stream) {
+      if ((tags || []).includes(AGENT_NODE_TAG)) {
+        if (event === 'on_llm_stream') {
+          const chunk = data?.chunk;
+          const msg = chunk.message;
+          if (msg?.tool_call_chunks && msg?.tool_call_chunks.length > 0) {
+            // I don't think we hit this anymore because of our check for AGENT_NODE_TAG
+            // however, no harm to keep it in
+            /* empty */
+          } else if (!didEnd) {
+            push({ payload: msg.content, type: 'content' });
+            finalMessage += msg.content;
+          }
         }
-      }
 
-      if (event === 'on_llm_end' && !didEnd) {
-        const generation = data.output?.generations[0][0];
-        if (
-          // if generation is null, an error occurred - do nothing and let error handling complete the stream
-          generation != null &&
-          // no finish_reason means the stream was aborted
-          (!generation?.generationInfo?.finish_reason ||
-            generation?.generationInfo?.finish_reason === 'stop')
-        ) {
-          handleStreamEnd(
-            generation?.text && generation?.text.length ? generation?.text : finalMessage
-          );
+        if (event === 'on_llm_end' && !didEnd) {
+          const generation = data.output?.generations[0][0];
+          if (
+            // if generation is null, an error occurred - do nothing and let error handling complete the stream
+            generation != null &&
+            // no finish_reason means the stream was aborted
+            (!generation?.generationInfo?.finish_reason ||
+              generation?.generationInfo?.finish_reason === 'stop')
+          ) {
+            handleStreamEnd(
+              generation?.text && generation?.text.length ? generation?.text : finalMessage
+            );
+          }
         }
       }
     }
   }
+
+  pushStreamUpdate().catch((err) => {
+    if (streamingSpan) {
+      streamingSpan.outcome = 'failure';
+      streamingSpan.end();
+    }
+    logger.error(`Error streaming graph: ${err}`);
+    handleStreamEnd(err.message, true);
+  });
 
   return responseWithHeaders;
 };
