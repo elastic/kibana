@@ -13,10 +13,11 @@ import { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/commo
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   deleteKnowledgeBaseModel,
-  createKnowledgeBaseModel,
+  importTinyElserModel,
   clearKnowledgeBase,
   deleteInferenceEndpoint,
-  TINY_ELSER,
+  setupKnowledgeBase,
+  waitForKnowledgeBaseReady,
 } from './helpers';
 
 interface InferenceChunk {
@@ -46,6 +47,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const es = getService('es');
   const ml = getService('ml');
   const retry = getService('retry');
+  const log = getService('log');
 
   const archive =
     'x-pack/test/functional/es_archives/observability/ai_assistant/knowledge_base_8_15';
@@ -74,17 +76,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     before(async () => {
       await clearKnowledgeBase(es);
       await esArchiver.load(archive);
-      await createKnowledgeBaseModel(ml);
-      const { status } = await observabilityAIAssistantAPIClient.admin({
-        endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-        params: {
-          query: {
-            model_id: TINY_ELSER.id,
-          },
-        },
-      });
-
-      expect(status).to.be(200);
+      await importTinyElserModel(ml);
+      await setupKnowledgeBase(observabilityAIAssistantAPIClient);
+      await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
     });
 
     after(async () => {
