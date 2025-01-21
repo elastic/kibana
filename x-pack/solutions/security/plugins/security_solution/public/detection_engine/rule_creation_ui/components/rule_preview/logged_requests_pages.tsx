@@ -59,7 +59,7 @@ const LoggedRequestsPagesComponent: FC<{
         <OptimizedAccordion
           id={`preview-logged-requests-page-accordion-${key}`}
           data-test-subj="preview-logged-requests-page-accordion"
-          buttonContent={`Page ${key + 1} of search results`}
+          buttonContent={`Page ${key + 1} of search queries`}
           borders="horizontal"
           css={{
             'margin-left': paddingLarge,

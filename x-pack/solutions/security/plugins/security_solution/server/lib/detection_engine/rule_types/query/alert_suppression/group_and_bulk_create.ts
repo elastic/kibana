@@ -33,6 +33,7 @@ import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../c
 import type { ExperimentalFeatures } from '../../../../../../common';
 import { createEnrichEventsFunction } from '../../utils/enrichments';
 import { getNumberOfSuppressedAlerts } from '../../utils/get_number_of_suppressed_alerts';
+import * as i18n from '../../translations';
 
 export interface BucketHistory {
   key: Record<string, string | number | null>;
@@ -201,7 +202,12 @@ export const groupAndBulkCreate = async ({
         secondaryTimestamp: runOpts.secondaryTimestamp,
         runtimeMappings: runOpts.runtimeMappings,
         additionalFilters: bucketHistoryFilter,
-        loggedRequestDescription: isLoggedRequestsEnabled ? 'Find events' : undefined,
+        loggedRequestsEnabled: isLoggedRequestsEnabled
+          ? {
+              type: 'findDocuments',
+              description: i18n.FIND_EVENTS_DESCRIPTION,
+            }
+          : undefined,
       };
       const { searchResult, searchDuration, searchErrors, loggedRequests } =
         await singleSearchAfter(eventsSearchParams);

@@ -47,7 +47,7 @@ const createLoggedRequestsConfig = (
   return {
     type: 'findDocuments',
     description,
-    skipRequestQuery: page > 1, // skipping query logging for performance reasons, so we won't overwhelm Kibana with large response size
+    skipRequestQuery: page > 2, // skipping query logging for performance reasons, so we won't overwhelm Kibana with large response size
   };
 };
 
