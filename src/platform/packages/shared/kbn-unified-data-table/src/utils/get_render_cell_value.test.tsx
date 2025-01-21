@@ -246,7 +246,9 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <InTableSearchHighlightsWrapper>
+      <InTableSearchHighlightsWrapper
+        key="cell-"
+      >
         <SourcePopoverContent
           closeButton={
             <EuiButtonIcon
@@ -429,7 +431,9 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <InTableSearchHighlightsWrapper>
+      <InTableSearchHighlightsWrapper
+        key="cell-"
+      >
         <SourcePopoverContent
           closeButton={
             <EuiButtonIcon
@@ -584,7 +588,9 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <InTableSearchHighlightsWrapper>
+      <InTableSearchHighlightsWrapper
+        key="cell-"
+      >
         <SourcePopoverContent
           closeButton={
             <EuiButtonIcon
@@ -688,7 +694,9 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <InTableSearchHighlightsWrapper>
+      <InTableSearchHighlightsWrapper
+        key="cell-"
+      >
         <span
           className="unifiedDataTable__cellValue"
           dangerouslySetInnerHTML={
@@ -787,7 +795,9 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <InTableSearchHighlightsWrapper>
+      <InTableSearchHighlightsWrapper
+        key="cell-"
+      >
         <span
           className="unifiedDataTable__cellValue"
           dangerouslySetInnerHTML={
@@ -813,7 +823,9 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(componentWithDetails).toMatchInlineSnapshot(`
-      <InTableSearchHighlightsWrapper>
+      <InTableSearchHighlightsWrapper
+        key="cell-"
+      >
         <EuiFlexGroup
           data-test-subj="dataTableExpandCellActionPopover"
           direction="row"

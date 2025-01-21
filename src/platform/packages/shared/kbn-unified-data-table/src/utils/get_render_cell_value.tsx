@@ -168,7 +168,7 @@ export const getRenderCellValueFn = ({
 
     return (
       <InTableSearchHighlightsWrapper
-        key={inTableSearchTerm} // it's very important to have a unique key for each inTableSearchTerm change so it can add the highlights again
+        key={`cell-${inTableSearchTerm || ''}`} // it's very important to have a unique key for each inTableSearchTerm change so it can add the highlights again
         inTableSearchTerm={inTableSearchTerm}
         onHighlightsCountFound={onHighlightsCountFound}
       >

@@ -22,26 +22,22 @@ export const InTableSearchHighlightsWrapper: React.FC<InTableSearchHighlightsWra
   children,
 }) => {
   const cellValueRef = useRef<HTMLDivElement | null>(null);
-  const renderedForSearchTerm = useRef<string>();
+
+  const dryRun = Boolean(onHighlightsCountFound); // only to count highlights, not to modify the DOM
+  const shouldCallCallbackRef = useRef<boolean>(dryRun);
 
   useEffect(() => {
-    if (
-      inTableSearchTerm &&
-      cellValueRef.current &&
-      renderedForSearchTerm.current !== inTableSearchTerm
-    ) {
-      renderedForSearchTerm.current = inTableSearchTerm;
+    if (inTableSearchTerm && cellValueRef.current) {
       const cellNode = cellValueRef.current;
       setTimeout(() => {
-        const count = modifyDOMAndAddSearchHighlights(
-          cellNode,
-          inTableSearchTerm,
-          Boolean(onHighlightsCountFound)
-        );
-        onHighlightsCountFound?.(count);
+        const count = modifyDOMAndAddSearchHighlights(cellNode, inTableSearchTerm, dryRun);
+        if (shouldCallCallbackRef.current) {
+          shouldCallCallbackRef.current = false;
+          onHighlightsCountFound?.(count);
+        }
       }, 0);
     }
-  }, [inTableSearchTerm, onHighlightsCountFound]);
+  }, [dryRun, inTableSearchTerm, children, onHighlightsCountFound]);
 
   return <div ref={cellValueRef}>{children}</div>;
 };
