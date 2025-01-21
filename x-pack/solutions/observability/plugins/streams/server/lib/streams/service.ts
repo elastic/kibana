@@ -23,24 +23,7 @@ export const streamsStorageSettings = {
       name: types.keyword(),
       stream: types.object({
         properties: {
-          ingest: types.object({
-            properties: {
-              processing: types.object({ enabled: false }),
-              routing: types.object({
-                properties: {
-                  name: types.keyword(),
-                  condition: types.object({ enabled: false }),
-                },
-              }),
-              wired: types.object({
-                properties: {
-                  fields: types.object({
-                    enabled: false,
-                  }),
-                },
-              }),
-            },
-          }),
+          ingest: types.object({ enabled: false }),
         },
       }),
     },
