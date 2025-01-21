@@ -165,7 +165,17 @@ export const eqlExecutor = async ({
 
       let newSignals: Array<WrappedFieldsLatest<BaseFieldsLatest>> | undefined;
 
+      // @ts-expect-error shard_failures exists in
+      // elasticsearch response v 8.18.x
+      // TODO: remove ts-expect-error when ES lib version is updated
+      const shardFailures = response.shard_failures;
+
       const { events, sequences } = response.hits;
+
+      if (shardFailures) {
+        ruleExecutionLogger.warn(`shard failures, ${JSON.stringify(shardFailures)}`);
+        result.warningMessages.push(`shard failures, ${JSON.stringify(shardFailures)}`);
+      }
 
       if (events) {
         if (isAlertSuppressionActive) {

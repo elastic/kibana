@@ -87,6 +87,10 @@ export const buildEqlSearchRequest = ({
           filter: requestFilter,
         },
       },
+      // the allow_partial$ query parameters supersede xpack settings on cluster
+      // @ts-expect-error unknown property allow_partial_search_results
+      // TODO: remove this ts-expect when 8.18 elasticsearch client is released.
+      allow_partial_search_results: true,
       runtime_mappings: runtimeMappings,
       timestamp_field: timestampField,
       event_category_field: eventCategoryOverride,
