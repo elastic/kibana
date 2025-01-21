@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import { Filter, Query, TimeRange } from '../filters';
 
 export interface ExecutionContextSearch {
@@ -15,4 +16,5 @@ export interface ExecutionContextSearch {
   query?: Query | Query[];
   timeRange?: TimeRange;
   disableWarningToasts?: boolean;
+  esqlVariables?: ESQLControlVariable[];
 }

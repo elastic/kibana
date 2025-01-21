@@ -46,6 +46,7 @@ export const kibana: ExpressionFunctionKibana = {
       query: [...toArray(getSearchContext().query), ...toArray((input || {}).query)],
       filters: [...(getSearchContext().filters || []), ...((input || {}).filters || [])],
       timeRange: getSearchContext().timeRange || (input ? input.timeRange : undefined),
+      esqlVariables: getSearchContext().esqlVariables || (input ? input.esqlVariables : undefined),
     };
 
     return output;

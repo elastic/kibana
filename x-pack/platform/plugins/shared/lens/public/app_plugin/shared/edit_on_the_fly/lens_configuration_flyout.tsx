@@ -29,11 +29,9 @@ import {
   getLanguageDisplayName,
 } from '@kbn/es-query';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { esqlVariablesService } from '@kbn/esql-variables/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
@@ -90,10 +88,6 @@ export function LensEditConfigurationFlyout({
   const prevQuery = useRef<AggregateQuery | Query>(attributes.state.query);
   const [query, setQuery] = useState<AggregateQuery | Query>(attributes.state.query);
 
-  const [esqlVariables, setEsqlVariables] = useState<ESQLControlVariable[]>(
-    esqlVariablesService.getVariables()
-  );
-
   const [errors, setErrors] = useState<Error[] | undefined>();
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
@@ -107,6 +101,7 @@ export function LensEditConfigurationFlyout({
 
   const dashboardPanels = useStateFromPublishingSubject(dashboardApi?.children$);
   const controlGroupApi = useStateFromPublishingSubject(dashboardApi?.controlGroupApi$);
+  const esqlVariables = useStateFromPublishingSubject(dashboardApi?.esqlVariables$);
 
   const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
     useLensSelector((state) => state.lens);
@@ -132,17 +127,6 @@ export function LensEditConfigurationFlyout({
 
   // needed for text based languages mode which works ONLY with adHoc dataviews
   const adHocDataViews = Object.values(attributes.state.adHocDataViews ?? {});
-
-  useEffect(() => {
-    const s = esqlVariablesService?.esqlVariables$.subscribe((nextVariables) => {
-      if (nextVariables.length && !isEqual(nextVariables, esqlVariables)) {
-        setEsqlVariables(nextVariables);
-      }
-    });
-    return () => {
-      return s?.unsubscribe();
-    };
-  }, [esqlVariables]);
 
   const panel = useMemo(() => {
     if (!panelId) {
@@ -639,9 +623,8 @@ export function LensEditConfigurationFlyout({
                 <EuiTitle
                   size="xxs"
                   css={css`
-                padding: 2px;
-              }
-            `}
+                    padding: 2px;
+                  `}
                 >
                   <h5>
                     {i18n.translate('xpack.lens.config.visualizationConfigurationLabel', {
@@ -686,13 +669,12 @@ export function LensEditConfigurationFlyout({
             grow={isSuggestionsAccordionOpen ? 1 : false}
             data-test-subj="InlineEditingSuggestions"
             css={css`
-                border-top: ${euiThemeVars.euiBorderThin};
-                border-bottom: ${euiThemeVars.euiBorderThin};
-                padding-left: ${euiThemeVars.euiSize};
-                padding-right: ${euiThemeVars.euiSize};
-                .euiAccordion__childWrapper {
-                  flex: ${isSuggestionsAccordionOpen ? 1 : 'none'}
-                }
+              border-top: ${euiThemeVars.euiBorderThin};
+              border-bottom: ${euiThemeVars.euiBorderThin};
+              padding-left: ${euiThemeVars.euiSize};
+              padding-right: ${euiThemeVars.euiSize};
+              .euiAccordion__childWrapper {
+                flex: ${isSuggestionsAccordionOpen ? 1 : 'none'};
               }
             `}
           >

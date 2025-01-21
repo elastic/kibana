@@ -53,6 +53,7 @@ import type {
 } from '@kbn/core/public';
 import type { TimefilterContract, FilterManager } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import { PublishesESQLVariables } from '@kbn/esql-variables/common';
 import type {
   ExpressionRendererEvent,
   ReactExpressionRendererProps,
@@ -530,6 +531,6 @@ export interface ControlGroupApi {
   addNewPanel: (panelState: Record<string, unknown>) => void;
 }
 
-export interface DashboardApi extends PresentationContainer {
+export interface DashboardApi extends PresentationContainer, PublishesESQLVariables {
   controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
 }
