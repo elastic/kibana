@@ -14,13 +14,17 @@ import type { RetrievalQAChain } from 'langchain/chains';
 import { mockAlertsFieldsApi } from '@kbn/elastic-assistant-plugin/server/__mocks__/alerts';
 import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
 import { loggerMock } from '@kbn/logging-mocks';
-import { ContentReferencesStore, contentReferencesStoreFactoryMock, SecurityAlertContentReference } from '@kbn/elastic-assistant-common';
+import type {
+  ContentReferencesStore,
+  SecurityAlertContentReference,
+} from '@kbn/elastic-assistant-common';
+import { contentReferencesStoreFactoryMock } from '@kbn/elastic-assistant-common';
 
 const MAX_SIZE = 10000;
 
 jest.mock('@kbn/elastic-assistant-common', () => ({
   transformRawData: jest.fn(() => 'transformedData'),
-  ...jest.requireActual('@kbn/elastic-assistant-common')
+  ...jest.requireActual('@kbn/elastic-assistant-common'),
 }));
 
 describe('OpenAndAcknowledgedAlertsTool', () => {
@@ -243,21 +247,22 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
 
       (esClient.search as jest.Mock).mockResolvedValue({
         hits: {
-          hits: [{ _id: 4 }]
-        }
+          hits: [{ _id: 4 }],
+        },
       });
 
-      (contentReferencesStore.add as jest.Mock).mockImplementation((creator: Parameters<ContentReferencesStore['add']>[0]) => {
-        const reference = creator({ id: "exampleContentReferenceId" })
-        expect(reference.type).toEqual("SecurityAlert")
-        expect((reference as SecurityAlertContentReference).alertId).toEqual(4)
-        return reference
-      })
+      (contentReferencesStore.add as jest.Mock).mockImplementation(
+        (creator: Parameters<ContentReferencesStore['add']>[0]) => {
+          const reference = creator({ id: 'exampleContentReferenceId' });
+          expect(reference.type).toEqual('SecurityAlert');
+          expect((reference as SecurityAlertContentReference).alertId).toEqual(4);
+          return reference;
+        }
+      );
 
       const result = await tool.func('');
 
-      expect(result).toContain("Citation,{reference(exampleContentReferenceId)}")
-
+      expect(result).toContain('Citation,{reference(exampleContentReferenceId)}');
     });
 
     it('returns null when alertsIndexPattern is undefined', () => {
