@@ -115,7 +115,9 @@ export const getEventType = (event: Ecs): Omit<TimelineEventsType, 'all'> => {
     return 'eql';
   } else if (!isEmpty(event?.kibana?.alert?.rule?.uuid)) {
     return 'signal';
-  } else return 'raw';
+  }
+
+  return 'raw';
 };
 
 export const NOTE_CONTENT_CLASS_NAME = 'note-content';
