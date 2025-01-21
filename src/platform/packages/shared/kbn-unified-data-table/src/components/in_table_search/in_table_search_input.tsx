@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ChangeEvent, FocusEvent, useCallback, useMemo, useState } from 'react';
+import React, { ChangeEvent, FocusEvent, useCallback } from 'react';
 import {
   EuiButtonIcon,
   EuiFieldSearch,
@@ -17,7 +17,7 @@ import {
   keys,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { debounce } from 'lodash';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 
 export interface InTableSearchInputProps {
   matchesCount: number | null;
@@ -39,24 +39,17 @@ export const InTableSearchInput: React.FC<InTableSearchInputProps> = React.memo(
     onChangeSearchTerm,
     onHideInput,
   }) => {
-    const [inputValue, setInputValue] = useState<string>('');
-
-    const debouncedOnChangeSearchTerm = useMemo(
-      () =>
-        debounce(onChangeSearchTerm, 300, {
-          leading: false,
-          trailing: true,
-        }),
-      [onChangeSearchTerm]
-    );
+    const { inputValue, handleInputChange } = useDebouncedValue({
+      onChange: onChangeSearchTerm,
+      value: '',
+    });
 
     const onInputChange = useCallback(
       (event: ChangeEvent<HTMLInputElement>) => {
         const nextValue = event.target.value;
-        setInputValue(nextValue);
-        debouncedOnChangeSearchTerm(nextValue);
+        handleInputChange(nextValue);
       },
-      [setInputValue, debouncedOnChangeSearchTerm]
+      [handleInputChange]
     );
 
     const onKeyUp = useCallback(

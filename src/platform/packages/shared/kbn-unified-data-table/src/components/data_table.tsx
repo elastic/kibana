@@ -759,6 +759,7 @@ export const UnifiedDataTable = ({
     }
     return (
       <InTableSearchControl
+        inTableSearchTerm={inTableSearchTerm}
         visibleColumns={visibleColumns}
         rows={displayedRows}
         renderCellValue={renderCellValue}
@@ -790,6 +791,7 @@ export const UnifiedDataTable = ({
     currentPageSize,
     changeCurrentPageIndex,
     isPaginationEnabled,
+    inTableSearchTerm,
   ]);
 
   const extendedCellContext: EuiDataGridProps['cellContext'] = useMemo(() => {

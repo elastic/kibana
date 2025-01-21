@@ -28,6 +28,7 @@ interface ActiveMatch {
 }
 
 export interface UseInTableSearchMatchesProps {
+  inTableSearchTerm: string;
   visibleColumns: string[];
   rows: DataTableRecord[];
   renderCellValue: (
@@ -51,7 +52,6 @@ export interface UseInTableSearchMatchesReturn
   goToPrevMatch: () => void;
   goToNextMatch: () => void;
   resetState: () => void;
-  onChangeInTableSearchTerm: (searchTerm: string) => void;
 }
 
 const INITIAL_STATE: UseInTableSearchMatchesState = {
@@ -66,8 +66,7 @@ const INITIAL_STATE: UseInTableSearchMatchesState = {
 export const useInTableSearchMatches = (
   props: UseInTableSearchMatchesProps
 ): UseInTableSearchMatchesReturn => {
-  const [inTableSearchTerm, setInTableSearchTerm] = useState<string>('');
-  const { visibleColumns, rows, renderCellValue, onScrollToActiveMatch } = props;
+  const { inTableSearchTerm, visibleColumns, rows, renderCellValue, onScrollToActiveMatch } = props;
   const [state, setState] = useState<UseInTableSearchMatchesState>(INITIAL_STATE);
   const { matchesCount, activeMatchPosition, isProcessing, renderCellsShadowPortal } = state;
   const numberOfRunsRef = useRef<number>(0);
@@ -145,7 +144,6 @@ export const useInTableSearchMatches = (
       resetState,
       isProcessing,
       renderCellsShadowPortal,
-      onChangeInTableSearchTerm: setInTableSearchTerm,
     }),
     [
       matchesCount,

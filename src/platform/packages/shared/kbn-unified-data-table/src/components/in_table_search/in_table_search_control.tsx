@@ -85,21 +85,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
     goToNextMatch,
     renderCellsShadowPortal,
     resetState,
-    onChangeInTableSearchTerm,
   } = useInTableSearchMatches({ ...props, onScrollToActiveMatch });
-
-  const onChangeSearchTerm = useCallback(
-    (value: string) => {
-      // sending the value to the grid and to the hook, so they can process it hopefully in parallel
-      setTimeout(() => {
-        onChange(value);
-      }, 0);
-      setTimeout(() => {
-        onChangeInTableSearchTerm(value);
-      }, 0);
-    },
-    [onChange, onChangeInTableSearchTerm]
-  );
 
   const focusInput = useCallback(() => {
     setIsFocused(true);
@@ -178,7 +164,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
         isProcessing={isProcessing}
         goToPrevMatch={goToPrevMatch}
         goToNextMatch={goToNextMatch}
-        onChangeSearchTerm={onChangeSearchTerm}
+        onChangeSearchTerm={onChange}
         onHideInput={hideInput}
       />
       {renderCellsShadowPortal ? renderCellsShadowPortal() : null}
