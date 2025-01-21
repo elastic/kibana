@@ -11,16 +11,9 @@ import React from 'react';
 
 import { DeleteManagedAssetsCallout as Component } from './callout';
 
-import mdx from '../README.mdx';
-
 export default {
   title: 'Developer/Delete Managed Assets Callout',
   description: '',
-  parameters: {
-    docs: {
-      page: mdx,
-    },
-  },
 };
 
 export const DeleteManagedAssetsCallout = () => {
