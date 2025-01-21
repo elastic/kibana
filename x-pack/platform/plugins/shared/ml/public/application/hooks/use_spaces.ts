@@ -11,17 +11,9 @@ import { getEmptyFunctionComponent } from '../components/empty_component/get_emp
 
 export const useCanManageSpacesAndSavedObjects = () => {
   const {
-    services: { spaces, application },
+    services: { spaces },
   } = useMlKibana();
-  const canManageSpacesAndSavedObjects = useMemo(
-    () =>
-      spaces !== undefined &&
-      spaces.ui.components.getSpacesContextProvider !== undefined &&
-      application.capabilities &&
-      application.capabilities.spaces?.manage === true &&
-      application.capabilities.savedObjectsManagement?.shareIntoSpace === true,
-    [spaces, application]
-  );
+  const canManageSpacesAndSavedObjects = useMemo(() => spaces !== undefined, [spaces]);
 
   return canManageSpacesAndSavedObjects;
 };
@@ -30,13 +22,9 @@ export const useSpacesContextWrapper = () => {
   const {
     services: { spaces },
   } = useMlKibana();
-  const canManageSpacesAndSavedObjects = useCanManageSpacesAndSavedObjects();
 
   return useMemo(
-    () =>
-      canManageSpacesAndSavedObjects && spaces
-        ? spaces.ui.components.getSpacesContextProvider
-        : getEmptyFunctionComponent,
-    [canManageSpacesAndSavedObjects, spaces]
+    () => (spaces ? spaces.ui.components.getSpacesContextProvider : getEmptyFunctionComponent),
+    [spaces]
   );
 };

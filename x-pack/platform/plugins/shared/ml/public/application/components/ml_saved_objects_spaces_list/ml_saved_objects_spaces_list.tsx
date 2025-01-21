@@ -38,7 +38,7 @@ export const MLSavedObjectsSpacesList: FC<Props> = ({
   spacesApi,
   spaceIds = FALLBACK_SPACES_ID,
   id,
-  mlSavedObjectType = ML_JOB_SAVED_OBJECT_TYPE as MlSavedObjectType,
+  mlSavedObjectType,
   refresh,
 }) => {
   const {
