@@ -1968,6 +1968,9 @@ x-pack/solutions/security/plugins/security_solution/server/lib/security_integrat
 # Changes to translation files should not ping code reviewers
 x-pack/plugins/translations/translations
 
+# Profiling cypress tests
+x-pack/test/profiling_cypress @elastic/obs-ux-infra_services-team
+
 # Profiling api integration testing
 x-pack/test/profiling_api_integration @elastic/obs-ux-infra_services-team
 
