@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-export const REACT_ROOT_ID = 'indexManagementReactRoot';
-
-export const ENRICH_POLICIES_REQUIRED_PRIVILEGES = ['manage_enrich'];
-
-export * from './ilm_locator';
-
-export * from './ingest_pipelines_locator';
+export class DetectedMappingFailure extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'DetectedMappingFailure';
+  }
+}

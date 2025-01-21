@@ -5,12 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import {
-  isWiredStreamGetResponse,
-  wiredStreamDefinitionSchemaBase,
-  unwiredStreamDefinitionSchemaBase,
-  inheritedFieldDefinitionSchema,
-} from '@kbn/streams-schema';
+import { isWiredStreamGetResponse } from '@kbn/streams-schema';
 import React from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
