@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'settings', 'security', 'spaceSelector']);
+  const PageObjects = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
   const spacesService = getService('spaces');
   const browser = getService('browser');
@@ -145,11 +145,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         // The tour still does not appear after refresh, even with 1 space with a solution set.
         // Due to caching, sometimes the ui setting value is not reflected correctly.
-        await retry.tryForTime(5000, async () => {
-          log.info('check if solution tour shows after second refresh');
-          await testSubjects.missingOrFail('spaceSolutionTour', { timeout: 3000 });
-          log.info('solution tour does not show after second refresh');
-        });
+        await retry.tryForTime(
+          15000,
+          async () => {
+            log.info('check if solution tour shows after second refresh');
+            await testSubjects.missingOrFail('spaceSolutionTour');
+            log.info('solution tour does not show after second refresh');
+          },
+          async () => {
+            log.info('retrying check if solution tour shows after second refresh');
+          },
+          500
+        );
       });
     });
   });
