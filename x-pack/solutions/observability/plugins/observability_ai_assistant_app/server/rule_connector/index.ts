@@ -189,19 +189,20 @@ async function executor(
     await resources.plugins.actions.start()
   ).getActionsClientWithRequest(request);
 
-  for (const prompt of params.prompts) {
-    executeAlertsChatCompletion(
-      resources,
-      prompt,
-      params,
-      execOptions.actionId,
-      alertDetailsContextService,
-      client,
-      functionClient,
-      actionsClient,
-      execOptions.logger
-    );
-  }
+  await Promise.all(
+    params.prompts.map((prompt) =>
+      executeAlertsChatCompletion(
+        resources,
+        prompt,
+        params,
+        alertDetailsContextService,
+        client,
+        functionClient,
+        actionsClient,
+        execOptions.logger
+      )
+    )
+  );
 
   return { actionId: execOptions.actionId, status: 'ok' };
 }
@@ -210,13 +211,12 @@ async function executeAlertsChatCompletion(
   resources: ObservabilityAIAssistantRouteHandlerResources,
   prompt: { statuses: string[]; message: string },
   params: ConnectorParamsType,
-  actionId: string,
   alertDetailsContextService: AlertDetailsContextualInsightsService,
   client: ObservabilityAIAssistantClient,
   functionClient: ChatFunctionClient,
   actionsClient: PublicMethodsOf<ActionsClient>,
   logger: Logger
-) {
+): Promise<void> {
   const alerts = {
     new: [...(params.alerts?.new || [])],
     recovered: [...(params.alerts?.recovered || [])],
@@ -234,7 +234,7 @@ async function executeAlertsChatCompletion(
   if (alerts.new.length === 0 && alerts.recovered.length === 0) {
     // connector could be executed with only ongoing actions. we use this path as
     // dedup mechanism to prevent triggering the same worfklow for an ongoing alert
-    return { actionId, status: 'ok' };
+    return;
   }
 
   const connectorsList = await actionsClient.getAll().then((connectors) => {
