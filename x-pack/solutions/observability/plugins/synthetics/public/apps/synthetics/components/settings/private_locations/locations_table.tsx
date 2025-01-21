@@ -18,8 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
-import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
-import { ALL_SPACES_LABEL } from '../components/spaces_select';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CopyName } from './copy_name';
 import { ViewLocationMonitors } from './view_location_monitors';
 import { TableTitle } from '../../common/components/table_title';
@@ -33,6 +32,7 @@ import { useLocationMonitors } from './hooks/use_location_monitors';
 import { PolicyName } from './policy_name';
 import { LOCATION_NAME_LABEL } from './location_form';
 import { setIsCreatePrivateLocationFlyoutVisible } from '../../../state/private_locations/actions';
+import { ClientPluginsStart } from '../../../../../plugin';
 
 interface ListItem extends PrivateLocation {
   monitors: number;
@@ -55,6 +55,10 @@ export const PrivateLocationsTable = ({
   const { locationMonitors, loading } = useLocationMonitors();
 
   const { canSave, canManagePrivateLocations } = useSyntheticsSettingsContext();
+
+  const { services } = useKibana<ClientPluginsStart>();
+
+  const LazySpaceList = services.spaces?.ui.components.getSpaceList;
 
   const tagsList = privateLocations.reduce((acc, item) => {
     const tags = item.tags || [];
@@ -104,10 +108,11 @@ export const PrivateLocationsTable = ({
       field: 'spaces',
       sortable: true,
       render: (spaces: string[]) => {
-        if (!spaces || spaces.length === 0 || spaces.includes(ALL_SPACES_ID)) {
-          return ALL_SPACES_LABEL;
-        }
-        return spaces.join(', ');
+        return <LazySpaceList namespaces={spaces} behaviorContext="outside-space" />;
+        // if (!spaces || spaces.length === 0 || spaces.includes(ALL_SPACES_ID)) {
+        //   return ALL_SPACES_LABEL;
+        // }
+        // return spaces.join(', ');
       },
     },
     {
