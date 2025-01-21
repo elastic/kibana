@@ -16,6 +16,7 @@ import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 import { SpyRoute } from '../common/utils/route/spy_routes';
 import { FiltersGlobal } from '../common/components/filters_global';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
+import { getFindingsExpandableFlyout } from './components/expandable_flyout/findings_expandable_flyout';
 
 // This exists only for the type signature cast
 const CloudPostureSpyRoute = ({ pageName, ...rest }: { pageName?: CloudSecurityPosturePageId }) => (
@@ -35,7 +36,10 @@ const CloudSecurityPosture = () => {
     <PluginTemplateWrapper>
       <TrackApplicationView viewId="cloud_security_posture">
         <SecuritySolutionPageWrapper noPadding noTimeline>
-          <CloudSecurityPostureRouter securitySolutionContext={cspSecuritySolutionContext} />
+          <CloudSecurityPostureRouter
+            securitySolutionContext={cspSecuritySolutionContext}
+            getFindingsExpandableFlyout={getFindingsExpandableFlyout}
+          />
         </SecuritySolutionPageWrapper>
       </TrackApplicationView>
     </PluginTemplateWrapper>

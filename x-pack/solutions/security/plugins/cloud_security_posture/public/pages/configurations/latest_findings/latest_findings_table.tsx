@@ -10,7 +10,7 @@ import { Filter } from '@kbn/es-query';
 import { DataTableRecord } from '@kbn/discover-utils/types';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
-import { EuiDataGridCellValueElementProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiDataGridCellValueElementProps, EuiFlexItem, EuiFlyout, EuiSpacer } from '@elastic/eui';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
 import {
@@ -18,6 +18,7 @@ import {
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { GetFindingsExpandableFlyout } from '../../../application/csp_router';
 import { getVendorName } from '../../../common/utils/get_vendor_name';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
@@ -35,6 +36,7 @@ interface LatestFindingsTableProps {
   height?: number;
   showDistributionBar?: boolean;
   nonPersistedFilters?: Filter[];
+  getFindingsExpandableFlyout?: GetFindingsExpandableFlyout;
 }
 
 /**
@@ -89,6 +91,7 @@ export const LatestFindingsTable = ({
   height,
   showDistributionBar = true,
   nonPersistedFilters,
+  getFindingsExpandableFlyout,
 }: LatestFindingsTableProps) => {
   const {
     cloudPostureDataTable,
@@ -107,6 +110,18 @@ export const LatestFindingsTable = ({
     nonPersistedFilters,
     showDistributionBar,
   });
+
+  const FlyoutComponentAlpha = (row: DataTableRecord, onCloseFlyout: () => void): JSX.Element => {
+    return (
+      <EuiFlyout onClose={onCloseFlyout}>
+        {getFindingsExpandableFlyout({
+          ruleId: 'test-rule-id-from-findings-page',
+          resourceId: 'test-resource-from-findings-page',
+          row,
+        })}
+      </EuiFlyout>
+    );
+  };
 
   const createMisconfigurationRuleFn = (rowIndex: number) => {
     const finding = getCspFinding(rows[rowIndex].raw._source);
@@ -141,7 +156,7 @@ export const LatestFindingsTable = ({
             defaultColumns={defaultColumns}
             rows={rows}
             total={total}
-            flyoutComponent={flyoutComponent}
+            flyoutComponent={FlyoutComponentAlpha}
             cloudPostureDataTable={cloudPostureDataTable}
             loadMore={fetchNextPage}
             title={title}

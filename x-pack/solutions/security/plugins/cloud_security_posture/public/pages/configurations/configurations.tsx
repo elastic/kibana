@@ -19,8 +19,13 @@ import { CloudPosturePage, defaultLoadingRenderer } from '../../components/cloud
 import { cloudPosturePages } from '../../common/navigation/constants';
 import { LatestFindingsContainer } from './latest_findings/latest_findings_container';
 import { DataViewContext } from '../../common/contexts/data_view_context';
+import { GetFindingsExpandableFlyout } from '../../application/csp_router';
 
-export const Configurations = () => {
+export const Configurations = ({
+  getFindingsExpandableFlyout,
+}: {
+  getFindingsExpandableFlyout: GetFindingsExpandableFlyout;
+}) => {
   const location = useLocation();
   const dataViewQuery = useDataView(CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX);
   const { data: getSetupStatus, isLoading: getSetupStatusIsLoading } = useCspSetupStatusApi();
@@ -67,7 +72,9 @@ export const Configurations = () => {
           render={() => (
             <TrackApplicationView viewId={findingsNavigation.findings_default.id}>
               <DataViewContext.Provider value={dataViewContextValue}>
-                <LatestFindingsContainer />
+                <LatestFindingsContainer
+                  getFindingsExpandableFlyout={getFindingsExpandableFlyout}
+                />
               </DataViewContext.Provider>
             </TrackApplicationView>
           )}
