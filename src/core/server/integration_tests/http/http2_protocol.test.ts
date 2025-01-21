@@ -22,6 +22,11 @@ import {
 } from '@kbn/core-http-server-internal';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import type { Logger } from '@kbn/logging';
+import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
+
+const options = getEnvOptions();
+options.cliArgs.dev = false;
+const env = createTestEnv({ envOptions: options });
 
 const CSP_CONFIG = cspConfig.schema.validate({});
 const EXTERNAL_URL_CONFIG = externalUrlConfig.schema.validate({});
@@ -74,7 +79,7 @@ describe('Http2 - Smoke tests', () => {
       innerServerListener = innerServer.listener;
 
       const router = new Router('', logger, enhanceWithContext, {
-        isDev: false,
+        env,
         versionedRouterOptions: {
           defaultHandlerResolutionStrategy: 'oldest',
         },
@@ -177,7 +182,7 @@ describe('Http2 - Smoke tests', () => {
       innerServerListener = innerServer.listener;
 
       const router = new Router('', logger, enhanceWithContext, {
-        isDev: false,
+        env,
         versionedRouterOptions: {
           defaultHandlerResolutionStrategy: 'oldest',
         },

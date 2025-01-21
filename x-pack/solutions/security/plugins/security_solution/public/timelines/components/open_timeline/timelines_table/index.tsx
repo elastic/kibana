@@ -180,7 +180,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
         onSelectionChange,
       };
     }, [onSelectionChange]);
-    const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
+    const { timelinePrivileges } = useUserPrivileges();
     const columns = useMemo(
       () =>
         getTimelinesTableColumns({
@@ -196,7 +196,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
           onToggleShowNotes,
           showExtendedColumns,
           timelineType,
-          hasCrudAccess: kibanaSecuritySolutionsPrivileges.crud,
+          hasCrudAccess: timelinePrivileges.crud,
         }),
       [
         actionTimelineToShow,
@@ -211,7 +211,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
         onToggleShowNotes,
         showExtendedColumns,
         timelineType,
-        kibanaSecuritySolutionsPrivileges,
+        timelinePrivileges,
       ]
     );
 

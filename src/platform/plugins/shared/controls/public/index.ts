@@ -14,9 +14,13 @@ export {
   type ControlGroupStateBuilder,
 } from './control_group/utils/control_group_state_builder';
 
-export type { ControlGroupApi, ControlStateTransform } from './control_group/types';
+export {
+  ACTION_CLEAR_CONTROL,
+  ACTION_DELETE_CONTROL,
+  ACTION_EDIT_CONTROL,
+} from './actions/constants';
 
-export { ACTION_CLEAR_CONTROL, ACTION_DELETE_CONTROL, ACTION_EDIT_CONTROL } from './actions';
+export type { ControlGroupApi, ControlStateTransform } from './control_group/types';
 
 export type { DataControlApi, DataControlFactory } from './controls/data_controls/types';
 
