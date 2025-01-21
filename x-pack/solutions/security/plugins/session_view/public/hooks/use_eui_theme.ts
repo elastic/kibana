@@ -17,7 +17,7 @@ type ExtraEuiVars = {
   terminalOutputMarkerWarning: string;
   terminalOutputSliderBackground: string;
 };
-type EuiVars = typeof euiLightVars & ExtraEuiVars;
+type EuiVars = ExtraEuiVars;
 type EuiThemeReturn = ReturnType<typeof useEuiThemeHook> & { euiVars: EuiVars };
 
 // Not all Eui Tokens were fully migrated to @elastic/eui/useEuiTheme yet, so
@@ -27,8 +27,6 @@ export const useEuiTheme = (...props: EuiThemeProps): EuiThemeReturn => {
   const euiThemeHook = useEuiThemeHook(...props);
 
   const euiVars = useMemo(() => {
-    const themeVars = euiThemeHook.colorMode === 'DARK' ? euiDarkVars : euiLightVars; // TODO: Borealis migration - check if euiLightVars and euiDarkVars are still available in Borialis
-
     const extraEuiVars: ExtraEuiVars = {
       buttonsBackgroundNormalDefaultPrimary: '#006DE4', // TODO: Borealis migration - replace with proper color token
       // Terminal Output Colors don't change with the theme
@@ -39,10 +37,9 @@ export const useEuiTheme = (...props: EuiThemeProps): EuiThemeReturn => {
     };
 
     return {
-      ...themeVars,
       ...extraEuiVars,
     };
-  }, [euiThemeHook.colorMode]);
+  }, []);
 
   return {
     ...euiThemeHook,

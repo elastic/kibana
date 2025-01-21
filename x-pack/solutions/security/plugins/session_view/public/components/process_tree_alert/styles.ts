@@ -56,7 +56,7 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
         flexShrink: 0,
         marginRight: size.xs,
         '&:hover, &:focus, &:focus-within': {
-          backgroundColor: transparentize(euiVars.buttonsBackgroundNormalDefaultPrimary, 0.2), // TODO: Borealis migration - replace transparentize with color token
+          backgroundColor: transparentize(euiVars.buttonsBackgroundNormalDefaultPrimary, 0.2), // TODO: Borealis migration - replace transparentize with color token and get rid of custom buttonsBackgroundNormalDefaultPrimary
         },
       },
       '&& .euiFlexItem': {

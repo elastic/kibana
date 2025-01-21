@@ -10,7 +10,7 @@ import { CSSObject } from '@emotion/react';
 import { useEuiTheme } from '../../hooks';
 
 export const useStyles = () => {
-  const { euiTheme, euiVars } = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
     const { font } = euiTheme;
@@ -20,13 +20,13 @@ export const useStyles = () => {
       fontFamily: font.familyCode,
       overflow: 'auto',
       height: '100%',
-      backgroundColor: euiVars.euiColorLightestShade,
+      backgroundColor: euiTheme.colors.lightestShade,
     };
 
     return {
       sessionViewProcessTree,
     };
-  }, [euiTheme, euiVars]);
+  }, [euiTheme]);
 
   return cached;
 };
