@@ -39,8 +39,9 @@ import {
   allowAutoCreateRadios,
   STANDARD_INDEX_MODE,
   TIME_SERIES_MODE,
-  LOGSDB_INDEX_MODE, LOOKUP_INDEX_MODE
-} from "../../../../../common/constants";
+  LOGSDB_INDEX_MODE,
+  LOOKUP_INDEX_MODE,
+} from '../../../../../common/constants';
 import { indexModeLabels, indexModeDescriptions } from '../../../lib/index_mode_labels';
 
 // Create or Form components with partial props that are common to all instances
