@@ -20,8 +20,8 @@ import classNames from 'classnames';
 import React, { useEffect, useRef } from 'react';
 import { EUI_SIZE, TYPE_DEFINITION } from '../../../../constants';
 import { fieldSerializer } from '../../../../lib';
-import { isSemanticTextField } from '../../../../lib/utils';
-import { useDispatch } from '../../../../mappings_state_context';
+import { getFieldByPathName, isSemanticTextField } from '../../../../lib/utils';
+import { useDispatch, useMappingsState } from '../../../../mappings_state_context';
 import { Form, useForm, useFormData } from '../../../../shared_imports';
 import { Field, MainType, NormalizedFields } from '../../../../types';
 import { NameParameter, SubTypeParameter, TypeParameter } from '../../field_parameters';
@@ -29,7 +29,6 @@ import { ReferenceFieldSelects } from '../../field_parameters/reference_field_se
 import { SelectInferenceId } from '../../field_parameters/select_inference_id';
 import { FieldBetaBadge } from '../field_beta_badge';
 import { getRequiredParametersFormForType } from './required_parameters_forms';
-import { useSemanticText } from './semantic_text/use_semantic_text';
 
 const formWrapper = (props: any) => <form {...props} />;
 
@@ -77,8 +76,9 @@ export const CreateField = React.memo(function CreateFieldComponent({
   semanticTextInfo,
   createFieldFormRef,
 }: Props) {
-  const { isSemanticTextEnabled, setErrorsInTrainedModelDeployment } = semanticTextInfo ?? {};
+  const { isSemanticTextEnabled } = semanticTextInfo ?? {};
   const dispatch = useDispatch();
+  const { fields, mappingViewFields } = useMappingsState();
   const fieldTypeInputRef = useRef<HTMLInputElement>(null);
 
   const { form } = useForm<Field>({
@@ -111,6 +111,34 @@ export const CreateField = React.memo(function CreateFieldComponent({
   useEffect(() => {
     if (createFieldFormRef?.current) createFieldFormRef?.current.focus();
   }, [createFieldFormRef]);
+
+  useEffect(() => {
+    if (isSemanticText) {
+      const allSemanticFields = {
+        byId: {
+          ...fields.byId,
+          ...mappingViewFields.byId,
+        },
+        rootLevelFields: [],
+        aliases: {},
+        maxNestedDepth: 0,
+      };
+      const defaultName = getFieldByPathName(allSemanticFields, 'semantic_text')
+        ? ''
+        : 'semantic_text';
+      const referenceField =
+        Object.values(allSemanticFields.byId)
+          .find((field) => field.source.type === 'text' && !field.isMultiField)
+          ?.path.join('.') || '';
+      if (!form.getFormData().name) {
+        form.setFieldValue('name', defaultName);
+      }
+      if (!form.getFormData().reference_field) {
+        form.setFieldValue('reference_field', referenceField);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSemanticText]);
 
   const submitForm = async (
     e?: React.FormEvent,
@@ -241,11 +269,11 @@ export const CreateField = React.memo(function CreateFieldComponent({
         >
           {isMultiField
             ? i18n.translate('xpack.idxMgmt.mappingsEditor.createField.addMultiFieldButtonLabel', {
-              defaultMessage: 'Add multi-field',
-            })
+                defaultMessage: 'Add multi-field',
+              })
             : i18n.translate('xpack.idxMgmt.mappingsEditor.createField.addFieldButtonLabel', {
-              defaultMessage: 'Add field',
-            })}
+                defaultMessage: 'Add field',
+              })}
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -267,10 +295,11 @@ export const CreateField = React.memo(function CreateFieldComponent({
               'mappingsEditor__createFieldWrapper--multiField': isMultiField,
             })}
             style={{
-              paddingLeft: `${isMultiField
+              paddingLeft: `${
+                isMultiField
                   ? paddingLeft! - EUI_SIZE * 1.5 // As there are no "L" bullet list we need to substract some indent
                   : paddingLeft
-                }px`,
+              }px`,
             }}
             ref={createFieldFormRef}
             tabIndex={0}

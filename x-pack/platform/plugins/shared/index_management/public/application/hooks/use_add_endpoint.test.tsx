@@ -52,7 +52,7 @@ describe('useAddEndpoint', () => {
   it('calls onSuccess and shows success toast on successful endpoint creation', async () => {
     (createInferenceEndpoint as jest.Mock).mockResolvedValueOnce({ error: null });
 
-    const { result } = renderHook(() => useAddEndpoint(mockOnSuccess, mockOnError));
+    const { result } = renderHook(() => useAddEndpoint());
 
     await act(async () => {
       await result.current.addInferenceEndpoint(mockInferenceEndpoint);
@@ -73,7 +73,7 @@ describe('useAddEndpoint', () => {
     const mockError = new Error('Endpoint creation failed');
     (createInferenceEndpoint as jest.Mock).mockResolvedValueOnce({ error: mockError });
 
-    const { result } = renderHook(() => useAddEndpoint(mockOnSuccess, mockOnError));
+    const { result } = renderHook(() => useAddEndpoint());
 
     await act(async () => {
       await result.current.addInferenceEndpoint(mockInferenceEndpoint);

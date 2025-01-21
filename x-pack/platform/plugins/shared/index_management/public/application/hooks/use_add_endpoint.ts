@@ -11,12 +11,12 @@ import { InferenceEndpoint } from '../../../common/types/inference';
 import { useMLModelNotificationToasts } from '../../hooks/use_ml_model_status_toasts';
 import { createInferenceEndpoint } from '../services';
 
-export const useAddEndpoint = (onSuccess?: () => void, onError?: () => void) => {
+export const useAddEndpoint = () => {
   const { showInferenceCreationErrorToasts, showInferenceSuccessToast } =
     useMLModelNotificationToasts();
 
   const addInferenceEndpoint = useCallback(
-    async (inferenceEndpoint: InferenceEndpoint) => {
+    async (inferenceEndpoint: InferenceEndpoint, onSuccess?: () => void, onError?: () => void) => {
       const { error } = await createInferenceEndpoint(
         inferenceEndpoint.config.taskType,
         inferenceEndpoint.config.inferenceId,
@@ -35,7 +35,7 @@ export const useAddEndpoint = (onSuccess?: () => void, onError?: () => void) => 
         }
       }
     },
-    [onError, onSuccess, showInferenceCreationErrorToasts, showInferenceSuccessToast]
+    [showInferenceCreationErrorToasts, showInferenceSuccessToast]
   );
 
   return {

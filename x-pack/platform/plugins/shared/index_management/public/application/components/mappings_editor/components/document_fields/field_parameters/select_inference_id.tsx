@@ -26,12 +26,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback, useMemo } from 'react';
 
+import { InferenceFlyoutWrapper } from '@kbn/inference-endpoint-ui-common';
+import { useAddEndpoint } from '../../../../../hooks/use_add_endpoint';
 import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
 import { useLoadInferenceEndpoints } from '../../../../../services/api';
 import { UseField } from '../../../shared_imports';
-import { AddInferenceFlyoutWrapper } from './add_inference_flyout/add_inference_flyout_wrapper';
-
 export interface SelectInferenceIdProps {
   'data-test-subj'?: string;
 }
@@ -66,10 +66,14 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
   value,
 }) => {
   const {
-    core: { application },
+    core: { application, http },
+    services: {
+      notificationService: { toasts },
+    },
     docLinks,
     plugins: { share },
   } = useAppContext();
+  const { addInferenceEndpoint } = useAddEndpoint();
   const config = getFieldConfig('inference_id');
 
   const inferenceEndpointsPageLink = share?.url.locators
@@ -82,6 +86,11 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
   }, [isInferenceFlyoutVisible]);
 
   const { isLoading, data: endpoints, resendRequest } = useLoadInferenceEndpoints();
+
+  const onSubmitSuccess = useCallback(() => {
+    resendRequest();
+    setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
+  }, [isInferenceFlyoutVisible, resendRequest]);
 
   const options: EuiSelectableOption[] = useMemo(() => {
     const filteredEndpoints = endpoints?.filter(
@@ -263,9 +272,13 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
         <EuiFlexItem grow={false}>
           {inferencePopover()}
           {isInferenceFlyoutVisible ? (
-            <AddInferenceFlyoutWrapper
+            <InferenceFlyoutWrapper
               onFlyoutClose={onFlyoutClose}
-              resendRequest={resendRequest}
+              onSubmitSuccess={onSubmitSuccess}
+              isEdit={false}
+              http={http}
+              toasts={toasts}
+              addInferenceEndpoint={addInferenceEndpoint}
             />
           ) : null}
         </EuiFlexItem>
