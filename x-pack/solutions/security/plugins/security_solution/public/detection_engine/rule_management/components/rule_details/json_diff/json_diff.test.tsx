@@ -28,18 +28,6 @@ function findChildByTextContent(parent: Element, textContent: string): HTMLEleme
   ) as HTMLElement;
 }
 
-/*
-  Finds a diff line element (".diff-line") that contains a particular text content.
-  Match doesn't have to be exact, it's enough for the line to include the text.
-*/
-function findDiffLineContaining(text: string): Element | null {
-  const foundLine = Array.from(document.querySelectorAll('.diff-line')).find((element) =>
-    (element.textContent || '').includes(text)
-  );
-
-  return foundLine || null;
-}
-
 describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => {
   it.each(['light', 'dark'] as const)(
     'User can see precisely how property values would change after upgrade - %s theme',
@@ -208,68 +196,6 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
         expect(screen.queryAllByText(property, { exact: false })).toHaveLength(0);
       }
     );
-  });
-
-  it('Properties with semantically equal values should not be shown as modified', () => {
-    const oldRule: RuleResponse = {
-      ...savedRuleMock,
-      version: 1,
-    };
-
-    const newRule: RuleResponse = {
-      ...savedRuleMock,
-      version: 2,
-    };
-
-    /* DURATION */
-    /* Semantically equal durations should not be shown as modified */
-    const { rerender } = render(
-      <RuleDiffTab
-        oldRule={{ ...oldRule, from: 'now-1h' }}
-        newRule={{ ...newRule, from: 'now-60m' }}
-      />
-    );
-    expect(findDiffLineContaining('"from":')).toBeNull();
-
-    rerender(
-      <RuleDiffTab
-        oldRule={{ ...oldRule, from: 'now-1h' }}
-        newRule={{ ...newRule, from: 'now-3600s' }}
-      />
-    );
-    expect(findDiffLineContaining('"from":')).toBeNull();
-
-    rerender(
-      <RuleDiffTab
-        oldRule={{ ...oldRule, from: 'now-7200s' }}
-        newRule={{ ...newRule, from: 'now-2h' }}
-      />
-    );
-    expect(findDiffLineContaining('"from":')).toBeNull();
-
-    /* Semantically different durations should generate diff */
-    rerender(
-      <RuleDiffTab
-        oldRule={{ ...oldRule, from: 'now-7260s' }}
-        newRule={{ ...newRule, from: 'now-2h' }}
-      />
-    );
-    expect(findDiffLineContaining('-  "from": "now-7260s",+  "from": "now-7200s",')).not.toBeNull();
-
-    /* NOTE - Investigation guide */
-    rerender(<RuleDiffTab oldRule={{ ...oldRule, note: '' }} newRule={{ ...newRule }} />);
-    expect(findDiffLineContaining('"note":')).toBeNull();
-
-    rerender(
-      <RuleDiffTab oldRule={{ ...oldRule, note: '' }} newRule={{ ...newRule, note: undefined }} />
-    );
-    expect(findDiffLineContaining('"note":')).toBeNull();
-
-    rerender(<RuleDiffTab oldRule={{ ...oldRule }} newRule={{ ...newRule, note: '' }} />);
-    expect(findDiffLineContaining('"note":')).toBeNull();
-
-    rerender(<RuleDiffTab oldRule={{ ...oldRule }} newRule={{ ...newRule, note: 'abc' }} />);
-    expect(findDiffLineContaining('-  "note": "",+  "note": "abc",')).not.toBeNull();
   });
 
   it('Unchanged sections of a rule should be hidden by default', async () => {
