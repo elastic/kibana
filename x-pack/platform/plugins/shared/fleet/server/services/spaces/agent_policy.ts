@@ -197,24 +197,6 @@ export async function updateAgentPolicySpaces({
 
         const lastAgent = agents[agents.length - 1];
         searchAfter = lastAgent.sort;
-
-        await esClient.updateByQuery({
-          index: AGENT_ACTIONS_INDEX,
-          query: {
-            bool: {
-              must: {
-                terms: {
-                  agents: agents.map(({ id }) => id),
-                },
-              },
-            },
-          },
-          script: `ctx._source.namespaces = [${newSpaceIds
-            .map((spaceId) => `"${spaceId}"`)
-            .join(',')}]`,
-          ignore_unavailable: true,
-          refresh: true,
-        });
       }
     } finally {
       await closePointInTime(esClient, pitId);
