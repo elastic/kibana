@@ -208,7 +208,7 @@ export const buildAlertRoot = ({
   const reason = buildReasonMessage({
     name: completeRule.ruleConfig.name,
     severity: completeRule.ruleParams.severity,
-    mergedDoc: mergedAlerts as SignalSourceHit,
+    mergedDoc: { _source: mergedAlerts } as SignalSourceHit,
   });
   const doc = buildAlertFields({
     docs: wrappedBuildingBlocks,

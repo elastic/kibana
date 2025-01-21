@@ -21,8 +21,8 @@ import {
   PublishingSubject,
   runComparators,
   StateComparators,
+  HasSnapshottableState,
 } from '@kbn/presentation-publishing';
-import { HasSnapshottableState } from '../serialized_state';
 import { apiHasSaveNotification } from '../has_save_notification';
 
 export const COMPARATOR_SUBJECTS_DEBOUNCE = 100;

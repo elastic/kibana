@@ -10,16 +10,15 @@
 import React, { createContext, useMemo } from 'react';
 import { cloneDeep } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
-import fastIsEqual from 'fast-deep-equal';
 import { EuiListGroup, EuiPanel } from '@elastic/eui';
 
 import { PanelIncompatibleError, ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
+  SerializedTitles,
   initializeTitles,
+  SerializedPanelState,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
-
-import { SerializedPanelState } from '@kbn/presentation-containers';
 
 import {
   CONTENT_ID,
@@ -105,7 +104,26 @@ export const getLinksEmbeddableFactory = () => {
         state.defaultPanelDescription
       );
       const savedObjectId$ = new BehaviorSubject(state.savedObjectId);
+      const isByReference = Boolean(state.savedObjectId);
+
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+
+      const serializeLinksState = (byReference: boolean, newId?: string) => {
+        if (byReference) {
+          const linksByReferenceState: LinksByReferenceSerializedState = {
+            savedObjectId: newId ?? state.savedObjectId!,
+            ...serializeTitles(),
+          };
+          return { rawState: linksByReferenceState, references: [] };
+        }
+        const runtimeState = api.snapshotRuntimeState();
+        const { attributes, references } = serializeLinksAttributes(runtimeState);
+        const linksByValueState: LinksByValueSerializedState = {
+          attributes,
+          ...serializeTitles(),
+        };
+        return { rawState: linksByValueState, references };
+      };
 
       const api = buildApi(
         {
@@ -114,29 +132,8 @@ export const getLinksEmbeddableFactory = () => {
           defaultPanelTitle,
           defaultPanelDescription,
           isEditingEnabled: () => Boolean(error$.value === undefined),
-          libraryId$: savedObjectId$,
           getTypeDisplayName: () => DISPLAY_NAME,
-          getByValueRuntimeSnapshot: () => {
-            const snapshot = api.snapshotRuntimeState();
-            delete snapshot.savedObjectId;
-            return snapshot;
-          },
-          serializeState: (): SerializedPanelState<LinksSerializedState> => {
-            if (savedObjectId$.value !== undefined) {
-              const linksByReferenceState: LinksByReferenceSerializedState = {
-                savedObjectId: savedObjectId$.value,
-                ...serializeTitles(),
-              };
-              return { rawState: linksByReferenceState, references: [] };
-            }
-            const runtimeState = api.snapshotRuntimeState();
-            const { attributes, references } = serializeLinksAttributes(runtimeState);
-            const linksByValueState: LinksByValueSerializedState = {
-              attributes,
-              ...serializeTitles(),
-            };
-            return { rawState: linksByValueState, references };
-          },
+          serializeState: () => serializeLinksState(isByReference),
           saveToLibrary: async (newTitle: string) => {
             defaultPanelTitle.next(newTitle);
             const runtimeState = api.snapshotRuntimeState();
@@ -150,9 +147,17 @@ export const getLinksEmbeddableFactory = () => {
               },
               options: { references },
             });
-            savedObjectId$.next(id);
             return id;
           },
+          getSerializedStateByValue: () =>
+            serializeLinksState(false) as SerializedPanelState<LinksByValueSerializedState>,
+          getSerializedStateByReference: (newId: string) =>
+            serializeLinksState(
+              true,
+              newId
+            ) as SerializedPanelState<LinksByReferenceSerializedState>,
+          canLinkToLibrary: async () => !isByReference,
+          canUnlinkFromLibrary: async () => isByReference,
           checkForDuplicateTitle: async (
             newTitle: string,
             isTitleDuplicateConfirmed: boolean,
@@ -166,36 +171,41 @@ export const getLinksEmbeddableFactory = () => {
               onTitleDuplicate,
             });
           },
-          unlinkFromLibrary: () => {
-            savedObjectId$.next(undefined);
-          },
           onEdit: async () => {
             const { openEditorFlyout } = await import('../editor/open_editor_flyout');
             const newState = await openEditorFlyout({
               initialState: api.snapshotRuntimeState(),
               parentDashboard: parentApi,
             });
+            if (!newState) return;
 
-            if (newState) {
-              links$.next(newState.links);
-              layout$.next(newState.layout);
-              defaultPanelTitle.next(newState.defaultPanelTitle);
-              defaultPanelDescription.next(newState.defaultPanelDescription);
-              savedObjectId$.next(newState.savedObjectId);
+            // if the by reference state has changed during this edit, reinitialize the panel.
+            const nextIsByReference = Boolean(newState?.savedObjectId);
+            if (nextIsByReference !== isByReference) {
+              const serializedState = serializeLinksState(
+                nextIsByReference,
+                newState?.savedObjectId
+              );
+              (serializedState.rawState as SerializedTitles).title = newState.title;
+
+              api.parentApi?.replacePanel<LinksSerializedState>(api.uuid, {
+                serializedState,
+                panelType: api.type,
+              });
+              return;
             }
+            links$.next(newState.links);
+            layout$.next(newState.layout);
+            defaultPanelTitle.next(newState.defaultPanelTitle);
+            defaultPanelDescription.next(newState.defaultPanelDescription);
           },
         },
         {
           ...titleComparators,
-          links: [
-            links$,
-            (nextLinks?: ResolvedLink[]) => links$.next(nextLinks ?? []),
-            (a, b) => Boolean(savedObjectId$.value) || fastIsEqual(a, b), // Editing attributes in a by-reference panel should not trigger unsaved changes.
-          ],
+          links: [links$, (nextLinks?: ResolvedLink[]) => links$.next(nextLinks ?? [])],
           layout: [
             layout$,
             (nextLayout?: LinksLayoutType) => layout$.next(nextLayout ?? LINKS_VERTICAL_LAYOUT),
-            (a, b) => Boolean(savedObjectId$.value) || a === b,
           ],
           error: [error$, (nextError?: Error) => error$.next(nextError)],
           defaultPanelDescription: [

@@ -176,7 +176,7 @@ class DashboardBackupService implements DashboardBackupServiceType {
           if (
             dashboardStatesInSpace[dashboardId].viewMode === 'edit' &&
             (Object.keys(dashboardStatesInSpace[dashboardId]).some(
-              (stateKey) => stateKey !== 'viewMode'
+              (stateKey) => stateKey !== 'viewMode' && stateKey !== 'references'
             ) ||
               Object.keys(panelStatesInSpace?.[dashboardId]).length > 0)
           )
