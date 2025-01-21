@@ -99,21 +99,18 @@ describe('DeployStep', () => {
     });
 
     it('should report telemetry for integration complete', () => {
-      expect(mockReportEvent).toHaveBeenCalledWith(
-        TelemetryEventType.AutomaticImportComplete,
-        {
-          sessionId: expect.any(String),
-          integrationName,
-          integrationDescription: integrationSettings.description,
-          dataStreamName: integrationSettings.dataStreamName,
-          inputTypes: integrationSettings.inputTypes,
-          model: expect.any(String),
-          actionTypeId: connector.actionTypeId,
-          provider: connector.apiProvider ?? 'unknown',
-          durationMs: expect.any(Number),
-          errorMessage: undefined,
-        }
-      );
+      expect(mockReportEvent).toHaveBeenCalledWith(TelemetryEventType.AutomaticImportComplete, {
+        sessionId: expect.any(String),
+        integrationName,
+        integrationDescription: integrationSettings.description,
+        dataStreamName: integrationSettings.dataStreamName,
+        inputTypes: integrationSettings.inputTypes,
+        model: expect.any(String),
+        actionTypeId: connector.actionTypeId,
+        provider: connector.apiProvider ?? 'unknown',
+        durationMs: expect.any(Number),
+        errorMessage: undefined,
+      });
     });
 
     it('should render the save button', () => {
@@ -166,21 +163,18 @@ describe('DeployStep', () => {
       });
 
       it('should report telemetry for integration complete with error', () => {
-        expect(mockReportEvent).toHaveBeenCalledWith(
-          TelemetryEventType.AutomaticImportComplete,
-          {
-            sessionId: expect.any(String),
-            integrationName: integrationSettings.name,
-            integrationDescription: integrationSettings.description,
-            dataStreamName: integrationSettings.dataStreamName,
-            inputTypes: integrationSettings.inputTypes,
-            model: expect.any(String),
-            actionTypeId: connector.actionTypeId,
-            provider: connector.apiProvider ?? 'unknown',
-            durationMs: expect.any(Number),
-            errorMessage,
-          }
-        );
+        expect(mockReportEvent).toHaveBeenCalledWith(TelemetryEventType.AutomaticImportComplete, {
+          sessionId: expect.any(String),
+          integrationName: integrationSettings.name,
+          integrationDescription: integrationSettings.description,
+          dataStreamName: integrationSettings.dataStreamName,
+          inputTypes: integrationSettings.inputTypes,
+          model: expect.any(String),
+          actionTypeId: connector.actionTypeId,
+          provider: connector.apiProvider ?? 'unknown',
+          durationMs: expect.any(Number),
+          errorMessage,
+        });
       });
     });
 
@@ -218,21 +212,18 @@ describe('DeployStep', () => {
       });
 
       it('should report telemetry for integration complete with error', () => {
-        expect(mockReportEvent).toHaveBeenCalledWith(
-          TelemetryEventType.AutomaticImportComplete,
-          {
-            sessionId: expect.any(String),
-            integrationName: integrationSettings.name,
-            integrationDescription: integrationSettings.description,
-            dataStreamName: integrationSettings.dataStreamName,
-            inputTypes: integrationSettings.inputTypes,
-            model: expect.any(String),
-            actionTypeId: connector.actionTypeId,
-            provider: connector.apiProvider ?? 'unknown',
-            durationMs: expect.any(Number),
-            errorMessage,
-          }
-        );
+        expect(mockReportEvent).toHaveBeenCalledWith(TelemetryEventType.AutomaticImportComplete, {
+          sessionId: expect.any(String),
+          integrationName: integrationSettings.name,
+          integrationDescription: integrationSettings.description,
+          dataStreamName: integrationSettings.dataStreamName,
+          inputTypes: integrationSettings.inputTypes,
+          model: expect.any(String),
+          actionTypeId: connector.actionTypeId,
+          provider: connector.apiProvider ?? 'unknown',
+          durationMs: expect.any(Number),
+          errorMessage,
+        });
       });
     });
   });

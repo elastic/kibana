@@ -11,9 +11,6 @@ export const TITLE = i18n.translate('xpack.automaticImport.pages.header.title', 
   defaultMessage: 'New integration',
 });
 
-export const ASSISTANT_AVATAR = i18n.translate(
-  'xpack.automaticImport.pages.header.avatarTitle',
-  {
-    defaultMessage: 'Powered by generative AI',
-  }
-);
+export const ASSISTANT_AVATAR = i18n.translate('xpack.automaticImport.pages.header.avatarTitle', {
+  defaultMessage: 'Powered by generative AI',
+});

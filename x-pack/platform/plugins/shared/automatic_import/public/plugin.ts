@@ -18,8 +18,12 @@ import {
 } from './services';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import type { ExperimentalFeatures } from '../common/experimental_features';
-import { AutomaticImportPluginSetup, AutomaticImportPluginStart, AutomaticImportPluginStartDependencies } from './types';
-import { AutomaticImportConfigType } from '../server/config';
+import type {
+  AutomaticImportPluginSetup,
+  AutomaticImportPluginStart,
+  AutomaticImportPluginStartDependencies,
+} from './types';
+import type { AutomaticImportConfigType } from '../server/config';
 
 export class AutomaticImportPlugin
   implements Plugin<AutomaticImportPluginSetup, AutomaticImportPluginStart>

@@ -11,12 +11,9 @@ export const TITLE = i18n.translate('xpack.automaticImport.steps.connector.title
   defaultMessage: 'Choose your AI connector',
 });
 
-export const DESCRIPTION = i18n.translate(
-  'xpack.automaticImport.steps.connector.description',
-  {
-    defaultMessage: 'Select an AI connector to help you create your custom integration',
-  }
-);
+export const DESCRIPTION = i18n.translate('xpack.automaticImport.steps.connector.description', {
+  defaultMessage: 'Select an AI connector to help you create your custom integration',
+});
 
 export const CREATE_CONNECTOR = i18n.translate(
   'xpack.automaticImport.steps.connector.createConnectorLabel',

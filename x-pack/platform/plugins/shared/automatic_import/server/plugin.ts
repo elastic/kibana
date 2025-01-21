@@ -55,14 +55,14 @@ export class AutomaticImportPlugin
   public setup(
     core: CoreSetup<AutomaticImportPluginStartDependencies, AutomaticImportPluginStart>
   ): AutomaticImportPluginSetup {
-    core.http.registerRouteHandlerContext<
-      AutomaticImportRouteHandlerContext,
-      'automaticImport'
-    >('automaticImport', () => ({
-      getStartServices: core.getStartServices,
-      isAvailable: () => this.isAvailable && this.hasLicense,
-      logger: this.logger,
-    }));
+    core.http.registerRouteHandlerContext<AutomaticImportRouteHandlerContext, 'automaticImport'>(
+      'automaticImport',
+      () => ({
+        getStartServices: core.getStartServices,
+        isAvailable: () => this.isAvailable && this.hasLicense,
+        logger: this.logger,
+      })
+    );
     const router = core.http.createRouter<AutomaticImportRouteHandlerContext>();
 
     this.logger.debug('automaticImport api: Setup');

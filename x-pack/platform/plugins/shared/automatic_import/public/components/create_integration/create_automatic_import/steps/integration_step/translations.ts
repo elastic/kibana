@@ -10,12 +10,9 @@ import { i18n } from '@kbn/i18n';
 export const TITLE = i18n.translate('xpack.automaticImport.step.integration.title', {
   defaultMessage: 'Integration details',
 });
-export const DESCRIPTION = i18n.translate(
-  'xpack.automaticImport.step.integration.description',
-  {
-    defaultMessage: 'Name your integration, give it a description, and (optional) add a logo',
-  }
-);
+export const DESCRIPTION = i18n.translate('xpack.automaticImport.step.integration.description', {
+  defaultMessage: 'Name your integration, give it a description, and (optional) add a logo',
+});
 
 export const TITLE_LABEL = i18n.translate(
   'xpack.automaticImport.step.integration.integrationTitle',

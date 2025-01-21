@@ -26,9 +26,7 @@ import { handleCustomErrors } from './routes_util';
 import { GenerationErrorCode } from '../../common/constants';
 import { CefError } from '../lib/errors/cef_error';
 
-export function registerAnalyzeLogsRoutes(
-  router: IRouter<AutomaticImportRouteHandlerContext>
-) {
+export function registerAnalyzeLogsRoutes(router: IRouter<AutomaticImportRouteHandlerContext>) {
   router.versioned
     .post({
       path: ANALYZE_LOGS_PATH,

@@ -22,12 +22,9 @@ export const OPEN_API_UPLOAD_INSTRUCTIONS = i18n.translate(
   }
 );
 
-export const ANALYZING = i18n.translate(
-  'xpack.automaticImport.celFlyout.step.celInput.analyzing',
-  {
-    defaultMessage: 'Analyzing',
-  }
-);
+export const ANALYZING = i18n.translate('xpack.automaticImport.celFlyout.step.celInput.analyzing', {
+  defaultMessage: 'Analyzing',
+});
 
 export const API_DEFINITION_TITLE = i18n.translate(
   'xpack.automaticImport.celFlyout.step.celInput.apiDefinition.title',

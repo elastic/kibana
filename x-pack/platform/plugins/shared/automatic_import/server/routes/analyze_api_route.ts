@@ -23,9 +23,7 @@ import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
 
-export function registerApiAnalysisRoutes(
-  router: IRouter<AutomaticImportRouteHandlerContext>
-) {
+export function registerApiAnalysisRoutes(router: IRouter<AutomaticImportRouteHandlerContext>) {
   router.versioned
     .post({
       path: ANALYZE_API_PATH,

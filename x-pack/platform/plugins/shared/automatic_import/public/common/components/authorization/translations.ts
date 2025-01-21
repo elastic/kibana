@@ -22,12 +22,9 @@ export const PRIVILEGES_REQUIRED_TITLE = i18n.translate(
 );
 
 export const REQUIRED_PRIVILEGES = {
-  FLEET_ALL: i18n.translate(
-    'xpack.automaticImport.missingPrivileges.requiredPrivileges.fleet',
-    {
-      defaultMessage: 'Management > Fleet: All',
-    }
-  ),
+  FLEET_ALL: i18n.translate('xpack.automaticImport.missingPrivileges.requiredPrivileges.fleet', {
+    defaultMessage: 'Management > Fleet: All',
+  }),
   INTEGRATIONS_ALL: i18n.translate(
     'xpack.automaticImport.missingPrivileges.requiredPrivileges.integrations',
     {

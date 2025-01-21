@@ -29,9 +29,7 @@ import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
 import { handleCustomErrors } from './routes_util';
 import { CATEGORIZATION_RECURSION_LIMIT, GenerationErrorCode } from '../../common/constants';
 
-export function registerCategorizationRoutes(
-  router: IRouter<AutomaticImportRouteHandlerContext>
-) {
+export function registerCategorizationRoutes(router: IRouter<AutomaticImportRouteHandlerContext>) {
   router.versioned
     .post({
       path: CATEGORIZATION_GRAPH_PATH,

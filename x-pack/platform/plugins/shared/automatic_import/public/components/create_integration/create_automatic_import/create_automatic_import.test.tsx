@@ -70,8 +70,7 @@ jest.mock('../../../common/hooks/use_navigate', () => ({
   useNavigate: () => mockNavigate,
 }));
 
-const renderAutomaticImport = () =>
-  render(<CreateAutomaticImport />, { wrapper: TestProvider });
+const renderAutomaticImport = () => render(<CreateAutomaticImport />, { wrapper: TestProvider });
 
 describe('CreateIntegration', () => {
   beforeEach(() => {

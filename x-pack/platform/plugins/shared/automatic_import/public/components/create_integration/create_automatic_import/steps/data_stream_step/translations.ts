@@ -163,20 +163,14 @@ export const LOGS_SAMPLE_DESCRIPTION = i18n.translate(
   }
 );
 export const LOGS_SAMPLE_ERROR = {
-  CAN_NOT_READ: i18n.translate(
-    'xpack.automaticImport.step.dataStream.logsSample.errorCanNotRead',
-    {
-      defaultMessage: 'Failed to read the logs sample file',
-    }
-  ),
+  CAN_NOT_READ: i18n.translate('xpack.automaticImport.step.dataStream.logsSample.errorCanNotRead', {
+    defaultMessage: 'Failed to read the logs sample file',
+  }),
   CAN_NOT_READ_WITH_REASON: (reason: string) =>
-    i18n.translate(
-      'xpack.automaticImport.step.dataStream.logsSample.errorCanNotReadWithReason',
-      {
-        values: { reason },
-        defaultMessage: 'An error occurred when reading logs sample: {reason}',
-      }
-    ),
+    i18n.translate('xpack.automaticImport.step.dataStream.logsSample.errorCanNotReadWithReason', {
+      values: { reason },
+      defaultMessage: 'An error occurred when reading logs sample: {reason}',
+    }),
   CAN_NOT_PARSE: i18n.translate(
     'xpack.automaticImport.step.dataStream.logsSample.errorCanNotParse',
     {
@@ -195,12 +189,9 @@ export const LOGS_SAMPLE_ERROR = {
   EMPTY: i18n.translate('xpack.automaticImport.step.dataStream.logsSample.errorEmpty', {
     defaultMessage: 'The logs sample file is empty',
   }),
-  NOT_OBJECT: i18n.translate(
-    'xpack.automaticImport.step.dataStream.logsSample.errorNotObject',
-    {
-      defaultMessage: 'The logs sample file contains non-object entries',
-    }
-  ),
+  NOT_OBJECT: i18n.translate('xpack.automaticImport.step.dataStream.logsSample.errorNotObject', {
+    defaultMessage: 'The logs sample file contains non-object entries',
+  }),
 };
 
 export const ANALYZING = i18n.translate('xpack.automaticImport.step.dataStream.analyzing', {
@@ -240,12 +231,9 @@ export const RETRY = i18n.translate('xpack.automaticImport.step.dataStream.retry
   defaultMessage: 'Retry',
 });
 
-export const DECODE_CEF_LINK = i18n.translate(
-  'xpack.automaticImport.errors.cefFormat.decodeLink',
-  {
-    defaultMessage: 'CEF format not supported yet. Instead please use CEF Integration:',
-  }
-);
+export const DECODE_CEF_LINK = i18n.translate('xpack.automaticImport.errors.cefFormat.decodeLink', {
+  defaultMessage: 'CEF format not supported yet. Instead please use CEF Integration:',
+});
 
 export const GENERATION_ERROR_TRANSLATION: Record<
   GenerationErrorCode,
