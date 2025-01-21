@@ -8,7 +8,6 @@
 import { z } from '@kbn/zod';
 import { badRequest, internal, notFound } from '@hapi/boom';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { findInheritedLifecycle } from '@kbn/streams-plugin/server/lib/streams/helpers/lifecycle';
 import {
   streamConfigDefinitionSchema,
   ListStreamsResponse,
@@ -18,6 +17,7 @@ import {
   InheritedFieldDefinition,
 } from '@kbn/streams-schema';
 import { isResponseError } from '@kbn/es-errors';
+import { findInheritedLifecycle } from '../../../lib/streams/helpers/lifecycle';
 import {
   DefinitionNotFound,
   ForkConditionMissing,
