@@ -189,14 +189,14 @@ export default function ({ getService }: FtrProviderContext) {
               persistent: {
                 cluster: {
                   logsdb: {
-                    enabled: undefined,
+                    enabled: null,
                   },
                 },
               },
             },
           });
 
-          const logsdbDataStreamName = 'logs-test-3';
+          const logsdbDataStreamName = 'logs-test-1';
           await createDataStream(logsdbDataStreamName);
 
           const { body: dataStream } = await supertest
@@ -222,7 +222,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           });
 
-          const logsdbDataStreamName = 'logs-test-1';
+          const logsdbDataStreamName = 'logs-test-2';
           await createDataStream(logsdbDataStreamName);
 
           const { body: dataStream } = await supertest
@@ -248,7 +248,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           });
 
-          const logsdbDataStreamName = 'logs-test-2';
+          const logsdbDataStreamName = 'logs-test-3';
           await createDataStream(logsdbDataStreamName);
 
           const { body: dataStream } = await supertest
