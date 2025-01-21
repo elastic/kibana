@@ -13,7 +13,7 @@ import type { CSSProperties, HTMLAttributes } from 'react';
 
 import type { ExpressionFunction } from '@kbn/expressions-plugin/common';
 
-import { OnSaveProps, SaveModalState } from '@kbn/saved-objects-plugin/public';
+import type { OnSaveProps, SaveModalState } from '@kbn/saved-objects-plugin/public';
 
 interface SaveModalDocumentInfo {
   id?: string;
