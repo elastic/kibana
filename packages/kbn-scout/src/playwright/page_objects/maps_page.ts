@@ -15,20 +15,15 @@ const RENDER_COMPLETE_SELECTOR = '[data-render-complete="true"]';
 const RENDER_COMPLETE_PENDING_SELECTOR = '[data-render-complete="false"]';
 const DATA_LOADING_SELECTOR = '[data-loading]';
 
-const debugLog = ToolingLog.bind(ToolingLog, { level: 'debug', writeTo: process.stdout });
 export class MapsPage {
-  constructor(private readonly page: ScoutPage) {}
+  constructor(private readonly page: ScoutPage, private readonly log: ToolingLog) {}
 
   async goto() {
     await this.page.gotoApp('maps');
   }
 
-  async waitForRenderCompletion(selector: string = RENDER_COMPLETE_SELECTOR) {
-    // This is my first attempt at a simple solution for test/functional/services/renderable.ts#waitForRender()
-    await this.page.locator(selector).waitFor();
-  }
   async waitForRender(count: number = 1): Promise<void> {
-    await retryForSuccess(new debugLog({ context: 'MapsPage' }), {
+    await retryForSuccess(this.log, {
       retryCount: 10,
       retryDelay: 1500,
       timeout: 10_000,
