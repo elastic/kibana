@@ -180,6 +180,7 @@ function getMockData(overwrites: Record<string, unknown> = {}): ScheduleBackfill
   return {
     ruleId: '1',
     start: '2023-11-16T08:00:00.000Z',
+    runActions: true,
     ...overwrites,
   };
 }
@@ -481,13 +482,13 @@ describe('scheduleBackfill()', () => {
         // @ts-expect-error
         rulesClient.scheduleBackfill(getMockData())
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Error validating backfill schedule parameters \\"{\\"ruleId\\":\\"1\\",\\"start\\":\\"2023-11-16T08:00:00.000Z\\"}\\" - expected value of type [array] but got [Object]"`
+        `"Error validating backfill schedule parameters \\"{\\"ruleId\\":\\"1\\",\\"start\\":\\"2023-11-16T08:00:00.000Z\\",\\"runActions\\":true}\\" - expected value of type [array] but got [Object]"`
       );
 
       await expect(
         rulesClient.scheduleBackfill([getMockData({ ruleId: 1 })])
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Error validating backfill schedule parameters \\"[{\\"ruleId\\":1,\\"start\\":\\"2023-11-16T08:00:00.000Z\\"}]\\" - [0.ruleId]: expected value of type [string] but got [number]"`
+        `"Error validating backfill schedule parameters \\"[{\\"ruleId\\":1,\\"start\\":\\"2023-11-16T08:00:00.000Z\\",\\"runActions\\":true}]\\" - [0.ruleId]: expected value of type [string] but got [number]"`
       );
     });
 
@@ -502,7 +503,7 @@ describe('scheduleBackfill()', () => {
           }),
         ])
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Error validating backfill schedule parameters \\"[{\\"ruleId\\":\\"1\\",\\"start\\":\\"2023-11-16T08:00:00.000Z\\"},{\\"ruleId\\":\\"2\\",\\"start\\":\\"2023-11-17T08:00:00.000Z\\",\\"end\\":\\"2023-11-17T08:00:00.000Z\\"}]\\" - [1]: Backfill end must be greater than backfill start"`
+        `"Error validating backfill schedule parameters \\"[{\\"ruleId\\":\\"1\\",\\"start\\":\\"2023-11-16T08:00:00.000Z\\",\\"runActions\\":true},{\\"ruleId\\":\\"2\\",\\"start\\":\\"2023-11-17T08:00:00.000Z\\",\\"runActions\\":true,\\"end\\":\\"2023-11-17T08:00:00.000Z\\"}]\\" - [1]: Backfill end must be greater than backfill start"`
       );
 
       await expect(
@@ -515,7 +516,7 @@ describe('scheduleBackfill()', () => {
           }),
         ])
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Error validating backfill schedule parameters \\"[{\\"ruleId\\":\\"1\\",\\"start\\":\\"2023-11-16T08:00:00.000Z\\"},{\\"ruleId\\":\\"2\\",\\"start\\":\\"2023-11-17T08:00:00.000Z\\",\\"end\\":\\"2023-11-16T08:00:00.000Z\\"}]\\" - [1]: Backfill end must be greater than backfill start"`
+        `"Error validating backfill schedule parameters \\"[{\\"ruleId\\":\\"1\\",\\"start\\":\\"2023-11-16T08:00:00.000Z\\",\\"runActions\\":true},{\\"ruleId\\":\\"2\\",\\"start\\":\\"2023-11-17T08:00:00.000Z\\",\\"runActions\\":true,\\"end\\":\\"2023-11-16T08:00:00.000Z\\"}]\\" - [1]: Backfill end must be greater than backfill start"`
       );
     });
 
