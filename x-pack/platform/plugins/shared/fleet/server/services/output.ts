@@ -81,6 +81,7 @@ import {
   extractAndWriteOutputSecrets,
   isOutputSecretStorageEnabled,
 } from './secrets';
+import { findAgentlessPolicies } from './outputs/helpers';
 import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
@@ -269,28 +270,6 @@ async function findPoliciesWithFleetServerOrSynthetics(outputId?: string, isDefa
   const policiesWithSynthetics =
     agentPolicies?.filter((policy) => agentPolicyService.hasSyntheticsIntegration(policy)) || [];
   return { policiesWithFleetServer, policiesWithSynthetics };
-}
-
-// Returns agentless policies that may need their data output ID updated
-// If outputId is provided, return agentless policies that use that output in addition
-// to policies that don't have an output set
-async function findAgentlessPolicies(outputId?: string) {
-  const internalSoClientWithoutSpaceExtension =
-    appContextService.getInternalUserSOClientWithoutSpaceExtension();
-
-  const agentlessPolicies = await agentPolicyService.list(internalSoClientWithoutSpaceExtension, {
-    spaceId: '*',
-    perPage: SO_SEARCH_LIMIT,
-    kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.supports_agentless:true`,
-  });
-
-  if (outputId) {
-    return agentlessPolicies.items.filter(
-      (policy) => policy.data_output_id === outputId || !policy.data_output_id
-    );
-  } else {
-    return agentlessPolicies.items.filter((policy) => !policy.data_output_id);
-  }
 }
 
 function validateOutputNotUsedInPolicy(
