@@ -81,6 +81,11 @@ const platinumBaseColumns = [
   },
   {
     columnHeaderType: 'not-filtered',
+    id: 'service.risk.calculated_level',
+    displayAsText: 'Service Risk Level',
+  },
+  {
+    columnHeaderType: 'not-filtered',
     id: 'host.asset.criticality',
     displayAsText: 'Host Criticality',
   },
@@ -88,6 +93,11 @@ const platinumBaseColumns = [
     columnHeaderType: 'not-filtered',
     id: 'user.asset.criticality',
     displayAsText: 'User Criticality',
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'service.asset.criticality',
+    displayAsText: 'Service Criticality',
   },
   { columnHeaderType: 'not-filtered', id: 'process.name' },
   { columnHeaderType: 'not-filtered', id: 'file.name' },
