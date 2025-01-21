@@ -109,7 +109,8 @@ export const ProcessorOutcomePreview = ({
   }, [formFields.field, detectedFieldsColumns, selectedDocsFilter]);
 
   const detectedFieldsEnabled =
-    isWiredReadStream(definition) && simulation && !isEmpty(simulation.detected_fields);
+    isWiredReadStream(definition) &&
+    ((simulation && !isEmpty(simulation.detected_fields)) || !isEmpty(formFields.detected_fields));
 
   return (
     <EuiPanel hasShadow={false} paddingSize="none">
@@ -126,7 +127,9 @@ export const ProcessorOutcomePreview = ({
           iconType="play"
           color="accentSecondary"
           size="s"
-          onClick={() => onSimulate(convertFormStateToProcessing(formFields))}
+          onClick={() => {
+            onSimulate(convertFormStateToProcessing(formFields), formFields.detected_fields);
+          }}
           isLoading={isLoading}
         >
           {i18n.translate(
@@ -136,7 +139,7 @@ export const ProcessorOutcomePreview = ({
         </EuiButton>
       </EuiFlexGroup>
       <EuiSpacer />
-      {detectedFieldsEnabled && <DetectedFields detectedFields={simulation.detected_fields} />}
+      {detectedFieldsEnabled && <DetectedFields detectedFields={simulation?.detected_fields} />}
       <OutcomeControls
         docsFilter={selectedDocsFilter}
         onDocsFilterChange={setSelectedDocsFilter}
@@ -264,14 +267,14 @@ const OutcomeControls = ({
   );
 };
 
-const DetectedFields = ({ detectedFields }: { detectedFields: DetectedField[] }) => {
+const DetectedFields = ({ detectedFields }: { detectedFields?: DetectedField[] }) => {
   const { euiTheme } = useEuiTheme();
   const { fields, replace } = useFieldArray<{ detected_fields: DetectedField[] }>({
     name: 'detected_fields',
   });
 
   useEffect(() => {
-    replace(detectedFields);
+    if (detectedFields) replace(detectedFields);
   }, [detectedFields, replace]);
 
   return (
