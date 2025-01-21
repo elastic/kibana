@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-import type { GenericFtrProviderContext } from '@kbn/test';
-
-export type FtrProviderContext = GenericFtrProviderContext<{}, {}>;
+module.exports = {
+  preset: '@kbn/test/jest_integration',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/observability/plugins/slo'],
+};
