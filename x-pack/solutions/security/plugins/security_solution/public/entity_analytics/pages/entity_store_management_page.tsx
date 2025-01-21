@@ -96,7 +96,7 @@ export const EntityStoreManagementPage = () => {
     if (isEntityStoreEnabled(entityStoreStatus.data?.status)) {
       stopEntityEngineMutation.mutate();
     } else {
-      enableStoreMutation.mutate();
+      enableStoreMutation.mutate(); // foo
     }
   }, [entityStoreStatus.data?.status, stopEntityEngineMutation, enableStoreMutation]);
 

@@ -9,8 +9,6 @@ import type { Logger, ElasticsearchClient, IScopedClusterClient } from '@kbn/cor
 
 import type { ExperimentalFeatures } from '../../../common';
 
-import { createKeywordBuilderPipeline, deleteKeywordBuilderPipeline } from './ingest_pipelines';
-
 interface AssetInventoryClientOpts {
   logger: Logger;
   clusterClient: IScopedClusterClient;
@@ -58,12 +56,7 @@ export class AssetInventoryDataClient {
   private async asyncSetup() {
     const { logger } = this.options;
     try {
-      logger.debug('creating keyword builder pipeline');
-      await createKeywordBuilderPipeline({
-        logger,
-        esClient: this.esClient,
-      });
-      logger.debug('keyword builder pipeline created');
+      logger.debug('this is a placeholder');
     } catch (err) {
       logger.error(`Error initializing asset inventory: ${err.message}`);
       await this.delete();
@@ -77,15 +70,6 @@ export class AssetInventoryDataClient {
     logger.debug(`Deleting asset inventory`);
 
     try {
-      logger.debug(`Deleting asset inventory keyword builder pipeline`);
-
-      await deleteKeywordBuilderPipeline({
-        logger,
-        esClient: this.esClient,
-      }).catch((err) => {
-        logger.error('Error on deleting keyword builder pipeline', err);
-      });
-
       logger.debug(`Deleted asset inventory`);
       return { deleted: true };
     } catch (err) {
