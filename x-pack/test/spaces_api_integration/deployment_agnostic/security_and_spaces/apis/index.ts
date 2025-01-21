@@ -15,6 +15,7 @@ export default function ({ loadTestFile, getService }: DeploymentAgnosticFtrProv
   const supertest = getService('supertest');
 
   describe('spaces api with security', function () {
+    this.tags('skipMKI');
     before(async () => {
       if (license === 'basic') {
         await createUsersAndRoles(es, supertest);

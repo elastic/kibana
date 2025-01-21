@@ -335,15 +335,7 @@ export const ROLES = {
 };
 
 export const isBuiltInRole = (role: string) =>
-  [
-    'admin',
-    'viewer',
-    'editor',
-    'system_indices_superuser',
-    'monitoring_user',
-    'machine_learning_admin',
-    'machine_learning_user',
-  ].includes(role);
+  ['admin', 'viewer', 'system_indices_superuser'].includes(role);
 
 export const getRoleDefinitionForUser = (user: { role: string }) =>
   ROLES[user.role as keyof typeof ROLES];
