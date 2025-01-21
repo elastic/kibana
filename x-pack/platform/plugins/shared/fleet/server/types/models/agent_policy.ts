@@ -409,6 +409,7 @@ export const FullAgentPolicyResponseSchema = schema.object({
         metrics: schema.boolean(),
         logs: schema.boolean(),
         traces: schema.boolean(),
+        apm: schema.maybe(schema.any()),
       }),
       download: schema.object({
         sourceURI: schema.string(),

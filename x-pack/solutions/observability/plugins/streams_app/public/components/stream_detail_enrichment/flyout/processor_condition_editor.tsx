@@ -8,9 +8,10 @@
 import React from 'react';
 import { useController } from 'react-hook-form';
 import { ConditionEditor } from '../../condition_editor';
+import { ProcessorFormState } from '../types';
 
 export const ProcessorConditionEditor = () => {
-  const { field } = useController({ name: 'condition' });
+  const { field } = useController<ProcessorFormState, 'condition'>({ name: 'condition' });
 
   return <ConditionEditor condition={field.value} onConditionChange={field.onChange} />;
 };

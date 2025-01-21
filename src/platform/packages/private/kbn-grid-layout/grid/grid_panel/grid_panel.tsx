@@ -68,13 +68,12 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
     /** Set initial styles based on state at mount to prevent styles from "blipping" */
     const initialStyles = useMemo(() => {
       const initialPanel = gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels[panelId];
-      const { rowHeight } = gridLayoutStateManager.runtimeSettings$.getValue();
       return css`
         position: relative;
         height: calc(
           1px *
             (
-              ${initialPanel.height} * (${rowHeight} + var(--kbnGridGutterSize)) -
+              ${initialPanel.height} * (var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) -
                 var(--kbnGridGutterSize)
             )
         );
@@ -91,10 +90,9 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
         const activePanelStyleSubscription = combineLatest([
           gridLayoutStateManager.activePanel$,
           gridLayoutStateManager.gridLayout$,
-          gridLayoutStateManager.runtimeSettings$,
         ])
           .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
-          .subscribe(([activePanel, gridLayout, runtimeSettings]) => {
+          .subscribe(([activePanel, gridLayout]) => {
             const ref = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
             const panel = gridLayout[rowIndex].panels[panelId];
             if (!ref || !panel) return;
@@ -102,8 +100,11 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
             const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
 
             if (panelId === activePanel?.id) {
+              ref.classList.add('kbnGridPanel--active');
+
               // if the current panel is active, give it fixed positioning depending on the interaction event
               const { position: draggingPosition } = activePanel;
+              const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
 
               ref.style.zIndex = `${euiTheme.levels.modal}`;
               if (currentInteractionEvent?.type === 'resize') {
@@ -135,7 +136,7 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
                 ref.style.gridArea = `auto`; // shortcut to set all grid styles to `auto`
               }
             } else {
-              const { rowHeight } = gridLayoutStateManager.runtimeSettings$.getValue();
+              ref.classList.remove('kbnGridPanel--active');
 
               ref.style.zIndex = `auto`;
 
@@ -145,7 +146,7 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
               ref.style.top = ``;
               ref.style.width = ``;
               // setting the height is necessary for mobile mode
-              ref.style.height = `calc(1px * (${panel.height} * (${rowHeight} + var(--kbnGridGutterSize)) - var(--kbnGridGutterSize)))`;
+              ref.style.height = `calc(1px * (${panel.height} * (var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) - var(--kbnGridGutterSize)))`;
 
               // and render the panel locked to the grid
               ref.style.gridColumnStart = `${panel.column + 1}`;
