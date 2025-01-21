@@ -10,27 +10,39 @@
 import { PanelInteractionEvent, RuntimeGridSettings, UserInteractionEvent } from '../types';
 import { getPointerPosition } from './sensors';
 
-export const getResizePreviewRect = (
-  interactionEvent: PanelInteractionEvent,
-  pointerPixel: { clientX: number; clientY: number },
-  runtimeSettings: RuntimeGridSettings
-) => {
+const getGridWidth = (runtimeSettings: RuntimeGridSettings) => {
   const { columnCount, gutterSize, columnPixelWidth } = runtimeSettings;
-  const gridWidth = (gutterSize + columnPixelWidth) * columnCount + gutterSize * 2;
+  return (gutterSize + columnPixelWidth) * columnCount + gutterSize * 2;
+};
 
+export const getResizePreviewRect = ({
+  interactionEvent,
+  pointerPixel,
+  runtimeSettings,
+}: {
+  pointerPixel: { clientX: number; clientY: number };
+  interactionEvent: PanelInteractionEvent;
+  runtimeSettings: RuntimeGridSettings;
+}) => {
   const panelRect = interactionEvent.panelDiv.getBoundingClientRect();
   return {
     left: panelRect.left,
     top: panelRect.top,
     bottom: pointerPixel.clientY - interactionEvent.pointerOffsets.bottom,
-    right: Math.min(pointerPixel.clientX - interactionEvent.pointerOffsets.right, gridWidth),
+    right: Math.min(
+      pointerPixel.clientX - interactionEvent.pointerOffsets.right,
+      getGridWidth(runtimeSettings)
+    ),
   };
 };
 
-export const getDragPreviewRect = (
-  interactionEvent: PanelInteractionEvent,
-  pointerPixel: { clientX: number; clientY: number }
-) => {
+export const getDragPreviewRect = ({
+  pointerPixel,
+  interactionEvent,
+}: {
+  pointerPixel: { clientX: number; clientY: number };
+  interactionEvent: PanelInteractionEvent;
+}) => {
   return {
     left: pointerPixel.clientX - interactionEvent.pointerOffsets.left,
     top: pointerPixel.clientY - interactionEvent.pointerOffsets.top,

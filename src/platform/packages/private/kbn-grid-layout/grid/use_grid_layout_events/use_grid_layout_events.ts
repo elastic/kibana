@@ -41,59 +41,54 @@ export const useGridLayoutEvents = ({
   const lastRequestedPanelPosition = useRef<GridPanelData | undefined>(undefined);
   const pointerPixel = useRef<{ clientX: number; clientY: number }>({ clientX: 0, clientY: 0 });
 
-  const onPointerMove = useCallback(
+  const handleMove = useCallback(
     (e: Event) => {
-      const { runtimeSettings$, interactionEvent$, gridLayout$, activePanel$, rowRefs } =
-        gridLayoutStateManager;
+      const {
+        runtimeSettings$: { value: runtimeSettings },
+        interactionEvent$,
+        gridLayout$,
+        activePanel$,
+        rowRefs: { current: gridRowElements },
+      } = gridLayoutStateManager;
       const interactionEvent = interactionEvent$.value;
-      if (!interactionEvent) {
+      if (!interactionEvent || !runtimeSettings || !gridRowElements) {
         // if no interaction event return early
         return;
       }
 
-      const gridRowElements = rowRefs.current;
-      if (!runtimeSettings$.value || !gridRowElements) {
-        return;
-      }
-
-      e.stopPropagation();
-      // make sure when the user is dragging through touchmove, the page doesn't scroll
-      if (isTouchEvent(e)) {
-        e.preventDefault();
-      }
-
       const currentLayout = gridLayout$.value;
-      const currentGridData = (() => {
-        for (const row of currentLayout) {
-          if (row.panels[interactionEvent.id]) return row.panels[interactionEvent.id];
-        }
-      })();
 
-      if (!currentGridData) {
+      const currentPanelData =
+        currentLayout[interactionEvent.targetRowIndex].panels[interactionEvent.id];
+
+      if (!currentPanelData) {
         return;
       }
 
-      if (isMouseEvent(e) || isTouchEvent(e)) {
-        pointerPixel.current = getPointerPosition(e);
-      }
+      const isResize = interactionEvent.type === 'resize';
 
-      const runtimeSettings = runtimeSettings$.value;
+      const previewRect = (() => {
+        return isResize
+        ? getResizePreviewRect({
+            interactionEvent,
+            pointerPixel: pointerPixel.current,
+            runtimeSettings,
+          }): getDragPreviewRect({
+            interactionEvent,
+            pointerPixel: pointerPixel.current,
+          })
+        })();
+
+   
+      activePanel$.next({ id: interactionEvent.id, position: previewRect });
 
       const { columnCount, gutterSize, rowHeight, columnPixelWidth } = runtimeSettings;
 
-      const isResize = interactionEvent?.type === 'resize';
-
-      const previewRect = isResize
-        ? getResizePreviewRect(interactionEvent, pointerPixel.current, currentRuntimeSettings)
-        : getDragPreviewRect(interactionEvent, pointerPixel.current);
-
-      activePanel$.next({ id: interactionEvent.id, position: previewRect });
-
       // find the grid that the preview rect is over
-      const lastRowIndex = interactionEvent?.targetRowIndex;
+      const lastRowIndex = interactionEvent.targetRowIndex;
       const targetRowIndex = (() => {
         if (isResize) return lastRowIndex;
-        const previewBottom = previewRect.top + runtimeSettings$.value.rowHeight;
+        const previewBottom = previewRect.top + rowHeight;
 
         let highestOverlap = -Infinity;
         let highestOverlapRowIndex = -1;
@@ -124,7 +119,7 @@ export const useGridLayoutEvents = ({
       const targetedGridLeft = targetedGridRow?.getBoundingClientRect().left ?? 0;
       const targetedGridTop = targetedGridRow?.getBoundingClientRect().top ?? 0;
 
-      const maxColumn = isResize ? columnCount : columnCount - currentGridData.width;
+      const maxColumn = isResize ? columnCount : columnCount - currentPanelData.width;
 
       const localXCoordinate = isResize
         ? previewRect.right - targetedGridLeft
@@ -139,7 +134,7 @@ export const useGridLayoutEvents = ({
       );
       const targetRow = Math.max(Math.round(localYCoordinate / (rowHeight + gutterSize)), 0);
 
-      const requestedGridData = { ...currentGridData };
+      const requestedGridData = { ...currentPanelData };
       if (isResize) {
         requestedGridData.width = Math.max(targetColumn - requestedGridData.column, 1);
         requestedGridData.height = Math.max(targetRow - requestedGridData.row, 1);
@@ -184,12 +179,11 @@ export const useGridLayoutEvents = ({
     (e: UserInteractionEvent) => {
       if (!isLayoutInteractive(gridLayoutStateManager)) return;
 
-      const onStart = () => {
+      const onStart = () =>
         startAction(gridLayoutStateManager, e, interactionType, rowIndex, panelId);
-      };
-      const onEnd = () => {
-        commitAction(gridLayoutStateManager);
-      };
+
+      const onEnd = () => commitAction(gridLayoutStateManager);
+
       const onBlur = () => {
         const {
           interactionEvent$: { value: { id, targetRowIndex, type } = {} },
@@ -199,26 +193,34 @@ export const useGridLayoutEvents = ({
         }
       };
 
+
+      const onMove = (ev: Event) => {
+        if (isMouseEvent(ev) || isTouchEvent(ev)) {
+          pointerPixel.current = getPointerPosition(ev);
+        }
+        handleMove(ev);
+      };
+
       if (isMouseEvent(e)) {
         e.stopPropagation();
         startMouseInteraction({
           e,
           onStart,
-          onMove: onPointerMove,
+          onMove,
           onEnd,
         });
       } else if (isTouchEvent(e)) {
         startTouchInteraction({
           e,
           onStart,
-          onMove: onPointerMove,
+          onMove,
           onEnd,
         });
       } else if (isKeyboardEvent(e)) {
         onKeyDown({
           e,
           gridLayoutStateManager,
-          onMove: onPointerMove,
+          onMove,
           onStart,
           onCancel: () => {
             cancelAction(gridLayoutStateManager);
@@ -228,7 +230,7 @@ export const useGridLayoutEvents = ({
         });
       }
     },
-    [gridLayoutStateManager, onPointerMove, rowIndex, panelId, interactionType]
+    [gridLayoutStateManager, handleMove, rowIndex, panelId, interactionType]
   );
 
   return startInteraction;
