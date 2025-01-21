@@ -29,6 +29,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let transformHelper: TransformHelper;
 
   describe('Create SLOs', function () {
+    // see details: https://github.com/elastic/kibana/issues/207354
+    this.tags(['failsOnMKI']);
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       transformHelper = createTransformHelper(getService);
@@ -62,7 +64,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(definitions.results[0]).eql({
         budgetingMethod: 'occurrences',
         updatedAt: definitions.results[0].updatedAt,
+        updatedBy: 'elastic_admin',
         createdAt: definitions.results[0].createdAt,
+        createdBy: 'elastic_admin',
         description: 'Fixture for api integration tests',
         enabled: true,
         groupBy: 'tags',
@@ -98,7 +102,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const rollUpTransformResponse = await transformHelper.assertExist(getSLOTransformId(id, 1));
       expect(rollUpTransformResponse.transforms[0].source.index).eql(['kbn-data-forge*']);
       expect(rollUpTransformResponse.transforms[0].dest).eql({
-        index: '.slo-observability.sli-v3.3',
+        index: '.slo-observability.sli-v3.4',
         pipeline: `.slo-observability.sli.pipeline-${id}-1`,
       });
       expect(rollUpTransformResponse.transforms[0].pivot.group_by).eql({
@@ -110,10 +114,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         getSLOSummaryTransformId(id, 1)
       );
       expect(summaryTransformResponse.transforms[0].source.index).eql([
-        '.slo-observability.sli-v3.3*',
+        '.slo-observability.sli-v3.4*',
       ]);
       expect(summaryTransformResponse.transforms[0].dest).eql({
-        index: '.slo-observability.summary-v3.3',
+        index: '.slo-observability.summary-v3.4',
         pipeline: `.slo-observability.summary.pipeline-${id}-1`,
       });
     });

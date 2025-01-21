@@ -9,12 +9,12 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { HasSerializableState } from '@kbn/presentation-containers';
 import { PanelCompatibleComponent } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import {
   HasParentApi,
   HasType,
   HasUniqueId,
+  HasSerializableState,
   PublishesBlockingError,
   PublishesDataLoading,
   PublishesDisabledActionIds,
