@@ -122,7 +122,7 @@ function onPackagePolicyPostCreate({
   coreStart: CoreStart;
   logger: Logger;
 }): PostPackagePolicyPostCreateCallback {
-  return async (packagePolicy) => {
+  return async (packagePolicy, savedObjectsClient) => {
     if (packagePolicy.package?.name !== 'apm') {
       return packagePolicy;
     }
@@ -130,6 +130,7 @@ function onPackagePolicyPostCreate({
     // add api key to new package policy
     await addApiKeysToPackagePolicyIfMissing({
       policy: packagePolicy,
+      savedObjectsClient,
       coreStart,
       fleet,
       logger,
