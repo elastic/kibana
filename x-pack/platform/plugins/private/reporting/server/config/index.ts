@@ -32,12 +32,13 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
     unused('capture.viewport', { level: 'warning' }), // deprecated as unused since 7.16
     (settings, fromPath, addDeprecation) => {
       const reporting = get(settings, fromPath);
-      if (reporting?.roles?.enabled !== false) {
+      const allowedRoles = reporting?.roles?.allow ?? [];
+      if (allowedRoles.length !== 0) {
         addDeprecation({
           configPath: `${fromPath}.roles.enabled`,
           level: 'warning',
           title: i18n.translate('xpack.reporting.deprecations.reportingRoles.title', {
-            defaultMessage: `The "{fromPath}.roles" setting is deprecated`,
+            defaultMessage: `The "{fromPath}.roles.allow" setting is deprecated`,
             values: { fromPath },
           }),
           // TODO: once scheduled reports is released, restate this to say that we have no access to scheduled reporting.
@@ -50,11 +51,8 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
           }),
           correctiveActions: {
             manualSteps: [
-              i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepOne', {
-                defaultMessage: `Set "xpack.reporting.roles.enabled" to "false" in kibana.yml.`,
-              }),
               i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepTwo', {
-                defaultMessage: `Remove "xpack.reporting.roles.allow" in kibana.yml, if present.`,
+                defaultMessage: `Remove "xpack.reporting.roles.allow" in kibana.yml.`,
               }),
               i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepThree', {
                 defaultMessage:
