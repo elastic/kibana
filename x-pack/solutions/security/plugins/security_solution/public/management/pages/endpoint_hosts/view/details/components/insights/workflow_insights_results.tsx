@@ -122,13 +122,15 @@ export const WorkflowInsightsResults = ({
                 <EuiFlexItem>
                   <EuiText size="s">
                     <EuiText size={'s'}>
-                      <strong>{insight.value}</strong>
+                      <strong>{insight.metadata.display_name || insight.value}</strong>
                     </EuiText>
                     <EuiText size={'s'} color={'subdued'}>
                       {insight.message}
                     </EuiText>
                     <EuiText size={'xs'} color={'subdued'}>
-                      {item.entries[0].type === 'match' && item.entries[0].value}
+                      {item.entries[0].type === 'match' &&
+                        item.entries[0].field === 'process.executable.caseless' &&
+                        item.entries[0].value}
                     </EuiText>
                   </EuiText>
                 </EuiFlexItem>
