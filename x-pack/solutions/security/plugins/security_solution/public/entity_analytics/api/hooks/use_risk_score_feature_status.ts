@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { REQUEST_NAMES, useFetch } from '../../../common/hooks/use_fetch';
-import type { RiskScoreEntity } from '../../../../common/search_strategy';
+import type { EntityType } from '../../../../common/search_strategy';
 import { useHasSecurityCapability } from '../../../helper_hooks';
 import { useEntityAnalyticsRoutes } from '../api';
 
@@ -25,7 +25,7 @@ interface RiskScoresFeatureStatus {
 }
 
 export const useRiskScoreFeatureStatus = (
-  riskEntity: RiskScoreEntity.host | RiskScoreEntity.user,
+  riskEntity: EntityType,
   defaultIndex?: string
 ): RiskScoresFeatureStatus => {
   const { isPlatinumOrTrialLicense, capabilitiesFetched } = useMlCapabilities();

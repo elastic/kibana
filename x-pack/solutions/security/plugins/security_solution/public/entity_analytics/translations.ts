@@ -7,20 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SHOW_HOSTS_RISK_SCORE = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.hosts.show',
-  {
-    defaultMessage: 'Show hosts',
-  }
-);
-
-export const HIDE_HOSTS_RISK_SCORE = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.hosts.hide',
-  {
-    defaultMessage: 'Hide hosts',
-  }
-);
-
 export const SHOW_USERS_RISK_SCORE = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.users.show',
   {

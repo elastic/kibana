@@ -1304,6 +1304,9 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 # Observability settings
 /x-pack/plugins/observability_solution/observability/server/ui_settings.ts @elastic/obs-docs
 
+# Streams
+/x-pack/test/api_integration/deployment_agnostic/apis/observability/streams @elastic/streams-program-team
+
 ### END Observability Plugins
 
 # Presentation
@@ -1629,6 +1632,7 @@ x-pack/test/security_solution_api_integration/test_suites/detections_response/te
 x-pack/test/security_solution_api_integration/test_suites/detections_response/user_roles @elastic/security-detections-response
 x-pack/test/security_solution_api_integration/test_suites/explore @elastic/security-threat-hunting-explore
 x-pack/test/security_solution_api_integration/test_suites/investigations @elastic/security-threat-hunting-investigations
+x-pack/test/security_solution_api_integration/test_suites/siem_migrations @elastic/security-threat-hunting
 x-pack/test/security_solution_api_integration/test_suites/sources @elastic/security-detections-response
 
 # Security Solution sub teams

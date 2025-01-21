@@ -106,7 +106,7 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
                     <EuiBadge
                       color={convertTranslationResultIntoColor(ruleMigration.translation_result)}
                       onClick={() => {}}
-                      onClickAriaLabel={'Click to update translation status'}
+                      onClickAriaLabel={'Translation status badge'}
                     >
                       {isInstalled
                         ? i18n.INSTALLED_LABEL
