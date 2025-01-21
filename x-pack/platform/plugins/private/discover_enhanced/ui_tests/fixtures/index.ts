@@ -10,29 +10,29 @@ import {
   spaceTest as spaceBaseTest,
   PageObjects,
   createLazyPageObject,
-  ScoutSingleThreadTestFixtures,
-  ScoutSingleThreadWorkerFixtures,
-  ScoutParallelTestFixtures,
-  ScoutParallelWorkerFixtures,
+  ScoutTestFixtures,
+  ScoutWorkerFixtures,
+  ScoutParallelRunTestFixtures,
+  ScoutParallelRunWorkerFixtures,
 } from '@kbn/scout';
 import { DemoPage } from './page_objects';
 
-export interface SingleThreadTestFixtures extends ScoutSingleThreadTestFixtures {
+export interface ExtScoutTestFixtures extends ScoutTestFixtures {
   pageObjects: PageObjects & {
     demo: DemoPage;
   };
 }
 
-export const test = baseTest.extend<SingleThreadTestFixtures, ScoutSingleThreadWorkerFixtures>({
+export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
   pageObjects: async (
     {
       pageObjects,
       page,
     }: {
-      pageObjects: SingleThreadTestFixtures['pageObjects'];
-      page: SingleThreadTestFixtures['page'];
+      pageObjects: ExtScoutTestFixtures['pageObjects'];
+      page: ExtScoutTestFixtures['page'];
     },
-    use: (pageObjects: SingleThreadTestFixtures['pageObjects']) => Promise<void>
+    use: (pageObjects: ExtScoutTestFixtures['pageObjects']) => Promise<void>
   ) => {
     const extendedPageObjects = {
       ...pageObjects,
@@ -43,33 +43,34 @@ export const test = baseTest.extend<SingleThreadTestFixtures, ScoutSingleThreadW
   },
 });
 
-export interface ParallelRunTestFixtures extends ScoutParallelTestFixtures {
+export interface ExtParallelRunTestFixtures extends ScoutParallelRunTestFixtures {
   pageObjects: PageObjects & {
     demo: DemoPage;
   };
 }
 
-export const spaceTest = spaceBaseTest.extend<ParallelRunTestFixtures, ScoutParallelWorkerFixtures>(
-  {
-    pageObjects: async (
-      {
-        pageObjects,
-        page,
-      }: {
-        pageObjects: ParallelRunTestFixtures['pageObjects'];
-        page: ParallelRunTestFixtures['page'];
-      },
-      use: (pageObjects: ParallelRunTestFixtures['pageObjects']) => Promise<void>
-    ) => {
-      const extendedPageObjects = {
-        ...pageObjects,
-        demo: createLazyPageObject(DemoPage, page),
-      };
-
-      await use(extendedPageObjects);
+export const spaceTest = spaceBaseTest.extend<
+  ExtParallelRunTestFixtures,
+  ScoutParallelRunWorkerFixtures
+>({
+  pageObjects: async (
+    {
+      pageObjects,
+      page,
+    }: {
+      pageObjects: ExtParallelRunTestFixtures['pageObjects'];
+      page: ExtParallelRunTestFixtures['page'];
     },
-  }
-);
+    use: (pageObjects: ExtParallelRunTestFixtures['pageObjects']) => Promise<void>
+  ) => {
+    const extendedPageObjects = {
+      ...pageObjects,
+      demo: createLazyPageObject(DemoPage, page),
+    };
+
+    await use(extendedPageObjects);
+  },
+});
 
 export * as testData from './constants';
 export * as assertionMessages from './assertion_messages';

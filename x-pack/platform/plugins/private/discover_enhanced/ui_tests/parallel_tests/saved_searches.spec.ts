@@ -7,12 +7,12 @@
 
 import { expect } from '@kbn/scout';
 import { spaceTest, testData } from '../fixtures';
-import type { ParallelRunTestFixtures } from '../fixtures';
+import type { ExtParallelRunTestFixtures } from '../fixtures';
 
 const assertNoFilterAndEmptyQuery = async (
   filterBadge: { field: string; value: string },
-  pageObjects: ParallelRunTestFixtures['pageObjects'],
-  page: ParallelRunTestFixtures['page']
+  pageObjects: ExtParallelRunTestFixtures['pageObjects'],
+  page: ExtParallelRunTestFixtures['page']
 ) => {
   expect(
     // checking if filter exists, enabled or disabled
@@ -25,7 +25,7 @@ const assertNoFilterAndEmptyQuery = async (
   ).toHaveText('');
 };
 
-const assertDataViewIsSelected = async (page: ParallelRunTestFixtures['page'], name: string) =>
+const assertDataViewIsSelected = async (page: ExtParallelRunTestFixtures['page'], name: string) =>
   await expect(
     page.testSubj.locator('*dataView-switch-link'),
     'Incorrect data view is selected'

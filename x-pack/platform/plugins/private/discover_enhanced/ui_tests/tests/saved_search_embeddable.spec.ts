@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ScoutSingleThreadWorkerFixtures, expect, tags } from '@kbn/scout';
+import { ScoutWorkerFixtures, expect, tags } from '@kbn/scout';
 import { test, testData } from '../fixtures';
 
 const createSavedSearch = async (
-  kbnClient: ScoutSingleThreadWorkerFixtures['kbnClient'],
+  kbnClient: ScoutWorkerFixtures['kbnClient'],
   searchId: string,
   searchTitle: string,
   dataViewId: string

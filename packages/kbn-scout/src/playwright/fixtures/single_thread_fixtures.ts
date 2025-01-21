@@ -29,7 +29,7 @@ import {
 } from './test';
 export type { PageObjects, ScoutPage } from './test';
 
-export const scoutSingleThreadFixtures = mergeTests(
+export const scoutFixtures = mergeTests(
   // worker scope fixtures
   coreWorkerFixtures,
   esArchiverFixture,
@@ -41,13 +41,13 @@ export const scoutSingleThreadFixtures = mergeTests(
   validateTagsFixture
 );
 
-export interface ScoutSingleThreadTestFixtures {
+export interface ScoutTestFixtures {
   browserAuth: BrowserAuthFixture;
   page: ScoutPage;
   pageObjects: PageObjects;
 }
 
-export interface ScoutSingleThreadWorkerFixtures {
+export interface ScoutWorkerFixtures {
   log: ToolingLog;
   config: ScoutTestConfig;
   kbnUrl: KibanaUrl;

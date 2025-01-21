@@ -25,7 +25,7 @@ import {
 } from './test';
 import type { BrowserAuthFixture, ScoutPage, PageObjects } from './test';
 
-export const scoutParallelWorkersFixtures = mergeTests(
+export const scoutParallelRunFixtures = mergeTests(
   // worker scope fixtures
   coreWorkerFixtures,
   scoutSpaceParallelFixture,
@@ -36,13 +36,13 @@ export const scoutParallelWorkersFixtures = mergeTests(
   validateTagsFixture
 );
 
-export interface ScoutParallelTestFixtures {
+export interface ScoutParallelRunTestFixtures {
   browserAuth: BrowserAuthFixture;
   page: ScoutPage;
   pageObjects: PageObjects;
 }
 
-export interface ScoutParallelWorkerFixtures {
+export interface ScoutParallelRunWorkerFixtures {
   log: ToolingLog;
   config: ScoutTestConfig;
   kbnUrl: KibanaUrl;

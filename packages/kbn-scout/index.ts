@@ -21,10 +21,10 @@ export type {
   ScoutTestOptions,
   ScoutPage,
   PageObjects,
-  ScoutSingleThreadTestFixtures,
-  ScoutSingleThreadWorkerFixtures,
-  ScoutParallelTestFixtures,
-  ScoutParallelWorkerFixtures,
+  ScoutTestFixtures,
+  ScoutWorkerFixtures,
+  ScoutParallelRunTestFixtures,
+  ScoutParallelRunWorkerFixtures,
 } from './src/playwright';
 
 export type { Client, KbnClient, KibanaUrl, SamlSessionManager, ToolingLog } from './src/types';
