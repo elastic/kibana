@@ -46,7 +46,7 @@ const tourSteps: Array<{
     title: i18n.TRANSLATION_STATUS_TOUR_STEP_TITLE,
     content: (
       <FormattedMessage
-        id="xpack.securitySolution.siemMigrations.rules.tableColumn.statusTooltip"
+        id="xpack.securitySolution.siemMigrations.rules.tour.statusStepContent"
         defaultMessage="{installed} rules have a check mark. Click {view} to access rule details. {translated} rules are ready to {install}, or for your to {edit}. Rules with errors can be {reprocessed}. Learn more about our AI Translations here.
         {lineBreak}{lineBreak}
         Learn more about our {link}"
