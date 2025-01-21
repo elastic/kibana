@@ -19,12 +19,14 @@ export const useRedirectToOnboardingStart = () => {
     services: { application, searchIndices, navigation },
   } = useKibana<KibanaDeps>();
 
-  const indicesStatus = searchIndices?.fetchIndicesStatus();
+  const { data: indicesStatus, isFetching } = searchIndices?.fetchIndicesStatus() || {};
   const isSolutionNav = useObservable(navigation.isSolutionNavEnabled$, false);
 
   useEffect(() => {
-    if (isSolutionNav && indicesStatus?.data?.indexNames.length === 0) {
+    if (!isFetching && isSolutionNav && indicesStatus?.indexNames.length === 0) {
       application?.navigateToApp(SEARCH_INDICES_START);
     }
-  }, [application, indicesStatus, isSolutionNav]);
+  }, [isFetching, application, indicesStatus, isSolutionNav]);
+
+  return { isChecking: isFetching };
 };

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { createContext } from 'react';
+
 import { useQuery } from '@tanstack/react-query';
+import type { UseQueryResult, QueryClient } from '@tanstack/react-query';
 
 import { GET_STATUS_ROUTE } from '../../../common/routes';
 import type { IndicesStatusResponse } from '../../../common/types';
@@ -15,8 +18,13 @@ import { useKibana } from '../use_kibana';
 
 const DEFAULT_INDICES_POLLING_INTERVAL = 15 * 1000;
 
-export const useIndicesStatusQuery = (pollingInterval = DEFAULT_INDICES_POLLING_INTERVAL) => {
+export const useIndicesStatusQuery = (
+  queryClient?: QueryClient,
+  pollingInterval = DEFAULT_INDICES_POLLING_INTERVAL
+): UseQueryResult<IndicesStatusResponse> => {
   const { http } = useKibana().services;
+  const clientContext = createContext(queryClient);
+
   return useQuery({
     refetchInterval: pollingInterval,
     refetchIntervalInBackground: true,
@@ -24,5 +32,6 @@ export const useIndicesStatusQuery = (pollingInterval = DEFAULT_INDICES_POLLING_
     retry: true,
     queryKey: [QueryKeys.FetchSearchIndicesStatus],
     queryFn: () => http.get<IndicesStatusResponse>(GET_STATUS_ROUTE),
+    context: queryClient ? clientContext : undefined,
   });
 };

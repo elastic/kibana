@@ -27,6 +27,7 @@ import {
   SearchIndexDetailsTabValues,
 } from './routes';
 import { registerLocators } from './locators';
+import { useIndicesStatusQuery } from './hooks/api/use_indices_status';
 
 export class SearchIndicesPlugin
   implements Plugin<SearchIndicesPluginSetup, SearchIndicesPluginStart>
@@ -90,6 +91,7 @@ export class SearchIndicesPlugin
 
     return {
       enabled: true,
+      fetchIndicesStatus: useIndicesStatusQuery.bind(null, queryClient),
       startAppId: START_APP_ID,
       startRoute: START_APP_BASE,
     };
@@ -100,6 +102,7 @@ export class SearchIndicesPlugin
     deps: SearchIndicesAppPluginStartDependencies
   ): SearchIndicesPluginStart {
     const { indexManagement } = deps;
+    const queryClient = initQueryClient(core.notifications.toasts);
     docLinks.setDocLinks(core.docLinks.links);
 
     if (this.pluginEnabled) {
@@ -121,6 +124,7 @@ export class SearchIndicesPlugin
     }
     return {
       enabled: this.pluginEnabled,
+      fetchIndicesStatus: useIndicesStatusQuery.bind(null, queryClient),
       startAppId: START_APP_ID,
       startRoute: START_APP_BASE,
     };

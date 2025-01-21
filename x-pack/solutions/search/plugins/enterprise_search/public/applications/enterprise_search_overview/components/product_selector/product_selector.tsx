@@ -17,6 +17,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
 import { ApiKeyPanel } from '../../../shared/api_key/api_key_panel';
@@ -39,14 +40,20 @@ import { WelcomeBanner } from './welcome_banner';
 export const ProductSelector: React.FC = () => {
   const { user } = useValues(KibanaLogic);
 
-  useRedirectToOnboardingStart();
+  const { isChecking: isCheckingOnboardingStatus } = useRedirectToOnboardingStart();
 
   // The create index flow does not work without ent-search, when content is updated
   // to no longer rely on ent-search we can always show the Add Content component
 
   return (
     <>
-      <EnterpriseSearchOverviewPageTemplate restrictWidth grow offset={0} customPageSections>
+      <EnterpriseSearchOverviewPageTemplate
+        restrictWidth
+        grow
+        offset={0}
+        customPageSections
+        isLoading={isCheckingOnboardingStatus}
+      >
         <TrialCallout />
         <EuiPageTemplate.Section alignment="top" className="entSearchProductSelectorHeader">
           <WelcomeBanner user={user || undefined} image={headerImage} />
