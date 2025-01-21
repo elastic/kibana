@@ -67,8 +67,6 @@ export type UserActionListProps = Omit<
   Pick<UserActionBuilderArgs, 'commentRefs' | 'handleManageQuote'> & {
     caseUserActions: UserActionUI[];
     attachments: AttachmentUI[];
-    loadingAlertData: boolean;
-    manualAlertsData: Record<string, unknown>;
     bottomActions?: EuiCommentProps[];
     isExpandable?: boolean;
   };
@@ -86,8 +84,6 @@ export const UserActionsList = React.memo(
     actionsNavigation,
     onRuleDetailsClick,
     onShowAlertDetails,
-    loadingAlertData,
-    manualAlertsData,
     commentRefs,
     handleManageQuote,
     bottomActions = [],
@@ -142,8 +138,6 @@ export const UserActionsList = React.memo(
           manageMarkdownEditIds,
           selectedOutlineCommentId,
           loadingCommentIds,
-          loadingAlertData,
-          alertData: manualAlertsData,
           euiTheme,
           handleOutlineComment,
           handleManageMarkdownEditId,
@@ -172,8 +166,6 @@ export const UserActionsList = React.memo(
       manageMarkdownEditIds,
       selectedOutlineCommentId,
       loadingCommentIds,
-      loadingAlertData,
-      manualAlertsData,
       euiTheme,
       handleOutlineComment,
       handleManageMarkdownEditId,

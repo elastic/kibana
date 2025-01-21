@@ -28,7 +28,7 @@ import {
 } from '../../../common/types/api';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import { createCaseError } from '../../common/error';
-import { countAlertsForID, flattenCaseSavedObject, countUserAttachments } from '../../common/utils';
+import { flattenCaseSavedObject } from '../../common/utils';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
@@ -167,11 +167,7 @@ export interface GetParams {
  *
  * @ignore
  */
-export const get = async (
-  // TODO: Remove includeComments
-  { id, includeComments }: GetParams,
-  clientArgs: CasesClientArgs
-): Promise<Case> => {
+export const get = async ({ id }: GetParams, clientArgs: CasesClientArgs): Promise<Case> => {
   const {
     services: { caseService },
     logger,
@@ -188,30 +184,11 @@ export const get = async (
       entities: [{ owner: theCase.attributes.owner, id: theCase.id }],
     });
 
-    if (!includeComments) {
-      return decodeOrThrow(CaseRt)(
-        flattenCaseSavedObject({
-          savedObject: theCase,
-        })
-      );
-    }
-
-    const theComments = await caseService.getAllCaseComments({
-      id,
-      options: {
-        sortField: 'created_at',
-        sortOrder: 'asc',
-      },
-    });
-
-    const res = flattenCaseSavedObject({
-      savedObject: theCase,
-      comments: theComments.saved_objects,
-      totalComment: countUserAttachments(theComments.saved_objects),
-      totalAlerts: countAlertsForID({ comments: theComments, id }),
-    });
-
-    return decodeOrThrow(CaseRt)(res);
+    return decodeOrThrow(CaseRt)(
+      flattenCaseSavedObject({
+        savedObject: theCase,
+      })
+    );
   } catch (error) {
     throw createCaseError({ message: `Failed to get case id: ${id}: ${error}`, error, logger });
   }
@@ -223,7 +200,7 @@ export const get = async (
  * @experimental
  */
 export const resolve = async (
-  { id, includeComments }: GetParams,
+  { id }: GetParams,
   clientArgs: CasesClientArgs
 ): Promise<CaseResolveResponse> => {
   const {
@@ -250,34 +227,12 @@ export const resolve = async (
       ],
     });
 
-    if (!includeComments) {
-      return decodeOrThrow(CaseResolveResponseRt)({
-        ...resolveData,
-        case: flattenCaseSavedObject({
-          savedObject: resolvedSavedObject,
-        }),
-      });
-    }
-
-    const theComments = await caseService.getAllCaseComments({
-      id: resolvedSavedObject.id,
-      options: {
-        sortField: 'created_at',
-        sortOrder: 'asc',
-      },
-    });
-
-    const res = {
+    return decodeOrThrow(CaseResolveResponseRt)({
       ...resolveData,
       case: flattenCaseSavedObject({
         savedObject: resolvedSavedObject,
-        comments: theComments.saved_objects,
-        totalComment: theComments.total,
-        totalAlerts: countAlertsForID({ comments: theComments, id: resolvedSavedObject.id }),
       }),
-    };
-
-    return decodeOrThrow(CaseResolveResponseRt)(res);
+    });
   } catch (error) {
     throw createCaseError({ message: `Failed to resolve case id: ${id}: ${error}`, error, logger });
   }
