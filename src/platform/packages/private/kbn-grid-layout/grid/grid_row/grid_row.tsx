@@ -12,7 +12,6 @@ import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest, map, pairwise, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 import { DragPreview } from '../drag_preview';
 import { GridPanel } from '../grid_panel';
