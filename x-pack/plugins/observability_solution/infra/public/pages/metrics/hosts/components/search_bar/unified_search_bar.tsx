@@ -60,6 +60,7 @@ export const UnifiedSearchBar = () => {
             showQueryMenu
             useDefaultBehaviors
             isAutoRefreshDisabled
+            isRefreshPaused
           />
         </EuiFlexItem>
         <EuiFlexItem>

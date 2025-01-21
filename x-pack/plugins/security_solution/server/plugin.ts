@@ -499,7 +499,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       DEFAULT_QUEUE_CONFIG,
       this.telemetryReceiver,
       plugins.telemetry,
-      this.telemetryUsageCounter
+      this.telemetryUsageCounter,
+      core.analytics
     );
 
     this.telemetryEventsSender.setup(

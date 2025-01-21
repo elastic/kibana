@@ -34,5 +34,7 @@
     "@kbn/zod",
     "@kbn/data-views-plugin",
     "@kbn/user-profile-components",
+    "@kbn/core-chrome-browser-mocks",
+    "@kbn/core-chrome-browser",
   ]
 }

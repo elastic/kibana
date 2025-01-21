@@ -7,9 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint "no-restricted-syntax": [
+            "error",
+            {
+                "selector": "CallExpression[callee.object.name='console'][callee.property.name!=/^(warn|error)$/]",
+                "message": "Debug logging to stdout in this file will attempt to upload the log message as yaml to buildkite, which might result in pipeline syntax error. Use emitPipeline() to upload steps, or log to stderr."
+            }
+        ] */
+
 import fs from 'fs';
 import prConfigs from '../../../pull_requests.json';
-import { areChangesSkippable, doAnyChangesMatch, getAgentImageConfig } from '#pipeline-utils';
+import {
+  areChangesSkippable,
+  doAnyChangesMatch,
+  getAgentImageConfig,
+  emitPipeline,
+} from '#pipeline-utils';
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 const emptyStep = `steps: []`;
@@ -35,7 +48,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
     const skippable = await areChangesSkippable(SKIPPABLE_PR_MATCHERS, REQUIRED_PATHS);
 
     if (skippable) {
-      console.log(emptyStep);
+      emitPipeline([emptyStep]);
       return;
     }
 
@@ -44,8 +57,8 @@ const getPipeline = (filename: string, removeSteps = true) => {
     const onlyRunQuickChecks = await areChangesSkippable([/^renovate\.json$/], REQUIRED_PATHS);
     if (onlyRunQuickChecks) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/renovate.yml', false));
-
-      console.log([...new Set(pipeline)].join('\n'));
+      console.warn('Isolated changes to renovate.json. Skipping main PR pipeline.');
+      emitPipeline(pipeline);
       return;
     }
 
@@ -360,8 +373,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
-    // remove duplicated steps
-    console.log([...new Set(pipeline)].join('\n'));
+    emitPipeline(pipeline);
   } catch (ex) {
     console.error('Error while generating the pipeline steps: ' + ex.message, ex);
     process.exit(1);

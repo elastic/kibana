@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
+import { Rule, SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { publicAlertsClientMock } from '@kbn/alerting-plugin/server/alerts_client/alerts_client.mock';
@@ -25,7 +25,13 @@ import {
 import { ISearchStartSearchSource } from '@kbn/data-plugin/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
-import { Rule } from '@kbn/alerting-plugin/common';
+import {
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_GROUP,
+  ALERT_REASON,
+  SLO_BURN_RATE_RULE_TYPE_ID,
+} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { sloDefinitionSchema } from '@kbn/slo-schema';
 import { get } from 'lodash';
@@ -41,25 +47,18 @@ import {
   SLO_INSTANCE_ID_FIELD,
   SLO_REVISION_FIELD,
 } from '../../../../common/field_names/slo';
-import {
-  ALERT_EVALUATION_THRESHOLD,
-  ALERT_EVALUATION_VALUE,
-  ALERT_GROUP,
-  ALERT_REASON,
-  SLO_BURN_RATE_RULE_TYPE_ID,
-} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { SLODefinition, StoredSLODefinition } from '../../../domain/models';
 import { SLONotFound } from '../../../errors';
 import { SO_SLO_TYPE } from '../../../saved_objects';
 import { createSLO } from '../../../services/fixtures/slo';
 import { BurnRateAlert, getRuleExecutor } from './executor';
 import {
+  LONG_WINDOW,
+  SHORT_WINDOW,
   generateAboveThresholdKey,
   generateBurnRateKey,
   generateStatsKey,
   generateWindowId,
-  LONG_WINDOW,
-  SHORT_WINDOW,
 } from './lib/build_query';
 import { EvaluationBucket } from './lib/evaluate';
 import {
@@ -188,7 +187,7 @@ describe('BurnRateRuleExecutor', () => {
   describe('multi-window', () => {
     it('throws when the slo is not found', async () => {
       soClientMock.find.mockRejectedValue(new SLONotFound('SLO [non-existent] not found'));
-      const executor = getRuleExecutor({ basePath: basePathMock });
+      const executor = getRuleExecutor(basePathMock);
 
       await expect(
         executor({
@@ -212,7 +211,7 @@ describe('BurnRateRuleExecutor', () => {
     it('returns early when the slo is disabled', async () => {
       const slo = createSLO({ objective: { target: 0.9 }, enabled: false });
       soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
-      const executor = getRuleExecutor({ basePath: basePathMock });
+      const executor = getRuleExecutor(basePathMock);
 
       const result = await executor({
         params: someRuleParamsWithWindows({ sloId: slo.id }),
@@ -264,7 +263,7 @@ describe('BurnRateRuleExecutor', () => {
         generateEsResponse(ruleParams, [], { instanceId: 'bar' })
       );
 
-      const executor = getRuleExecutor({ basePath: basePathMock });
+      const executor = getRuleExecutor(basePathMock);
       await executor({
         params: ruleParams,
         startedAt: new Date(),
@@ -312,7 +311,7 @@ describe('BurnRateRuleExecutor', () => {
         generateEsResponse(ruleParams, [], { instanceId: 'bar' })
       );
 
-      const executor = getRuleExecutor({ basePath: basePathMock });
+      const executor = getRuleExecutor(basePathMock);
       await executor({
         params: ruleParams,
         startedAt: new Date(),
@@ -369,9 +368,7 @@ describe('BurnRateRuleExecutor', () => {
         start: new Date().toISOString(),
       }));
 
-      const executor = getRuleExecutor({
-        basePath: basePathMock,
-      });
+      const executor = getRuleExecutor(basePathMock);
 
       await executor({
         params: ruleParams,
@@ -519,9 +516,7 @@ describe('BurnRateRuleExecutor', () => {
         start: new Date().toISOString(),
       }));
 
-      const executor = getRuleExecutor({
-        basePath: basePathMock,
-      });
+      const executor = getRuleExecutor(basePathMock);
 
       await executor({
         params: ruleParams,
@@ -643,7 +638,7 @@ describe('BurnRateRuleExecutor', () => {
         start: new Date().toISOString(),
       }));
 
-      const executor = getRuleExecutor({ basePath: basePathMock });
+      const executor = getRuleExecutor(basePathMock);
       await executor({
         params: ruleParams,
         startedAt: new Date(),

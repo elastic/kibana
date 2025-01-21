@@ -47,13 +47,18 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
   };
 
   const handleSubmitNewEntryClick = async () => {
-    let entries: Array<Omit<KnowledgeBaseEntry, '@timestamp' | 'title'> & { title: string }> = [];
     const text = await files[0].text();
 
     const elements = text.split('\n').filter(Boolean);
 
     try {
-      entries = elements.map((el) => JSON.parse(el));
+      const entries = elements.map(
+        (el) =>
+          JSON.parse(el) as Omit<KnowledgeBaseEntry, '@timestamp' | 'title'> & {
+            title: string;
+          }
+      );
+      await mutateAsync({ entries });
     } catch (_) {
       toasts.addError(
         new Error(
@@ -74,8 +79,7 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
         }
       );
     }
-
-    mutateAsync({ entries }).then(onClose);
+    onClose();
   };
 
   return (
