@@ -285,7 +285,6 @@ export function useOnSubmit({
   }, [packagePolicy, agentPolicies, updatePackagePolicy, canUseMultipleAgentPolicies]);
 
   const onSaveNavigate = useOnSaveNavigate({
-    packagePolicy,
     queryParamsPolicyId,
   });
 

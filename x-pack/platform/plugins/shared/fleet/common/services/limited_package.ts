@@ -17,10 +17,7 @@ export const doesAgentPolicyAlreadyIncludePackage = (
   agentPolicy: AgentPolicy,
   packageName: string
 ): boolean => {
-  if (!agentPolicy.package_policies) {
-    throw new Error('Unable to read full package policy information');
-  }
-  return agentPolicy.package_policies
+  return (agentPolicy.package_policies || [])
     .map((packagePolicy) => packagePolicy.package?.name || '')
     .includes(packageName);
 };
