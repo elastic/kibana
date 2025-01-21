@@ -128,14 +128,7 @@ export const PresentationPanelInternal = <
         aria-labelledby={headerId}
         data-test-subj="embeddablePanel"
         {...contentAttrs}
-        css={css`
-          z-index: auto;
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          height: 100%;
-          position: relative;
-        `}
+        css={styles.embPanel}
       >
         {!hideHeader && api && (
           <PresentationPanelHeader
@@ -165,21 +158,7 @@ export const PresentationPanelInternal = <
         {!initialLoadComplete && <PanelLoader />}
         <div
           className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}
-          css={css`
-            &.embPanelContent {
-              display: flex;
-              flex: 1 1 100%;
-              z-index: 1;
-              min-height: 0; // Absolute must for Firefox to scroll contents
-              border-radius: 4px;
-              overflow: hidden;
-            }
-
-            &.embPanel__content--hidden,
-            &[data-error] {
-              display: none;
-            }
-          `}
+          css={styles.embPanelContent}
         >
           <EuiErrorBoundary>
             <Component
@@ -193,4 +172,32 @@ export const PresentationPanelInternal = <
       </EuiPanel>
     </PresentationPanelHoverActions>
   );
+};
+
+/**
+ * if there is no reliance on EUI theme, then it is more performant to store styles as minimizable objects
+ * outside of the React component so that it is not parsed on every render
+ */
+const styles = {
+  embPanel: css({
+    zIndex: 'auto',
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    position: 'relative',
+  }),
+  embPanelContent: css({
+    '&.embPanelContent': {
+      display: 'flex',
+      flex: '1 1 100%',
+      zIndex: 1,
+      minHeight: 0, // Absolute must for Firefox to scroll contents
+      borderRadius: '4px',
+      overflow: 'hidden',
+    },
+    '&.embPanel__content--hidden, &[data-error]': {
+      display: 'none',
+    },
+  }),
 };
