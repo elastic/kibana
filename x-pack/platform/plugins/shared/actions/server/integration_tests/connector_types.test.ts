@@ -12,7 +12,6 @@ import { connectorTypes } from './mocks/connector_types';
 import { actionsConfigMock } from '../actions_config.mock';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ActionTypeConfig, Services } from '../types';
-import { MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
 
 jest.mock('../action_type_registry', () => {
   const actual = jest.requireActual('../action_type_registry');
@@ -67,7 +66,7 @@ describe('Connector type config checks', () => {
       if (getService) {
         let connectorConfig: ActionTypeConfig = {};
 
-        if (connectorTypeId === MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID) {
+        if (connectorTypeId === '.microsoft_defender_endpoint') {
           connectorConfig = {
             clientId: 'foo',
             tenantId: 'foo-foo',
