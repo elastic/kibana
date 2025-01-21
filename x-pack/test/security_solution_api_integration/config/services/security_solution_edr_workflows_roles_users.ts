@@ -53,8 +53,8 @@ export function RolesUsersProvider({ getService }: FtrProviderContext) {
       if (predefinedRole) {
         const roleConfig = rolesMapping[predefinedRole];
         if (extraPrivileges) {
-          roleConfig.kibana[0].feature.siem = [
-            ...roleConfig.kibana[0].feature.siem,
+          roleConfig.kibana[0].feature.siemV2 = [
+            ...roleConfig.kibana[0].feature.siemV2,
             ...extraPrivileges,
           ];
         }
@@ -74,7 +74,7 @@ export function RolesUsersProvider({ getService }: FtrProviderContext) {
               spaces: ['*'],
               base: [],
               feature: {
-                siem: customRole.extraPrivileges,
+                siemV2: customRole.extraPrivileges,
               },
             },
           ],
