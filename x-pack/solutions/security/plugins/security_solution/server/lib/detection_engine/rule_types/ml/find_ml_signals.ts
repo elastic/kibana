@@ -59,6 +59,7 @@ export const findMlSignals = async ({
       request: logSearchRequest(searchQuery),
       description: i18n.ML_SEARCH_ANOMALIES_DESCRIPTION,
       duration: anomalyResults.took,
+      request_type: 'findAnomalies',
     });
   }
   return { anomalyResults, ...(isLoggedRequestsEnabled ? { loggedRequests } : {}) };

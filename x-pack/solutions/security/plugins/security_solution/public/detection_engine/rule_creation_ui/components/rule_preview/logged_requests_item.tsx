@@ -17,9 +17,7 @@ import { PreferenceFormattedDate } from '../../../../common/components/formatted
 import { OptimizedAccordion } from './optimized_accordion';
 import { LoggedRequestsQuery } from './logged_requests_query';
 import { useAccordionStyling } from './use_accordion_styling';
-import { LoggedRequestsPages } from './logged_requests_pages';
-
-const PAGE_VIEW_RULE_TYPES: Type[] = ['query', 'saved_query'];
+import { LoggedRequestsPages, isPageViewSupported } from './logged_requests_pages';
 
 const LoggedRequestsItemComponent: FC<PropsWithChildren<RulePreviewLogs & { ruleType: Type }>> = ({
   startedAt,
@@ -29,8 +27,6 @@ const LoggedRequestsItemComponent: FC<PropsWithChildren<RulePreviewLogs & { rule
 }) => {
   const paddingLarge = useEuiPaddingSize('l');
   const cssStyles = useAccordionStyling();
-  const isPageViewSupported = PAGE_VIEW_RULE_TYPES.includes(ruleType);
-
   return (
     <OptimizedAccordion
       data-test-subj="preview-logged-requests-item-accordion"
@@ -54,7 +50,7 @@ const LoggedRequestsItemComponent: FC<PropsWithChildren<RulePreviewLogs & { rule
         ...cssStyles,
       }}
     >
-      {isPageViewSupported ? (
+      {isPageViewSupported(ruleType) ? (
         <LoggedRequestsPages requests={requests} ruleType={ruleType} />
       ) : (
         requests.map((request, key) => <LoggedRequestsQuery key={key} {...request} />)

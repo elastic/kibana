@@ -117,8 +117,12 @@ export const findThresholdSignals = async ({
         runtimeMappings,
         primaryTimestamp,
         secondaryTimestamp,
-        loggedRequestDescription: isLoggedRequestsEnabled
-          ? i18n.FIND_THRESHOLD_BUCKETS_DESCRIPTION(stringifyAfterKey(sortKeys))
+        loggedRequestsEnabled: isLoggedRequestsEnabled
+          ? {
+              type: 'findThresholdBuckets',
+              description: i18n.FIND_THRESHOLD_BUCKETS_DESCRIPTION(stringifyAfterKey(sortKeys)),
+              skipRequestQuery: loggedRequests.length > 2,
+            }
           : undefined,
       });
 
@@ -164,8 +168,11 @@ export const findThresholdSignals = async ({
       runtimeMappings,
       primaryTimestamp,
       secondaryTimestamp,
-      loggedRequestDescription: isLoggedRequestsEnabled
-        ? i18n.FIND_THRESHOLD_BUCKETS_DESCRIPTION()
+      loggedRequestsEnabled: isLoggedRequestsEnabled
+        ? {
+            type: 'findThresholdBuckets',
+            description: i18n.FIND_THRESHOLD_BUCKETS_DESCRIPTION(),
+          }
         : undefined,
     });
 
