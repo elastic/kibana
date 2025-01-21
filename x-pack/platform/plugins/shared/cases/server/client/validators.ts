@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { OBSERVABLE_TYPES_BUILTIN } from '../../common/constants';
 import { type CasesClient } from './client';
-import { getAvailableObservableTypesSet } from './observable_types';
+import { getAvailableObservableTypesMap } from './observable_types';
 
 /**
  * Throws an error if the request has custom fields with duplicated keys.
@@ -122,7 +122,7 @@ export const validateObservableTypeKeyExists = async (
     observableTypeKey: string;
   }
 ) => {
-  const observableTypesSet = await getAvailableObservableTypesSet(casesClient, caseOwner);
+  const observableTypesSet = await getAvailableObservableTypesMap(casesClient, caseOwner);
   if (!observableTypesSet.has(observableTypeKey)) {
     throw Boom.badRequest(`Invalid observable type, key does not exist: ${observableTypeKey}`);
   }

@@ -319,18 +319,6 @@
                 "path": "src/platform/plugins/shared/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts"
               },
               {
-                "plugin": "controls",
-                "path": "src/platform/plugins/shared/controls/public/plugin.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/platform/plugins/shared/controls/public/plugin.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/platform/plugins/shared/controls/public/plugin.ts"
-              },
-              {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
               },

@@ -20,7 +20,7 @@ import {
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/common';
-import { CancellableTask, RunResult } from '@kbn/task-manager-plugin/server/task';
+import { CancellableTask, RunResult, TaskPriority } from '@kbn/task-manager-plugin/server/task';
 import { AdHocRunStatus, adHocRunStatus } from '../../common/constants';
 import { RuleRunnerErrorStackTraceLog, RuleTaskStateAndMetrics, TaskRunnerContext } from './types';
 import { getExecutorServices } from './get_executor_services';
@@ -35,7 +35,7 @@ import {
   RuleTypeState,
 } from '../types';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
-import { AdHocRun, AdHocRunSchedule, AdHocRunSO } from '../data/ad_hoc_run/types';
+import { AdHocRun, AdHocRunSO, AdHocRunSchedule } from '../data/ad_hoc_run/types';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { AdHocTaskRunningHandler } from './ad_hoc_task_running_handler';
@@ -52,6 +52,8 @@ import {
 import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { getEsErrorMessage } from '../lib/errors';
 import { Result, isOk, asOk, asErr } from '../lib/result_type';
+import { ActionScheduler } from './action_scheduler';
+import { transformAdHocRunToAdHocRunData } from '../application/backfill/transforms/transform_ad_hoc_run_to_backfill_result';
 
 interface ConstructorParams {
   context: TaskRunnerContext;
@@ -173,7 +175,7 @@ export class AdHocTaskRunner implements CancellableTask {
       return ruleRunMetricsStore.getMetrics();
     }
 
-    const { rule } = adHocRunData;
+    const { rule, apiKeyToUse, apiKeyId } = adHocRunData;
     const ruleType = this.ruleTypeRegistry.get(rule.alertTypeId);
 
     const ruleLabel = `${ruleType.id}:${rule.id}: '${rule.name}'`;
@@ -254,6 +256,36 @@ export class AdHocTaskRunner implements CancellableTask {
       throw error;
     }
 
+    const actionScheduler = new ActionScheduler({
+      rule: {
+        ...rule,
+        muteAll: false,
+        mutedInstanceIds: [],
+        createdAt: new Date(rule.createdAt),
+        updatedAt: new Date(rule.updatedAt),
+      },
+      ruleType,
+      logger: this.logger,
+      taskRunnerContext: this.context,
+      taskInstance: this.taskInstance,
+      ruleRunMetricsStore,
+      apiKey: apiKeyToUse,
+      apiKeyId,
+      ruleConsumer: rule.consumer,
+      executionId: this.executionId,
+      ruleLabel,
+      previousStartedAt: null,
+      alertingEventLogger: this.alertingEventLogger,
+      actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
+      alertsClient,
+      priority: TaskPriority.Low,
+    });
+
+    await actionScheduler.run({
+      activeCurrentAlerts: alertsClient.getProcessedAlerts('activeCurrent'),
+      recoveredCurrentAlerts: alertsClient.getProcessedAlerts('recoveredCurrent'),
+    });
+
     return ruleRunMetricsStore.getMetrics();
   }
 
@@ -299,14 +331,12 @@ export class AdHocTaskRunner implements CancellableTask {
             { namespace }
           );
 
-        adHocRunData = {
-          id: adHocRunSO.id,
-          ...adHocRunSO.attributes,
-          rule: {
-            ...adHocRunSO.attributes.rule,
-            id: adHocRunSO.references[0].id,
-          },
-        };
+        adHocRunData = transformAdHocRunToAdHocRunData({
+          adHocRunSO,
+          isSystemAction: (connectorId: string) =>
+            this.context.actionsPlugin.isSystemActionConnector(connectorId),
+          omitGeneratedActionValues: false,
+        });
       } catch (err) {
         const errorSource = SavedObjectsErrorHelpers.isNotFoundError(err)
           ? TaskErrorSource.USER
