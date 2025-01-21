@@ -17,7 +17,10 @@ import { ServiceLink } from './components/service_link';
 import { SpanLink } from './components/span_link';
 import { TransactionLink } from './components/transaction_link';
 
-export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvider => ({
+export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvider<{
+  category: DataSourceCategory;
+  indexPattern?: string;
+}> => ({
   profileId: 'traces-data-source-profile',
   // isExperimental: true,
   profile: {
@@ -96,6 +99,7 @@ export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvid
                           <TransactionLink
                             traceId={traceId as string}
                             transactionName={transactionName as string}
+                            indexPattern={context.indexPattern}
                           />
                         </EuiFlexItem>
                       )}
@@ -133,6 +137,7 @@ export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvid
       isMatch: true,
       context: {
         category: DataSourceCategory.Traces,
+        indexPattern: params.dataView?.getIndexPattern(),
       },
     };
   },
