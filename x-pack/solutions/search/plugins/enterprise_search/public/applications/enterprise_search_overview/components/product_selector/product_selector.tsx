@@ -24,8 +24,8 @@ import { KibanaLogic } from '../../../shared/kibana';
 import { SetSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SearchLabsBanner } from '../../../shared/search_labs_banner/search_labs_banner';
 import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
-
 import headerImage from '../../assets/search_header.png';
+import { useRedirectToOnboardingStart } from '../../hooks/use_redirect_to_onboarding_start';
 
 import { EnterpriseSearchOverviewPageTemplate } from '../layout';
 import { TrialCallout } from '../trial_callout';
@@ -38,6 +38,8 @@ import { WelcomeBanner } from './welcome_banner';
 
 export const ProductSelector: React.FC = () => {
   const { user } = useValues(KibanaLogic);
+
+  useRedirectToOnboardingStart();
 
   // The create index flow does not work without ent-search, when content is updated
   // to no longer rely on ent-search we can always show the Add Content component
