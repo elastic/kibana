@@ -97,7 +97,7 @@ export const similar = async (
     const similarCasesFilter = buildObservablesFieldsFilter(
       retrievedCase.attributes.observables.reduce((observableMap, observable) => {
         // NOTE: skip non-existent observable types
-        if (!availableObservableTypesSet.has(observable.typeKey)) {
+        if (!availableObservableTypesMap.has(observable.typeKey)) {
           return observableMap;
         }
 
@@ -146,7 +146,7 @@ export const similar = async (
       cases: cases.saved_objects.map((so) => ({
         ...flattenCaseSavedObject({ savedObject: so }),
         similarities: {
-          observables: getSimilarities(retrievedCase, so, availableObservableTypesSet),
+          observables: getSimilarities(retrievedCase, so, availableObservableTypesMap),
         },
       })),
       page: cases.page,
