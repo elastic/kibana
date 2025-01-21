@@ -14,13 +14,15 @@ import { PossibleMitigations } from '../../possible_mitigations';
 export function PossibleDegradedFieldMitigations() {
   const { degradedFieldAnalysis } = useQualityIssues();
   const { integrationDetails } = useDatasetQualityDetailsState();
-  const isIntegration = Boolean(integrationDetails?.integration);
+  const areIntegrationAssetsAvailable = Boolean(
+    integrationDetails?.integration?.areAssetsAvailable
+  );
 
   return (
     <PossibleMitigations>
       {degradedFieldAnalysis?.isFieldLimitIssue && (
         <>
-          <FieldMappingLimit areIntegrationAssetsAvailable={isIntegration} />
+          <FieldMappingLimit areIntegrationAssetsAvailable={areIntegrationAssetsAvailable} />
           <EuiSpacer size="m" />
         </>
       )}
