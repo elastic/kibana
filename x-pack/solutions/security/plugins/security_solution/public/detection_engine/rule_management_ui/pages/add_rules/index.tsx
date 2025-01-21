@@ -25,6 +25,7 @@ import { APP_UI_ID } from '../../../../../common';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../detections/components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../../../detections/components/callouts/missing_privileges_callout';
 import { getDetectionEngineUrl } from '../../../../common/components/link_to';
+import { RulePreviewContextProvider } from '../../components/rules_table/upgrade_prebuilt_rules_table/rule_preview_context';
 
 const AddRulesPageComponent: React.FC = () => {
   const { navigateToApp } = useKibana().services.application;
@@ -52,14 +53,16 @@ const AddRulesPageComponent: React.FC = () => {
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
 
-      <AddPrebuiltRulesTableContextProvider>
-        <SecuritySolutionPageWrapper>
-          <HeaderPage title={i18n.PAGE_TITLE}>
-            <AddPrebuiltRulesHeaderButtons />
-          </HeaderPage>
-          <AddPrebuiltRulesTable />
-        </SecuritySolutionPageWrapper>
-      </AddPrebuiltRulesTableContextProvider>
+      <RulePreviewContextProvider>
+        <AddPrebuiltRulesTableContextProvider>
+          <SecuritySolutionPageWrapper>
+            <HeaderPage title={i18n.PAGE_TITLE}>
+              <AddPrebuiltRulesHeaderButtons />
+            </HeaderPage>
+            <AddPrebuiltRulesTable />
+          </SecuritySolutionPageWrapper>
+        </AddPrebuiltRulesTableContextProvider>
+      </RulePreviewContextProvider>
 
       <SpyRoute pageName={SecurityPageName.rulesAdd} />
     </>
