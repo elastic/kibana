@@ -55,12 +55,14 @@ import {
   CasesSimilarResponse,
   UserActionFindRequest,
   UserActionInternalFindResponse,
+  AttachmentsFindResponse,
 } from '@kbn/cases-plugin/common/types/api';
 import {
   getCaseCreateObservableUrl,
   getCaseUpdateObservableUrl,
   getCaseDeleteObservableUrl,
   getCaseFindUserActionsUrl,
+  getCaseFindAttachmentsUrl,
 } from '@kbn/cases-plugin/common/api';
 import { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
@@ -473,19 +475,15 @@ export const getAllCasesStatuses = async ({
 export const getCase = async ({
   supertest,
   caseId,
-  includeComments,
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
   supertest: SuperTest.Agent;
   caseId: string;
-  includeComments?: boolean;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
 }): Promise<Case> => {
-  const basePath = `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}`;
-  const path =
-    includeComments != null ? `${basePath}?includeComments=${includeComments}` : basePath;
+  const path = `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}`;
 
   const { body: theCase } = await supertest
     .get(path)
@@ -522,22 +520,16 @@ export const getCaseMetrics = async ({
 export const resolveCase = async ({
   supertest,
   caseId,
-  includeComments = false,
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
   supertest: SuperTest.Agent;
   caseId: string;
-  includeComments?: boolean;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
 }): Promise<CaseResolveResponse> => {
   const { body: theResolvedCase } = await supertest
-    .get(
-      `${getSpaceUrlPrefix(
-        auth?.space
-      )}${CASES_URL}/${caseId}/resolve?includeComments=${includeComments}`
-    )
+    .get(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/resolve`)
     .set('kbn-xsrf', 'true')
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
@@ -999,4 +991,22 @@ export const findInternalCaseUserActions = async ({
     .expect(expectedHttpCode);
 
   return userActions;
+};
+
+export const findComments = async ({
+  supertest,
+  caseId,
+  auth,
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  auth: { user: User; space: string };
+}): Promise<AttachmentsFindResponse> => {
+  const { body } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${getCaseFindAttachmentsUrl(caseId)}`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .expect(200);
+
+  return body;
 };

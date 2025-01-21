@@ -27,10 +27,9 @@ describe('getCaseRoute', () => {
     await expect(
       // @ts-expect-error: no need to create the context
       router.handler({ response, request, logger, kibanaVersion, context })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "Failed to retrieve case in route case id: foo 
-      include comments: true: Error: includeComments is not supported"
-    `);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to retrieve case in route case id: foo: Error: includeComments is not supported"`
+    );
   });
 
   it('does not throw a bad request if the includeComments is set in non-serverless', async () => {

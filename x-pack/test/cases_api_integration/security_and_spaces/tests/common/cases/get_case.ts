@@ -7,27 +7,14 @@
 
 import expect from '@kbn/expect';
 
-import { getCaseDetailsUrl } from '@kbn/cases-plugin/common/api';
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
-import { UserCommentAttachmentAttributes } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import {
-  defaultUser,
-  postCaseReq,
-  postCaseResp,
-  postCommentUserReq,
-  getPostCaseRequest,
-  postCommentAlertReq,
-} from '../../../../common/lib/mock';
+import { postCaseResp, getPostCaseRequest } from '../../../../common/lib/mock';
 import {
   deleteCasesByESQuery,
   createCase,
   getCase,
-  createComment,
   removeServerGeneratedPropertiesFromCase,
-  removeServerGeneratedPropertiesFromSavedObject,
-  extractWarningValueFromWarningHeader,
-  bulkCreateAttachments,
 } from '../../../../common/lib/api';
 import {
   secOnly,
@@ -40,8 +27,6 @@ import {
   noKibanaPrivileges,
   obsSec,
 } from '../../../../common/lib/authentication/users';
-import { getUserInfo } from '../../../../common/lib/authentication';
-import { assertWarningHeader } from '../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -54,62 +39,12 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteCasesByESQuery(es);
     });
 
-    it('should return a case with no comments', async () => {
+    it('should return a case', async () => {
       const postedCase = await createCase(supertest, getPostCaseRequest());
-      const theCase = await getCase({ supertest, caseId: postedCase.id, includeComments: true });
+      const theCase = await getCase({ supertest, caseId: postedCase.id });
 
       const data = removeServerGeneratedPropertiesFromCase(theCase);
       expect(data).to.eql(postCaseResp());
-      expect(data.comments?.length).to.eql(0);
-    });
-
-    it('should return a case with comments', async () => {
-      const postedCase = await createCase(supertest, postCaseReq);
-      await createComment({ supertest, caseId: postedCase.id, params: postCommentUserReq });
-      const theCase = await getCase({ supertest, caseId: postedCase.id, includeComments: true });
-
-      const comment = removeServerGeneratedPropertiesFromSavedObject(
-        theCase.comments![0] as UserCommentAttachmentAttributes
-      );
-
-      expect(theCase.comments?.length).to.eql(1);
-      expect(comment).to.eql({
-        type: postCommentUserReq.type,
-        comment: postCommentUserReq.comment,
-        created_by: defaultUser,
-        pushed_at: null,
-        pushed_by: null,
-        updated_by: null,
-        owner: 'securitySolutionFixture',
-      });
-    });
-
-    it('should set totalComment to 0 when all attachments are alerts', async () => {
-      const postedCase = await createCase(supertest, postCaseReq);
-
-      await bulkCreateAttachments({
-        supertest,
-        caseId: postedCase.id,
-        params: [postCommentAlertReq, postCommentAlertReq],
-      });
-
-      const theCase = await getCase({ supertest, caseId: postedCase.id, includeComments: true });
-
-      expect(theCase.totalComment).to.be(0);
-    });
-
-    it('should set totalComment to 1 when there is one user attachment and one alert', async () => {
-      const postedCase = await createCase(supertest, postCaseReq);
-
-      await bulkCreateAttachments({
-        supertest,
-        caseId: postedCase.id,
-        params: [postCommentAlertReq, postCommentUserReq],
-      });
-
-      const theCase = await getCase({ supertest, caseId: postedCase.id, includeComments: true });
-
-      expect(theCase.totalComment).to.be(1);
     });
 
     it('unhappy path - 404s when case is not there', async () => {
@@ -137,51 +72,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(theCase.owner).to.eql('securitySolutionFixture');
         }
-      });
-
-      it('should get a case with comments', async () => {
-        const postedCase = await createCase(
-          supertestWithoutAuth,
-          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
-          200,
-          {
-            user: secOnly,
-            space: 'space1',
-          }
-        );
-
-        await createComment({
-          supertest: supertestWithoutAuth,
-          caseId: postedCase.id,
-          params: postCommentUserReq,
-          expectedHttpCode: 200,
-          auth: {
-            user: secOnly,
-            space: 'space1',
-          },
-        });
-
-        const theCase = await getCase({
-          supertest: supertestWithoutAuth,
-          caseId: postedCase.id,
-          includeComments: true,
-          auth: { user: secOnly, space: 'space1' },
-        });
-
-        const comment = removeServerGeneratedPropertiesFromSavedObject(
-          theCase.comments![0] as UserCommentAttachmentAttributes
-        );
-
-        expect(theCase.comments?.length).to.eql(1);
-        expect(comment).to.eql({
-          type: postCommentUserReq.type,
-          comment: postCommentUserReq.comment,
-          created_by: getUserInfo(secOnly),
-          pushed_at: null,
-          pushed_by: null,
-          updated_by: null,
-          owner: 'securitySolutionFixture',
-        });
       });
 
       it('should not get a case when the user does not have access to owner', async () => {
@@ -222,30 +112,6 @@ export default ({ getService }: FtrProviderContext): void => {
           expectedHttpCode: 403,
           auth: { user: secOnly, space: 'space2' },
         });
-      });
-    });
-
-    describe('deprecations', () => {
-      for (const paramValue of [true, false]) {
-        it(`should return a warning header if includeComments=${paramValue}`, async () => {
-          const theCase = await createCase(supertest, postCaseReq);
-          const res = await supertest
-            .get(`${getCaseDetailsUrl(theCase.id)}?includeComments=${paramValue}`)
-            .expect(200);
-          const warningHeader = res.header.warning;
-
-          assertWarningHeader(warningHeader);
-
-          const warningValue = extractWarningValueFromWarningHeader(warningHeader);
-          expect(warningValue).to.be('Deprecated query parameter includeComments');
-        });
-      }
-
-      it('should not return a warning header if includeComments is not provided', async () => {
-        const theCase = await createCase(supertest, postCaseReq);
-        const res = await supertest.get(getCaseDetailsUrl(theCase.id)).expect(200);
-        const warningHeader = res.header.warning;
-        expect(warningHeader).to.be(undefined);
       });
     });
   });
