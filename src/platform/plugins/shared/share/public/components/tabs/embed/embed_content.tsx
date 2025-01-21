@@ -50,11 +50,6 @@ interface UrlParams {
   };
 }
 
-export enum ExportUrlAsType {
-  EXPORT_URL_AS_SAVED_OBJECT = 'savedObject',
-  EXPORT_URL_AS_SNAPSHOT = 'snapshot',
-}
-
 export const EmbedContent = ({
   embedUrlParamExtensions: urlParamExtensions,
   shareableUrlForSavedObject,
@@ -71,7 +66,6 @@ export const EmbedContent = ({
   const [isLoading, setIsLoading] = useState(false);
   const [snapshotUrl, setSnapshotUrl] = useState<string>('');
   const [isTextCopied, setTextCopied] = useState(false);
-  const exportUrlAs = useRef<ExportUrlAsType>(ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT);
   const urlToCopy = useRef<string | undefined>(undefined);
   const [anonymousAccessParameters, setAnonymousAccessParameters] =
     useState<AnonymousAccessState['accessURLParameters']>(null);
@@ -207,11 +201,7 @@ export const EmbedContent = ({
 
   const getEmbedLink = useCallback(async () => {
     const embedUrl = addUrlAnonymousAccessParameters(
-      exportUrlAs.current === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT
-        ? getSavedObjectUrl()
-        : allowShortUrl
-        ? await createShortUrl()
-        : snapshotUrl
+      !isDirty ? getSavedObjectUrl() : allowShortUrl ? await createShortUrl() : snapshotUrl
     );
 
     return `<iframe src="${embedUrl}" height="600" width="800"></iframe>`;
@@ -220,20 +210,9 @@ export const EmbedContent = ({
     allowShortUrl,
     createShortUrl,
     getSavedObjectUrl,
+    isDirty,
     snapshotUrl,
   ]);
-
-  // useEffect(() => {
-  //   const resetUrl = () => {
-  //     setUrlHelper();
-  //   };
-
-  //   window.addEventListener('hashchange', resetUrl);
-
-  //   return () => {
-  //     window.removeEventListener('hashchange', resetUrl);
-  //   };
-  // }, [getUrlParamExtensions, setUrlHelper, url]);
 
   const copyUrlHelper = useCallback(async () => {
     setIsLoading(true);
