@@ -134,16 +134,10 @@ export type ServerRouteHandlerReturnType =
   | ServerRouteHandlerReturnTypeWithoutRecord
   | Record<string, any>;
 
-interface TRouteResponseStatusCodes {
+export type TRouteResponse = {
   [statusCode: number]: {
     body: z.ZodSchema<ServerRouteHandlerReturnType>;
   } & Omit<VersionedRouteResponseValidation[number], 'body'>;
-}
-
-export type TRouteResponse = TRouteResponseStatusCodes & {
-  [StatusCode in keyof TRouteResponseStatusCodes]: {
-    body: z.infer<TRouteResponseStatusCodes[StatusCode]['body']>;
-  };
 } & Omit<VersionedRouteResponseValidation, number>;
 
 export type ExtractResponseStatusBodyTypes<T extends TRouteResponse> = z.infer<
