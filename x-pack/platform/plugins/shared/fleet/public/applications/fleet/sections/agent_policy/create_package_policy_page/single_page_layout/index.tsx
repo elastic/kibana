@@ -411,10 +411,10 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                 // agentless doesn't need system integration
                 setWithSysMonitoring(value === SetupTechnology.AGENT_BASED);
 
-                // reset selected output if swtiching to agentless
+                // reset selected output if switching to agentless
                 // this is a quick fix to avoid retrieving outputs and comparing against
                 // allowed outputs
-                if (setupTechnology === SetupTechnology.AGENTLESS) {
+                if (value === SetupTechnology.AGENTLESS) {
                   updatePackagePolicy({
                     output_id: null,
                   });
