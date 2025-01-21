@@ -7,12 +7,12 @@
 
 import { expect } from '@kbn/scout';
 import { spaceTest, testData } from '../fixtures';
-import type { ExtendedScoutTestFixtures } from '../fixtures';
+import type { ParallelRunTestFixtures } from '../fixtures';
 
 const assertNoFilterAndEmptyQuery = async (
   filterBadge: { field: string; value: string },
-  pageObjects: ExtendedScoutTestFixtures['pageObjects'],
-  page: ExtendedScoutTestFixtures['page']
+  pageObjects: ParallelRunTestFixtures['pageObjects'],
+  page: ParallelRunTestFixtures['page']
 ) => {
   expect(
     // checking if filter exists, enabled or disabled
@@ -25,7 +25,7 @@ const assertNoFilterAndEmptyQuery = async (
   ).toHaveText('');
 };
 
-const assertDataViewIsSelected = async (page: ExtendedScoutTestFixtures['page'], name: string) =>
+const assertDataViewIsSelected = async (page: ParallelRunTestFixtures['page'], name: string) =>
   await expect(
     page.testSubj.locator('*dataView-switch-link'),
     'Incorrect data view is selected'
@@ -47,16 +47,16 @@ spaceTest.describe(
       value: `Men's Shoes`,
     };
 
-    spaceTest.beforeAll(async ({ kbnSpace }) => {
-      await kbnSpace.savedObjects.load(testData.KBN_ARCHIVES.DISCOVER);
-      await kbnSpace.savedObjects.load(testData.KBN_ARCHIVES.ECOMMERCE);
-      await kbnSpace.uiSettings.setDefaultIndex('ecommerce');
-      await kbnSpace.uiSettings.setDefaultTime({ from: START_TIME, to: END_TIME });
+    spaceTest.beforeAll(async ({ scoutSpace }) => {
+      await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.DISCOVER);
+      await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.ECOMMERCE);
+      await scoutSpace.uiSettings.setDefaultIndex('ecommerce');
+      await scoutSpace.uiSettings.setDefaultTime({ from: START_TIME, to: END_TIME });
     });
 
-    spaceTest.afterAll(async ({ kbnSpace }) => {
-      await kbnSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
-      await kbnSpace.savedObjects.cleanStandardList();
+    spaceTest.afterAll(async ({ scoutSpace }) => {
+      await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
+      await scoutSpace.savedObjects.cleanStandardList();
     });
 
     spaceTest.beforeEach(async ({ browserAuth }) => {

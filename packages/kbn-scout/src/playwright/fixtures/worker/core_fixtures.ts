@@ -10,6 +10,9 @@
 import { test as base } from '@playwright/test';
 
 import type { ToolingLog } from '@kbn/tooling-log';
+
+import { KbnClient, SamlSessionManager } from '@kbn/test';
+import { Client } from '@elastic/elasticsearch';
 import {
   createKbnUrl,
   createEsClient,
@@ -18,16 +21,16 @@ import {
   createSamlSessionManager,
   createScoutConfig,
   KibanaUrl,
-} from '../../../../common/services';
-import { ScoutTestOptions } from '../../../types';
-import { Client, KbnClient, SamlSessionManager, ScoutTestConfig } from '../../../../types';
+} from '../../../common/services';
+import { ScoutTestOptions } from '../../types';
+import { ScoutTestConfig } from '.';
 
 // re-export to import types from '@kbn-scout'
 export type { KbnClient, SamlSessionManager } from '@kbn/test';
 export type { ToolingLog } from '@kbn/tooling-log';
 export type { Client as EsClient } from '@elastic/elasticsearch';
-export type { KibanaUrl } from '../../../../common/services/kibana_url';
-export type { ScoutTestConfig } from '../../../../types';
+export type { KibanaUrl } from '../../../common/services/kibana_url';
+export type { ScoutTestConfig } from '../../../types';
 
 /**
  * The coreWorkerFixtures setup defines foundational fixtures that are essential

@@ -7,45 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { test as base } from '@playwright/test';
 import { UiSettingValues } from '@kbn/test/src/kbn_client/kbn_client_ui_settings';
 import { formatTime, isValidUTCDate } from '../../../utils';
-import { KbnClient, ToolingLog } from '../../common';
+import { coreWorkerFixtures } from '..';
+import { ImportSavedObjects, ScoutSpaceParallelFixture } from '.';
 
-export interface ImportSavedObjects {
-  type: string;
-  destinationId: string;
-  meta: { title: string };
-}
-export interface ImportExportResponse {
-  successResults: ImportSavedObjects[];
-}
-export interface SavedObjectResponse {
-  id: string;
-  type: string;
-  title: string;
-}
-
-export interface KbnSpaceFixture {
-  id: string;
-  savedObjects: {
-    load: (path: string) => Promise<SavedObjectResponse[]>;
-    cleanStandardList: () => Promise<void>;
-  };
-  uiSettings: {
-    setDefaultIndex: (dataViewId: string) => Promise<void>;
-    set: (values: UiSettingValues) => Promise<void>;
-    unset: (...keys: string[]) => Promise<any[]>;
-    setDefaultTime: ({ from, to }: { from: string; to: string }) => Promise<void>;
-  };
-}
-
-export const kbnSpaceFixture = base.extend<
+export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
   {},
-  { log: ToolingLog; kbnClient: KbnClient; kbnSpace: KbnSpaceFixture }
+  { scoutSpace: ScoutSpaceParallelFixture }
 >({
-  kbnSpace: [
-    async ({ log, kbnClient }: { log: ToolingLog; kbnClient: KbnClient }, use, workerInfo) => {
+  scoutSpace: [
+    async ({ log, kbnClient }, use, workerInfo) => {
       const id = `test-space-${workerInfo.workerIndex}`;
       const spacePayload = {
         id,

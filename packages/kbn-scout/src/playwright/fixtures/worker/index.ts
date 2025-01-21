@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { coreWorkerFixtures } from './core';
-export { esArchiverFixture } from './es_archiver';
-export type { EsArchiverFixture } from './es_archiver';
+export { coreWorkerFixtures } from './core_fixtures';
 export type {
   ToolingLog,
   ScoutTestConfig,
@@ -17,4 +15,13 @@ export type {
   EsClient,
   KbnClient,
   SamlSessionManager,
-} from './core';
+} from './core_fixtures';
+
+export { esArchiverFixture } from './es_archiver';
+export type { EsArchiverFixture } from './es_archiver';
+
+export { uiSettingsFixture } from './ui_settings';
+export type { UiSettingsFixture } from './ui_settings';
+
+export { scoutSpaceParallelFixture } from './scout_space';
+export type { ScoutSpaceParallelFixture } from './scout_space';

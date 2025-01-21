@@ -7,27 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mergeTests } from 'playwright/test';
-import * as common from './common';
-import * as spaceAware from './parallel_workers';
-import * as singleThread from './single_worker/worker_scope';
-
-export const scoutCoreFixtures = mergeTests(
-  common.coreWorkerFixtures,
-  common.validateTagsFixture,
-  common.scoutPageFixture,
-  common.pageObjectsFixture,
-  common.esArchiverFixture,
-  common.browserAuthFixture,
-  singleThread.uiSettingsFixture
-);
-export const scoutCoreSpaceAwareFixtures = mergeTests(
-  common.coreWorkerFixtures,
-  common.validateTagsFixture,
-  spaceAware.scoutPageSpaceFixture,
-  common.pageObjectsFixture,
-  spaceAware.browserAuthFixture,
-  spaceAware.kbnSpaceFixture
-);
-
-export * from './types';
+export * from './single_thread_fixtures';
+export * from './parallel_workers_fixtures';

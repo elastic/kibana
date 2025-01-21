@@ -17,15 +17,14 @@ export {
   createLazyPageObject,
 } from './src/playwright';
 export type {
-  ScoutPage,
   ScoutPlaywrightOptions,
   ScoutTestOptions,
+  ScoutPage,
   PageObjects,
-  ScoutTestFixtures,
-  ScoutWorkerFixtures,
-  EsArchiverFixture,
-  ParallelRunTestFixtures,
-  ParallelRunWorkerFixtures,
+  ScoutSingleThreadTestFixtures,
+  ScoutSingleThreadWorkerFixtures,
+  ScoutParallelTestFixtures,
+  ScoutParallelWorkerFixtures,
 } from './src/playwright';
 
 export type { Client, KbnClient, KibanaUrl, SamlSessionManager, ToolingLog } from './src/types';

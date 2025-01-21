@@ -14,14 +14,14 @@ spaceTest.describe(
   // TODO: Update to use an ES archive with an index accessible to 'viewer'
   // for running this test against the Security serverless project.
   () => {
-    spaceTest.beforeAll(async ({ kbnSpace }) => {
-      await kbnSpace.savedObjects.load(testData.KBN_ARCHIVES.NO_TIME_FIELD);
-      await kbnSpace.uiSettings.setDefaultIndex('without-timefield');
+    spaceTest.beforeAll(async ({ scoutSpace }) => {
+      await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.NO_TIME_FIELD);
+      await scoutSpace.uiSettings.setDefaultIndex('without-timefield');
     });
 
-    spaceTest.afterAll(async ({ kbnSpace }) => {
-      await kbnSpace.uiSettings.unset('defaultIndex');
-      await kbnSpace.savedObjects.cleanStandardList();
+    spaceTest.afterAll(async ({ scoutSpace }) => {
+      await scoutSpace.uiSettings.unset('defaultIndex');
+      await scoutSpace.savedObjects.cleanStandardList();
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {

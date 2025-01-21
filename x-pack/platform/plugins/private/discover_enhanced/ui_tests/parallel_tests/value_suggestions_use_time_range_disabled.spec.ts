@@ -12,20 +12,20 @@ spaceTest.describe(
   'Discover app - value suggestions: useTimeRange disabled',
   { tag: tags.DEPLOYMENT_AGNOSTIC },
   () => {
-    spaceTest.beforeAll(async ({ kbnSpace }) => {
-      await kbnSpace.savedObjects.load(testData.KBN_ARCHIVES.DASHBOARD_DRILLDOWNS);
-      await kbnSpace.uiSettings.setDefaultIndex('logstash-*');
-      await kbnSpace.uiSettings.setDefaultTime({
+    spaceTest.beforeAll(async ({ scoutSpace }) => {
+      await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.DASHBOARD_DRILLDOWNS);
+      await scoutSpace.uiSettings.setDefaultIndex('logstash-*');
+      await scoutSpace.uiSettings.setDefaultTime({
         from: testData.LOGSTASH_DEFAULT_START_TIME,
         to: testData.LOGSTASH_DEFAULT_END_TIME,
       });
-      await kbnSpace.uiSettings.set({ 'autocomplete:useTimeRange': false });
+      await scoutSpace.uiSettings.set({ 'autocomplete:useTimeRange': false });
     });
 
-    spaceTest.afterAll(async ({ kbnSpace }) => {
-      await kbnSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
-      await kbnSpace.uiSettings.set({ 'autocomplete:useTimeRange': true });
-      await kbnSpace.savedObjects.cleanStandardList();
+    spaceTest.afterAll(async ({ scoutSpace }) => {
+      await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
+      await scoutSpace.uiSettings.set({ 'autocomplete:useTimeRange': true });
+      await scoutSpace.savedObjects.cleanStandardList();
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {

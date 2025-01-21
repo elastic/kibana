@@ -8,25 +8,28 @@
  */
 
 import { Page, test as base } from '@playwright/test';
-import { ScoutPage, extendPlaywrightPage } from '../../common/test_scope/page';
-import { KibanaUrl } from '../../common';
-import { KbnSpaceFixture } from '../worker_scope';
+import { ScoutPage } from '.';
+import { KibanaUrl } from '../../worker';
+import { ScoutSpaceParallelFixture } from '../../worker/scout_space';
+import { extendPlaywrightPage } from './single_thread';
 
-export type ScoutPageSpaceFixture = ScoutPage;
-
-export const scoutPageSpaceFixture = base.extend<
+export const scoutPageParallelFixture = base.extend<
   {},
-  { kbnUrl: KibanaUrl; kbnSpace: KbnSpaceFixture }
+  { kbnUrl: KibanaUrl; scoutSpace: ScoutSpaceParallelFixture }
 >({
   page: async (
-    { page, kbnUrl, kbnSpace }: { page: Page; kbnUrl: KibanaUrl; kbnSpace: KbnSpaceFixture },
-    use: (spaceAwarePage: ScoutPage) => Promise<void>
+    {
+      page,
+      kbnUrl,
+      scoutSpace,
+    }: { page: Page; kbnUrl: KibanaUrl; scoutSpace: ScoutSpaceParallelFixture },
+    use: (extendedPage: ScoutPage) => Promise<void>
   ) => {
     const extendedPage = extendPlaywrightPage({ page, kbnUrl });
 
     // Overriding navigation to specific Kibana apps to take into account the worker space
     extendedPage.gotoApp = (appName: string) =>
-      page.goto(kbnUrl.app(appName, { space: kbnSpace.id }));
+      page.goto(kbnUrl.app(appName, { space: scoutSpace.id }));
     // Method to wait for global loading indicator to be hidden
     await use(extendedPage);
   },

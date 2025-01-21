@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { test as base } from '@playwright/test';
 import { PageObjects, createCorePageObjects } from '../../../page_objects';
-import { ScoutPage } from './page';
+import { scoutPageFixture } from '../scout_page';
 
 /**
  * The "pageObjects" fixture provides a centralized and consistent way to access and
@@ -19,7 +18,9 @@ import { ScoutPage } from './page';
  *
  * Note: Page Objects are lazily instantiated on first access.
  */
-export const pageObjectsFixture = base.extend<{ page: ScoutPage; pageObjects: PageObjects }>({
+export const pageObjectsFixture = scoutPageFixture.extend<{
+  pageObjects: PageObjects;
+}>({
   pageObjects: async ({ page }, use) => {
     const corePageObjects = createCorePageObjects(page);
 

@@ -9,17 +9,17 @@ import { expect, tags } from '@kbn/scout';
 import { spaceTest, testData } from '../fixtures';
 
 spaceTest.describe('Discover app - errors', { tag: tags.ESS_ONLY }, () => {
-  spaceTest.beforeAll(async ({ kbnSpace }) => {
-    await kbnSpace.savedObjects.cleanStandardList();
-    await kbnSpace.savedObjects.load(testData.KBN_ARCHIVES.INVALID_SCRIPTED_FIELD);
-    await kbnSpace.uiSettings.setDefaultTime({
+  spaceTest.beforeAll(async ({ scoutSpace }) => {
+    await scoutSpace.savedObjects.cleanStandardList();
+    await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.INVALID_SCRIPTED_FIELD);
+    await scoutSpace.uiSettings.setDefaultTime({
       from: testData.LOGSTASH_DEFAULT_START_TIME,
       to: testData.LOGSTASH_DEFAULT_END_TIME,
     });
   });
 
-  spaceTest.afterAll(async ({ kbnSpace }) => {
-    await kbnSpace.savedObjects.cleanStandardList();
+  spaceTest.afterAll(async ({ scoutSpace }) => {
+    await scoutSpace.savedObjects.cleanStandardList();
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {

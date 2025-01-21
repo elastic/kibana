@@ -7,13 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { test as base } from '@playwright/test';
-import type { Client } from '@elastic/elasticsearch';
-
 import { LoadActionPerfOptions } from '@kbn/es-archiver';
 import { IndexStats } from '@kbn/es-archiver/src/lib/stats';
-import { createEsArchiver } from '../../../../common/services';
-import { KbnClient, ToolingLog } from './core';
+import { coreWorkerFixtures } from './core_fixtures';
+import { createEsArchiver } from '../../../common/services';
 
 export interface EsArchiverFixture {
   /**
@@ -29,10 +26,7 @@ export interface EsArchiverFixture {
   ) => Promise<Record<string, IndexStats>>;
 }
 
-export const esArchiverFixture = base.extend<
-  {},
-  { log: ToolingLog; esClient: Client; kbnClient: KbnClient; esArchiver: EsArchiverFixture }
->({
+export const esArchiverFixture = coreWorkerFixtures.extend<{}, { esArchiver: EsArchiverFixture }>({
   /**
    * Provides utilities for managing test data in Elasticsearch. The "loadIfNeeded" method
    * optimizes test execution by loading data archives only if required, avoiding redundant

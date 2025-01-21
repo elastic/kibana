@@ -7,12 +7,12 @@
 
 import { expect } from '@kbn/scout';
 import { test, testData } from '../fixtures';
-import type { ExtendedScoutTestFixtures } from '../fixtures';
+import type { SingleThreadTestFixtures } from '../fixtures';
 
 const assertNoFilterAndEmptyQuery = async (
   filterBadge: { field: string; value: string },
-  pageObjects: ExtendedScoutTestFixtures['pageObjects'],
-  page: ExtendedScoutTestFixtures['page']
+  pageObjects: SingleThreadTestFixtures['pageObjects'],
+  page: SingleThreadTestFixtures['page']
 ) => {
   expect(
     // checking if filter exists, enabled or disabled
@@ -25,7 +25,7 @@ const assertNoFilterAndEmptyQuery = async (
   ).toHaveText('');
 };
 
-const assertDataViewIsSelected = async (page: ExtendedScoutTestFixtures['page'], name: string) =>
+const assertDataViewIsSelected = async (page: SingleThreadTestFixtures['page'], name: string) =>
   await expect(
     page.testSubj.locator('*dataView-switch-link'),
     'Incorrect data view is selected'

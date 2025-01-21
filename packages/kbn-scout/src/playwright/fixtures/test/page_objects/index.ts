@@ -7,5 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { kbnSpaceFixture } from './kbn_space';
-export type { KbnSpaceFixture } from './kbn_space';
+export type LoginFunction = (role: string) => Promise<void>;
+
+export type { PageObjects } from '../../../page_objects';
+
+export { pageObjectsParallelFixture } from './parallel';
+export { pageObjectsFixture } from './single_thread';
