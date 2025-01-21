@@ -1579,7 +1579,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /.eslintignore @elastic/kibana-operations
 
 # QA - Appex QA
-/x-pack/plugins/maps/ui_tests @elastic/appex-qa # temporarily
+/x-pack/platform/plugins/shared/maps/ui_tests @elastic/appex-qa # temporarily
 /x-pack/platform/plugins/private/discover_enhanced/ui_tests/ @elastic/appex-qa # temporarily
 /x-pack/test/functional/fixtures/package_registry_config.yml @elastic/appex-qa # No usages found
 /x-pack/test/functional/fixtures/kbn_archiver/packaging.json @elastic/appex-qa # No usages found
