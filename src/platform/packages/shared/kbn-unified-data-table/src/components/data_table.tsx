@@ -750,8 +750,10 @@ export const UnifiedDataTable = ({
   );
 
   const { dataGridId, dataGridWrapper, setDataGridWrapper } = useFullScreenWatcher();
-  const [inTableSearchTerm, setInTableSearchTerm] = useState<string>('');
-  const [inTableSearchTermCss, setInTableSearchTermCss] = useState<SerializedStyles>();
+  const [{ inTableSearchTerm, inTableSearchTermCss }, setInTableSearchState] = useState<{
+    inTableSearchTerm: string;
+    inTableSearchTermCss?: SerializedStyles;
+  }>(() => ({ inTableSearchTerm: '' }));
 
   const inTableSearchControl = useMemo(() => {
     if (!enableInTableSearch) {
@@ -770,8 +772,10 @@ export const UnifiedDataTable = ({
         shouldOverrideCmdF={(element) => {
           return dataGridWrapper?.contains?.(element) ?? false;
         }}
-        onChange={(searchTerm) => setInTableSearchTerm(searchTerm || '')}
-        onChangeCss={(styles) => setInTableSearchTermCss(styles)}
+        onChange={(searchTerm) => setInTableSearchState({ inTableSearchTerm: searchTerm || '' })}
+        onChangeCss={(styles) =>
+          setInTableSearchState((prevState) => ({ ...prevState, inTableSearchTermCss: styles }))
+        }
         onChangeToExpectedPage={(expectedPageIndex) => {
           if (isPaginationEnabled && currentPageIndexRef.current !== expectedPageIndex) {
             changeCurrentPageIndex(expectedPageIndex);
@@ -781,8 +785,7 @@ export const UnifiedDataTable = ({
     );
   }, [
     enableInTableSearch,
-    setInTableSearchTerm,
-    setInTableSearchTermCss,
+    setInTableSearchState,
     displayedRows,
     renderCellValue,
     visibleColumns,
