@@ -14,21 +14,21 @@ import {
 import {
   disableStreams,
   enableStreams,
-  fetchDocument,
-  /* fetchDocument,*/ indexDocument,
+  indexDocument,
+  putStream,
+  assertStreamInList,
+  assertDocInIndex,
 } from './helpers/requests';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const esClient = getService('es');
-  // const config = getService('config');
-  // const isServerless = !!config.get('serverless');
 
   const TEST_STREAM_NAME = 'logs-test.nested-default';
 
   let apiClient: StreamsSupertestRepositoryClient;
 
-  describe.only('Forking classic streams', () => {
+  describe('Forking classic streams', () => {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
@@ -62,15 +62,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(resp.status).to.eql(200);
 
-      const {
-        body: { streams },
-      } = await apiClient.fetch('GET /api/streams');
-
-      const classicStream = streams.find(
-        (stream) => stream.name === 'logs-test.nested.myfork-default'
-      );
-
-      expect(classicStream).to.eql({
+      await assertStreamInList(apiClient, 'logs-test.nested.myfork-default', {
         name: 'logs-test.nested.myfork-default',
         stream: {
           ingest: {
@@ -90,27 +82,234 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         '@timestamp': '2024-01-01T00:00:10.000Z',
         abc: 'test',
       };
-      const response = await indexDocument(esClient, 'logs-test.nested-default', doc);
-      expect(response.result).to.eql('created');
+      await assertDocInIndex(
+        esClient,
+        'logs-test.nested-default',
+        'logs-test.nested.myfork-default',
+        doc
+      );
+    });
 
-      const result = await fetchDocument(esClient, 'logs-test.nested.myfork-default', response._id);
-      expect(result._source).to.eql({
-        '@timestamp': '2024-01-01T00:00:10.000Z',
+    it('Allows forking a wired stream from an unwired root', async () => {
+      const resp = await apiClient.fetch('POST /api/streams/{id}/_fork', {
+        params: {
+          path: {
+            id: 'logs-test.nested.myfork-default',
+          },
+          body: {
+            stream: { name: 'logs-test.nested.myfork.doublefork-default' },
+            condition: {
+              field: 'xyz',
+              operator: 'exists',
+            },
+          },
+        },
+      });
+
+      expect(resp.status).to.eql(200);
+    });
+
+    it('Allows sending data to the forked sub stream', async () => {
+      const doc = {
         message: 'hello world',
+        '@timestamp': '2024-01-01T00:00:10.000Z',
         abc: 'test',
+        xyz: 'test',
+      };
+      await assertDocInIndex(
+        esClient,
+        'logs-test.nested-default',
+        'logs-test.nested.myfork.doublefork-default',
+        doc
+      );
+    });
+
+    it('Allows adding processing and fields to wired child', async () => {
+      await putStream(apiClient, 'logs-test.nested.myfork.doublefork-default', {
+        ingest: {
+          processing: [
+            {
+              config: {
+                grok: {
+                  field: 'message',
+                  patterns: ['%{WORD:firstword}'],
+                },
+              },
+            },
+          ],
+          routing: [],
+          wired: {
+            fields: {
+              firstword: {
+                type: 'keyword',
+              },
+            },
+          },
+        },
       });
     });
 
-    // it('Allows forking a wired stream from an unwired root', async () => {});
+    it('Executes processing on the forked stream', async () => {
+      const doc = {
+        message: 'hello world',
+        '@timestamp': '2024-01-01T00:00:10.000Z',
+        abc: 'test',
+        xyz: 'test',
+      };
+      await assertDocInIndex(
+        esClient,
+        'logs-test.nested-default',
+        'logs-test.nested.myfork.doublefork-default',
+        {
+          ...doc,
+          firstword: 'hello',
+        }
+      );
 
-    // it('Allows adding processing and fields to wired child', async () => {});
+      const searchResponse = await esClient.search({
+        index: 'logs-test.nested.myfork.doublefork-default',
+        query: {
+          term: {
+            firstword: {
+              value: 'hello',
+            },
+          },
+        },
+      });
+      expect(searchResponse.hits.total).to.eql({ value: 1, relation: 'eq' });
+    });
 
-    // it('Validates field rules within tree of wired streams under classic root', async () => {});
+    it('Validates field rules within tree of wired streams under classic root', async () => {
+      await putStream(
+        apiClient,
+        'logs-test.nested.myfork.doublefork.evendeeper-default',
+        {
+          ingest: {
+            processing: [],
+            routing: [],
+            wired: {
+              fields: {
+                firstword: {
+                  type: 'long',
+                },
+              },
+            },
+          },
+        },
+        400
+      );
+    });
 
-    // it('Allows creating a wired child for classic stream via PUT', async () => {});
-    
-    // it('Allows creating a wired child for classic stream via PUT and extending routing array', async () => {});
- 
-    // it('Allows creating multi-nested wired children via PUT API', async () => {});
+    it('Allows creating a wired child for classic stream via PUT', async () => {
+      await putStream(apiClient, 'logs-test.nested.myfork2-default', {
+        ingest: {
+          processing: [],
+          routing: [],
+          wired: {
+            fields: {
+              atest: {
+                type: 'long',
+              },
+            },
+          },
+        },
+      });
+
+      await assertStreamInList(apiClient, 'logs-test.nested.myfork2-default', {
+        name: 'logs-test.nested.myfork2-default',
+        stream: {
+          ingest: {
+            processing: [],
+            routing: [],
+            wired: {
+              fields: {
+                atest: {
+                  type: 'long',
+                },
+              },
+            },
+          },
+        },
+      });
+    });
+
+    it('Allows creating a wired child for classic stream via PUT and extending routing array', async () => {
+      await putStream(apiClient, 'logs-test.nested-default', {
+        ingest: {
+          processing: [],
+          routing: [
+            {
+              name: 'logs-test.nested.myfork-default',
+              condition: {
+                field: 'abc',
+                operator: 'exists',
+              },
+            },
+            {
+              name: 'logs-test.nested.myfork2-default',
+              condition: {
+                field: 'otherfield',
+                operator: 'exists',
+              },
+            },
+          ],
+        },
+      });
+
+      const doc = {
+        message: 'hello world',
+        '@timestamp': '2024-01-01T00:00:10.000Z',
+        otherfield: 'test',
+      };
+      await assertDocInIndex(
+        esClient,
+        'logs-test.nested-default',
+        'logs-test.nested.myfork2-default',
+        doc
+      );
+    });
+
+    it('Allows creating multi-nested wired children via PUT API', async () => {
+      await putStream(apiClient, 'logs-test.nested.myfork3.deeply.nested-default', {
+        ingest: {
+          processing: [],
+          routing: [],
+          wired: {
+            fields: {},
+          },
+        },
+      });
+
+      const {
+        body: { streams },
+      } = await apiClient.fetch('GET /api/streams');
+
+      expect(streams.some((stream) => stream.name === 'logs-test.nested.myfork3-default')).to.be(
+        true
+      );
+      expect(
+        streams.some((stream) => stream.name === 'logs-test.nested.myfork3.deeply-default')
+      ).to.be(true);
+      expect(
+        streams.some((stream) => stream.name === 'logs-test.nested.myfork3.deeply.nested-default')
+      ).to.be(true);
+    });
+
+    it.only('Validates whether an unwired root exists before creating substreams', async () => {
+      await putStream(
+        apiClient,
+        'logs-woopy.doopy-default',
+        {
+          ingest: {
+            processing: [],
+            routing: [],
+            wired: {
+              fields: {},
+            },
+          },
+        },
+        400
+      );
+    });
   });
 }

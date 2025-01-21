@@ -9,6 +9,7 @@ import { z } from '@kbn/zod';
 import { badRequest, internal, notFound } from '@hapi/boom';
 import { conditionSchema, isCompleteCondition } from '@kbn/streams-schema';
 import { errors } from '@elastic/elasticsearch';
+import { MalformedStream } from '../../../lib/streams/errors/malformed_stream';
 import {
   DefinitionNotFound,
   ForkConditionMissing,
@@ -23,6 +24,7 @@ import { validateCondition } from '../../../lib/streams/helpers/condition_fields
 import { conditionToQueryDsl } from '../../../lib/streams/helpers/condition_to_query_dsl';
 import { getFields } from '../../../lib/streams/helpers/condition_fields';
 import { ResyncStreamsResponse } from '../../../lib/streams/client';
+import { MalformedFields } from '../../../lib/streams/errors/malformed_fields';
 
 export const forkStreamsRoute = createServerRoute({
   endpoint: 'POST /api/streams/{id}/_fork',
@@ -68,6 +70,8 @@ export const forkStreamsRoute = createServerRoute({
         e instanceof SecurityException ||
         e instanceof ForkConditionMissing ||
         e instanceof MalformedStreamId ||
+        e instanceof MalformedFields ||
+        e instanceof MalformedStream ||
         e instanceof RootStreamImmutabilityException
       ) {
         throw badRequest(e);

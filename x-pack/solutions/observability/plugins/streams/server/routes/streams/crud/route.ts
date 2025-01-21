@@ -17,6 +17,8 @@ import {
   isWiredStream,
 } from '@kbn/streams-schema';
 import { isResponseError } from '@kbn/es-errors';
+import { MalformedStream } from '../../../lib/streams/errors/malformed_stream';
+import { MalformedFields } from '../../../lib/streams/errors/malformed_fields';
 import { MalformedStreamId } from '../../../lib/streams/errors/malformed_stream_id';
 import {
   DefinitionNotFound,
@@ -229,6 +231,8 @@ export const editStreamRoute = createServerRoute({
         e instanceof SecurityException ||
         e instanceof ForkConditionMissing ||
         e instanceof MalformedStreamId ||
+        e instanceof MalformedFields ||
+        e instanceof MalformedStream ||
         e instanceof RootStreamImmutabilityException
       ) {
         throw badRequest(e);

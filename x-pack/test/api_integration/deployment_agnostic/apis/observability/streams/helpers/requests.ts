@@ -74,3 +74,28 @@ export async function putStream(
     .expect(expectStatusCode)
     .then((response) => response.body);
 }
+
+export async function assertStreamInList(
+  client: StreamsSupertestRepositoryClient,
+  streamName: string,
+  expectedStream: JsonObject
+) {
+  const {
+    body: { streams },
+  } = await client.fetch('GET /api/streams');
+  const stream = streams.find((s: any) => s.name === streamName);
+  expect(stream).to.eql(expectedStream);
+}
+
+export async function assertDocInIndex(
+  esClient: Client,
+  targetIndex: string,
+  finalIndex: string,
+  doc: JsonObject
+) {
+  const response = await indexDocument(esClient, targetIndex, doc);
+  expect(response.result).to.eql('created');
+
+  const result = await fetchDocument(esClient, finalIndex, response._id);
+  expect(result._source).to.eql(doc);
+}

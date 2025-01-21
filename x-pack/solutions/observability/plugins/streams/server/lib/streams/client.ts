@@ -821,22 +821,24 @@ export class StreamsClient {
         },
       });
 
-      streams.forEach((candidateStream) => {
-        const candidateStreamName = parseStreamName(candidateStream.name);
-        // The longest unwired stream with a matching prefix is the classic root
-        if (
-          candidateStreamName.type === 'dsns' &&
-          candidateStreamName.datasetSegments.every(
-            (segment, index) => segment === streamName.datasetSegments[index]
-          ) &&
-          candidateStreamName.datastreamType === streamName.datastreamType &&
-          candidateStreamName.datastreamNamespace === streamName.datastreamNamespace &&
-          candidateStreamName.datasetSegments.length > classicRootSegmentLength
-        ) {
-          classicRoot = candidateStream;
-          classicRootSegmentLength = candidateStreamName.datasetSegments.length;
-        }
-      });
+      streams
+        .filter((candidateStream) => !isWiredStream(candidateStream))
+        .forEach((candidateStream) => {
+          const candidateStreamName = parseStreamName(candidateStream.name);
+          // The longest unwired stream with a matching prefix is the classic root
+          if (
+            candidateStreamName.type === 'dsns' &&
+            candidateStreamName.datasetSegments.every(
+              (segment, index) => segment === streamName.datasetSegments[index]
+            ) &&
+            candidateStreamName.datastreamType === streamName.datastreamType &&
+            candidateStreamName.datastreamNamespace === streamName.datastreamNamespace &&
+            candidateStreamName.datasetSegments.length > classicRootSegmentLength
+          ) {
+            classicRoot = candidateStream;
+            classicRootSegmentLength = candidateStreamName.datasetSegments.length;
+          }
+        });
     }
     return classicRoot;
   }
