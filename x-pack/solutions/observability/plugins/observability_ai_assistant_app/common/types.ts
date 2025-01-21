@@ -11,13 +11,10 @@ import {
   ALERT_STATUS_UNTRACKED,
 } from '@kbn/rule-data-utils';
 
-import { ALERT_STATUS_ALL } from './constants';
-
 type Status =
   | typeof ALERT_STATUS_ACTIVE
   | typeof ALERT_STATUS_RECOVERED
-  | typeof ALERT_STATUS_UNTRACKED
-  | typeof ALERT_STATUS_ALL;
+  | typeof ALERT_STATUS_UNTRACKED;
 
 export interface AlertStatus {
   id: Status;
