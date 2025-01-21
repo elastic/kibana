@@ -22,6 +22,7 @@ describe('update ES|QL query action', () => {
       const isCompatible = await createControlAction.isCompatible({
         queryString: '',
         variableType: ESQLVariableType.FIELDS,
+        esqlVariables: [],
       });
 
       expect(isCompatible).toBeFalsy();
@@ -32,6 +33,7 @@ describe('update ES|QL query action', () => {
       const isCompatible = await createControlAction.isCompatible({
         queryString: 'FROM meow',
         variableType: ESQLVariableType.FIELDS,
+        esqlVariables: [],
       });
 
       expect(isCompatible).toBeTruthy();

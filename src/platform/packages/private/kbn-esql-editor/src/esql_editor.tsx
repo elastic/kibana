@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { isEqual } from 'lodash';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -30,7 +31,7 @@ import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
-import { ESQLRealField } from '@kbn/esql-validation-autocomplete';
+import { ESQLRealField, ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
 import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
 import { EditorFooter } from './editor_footer';
@@ -65,6 +66,7 @@ const triggerControl = async (
   variableType: ESQLVariableType,
   position: monaco.Position | null | undefined,
   uiActions: ESQLEditorDeps['uiActions'],
+  esqlVariables?: ESQLControlVariable[],
   onSaveControl?: ESQLEditorProps['onSaveControl'],
   onCancelControl?: ESQLEditorProps['onCancelControl']
 ) => {
@@ -72,6 +74,7 @@ const triggerControl = async (
     queryString,
     variableType,
     cursorPosition: position,
+    esqlVariables,
     onSaveControl,
     onCancelControl,
   });
@@ -99,6 +102,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   onSaveControl,
   onCancelControl,
   supportsControls,
+  esqlVariables,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const datePickerOpenStatusRef = useRef<boolean>(false);
@@ -113,9 +117,9 @@ export const ESQLEditor = memo(function ESQLEditor({
     fieldsMetadata,
     uiSettings,
     uiActions,
-    esqlService,
   } = kibana.services;
 
+  const variablesService = kibana.services?.esql?.variablesService;
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
   const [code, setCode] = useState<string>(query.esql ?? '');
   // To make server side errors less "sticky", register the state of the code when submitting
@@ -213,11 +217,19 @@ export const ESQLEditor = memo(function ESQLEditor({
   // Enable the variables service if the feature is supported in the consumer app
   useEffect(() => {
     if (supportsControls) {
-      esqlService.enableSuggestions();
+      variablesService?.enableSuggestions();
+
+      const variables = variablesService?.esqlVariables;
+      if (!isEqual(variables, esqlVariables)) {
+        variablesService?.clearVariables();
+        esqlVariables?.forEach((variable) => {
+          variablesService?.addVariable(variable);
+        });
+      }
     } else {
-      esqlService.disableSuggestions();
+      variablesService?.disableSuggestions();
     }
-  }, [esqlService, supportsControls]);
+  }, [variablesService, supportsControls, esqlVariables]);
 
   const toggleHistory = useCallback((status: boolean) => {
     setIsHistoryOpen(status);
@@ -269,6 +281,7 @@ export const ESQLEditor = memo(function ESQLEditor({
       ESQLVariableType.TIME_LITERAL,
       position,
       uiActions,
+      esqlVariables,
       onSaveControl,
       onCancelControl
     );
@@ -281,6 +294,7 @@ export const ESQLEditor = memo(function ESQLEditor({
       ESQLVariableType.FIELDS,
       position,
       uiActions,
+      esqlVariables,
       onSaveControl,
       onCancelControl
     );
@@ -293,6 +307,7 @@ export const ESQLEditor = memo(function ESQLEditor({
       ESQLVariableType.VALUES,
       position,
       uiActions,
+      esqlVariables,
       onSaveControl,
       onCancelControl
     );
@@ -442,10 +457,10 @@ export const ESQLEditor = memo(function ESQLEditor({
       // @ts-expect-error To prevent circular type import, type defined here is partial of full client
       getFieldsMetadata: fieldsMetadata?.getClient(),
       getVariablesByType: (type: ESQLVariableType) => {
-        return esqlService.getVariablesByType(type);
+        return variablesService?.esqlVariables.filter((variable) => variable.type === type);
       },
       canSuggestVariables: () => {
-        return esqlService.areSuggestionsEnabled;
+        return variablesService?.areSuggestionsEnabled ?? false;
       },
       getJoinIndices: kibana.services?.esql?.getJoinIndicesAutocomplete,
     };
@@ -463,7 +478,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     abortController,
     indexManagementApiService,
     histogramBarTarget,
-    esqlService,
+    variablesService,
     kibana.services?.esql?.getJoinIndicesAutocomplete,
   ]);
 

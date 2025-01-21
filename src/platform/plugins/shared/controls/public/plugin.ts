@@ -13,7 +13,9 @@ import { registerOptionsListControl } from './controls/data_controls/options_lis
 import { registerRangeSliderControl } from './controls/data_controls/range_slider/register_range_slider_control';
 import { registerTimeSliderControl } from './controls/timeslider_control/register_timeslider_control';
 import { registerESQLControl } from './controls/esql_control/register_esql_control';
+
 import { setKibanaServices } from './services/kibana_services';
+
 import type { ControlsPluginSetupDeps, ControlsPluginStartDeps } from './types';
 import { registerActions } from './actions/register_actions';
 

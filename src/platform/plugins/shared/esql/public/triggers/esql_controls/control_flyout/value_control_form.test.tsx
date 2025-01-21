@@ -49,20 +49,12 @@ describe('ValueControlForm', () => {
     get: (key: string) => uiConfig[key],
   } as IUiSettingsClient;
 
-  const esqlVariablesService = {
-    enableSuggestions: jest.fn(),
-    disableSuggestions: jest.fn(),
-    getVariablesByType: jest.fn(),
-    areSuggestionsEnabled: false,
-  };
-
   const services = {
     uiSettings,
     settings: {
       client: uiSettings,
     },
     core: coreMock.createStart(),
-    esqlService: esqlVariablesService,
   };
 
   describe('Interval type', () => {
@@ -75,6 +67,7 @@ describe('ValueControlForm', () => {
           closeFlyout={jest.fn()}
           onEditControl={jest.fn()}
           search={searchMock}
+          esqlVariables={[]}
         />
       );
       // control type dropdown should be rendered and default to 'STATIC_VALUES'
@@ -120,6 +113,7 @@ describe('ValueControlForm', () => {
           closeFlyout={jest.fn()}
           onEditControl={jest.fn()}
           search={searchMock}
+          esqlVariables={[]}
         />
       );
 
@@ -145,6 +139,7 @@ describe('ValueControlForm', () => {
           closeFlyout={jest.fn()}
           onEditControl={jest.fn()}
           search={searchMock}
+          esqlVariables={[]}
         />
       );
       // click on the cancel button
@@ -173,6 +168,7 @@ describe('ValueControlForm', () => {
           onEditControl={jest.fn()}
           search={searchMock}
           initialState={initialState}
+          esqlVariables={[]}
         />
       );
       // variable name input should be rendered and with the default value
@@ -221,6 +217,7 @@ describe('ValueControlForm', () => {
           onEditControl={onEditControlSpy}
           search={searchMock}
           initialState={initialState}
+          esqlVariables={[]}
         />
       );
       // click on the create button
@@ -240,6 +237,7 @@ describe('ValueControlForm', () => {
                 closeFlyout={jest.fn()}
                 onEditControl={jest.fn()}
                 search={searchMock}
+                esqlVariables={[]}
               />
             </IntlProvider>
           </KibanaContextProvider>

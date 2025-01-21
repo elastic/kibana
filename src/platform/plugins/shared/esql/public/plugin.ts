@@ -27,6 +27,7 @@ import {
 import { setKibanaServices } from './kibana_services';
 import { JoinIndicesAutocompleteResult } from '../common';
 import { cacheNonParametrizedAsyncFunction } from './util/cache';
+import { EsqlVariablesService } from './variables_service';
 
 interface EsqlPluginSetupDependencies {
   indexManagement: IndexManagementPluginSetup;
@@ -44,6 +45,7 @@ interface EsqlPluginStartDependencies {
 
 export interface EsqlPluginStart {
   getJoinIndicesAutocomplete: () => Promise<JoinIndicesAutocompleteResult>;
+  variablesService: EsqlVariablesService;
 }
 
 export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
@@ -78,6 +80,8 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
     const createESQLControlAction = new CreateESQLControlAction(core, data.search.search);
     uiActions.addTriggerAction(ESQL_CONTROL_TRIGGER, createESQLControlAction);
 
+    const variablesService = new EsqlVariablesService();
+
     const getJoinIndicesAutocomplete = cacheNonParametrizedAsyncFunction(
       async () => {
         const result = await core.http.get<JoinIndicesAutocompleteResult>(
@@ -92,6 +96,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
 
     const start = {
       getJoinIndicesAutocomplete,
+      variablesService,
     };
 
     setKibanaServices(

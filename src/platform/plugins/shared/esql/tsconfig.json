@@ -32,7 +32,6 @@
     "@kbn/search-types",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
-    "@kbn/esql-variables",
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/i18n-react",
   ],

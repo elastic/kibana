@@ -23,7 +23,6 @@
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
-      "esqlVariables"
     ]
   }
 }

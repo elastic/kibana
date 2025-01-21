@@ -19,7 +19,6 @@
       "unifiedSearch",
       "uiActions",
     ],
-    "requiredBundles": ["esqlVariables"],
     "extraPublicDirs": [
       "common"
     ]

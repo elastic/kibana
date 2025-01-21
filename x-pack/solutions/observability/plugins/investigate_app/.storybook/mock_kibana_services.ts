@@ -35,6 +35,14 @@ const storage = new LocalStorageMock({}) as unknown as Storage;
 setKibanaServices(
   {
     getJoinIndicesAutocomplete: async () => ({ indices: [] }),
+    variablesService: {
+      esqlVariables: [],
+      areSuggestionsEnabled: false,
+      enableSuggestions: () => undefined,
+      disableSuggestions: () => undefined,
+      clearVariables: () => undefined,
+      addVariable: () => undefined,
+    },
   },
   coreMock.createStart(),
   dataViewPluginMocks.createStartContract(),

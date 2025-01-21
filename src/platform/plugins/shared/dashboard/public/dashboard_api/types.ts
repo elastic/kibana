@@ -16,7 +16,7 @@ import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { RefreshInterval, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
-import { PublishesESQLVariables } from '@kbn/esql-variables/public';
+import { PublishesESQLVariables } from '@kbn/esql-variables-types';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
   CanExpandPanels,
