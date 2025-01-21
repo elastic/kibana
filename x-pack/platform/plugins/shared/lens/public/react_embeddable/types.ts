@@ -54,7 +54,6 @@ import type {
 } from '@kbn/core/public';
 import type { TimefilterContract, FilterManager } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import { PublishesESQLVariables } from '@kbn/esql-variables/common';
 import type {
   ExpressionRendererEvent,
   ReactExpressionRendererProps,

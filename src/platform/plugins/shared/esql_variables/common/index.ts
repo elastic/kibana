@@ -12,9 +12,3 @@ import { EsqlVariablesService } from './esql_variables_service';
 const esqlVariablesService = new EsqlVariablesService();
 
 export { esqlVariablesService, type EsqlVariablesService };
-export {
-  type PublishesESQLVariable,
-  type PublishesESQLVariables,
-  apiPublishesESQLVariable,
-  apiPublishesESQLVariables,
-} from './esql_publishing';
