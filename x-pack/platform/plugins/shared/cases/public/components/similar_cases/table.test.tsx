@@ -30,6 +30,12 @@ describe('SimilarCasesTable', () => {
     expect(result.getByTestId('similar-cases-table')).toBeInTheDocument();
   });
 
+  it('renders similarities correctly', async () => {
+    const result = appMock.render(<SimilarCasesTable {...props} />);
+
+    expect(await result.findByTestId('similar-cases-table-column-similarities')).toBeTruthy();
+  });
+
   it('renders loading indicator when loading', async () => {
     const result = appMock.render(<SimilarCasesTable {...props} isLoading={true} />);
     expect(result.queryByTestId('similar-cases-table')).not.toBeInTheDocument();
