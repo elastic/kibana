@@ -295,6 +295,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         await validateAgentPolicyOutputForIntegration(
           soClient,
           agentPolicy,
+          packagePolicy,
           enrichedPackagePolicy.package?.name
         );
       }
@@ -2212,6 +2213,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                 await validateAgentPolicyOutputForIntegration(
                   soClient,
                   agentPolicy,
+                  packagePolicy,
                   packagePolicy.package.name,
                   false
                 );
