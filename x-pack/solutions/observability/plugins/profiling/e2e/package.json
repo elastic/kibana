@@ -5,7 +5,7 @@
   "private": true,
   "license": "Elastic License 2.0",
   "scripts": {
-    "cypress": "NODE_OPTIONS=--openssl-legacy-provider node ../../../../security/plugins/security_solution/scripts/start_cypress_parallel --config-file ../observability/plugins/profiling/e2e/cypress.config.ts --ftr-config-file ../../../../../test/profiling_cypress/cli_config",
+    "cypress": "node ../../../../security/plugins/security_solution/scripts/start_cypress_parallel --config-file ../observability/plugins/profiling/e2e/cypress.config.ts --ftr-config-file ../../../../../test/profiling_cypress/cli_config",
     "cypress:open": "yarn cypress open",
     "cypress:run": "yarn cypress run",
     "cypress:run:headed": "yarn cypress run --headed",
