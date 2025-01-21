@@ -57,9 +57,9 @@ export function initializeDashboardServices(
   internalApi: LensInternalApi,
   stateConfig: StateManagementConfig,
   parentApi: unknown,
+  titleManager: ReturnType<typeof initializeTitleManager>,
   { attributeService, uiActions }: LensEmbeddableStartServices
 ): DashboardServicesConfig {
-  const titleManager = initializeTitleManager(initialState);
   // For some legacy reason the title and description default value is picked differently
   // ( based on existing FTR tests ).
   const [defaultTitle$] = buildObservableVariable<string | undefined>(
