@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { PublishesESQLVariable } from '@kbn/esql-variables/public';
+
 import type { ESQLControlState as ControlState } from '@kbn/esql/public';
 import type { HasEditCapabilities, PublishesPanelTitle } from '@kbn/presentation-publishing';
 import type { DefaultControlState } from '../../../common';
