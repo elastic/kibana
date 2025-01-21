@@ -13,6 +13,8 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
 
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import { DefendInsightType } from '@kbn/elastic-assistant-common';
 import type {
   SearchParams,
   SecurityWorkflowInsight,
@@ -160,3 +162,42 @@ export function getUniqueInsights(insights: SecurityWorkflowInsight[]): Security
   }
   return Object.values(uniqueInsights);
 }
+
+export const checkIfRemediationExists = async ({
+  insight,
+  exceptionListsClient,
+}: {
+  insight: SecurityWorkflowInsight;
+  exceptionListsClient: ExceptionListClient;
+}): Promise<boolean> => {
+  if (insight.type !== DefendInsightType.Enum.incompatible_antivirus) {
+    return false;
+  }
+
+  const filter = insight.remediation.exception_list_items
+    ?.flatMap((item) =>
+      item.entries
+        .map((entry) => {
+          if ('value' in entry) {
+            return `exception-list-agnostic.attributes.entries.value:\"${entry.value}\"`;
+          }
+          return '';
+        })
+        .filter(Boolean)
+    )
+    .join(' AND ');
+
+  if (!filter) return false;
+
+  const response = await exceptionListsClient.findExceptionListItem({
+    listId: 'endpoint_trusted_apps',
+    page: 1,
+    perPage: 1,
+    namespaceType: 'agnostic',
+    filter,
+    sortField: 'created_at',
+    sortOrder: 'desc',
+  });
+
+  return !!response?.total && response.total > 0;
+};
