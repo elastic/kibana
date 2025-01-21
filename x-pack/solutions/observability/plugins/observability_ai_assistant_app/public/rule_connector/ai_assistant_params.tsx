@@ -15,15 +15,16 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiTextArea,
-  EuiSuperSelect,
-  EuiFormLabel,
+  EuiComboBox,
+  EuiButton,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import {
   ObservabilityAIAssistantService,
   useGenAIConnectorsWithoutContext,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { ObsAIAssistantActionParams } from './types';
-import { ALERT_STATUSES, ALL_ALERTS } from '../../common/constants';
+import { ALERT_STATUSES } from '../../common/constants';
 
 const ObsAIAssistantParamsFields: React.FunctionComponent<
   ActionParamsProps<ObsAIAssistantActionParams> & { service: ObservabilityAIAssistantService }
@@ -37,10 +38,49 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
   }, [selectedConnector, index]);
 
   useEffect(() => {
-    if (!actionParams.status) {
-      editAction('status', ALL_ALERTS.id, index);
+    // Ensure backwards compatibility by using the message field as a prompt if prompts are missing
+    if (!actionParams.prompts) {
+      editAction(
+        'prompts',
+        [
+          {
+            statuses: ALERT_STATUSES.map(({ id }) => id),
+            message: actionParams.message || '',
+          },
+        ],
+        index
+      );
     }
-  }, [actionParams.status, editAction, index]);
+  }, [actionParams, editAction, index]);
+
+  const handleOnChange = (
+    key: 'statuses' | 'message',
+    value: string | string[],
+    promptIndex: number
+  ) => {
+    const prompts = actionParams.prompts ? [...actionParams.prompts] : [];
+    prompts[promptIndex] = { ...prompts[promptIndex], [key]: value };
+    editAction('prompts', prompts, index);
+  };
+
+  const handleAddPrompt = () => {
+    if (actionParams.prompts) {
+      const prompts = [
+        ...actionParams.prompts,
+        {
+          statuses: ALERT_STATUSES.map(({ id }) => id),
+          message: '',
+        },
+      ];
+      editAction('prompts', prompts, index);
+    }
+  };
+  const handleRemovePrompt = () => {
+    if (actionParams.prompts) {
+      const prompts = actionParams.prompts.slice(0, -1);
+      editAction('prompts', prompts, index);
+    }
+  };
 
   return (
     <>
@@ -67,61 +107,95 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
         />
       </EuiFormRow>
 
-      <EuiSpacer size="m" />
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate(
-          'xpack.observabilityAiAssistant.alertConnector.messageTextAreaFieldLabel',
-          {
-            defaultMessage: 'On status changes',
-          }
-        )}
-      >
-        <EuiSuperSelect
-          prepend={
-            <EuiFormLabel htmlFor={`addNewActionConnectorActionGroup-${index}`}>
-              <FormattedMessage
-                id="xpack.observabilityAiAssistant.obsAIAssistantParamsFields"
-                defaultMessage="Run when"
-              />
-            </EuiFormLabel>
-          }
-          fullWidth
-          id={`addNewActionConnectorActionGroup-${index}`}
-          data-test-subj={`addNewActionConnectorActionGroup-${index}`}
-          options={ALERT_STATUSES.map(({ id: value, label }) => ({
-            value,
-            inputDisplay: label,
-          }))}
-          valueOfSelected={actionParams.status}
-          onChange={(status) => {
-            editAction('status', status, index);
-          }}
-        />
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate(
-          'xpack.observabilityAiAssistant.alertConnector.messageTextAreaFieldLabel',
-          {
-            defaultMessage: 'Message',
-          }
-        )}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiTextArea
+      {actionParams?.prompts?.map((prompt, promptIndex) => (
+        <div key={promptIndex}>
+          <EuiSpacer size="m" />
+          <EuiFormRow
             fullWidth
-            data-test-subj="observabilityAiAssistantAlertConnectorMessageTextArea"
-            value={actionParams.message}
-            onChange={(event) => {
-              editAction('message', event.target.value, index);
-            }}
-            // @ts-expect-error upgrade typescript v5.1.6
-            isInvalid={errors.message?.length > 0}
-          />
+            label={i18n.translate(
+              'xpack.observabilityAiAssistant.alertConnector.messageTextAreaFieldLabel',
+              {
+                defaultMessage: 'On status changes',
+              }
+            )}
+          >
+            <EuiComboBox
+              fullWidth
+              id={`addNewActionConnectorActionGroup-${index}`}
+              data-test-subj={`addNewActionConnectorActionGroup-${index}`}
+              options={ALERT_STATUSES.map(({ id }) => ({
+                label: id,
+              }))}
+              selectedOptions={prompt.statuses.map((id) => ({ label: id }))}
+              onChange={(statuses) => {
+                handleOnChange(
+                  'statuses',
+                  statuses.map((status) => status.label),
+                  promptIndex
+                );
+              }}
+              isClearable={true}
+            />
+          </EuiFormRow>
+          <EuiSpacer size="m" />
+          <EuiFormRow
+            fullWidth
+            label={i18n.translate(
+              'xpack.observabilityAiAssistant.alertConnector.messageTextAreaFieldLabel',
+              {
+                defaultMessage: 'Message',
+              }
+            )}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiTextArea
+                fullWidth
+                data-test-subj="observabilityAiAssistantAlertConnectorMessageTextArea"
+                value={prompt.message}
+                onChange={(event) => {
+                  handleOnChange('message', event.target.value, promptIndex);
+                }}
+                // @ts-expect-error upgrade typescript v5.1.6
+                isInvalid={errors.message?.length > 0}
+              />
+            </EuiFlexItem>
+          </EuiFormRow>
+        </div>
+      ))}
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem grow>
+          <EuiButton
+            disabled={actionParams?.prompts?.length === 1}
+            size="m"
+            fullWidth
+            color="danger"
+            iconType="minusInCircle"
+            data-test-subj="removePropmptButton"
+            onClick={handleRemovePrompt}
+          >
+            <FormattedMessage
+              id="xpack.observabilityAiAssistant.alertConnector.removePromptButtonLabel"
+              defaultMessage="Remove Prompt"
+            />
+          </EuiButton>
         </EuiFlexItem>
-      </EuiFormRow>
+        <EuiFlexItem grow>
+          <EuiButton
+            disabled={actionParams?.prompts?.length === ALERT_STATUSES.length}
+            size="m"
+            fullWidth
+            iconType="plusInCircle"
+            data-test-subj="addPrompButton"
+            onClick={handleAddPrompt}
+          >
+            <FormattedMessage
+              id="xpack.observabilityAiAssistant.alertConnector.addPromptButtonLabel"
+              defaultMessage="Add Prompt"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 };

@@ -7,6 +7,9 @@
 
 export interface ObsAIAssistantActionParams {
   connector: string;
-  message: string;
-  status: string;
+  prompts: Array<{
+    message: string;
+    statuses: string[];
+  }>;
+  message?: string; // this is a legacy field
 }

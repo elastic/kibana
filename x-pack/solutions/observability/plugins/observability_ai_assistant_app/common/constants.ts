@@ -16,13 +16,6 @@ import { AlertStatus } from './types';
 
 export const ALERT_STATUS_ALL = 'all';
 
-export const ALL_ALERTS: AlertStatus = {
-  id: ALERT_STATUS_ALL,
-  label: i18n.translate('xpack.observabilityAiAssistant.alertConnector.alertStatus.showAll', {
-    defaultMessage: 'All',
-  }),
-};
-
 export const ACTIVE_ALERTS: AlertStatus = {
   id: ALERT_STATUS_ACTIVE,
   label: i18n.translate('xpack.observabilityAiAssistant.alertConnector.alertStatus.active', {
@@ -44,4 +37,4 @@ export const UNTRACKED_ALERTS: AlertStatus = {
   }),
 };
 
-export const ALERT_STATUSES = [ALL_ALERTS, ACTIVE_ALERTS, RECOVERED_ALERTS, UNTRACKED_ALERTS];
+export const ALERT_STATUSES = [ACTIVE_ALERTS, RECOVERED_ALERTS, UNTRACKED_ALERTS];
