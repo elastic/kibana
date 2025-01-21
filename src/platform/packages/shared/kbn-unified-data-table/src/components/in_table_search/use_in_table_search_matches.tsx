@@ -13,8 +13,6 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { InTableSearchHighlightsWrapperProps } from './in_table_search_highlights_wrapper';
 
-let latestTimeoutTimer: NodeJS.Timeout | null = null;
-
 interface RowMatches {
   rowIndex: number;
   rowMatchesCount: number;
@@ -81,8 +79,6 @@ export const useInTableSearchMatches = (
 
     const numberOfRuns = numberOfRunsRef.current;
 
-    stopTimer(latestTimeoutTimer);
-
     setState((prevState) => ({
       ...prevState,
       isProcessing: true,
@@ -90,7 +86,7 @@ export const useInTableSearchMatches = (
         <AllCellsHighlightsCounter
           key={numberOfRuns}
           inTableSearchTerm={inTableSearchTerm}
-          rows={rows}
+          rowsCount={rows.length}
           visibleColumns={visibleColumns}
           renderCellValue={renderCellValue}
           onFinish={({ matchesList: nextMatchesList, totalMatchesCount }) => {
@@ -131,7 +127,6 @@ export const useInTableSearchMatches = (
   }, [setState, onScrollToActiveMatch]);
 
   const resetState = useCallback(() => {
-    stopTimer(latestTimeoutTimer);
     setState(INITIAL_STATE);
   }, [setState]);
 
@@ -268,8 +263,8 @@ function changeActiveMatchInState(
 
 type AllCellsProps = Pick<
   UseInTableSearchMatchesProps,
-  'renderCellValue' | 'rows' | 'visibleColumns'
-> & { inTableSearchTerm: string };
+  'renderCellValue' | 'visibleColumns' | 'inTableSearchTerm'
+> & { rowsCount: number };
 
 function AllCellsHighlightsCounter(
   props: AllCellsProps & {
@@ -280,122 +275,128 @@ function AllCellsHighlightsCounter(
   const containerRef = useRef<DocumentFragment>();
   containerRef.current = container;
 
-  const { rows, visibleColumns, onFinish } = props;
-  const resultsMapRef = useRef<Record<number, Record<string, number>>>({});
-  const remainingNumberOfResultsRef = useRef<number>(rows.length * visibleColumns.length);
-
-  const onHighlightsCountFound = useCallback(
-    (rowIndex: number, columnId: string, count: number) => {
-      remainingNumberOfResultsRef.current = remainingNumberOfResultsRef.current - 1;
-
-      if (count === 0) {
-        return;
-      }
-
-      if (!resultsMapRef.current[rowIndex]) {
-        resultsMapRef.current[rowIndex] = {};
-      }
-      resultsMapRef.current[rowIndex][columnId] = count;
-    },
-    []
-  );
-
-  const onComplete = useCallback(() => {
-    let totalMatchesCount = 0;
-    const newMatchesList: RowMatches[] = [];
-
-    Object.keys(resultsMapRef.current)
-      .map((rowIndex) => Number(rowIndex))
-      .sort((a, b) => a - b)
-      .forEach((rowIndex) => {
-        const matchesCountPerColumnId = resultsMapRef.current[rowIndex];
-        const rowMatchesCount = Object.values(matchesCountPerColumnId).reduce(
-          (acc, count) => acc + count,
-          0
-        );
-
-        newMatchesList.push({
-          rowIndex,
-          rowMatchesCount,
-          matchesCountPerColumnId,
-        });
-        totalMatchesCount += rowMatchesCount;
-      });
-
-    onFinish({ matchesList: newMatchesList, totalMatchesCount });
-  }, [onFinish]);
-
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const [_] = useState(() => {
-    const newTimer = setTimeout(onComplete, 30000);
-    timerRef.current = newTimer;
-    return registerTimer(newTimer);
-  });
-
   useEffect(() => {
     return () => {
-      stopTimer(timerRef.current);
-
       if (containerRef.current) {
         unmountComponentAtNode(containerRef.current);
       }
     };
   }, []);
 
-  return createPortal(
-    <AllCells
-      {...props}
-      onHighlightsCountFound={(rowIndex, columnId, count) => {
-        onHighlightsCountFound(rowIndex, columnId, count);
-
-        if (remainingNumberOfResultsRef.current === 0) {
-          stopTimer(timerRef.current);
-          onComplete();
-        }
-      }}
-    />,
-    container
-  );
+  return createPortal(<AllCells {...props} />, container);
 }
 
 function AllCells({
   inTableSearchTerm,
-  rows,
   visibleColumns,
   renderCellValue,
-  onHighlightsCountFound,
+  rowsCount,
+  onFinish,
 }: AllCellsProps & {
-  onHighlightsCountFound: (rowIndex: number, columnId: string, count: number) => void;
+  onFinish: (params: { matchesList: RowMatches[]; totalMatchesCount: number }) => void;
+}) {
+  const matchesListRef = useRef<RowMatches[]>([]);
+  const totalMatchesCountRef = useRef<number>(0);
+  const [rowIndex, setRowIndex] = useState<number>(0);
+
+  const onRowHighlightsCountFound = useCallback(
+    (rowMatches: RowMatches) => {
+      if (rowMatches.rowMatchesCount > 0) {
+        totalMatchesCountRef.current += rowMatches.rowMatchesCount;
+        matchesListRef.current.push(rowMatches);
+      }
+
+      const nextRowIndex = rowIndex + 1;
+
+      if (nextRowIndex < rowsCount) {
+        setRowIndex(nextRowIndex);
+      } else {
+        onFinish({
+          matchesList: matchesListRef.current,
+          totalMatchesCount: totalMatchesCountRef.current,
+        });
+      }
+    },
+    [setRowIndex, rowIndex, rowsCount, onFinish]
+  );
+
+  // iterating through rows one at the time to avoid blocking the main thread
+  return (
+    <RowCells
+      key={rowIndex}
+      rowIndex={rowIndex}
+      inTableSearchTerm={inTableSearchTerm}
+      visibleColumns={visibleColumns}
+      renderCellValue={renderCellValue}
+      onRowHighlightsCountFound={onRowHighlightsCountFound}
+    />
+  );
+}
+
+function RowCells({
+  rowIndex,
+  inTableSearchTerm,
+  visibleColumns,
+  renderCellValue,
+  onRowHighlightsCountFound,
+}: Omit<AllCellsProps, 'rowsCount'> & {
+  rowIndex: number;
+  onRowHighlightsCountFound: (rowMatch: RowMatches) => void;
 }) {
   const UnifiedDataTableRenderCellValue = renderCellValue;
+  const resultsMapRef = useRef<Record<string, number>>({});
+  const rowMatchesCountRef = useRef<number>(0);
+  const remainingNumberOfResultsRef = useRef<number>(visibleColumns.length);
+
+  const onComplete = useCallback(() => {
+    onRowHighlightsCountFound({
+      rowIndex,
+      rowMatchesCount: rowMatchesCountRef.current,
+      matchesCountPerColumnId: resultsMapRef.current,
+    });
+  }, [rowIndex, onRowHighlightsCountFound]);
+
+  const onCellHighlightsCountFound = useCallback(
+    (columnId: string, count: number) => {
+      remainingNumberOfResultsRef.current = remainingNumberOfResultsRef.current - 1;
+
+      if (count > 0) {
+        resultsMapRef.current[columnId] = count;
+        rowMatchesCountRef.current += count;
+      }
+
+      if (remainingNumberOfResultsRef.current === 0) {
+        onComplete();
+      }
+    },
+    [onComplete]
+  );
 
   return (
     <>
-      {(rows || []).flatMap((_, rowIndex) => {
-        return visibleColumns.map((columnId) => {
-          return (
-            <ErrorBoundary
-              key={`${rowIndex}-${columnId}`}
-              onError={() => {
-                onHighlightsCountFound(rowIndex, columnId, 0);
+      {visibleColumns.map((columnId) => {
+        return (
+          <ErrorBoundary
+            key={`${rowIndex}-${columnId}`}
+            onError={() => {
+              onCellHighlightsCountFound(columnId, 0);
+            }}
+          >
+            <UnifiedDataTableRenderCellValue
+              columnId={columnId}
+              rowIndex={rowIndex}
+              isExpandable={false}
+              isExpanded={false}
+              isDetails={false}
+              colIndex={0}
+              setCellProps={() => {}}
+              inTableSearchTerm={inTableSearchTerm}
+              onHighlightsCountFound={(count) => {
+                onCellHighlightsCountFound(columnId, count);
               }}
-            >
-              <UnifiedDataTableRenderCellValue
-                columnId={columnId}
-                rowIndex={rowIndex}
-                isExpandable={false}
-                isExpanded={false}
-                isDetails={false}
-                colIndex={0}
-                setCellProps={() => {}}
-                inTableSearchTerm={inTableSearchTerm}
-                onHighlightsCountFound={(count) => {
-                  onHighlightsCountFound(rowIndex, columnId, count);
-                }}
-              />
-            </ErrorBoundary>
-          );
-        });
+            />
+          </ErrorBoundary>
+        );
       })}
     </>
   );
@@ -429,17 +430,5 @@ export class ErrorBoundary extends React.Component<
     }
 
     return this.props.children;
-  }
-}
-
-function registerTimer(timer: NodeJS.Timeout) {
-  stopTimer(latestTimeoutTimer);
-  latestTimeoutTimer = timer;
-  return timer;
-}
-
-function stopTimer(timer: NodeJS.Timeout | null) {
-  if (timer) {
-    clearTimeout(timer);
   }
 }
