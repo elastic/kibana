@@ -17,10 +17,10 @@ import { authenticatedUser } from '../../__mocks__/user';
 import { getCreateKnowledgeBaseEntrySchemaMock } from '../../__mocks__/knowledge_base_entry_schema.mock';
 import {
   ContentReferencesStore,
-  contentReferencesStoreFactoryMock,
   EsqlContentReference,
   IndexEntry,
 } from '@kbn/elastic-assistant-common';
+import { contentReferencesStoreFactoryMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 
 // Mock dependencies
 jest.mock('@elastic/elasticsearch');

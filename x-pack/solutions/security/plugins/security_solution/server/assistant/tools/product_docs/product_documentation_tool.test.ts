@@ -20,7 +20,7 @@ import type {
   ContentReferencesStore,
   ProductDocumentationContentReference,
 } from '@kbn/elastic-assistant-common';
-import { contentReferencesStoreFactoryMock } from '@kbn/elastic-assistant-common';
+import { contentReferencesStoreFactoryMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 
 describe('ProductDocumentationTool', () => {
   const chain = {} as RetrievalQAChain;

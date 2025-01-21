@@ -33,7 +33,6 @@ export {
   contentReferenceBlock,
   removeContentReferences,
   pruneContentReferences,
-  contentReferencesStoreFactoryMock,
 } from './impl/content_references';
 
 export type {

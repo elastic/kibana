@@ -18,7 +18,7 @@ import {
   createStructuredChatAgent,
   createToolCallingAgent,
 } from 'langchain/agents';
-import { contentReferencesStoreFactoryMock } from '@kbn/elastic-assistant-common';
+import { contentReferencesStoreFactoryMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 jest.mock('./graph');
 jest.mock('./helpers');
 jest.mock('langchain/agents');
