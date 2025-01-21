@@ -72,7 +72,6 @@ export const getMockBuilderArgs = (): UserActionBuilderArgs => {
     manageMarkdownEditIds: [],
     selectedOutlineCommentId: '',
     loadingCommentIds: [],
-    loadingAlertData: false,
     caseConnectors,
     getRuleDetailsHref,
     onRuleDetailsClick,

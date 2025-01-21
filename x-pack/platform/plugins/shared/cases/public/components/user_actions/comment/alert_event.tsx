@@ -7,7 +7,6 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import { isEmpty } from 'lodash';
-import { EuiLoadingSpinner } from '@elastic/eui';
 
 import * as i18n from '../translations';
 import { LinkAnchor } from '../../links';
@@ -19,7 +18,6 @@ interface SingleAlertProps {
   ruleName?: string | null;
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
   onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
-  loadingAlertData?: boolean;
 }
 
 interface MultipleAlertsProps extends SingleAlertProps {
@@ -27,7 +25,7 @@ interface MultipleAlertsProps extends SingleAlertProps {
 }
 
 const RuleLink: React.FC<SingleAlertProps> = memo(
-  ({ onRuleDetailsClick, getRuleDetailsHref, ruleId, ruleName, loadingAlertData, actionId }) => {
+  ({ onRuleDetailsClick, getRuleDetailsHref, ruleId, ruleName, actionId }) => {
     const onLinkClick = useCallback(
       (ev: React.MouseEvent) => {
         ev.preventDefault();
@@ -44,10 +42,6 @@ const RuleLink: React.FC<SingleAlertProps> = memo(
       }
       return !isEmpty(ruleId);
     }, [onRuleDetailsClick, ruleDetailsHref, ruleId]);
-
-    if (loadingAlertData) {
-      return <EuiLoadingSpinner size="m" data-test-subj={`alert-loading-spinner-${actionId}`} />;
-    }
 
     if (isValidLink) {
       return (
@@ -70,7 +64,6 @@ RuleLink.displayName = 'RuleLink';
 const SingleAlertCommentEventComponent: React.FC<SingleAlertProps> = ({
   actionId,
   getRuleDetailsHref,
-  loadingAlertData = false,
   onRuleDetailsClick,
   ruleId,
   ruleName,
@@ -84,7 +77,6 @@ const SingleAlertCommentEventComponent: React.FC<SingleAlertProps> = ({
         ruleName={ruleName}
         getRuleDetailsHref={getRuleDetailsHref}
         onRuleDetailsClick={onRuleDetailsClick}
-        loadingAlertData={loadingAlertData}
       />
     </span>
   );
@@ -97,7 +89,6 @@ export const SingleAlertCommentEvent = memo(SingleAlertCommentEventComponent);
 const MultipleAlertsCommentEventComponent: React.FC<MultipleAlertsProps> = ({
   actionId,
   getRuleDetailsHref,
-  loadingAlertData = false,
   onRuleDetailsClick,
   ruleId,
   ruleName,
@@ -112,7 +103,6 @@ const MultipleAlertsCommentEventComponent: React.FC<MultipleAlertsProps> = ({
         ruleName={ruleName}
         getRuleDetailsHref={getRuleDetailsHref}
         onRuleDetailsClick={onRuleDetailsClick}
-        loadingAlertData={loadingAlertData}
       />
     </span>
   );

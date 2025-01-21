@@ -62,20 +62,13 @@ export const convertToCamelCase = <T, U extends {}>(obj: T): U =>
   }, {} as U);
 
 export const convertCaseToCamelCase = (theCase: Case): CaseUI => {
-  const { comments, ...restCase } = theCase;
-  return {
-    ...convertToCamelCase<Case, CaseUI>(restCase),
-    ...(comments != null ? { comments: convertAttachmentsToCamelCase(comments) } : {}),
-  };
+  return convertToCamelCase<Case, CaseUI>(theCase);
 };
 
 export const convertCasesToCamelCase = (cases: Cases): CasesUI => cases.map(convertCaseToCamelCase);
 
 export const convertSimilarCaseToCamelCase = (theCase: SimilarCase): SimilarCaseUI => {
-  const { comments, ...restCase } = theCase;
-  return {
-    ...convertToCamelCase<SimilarCase, SimilarCaseUI>(restCase),
-  };
+  return convertToCamelCase<SimilarCase, SimilarCaseUI>(theCase);
 };
 
 export const convertSimilarCasesToCamelCase = (cases: SimilarCases): SimilarCasesUI =>

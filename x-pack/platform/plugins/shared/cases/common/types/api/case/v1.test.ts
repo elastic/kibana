@@ -20,7 +20,6 @@ import {
   MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
 } from '../../../constants';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { AttachmentType } from '../../domain/attachment/v1';
 import type { Case } from '../../domain/case/v1';
 import { CaseSeverity, CaseStatuses } from '../../domain/case/v1';
 import { ConnectorTypes } from '../../domain/connector/v1';
@@ -49,25 +48,6 @@ const basicCase: Case = {
   closed_at: null,
   closed_by: null,
   id: 'basic-case-id',
-  comments: [
-    {
-      comment: 'Solve this fast!',
-      type: AttachmentType.user,
-      id: 'basic-comment-id',
-      created_at: '2020-02-19T23:06:33.798Z',
-      created_by: {
-        full_name: 'Leslie Knope',
-        username: 'lknope',
-        email: 'leslie.knope@elastic.co',
-      },
-      owner: 'cases',
-      pushed_at: null,
-      pushed_by: null,
-      updated_at: null,
-      updated_by: null,
-      version: 'WzQ3LDFc',
-    },
-  ],
   created_at: '2020-02-19T23:06:33.798Z',
   created_by: {
     full_name: 'Leslie Knope',

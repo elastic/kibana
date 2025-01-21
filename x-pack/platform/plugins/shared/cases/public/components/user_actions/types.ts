@@ -68,6 +68,7 @@ export interface UserActionBuilderArgs {
   manageMarkdownEditIds: string[];
   selectedOutlineCommentId: string;
   loadingCommentIds: string[];
+  alertData: Record<string, unknown>;
   actionsNavigation?: ActionsNavigation;
   handleOutlineComment: (id: string) => void;
   handleManageMarkdownEditId: (id: string) => void;

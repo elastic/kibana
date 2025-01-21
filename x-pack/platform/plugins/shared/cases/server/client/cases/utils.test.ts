@@ -312,10 +312,7 @@ describe('utils', () => {
 
     it('creates comments correctly', async () => {
       const res = await createIncident({
-        theCase: {
-          ...theCase,
-          comments: [commentObj],
-        },
+        theCase,
         userActions,
         connector,
         alerts: [],
@@ -335,7 +332,6 @@ describe('utils', () => {
       const res = await createIncident({
         theCase: {
           ...theCase,
-          comments: [commentObj, commentAlert, commentAlertMultipleIds],
         },
         userActions,
         connector,

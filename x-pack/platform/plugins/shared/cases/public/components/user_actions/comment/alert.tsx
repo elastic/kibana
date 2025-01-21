@@ -29,7 +29,6 @@ type BuilderArgs = Pick<
   | 'alertData'
   | 'getRuleDetailsHref'
   | 'onRuleDetailsClick'
-  | 'loadingAlertData'
   | 'onShowAlertDetails'
   | 'userProfiles'
   | 'handleDeleteComment'
@@ -41,7 +40,6 @@ const getSingleAlertUserAction = ({
   userProfiles,
   attachment,
   alertData,
-  loadingAlertData,
   loadingCommentIds,
   getRuleDetailsHref,
   onRuleDetailsClick,
@@ -69,7 +67,6 @@ const getSingleAlertUserAction = ({
         <SingleAlertCommentEvent
           actionId={userAction.id}
           getRuleDetailsHref={getRuleDetailsHref}
-          loadingAlertData={loadingAlertData}
           onRuleDetailsClick={onRuleDetailsClick}
           ruleId={ruleId}
           ruleName={ruleName}
@@ -104,7 +101,6 @@ const getMultipleAlertsUserAction = ({
   userProfiles,
   attachment,
   alertData,
-  loadingAlertData,
   loadingCommentIds,
   getRuleDetailsHref,
   onRuleDetailsClick,
@@ -126,7 +122,6 @@ const getMultipleAlertsUserAction = ({
       event: (
         <MultipleAlertsCommentEvent
           actionId={userAction.id}
-          loadingAlertData={loadingAlertData}
           totalAlerts={totalAlerts}
           ruleId={ruleId}
           ruleName={ruleName}
