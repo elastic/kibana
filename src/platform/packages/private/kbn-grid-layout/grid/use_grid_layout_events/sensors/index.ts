@@ -16,7 +16,8 @@ export { isTouchEvent, startTouchInteraction } from './touch';
 
 export function getPointerPosition(e: UserInteractionEvent) {
   if (!isMouseEvent(e) && !isTouchEvent(e)) {
-    throw new Error('Invalid event type');
+    return { clientX: 0, clientY: 0 };
+    // throw new Error('Invalid event type');
   }
   return isTouchEvent(e) ? e.touches[0] : e;
 }

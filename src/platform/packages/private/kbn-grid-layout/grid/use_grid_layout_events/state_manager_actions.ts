@@ -15,6 +15,8 @@ import { getDragPreviewRect, getPointerOffsets, getResizePreviewRect } from './p
 import { resolveGridRow } from '../utils/resolve_grid_row';
 import { isGridDataEqual } from '../utils/equality_checks';
 import { UserInteractionEvent } from './types';
+import { isKeyboardEvent } from './sensors/keyboard/keyboard';
+import { getKeyboardDragPreviewRect, getKeyboardResizePreviewRect } from './sensors/keyboard/utils';
 
 export const startAction = (
   e: UserInteractionEvent,
@@ -55,6 +57,7 @@ export const commitAction = ({
 };
 
 export const moveAction = (
+  e: UserInteractionEvent,
   gridLayoutStateManager: GridLayoutStateManager,
   pointerPixel: { clientX: number; clientY: number },
   lastRequestedPanelPosition: MutableRefObject<GridPanelData | undefined>
@@ -84,16 +87,14 @@ export const moveAction = (
   const isResize = interactionEvent.type === 'resize';
 
   const previewRect = (() => {
+    if (isKeyboardEvent(e)) {
+      return isResize
+        ? getKeyboardResizePreviewRect({ e, interactionEvent, runtimeSettings })
+        : getKeyboardDragPreviewRect({ e, interactionEvent, runtimeSettings });
+    }
     return isResize
-      ? getResizePreviewRect({
-          interactionEvent,
-          pointerPixel,
-          runtimeSettings,
-        })
-      : getDragPreviewRect({
-          interactionEvent,
-          pointerPixel,
-        });
+      ? getResizePreviewRect({ interactionEvent, pointerPixel, runtimeSettings })
+      : getDragPreviewRect({ interactionEvent, pointerPixel });
   })();
 
   activePanel$.next({ id: interactionEvent.id, position: previewRect });
@@ -187,4 +188,15 @@ export const moveAction = (
       proposedGridLayout$.next(nextLayout);
     }
   }
+};
+
+export const cancelAction = ({
+  activePanel$,
+  interactionEvent$,
+  gridLayout$,
+  proposedGridLayout$,
+}: GridLayoutStateManager) => {
+  activePanel$.next(undefined);
+  interactionEvent$.next(undefined);
+  proposedGridLayout$.next(undefined);
 };
