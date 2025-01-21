@@ -13,8 +13,12 @@ import { i18n } from '@kbn/i18n';
 import { ViewMode } from '@kbn/presentation-publishing';
 import React, { useCallback } from 'react';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
-import { PresentationPanelTitle, placeholderTitle } from './presentation_panel_title';
+import { PresentationPanelTitle } from './presentation_panel_title';
 import { usePresentationPanelHeaderActions } from './use_presentation_panel_header_actions';
+
+const placeholderTitle = i18n.translate('presentationPanel.placeholderTitle', {
+  defaultMessage: '[No Title]',
+});
 
 const getAriaLabelForTitle = (title?: string) => {
   return title
@@ -85,7 +89,7 @@ export const PresentationPanelHeader = <
       data-test-subj={`embeddablePanelHeading-${(panelTitle || '').replace(/\s/g, '')}`}
       className={'embPanel__header'}
       css={css`
-        &:hover {
+        .dshLayout--editing &:hover {
           cursor: move;
           background-color: ${transparentize(euiTheme.colors.warning, 0.2)};
         }

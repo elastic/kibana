@@ -101,6 +101,7 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
 
             const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
 
+            ref.setAttribute('data-kbn-grid-row', `${panel.row}`);
             if (panelId === activePanel?.id) {
               ref.classList.add('kbnGridPanel--active');
 
@@ -195,7 +196,7 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
     }, [panelId, renderPanelContents, dragHandleApi]);
 
     return (
-      <div ref={panelRef} css={initialStyles} className="kbnGridPanel">
+      <div ref={panelRef} css={initialStyles} className={`kbnGridPanel`}>
         <DragHandle
           ref={setDragHandleApi}
           gridLayoutStateManager={gridLayoutStateManager}

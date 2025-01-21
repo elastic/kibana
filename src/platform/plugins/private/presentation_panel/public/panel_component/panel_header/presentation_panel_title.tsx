@@ -96,6 +96,7 @@ export const PresentationPanelTitle = ({
             display: flex;
             flex-wrap: nowrap;
             column-gap: ${euiTheme.size.xs};
+            align-items: center;
           `,
         }}
       >

@@ -132,7 +132,6 @@ export const PresentationPanelHoverActions = ({
   const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean>(false);
   const [notifications, setNotifications] = useState<AnyApiAction[]>([]);
   const dragHandleRef = useRef<HTMLButtonElement | null>(null);
-  const anchorRef = useRef<HTMLDivElement | null>(null);
 
   const { euiTheme } = useEuiTheme();
 
@@ -439,7 +438,6 @@ export const PresentationPanelHoverActions = ({
 
   return (
     <div
-      ref={anchorRef}
       className={classNames('embPanel__hoverActionsAnchor', {
         'embPanel__hoverActionsAnchor--lockHoverActions': hasLockedHoverActions,
       })}
@@ -470,7 +468,16 @@ export const PresentationPanelHoverActions = ({
       {children}
       {api && hasHoverActions && (
         <div className={classNames('embPanel__hoverActions', className)} css={hoverActionStyles}>
-          {viewMode === 'edit' && dragHandle}
+          {viewMode === 'edit' ? (
+            dragHandle
+          ) : (
+            // this is necessary so that the CSS grid responds properly
+            <div
+              css={css`
+                visibility: hidden;
+              `}
+            />
+          )}
           <div className="breakpoint" />
           {showNotifications && notificationElements}
           {showDescription && (

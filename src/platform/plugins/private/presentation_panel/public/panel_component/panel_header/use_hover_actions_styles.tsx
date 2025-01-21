@@ -27,6 +27,7 @@ export const useHoverActionStyles = () => {
         top: -${euiTheme.size.xl};
         z-index: -1;
         opacity: 0;
+        visibility: hidden;
 
         // delay hiding hover actions to make grabbing the drag handle easier
         transition: ${euiTheme.animation.extraFast} opacity ease-in,
@@ -43,12 +44,34 @@ export const useHoverActionStyles = () => {
       .embPanel__hoverActions:has(:focus-visible) {
         z-index: ${euiTheme.levels.toast};
         opacity: 1;
-        transition: none; // apply transition on hover out only
+        visibility: visible;
+        transition: 0s opacity; // apply transition on hover out only
       }
     `;
   }, [euiTheme]);
 
   const hoverActionStyles = useMemo(() => {
+    const singleWrapperStyles = css`
+      width: fit-content;
+      top: -${euiTheme.size.l} !important;
+      right: ${euiTheme.size.xs};
+      padding: var(--paddingAroundAction);
+
+      border-radius: ${euiTheme.border.radius.medium};
+      border: var(--borderStyle);
+      background-color: ${euiTheme.colors.backgroundBasePlain};
+      grid-template-columns: max-content;
+
+      & > * {
+        // undo certain styles on all children so that parent takes precedence
+        border: none !important;
+        padding: 0px !important;
+        border-radius: unset !important;
+        background-color: transparent !important;
+        height: unset !important;
+      }
+    `;
+
     return css`
       --paddingAroundAction: calc(${euiTheme.size.xs} - 1px);
 
@@ -58,17 +81,15 @@ export const useHoverActionStyles = () => {
       padding: 0px ${euiTheme.size.m};
       width: 100%;
 
-      display: grid;
-      grid-template-columns: max-content auto; // left actions + breakpoint
-      grid-auto-columns: max-content; // handle all right actions
-      grid-auto-flow: column;
+      display: flex;
       align-items: center;
 
       & > * {
-        pointer-events: all; // re-enable pointer events for children
         height: ${euiTheme.size.xl};
 
         &:not(.breakpoint) {
+          flex: 0; // do not grow
+          pointer-events: all; // re-enable pointer events for non-breakpoint children
           // style children that are **not** the breakpoint
           border-top: var(--borderStyle);
           border-radius: 0px;
@@ -77,8 +98,12 @@ export const useHoverActionStyles = () => {
         }
       }
 
+      & > .breakpoint {
+        flex: 1; // grow to fill remaining space between left and right action groups
+      }
+
       // start of action group
-      & > *:first-child,
+      & > *:first-child:not(.breakpoint),
       & > .breakpoint + * {
         border-left: var(--borderStyle);
         border-top-left-radius: ${euiTheme.border.radius.medium};
@@ -94,20 +119,14 @@ export const useHoverActionStyles = () => {
       }
 
       @container hoverActionsAnchor (width < 250px) {
-        width: fit-content;
-        top: -${euiTheme.size.l};
-        right: ${euiTheme.size.xs};
-        padding: var(--paddingAroundAction);
+        // shrink down to single wrapped element with no breakpoint when panel gets smaller
+        ${singleWrapperStyles}
+      }
 
-        border-radius: ${euiTheme.border.radius.medium};
-        border: var(--borderStyle);
-        background-color: ${euiTheme.colors.backgroundBasePlain};
-        grid-template-columns: max-content;
-
-        & > * {
-          border: none !important;
-          padding: 0px !important;
-        }
+      .dshDashboardViewportWrapper--isFullscreen .kbnGridPanel[data-kbn-grid-row='0'] & {
+        // when in fullscreen mode, combine all floating actions on first row down and nudge them down
+        ${singleWrapperStyles}
+        top: -${euiTheme.size.s} !important;
       }
     `;
   }, [euiTheme]);
