@@ -14,7 +14,7 @@ export const promptSavedObjectMappings: SavedObjectsType['mappings'] = {
     description: {
       type: 'text',
     },
-    name: {
+    promptId: {
       type: 'keyword',
     },
     llm: {
@@ -25,10 +25,11 @@ export const promptSavedObjectMappings: SavedObjectsType['mappings'] = {
     },
     prompt: {
       properties: {
-        // ISO 639 two-letter language code
-        en: {
+        // English is default
+        default: {
           type: 'text',
         },
+        // optionally, add ISO 639 two-letter language code to support more translations
       },
     },
   },
