@@ -661,7 +661,7 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
   description: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.endpointExceptions.description',
     {
-      defaultMessage: 'Manage Endpoint Exceptions.',
+      defaultMessage: 'Use Endpoint Exceptions.',
     }
   ),
   privilegeGroups: [
