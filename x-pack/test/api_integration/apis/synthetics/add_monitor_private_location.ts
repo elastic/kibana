@@ -71,7 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('add a test private location', async () => {
       pvtLoc = await testPrivateLocations.addPrivateLocation();
-      testFleetPolicyID = pvtLoc.id;
+      testFleetPolicyID = pvtLoc.agentPolicyId;
 
       const apiResponse = await supertestAPI.get(SYNTHETICS_API_URLS.SERVICE_LOCATIONS);
 
@@ -138,8 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       const packagePolicy = apiResponse.body.items.find(
-        (pkgPolicy: PackagePolicy) =>
-          pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID + '-default'
+        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitorId + '-' + pvtLoc.id + '-default'
       );
 
       expect(packagePolicy?.policy_id).eql(testFleetPolicyID);
@@ -149,18 +148,19 @@ export default function ({ getService }: FtrProviderContext) {
         getTestSyntheticsPolicy({
           name: httpMonitorJson.name,
           id: newMonitorId,
-          location: { id: testFleetPolicyID },
+          location: { id: pvtLoc.id },
         })
       );
     });
 
     let testFleetPolicyID2: string;
+    let pvtLoc2: PrivateLocation;
 
     it('edits a monitor with additional private location', async () => {
       const resPolicy = await testPrivateLocations.addFleetPolicy(testPolicyName + 1);
       testFleetPolicyID2 = resPolicy.body.item.id;
 
-      const pvtLoc2 = await testPrivateLocations.addPrivateLocation({
+      pvtLoc2 = await testPrivateLocations.addPrivateLocation({
         policyId: testFleetPolicyID2,
         label: 'Test private location 1',
       });
@@ -169,7 +169,7 @@ export default function ({ getService }: FtrProviderContext) {
         id: pvtLoc2.id,
         label: pvtLoc2.label,
         isServiceManaged: false,
-        agentPolicyId: pvtLoc2.id,
+        agentPolicyId: pvtLoc2.agentPolicyId,
         geo: {
           lat: 0,
           lon: 0,
@@ -200,8 +200,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       let packagePolicy = apiResponsePolicy.body.items.find(
-        (pkgPolicy: PackagePolicy) =>
-          pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID + '-default'
+        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitorId + '-' + pvtLoc.id + '-default'
       );
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID);
@@ -211,13 +210,12 @@ export default function ({ getService }: FtrProviderContext) {
         getTestSyntheticsPolicy({
           name: httpMonitorJson.name,
           id: newMonitorId,
-          location: { id: testFleetPolicyID },
+          location: { id: pvtLoc.id },
         })
       );
 
       packagePolicy = apiResponsePolicy.body.items.find(
-        (pkgPolicy: PackagePolicy) =>
-          pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID2 + '-default'
+        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitorId + '-' + pvtLoc2.id + '-default'
       );
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID2);
@@ -228,16 +226,14 @@ export default function ({ getService }: FtrProviderContext) {
           id: newMonitorId,
           location: {
             name: 'Test private location 1',
-            id: testFleetPolicyID2,
+            id: pvtLoc2.id,
           },
         })
       );
     });
 
     it('deletes integration for a removed location from monitor', async () => {
-      httpMonitorJson.locations = httpMonitorJson.locations.filter(
-        ({ id }) => id !== testFleetPolicyID2
-      );
+      httpMonitorJson.locations = httpMonitorJson.locations.filter(({ id }) => id !== pvtLoc2.id);
 
       await supertestAPI
         .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + newMonitorId + '?internal=true')
@@ -250,8 +246,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       let packagePolicy = apiResponsePolicy.body.items.find(
-        (pkgPolicy: PackagePolicy) =>
-          pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID + '-default'
+        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitorId + '-' + pvtLoc.id + '-default'
       );
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID);
@@ -261,13 +256,12 @@ export default function ({ getService }: FtrProviderContext) {
         getTestSyntheticsPolicy({
           name: httpMonitorJson.name,
           id: newMonitorId,
-          location: { id: testFleetPolicyID },
+          location: { id: pvtLoc.id },
         })
       );
 
       packagePolicy = apiResponsePolicy.body.items.find(
-        (pkgPolicy: PackagePolicy) =>
-          pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID2 + '-default'
+        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitorId + '-' + pvtLoc2.id + '-default'
       );
 
       expect(packagePolicy).eql(undefined);
@@ -325,7 +319,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const packagePolicy = policyResponse.body.items.find(
           (pkgPolicy: PackagePolicy) =>
-            pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-${SPACE_ID}`
+            pkgPolicy.id === monitorId + '-' + pvtLoc.id + `-${SPACE_ID}`
         );
 
         expect(packagePolicy.policy_id).eql(testFleetPolicyID);
@@ -335,7 +329,7 @@ export default function ({ getService }: FtrProviderContext) {
           getTestSyntheticsPolicy({
             name: monitor.name,
             id: monitorId,
-            location: { id: testFleetPolicyID },
+            location: { id: pvtLoc.id },
             namespace: formatKibanaNamespace(SPACE_ID),
             spaceId: SPACE_ID,
           })
@@ -359,7 +353,7 @@ export default function ({ getService }: FtrProviderContext) {
         ...httpMonitorJson,
         locations: [
           {
-            id: testFleetPolicyID,
+            id: pvtLoc.id,
             label: 'Test private location 0',
             isServiceManaged: false,
           },
@@ -383,15 +377,14 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         const packagePolicy = policyResponse.body.items.find(
-          (pkgPolicy: PackagePolicy) =>
-            pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-default`
+          (pkgPolicy: PackagePolicy) => pkgPolicy.id === monitorId + '-' + pvtLoc.id + `-default`
         );
         comparePolicies(
           packagePolicy,
           getTestSyntheticsPolicy({
             name: monitor.name,
             id: monitorId,
-            location: { id: testFleetPolicyID },
+            location: { id: pvtLoc.id },
             isTLSEnabled: true,
           })
         );
@@ -407,7 +400,7 @@ export default function ({ getService }: FtrProviderContext) {
         ...httpMonitorJson,
         locations: [
           {
-            id: testFleetPolicyID,
+            id: pvtLoc.id,
             label: 'Test private location 0',
             isServiceManaged: false,
           },
@@ -432,15 +425,14 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         const packagePolicy = policyResponse.body.items.find(
-          (pkgPolicy: PackagePolicy) =>
-            pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-default`
+          (pkgPolicy: PackagePolicy) => pkgPolicy.id === monitorId + '-' + pvtLoc.id + `-default`
         );
         comparePolicies(
           packagePolicy,
           getTestSyntheticsPolicy({
             name: monitor.name,
             id: monitorId,
-            location: { id: testFleetPolicyID },
+            location: { id: pvtLoc.id },
           })
         );
       } finally {
@@ -457,7 +449,7 @@ export default function ({ getService }: FtrProviderContext) {
         [ConfigKey.NAMESPACE]: 'default',
         locations: [
           {
-            id: testFleetPolicyID,
+            id: pvtLoc.id,
             label: 'Test private location 0',
             isServiceManaged: false,
           },
@@ -477,8 +469,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         const packagePolicy = policyResponse.body.items.find(
-          (pkgPolicy: PackagePolicy) =>
-            pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-default`
+          (pkgPolicy: PackagePolicy) => pkgPolicy.id === monitorId + '-' + pvtLoc.id + `-default`
         );
 
         expect(packagePolicy.package.version).eql(INSTALLED_VERSION);
@@ -488,8 +479,7 @@ export default function ({ getService }: FtrProviderContext) {
           '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
         );
         const packagePolicyAfterUpgrade = policyResponseAfterUpgrade.body.items.find(
-          (pkgPolicy: PackagePolicy) =>
-            pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-default`
+          (pkgPolicy: PackagePolicy) => pkgPolicy.id === monitorId + '-' + pvtLoc.id + `-default`
         );
         expect(semver.gte(packagePolicyAfterUpgrade.package.version, INSTALLED_VERSION)).eql(true);
       } finally {
