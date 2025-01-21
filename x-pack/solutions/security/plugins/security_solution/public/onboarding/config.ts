@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { OnboardingTopicId } from './constants';
 import {
@@ -13,7 +12,6 @@ import {
   siemMigrationsBodyConfig,
 } from './components/onboarding_body/body_config';
 import type { TopicConfig } from './types';
-import { SiemMigrationSetupTour } from '../siem_migrations/rules/components/tours/setup_guide';
 
 export const onboardingConfig: TopicConfig[] = [
   {
@@ -25,15 +23,9 @@ export const onboardingConfig: TopicConfig[] = [
   },
   {
     id: OnboardingTopicId.siemMigrations,
-    title: (
-      <SiemMigrationSetupTour>
-        <>
-          {i18n.translate('xpack.securitySolution.onboarding.topic.siemMigrations', {
-            defaultMessage: 'SIEM Rule migration',
-          })}
-        </>
-      </SiemMigrationSetupTour>
-    ),
+    title: i18n.translate('xpack.securitySolution.onboarding.topic.siemMigrations', {
+      defaultMessage: 'SIEM Rule migration',
+    }),
     body: siemMigrationsBodyConfig,
     licenseTypeRequired: 'enterprise',
     experimentalFlagRequired: 'siemMigrationsEnabled',
