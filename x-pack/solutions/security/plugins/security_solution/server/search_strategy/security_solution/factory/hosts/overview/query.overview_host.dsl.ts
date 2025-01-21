@@ -308,6 +308,5 @@ export const buildOverviewHostQuery = ({
     },
   } as const;
 
-  // @ts-expect-error @elastic-elasticsearch readonly [] is not assignable to mutable QueryDslQueryContainer[]
   return dslQuery;
 };

@@ -62,7 +62,7 @@ export const buildManagedUserDetailsQuery = ({
         },
       },
     },
-    sort: [{ '@timestamp': 'desc' }],
+    sort: [{ '@timestamp': 'desc' as const }],
   };
 
   return dslQuery;
