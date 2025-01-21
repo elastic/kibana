@@ -18,6 +18,7 @@ export const DefaultDragHandle = React.memo(
       <button
         onMouseDown={dragHandleApi.startDrag}
         onTouchStart={dragHandleApi.startDrag}
+        onKeyDown={dragHandleApi.startDrag}
         aria-label={i18n.translate('kbnGridLayout.dragHandle.ariaLabel', {
           defaultMessage: 'Drag to move',
         })}
@@ -44,6 +45,7 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     height: euiTheme.size.l,
     zIndex: euiTheme.levels.modal,
     marginLeft: euiTheme.size.s,
+    scrollMarginTop: '200px', // TODO: OFFSET_TOP
     border: `1px solid ${euiTheme.border.color}`,
     borderBottom: 'none',
     backgroundColor: euiTheme.colors.backgroundBasePlain,

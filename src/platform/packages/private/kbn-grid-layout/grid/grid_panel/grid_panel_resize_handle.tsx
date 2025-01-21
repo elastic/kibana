@@ -27,6 +27,7 @@ export const ResizeHandle = React.memo(({ rowId, panelId }: { rowId: string; pan
       css={styles}
       onMouseDown={startInteraction}
       onTouchStart={startInteraction}
+      onKeyDown={startInteraction}
       className="kbnGridPanel--resizeHandle"
       aria-label={i18n.translate('kbnGridLayout.resizeHandle.ariaLabel', {
         defaultMessage: 'Resize panel',
@@ -47,6 +48,7 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     height: euiTheme.size.l,
     zIndex: euiTheme.levels.toast,
     touchAction: 'none',
+    scrollMarginBottom: euiTheme.size.l,
     '&:hover, &:focus': {
       cursor: 'se-resize',
     },

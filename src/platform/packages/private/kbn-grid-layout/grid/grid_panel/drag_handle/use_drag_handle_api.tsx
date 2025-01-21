@@ -41,13 +41,16 @@ export const useDragHandleApi = ({
         if (handle === null) return;
         handle.addEventListener('mousedown', startInteraction, { passive: true });
         handle.addEventListener('touchstart', startInteraction, { passive: true });
+        handle.addEventListener('keydown', startInteraction);
         handle.style.touchAction = 'none';
+        handle.style.scrollMarginTop = '200px'; // todo: OFFSET_TOP
       }
       removeEventListenersRef.current = () => {
         for (const handle of dragHandles) {
           if (handle === null) return;
           handle.removeEventListener('mousedown', startInteraction);
           handle.removeEventListener('touchstart', startInteraction);
+          handle.removeEventListener('keydown', startInteraction);
         }
       };
     },
