@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 import { useConfig } from '../../../../../hooks';
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../../common/services/generate_new_agent_policy';
@@ -28,7 +28,6 @@ import {
 import {
   isAgentlessIntegration as isAgentlessIntegrationFn,
   getAgentlessAgentPolicyNameFromPackagePolicyName,
-  isOnlyAgentlessIntegration,
 } from '../../../../../../../../common/services/agentless_policy_helper';
 
 export const useAgentless = () => {
@@ -85,11 +84,15 @@ export function useSetupTechnology({
   // this is a placeholder for the new agent-BASED policy that will be used when the user switches from agentless to agent-based and back
   const orginalAgentPolicyRef = useRef<NewAgentPolicy>({ ...newAgentPolicy });
   const [currentAgentPolicy, setCurrentAgentPolicy] = useState(newAgentPolicy);
-  const defaultSetupTechnology = useMemo(() => {
-    return isOnlyAgentlessIntegration(packageInfo) || isAgentlessSetupDefault(packageInfo)
-      ? SetupTechnology.AGENTLESS
-      : SetupTechnology.AGENT_BASED;
-  }, [packageInfo]);
+  // const defaultSetupTechnology = useMemo(() => {
+  //   return isOnlyAgentlessIntegration(packageInfo) || isAgentlessSetupDefault(packageInfo)
+  //     ? SetupTechnology.AGENTLESS
+  //     : SetupTechnology.AGENT_BASED;
+  // }, [packageInfo]);
+  const defaultSetupTechnology = isAgentlessSetupDefault(packageInfo)
+    ? SetupTechnology.AGENTLESS
+    : SetupTechnology.AGENT_BASED;
+
   const [selectedSetupTechnology, setSelectedSetupTechnology] =
     useState<SetupTechnology>(defaultSetupTechnology);
 

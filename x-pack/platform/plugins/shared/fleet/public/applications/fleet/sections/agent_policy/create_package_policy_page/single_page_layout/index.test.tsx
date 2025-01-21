@@ -740,14 +740,16 @@ describe('When on the package policy create page', () => {
           fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
         });
 
-        expect(sendCreateAgentPolicy).toHaveBeenCalledWith(
-          expect.objectContaining({
-            monitoring_enabled: ['logs', 'metrics', 'traces'],
-            name: 'Agent policy 2',
-          }),
-          { withSysMonitoring: true }
-        );
-        expect(sendCreatePackagePolicy).toHaveBeenCalled();
+        await waitFor(() => {
+          expect(sendCreateAgentPolicy).toHaveBeenCalledWith(
+            expect.objectContaining({
+              monitoring_enabled: ['logs', 'metrics', 'traces'],
+              name: 'Agent policy 2',
+            }),
+            { withSysMonitoring: true }
+          );
+          expect(sendCreatePackagePolicy).toHaveBeenCalled();
+        });
 
         await waitFor(() => {
           expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();
@@ -766,15 +768,17 @@ describe('When on the package policy create page', () => {
           fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
         });
 
-        expect(sendCreateAgentPolicy).toHaveBeenCalledWith(
-          expect.objectContaining({
-            monitoring_enabled: ['logs', 'metrics'],
-            name: 'Agentless policy for nginx-1',
-            supports_agentless: true,
-          }),
-          { withSysMonitoring: false }
-        );
-        expect(sendCreatePackagePolicy).toHaveBeenCalled();
+        await waitFor(() => {
+          expect(sendCreateAgentPolicy).toHaveBeenCalledWith(
+            expect.objectContaining({
+              monitoring_enabled: ['logs', 'metrics'],
+              name: 'Agentless policy for nginx-1',
+              supports_agentless: true,
+            }),
+            { withSysMonitoring: false }
+          );
+          expect(sendCreatePackagePolicy).toHaveBeenCalled();
+        });
 
         await waitFor(() => {
           expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();
