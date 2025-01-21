@@ -9,6 +9,7 @@ import { AlertHit } from '@kbn/alerting-plugin/server/types';
 import { ObservabilityAIAssistantRouteHandlerResources } from '@kbn/observability-ai-assistant-plugin/server/routes/types';
 import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
 import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
+import { ACTIVE_ALERTS, ALERT_STATUSES } from '../../common/constants';
 import {
   getObsAIAssistantConnectorAdapter,
   getObsAIAssistantConnectorType,
@@ -28,7 +29,7 @@ describe('observabilityAIAssistant rule_connector', () => {
     it('builds action params', () => {
       const adapter = getObsAIAssistantConnectorAdapter();
       const params = adapter.buildActionParams({
-        params: { connector: '.azure', message: 'hello', status: 'all' },
+        params: { connector: '.azure', message: 'hello' },
         rule: { id: 'foo', name: 'bar', tags: [], consumer: '', producer: '' },
         ruleUrl: 'http://myrule.com',
         spaceId: 'default',
@@ -42,8 +43,7 @@ describe('observabilityAIAssistant rule_connector', () => {
 
       expect(params).toEqual({
         connector: '.azure',
-        message: 'hello',
-        status: 'all',
+        prompts: [{ message: 'hello', statuses: ALERT_STATUSES.map(({ id }) => id) }],
         rule: { id: 'foo', name: 'bar', tags: [], ruleUrl: 'http://myrule.com' },
         alerts: {
           new: [{ _id: 'new_alert' }],
@@ -125,9 +125,12 @@ describe('observabilityAIAssistant rule_connector', () => {
         actionId: 'observability-ai-assistant',
         request: getFakeKibanaRequest({ id: 'foo', api_key: 'bar' }),
         params: {
-          message: 'hello',
+          prompts: [{ message: 'hello', statuses: ALERT_STATUSES.map(({ id }) => id) }],
           connector: 'azure-open-ai',
-          alerts: { new: [{ _id: 'new_alert' }], recovered: [] },
+          alerts: {
+            new: [{ kibana: { alert: { status: ACTIVE_ALERTS.id, _id: 'new_alert' } } }],
+            recovered: [],
+          },
         },
       } as unknown as ObsAIAssistantConnectorTypeExecutorOptions);
 

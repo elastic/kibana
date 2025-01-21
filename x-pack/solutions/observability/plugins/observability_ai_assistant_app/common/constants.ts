@@ -14,8 +14,6 @@ import {
 
 import { AlertStatus } from './types';
 
-export const ALERT_STATUS_ALL = 'all';
-
 export const ACTIVE_ALERTS: AlertStatus = {
   id: ALERT_STATUS_ACTIVE,
   label: i18n.translate('xpack.observabilityAiAssistant.alertConnector.alertStatus.active', {

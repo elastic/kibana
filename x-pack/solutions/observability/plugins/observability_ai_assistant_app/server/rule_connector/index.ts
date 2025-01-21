@@ -172,6 +172,12 @@ async function executor(
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
   const { request, params } = execOptions;
 
+  if ((params.alerts?.new || []).length === 0 && (params.alerts?.recovered || []).length === 0) {
+    // connector could be executed with only ongoing actions. we use this path as
+    // dedup mechanism to prevent triggering the same worfklow for an ongoing alert
+    return { actionId: execOptions.actionId, status: 'ok' };
+  }
+
   if (!request) {
     throw new Error('AI Assistant connector requires a kibana request');
   }
@@ -232,8 +238,6 @@ async function executeAlertsChatCompletion(
   }
 
   if (alerts.new.length === 0 && alerts.recovered.length === 0) {
-    // connector could be executed with only ongoing actions. we use this path as
-    // dedup mechanism to prevent triggering the same worfklow for an ongoing alert
     return;
   }
 

@@ -6757,30 +6757,73 @@ Object {
       ],
       "type": "string",
     },
-    "message": Object {
+    "prompts": Object {
       "flags": Object {
         "error": [Function],
       },
-      "metas": Array [
+      "items": Array [
         Object {
-          "x-oas-min-length": 1,
+          "flags": Object {
+            "default": Object {
+              "special": "deep",
+            },
+            "error": [Function],
+            "presence": "optional",
+          },
+          "keys": Object {
+            "message": Object {
+              "flags": Object {
+                "error": [Function],
+              },
+              "metas": Array [
+                Object {
+                  "x-oas-min-length": 1,
+                },
+              ],
+              "rules": Array [
+                Object {
+                  "args": Object {
+                    "method": [Function],
+                  },
+                  "name": "custom",
+                },
+                Object {
+                  "args": Object {
+                    "method": [Function],
+                  },
+                  "name": "custom",
+                },
+              ],
+              "type": "string",
+            },
+            "statuses": Object {
+              "flags": Object {
+                "error": [Function],
+              },
+              "items": Array [
+                Object {
+                  "flags": Object {
+                    "error": [Function],
+                    "presence": "optional",
+                  },
+                  "rules": Array [
+                    Object {
+                      "args": Object {
+                        "method": [Function],
+                      },
+                      "name": "custom",
+                    },
+                  ],
+                  "type": "string",
+                },
+              ],
+              "type": "array",
+            },
+          },
+          "type": "object",
         },
       ],
-      "rules": Array [
-        Object {
-          "args": Object {
-            "method": [Function],
-          },
-          "name": "custom",
-        },
-        Object {
-          "args": Object {
-            "method": [Function],
-          },
-          "name": "custom",
-        },
-      ],
-      "type": "string",
+      "type": "array",
     },
     "rule": Object {
       "flags": Object {
@@ -6884,20 +6927,6 @@ Object {
         },
       },
       "type": "object",
-    },
-    "status": Object {
-      "flags": Object {
-        "error": [Function],
-      },
-      "rules": Array [
-        Object {
-          "args": Object {
-            "method": [Function],
-          },
-          "name": "custom",
-        },
-      ],
-      "type": "string",
     },
   },
   "type": "object",
