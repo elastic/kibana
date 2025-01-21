@@ -58,7 +58,7 @@ export const AIConnectorCard: OnboardingCardComponent<AIConnectorCardMetadata> =
             <ConnectorCards
               canCreateConnectors={canCreateConnectors}
               connectors={connectors}
-              onConnectorSaved={checkComplete}
+              onNewConnectorSaved={checkComplete}
               selectedConnectorId={storedConnectorId}
               onConnectorSelected={setSelectedConnector}
             />
