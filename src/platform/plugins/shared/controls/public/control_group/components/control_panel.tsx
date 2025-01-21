@@ -27,7 +27,7 @@ import {
   apiPublishesViewMode,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { FloatingActions } from '@kbn/presentation-util-plugin/public';
+import { FloatingActions } from './floating_actions';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../common';
 
 import { ControlPanelProps, DefaultControlApi } from '../../controls/types';

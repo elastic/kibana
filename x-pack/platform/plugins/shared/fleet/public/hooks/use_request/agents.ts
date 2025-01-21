@@ -351,6 +351,21 @@ export function sendGetAgentsAvailableVersions() {
   });
 }
 
+export function useGetAgentsAvailableVersionsQuery(options: Partial<{ enabled: boolean }> = {}) {
+  return useQuery(
+    ['available_versions'],
+    () =>
+      sendRequestForRq<GetAvailableVersionsResponse>({
+        method: 'get',
+        path: agentRouteService.getAvailableVersionsPath(),
+        version: API_VERSIONS.public.v1,
+      }),
+    {
+      enabled: options.enabled,
+    }
+  );
+}
+
 export function sendGetAgentStatusRuntimeField() {
   return sendRequestForRq<string>({
     method: 'get',

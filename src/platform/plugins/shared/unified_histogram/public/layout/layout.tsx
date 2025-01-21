@@ -120,10 +120,6 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   renderCustomChartToggleActions?: () => ReactElement | undefined;
   /**
-   * Disable automatic refetching based on props changes, and instead wait for a `refetch` message
-   */
-  disableAutoFetching?: boolean;
-  /**
    * Disable triggers for the Lens embeddable
    */
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
@@ -219,7 +215,6 @@ export const UnifiedHistogramLayout = ({
   container,
   topPanelHeight,
   renderCustomChartToggleActions,
-  disableAutoFetching,
   disableTriggers,
   disabledActions,
   lensSuggestionsApi,
@@ -359,7 +354,6 @@ export const UnifiedHistogramLayout = ({
           breakdown={breakdown}
           renderCustomChartToggleActions={renderCustomChartToggleActions}
           appendHistogram={chartSpacer}
-          disableAutoFetching={disableAutoFetching}
           disableTriggers={disableTriggers}
           disabledActions={disabledActions}
           input$={input$}
