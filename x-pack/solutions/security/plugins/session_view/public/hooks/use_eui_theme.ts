@@ -11,7 +11,6 @@ import { useMemo } from 'react';
 
 type EuiThemeProps = Parameters<typeof useEuiThemeHook>;
 type ExtraEuiVars = {
-  buttonsBackgroundNormalDefaultPrimary: string;
   terminalOutputBackground: string;
   terminalOutputMarkerAccent: string;
   terminalOutputMarkerWarning: string;
@@ -28,7 +27,6 @@ export const useEuiTheme = (...props: EuiThemeProps): EuiThemeReturn => {
 
   const euiVars = useMemo(() => {
     const extraEuiVars: ExtraEuiVars = {
-      buttonsBackgroundNormalDefaultPrimary: '#006DE4', // TODO: Borealis migration - replace with proper color token
       // Terminal Output Colors don't change with the theme
       terminalOutputBackground: '#1d1e23', // TODO: Borealis migration - replace with proper color token
       terminalOutputMarkerAccent: euiLightVars.euiColorAccent,
