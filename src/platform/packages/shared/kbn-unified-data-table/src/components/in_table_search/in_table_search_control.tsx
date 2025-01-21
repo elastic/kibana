@@ -7,29 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ChangeEvent, FocusEvent, useCallback, useState, useEffect, useRef } from 'react';
-import {
-  EuiFieldSearch,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-  EuiText,
-  keys,
-} from '@elastic/eui';
-import { useDebouncedValue } from '@kbn/visualization-utils';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css, type SerializedStyles } from '@emotion/react';
 import {
   useInTableSearchMatches,
   UseInTableSearchMatchesProps,
 } from './use_in_table_search_matches';
+import { InTableSearchInput } from './in_table_search_input';
 import './in_table_search.scss';
 
 const BUTTON_TEST_SUBJ = 'startInTableSearchButton';
 
 export interface InTableSearchControlProps
-  extends Omit<UseInTableSearchMatchesProps, 'inTableSearchTerm'> {
+  extends Omit<UseInTableSearchMatchesProps, 'onScrollToActiveMatch'> {
   pageSize: number | null; // null when the pagination is disabled
   scrollToCell: (params: { rowIndex: number; columnIndex: number; align: 'smart' }) => void;
   shouldOverrideCmdF: (element: HTMLElement) => boolean;
@@ -47,8 +39,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
   onChangeToExpectedPage,
   ...props
 }) => {
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const [buttonNode, setButtonNode] = useState<HTMLButtonElement | null>(null);
+  // const [buttonNode, setButtonNode] = useState<HTMLButtonElement | null>(null);
   const shouldReturnFocusToButtonRef = useRef<boolean>(false);
   const [isFocused, setIsFocused] = useState<boolean>(false);
 
@@ -86,32 +77,29 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
     [scrollToCell, onChangeCss, onChangeToExpectedPage, pageSize]
   );
 
-  const [inTableSearchTerm, setInTableSearchTerm] = useState<string>('');
-  const onChangeSearchTerm = useCallback(
-    (value: string) => {
-      // sending the value to the grid and to the hook, so they can process it hopefully in parallel
-      onChange(value);
-      setInTableSearchTerm(value);
-    },
-    [onChange, setInTableSearchTerm]
-  );
-  const { inputValue, handleInputChange } = useDebouncedValue({
-    onChange: onChangeSearchTerm,
-    value: inTableSearchTerm,
-  });
-
   const {
     matchesCount,
     activeMatchPosition,
     isProcessing,
-    renderCellsShadowPortal,
     goToPrevMatch,
     goToNextMatch,
+    renderCellsShadowPortal,
     resetState,
-  } = useInTableSearchMatches({ ...props, inTableSearchTerm, onScrollToActiveMatch });
+    onChangeInTableSearchTerm,
+  } = useInTableSearchMatches({ ...props, onScrollToActiveMatch });
 
-  const isSearching = isProcessing;
-  const areArrowsDisabled = !matchesCount || isSearching;
+  const onChangeSearchTerm = useCallback(
+    (value: string) => {
+      // sending the value to the grid and to the hook, so they can process it hopefully in parallel
+      setTimeout(() => {
+        onChange(value);
+      }, 0);
+      setTimeout(() => {
+        onChangeInTableSearchTerm(value);
+      }, 0);
+    },
+    [onChange, onChangeInTableSearchTerm]
+  );
 
   const focusInput = useCallback(() => {
     setIsFocused(true);
@@ -126,50 +114,6 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
     [setIsFocused, resetState]
   );
 
-  const onInputChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      handleInputChange(event.target.value);
-    },
-    [handleInputChange]
-  );
-
-  const onKeyUp = useCallback(
-    (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === keys.ESCAPE) {
-        hideInput(true);
-        return;
-      }
-
-      if (areArrowsDisabled) {
-        return;
-      }
-
-      if (event.key === keys.ENTER && event.shiftKey) {
-        goToPrevMatch();
-      } else if (event.key === keys.ENTER) {
-        goToNextMatch();
-      }
-    },
-    [goToPrevMatch, goToNextMatch, hideInput, areArrowsDisabled]
-  );
-
-  const onBlur = useCallback(
-    (event: FocusEvent<HTMLInputElement>) => {
-      if (
-        (!event.relatedTarget ||
-          event.relatedTarget.getAttribute('data-test-subj') !== 'clearSearchButton') &&
-        !inputValue
-      ) {
-        hideInput();
-      }
-    },
-    [hideInput, inputValue]
-  );
-
-  const onSetInputRef = useCallback((node: HTMLInputElement | null) => {
-    inputRef.current = node;
-  }, []);
-
   useEffect(() => {
     const handleGlobalKeyDown = (event: KeyboardEvent) => {
       if (
@@ -179,7 +123,8 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
       ) {
         event.preventDefault(); // prevent default browser find-in-page behavior
         focusInput();
-        inputRef.current?.focus(); // if it was already open before, make sure to shift the focus to it
+        // TODO: refactor
+        // inputRef.current?.focus(); // if it was already open before, make sure to shift the focus to it
       }
     };
 
@@ -191,14 +136,15 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
     };
   }, [focusInput, shouldOverrideCmdF]);
 
-  const shouldRenderButton = !isFocused && !inputValue;
+  const shouldRenderButton = !isFocused;
 
-  useEffect(() => {
-    if (shouldReturnFocusToButtonRef.current && buttonNode && shouldRenderButton) {
-      shouldReturnFocusToButtonRef.current = false;
-      buttonNode.focus();
-    }
-  }, [buttonNode, shouldRenderButton]);
+  // TODO: refactor
+  // useEffect(() => {
+  //   if (shouldReturnFocusToButtonRef.current && buttonNode && shouldRenderButton) {
+  //     shouldReturnFocusToButtonRef.current = false;
+  //     buttonNode.focus();
+  //   }
+  // }, [buttonNode, shouldRenderButton]);
 
   if (shouldRenderButton) {
     return (
@@ -209,7 +155,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
         delay="long"
       >
         <EuiButtonIcon
-          buttonRef={setButtonNode}
+          // buttonRef={setButtonNode}
           data-test-subj={BUTTON_TEST_SUBJ}
           iconType="search"
           size="xs"
@@ -226,54 +172,14 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
 
   return (
     <div className="unifiedDataTable__inTableSearchInputContainer">
-      <EuiFieldSearch
-        inputRef={onSetInputRef}
-        autoFocus
-        compressed
-        className="unifiedDataTable__inTableSearchInput"
-        isClearable={!isSearching}
-        isLoading={isSearching}
-        append={
-          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
-            <EuiFlexItem grow={false} className="unifiedDataTable__inTableSearchMatchesCounter">
-              <EuiText color="subdued" size="s">
-                {matchesCount && activeMatchPosition
-                  ? `${activeMatchPosition}/${matchesCount}`
-                  : '0/0'}
-                &nbsp;
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="arrowUp"
-                color="text"
-                disabled={areArrowsDisabled}
-                aria-label={i18n.translate('unifiedDataTable.inTableSearch.buttonPreviousMatch', {
-                  defaultMessage: 'Previous',
-                })}
-                onClick={goToPrevMatch}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="arrowDown"
-                color="text"
-                disabled={areArrowsDisabled}
-                aria-label={i18n.translate('unifiedDataTable.inTableSearch.buttonNextMatch', {
-                  defaultMessage: 'Next',
-                })}
-                onClick={goToNextMatch}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        placeholder={i18n.translate('unifiedDataTable.inTableSearch.inputPlaceholder', {
-          defaultMessage: 'Search in the table',
-        })}
-        value={inputValue}
-        onChange={onInputChange}
-        onKeyUp={onKeyUp}
-        onBlur={onBlur}
+      <InTableSearchInput
+        matchesCount={matchesCount}
+        activeMatchPosition={activeMatchPosition}
+        isProcessing={isProcessing}
+        goToPrevMatch={goToPrevMatch}
+        goToNextMatch={goToNextMatch}
+        onChangeSearchTerm={onChangeSearchTerm}
+        onHideInput={hideInput}
       />
       {renderCellsShadowPortal ? renderCellsShadowPortal() : null}
     </div>

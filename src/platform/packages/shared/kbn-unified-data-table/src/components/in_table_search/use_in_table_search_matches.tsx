@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useState, ReactNode, useRef } from 'react';
-import { createPortal } from 'react-dom';
+import React, { useCallback, useEffect, useState, ReactNode, useRef, useMemo } from 'react';
+import { createPortal, unmountComponentAtNode } from 'react-dom';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { InTableSearchHighlightsWrapperProps } from './in_table_search_highlights_wrapper';
@@ -30,7 +30,6 @@ interface ActiveMatch {
 export interface UseInTableSearchMatchesProps {
   visibleColumns: string[];
   rows: DataTableRecord[];
-  inTableSearchTerm: string;
   renderCellValue: (
     props: EuiDataGridCellValueElementProps &
       Pick<InTableSearchHighlightsWrapperProps, 'inTableSearchTerm' | 'onHighlightsCountFound'>
@@ -44,7 +43,6 @@ interface UseInTableSearchMatchesState {
   activeMatchPosition: number | null;
   columns: string[];
   isProcessing: boolean;
-  calculatedForSearchTerm: string | null;
   renderCellsShadowPortal: (() => ReactNode) | null;
 }
 
@@ -53,6 +51,7 @@ export interface UseInTableSearchMatchesReturn
   goToPrevMatch: () => void;
   goToNextMatch: () => void;
   resetState: () => void;
+  onChangeInTableSearchTerm: (searchTerm: string) => void;
 }
 
 const INITIAL_STATE: UseInTableSearchMatchesState = {
@@ -61,22 +60,16 @@ const INITIAL_STATE: UseInTableSearchMatchesState = {
   activeMatchPosition: null,
   columns: [],
   isProcessing: false,
-  calculatedForSearchTerm: null,
   renderCellsShadowPortal: null,
 };
 
 export const useInTableSearchMatches = (
   props: UseInTableSearchMatchesProps
 ): UseInTableSearchMatchesReturn => {
-  const { visibleColumns, rows, inTableSearchTerm, renderCellValue, onScrollToActiveMatch } = props;
+  const [inTableSearchTerm, setInTableSearchTerm] = useState<string>('');
+  const { visibleColumns, rows, renderCellValue, onScrollToActiveMatch } = props;
   const [state, setState] = useState<UseInTableSearchMatchesState>(INITIAL_STATE);
-  const {
-    matchesCount,
-    activeMatchPosition,
-    calculatedForSearchTerm,
-    isProcessing,
-    renderCellsShadowPortal,
-  } = state;
+  const { matchesCount, activeMatchPosition, isProcessing, renderCellsShadowPortal } = state;
   const numberOfRunsRef = useRef<number>(0);
 
   useEffect(() => {
@@ -113,7 +106,6 @@ export const useInTableSearchMatches = (
               activeMatchPosition: nextActiveMatchPosition,
               columns: visibleColumns,
               isProcessing: false,
-              calculatedForSearchTerm: inTableSearchTerm,
               renderCellsShadowPortal: null,
             });
 
@@ -144,16 +136,27 @@ export const useInTableSearchMatches = (
     setState(INITIAL_STATE);
   }, [setState]);
 
-  return {
-    matchesCount,
-    activeMatchPosition,
-    goToPrevMatch,
-    goToNextMatch,
-    resetState,
-    isProcessing,
-    calculatedForSearchTerm,
-    renderCellsShadowPortal,
-  };
+  return useMemo(
+    () => ({
+      matchesCount,
+      activeMatchPosition,
+      goToPrevMatch,
+      goToNextMatch,
+      resetState,
+      isProcessing,
+      renderCellsShadowPortal,
+      onChangeInTableSearchTerm: setInTableSearchTerm,
+    }),
+    [
+      matchesCount,
+      activeMatchPosition,
+      goToPrevMatch,
+      goToNextMatch,
+      resetState,
+      isProcessing,
+      renderCellsShadowPortal,
+    ]
+  );
 };
 
 function getActiveMatch({
@@ -235,7 +238,11 @@ function changeActiveMatchInState(
   direction: 'prev' | 'next',
   onScrollToActiveMatch: (activeMatch: ActiveMatch) => void
 ): UseInTableSearchMatchesState {
-  if (typeof prevState.matchesCount !== 'number' || !prevState.activeMatchPosition) {
+  if (
+    typeof prevState.matchesCount !== 'number' ||
+    !prevState.activeMatchPosition ||
+    prevState.isProcessing
+  ) {
     return prevState;
   }
 
@@ -263,8 +270,8 @@ function changeActiveMatchInState(
 
 type AllCellsProps = Pick<
   UseInTableSearchMatchesProps,
-  'inTableSearchTerm' | 'renderCellValue' | 'rows' | 'visibleColumns'
->;
+  'renderCellValue' | 'rows' | 'visibleColumns'
+> & { inTableSearchTerm: string };
 
 function AllCellsHighlightsCounter(
   props: AllCellsProps & {
@@ -272,6 +279,9 @@ function AllCellsHighlightsCounter(
   }
 ) {
   const [container] = useState(() => document.createDocumentFragment());
+  const containerRef = useRef<DocumentFragment>();
+  containerRef.current = container;
+
   const { rows, visibleColumns, onFinish } = props;
   const resultsMapRef = useRef<Record<number, Record<string, number>>>({});
   const remainingNumberOfResultsRef = useRef<number>(rows.length * visibleColumns.length);
@@ -327,6 +337,10 @@ function AllCellsHighlightsCounter(
   useEffect(() => {
     return () => {
       stopTimer(timerRef.current);
+
+      if (containerRef.current) {
+        unmountComponentAtNode(containerRef.current);
+      }
     };
   }, []);
 

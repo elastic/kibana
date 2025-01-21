@@ -31,12 +31,15 @@ export const InTableSearchHighlightsWrapper: React.FC<InTableSearchHighlightsWra
       renderedForSearchTerm.current !== inTableSearchTerm
     ) {
       renderedForSearchTerm.current = inTableSearchTerm;
-      const count = modifyDOMAndAddSearchHighlights(
-        cellValueRef.current,
-        inTableSearchTerm,
-        Boolean(onHighlightsCountFound)
-      );
-      onHighlightsCountFound?.(count);
+      const cellNode = cellValueRef.current;
+      setTimeout(() => {
+        const count = modifyDOMAndAddSearchHighlights(
+          cellNode,
+          inTableSearchTerm,
+          Boolean(onHighlightsCountFound)
+        );
+        onHighlightsCountFound?.(count);
+      }, 0);
     }
   }, [inTableSearchTerm, onHighlightsCountFound]);
 
@@ -63,16 +66,15 @@ function modifyDOMAndAddSearchHighlights(
 
     if (node.nodeType === Node.TEXT_NODE) {
       const nodeWithText = node as Text;
-      const parts = (nodeWithText.textContent || '').split(searchTermRegExp);
+      const textContent = nodeWithText.textContent || '';
 
       if (dryRun) {
-        parts.forEach((part) => {
-          if (searchTermRegExp.test(part)) {
-            matchIndex++;
-          }
-        });
+        const nodeMatchesCount = (textContent.match(searchTermRegExp) || []).length;
+        matchIndex += nodeMatchesCount;
         return;
       }
+
+      const parts = textContent.split(searchTermRegExp);
 
       if (parts.length > 1) {
         const nodeWithHighlights = document.createDocumentFragment();
