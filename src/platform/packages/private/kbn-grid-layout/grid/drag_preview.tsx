@@ -10,7 +10,6 @@
 import React, { useEffect, useRef } from 'react';
 import { combineLatest, skip } from 'rxjs';
 
-import { transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { GridLayoutStateManager } from './types';
@@ -23,7 +22,6 @@ export const DragPreview = ({
   gridLayoutStateManager: GridLayoutStateManager;
 }) => {
   const dragPreviewRef = useRef<HTMLDivElement | null>(null);
-  const { euiTheme } = useEuiTheme();
 
   useEffect(
     () => {
@@ -59,12 +57,10 @@ export const DragPreview = ({
   return (
     <div
       ref={dragPreviewRef}
+      className={'kbnGridPanel--dragPreview'}
       css={css`
         display: none;
         pointer-events: none;
-        border-radius: ${euiTheme.border.radius};
-        background-color: ${transparentize(euiTheme.colors.accentSecondary, 0.2)};
-        transition: opacity 100ms linear;
       `}
     />
   );
