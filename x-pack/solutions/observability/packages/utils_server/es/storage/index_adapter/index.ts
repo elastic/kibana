@@ -456,6 +456,7 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings> 
         refresh: true,
         ...request,
         index: this.getSearchIndexPattern(),
+        ignore_unavailable: true,
         allow_no_indices: true,
       })
     );
