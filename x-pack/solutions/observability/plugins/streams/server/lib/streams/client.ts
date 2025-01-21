@@ -17,6 +17,7 @@ import {
   Condition,
   IngestStreamDefinition,
   StreamDefinition,
+  StreamLifecycle,
   WiredStreamDefinition,
   assertsSchema,
   getAncestors,
@@ -185,7 +186,21 @@ export class StreamsClient {
         isServerless: this.dependencies.isServerless,
       });
 
-      await this.updateStreamLifecycle(definition);
+      const findInheritedLifecycle = async (def: WiredStreamDefinition) => {
+        const ancestors = await this.getAncestors(def.name);
+        const lifecycleOriginDefinition = orderBy(
+          [...ancestors, def],
+          (parent) => parent.name.split('.').length,
+          'asc'
+        ).findLast((definition) => definition.stream.ingest.lifecycle);
+
+        if (!lifecycleOriginDefinition) {
+          return undefined;
+        }
+        return lifecycleOriginDefinition.stream.ingest.lifecycle;
+      };
+
+      await this.updateStreamLifecycle(definition, await findInheritedLifecycle(definition));
     } else if (isIngestStream(definition)) {
       await syncIngestStreamDefinitionObjects({
         definition,
@@ -788,7 +803,7 @@ export class StreamsClient {
    * inherited, any updates to a given data stream also triggers an update
    * to existing children data streams that do not specify an override.
    */
-  private async updateStreamLifecycle(root: WiredStreamDefinition) {
+  private async updateStreamLifecycle(root: WiredStreamDefinition, lifecycle?: StreamLifecycle) {
     const { logger, scopedClusterClient } = this.dependencies;
     const descendants = await this.getDescendants(root.name);
 
@@ -809,8 +824,8 @@ export class StreamsClient {
     await updateDataStreamsLifecycle({
       esClient: scopedClusterClient.asCurrentUser,
       names: toUpdate,
-      lifecycle: root.stream.ingest.lifecycle,
       isServerless: this.dependencies.isServerless,
+      lifecycle,
       logger,
     });
   }
