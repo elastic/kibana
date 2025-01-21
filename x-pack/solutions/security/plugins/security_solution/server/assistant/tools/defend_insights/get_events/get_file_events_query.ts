@@ -14,7 +14,6 @@ const SIZE = 200;
 export function getFileEventsQuery({ endpointIds }: { endpointIds: string[] }): SearchRequest {
   return {
     allow_no_indices: true,
-    fields: ['_id', 'agent.id', 'process.executable'],
     query: {
       bool: {
         must: [
@@ -34,15 +33,31 @@ export function getFileEventsQuery({ endpointIds }: { endpointIds: string[] }): 
         ],
       },
     },
-    size: SIZE,
-    sort: [
-      {
-        '@timestamp': {
-          order: 'desc',
+    size: 0, // Aggregations only
+    aggs: {
+      unique_process_executable: {
+        terms: {
+          field: 'process.executable',
+          size: SIZE,
+        },
+        aggs: {
+          // Get the latest event for each process.executable
+          latest_event: {
+            top_hits: {
+              size: 1,
+              sort: [
+                {
+                  '@timestamp': {
+                    order: 'desc',
+                  },
+                },
+              ],
+              _source: ['_id', 'agent.id', 'process.executable'], // Include only necessary fields
+            },
+          },
         },
       },
-    ],
-    _source: false,
+    },
     ignore_unavailable: true,
     index: [FILE_EVENTS_INDEX_PATTERN],
   };
