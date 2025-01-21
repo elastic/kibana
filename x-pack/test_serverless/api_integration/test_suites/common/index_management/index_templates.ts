@@ -126,6 +126,70 @@ export default function ({ getService }: FtrProviderContext) {
           expect(body.name).to.eql(templateName);
           expect(Object.keys(body).sort()).to.eql(expectedKeys);
         });
+
+        describe('with logs-*-* index pattern', () => {
+          const logsdbTemplateName = 'logs';
+          before(async () => {
+            const template = getTemplatePayload(logsdbTemplateName, ['logs-*-*']);
+            await createTemplate(template).expect(200);
+          });
+
+          after(async () => {
+            await deleteTemplates([logsdbTemplateName]);
+          });
+
+          // In serverless Kibana, the cluster.logsdb.enabled setting is true by default
+          it('returns logsdb index mode if logsdg.enabled setting is not set', async () => {
+            await es.cluster.putSettings({
+              body: {
+                persistent: {
+                  cluster: {
+                    logsdb: {
+                      enabled: null,
+                    },
+                  },
+                },
+              },
+            });
+
+            const { body } = await getOneTemplate(logsdbTemplateName).expect(200);
+            expect(body.indexMode).to.equal('logsdb');
+          });
+
+          it('returns logsdb index mode if logsdg.enabled setting is true', async () => {
+            await es.cluster.putSettings({
+              body: {
+                persistent: {
+                  cluster: {
+                    logsdb: {
+                      enabled: true,
+                    },
+                  },
+                },
+              },
+            });
+
+            const { body } = await getOneTemplate(logsdbTemplateName).expect(200);
+            expect(body.indexMode).to.equal('logsdb');
+          });
+
+          it('returns standard index mode if logsdg.enabled setting is false', async () => {
+            await es.cluster.putSettings({
+              body: {
+                persistent: {
+                  cluster: {
+                    logsdb: {
+                      enabled: false,
+                    },
+                  },
+                },
+              },
+            });
+
+            const { body } = await getOneTemplate(logsdbTemplateName).expect(200);
+            expect(body.indexMode).to.equal('standard');
+          });
+        });
       });
     });
 

@@ -143,14 +143,14 @@ export default function ({ getService }: FtrProviderContext) {
           await deleteDataStream(logsdbDataStreamName);
         });
 
-        // In serverless Kibana, the cluster.logsdb.enabled setting is false by default
+        // In serverless Kibana, the cluster.logsdb.enabled setting is true by default
         it('returns logsdb index mode for logs-*-* data stream if logsdg.enabled setting is not set', async () => {
           await es.cluster.putSettings({
             body: {
               persistent: {
                 cluster: {
                   logsdb: {
-                    enabled: undefined,
+                    enabled: null,
                   },
                 },
               },
