@@ -58,7 +58,7 @@ export const PrivateLocationsTable = ({
 
   const { services } = useKibana<ClientPluginsStart>();
 
-  const LazySpaceList = services.spaces?.ui.components.getSpaceList;
+  const LazySpaceList = services.spaces?.ui.components.getSpaceList ?? (() => null);
 
   const tagsList = privateLocations.reduce((acc, item) => {
     const tags = item.tags || [];
@@ -109,10 +109,6 @@ export const PrivateLocationsTable = ({
       sortable: true,
       render: (spaces: string[]) => {
         return <LazySpaceList namespaces={spaces} behaviorContext="outside-space" />;
-        // if (!spaces || spaces.length === 0 || spaces.includes(ALL_SPACES_ID)) {
-        //   return ALL_SPACES_LABEL;
-        // }
-        // return spaces.join(', ');
       },
     },
     {

@@ -7,6 +7,7 @@
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 import { PrivateLocationsTable } from './locations_table';
 import { ManageEmptyState } from './manage_empty_state';
@@ -17,6 +18,8 @@ import { getServiceLocations } from '../../../state';
 import { getAgentPoliciesAction } from '../../../state/agent_policies';
 import { setIsCreatePrivateLocationFlyoutVisible } from '../../../state/private_locations/actions';
 import { ClientPluginsStart } from '../../../../../plugin';
+
+const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
 export const ManagePrivateLocations = () => {
   const dispatch = useDispatch();
