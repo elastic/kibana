@@ -97,6 +97,11 @@ export type UserActionUI = SnakeToCamelCase<UserAction>;
 export type FindCaseUserActions = Omit<SnakeToCamelCase<UserActionFindResponse>, 'userActions'> & {
   userActions: UserActionUI[];
 };
+
+export interface InternalFindCaseUserActions extends FindCaseUserActions {
+  latestAttachments: AttachmentUI[];
+}
+
 export type CaseUserActionsStats = SnakeToCamelCase<CaseUserActionStatsResponse>;
 export type CaseUI = Omit<SnakeToCamelCase<CaseSnakeCase>, 'comments'> & {
   comments: AttachmentUI[];

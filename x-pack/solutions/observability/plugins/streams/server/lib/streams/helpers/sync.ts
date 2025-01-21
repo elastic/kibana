@@ -44,8 +44,10 @@ export async function syncWiredStreamDefinitionObjects({
   definition,
   scopedClusterClient,
   logger,
+  isServerless,
 }: SyncStreamParamsBase & {
   definition: WiredStreamDefinition;
+  isServerless: boolean;
 }) {
   const componentTemplate = generateLayer(definition.name, definition);
   await upsertComponent({
@@ -72,7 +74,7 @@ export async function syncWiredStreamDefinitionObjects({
   await upsertTemplate({
     esClient: scopedClusterClient.asCurrentUser,
     logger,
-    template: generateIndexTemplate(definition.name),
+    template: generateIndexTemplate(definition.name, isServerless),
   });
 
   await upsertDataStream({
