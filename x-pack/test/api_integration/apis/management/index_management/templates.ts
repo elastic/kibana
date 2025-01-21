@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 
 import { TemplateDeserialized } from '@kbn/index-management-plugin/common';
-import { API_BASE_PATH } from './constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { templatesApi } from './lib/templates.api';
 import { templatesHelpers } from './lib/templates.helpers';
