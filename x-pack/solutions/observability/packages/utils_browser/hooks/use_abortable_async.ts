@@ -27,6 +27,13 @@ interface UseAbortableAsyncOptions<T> {
   onError?: (error: Error) => void;
 }
 
+interface State<T> {
+  error?: Error;
+  value?: T;
+  loading: boolean;
+  generation: number;
+}
+
 export type UseAbortableAsync<
   TAdditionalParameters extends Record<string, any> = {},
   TAdditionalOptions extends Record<string, any> = {}
@@ -48,9 +55,39 @@ export function useAbortableAsync<T>(
 
   const [refreshId, setRefreshId] = useState(0);
 
-  const [error, setError] = useState<Error>();
-  const [loading, setLoading] = useState(false);
-  const [value, setValue] = useState<T | undefined>(options?.defaultValue);
+  const [internalState, setInternalState] = useState<State<T>>(() => ({
+    error: undefined,
+    loading: false,
+    value: options?.defaultValue ? options.defaultValue() : undefined,
+    generation: 0,
+  }));
+
+  function updateState(newState: Partial<Omit<State<T>, 'generation'>> & { generation: number }) {
+    setInternalState((currentState) => {
+      if (currentState.generation === newState.generation) {
+        return {
+          ...currentState,
+          ...newState,
+        };
+      }
+      return currentState;
+    });
+  }
+
+  /**
+   * Start a new generation to track the current request.
+   * All state updates from old requests will be ignored if the generation changes.
+   */
+  function startNewGeneration() {
+    const newGeneration = Math.random();
+    setInternalState((currentState) => {
+      return {
+        ...currentState,
+        generation: newGeneration,
+      };
+    });
+    return newGeneration;
+  }
 
   useEffect(() => {
     controllerRef.current.abort();
@@ -58,35 +95,55 @@ export function useAbortableAsync<T>(
     const controller = new AbortController();
     controllerRef.current = controller;
 
+    const currentGeneration = startNewGeneration();
+
     if (clearValueOnNext) {
-      setValue(undefined);
-      setError(undefined);
+      updateState({
+        value: undefined,
+        error: undefined,
+        generation: currentGeneration,
+      });
     }
 
     function handleError(err: Error) {
-      setError(err);
-      if (unsetValueOnError) {
-        setValue(undefined);
-      }
-      setLoading(false);
+      updateState({
+        error: err,
+        loading: false,
+        ...(!unsetValueOnError && { value: undefined }),
+        generation: currentGeneration,
+      });
       options?.onError?.(err);
     }
 
     try {
       const response = fn({ signal: controller.signal });
       if (isPromise(response)) {
-        setLoading(true);
+        updateState({
+          loading: true,
+          generation: currentGeneration,
+        });
         response
           .then((nextValue) => {
-            setError(undefined);
-            setValue(nextValue);
+            updateState({
+              value: nextValue,
+              error: undefined,
+              generation: currentGeneration,
+            });
           })
           .catch(handleError)
-          .finally(() => setLoading(false));
+          .finally(() => {
+            updateState({
+              loading: false,
+              generation: currentGeneration,
+            });
+          });
       } else {
-        setError(undefined);
-        setValue(response);
-        setLoading(false);
+        updateState({
+          loading: false,
+          error: undefined,
+          value: response,
+          generation: currentGeneration,
+        });
       }
     } catch (err) {
       handleError(err);
@@ -100,12 +157,12 @@ export function useAbortableAsync<T>(
 
   return useMemo<AbortableAsyncState<T>>(() => {
     return {
-      error,
-      loading,
-      value,
+      error: internalState.error,
+      loading: internalState.loading,
+      value: internalState.value,
       refresh: () => {
         setRefreshId((id) => id + 1);
       },
     } as unknown as AbortableAsyncState<T>;
-  }, [error, value, loading]);
+  }, [internalState.error, internalState.value, internalState.loading]);
 }
