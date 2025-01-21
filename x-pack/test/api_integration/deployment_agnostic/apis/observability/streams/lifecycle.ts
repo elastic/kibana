@@ -6,7 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { WiredReadStreamDefinition, WiredStreamConfigDefinition } from '@kbn/streams-schema';
+import {
+  InheritedStreamLifecycle,
+  WiredReadStreamDefinition,
+  WiredStreamConfigDefinition,
+} from '@kbn/streams-schema';
 import { disableStreams, enableStreams, putStream, getStream } from './helpers/requests';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
@@ -17,17 +21,35 @@ import {
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const config = getService('config');
   const roleScopedSupertest = getService('roleScopedSupertest');
-
+  const esClient = getService('es');
   const isServerless = !!config.get('serverless');
   let apiClient: StreamsSupertestRepositoryClient;
 
+  async function expectLifecycle(streams: string[], expectedLifecycle: InheritedStreamLifecycle) {
+    const definitions = await Promise.all(streams.map((stream) => getStream(apiClient, stream)));
+    for (const definition of definitions) {
+      expect(definition.effective_lifecycle).to.eql(expectedLifecycle);
+    }
+
+    const dataStreams = await esClient.indices.getDataStream({
+      name: definitions.map((definition) => definition.name),
+    });
+    for (const dataStream of dataStreams.data_streams) {
+      if (expectedLifecycle.type === 'dlm') {
+        expect(dataStream.lifecycle?.data_retention).to.eql(expectedLifecycle.data_retention);
+        if (!isServerless) {
+          expect(dataStream.prefer_ilm).to.eql(false);
+        }
+      } else if (expectedLifecycle.type === 'ilm') {
+        expect(dataStream.prefer_ilm).to.eql(true);
+        expect(dataStream.ilm_policy).to.eql(expectedLifecycle.policy);
+      }
+    }
+  }
+
   describe('Lifecycle', () => {
     const wiredPutBody: WiredStreamConfigDefinition = {
-      ingest: {
-        routing: [],
-        processing: [],
-        wired: { fields: {} },
-      },
+      ingest: { routing: [], processing: [], wired: { fields: {} } },
     };
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
@@ -82,30 +104,40 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       });
 
-      await Promise.all([
-        getStream(apiClient, 'logs.inherits'),
-        getStream(apiClient, 'logs.inherits.lifecycle'),
-      ]).then((definitions) => {
-        for (const definition of definitions) {
-          expect(definition.effective_lifecycle).to.eql({
-            type: 'dlm',
-            data_retention: '10m',
-            from: 'logs',
-          });
-        }
+      await expectLifecycle(['logs.inherits', 'logs.inherits.lifecycle'], {
+        type: 'dlm',
+        data_retention: '10m',
+        from: 'logs',
       });
 
-      await Promise.all([
-        getStream(apiClient, 'logs.overrides'),
-        getStream(apiClient, 'logs.overrides.lifecycle'),
-      ]).then((definitions) => {
-        for (const definition of definitions) {
-          expect(definition.effective_lifecycle).to.eql({
-            type: 'dlm',
-            data_retention: '1d',
-            from: 'logs.overrides',
-          });
-        }
+      await expectLifecycle(['logs.overrides', 'logs.overrides.lifecycle'], {
+        type: 'dlm',
+        data_retention: '1d',
+        from: 'logs.overrides',
+      });
+    });
+
+    it('applies the nearest parent lifecycle when deleted', async () => {
+      await putStream(apiClient, 'logs.10d', {
+        ingest: { ...wiredPutBody.ingest, lifecycle: { type: 'dlm', data_retention: '10d' } },
+      });
+      await putStream(apiClient, 'logs.10d.20d', {
+        ingest: { ...wiredPutBody.ingest, lifecycle: { type: 'dlm', data_retention: '20d' } },
+      });
+      await putStream(apiClient, 'logs.10d.20d.inherits', wiredPutBody);
+
+      // delete lifecycle of the 20d override
+      await putStream(apiClient, 'logs.10d.20d', {
+        ingest: {
+          ...wiredPutBody.ingest,
+          routing: [{ name: 'logs.10d.20d.inherits' }],
+        },
+      });
+
+      await expectLifecycle(['logs.10d', 'logs.10d.20d', 'logs.10d.20d.inherits'], {
+        type: 'dlm',
+        data_retention: '10d',
+        from: 'logs.10d',
       });
     });
 
@@ -140,17 +172,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
-        await Promise.all([
-          getStream(apiClient, 'logs.ilm'),
-          getStream(apiClient, 'logs.ilm.stream'),
-        ]).then((definitions) => {
-          for (const definition of definitions) {
-            expect(definition.effective_lifecycle).to.eql({
-              type: 'ilm',
-              policy: 'my-policy',
-              from: 'logs.ilm',
-            });
-          }
+        await expectLifecycle(['logs.ilm', 'logs.ilm.stream'], {
+          type: 'ilm',
+          policy: 'my-policy',
+          from: 'logs.ilm',
         });
       });
     }
