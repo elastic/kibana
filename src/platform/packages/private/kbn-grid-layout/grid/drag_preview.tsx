@@ -11,7 +11,6 @@ import React, { useEffect, useRef } from 'react';
 import { combineLatest, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 import { GridLayoutStateManager } from './types';
 
