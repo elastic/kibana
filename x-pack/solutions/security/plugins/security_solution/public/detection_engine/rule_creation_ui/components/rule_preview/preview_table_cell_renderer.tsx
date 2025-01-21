@@ -32,7 +32,7 @@ export const PreviewRenderCellValue: React.FC<
   return (
     <CellValue
       tableType={TableId.rulePreview}
-      scopeId={SourcererScopeName.detections}
+      sourcererScope={SourcererScopeName.detections}
       legacyAlert={(data ?? []) as LegacyField[]}
       ecsAlert={ecsData}
       asPlainText={true}
@@ -46,6 +46,7 @@ export const PreviewRenderCellValue: React.FC<
       rowRenderers={rowRenderers}
       isDraggable={isDraggable}
       truncate={truncate}
+      userProfiles={{ profiles: [], isLoading: false }}
     />
   );
 };

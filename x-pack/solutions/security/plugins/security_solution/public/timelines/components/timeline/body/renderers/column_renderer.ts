@@ -38,7 +38,7 @@ export interface ColumnRenderer {
     className?: string;
     columnName: string;
     ecsData?: Ecs;
-    eventId: string;
+    eventId?: string;
     field: ColumnHeaderOptions;
     globalFilters?: Filter[];
     isDetails?: boolean;

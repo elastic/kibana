@@ -28,6 +28,7 @@ import { VIEW_SELECTION } from '../../../../common/constants';
 import { getAllFieldsByName } from '../../../common/containers/source';
 import { eventRenderedViewColumns, getColumns } from './columns';
 import type { GetSecurityAlertsTableProp } from '../../components/alerts_table/types';
+import type { CellValueElementProps, ColumnHeaderOptions } from '../../../../common/types';
 
 /**
  * This implementation of `EuiDataGrid`'s `renderCellValue`
@@ -51,13 +52,15 @@ type RenderCellValueProps = Pick<
   | 'colIndex'
   | 'setCellProps'
   | 'truncate'
+  | 'sourcererScope'
+  | 'userProfiles'
 > &
-  Record<string, unknown>;
+  Partial<Omit<CellValueElementProps, 'browserFields'>>;
 
 export const CellValue = memo(function RenderCellValue({
   columnId,
   rowIndex,
-  scopeId,
+  sourcererScope,
   tableId,
   tableType,
   header,
@@ -73,7 +76,7 @@ export const CellValue = memo(function RenderCellValue({
   eventId,
   setCellProps,
   truncate,
-  context,
+  userProfiles,
 }: RenderCellValueProps) {
   const isTourAnchor = useMemo(
     () =>
@@ -83,7 +86,7 @@ export const CellValue = memo(function RenderCellValue({
       !isDetails,
     [columnId, isDetails, rowIndex, tableType]
   );
-  const { browserFields } = useSourcererDataView(scopeId);
+  const { browserFields } = useSourcererDataView(sourcererScope);
   const browserFieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
   const license = useLicense();
@@ -134,7 +137,8 @@ export const CellValue = memo(function RenderCellValue({
   }, [ecsAlert, legacyAlert]);
 
   const Renderer = useMemo(() => {
-    const myHeader = header ?? { id: columnId, ...browserFieldsByName[columnId] };
+    const myHeader =
+      header ?? ({ id: columnId, ...browserFieldsByName[columnId] } as ColumnHeaderOptions);
     const colHeader = columnHeaders.find((col) => col.id === columnId);
     const localLinkValues = getOr([], colHeader?.linkField ?? '', ecsAlert);
     return (
@@ -159,10 +163,10 @@ export const CellValue = memo(function RenderCellValue({
           colIndex={colIndex}
           rowRenderers={rowRenderers ?? defaultRowRenderers}
           setCellProps={setCellProps}
-          scopeId={scopeId}
+          scopeId={sourcererScope}
           truncate={truncate}
           asPlainText={false}
-          context={context}
+          context={userProfiles}
         />
       </GuidedOnboardingTourStep>
     );
@@ -185,9 +189,9 @@ export const CellValue = memo(function RenderCellValue({
     colIndex,
     rowRenderers,
     setCellProps,
-    scopeId,
+    sourcererScope,
     truncate,
-    context,
+    userProfiles,
   ]);
 
   return columnId === SIGNAL_RULE_NAME_FIELD_NAME && actualSuppressionCount ? (
