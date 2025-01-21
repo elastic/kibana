@@ -33,6 +33,7 @@ export default function copyToSpaceSpacesAndSecuritySuite(
   } = copyToSpaceTestSuiteFactory(context);
 
   describe('copy to spaces', () => {
+    this.tags('skipMKI');
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,

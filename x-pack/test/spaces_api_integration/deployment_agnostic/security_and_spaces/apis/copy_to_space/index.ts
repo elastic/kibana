@@ -13,10 +13,12 @@ export default function ({ loadTestFile, getService }: DeploymentAgnosticFtrProv
   const license = config.get('esTestCluster.license');
   const es = getService('es');
   const supertest = getService('supertest');
+  const isServerless = config.get('serverless');
 
   describe('spaces api with security', function () {
+    this.tags('skipMKI');
     before(async () => {
-      if (license === 'basic') {
+      if (license === 'basic' && !isServerless) {
         await createUsersAndRoles(es, supertest);
       }
     });
