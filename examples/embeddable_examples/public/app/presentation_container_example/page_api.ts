@@ -12,7 +12,6 @@ import { v4 as generateId } from 'uuid';
 import { TimeRange } from '@kbn/es-query';
 import {
   PanelPackage,
-  apiHasSerializableState,
   childrenUnsavedChanges$,
   combineCompatibleChildrenApis,
 } from '@kbn/presentation-containers';
@@ -21,6 +20,7 @@ import {
   PublishesDataLoading,
   PublishingSubject,
   ViewMode,
+  apiHasSerializableState,
   apiPublishesDataLoading,
   apiPublishesUnsavedChanges,
 } from '@kbn/presentation-publishing';

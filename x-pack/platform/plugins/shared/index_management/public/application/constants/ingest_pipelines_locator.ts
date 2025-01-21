@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import type { GenericFtrProviderContext } from '@kbn/test';
-
-export type FtrProviderContext = GenericFtrProviderContext<{}, {}>;
+export const INGEST_PIPELINES_LOCATOR_ID = 'INGEST_PIPELINES_APP_LOCATOR';
+export const INGEST_PIPELINES_EDIT = 'pipeline_edit';
+export const INGEST_PIPELINES_LIST = 'pipelines_list';
