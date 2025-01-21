@@ -7,12 +7,12 @@
 
 import { z } from '@kbn/zod';
 import { wiredStreamDefinitonSchema } from '../streams';
-import { inheritedFieldDefinitionSchema, lifecycleSchema } from '../common';
+import { inheritedFieldDefinitionSchema, inheritedLifecycleSchema } from '../common';
 
 export const wiredReadStreamDefinitonSchema = wiredStreamDefinitonSchema
   .extend({
     inherited_fields: inheritedFieldDefinitionSchema,
-    effective_lifecycle: z.optional(lifecycleSchema.and(z.object({ from: z.string() }))),
+    effective_lifecycle: z.optional(inheritedLifecycleSchema),
   })
   .strict();
 

@@ -54,6 +54,7 @@ import {
 } from './stream_crud';
 import { updateDataStreamsLifecycle } from './data_streams/manage_data_streams';
 import { MalformedStream } from './errors/malformed_stream';
+import { findInheritedLifecycle } from './helpers/lifecycle';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -186,21 +187,11 @@ export class StreamsClient {
         isServerless: this.dependencies.isServerless,
       });
 
-      const findInheritedLifecycle = async (def: WiredStreamDefinition) => {
-        const ancestors = await this.getAncestors(def.name);
-        const lifecycleOriginDefinition = orderBy(
-          [...ancestors, def],
-          (parent) => parent.name.split('.').length,
-          'asc'
-        ).findLast((definition) => definition.stream.ingest.lifecycle);
-
-        if (!lifecycleOriginDefinition) {
-          return undefined;
-        }
-        return lifecycleOriginDefinition.stream.ingest.lifecycle;
-      };
-
-      await this.updateStreamLifecycle(definition, await findInheritedLifecycle(definition));
+      const effectiveLifecycle = findInheritedLifecycle(
+        definition,
+        definition.stream.ingest.lifecycle ? [] : await this.getAncestors(definition.name)
+      );
+      await this.updateStreamLifecycle(definition, effectiveLifecycle);
     } else if (isIngestStream(definition)) {
       await syncIngestStreamDefinitionObjects({
         definition,

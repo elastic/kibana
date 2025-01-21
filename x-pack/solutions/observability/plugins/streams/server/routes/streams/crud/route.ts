@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { orderBy } from 'lodash';
 import { z } from '@kbn/zod';
 import { badRequest, internal, notFound } from '@hapi/boom';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import { findInheritedLifecycle } from '@kbn/streams-plugin/server/lib/streams/helpers/lifecycle';
 import {
   streamConfigDefinitionSchema,
   ListStreamsResponse,
@@ -65,28 +65,19 @@ export const readStreamRoute = createServerRoute({
       ]);
 
       if (!isWiredStream(streamDefinition)) {
-        const lifecycle = getDataStreamLifecycle(dataStream);
+        const effectiveLifecycle = getDataStreamLifecycle(dataStream);
         return {
           ...streamDefinition,
           dashboards,
-          effective_lifecycle: lifecycle,
+          effective_lifecycle: effectiveLifecycle,
           inherited_fields: {},
         };
       }
 
-      const lifecycleOriginDefinition = orderBy(
-        [...ancestors, streamDefinition],
-        (parent) => parent.name.split('.').length,
-        'asc'
-      ).findLast((definition) => definition.stream.ingest.lifecycle);
-
       const body: WiredReadStreamDefinition = {
         ...streamDefinition,
         dashboards,
-        effective_lifecycle: lifecycleOriginDefinition && {
-          from: lifecycleOriginDefinition.name,
-          ...lifecycleOriginDefinition.stream.ingest.lifecycle!,
-        },
+        effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
         inherited_fields: ancestors.reduce((acc, def) => {
           Object.entries(def.stream.ingest.wired.fields).forEach(([key, fieldDef]) => {
             acc[key] = { ...fieldDef, from: def.name };

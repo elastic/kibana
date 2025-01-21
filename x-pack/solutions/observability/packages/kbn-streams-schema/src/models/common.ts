@@ -146,3 +146,7 @@ export const lifecycleSchema = z.discriminatedUnion('type', [
 ]);
 
 export type StreamLifecycle = z.infer<typeof lifecycleSchema>;
+
+export const inheritedLifecycleSchema = lifecycleSchema.and(z.object({ from: z.string() }));
+
+export type InheritedStreamLifecycle = z.infer<typeof inheritedLifecycleSchema>;

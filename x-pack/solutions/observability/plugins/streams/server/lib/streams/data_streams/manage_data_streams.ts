@@ -118,8 +118,8 @@ export async function updateDataStreamsLifecycle({
     );
 
     // if we transition from ilm to dlm or vice versa, the rolled over backing
-    // indices need to be updated or they'll retain their historical lifecycle
-    // configuration.
+    // indices need to be updated or they'll retain the lifecycle configuration
+    // set at the time of creation.
     // this is not needed for serverless since only dlm is allowed.
     if (isServerless) {
       return;
