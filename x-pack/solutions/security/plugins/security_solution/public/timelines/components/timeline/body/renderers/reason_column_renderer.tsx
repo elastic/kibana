@@ -35,7 +35,7 @@ export const reasonColumnRenderer: ColumnRenderer = {
   }: {
     columnName: string;
     ecsData?: Ecs;
-    eventId: string;
+    eventId?: string;
     field: ColumnHeaderOptions;
     isDetails?: boolean;
     isDraggable?: boolean;

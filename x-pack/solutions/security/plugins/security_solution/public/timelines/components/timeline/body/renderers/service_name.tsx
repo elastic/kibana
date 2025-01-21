@@ -21,7 +21,7 @@ import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_a
 interface Props {
   contextId: string;
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  eventId: string;
+  eventId?: string;
   fieldName: string;
   fieldType: string;
   isAggregatable: boolean;

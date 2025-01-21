@@ -21,7 +21,7 @@ export type CellValueElementProps = EuiDataGridCellValueElementProps & {
   browserFields?: BrowserFields;
   data: TimelineNonEcsData[];
   ecsData?: Ecs;
-  eventId: string; // _id
+  eventId?: string; // _id
   header: ColumnHeaderOptions;
   isDraggable: boolean;
   isTimeline?: boolean; // Default cell renderer is used for both the alert table and timeline. This allows us to cheaply separate concerns

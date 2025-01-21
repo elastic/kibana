@@ -66,7 +66,7 @@ const FormattedFieldValueComponent: React.FC<{
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   contextId: string;
-  eventId: string;
+  eventId?: string;
   isAggregatable?: boolean;
   isObjectArray?: boolean;
   isUnifiedDataTable?: boolean;

@@ -18,7 +18,7 @@ export const EVENT_DURATION_FIELD_NAME = 'event.duration';
  */
 export const Duration = React.memo<{
   contextId: string;
-  eventId: string;
+  eventId?: string;
   fieldName: string;
   fieldType: string;
   isAggregatable: boolean;
