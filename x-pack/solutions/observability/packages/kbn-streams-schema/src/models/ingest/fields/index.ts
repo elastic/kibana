@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { nonEmptyStringSchema } from '../../common';
+import { NonEmptyString } from '@kbn/zod-helpers';
 
 export const FIELD_DEFINITION_TYPES = [
   'keyword',
@@ -27,7 +27,7 @@ export interface FieldDefinitionConfig {
 
 export const fieldDefinitionConfigSchema: z.Schema<FieldDefinitionConfig> = z.object({
   type: z.enum(FIELD_DEFINITION_TYPES),
-  format: z.optional(nonEmptyStringSchema),
+  format: z.optional(NonEmptyString),
 });
 
 export interface FieldDefinition {
@@ -49,7 +49,7 @@ export interface InheritedFieldDefinition {
 
 export const inheritedFieldDefinitionSchema: z.Schema<InheritedFieldDefinition> = z.record(
   z.string(),
-  z.intersection(fieldDefinitionConfigSchema, z.object({ from: nonEmptyStringSchema }))
+  z.intersection(fieldDefinitionConfigSchema, z.object({ from: NonEmptyString }))
 );
 
 export interface NamedFieldDefinitionConfig extends FieldDefinitionConfig {
@@ -60,6 +60,6 @@ export const namedFieldDefinitionConfigSchema: z.Schema<NamedFieldDefinitionConf
   z.intersection(
     fieldDefinitionConfigSchema,
     z.object({
-      name: nonEmptyStringSchema,
+      name: NonEmptyString,
     })
   );

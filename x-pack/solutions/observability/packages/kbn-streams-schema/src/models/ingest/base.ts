@@ -6,11 +6,11 @@
  */
 
 import { z } from '@kbn/zod';
+import { NonEmptyString } from '@kbn/zod-helpers';
 import { StreamDefinitionBase } from '../base';
 import { FieldDefinition, fieldDefinitionSchema } from './fields';
 import { ProcessorDefinition, processorDefinitionSchema } from './processors';
 import { RoutingDefinition, routingDefinitionSchema } from './routing';
-import { nonEmptyStringSchema } from '../common';
 
 interface IngestBase {
   processing: ProcessorDefinition[];
@@ -76,14 +76,14 @@ const wiredStreamDefinitionSchemaBase: z.Schema<WiredStreamDefinitionBase> = z.o
 
 const wiredStreamDefinitionSchema: z.Schema<WiredStreamDefinition> = z.intersection(
   z.object({
-    name: nonEmptyStringSchema,
+    name: NonEmptyString,
   }),
   wiredStreamDefinitionSchemaBase
 );
 
 const unwiredStreamDefinitionSchema: z.Schema<UnwiredStreamDefinition> = z.intersection(
   z.object({
-    name: nonEmptyStringSchema,
+    name: NonEmptyString,
   }),
   unwiredStreamDefinitionSchemaBase
 );

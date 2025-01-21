@@ -6,8 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
+import { NonEmptyString } from '@kbn/zod-helpers';
 import { createIsNarrowSchema } from '../../../helpers';
-import { nonEmptyStringSchema } from '../../common';
 
 const stringOrNumberOrBoolean = z.union([z.string(), z.number(), z.boolean()]);
 
@@ -36,13 +36,13 @@ export interface UnaryFilterCondition {
 }
 
 export const binaryFilterConditionSchema: z.Schema<BinaryFilterCondition> = z.object({
-  field: nonEmptyStringSchema,
+  field: NonEmptyString,
   operator: z.enum(['eq', 'neq', 'lt', 'lte', 'gt', 'gte', 'contains', 'startsWith', 'endsWith']),
   value: stringOrNumberOrBoolean,
 });
 
 export const unaryFilterConditionSchema: z.Schema<UnaryFilterCondition> = z.object({
-  field: nonEmptyStringSchema,
+  field: NonEmptyString,
   operator: z.enum(['exists', 'notExists']),
 });
 

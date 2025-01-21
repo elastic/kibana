@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { nonEmptyStringSchema } from '../common';
+import { NonEmptyString } from '@kbn/zod-helpers';
 
 const ELASTICSEARCH_ASSET_TYPES = [
   'ingest_pipeline',
@@ -23,7 +23,7 @@ export interface ElasticsearchAsset {
 
 export const elasticsearchAssetSchema: z.Schema<ElasticsearchAsset> = z.object({
   type: z.enum(['ingest_pipeline', 'component_template', 'index_template', 'data_stream']),
-  id: nonEmptyStringSchema,
+  id: NonEmptyString,
 });
 
 export interface IngestStreamLifecycleDLM {
@@ -41,7 +41,7 @@ export type IngestStreamLifecycle = IngestStreamLifecycleDLM | IngestStreamLifec
 export const ingestStreamLifecycleSchema: z.Schema<IngestStreamLifecycle> = z.discriminatedUnion(
   'type',
   [
-    z.object({ type: z.literal('dlm'), data_retention: z.optional(nonEmptyStringSchema) }),
-    z.object({ type: z.literal('ilm'), policy: nonEmptyStringSchema }),
+    z.object({ type: z.literal('dlm'), data_retention: z.optional(NonEmptyString) }),
+    z.object({ type: z.literal('ilm'), policy: NonEmptyString }),
   ]
 );

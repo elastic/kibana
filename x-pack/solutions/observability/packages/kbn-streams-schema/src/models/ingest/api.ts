@@ -29,7 +29,7 @@ import {
   elasticsearchAssetSchema,
   ingestStreamLifecycleSchema,
 } from './common';
-import { createIsNarrowSchema, createIsOrThrowSchema } from '../../helpers';
+import { createIsNarrowSchema, createAsSchemaOrThrow } from '../../helpers';
 
 /**
  * Ingest get response
@@ -158,12 +158,12 @@ const isUnWiredStreamGetResponse = createIsNarrowSchema(
   wiredStreamGetResponseSchema
 );
 
-const wiredStreamGetResponseOrThrow = createIsOrThrowSchema(
+const asWiredStreamGetResponse = createAsSchemaOrThrow(
   ingestStreamGetResponseSchema,
   wiredStreamGetResponseSchema
 );
 
-const unwiredStreamGetResponseOrThrow = createIsOrThrowSchema(
+const asUnwiredStreamGetResponse = createAsSchemaOrThrow(
   ingestStreamGetResponseSchema,
   unwiredStreamGetResponseSchema
 );
@@ -173,8 +173,8 @@ export {
   ingestUpsertRequestSchema,
   isWiredStreamGetResponse,
   isUnWiredStreamGetResponse,
-  wiredStreamGetResponseOrThrow,
-  unwiredStreamGetResponseOrThrow,
+  asWiredStreamGetResponse,
+  asUnwiredStreamGetResponse,
   type IngestGetResponse,
   type IngestStreamGetResponse,
   type IngestStreamUpsertRequest,

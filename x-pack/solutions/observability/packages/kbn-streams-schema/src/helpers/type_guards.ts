@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ZodError, ZodSchema, z } from '@kbn/zod';
+import { ZodSchema, z } from '@kbn/zod';
 
 export function createIsNarrowSchema<TBaseSchema extends z.Schema, TNarrowSchema extends z.Schema>(
   base: TBaseSchema,
@@ -18,7 +18,7 @@ export function createIsNarrowSchema<TBaseSchema extends z.Schema, TNarrowSchema
   };
 }
 
-export function createIsOrThrowSchema<TBaseSchema extends z.Schema, TNarrowSchema extends z.Schema>(
+export function createAsSchemaOrThrow<TBaseSchema extends z.Schema, TNarrowSchema extends z.Schema>(
   base: TBaseSchema,
   narrow: TNarrowSchema
 ) {
@@ -34,15 +34,7 @@ export function isSchema<TSchema extends z.Schema>(
   schema: TSchema,
   value: unknown
 ): value is z.input<TSchema> {
-  try {
-    schema.parse(value);
-    return true;
-  } catch (error) {
-    if (error instanceof ZodError) {
-      return false;
-    }
-    throw error;
-  }
+  return schema.safeParse(value).success;
 }
 
 export function assertsSchema<TSchema extends ZodSchema>(

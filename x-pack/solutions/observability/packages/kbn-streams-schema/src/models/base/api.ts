@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { nonEmptyStringSchema } from '../common';
+import { NonEmptyString } from '@kbn/zod-helpers';
 
 export interface StreamGetResponseBase {
   dashboards: string[];
@@ -17,9 +17,9 @@ export interface StreamUpsertRequestBase {
 }
 
 export const streamUpsertRequestSchemaBase: z.Schema<StreamUpsertRequestBase> = z.object({
-  dashboards: z.array(nonEmptyStringSchema),
+  dashboards: z.array(NonEmptyString),
 });
 
 export const streamGetResponseSchemaBase: z.Schema<StreamGetResponseBase> = z.object({
-  dashboards: z.array(nonEmptyStringSchema),
+  dashboards: z.array(NonEmptyString),
 });

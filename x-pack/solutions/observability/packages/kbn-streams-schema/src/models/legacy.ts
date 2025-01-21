@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { NonEmptyString } from '@kbn/zod-helpers';
 import {
   InheritedFieldDefinition,
   UnwiredStreamDefinition,
@@ -21,7 +22,6 @@ import {
   ingestStreamLifecycleSchema,
 } from './ingest/common';
 import { createIsNarrowSchema } from '../helpers';
-import { nonEmptyStringSchema } from './common';
 
 /**
  * These are deprecated types, they should be migrated to the updated types
@@ -47,7 +47,7 @@ type ReadStreamDefinition = WiredReadStreamDefinition | UnwiredReadStreamDefinit
 
 const readStreamDefinitionSchemaBase: z.Schema<ReadStreamDefinitionBase> = z.object({
   name: z.string(),
-  dashboards: z.array(nonEmptyStringSchema),
+  dashboards: z.array(NonEmptyString),
   elasticsearch_assets: z.array(elasticsearchAssetSchema),
   inherited_fields: inheritedFieldDefinitionSchema,
   lifecycle: ingestStreamLifecycleSchema,

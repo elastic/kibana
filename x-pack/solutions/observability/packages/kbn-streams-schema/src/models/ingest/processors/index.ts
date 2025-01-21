@@ -6,9 +6,9 @@
  */
 
 import { z } from '@kbn/zod';
+import { NonEmptyString } from '@kbn/zod-helpers';
 import { Condition, conditionSchema } from '../conditions';
 import { createIsNarrowSchema } from '../../../helpers';
-import { nonEmptyStringSchema } from '../../common';
 
 export interface ProcessorBase {
   if: Condition;
@@ -34,8 +34,8 @@ export const grokProcessorDefinitionSchema: z.Schema<GrokProcessorDefinition> = 
   grok: z.intersection(
     processorBaseSchema,
     z.object({
-      field: nonEmptyStringSchema,
-      patterns: z.array(nonEmptyStringSchema),
+      field: NonEmptyString,
+      patterns: z.array(NonEmptyString),
       pattern_definitions: z.optional(z.record(z.string())),
       ignore_failure: z.optional(z.boolean()),
       ignore_missing: z.optional(z.boolean()),
@@ -60,9 +60,9 @@ export const dissectProcessorDefinitionSchema: z.Schema<DissectProcessorDefiniti
     dissect: z.intersection(
       processorBaseSchema,
       z.object({
-        field: nonEmptyStringSchema,
-        pattern: nonEmptyStringSchema,
-        append_separator: z.optional(nonEmptyStringSchema),
+        field: NonEmptyString,
+        pattern: NonEmptyString,
+        append_separator: z.optional(NonEmptyString),
         ignore_failure: z.optional(z.boolean()),
         ignore_missing: z.optional(z.boolean()),
       })
