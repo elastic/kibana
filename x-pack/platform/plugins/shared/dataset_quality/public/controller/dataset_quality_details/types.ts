@@ -12,13 +12,13 @@ import {
   WithDefaultControllerState,
 } from '../../state_machines/dataset_quality_details_controller';
 
-type DegradedFieldTableSortOptions = Omit<QualityIssuesTableConfig['table']['sort'], 'field'> & {
+type QuaityIssuesTableSortOptions = Omit<QualityIssuesTableConfig['table']['sort'], 'field'> & {
   field: string;
 };
 
-export type DatasetQualityDegradedFieldTableOptions = Partial<
+export type DatasetQualityIssuesTableOptions = Partial<
   Omit<QualityIssuesTableConfig['table'], 'sort'> & {
-    sort?: DegradedFieldTableSortOptions;
+    sort?: QuaityIssuesTableSortOptions;
   }
 >;
 
@@ -39,8 +39,8 @@ export type DatasetQualityDetailsPublicStateUpdate = Partial<
 > & {
   dataStream: string;
 } & {
-  degradedFields?: {
-    table?: DatasetQualityDegradedFieldTableOptions;
+  qualityIssues?: {
+    table?: DatasetQualityIssuesTableOptions;
   };
 };
 

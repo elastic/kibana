@@ -18,7 +18,7 @@ export const urlSchemaRT = rt.exact(
       timeRange: timeRangeRT,
       qualityIssuesChart: qualityIssuesRT,
       breakdownField: rt.string,
-      degradedFields: degradedFieldRT,
+      qualityIssues: degradedFieldRT,
       expandedQualityIssue: rt.type({
         name: rt.string,
         type: qualityIssuesRT,

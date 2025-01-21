@@ -35,11 +35,11 @@ export const getContextFromPublicState = (
   qualityIssues: {
     table: {
       ...DEFAULT_CONTEXT.qualityIssues.table,
-      ...publicState.degradedFields?.table,
-      sort: publicState.degradedFields?.table?.sort
+      ...publicState.qualityIssues?.table,
+      sort: publicState.qualityIssues?.table?.sort
         ? {
-            ...publicState.degradedFields.table.sort,
-            field: publicState.degradedFields.table.sort.field as QualityIssueSortField,
+            ...publicState.qualityIssues.table.sort,
+            field: publicState.qualityIssues.table.sort.field as QualityIssueSortField,
           }
         : DEFAULT_CONTEXT.qualityIssues.table.sort,
     },
