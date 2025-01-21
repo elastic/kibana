@@ -60,8 +60,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     });
 
     after(async () => {
-      // await synthtrace.clean();
-      // await PageObjects.observabilityLogsExplorer.uninstallPackage(pkg);
+      await synthtrace.clean();
+      await PageObjects.observabilityLogsExplorer.uninstallPackage(pkg);
     });
 
     it('shows sort by dataset name and show namespace', async () => {
