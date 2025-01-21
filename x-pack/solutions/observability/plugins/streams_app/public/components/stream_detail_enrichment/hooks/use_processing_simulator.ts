@@ -72,7 +72,7 @@ export const useProcessingSimulator = ({
             condition,
             start: start?.valueOf(),
             end: end?.valueOf(),
-            number: 100,
+            size: 100,
           },
         },
       });

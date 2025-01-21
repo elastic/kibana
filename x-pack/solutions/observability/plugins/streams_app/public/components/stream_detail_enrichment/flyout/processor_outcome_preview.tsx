@@ -31,7 +31,7 @@ import {
   ReadStreamDefinition,
   isWiredReadStream,
 } from '@kbn/streams-schema';
-import { useController, useFieldArray } from 'react-hook-form';
+import { UseControllerProps, useController, useFieldArray } from 'react-hook-form';
 import { css } from '@emotion/react';
 import { flattenObject } from '@kbn/object-utils';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
@@ -290,17 +290,19 @@ const DetectedFields = ({ detectedFields }: { detectedFields?: DetectedField[] }
     >
       <EuiFlexGroup gutterSize="s" wrap>
         {fields.map((field, id) => (
-          <DetectedFieldSelector key={field.name} selectorId={`detected_fields.${id}`} />
+          <DetectedFieldSelector key={field.name} name={`detected_fields.${id}`} />
         ))}
       </EuiFlexGroup>
     </EuiFormRow>
   );
 };
 
-const DetectedFieldSelector = ({ selectorId }: { selectorId: string }) => {
-  const { field } = useController({ name: selectorId });
+const DetectedFieldSelector = (
+  props: UseControllerProps<ProcessorFormState, `detected_fields.${number}`>
+) => {
+  const { field } = useController(props);
 
-  const options = useMemo(() => getDetectedFieldSelectOptions(field.value), [field]);
+  const options = useMemo(() => getDetectedFieldSelectOptions(field.value), [field.value]);
 
   return (
     <EuiSuperSelect
