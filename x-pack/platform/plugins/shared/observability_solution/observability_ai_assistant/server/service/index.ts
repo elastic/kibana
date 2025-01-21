@@ -98,6 +98,7 @@ export class ObservabilityAIAssistantService {
     const { asInternalUser } = coreStart.elasticsearch.client;
 
     const kbService = new KnowledgeBaseService({
+      request,
       core: this.core,
       logger: this.logger.get('kb'),
       config: this.config,
