@@ -39,41 +39,6 @@
       },
       {
         "parentPluginId": "presentationUtil",
-        "id": "def-public.FloatingActions",
-        "type": "Function",
-        "tags": [],
-        "label": "FloatingActions",
-        "description": [],
-        "signature": [
-          "({ children, viewMode, isEnabled, api, className, disabledActions, }: ",
-          "FloatingActionsProps",
-          ") => React.JSX.Element"
-        ],
-        "path": "src/platform/plugins/shared/presentation_util/public/components/floating_actions/floating_actions.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.FloatingActions.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  children,\n  viewMode,\n  isEnabled,\n  api,\n  className = '',\n  disabledActions,\n}",
-            "description": [],
-            "signature": [
-              "FloatingActionsProps"
-            ],
-            "path": "src/platform/plugins/shared/presentation_util/public/components/floating_actions/floating_actions.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "presentationUtil",
         "id": "def-public.LazyDashboardPicker",
         "type": "Function",
         "tags": [],
