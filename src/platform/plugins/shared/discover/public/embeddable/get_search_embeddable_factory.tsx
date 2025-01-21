@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit } from 'lodash';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
@@ -79,7 +78,9 @@ export const getSearchEmbeddableFactory = ({
 
       /** Specific by-reference state */
       const savedObjectId$ = new BehaviorSubject<string | undefined>(initialState?.savedObjectId);
-      const defaultTitle$ = new BehaviorSubject<string | undefined>(initialState?.savedObjectTitle);
+      const defaultTitle$ = new BehaviorSubject<string | undefined>(
+        initialState?.savedObjectTitle
+      );
       const defaultDescription$ = new BehaviorSubject<string | undefined>(
         initialState?.savedObjectDescription
       );
@@ -108,8 +109,8 @@ export const getSearchEmbeddableFactory = ({
           ...timeRange.api,
           savedSearch$: searchEmbeddable.api.savedSearch$,
           dataViews$: searchEmbeddable.api.dataViews$,
-          savedObjectId$,
-          dataLoading$,
+          savedObjectId$: savedObjectId$,
+          dataLoading$: dataLoading$,
           blockingError$,
           fetchContext$,
           fetchWarnings$,
@@ -119,6 +120,16 @@ export const getSearchEmbeddableFactory = ({
         setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),
         setBlockingError: (error: Error | undefined) => blockingError$.next(error),
       });
+
+      const serialize = (savedObjectId?: string) =>
+        serializeState({
+          uuid,
+          initialState,
+          savedSearch: searchEmbeddable.api.savedSearch$.getValue(),
+          serializeTitles: titleManager.serialize,
+          serializeTimeRange: timeRange.serialize,
+          savedObjectId,
+        });
 
       const api: SearchEmbeddableApi = buildApi(
         {
@@ -137,15 +148,6 @@ export const getSearchEmbeddableFactory = ({
           savedObjectId$,
           defaultTitle$,
           defaultDescription$,
-          getByValueRuntimeSnapshot: () => {
-            const savedSearch = searchEmbeddable.api.savedSearch$.getValue();
-            return {
-              ...titleManager.serialize(),
-              ...timeRange.serialize(),
-              ...omit(savedSearch, 'searchSource'),
-              serializedSearchSource: savedSearch.searchSource.getSerializedFields(),
-            };
-          },
           hasTimeRange: () => {
             const fetchContext = fetchContext$.getValue();
             return fetchContext?.timeslice !== undefined || fetchContext?.timeRange !== undefined;
@@ -160,14 +162,12 @@ export const getSearchEmbeddableFactory = ({
             );
           },
           canUnlinkFromLibrary: async () => Boolean(savedObjectId$.getValue()),
-          libraryId$: savedObjectId$,
           saveToLibrary: async (title: string) => {
             const savedObjectId = await save({
               ...api.savedSearch$.getValue(),
               title,
             });
             defaultTitle$.next(title);
-            savedObjectId$.next(savedObjectId!);
             return savedObjectId!;
           },
           checkForDuplicateTitle: (newTitle, isTitleDuplicateConfirmed, onTitleDuplicate) =>
@@ -176,26 +176,9 @@ export const getSearchEmbeddableFactory = ({
               isTitleDuplicateConfirmed,
               onTitleDuplicate,
             }),
-          unlinkFromLibrary: () => {
-            savedObjectId$.next(undefined);
-            if ((titleManager.api.title$.getValue() ?? '').length === 0) {
-              titleManager.api.setTitle(defaultTitle$.getValue());
-            }
-            if ((titleManager.api.description$.getValue() ?? '').length === 0) {
-              titleManager.api.setDescription(defaultDescription$.getValue());
-            }
-            defaultTitle$.next(undefined);
-            defaultDescription$.next(undefined);
-          },
-          serializeState: () =>
-            serializeState({
-              uuid,
-              initialState,
-              savedSearch: searchEmbeddable.api.savedSearch$.getValue(),
-              serializeTitles: titleManager.serialize,
-              serializeTimeRange: timeRange.serialize,
-              savedObjectId: savedObjectId$.getValue(),
-            }),
+          getSerializedStateByValue: () => serialize(undefined),
+          getSerializedStateByReference: (newId: string) => serialize(newId),
+          serializeState: () => serialize(savedObjectId$.getValue()),
           getInspectorAdapters: () => searchEmbeddable.stateManager.inspectorAdapters.getValue(),
         },
         {
@@ -205,7 +188,10 @@ export const getSearchEmbeddableFactory = ({
           rawSavedObjectAttributes: getUnchangingComparator(),
           savedObjectId: [savedObjectId$, (value) => savedObjectId$.next(value)],
           savedObjectTitle: [defaultTitle$, (value) => defaultTitle$.next(value)],
-          savedObjectDescription: [defaultDescription$, (value) => defaultDescription$.next(value)],
+          savedObjectDescription: [
+            defaultDescription$,
+            (value) => defaultDescription$.next(value),
+          ],
           nonPersistedDisplayOptions: [
             nonPersistedDisplayOptions$,
             (value) => nonPersistedDisplayOptions$.next(value),

@@ -171,6 +171,22 @@ export const getVisualizeEmbeddableFactory: (deps: {
 
     const defaultTitle$ = new BehaviorSubject<string | undefined>(initialVisInstance.title);
 
+    const serializeVisualizeEmbeddable = (
+      savedObjectId: string | undefined,
+      linkedToLibrary: boolean
+    ) => {
+      const savedObjectProperties = savedObjectProperties$.getValue();
+      return serializeState({
+        serializedVis: vis$.getValue().serialize(),
+        titles: titleManager.serialize(),
+        id: savedObjectId,
+        linkedToLibrary,
+        ...(savedObjectProperties ? { savedObjectProperties } : {}),
+        ...(dynamicActionsApi?.serializeDynamicActions?.() ?? {}),
+        ...serializeCustomTimeRange(),
+      });
+    };
+
     const api = buildApi(
       {
         ...customTimeRangeApi,
@@ -186,20 +202,13 @@ export const getVisualizeEmbeddableFactory: (deps: {
           SELECT_RANGE_TRIGGER,
         ],
         serializeState: () => {
-          const savedObjectProperties = savedObjectProperties$.getValue();
-          return serializeState({
-            serializedVis: vis$.getValue().serialize(),
-            titles: titleManager.serialize(),
-            id: savedObjectId$.getValue(),
-            linkedToLibrary:
-              // In the visualize editor, linkedToLibrary should always be false to force the full state to be serialized,
-              // instead of just passing a reference to the linked saved object. Other contexts like dashboards should
-              // serialize the state with just the savedObjectId so that the current revision of the vis is always used
-              apiIsOfType(parentApi, VISUALIZE_APP_NAME) ? false : linkedToLibrary$.getValue(),
-            ...(savedObjectProperties ? { savedObjectProperties } : {}),
-            ...(dynamicActionsApi?.serializeDynamicActions?.() ?? {}),
-            ...serializeCustomTimeRange(),
-          });
+          // In the visualize editor, linkedToLibrary should always be false to force the full state to be serialized,
+          // instead of just passing a reference to the linked saved object. Other contexts like dashboards should
+          // serialize the state with just the savedObjectId so that the current revision of the vis is always used
+          const linkedToLibrary = apiIsOfType(parentApi, VISUALIZE_APP_NAME)
+            ? false
+            : linkedToLibrary$.getValue();
+          return serializeVisualizeEmbeddable(savedObjectId$.getValue(), Boolean(linkedToLibrary));
         },
         getVis: () => vis$.getValue(),
         getInspectorAdapters: () => inspectorAdapters$.getValue(),
@@ -238,7 +247,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
           if (!inspector.isAvailable(adapters)) return;
           return getInspector().open(adapters, {
             title:
-              titleManager.api.title$?.getValue() ||
+            titleManager.api.title$?.getValue() ||
               i18n.translate('visualizations.embeddable.inspectorTitle', {
                 defaultMessage: 'Inspector',
               }),
@@ -260,20 +269,11 @@ export const getVisualizeEmbeddableFactory: (deps: {
             references,
           });
         },
-        canLinkToLibrary: () => !state.linkedToLibrary,
-        canUnlinkFromLibrary: () => !!state.linkedToLibrary,
-        checkForDuplicateTitle: () => false, // Handled by saveToLibrary action
-        getByValueState: () => ({
-          savedVis: vis$.getValue().serialize(),
-          ...titleManager.serialize(),
-        }),
-        getByReferenceState: (libraryId) =>
-          serializeState({
-            serializedVis: vis$.getValue().serialize(),
-            titles: titleManager.serialize(),
-            id: libraryId,
-            linkedToLibrary: true,
-          }).rawState,
+        canLinkToLibrary: () => Promise.resolve(!state.linkedToLibrary),
+        canUnlinkFromLibrary: () => Promise.resolve(!!state.linkedToLibrary),
+        checkForDuplicateTitle: () => Promise.resolve(), // Handled by saveToLibrary action
+        getSerializedStateByValue: () => serializeVisualizeEmbeddable(undefined, false),
+        getSerializedStateByReference: (libraryId) => serializeVisualizeEmbeddable(libraryId, true),
       },
       {
         ...titleManager.comparators,

@@ -11,12 +11,15 @@ import {
   apiHasRuntimeChildState,
   apiIsPresentationContainer,
   HasSerializedChildState,
-  HasSnapshottableState,
   initializeUnsavedChanges,
-  SerializedPanelState,
 } from '@kbn/presentation-containers';
 import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
-import { ComparatorDefinition, StateComparators } from '@kbn/presentation-publishing';
+import {
+  ComparatorDefinition,
+  StateComparators,
+  HasSnapshottableState,
+  SerializedPanelState,
+} from '@kbn/presentation-publishing';
 import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime, map, skip, Subscription } from 'rxjs';
 import { v4 as generateId } from 'uuid';

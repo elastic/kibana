@@ -35,7 +35,7 @@ import { EventHandlers } from '../reducers/non_serializable_instances';
 
 export type MapSerializedState = SerializedTitles &
   Partial<DynamicActionsSerializedState> & {
-    // by-valye
+    // by-value
     attributes?: MapAttributes;
     // by-reference
     savedObjectId?: string;
@@ -61,7 +61,7 @@ export type MapApi = DefaultEmbeddableApi<MapSerializedState> &
   PublishesDataLoading &
   PublishesDataViews &
   PublishesUnifiedSearch &
-  HasLibraryTransforms<MapSerializedState> & {
+  HasLibraryTransforms<MapSerializedState, MapSerializedState> & {
     getLayerList: () => ILayer[];
     reload: () => void;
     setEventHandlers: (eventHandlers: EventHandlers) => void;
