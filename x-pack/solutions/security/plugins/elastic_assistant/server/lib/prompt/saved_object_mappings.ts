@@ -23,9 +23,6 @@ export const promptSavedObjectMappings: SavedObjectsType['mappings'] = {
     model: {
       type: 'keyword',
     },
-    version: {
-      type: 'long',
-    },
     prompt: {
       properties: {
         // ISO 639 two-letter language code
