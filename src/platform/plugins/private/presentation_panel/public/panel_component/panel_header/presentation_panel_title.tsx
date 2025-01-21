@@ -8,20 +8,7 @@
  */
 
 import { EuiIcon, EuiLink, EuiToolTip, euiTextTruncate, useEuiTheme } from '@elastic/eui';
-import { once } from 'lodash';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  defaultIfEmpty,
-  fromEvent,
-  map,
-  mergeMap,
-  race,
-  repeatWhen,
-  takeLast,
-  takeUntil,
-  takeWhile,
-  type Observable,
-} from 'rxjs';
+import React, { useCallback, useMemo } from 'react';
 
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -31,55 +18,6 @@ import {
   isApiCompatibleWithCustomizePanelAction,
 } from '../../panel_actions/customize_panel_action';
 import { openCustomizePanelFlyout } from '../../panel_actions/customize_panel_action/open_customize_panel';
-
-export const placeholderTitle = i18n.translate('presentationPanel.placeholderTitle', {
-  defaultMessage: '[No Title]',
-});
-
-const createDocumentMouseMoveListener = once(() => fromEvent<MouseEvent>(document, 'mousemove'));
-const createDocumentMouseUpListener = once(() => fromEvent<MouseEvent>(document, 'mouseup'));
-
-export const usePresentationPanelTitleClickHandler = (titleElmRef: HTMLElement | null) => {
-  const onClick = useRef<Observable<{ dragged: boolean }> | null>(null);
-  const [initialized, setInitialized] = useState(false);
-
-  useEffect(() => {
-    if (titleElmRef) {
-      const mouseup = createDocumentMouseUpListener();
-      const mousemove = createDocumentMouseMoveListener();
-      const mousedown = fromEvent<MouseEvent>(titleElmRef, 'mousedown');
-      const keydown = fromEvent<KeyboardEvent>(titleElmRef, 'keydown');
-
-      const mousedragExclusiveClick$ = mousedown
-        .pipe(
-          mergeMap(function (md) {
-            // create reference for when mouse is down
-            const startX = md.offsetX;
-            const startY = md.offsetY;
-
-            return mousemove
-              .pipe(
-                map(function (mm) {
-                  return { dragged: startX !== mm.clientX && startY !== mm.clientY };
-                })
-              )
-              .pipe(takeUntil(mouseup), takeLast(1))
-              .pipe(defaultIfEmpty({ dragged: false }));
-          })
-        )
-        .pipe(repeatWhen(() => mousedown));
-
-      onClick.current = race(
-        keydown.pipe(takeWhile((kd) => kd.key === 'Enter')).pipe(map(() => ({ dragged: false }))),
-        mousedragExclusiveClick$
-      );
-
-      setInitialized(true);
-    }
-  }, [titleElmRef]);
-
-  return initialized ? onClick.current : null;
-};
 
 export const PresentationPanelTitle = ({
   api,
@@ -96,13 +34,23 @@ export const PresentationPanelTitle = ({
 }) => {
   const { euiTheme } = useEuiTheme();
 
-  const [panelTitleElmRef, setPanelTitleElmRef] = useState<HTMLElement | null>(null);
+  const onClick = useCallback(() => {
+    openCustomizePanelFlyout({
+      api: api as CustomizePanelActionApi,
+      focusOnTitle: true,
+    });
+  }, [api]);
+
   const panelTitleElement = useMemo(() => {
     if (hideTitle) return null;
 
     const titleStyles = css`
       ${euiTextTruncate()};
       font-weight: ${euiTheme.font.weight.bold};
+
+      .kbnGridPanel--active & {
+        pointer-events: none; // prevent drag event from triggering onClick
+      }
     `;
 
     if (viewMode !== 'edit' || !isApiCompatibleWithCustomizePanelAction(api)) {
@@ -116,7 +64,7 @@ export const PresentationPanelTitle = ({
     return (
       <EuiLink
         color="text"
-        ref={setPanelTitleElmRef}
+        onClick={onClick}
         css={titleStyles}
         aria-label={i18n.translate('presentationPanel.header.titleAriaLabel', {
           defaultMessage: 'Click to edit title: {title}',
@@ -127,22 +75,7 @@ export const PresentationPanelTitle = ({
         {panelTitle}
       </EuiLink>
     );
-  }, [setPanelTitleElmRef, hideTitle, panelTitle, viewMode, api, euiTheme]);
-
-  const onClick = usePresentationPanelTitleClickHandler(panelTitleElmRef);
-
-  useEffect(() => {
-    const panelTitleClickSubscription = onClick?.subscribe(function onClickHandler({ dragged }) {
-      if (!dragged) {
-        openCustomizePanelFlyout({
-          api: api as CustomizePanelActionApi,
-          focusOnTitle: true,
-        });
-      }
-    });
-
-    return () => panelTitleClickSubscription?.unsubscribe();
-  }, [api, onClick]);
+  }, [onClick, hideTitle, panelTitle, viewMode, api, euiTheme]);
 
   const describedPanelTitleElement = useMemo(() => {
     if (hideTitle) return null;
