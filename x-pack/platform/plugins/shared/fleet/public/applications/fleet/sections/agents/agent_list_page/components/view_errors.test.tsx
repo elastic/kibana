@@ -40,9 +40,11 @@ jest.mock('@kbn/shared-ux-link-redirect-app', () => ({
 }));
 
 jest.mock('@kbn/logs-shared-plugin/common', () => {
+  const originalModule = jest.requireActual('@kbn/logs-shared-plugin/common');
   return {
+    ...originalModule,
     getLogsLocatorsFromUrlService: jest.fn().mockReturnValue({
-      logsLocator: { getRedirectUrl: jest.fn(() => 'https://discover-redirect-url') },
+      discoverLogsLocator: { getRedirectUrl: jest.fn(() => 'https://discover-redirect-url') },
     }),
   };
 });
