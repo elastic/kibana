@@ -20,6 +20,7 @@ import {
   PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_UPSELL_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID,
 } from './test_ids';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import { TestProviders } from '../../../../common/mock';
@@ -31,8 +32,10 @@ import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 jest.mock('@kbn/expandable-flyout');
+jest.mock('../../../../common/components/user_privileges');
 
 const mockedTelemetry = createTelemetryServiceMock();
 jest.mock('../../../../common/lib/kibana', () => {
@@ -134,6 +137,7 @@ describe('PrevalenceDetails', () => {
     jest.clearAllMocks();
     licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    (useUserPrivileges as jest.Mock).mockReturnValue({ timelinePrivileges: { read: true } });
   });
 
   it('should render the table with all data if license is platinum', () => {
@@ -219,7 +223,7 @@ describe('PrevalenceDetails', () => {
     ).not.toHaveTextContent('10%');
   });
 
-  it('should render formatted numbers for the alert and document count columns', () => {
+  it('should render formatted numbers for the alert and document count columns and be clickable buttons', () => {
     (usePrevalence as jest.Mock).mockReturnValue({
       loading: false,
       error: false,
@@ -235,7 +239,7 @@ describe('PrevalenceDetails', () => {
       ],
     });
 
-    const { getByTestId } = render(
+    const { getByTestId, getAllByTestId } = render(
       <TestProviders>
         <DocumentDetailsContext.Provider value={panelContextValue}>
           <PrevalenceDetails />
@@ -254,6 +258,52 @@ describe('PrevalenceDetails', () => {
     expect(getByTestId(PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID)).toHaveTextContent(
       '10%'
     );
+
+    expect(
+      getAllByTestId(PREVALENCE_DETAILS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID).length
+    ).toBeGreaterThan(1);
+  });
+
+  it('should render formatted numbers as text if user lacks timeline read privileges', () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({ timelinePrivileges: { read: false } });
+    (usePrevalence as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [
+        {
+          field: 'field1',
+          values: ['value1'],
+          alertCount: 1000,
+          docCount: 2000000,
+          hostPrevalence: 0.05,
+          userPrevalence: 0.1,
+        },
+      ],
+    });
+
+    const { getByTestId, queryAllByTestId } = render(
+      <TestProviders>
+        <DocumentDetailsContext.Provider value={panelContextValue}>
+          <PrevalenceDetails />
+        </DocumentDetailsContext.Provider>
+      </TestProviders>
+    );
+
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID)).toHaveTextContent('field1');
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID)).toHaveTextContent('value1');
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID)).toHaveTextContent('1k');
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID)).toHaveTextContent('2M');
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID)).toHaveTextContent(
+      '5%'
+    );
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID)).toHaveTextContent(
+      '10%'
+    );
+
+    expect(
+      queryAllByTestId(PREVALENCE_DETAILS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID).length
+    ).not.toBeGreaterThan(1);
   });
 
   it('should render multiple values in value column', () => {

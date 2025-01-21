@@ -157,6 +157,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
     );
 
     const response$ = client.chat(name, {
+      stream: true,
       messages,
       connectorId,
       signal,
@@ -203,6 +204,7 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
           client
             .chat(name, {
               ...params,
+              stream: true,
               connectorId,
               simulateFunctionCalling,
               signal,
