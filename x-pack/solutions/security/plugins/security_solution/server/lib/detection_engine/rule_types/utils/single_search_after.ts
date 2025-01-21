@@ -11,8 +11,12 @@ import type {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import type { LoggedRequestsEnabled } from '../types';
-import type { SignalSearchResponse, SignalSource, OverrideBodyQuery } from '../types';
+import type {
+  SignalSearchResponse,
+  SignalSource,
+  OverrideBodyQuery,
+  LoggedRequestsEnabled,
+} from '../types';
 import { buildEventsSearchQuery } from './build_events_query';
 import { createErrorsFromShard, makeFloatString } from './utils';
 import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';

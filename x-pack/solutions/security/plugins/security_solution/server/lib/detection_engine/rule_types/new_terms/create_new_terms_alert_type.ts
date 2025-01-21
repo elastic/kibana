@@ -163,6 +163,7 @@ export const createNewTermsAlertType = (
       if (exceptionsWarning) {
         result.warningMessages.push(exceptionsWarning);
       }
+      let pageNumber = 0;
 
       // There are 2 conditions that mean we're finished: either there were still too many alerts to create
       // after deduplication and the array of alerts was truncated before being submitted to ES, or there were
@@ -171,6 +172,7 @@ export const createNewTermsAlertType = (
       // in which case createdSignalsCount would still be less than maxSignals. Since valid alerts were truncated from
       // the array in that case, we stop and report the errors.
       while (result.createdSignalsCount <= params.maxSignals) {
+        pageNumber++;
         // PHASE 1: Fetch a page of terms using a composite aggregation. This will collect a page from
         // all of the terms seen over the last rule interval. In the next phase we'll determine which
         // ones are new.
@@ -196,8 +198,14 @@ export const createNewTermsAlertType = (
           primaryTimestamp,
           secondaryTimestamp,
           runtimeMappings,
-          loggedRequestDescription: isLoggedRequestsEnabled
-            ? i18n.FIND_ALL_NEW_TERMS_FIELDS_DESCRIPTION(stringifyAfterKey(afterKey))
+          loggedRequestsEnabled: isLoggedRequestsEnabled
+            ? {
+                type: 'findAllTerms',
+                description: i18n.FIND_ALL_NEW_TERMS_FIELDS_DESCRIPTION(
+                  stringifyAfterKey(afterKey)
+                ),
+                skipRequestQuery: pageNumber > 2,
+              }
             : undefined,
         });
         loggedRequests.push(...firstPhaseLoggedRequests);
@@ -368,8 +376,12 @@ export const createNewTermsAlertType = (
             pageSize: 0,
             primaryTimestamp,
             secondaryTimestamp,
-            loggedRequestDescription: isLoggedRequestsEnabled
-              ? i18n.FIND_NEW_TERMS_VALUES_DESCRIPTION(stringifyAfterKey(afterKey))
+            loggedRequestsEnabled: isLoggedRequestsEnabled
+              ? {
+                  type: 'findNewTerms',
+                  description: i18n.FIND_NEW_TERMS_VALUES_DESCRIPTION(stringifyAfterKey(afterKey)),
+                  skipRequestQuery: pageNumber > 2,
+                }
               : undefined,
           });
           result.searchAfterTimes.push(pageSearchDuration);
@@ -415,8 +427,14 @@ export const createNewTermsAlertType = (
               pageSize: 0,
               primaryTimestamp,
               secondaryTimestamp,
-              loggedRequestDescription: isLoggedRequestsEnabled
-                ? i18n.FIND_NEW_TERMS_EVENTS_DESCRIPTION(stringifyAfterKey(afterKey))
+              loggedRequestsEnabled: isLoggedRequestsEnabled
+                ? {
+                    type: 'findDocuments',
+                    description: i18n.FIND_NEW_TERMS_EVENTS_DESCRIPTION(
+                      stringifyAfterKey(afterKey)
+                    ),
+                    skipRequestQuery: pageNumber > 2,
+                  }
                 : undefined,
             });
             result.searchAfterTimes.push(docFetchSearchDuration);

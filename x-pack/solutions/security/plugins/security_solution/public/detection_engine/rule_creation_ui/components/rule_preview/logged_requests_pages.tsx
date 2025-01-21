@@ -15,8 +15,6 @@ import { OptimizedAccordion } from './optimized_accordion';
 import { useAccordionStyling } from './use_accordion_styling';
 import { LoggedRequestsQuery } from './logged_requests_query';
 
-const PAGE_VIEW_RULE_TYPES: Type[] = ['query', 'saved_query', 'threshold'];
-
 const ruleRequestsTypesMap: Record<Type, Record<string, unknown>> = {
   query: {
     findDocuments: 'pageDelimiter',
@@ -27,9 +25,12 @@ const ruleRequestsTypesMap: Record<Type, Record<string, unknown>> = {
   threshold: {
     findThresholdBuckets: 'pageDelimiter',
   },
+  new_terms: {
+    findAllTerms: 'pageDelimiter',
+  },
 };
 
-export const isPageViewSupported = (ruleType: Type) => PAGE_VIEW_RULE_TYPES.includes(ruleType);
+export const isPageViewSupported = (ruleType: Type) => Boolean(ruleRequestsTypesMap[ruleType]);
 
 const transformRequestsToPages = (
   requests: RulePreviewLoggedRequest[],

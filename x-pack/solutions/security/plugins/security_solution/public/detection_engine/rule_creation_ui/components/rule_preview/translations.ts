@@ -178,12 +178,6 @@ export const LOGGED_REQUEST_ITEM_ACCORDION_UNKNOWN_TIME_BUTTON = i18n.translate(
     defaultMessage: 'Preview logged requests',
   }
 );
-export const LOGGED_REQUEST_SHOW_CODE_BLOCK_BUTTON = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.loggedRequestShowCodeBlockButtonLabel',
-  {
-    defaultMessage: 'Show code block',
-  }
-);
 
 export const VIEW_DETAILS_FOR_ROW = ({
   ariaRowindex,

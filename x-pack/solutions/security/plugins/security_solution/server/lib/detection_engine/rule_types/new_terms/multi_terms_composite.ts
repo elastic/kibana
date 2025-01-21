@@ -84,7 +84,10 @@ const multiTermsCompositeNonRetryable = async ({
   isAlertSuppressionActive,
   isLoggedRequestsEnabled,
 }: MultiTermsCompositeArgs): Promise<
-  Omit<GenericBulkCreateResponse<NewTermsFieldsLatest>, 'suppressedItemsCount'> | undefined
+  | (Omit<GenericBulkCreateResponse<NewTermsFieldsLatest>, 'suppressedItemsCount'> & {
+      loggedRequests?: RulePreviewLoggedRequest;
+    })
+  | undefined
 > => {
   const {
     ruleExecutionLogger,
@@ -100,8 +103,10 @@ const multiTermsCompositeNonRetryable = async ({
   let internalAfterKey = afterKey ?? undefined;
 
   let i = 0;
+  let pageNumber = 0;
 
   while (i < buckets.length) {
+    pageNumber++;
     const batch = buckets.slice(i, i + batchSize);
     i += batchSize;
     const batchFilters = batch.map((b) => {
@@ -147,8 +152,14 @@ const multiTermsCompositeNonRetryable = async ({
       pageSize: 0,
       primaryTimestamp,
       secondaryTimestamp,
-      loggedRequestDescription: isLoggedRequestsEnabled
-        ? i18n.FIND_NEW_TERMS_VALUES_DESCRIPTION(stringifyAfterKey(internalAfterKey))
+      loggedRequestsEnabled: isLoggedRequestsEnabled
+        ? {
+            type: 'findNewTerms',
+            description: i18n.FIND_NEW_TERMS_VALUES_DESCRIPTION(
+              stringifyAfterKey(internalAfterKey)
+            ),
+            skipRequestQuery: Boolean(afterKey) || pageNumber > 2,
+          }
         : undefined,
     });
 
@@ -191,8 +202,14 @@ const multiTermsCompositeNonRetryable = async ({
         pageSize: 0,
         primaryTimestamp,
         secondaryTimestamp,
-        loggedRequestDescription: isLoggedRequestsEnabled
-          ? i18n.FIND_NEW_TERMS_EVENTS_DESCRIPTION(stringifyAfterKey(internalAfterKey))
+        loggedRequestsEnabled: isLoggedRequestsEnabled
+          ? {
+              type: 'findDocuments',
+              description: i18n.FIND_NEW_TERMS_EVENTS_DESCRIPTION(
+                stringifyAfterKey(internalAfterKey)
+              ),
+              skipRequestQuery: Boolean(afterKey) || pageNumber > 2,
+            }
           : undefined,
       });
       result.searchAfterTimes.push(docFetchSearchDuration);
@@ -206,7 +223,7 @@ const multiTermsCompositeNonRetryable = async ({
       }
 
       const bulkCreateResult = await createAlertsHook(docFetchResultWithAggs);
-      // console.log('bulkCreateResult.loggedRequests ', bulkCreateResult.loggedRequests.length);
+
       if (isLoggedRequestsEnabled) {
         bulkCreateResult.loggedRequests = loggedRequests;
       }
