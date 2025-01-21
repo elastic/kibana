@@ -75,6 +75,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await putStream(apiClient, 'logs.overrides', {
         ingest: {
           ...putBody.ingest,
+          routing: [{ name: 'logs.overrides.lifecycle' }],
           lifecycle: { type: 'dlm', data_retention: '1d' },
         },
       });
