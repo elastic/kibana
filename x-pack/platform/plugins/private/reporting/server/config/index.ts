@@ -35,7 +35,7 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
       const allowedRoles = reporting?.roles?.allow ?? [];
       if (allowedRoles.length !== 0) {
         addDeprecation({
-          configPath: `${fromPath}.roles.enabled`,
+          configPath: `${fromPath}.roles.allow`,
           level: 'warning',
           title: i18n.translate('xpack.reporting.deprecations.reportingRoles.title', {
             defaultMessage: `The "{fromPath}.roles.allow" setting is deprecated`,
@@ -46,7 +46,7 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
           message: i18n.translate('xpack.reporting.deprecations.reportingRoles.description', {
             defaultMessage:
               `The default mechanism for Reporting privileges will work differently in future versions,` +
-              ` which will affect the behavior of this cluster. Set "xpack.reporting.roles.enabled" to` +
+              ` which will affect the behavior of this cluster. Set "xpack.reporting.roles.allow" to` +
               ` "false" to adopt the future behavior before upgrading.`,
           }),
           correctiveActions: {
