@@ -246,56 +246,29 @@ export default function ({ getService }: FtrProviderContext) {
           await deleteTemplates([{ name: logsdbTemplateName }]);
         });
 
-        it('returns logsdb index mode if logsdg.enabled setting is true', async () => {
-          await es.cluster.putSettings({
-            body: {
-              persistent: {
-                cluster: {
-                  logsdb: {
-                    enabled: true,
+        const logsdbSettings: Array<{ enabled: boolean | null; indexMode: string }> = [
+          { enabled: true, indexMode: 'logsdb' },
+          { enabled: false, indexMode: 'standard' },
+          { enabled: null, indexMode: 'logsdb' }, // In stateful Kibana, the cluster.logsdb.enabled setting is false by default, so standard index mode
+        ];
+
+        logsdbSettings.forEach(({ enabled, indexMode }) => {
+          it(`returns ${indexMode} index mode if logsdb.enabled setting is ${enabled}`, async () => {
+            await es.cluster.putSettings({
+              body: {
+                persistent: {
+                  cluster: {
+                    logsdb: {
+                      enabled,
+                    },
                   },
                 },
               },
-            },
+            });
+
+            const { body } = await getOneTemplate(logsdbTemplateName).expect(200);
+            expect(body.indexMode).to.equal(indexMode);
           });
-
-          const { body } = await getOneTemplate(logsdbTemplateName).expect(200);
-          expect(body.indexMode).to.equal('logsdb');
-        });
-
-        it('returns standard index mode if logsdg.enabled setting is false', async () => {
-          await es.cluster.putSettings({
-            body: {
-              persistent: {
-                cluster: {
-                  logsdb: {
-                    enabled: false,
-                  },
-                },
-              },
-            },
-          });
-
-          const { body } = await getOneTemplate(logsdbTemplateName).expect(200);
-          expect(body.indexMode).to.equal('standard');
-        });
-
-        // In stateful Kibana, the cluster.logsdb.enabled setting is false by default
-        it('returns standard index mode if logsdg.enabled setting is not set', async () => {
-          await es.cluster.putSettings({
-            body: {
-              persistent: {
-                cluster: {
-                  logsdb: {
-                    enabled: null,
-                  },
-                },
-              },
-            },
-          });
-
-          const { body } = await getOneTemplate(logsdbTemplateName).expect(200);
-          expect(body.indexMode).to.equal('standard');
         });
       });
     });

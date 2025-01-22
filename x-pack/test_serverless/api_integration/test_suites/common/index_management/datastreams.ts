@@ -128,100 +128,44 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      describe('index mode', () => {
-        it('correctly returns index mode property based on index settings', async () => {
-          const logsdbDataStreamName = 'logsdb-test-data-stream';
-          const indexMode = 'logsdb';
+      describe('index mode of logs-*-* data streams', () => {
+        const logsdbDataStreamName = 'logs-test-ds';
 
-          await svlDatastreamsHelpers.createDataStream(logsdbDataStreamName, indexMode);
+        before(async () => {
+          await svlDatastreamsHelpers.createDataStream(logsdbDataStreamName);
+        });
 
-          const { body: dataStream } = await supertest
-            .get(`${API_BASE_PATH}/data_streams/${logsdbDataStreamName}`)
-            .set('kbn-xsrf', 'xxx')
-            .expect(200);
-
-          expect(dataStream.indexMode).to.eql(indexMode);
-
+        after(async () => {
           await svlDatastreamsHelpers.deleteDataStream(logsdbDataStreamName);
         });
 
-        it('returns logsdb index mode for logs-*-* data stream if logsdg.enabled setting is true', async () => {
-          await es.cluster.putSettings({
-            body: {
-              persistent: {
-                cluster: {
-                  logsdb: {
-                    enabled: true,
+        const logsdbSettings: Array<{ enabled: boolean | null; indexMode: string }> = [
+          { enabled: true, indexMode: 'logsdb' },
+          { enabled: false, indexMode: 'standard' },
+          { enabled: null, indexMode: 'logsdb' }, // In serverless Kibana, the cluster.logsdb.enabled setting is true by default, so logsdb index mode
+        ];
+
+        logsdbSettings.forEach(({ enabled, indexMode }) => {
+          it(`returns ${indexMode} index mode if logsdb.enabled setting is ${enabled}`, async () => {
+            await es.cluster.putSettings({
+              body: {
+                persistent: {
+                  cluster: {
+                    logsdb: {
+                      enabled,
+                    },
                   },
                 },
               },
-            },
+            });
+
+            const { body: dataStream } = await supertest
+              .get(`${API_BASE_PATH}/data_streams/${logsdbDataStreamName}`)
+              .set('kbn-xsrf', 'xxx')
+              .expect(200);
+
+            expect(dataStream.indexMode).to.eql(indexMode);
           });
-
-          const logsdbDataStreamName = 'logs-test-1';
-          await svlDatastreamsHelpers.createDataStream(logsdbDataStreamName);
-
-          const { body: dataStream } = await supertest
-            .get(`${API_BASE_PATH}/data_streams/${logsdbDataStreamName}`)
-            .set('kbn-xsrf', 'xxx')
-            .expect(200);
-
-          expect(dataStream.indexMode).to.eql('logsdb');
-
-          await svlDatastreamsHelpers.deleteDataStream(logsdbDataStreamName);
-        });
-
-        it('returns standard index mode for logs-*-* data stream if logsdg.enabled setting is false', async () => {
-          await es.cluster.putSettings({
-            body: {
-              persistent: {
-                cluster: {
-                  logsdb: {
-                    enabled: false,
-                  },
-                },
-              },
-            },
-          });
-
-          const logsdbDataStreamName = 'logs-test-2';
-          await svlDatastreamsHelpers.createDataStream(logsdbDataStreamName);
-
-          const { body: dataStream } = await supertest
-            .get(`${API_BASE_PATH}/data_streams/${logsdbDataStreamName}`)
-            .set('kbn-xsrf', 'xxx')
-            .expect(200);
-
-          expect(dataStream.indexMode).to.eql('standard');
-
-          await svlDatastreamsHelpers.deleteDataStream(logsdbDataStreamName);
-        });
-
-        // In serverless Kibana, the cluster.logsdb.enabled setting is true by default
-        it('returns logsdb index mode for logs-*-* data stream if logsdg.enabled setting is not set', async () => {
-          await es.cluster.putSettings({
-            body: {
-              persistent: {
-                cluster: {
-                  logsdb: {
-                    enabled: null,
-                  },
-                },
-              },
-            },
-          });
-
-          const logsdbDataStreamName = 'logs-test-3';
-          await svlDatastreamsHelpers.createDataStream(logsdbDataStreamName);
-
-          const { body: dataStream } = await supertest
-            .get(`${API_BASE_PATH}/data_streams/${logsdbDataStreamName}`)
-            .set('kbn-xsrf', 'xxx')
-            .expect(200);
-
-          expect(dataStream.indexMode).to.eql('logsdb');
-
-          await svlDatastreamsHelpers.deleteDataStream(logsdbDataStreamName);
         });
       });
     });

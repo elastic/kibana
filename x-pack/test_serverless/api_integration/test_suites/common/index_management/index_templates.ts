@@ -133,75 +133,40 @@ export default function ({ getService }: FtrProviderContext) {
             const template = svlTemplatesHelpers.getTemplatePayload(logsdbTemplateName, [
               'logs-*-*',
             ]);
-            await svlTemplatesApi.createTemplate(template).expect(200);
+            await svlTemplatesApi.createTemplate(template, roleAuthc).expect(200);
           });
 
           after(async () => {
-            await svlTemplatesApi.deleteTemplates([{ name: logsdbTemplateName }]);
+            await svlTemplatesApi.deleteTemplates([{ name: logsdbTemplateName }], roleAuthc);
           });
 
-          it('returns logsdb index mode if logsdg.enabled setting is true', async () => {
-            await es.cluster.putSettings({
-              body: {
-                persistent: {
-                  cluster: {
-                    logsdb: {
-                      enabled: true,
+          const logsdbSettings: Array<{ enabled: boolean | null; indexMode: string }> = [
+            { enabled: true, indexMode: 'logsdb' },
+            { enabled: false, indexMode: 'standard' },
+            { enabled: null, indexMode: 'logsdb' }, // In serverless Kibana, the cluster.logsdb.enabled setting is true by default, so logsdb index mode
+          ];
+
+          logsdbSettings.forEach(({ enabled, indexMode }) => {
+            it(`returns ${indexMode} index mode if logsdb.enabled setting is ${enabled}`, async () => {
+              await es.cluster.putSettings({
+                body: {
+                  persistent: {
+                    cluster: {
+                      logsdb: {
+                        enabled,
+                      },
                     },
                   },
                 },
-              },
+              });
+
+              const { body, status } = await supertestWithoutAuth
+                .get(`${API_BASE_PATH}/index_templates/${logsdbTemplateName}`)
+                .set(internalReqHeader)
+                .set(roleAuthc.apiKeyHeader);
+              expect(status).to.eql(200);
+              expect(body.indexMode).to.equal(indexMode);
             });
-
-            const { body, status } = await supertestWithoutAuth
-              .get(`${API_BASE_PATH}/index_templates/${logsdbTemplateName}`)
-              .set(internalReqHeader)
-              .set(roleAuthc.apiKeyHeader);
-            expect(status).to.eql(200);
-            expect(body.indexMode).to.equal('logsdb');
-          });
-
-          it('returns standard index mode if logsdg.enabled setting is false', async () => {
-            await es.cluster.putSettings({
-              body: {
-                persistent: {
-                  cluster: {
-                    logsdb: {
-                      enabled: false,
-                    },
-                  },
-                },
-              },
-            });
-
-            const { body, status } = await supertestWithoutAuth
-              .get(`${API_BASE_PATH}/index_templates/${logsdbTemplateName}`)
-              .set(internalReqHeader)
-              .set(roleAuthc.apiKeyHeader);
-            expect(status).to.eql(200);
-            expect(body.indexMode).to.equal('standard');
-          });
-
-          // In serverless Kibana, the cluster.logsdb.enabled setting is true by default
-          it('returns logsdb index mode if logsdg.enabled setting is not set', async () => {
-            await es.cluster.putSettings({
-              body: {
-                persistent: {
-                  cluster: {
-                    logsdb: {
-                      enabled: null,
-                    },
-                  },
-                },
-              },
-            });
-
-            const { body, status } = await supertestWithoutAuth
-              .get(`${API_BASE_PATH}/index_templates/${logsdbTemplateName}`)
-              .set(internalReqHeader)
-              .set(roleAuthc.apiKeyHeader);
-            expect(status).to.eql(200);
-            expect(body.indexMode).to.equal('logsdb');
           });
         });
       });
