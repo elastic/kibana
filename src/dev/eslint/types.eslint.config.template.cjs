@@ -27,7 +27,7 @@ module.exports = {
       'error',
       {
         disallowTypeAnnotations: false,
-        fixStyle: 'separate-type-imports',
+        fixStyle: 'inline-type-imports',
         prefer: 'type-imports',
       },
     ],
