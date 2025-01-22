@@ -8,10 +8,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
 import { EuiFlexGroup, EuiIcon, EuiLink, EuiPanel, EuiTitle } from '@elastic/eui';
-import { useKibanaContextForPlugin } from '../../../../../utils';
-import { useDatasetQualityDetailsState } from '../../../../../hooks';
-import { getComponentTemplatePrefixFromIndexTemplate } from '../../../../../../common/utils/component_template_name';
-import { otherMitigationsCustomComponentTemplate } from '../../../../../../common/translations';
+import { useKibanaContextForPlugin } from '../../../../../../utils';
+import { useDatasetQualityDetailsState } from '../../../../../../hooks';
+import { getComponentTemplatePrefixFromIndexTemplate } from '../../../../../../../common/utils/component_template_name';
+import { otherMitigationsCustomComponentTemplate } from '../../../../../../../common/translations';
 
 export function CreateEditComponentTemplateLink({
   areIntegrationAssetsAvailable,

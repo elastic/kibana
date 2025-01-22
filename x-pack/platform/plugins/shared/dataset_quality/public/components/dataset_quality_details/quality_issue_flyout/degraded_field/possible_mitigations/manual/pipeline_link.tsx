@@ -24,9 +24,9 @@ import {
   manualMitigationCustomPipelineCopyPipelineNameAriaText,
   manualMitigationCustomPipelineCreateEditPipelineLink,
   otherMitigationsCustomIngestPipeline,
-} from '../../../../../../common/translations';
-import { useKibanaContextForPlugin } from '../../../../../utils';
-import { useDatasetQualityDetailsState } from '../../../../../hooks';
+} from '../../../../../../../common/translations';
+import { useKibanaContextForPlugin } from '../../../../../../utils';
+import { useDatasetQualityDetailsState } from '../../../../../../hooks';
 
 const AccordionTitle = () => (
   <EuiTitle size="xxs">

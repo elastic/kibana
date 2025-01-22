@@ -11,7 +11,7 @@ import { EuiBetaBadge, EuiFlexGroup, EuiIcon, EuiTitle } from '@elastic/eui';
 import {
   overviewQualityIssuesAccordionTechPreviewBadge,
   possibleMitigationTitle,
-} from '../../../../../common/translations';
+} from '../../../../../../common/translations';
 
 export function PossibleMitigationTitle() {
   return (

@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { EuiSkeletonRectangle, EuiSpacer } from '@elastic/eui';
-import { useDatasetQualityDetailsState } from '../../../../../hooks';
+import { useDatasetQualityDetailsState } from '../../../../../../hooks';
 import { CreateEditComponentTemplateLink } from './component_template_link';
 import { CreateEditPipelineLink } from './pipeline_link';
-import { otherMitigationsLoadingAriaText } from '../../../../../../common/translations';
+import { otherMitigationsLoadingAriaText } from '../../../../../../../common/translations';
 
 export function ManualMitigations() {
   const {
