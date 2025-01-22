@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export * from './wired_stream_config';
-export * from './ingest_stream_config';
-export * from './stream_config';
+export interface StreamDefinitionBase {
+  name: string;
+}
