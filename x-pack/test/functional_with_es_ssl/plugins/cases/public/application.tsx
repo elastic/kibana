@@ -44,7 +44,7 @@ const permissions = {
   settings: true,
   createComment: true,
   reopenCase: true,
-  assignCase: true,
+  assign: true,
 };
 
 const attachments = [{ type: AttachmentType.user as const, comment: 'test' }];
