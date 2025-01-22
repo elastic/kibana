@@ -395,7 +395,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
 
-        const countColumn = table['Docs count'];
+        const countColumn = table[PageObjects.datasetQuality.texts.docsCountColumn];
         const cellTexts = await countColumn.getCellTexts();
 
         await countColumn.sort('ascending');
@@ -410,7 +410,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
-        const countColumn = table['Docs count'];
+        const countColumn = table[PageObjects.datasetQuality.texts.docsCountColumn];
 
         await retry.tryForTime(5000, async () => {
           const currentUrl = await browser.getCurrentUrl();
@@ -446,7 +446,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
 
-        const countColumn = table['Docs count'];
+        const countColumn = table[PageObjects.datasetQuality.texts.docsCountColumn];
         const cellTexts = await countColumn.getCellTexts();
 
         await synthtrace.index([
@@ -460,7 +460,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.datasetQuality.refreshDetailsPageData();
 
         const updatedTable = await PageObjects.datasetQuality.parseDegradedFieldTable();
-        const updatedCountColumn = updatedTable['Docs count'];
+        const updatedCountColumn = updatedTable[PageObjects.datasetQuality.texts.docsCountColumn];
 
         const updatedCellTexts = await updatedCountColumn.getCellTexts();
 

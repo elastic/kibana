@@ -145,7 +145,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       const expectedQuality = 'Poor';
       // Get default quality
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetQuality = cols['Data set quality'];
+      const datasetQuality = cols[PageObjects.datasetQuality.texts.datasetQualityColumn];
       const datasetQualityCellTexts = await datasetQuality.getCellTexts();
       expect(datasetQualityCellTexts).to.contain(expectedQuality);
 
@@ -153,7 +153,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       await PageObjects.datasetQuality.filterForQualities([expectedQuality]);
 
       const colsAfterFilter = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetQualityAfterFilter = colsAfterFilter['Data set quality'];
+      const datasetQualityAfterFilter =
+        colsAfterFilter[PageObjects.datasetQuality.texts.datasetQualityColumn];
       const datasetQualityCellTextsAfterFilter = await datasetQualityAfterFilter.getCellTexts();
 
       expect(datasetQualityCellTextsAfterFilter).to.eql([expectedQuality]);

@@ -42,7 +42,6 @@ export async function getFailedDocsErrors({
         },
       },
     ],
-    /* failure_store: 'only', */
   });
 
   const errors = extractAndDeduplicateValues(response.hits.hits);
