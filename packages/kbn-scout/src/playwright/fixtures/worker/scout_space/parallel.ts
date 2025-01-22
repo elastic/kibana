@@ -32,25 +32,24 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
       const savedObjectsCache = new Map<string, string>();
 
       const load = async (path: string) => {
-        const startTime = performance.now();
-        const response = await kbnClient.importExport.load(path, {
-          space: spaceId,
-          createNewCopies: true,
+        return measurePerformance(log, `scoutSpace:${spaceId} 'savedObjects.load'`, async () => {
+          const response = await kbnClient.importExport.load(path, {
+            space: spaceId,
+            // will create new copies of saved objects with unique ids
+            createNewCopies: true,
+          });
+
+          const imported = (response.successResults as ImportSavedObjects[]).map(
+            (r: { type: string; destinationId: string; meta: { title: string } }) => {
+              return { id: r.destinationId, type: r.type, title: r.meta.title };
+            }
+          );
+
+          imported.forEach((so) => savedObjectsCache.set(so.title, so.id));
+
+          return imported;
         });
-
-        const results = (response.successResults as ImportSavedObjects[]).map(
-          (r: { type: string; destinationId: string; meta: { title: string } }) => {
-            return { id: r.destinationId, type: r.type, title: r.meta.title };
-          }
-        );
-
-        results.forEach((r) => savedObjectsCache.set(r.title, r.id));
-
-        const endTime = performance.now() - startTime;
-        log.debug(`scoutSpace:${spaceId} 'savedObjects.load' took ${endTime.toFixed(2)}ms`);
-        return results;
       };
-
       const cleanStandardList = async () => {
         return measurePerformance(
           log,
@@ -63,7 +62,6 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
           }
         );
       };
-
       const setDefaultIndex = async (dataViewName: string) => {
         return measurePerformance(
           log,
@@ -82,15 +80,17 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
           }
         );
       };
-
       const set = async (values: UiSettingValues) => {
         return measurePerformance(log, `scoutSpace:${spaceId} 'uiSettings.set'`, async () => {
           return kbnClient.uiSettings.update(values, { space: spaceId });
         });
       };
-
       const unset = async (...keys: string[]) => {
-        return Promise.all(keys.map((key) => kbnClient.uiSettings.unset(key, { space: spaceId })));
+        return measurePerformance(log, `scoutSpace:${spaceId} 'uiSettings.unset'`, async () => {
+          return Promise.all(
+            keys.map((key) => kbnClient.uiSettings.unset(key, { space: spaceId }))
+          );
+        });
       };
       const setDefaultTime = async ({ from, to }: { from: string; to: string }) => {
         return measurePerformance(
