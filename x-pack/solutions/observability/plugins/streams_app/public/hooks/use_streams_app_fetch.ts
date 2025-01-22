@@ -55,6 +55,10 @@ export const useStreamsAppFetch: UseAbortableAsync<{}, { disableToastOnError?: b
           },
         }),
       });
+
+      // log to console to get the actual stack trace
+      // eslint-disable-next-line no-console
+      console.log(error);
     }
   };
 
