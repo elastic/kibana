@@ -34,7 +34,6 @@ import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core/public';
 import { generatePath } from 'react-router-dom';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding';
@@ -240,6 +239,7 @@ export const FindingsRuleFlyout = ({
   findingsCount,
   onPaginate,
 }: FindingFlyoutProps) => {
+  const { euiTheme } = useEuiTheme();
   const [tab, setTab] = useState<FindingsTab>(tabs[0]);
 
   const createMisconfigurationRuleFn = async (http: HttpSetup) =>
@@ -263,7 +263,7 @@ export const FindingsRuleFlyout = ({
         <div
           css={css`
             line-height: 20px;
-            margin-top: ${euiThemeVars.euiSizeM};
+            margin-top: ${euiTheme.size.m};
           `}
         >
           <CspInlineDescriptionList
@@ -287,7 +287,7 @@ export const FindingsRuleFlyout = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody key={tab.id}>
         {!isNativeCspFinding(finding) && ['overview', 'rule'].includes(tab.id) && (
-          <div style={{ marginBottom: euiThemeVars.euiSize }}>
+          <div style={{ marginBottom: euiTheme.size.base }}>
             <MissingFieldsCallout finding={finding} />
           </div>
         )}
