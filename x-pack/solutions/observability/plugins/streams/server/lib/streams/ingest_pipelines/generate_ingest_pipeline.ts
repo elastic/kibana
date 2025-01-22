@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { StreamDefinition } from '@kbn/streams-schema';
+import { StreamDefinition, isRoot } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { logsDefaultPipelineProcessors } from './logs_default_pipeline';
-import { isRoot } from '../helpers/hierarchy';
 import { getProcessingPipelineName } from './name';
 import { formatToIngestProcessors } from '../helpers/processing';
 

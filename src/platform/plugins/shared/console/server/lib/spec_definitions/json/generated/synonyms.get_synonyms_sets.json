@@ -16,7 +16,7 @@
     "patterns": [
       "_synonyms"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/list-synonyms-sets.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/get-synonyms-set.html",
     "availability": {
       "stack": true,
       "serverless": true

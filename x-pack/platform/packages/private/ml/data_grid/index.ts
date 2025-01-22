@@ -12,6 +12,7 @@ export {
   getFeatureImportance,
   getFieldsFromKibanaDataView,
   getNestedOrEscapedVal,
+  getPopulatedFieldsFromKibanaDataView,
   getProcessedFields,
   getTopClasses,
   multiColumnSortFactory,

@@ -5799,7 +5799,7 @@
         "tags": [],
         "label": "ValidationResult",
         "description": [],
-        "path": "packages/response-ops/rule_form/src/types.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5813,7 +5813,7 @@
             "signature": [
               "{ [x: string]: any; }"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6798,7 +6798,7 @@
                 "label": "validNormalizedTypes",
                 "description": [],
                 "signature": [
-                  "(\"date\" | \"number\")[]"
+                  "(\"number\" | \"date\")[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false,
@@ -6864,7 +6864,7 @@
                 "label": "validNormalizedTypes",
                 "description": [],
                 "signature": [
-                  "(\"date\" | \"number\")[]"
+                  "(\"number\" | \"date\")[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false,

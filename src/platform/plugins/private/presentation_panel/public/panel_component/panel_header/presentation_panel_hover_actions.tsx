@@ -50,9 +50,26 @@ import {
   panelNotificationTrigger,
   PANEL_NOTIFICATION_TRIGGER,
 } from '../../panel_actions';
-import { getContextMenuAriaLabel } from '../presentation_panel_strings';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 import { AnyApiAction } from '../../panel_actions/types';
+
+const getContextMenuAriaLabel = (title?: string, index?: number) => {
+  if (title) {
+    return i18n.translate('presentationPanel.contextMenu.ariaLabelWithTitle', {
+      defaultMessage: 'Panel options for {title}',
+      values: { title },
+    });
+  }
+  if (index) {
+    return i18n.translate('presentationPanel.contextMenu.ariaLabelWithIndex', {
+      defaultMessage: 'Options for panel {index}',
+      values: { index },
+    });
+  }
+  return i18n.translate('presentationPanel.contextMenu.ariaLabel', {
+    defaultMessage: 'Panel options',
+  });
+};
 
 const QUICK_ACTION_IDS = {
   edit: [

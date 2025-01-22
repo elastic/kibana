@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ZodSchema, custom } from '@kbn/zod';
+import { ZodSchema, custom, output } from '@kbn/zod';
 import {
   AndCondition,
   conditionSchema,
@@ -47,6 +47,13 @@ export function isSchema<T>(zodSchema: ZodSchema, subject: T) {
   }
 }
 
+export function assertsSchema<TSchema extends ZodSchema>(
+  schema: TSchema,
+  subject: any
+): asserts subject is output<TSchema> {
+  schema.parse(subject);
+}
+
 export function isReadStream(subject: any): subject is ReadStreamDefinition {
   return isSchema(readStreamDefinitonSchema, subject);
 }
@@ -75,7 +82,7 @@ const rootStreamSchema = custom<'RootStreamSchema'>((val) => {
   return val?.name?.split('.').length === 1;
 });
 
-export function isRootStream(subject: any) {
+export function isRootStream(subject: any): subject is WiredStreamDefinition {
   return (
     (isWiredStream(subject) || isWiredReadStream(subject)) && isSchema(rootStreamSchema, subject)
   );

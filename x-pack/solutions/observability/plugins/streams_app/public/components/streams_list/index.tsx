@@ -20,14 +20,14 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/css';
-import { StreamDefinition, isWiredStream } from '@kbn/streams-schema';
+import { StreamDefinition, isDescendantOf, isWiredStream } from '@kbn/streams-schema';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { NestedView } from '../nested_view';
 import { useKibana } from '../../hooks/use_kibana';
 import { getIndexPatterns } from '../../util/hierarchy_helpers';
 
 export interface StreamTree {
-  id: string;
+  name: string;
   type: 'wired' | 'root' | 'classic';
   definition: StreamDefinition;
   children: StreamTree[];
@@ -41,17 +41,20 @@ function asTrees(definitions: StreamDefinition[]) {
   wiredDefinitions.forEach((definition) => {
     let currentTree = trees;
     let existingNode: StreamTree | undefined;
+    const segments = definition.name.split('.');
     // traverse the tree following the prefix of the current id.
     // once we reach the leaf, the current id is added as child - this works because the ids are sorted by depth
-    while ((existingNode = currentTree.find((node) => definition.name.startsWith(node.id)))) {
+    while (
+      (existingNode = currentTree.find((node) => isDescendantOf(node.name, definition.name)))
+    ) {
       currentTree = existingNode.children;
     }
     if (!existingNode) {
       const newNode: StreamTree = {
-        id: definition.name,
+        name: definition.name,
         children: [],
         definition,
-        type: definition.name.split('.').length === 1 ? 'root' : 'wired',
+        type: segments.length === 1 ? 'root' : 'wired',
       };
       currentTree.push(newNode);
     }
@@ -88,7 +91,7 @@ export function StreamsList({
   const treeView = useMemo(() => {
     const trees = asTrees(filteredItems);
     const classicList = classicStreams.map((definition) => ({
-      id: definition.name,
+      name: definition.name,
       type: 'classic' as const,
       definition,
       children: [],
@@ -142,7 +145,12 @@ export function StreamsList({
       )}
       <EuiFlexItem grow={false}>
         {treeView.map((tree) => (
-          <StreamNode key={tree.id} node={tree} collapsed={collapsed} setCollapsed={setCollapsed} />
+          <StreamNode
+            key={tree.name}
+            node={tree}
+            collapsed={collapsed}
+            setCollapsed={setCollapsed}
+          />
         ))}
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -212,7 +220,7 @@ function StreamNode({
           <button
             type="button"
             onClick={() => {
-              setCollapsed?.({ ...collapsed, [node.id]: !collapsed?.[node.id] });
+              setCollapsed?.({ ...collapsed, [node.name]: !collapsed?.[node.name] });
             }}
             className={css`
               background: none;
@@ -220,11 +228,11 @@ function StreamNode({
               margin-right: ${euiThemeVars.euiSizeXS};
             `}
           >
-            <EuiIcon type={collapsed?.[node.id] ? 'arrowRight' : 'arrowDown'} />
+            <EuiIcon type={collapsed?.[node.name] ? 'arrowRight' : 'arrowDown'} />
           </button>
         )}
-        <EuiLink color="text" href={router.link('/{key}', { path: { key: node.id } })}>
-          {node.id}
+        <EuiLink color="text" href={router.link('/{key}', { path: { key: node.name } })}>
+          {node.name}
         </EuiLink>
         {node.type === 'root' && (
           <EuiBadge color="hollow">
@@ -254,7 +262,7 @@ function StreamNode({
               })}
               iconType="popout"
               target="_blank"
-              href={router.link('/{key}', { path: { key: node.id } })}
+              href={router.link('/{key}', { path: { key: node.name } })}
             />
           </EuiToolTip>
           <EuiToolTip
@@ -280,16 +288,16 @@ function StreamNode({
               aria-label={i18n.translate('xpack.streams.streamsTable.management', {
                 defaultMessage: 'Management',
               })}
-              href={router.link('/{key}/management', { path: { key: node.id } })}
+              href={router.link('/{key}/management', { path: { key: node.name } })}
             />
           </EuiToolTip>
         </EuiFlexGroup>
       </EuiFlexGroup>
-      {node.children.length > 0 && !collapsed?.[node.id] && (
+      {node.children.length > 0 && !collapsed?.[node.name] && (
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="xs">
             {node.children.map((child, index) => (
-              <NestedView key={child.id} last={index === node.children.length - 1}>
+              <NestedView key={child.name} last={index === node.children.length - 1}>
                 <StreamNode node={child} collapsed={collapsed} setCollapsed={setCollapsed} />
               </NestedView>
             ))}

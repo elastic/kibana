@@ -49,7 +49,7 @@ export const getTranslateRuleNode = ({
       response,
       comments: [cleanMarkdown(translationSummary)],
       elastic_rule: {
-        integration_id: integrationId,
+        integration_ids: [integrationId],
         query: esqlQuery,
         query_language: 'esql',
       },
