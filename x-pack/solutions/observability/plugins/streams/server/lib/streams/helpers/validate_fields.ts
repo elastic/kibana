@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldDefinition, WiredStreamDefinition, isWiredStream } from '@kbn/streams-schema';
+import { FieldDefinition, WiredStreamDefinition } from '@kbn/streams-schema';
 import { MalformedFields } from '../errors/malformed_fields';
 
 export function validateAncestorFields({
@@ -19,8 +19,7 @@ export function validateAncestorFields({
     for (const fieldName in fields) {
       if (
         Object.hasOwn(fields, fieldName) &&
-        isWiredStream(ancestor) &&
-        Object.entries(ancestor.stream.ingest.wired.fields).some(
+        Object.entries(ancestor.ingest.wired.fields).some(
           ([ancestorFieldName, attr]) =>
             attr.type !== fields[fieldName].type && ancestorFieldName === fieldName
         )
@@ -44,8 +43,7 @@ export function validateDescendantFields({
     for (const fieldName in fields) {
       if (
         Object.hasOwn(fields, fieldName) &&
-        isWiredStream(descendant) &&
-        Object.entries(descendant.stream.ingest.wired.fields).some(
+        Object.entries(descendant.ingest.wired.fields).some(
           ([descendantFieldName, attr]) =>
             attr.type !== fields[fieldName].type && descendantFieldName === fieldName
         )
