@@ -14,17 +14,15 @@ import type {
 import { PrivateLocation } from '../../../../common/runtime_types';
 
 export const toClientContract = (
-  locationObject: SavedObject<PrivateLocationAttributes>,
-  agentPolicies?: AgentPolicyInfo[]
+  locationObject: SavedObject<PrivateLocationAttributes>
 ): PrivateLocation => {
   const location = locationObject.attributes;
-  const agPolicy = agentPolicies?.find((policy) => policy.id === location.agentPolicyId);
   return {
     label: location.label,
     id: location.id,
     agentPolicyId: location.agentPolicyId,
     isServiceManaged: false,
-    isInvalid: !Boolean(agPolicy),
+    isInvalid: false,
     tags: location.tags,
     geo: location.geo,
     spaces: locationObject.namespaces,
