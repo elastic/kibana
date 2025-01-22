@@ -32,6 +32,12 @@ export interface FleetServerHostForm {
     hostUrlsInput: ReturnType<typeof useComboInput>;
     nameInput: ReturnType<typeof useInput>;
     isDefaultInput: ReturnType<typeof useSwitchInput>;
+    certificateAuthoritiesInput: ReturnType<typeof useInput>;
+    certificateInput: ReturnType<typeof useInput>;
+    certificateKeyInput: ReturnType<typeof useInput>;
+    esCertificateAuthoritiesInput: ReturnType<typeof useInput>;
+    esCertificateInput: ReturnType<typeof useInput>;
+    esCertificateKeyInput: ReturnType<typeof useInput>;
   };
 }
 
@@ -44,13 +50,45 @@ export const useFleetServerHost = (): FleetServerHostForm => {
   const isDefaultInput = useSwitchInput(false, isPreconfigured || fleetServerHost?.is_default);
   const hostUrlsInput = useComboInput('hostUrls', [], validateFleetServerHosts, isPreconfigured);
 
+  const certificateAuthoritiesInput = useInput(
+    fleetServerHost?.certificate_authorities ?? '',
+    () => undefined
+  );
+  const certificateInput = useInput(fleetServerHost?.certificate ?? '', () => undefined);
+  const certificateKeyInput = useInput(fleetServerHost?.certificate_key ?? '', () => undefined);
+  const esCertificateAuthoritiesInput = useInput(
+    fleetServerHost?.es_certificate_authorities ?? '',
+    () => undefined
+  );
+  const esCertificateInput = useInput(fleetServerHost?.es_certificate ?? '', () => undefined);
+  const esCertificateKeyInput = useInput(
+    fleetServerHost?.es_certificate_key ?? '',
+    () => undefined
+  );
+
   const inputs = useMemo(
     () => ({
       nameInput,
       isDefaultInput,
       hostUrlsInput,
+      certificateAuthoritiesInput,
+      certificateInput,
+      certificateKeyInput,
+      esCertificateAuthoritiesInput,
+      esCertificateInput,
+      esCertificateKeyInput,
     }),
-    [nameInput, isDefaultInput, hostUrlsInput]
+    [
+      nameInput,
+      isDefaultInput,
+      hostUrlsInput,
+      certificateAuthoritiesInput,
+      certificateInput,
+      certificateKeyInput,
+      esCertificateAuthoritiesInput,
+      esCertificateInput,
+      esCertificateKeyInput,
+    ]
   );
 
   const validate = useCallback(() => validateInputs(inputs), [inputs]);
@@ -80,6 +118,12 @@ export const useFleetServerHost = (): FleetServerHostForm => {
       name: inputs.nameInput.value,
       host_urls: inputs.hostUrlsInput.value,
       is_default: inputs.isDefaultInput.value,
+      certificate_authorities: inputs.certificateAuthoritiesInput.value,
+      certificate: inputs.certificateInput.value,
+      certificate_key: inputs.certificateKeyInput.value,
+      es_certificate_authorities: inputs.esCertificateAuthoritiesInput.value,
+      es_certificate: inputs.esCertificateInput.value,
+      es_certificate_key: inputs.esCertificateKeyInput.value,
     };
 
     const res = await sendPostFleetServerHost(newFleetServerHost);
@@ -97,10 +141,16 @@ export const useFleetServerHost = (): FleetServerHostForm => {
     return res.data.item;
   }, [
     validate,
-    refreshGetFleetServerHosts,
     inputs.nameInput.value,
     inputs.hostUrlsInput.value,
     inputs.isDefaultInput.value,
+    inputs.certificateAuthoritiesInput.value,
+    inputs.certificateInput.value,
+    inputs.certificateKeyInput.value,
+    inputs.esCertificateAuthoritiesInput.value,
+    inputs.esCertificateInput.value,
+    inputs.esCertificateKeyInput.value,
+    refreshGetFleetServerHosts,
   ]);
 
   return {
