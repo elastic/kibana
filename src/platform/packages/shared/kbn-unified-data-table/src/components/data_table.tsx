@@ -759,6 +759,8 @@ export const UnifiedDataTable = ({
     if (!enableInTableSearch) {
       return undefined;
     }
+    const controlsCount =
+      dataGridWrapper?.querySelectorAll('.euiDataGridHeaderCell--controlColumn').length ?? 0;
     return (
       <InTableSearchControl
         inTableSearchTerm={inTableSearchTerm}
@@ -766,6 +768,7 @@ export const UnifiedDataTable = ({
         rows={displayedRows}
         renderCellValue={renderCellValue}
         pageSize={isPaginationEnabled ? currentPageSize : null}
+        getColumnIndexFromId={(columnId) => visibleColumns.indexOf(columnId) + controlsCount}
         scrollToCell={(params) => {
           dataGridRef.current?.scrollToItem?.(params);
         }}
