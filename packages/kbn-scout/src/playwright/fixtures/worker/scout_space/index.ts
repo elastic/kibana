@@ -30,7 +30,7 @@ export interface ScoutSpaceParallelFixture {
     cleanStandardList: () => Promise<void>;
   };
   uiSettings: {
-    setDefaultIndex: (dataViewId: string) => Promise<void>;
+    setDefaultIndex: (dataViewName: string) => Promise<void>;
     set: (values: UiSettingValues) => Promise<void>;
     unset: (...keys: string[]) => Promise<any[]>;
     setDefaultTime: ({ from, to }: { from: string; to: string }) => Promise<void>;

@@ -50,7 +50,7 @@ spaceTest.describe(
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.DISCOVER);
       await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.ECOMMERCE);
-      await scoutSpace.uiSettings.setDefaultIndex('ecommerce');
+      await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_NAME.ECOMMERCE);
       await scoutSpace.uiSettings.setDefaultTime({ from: START_TIME, to: END_TIME });
     });
 
@@ -85,7 +85,7 @@ spaceTest.describe(
       `should unselect saved search when navigating to a 'new'`,
       async ({ pageObjects, page }) => {
         await pageObjects.discover.goto();
-        await assertDataViewIsSelected(page, testData.DATA_VIEW.ECOMMERCE);
+        await assertDataViewIsSelected(page, testData.DATA_VIEW_NAME.ECOMMERCE);
         await pageObjects.filterBar.addFilter({
           ...filterFieldAndValue,
           operator: 'is',
@@ -107,20 +107,20 @@ spaceTest.describe(
 
         // create new search
         await pageObjects.discover.clickNewSearch();
-        await assertDataViewIsSelected(page, testData.DATA_VIEW.ECOMMERCE);
+        await assertDataViewIsSelected(page, testData.DATA_VIEW_NAME.ECOMMERCE);
         await assertNoFilterAndEmptyQuery(filterFieldAndValue, pageObjects, page);
 
         // change data view
-        await pageObjects.discover.selectDataView(testData.DATA_VIEW.LOGSTASH);
+        await pageObjects.discover.selectDataView(testData.DATA_VIEW_NAME.LOGSTASH);
         await assertNoFilterAndEmptyQuery(filterFieldAndValue, pageObjects, page);
 
         // change data view again
-        await pageObjects.discover.selectDataView(testData.DATA_VIEW.ECOMMERCE);
+        await pageObjects.discover.selectDataView(testData.DATA_VIEW_NAME.ECOMMERCE);
         await assertNoFilterAndEmptyQuery(filterFieldAndValue, pageObjects, page);
 
         // create new search again
         await pageObjects.discover.clickNewSearch();
-        await assertDataViewIsSelected(page, testData.DATA_VIEW.ECOMMERCE);
+        await assertDataViewIsSelected(page, testData.DATA_VIEW_NAME.ECOMMERCE);
       }
     );
   }

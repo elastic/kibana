@@ -14,7 +14,7 @@ spaceTest.describe(
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.DASHBOARD_DRILLDOWNS);
-      await scoutSpace.uiSettings.setDefaultIndex('logstash-*');
+      await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_NAME.LOGSTASH);
       await scoutSpace.uiSettings.setDefaultTime({
         from: testData.LOGSTASH_DEFAULT_START_TIME,
         to: testData.LOGSTASH_DEFAULT_END_TIME,

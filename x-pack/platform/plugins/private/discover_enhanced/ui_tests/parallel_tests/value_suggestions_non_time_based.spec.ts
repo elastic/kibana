@@ -16,7 +16,7 @@ spaceTest.describe(
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.NO_TIME_FIELD);
-      await scoutSpace.uiSettings.setDefaultIndex('without-timefield');
+      await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_NAME.NO_TIME_FIELD);
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
