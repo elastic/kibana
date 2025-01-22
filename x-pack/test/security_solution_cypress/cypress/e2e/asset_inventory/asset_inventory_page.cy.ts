@@ -12,13 +12,28 @@ import { ASSET_INVENTORY_URL } from '../../urls/navigation';
 
 const ALL_ASSETS_TITLE = getDataTestSubjectSelector('all_assets_title');
 
-describe('Asset Inventory page', { tags: ['@ess', '@serverless'] }, () => {
-  beforeEach(() => {
-    login();
-    visit(ASSET_INVENTORY_URL);
-  });
+describe(
+  'Asset Inventory page',
+  {
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'assetInventoryUXEnabled',
+          ])}`,
+        ],
+      },
+    },
+    tags: ['@ess'],
+  },
+  () => {
+    beforeEach(() => {
+      login();
+      visit(ASSET_INVENTORY_URL);
+    });
 
-  it('should display All assets title', () => {
-    cy.get(ALL_ASSETS_TITLE).should('be.visible');
-  });
-});
+    it('should display All assets title', () => {
+      cy.get(ALL_ASSETS_TITLE).should('be.visible');
+    });
+  }
+);

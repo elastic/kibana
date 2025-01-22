@@ -17,6 +17,7 @@ import type { LinkItem } from '../common/links/types';
 
 export const links: LinkItem = {
   capabilities: [`${SECURITY_FEATURE_ID}.show`],
+  hideTimeline: true,
   globalNavPosition: 10,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.inventory', {
