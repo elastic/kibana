@@ -31,7 +31,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const isServerless = config.get('serverless');
   const expectedConsumer = isServerless ? 'observability' : 'logs';
 
-  describe('AVG - PCT - NoData', () => {
+  describe('AVG - PCT - NoData', function () {
+    // see details: https://github.com/elastic/kibana/issues/207792
+    this.tags(['failsOnMKI']);
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
     const DATA_VIEW_NAME = 'no-data-pattern-name';

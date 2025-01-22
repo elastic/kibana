@@ -26,6 +26,8 @@ import { getFixtureJson } from './helpers/get_fixture_json';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('getSyntheticsMonitors', function () {
+    // see details: https://github.com/elastic/kibana/issues/207792
+    this.tags(['failsOnMKI']);
     const supertest = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
     const retry = getService('retry');

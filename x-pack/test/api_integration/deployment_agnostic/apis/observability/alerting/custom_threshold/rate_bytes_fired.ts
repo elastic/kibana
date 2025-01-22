@@ -30,7 +30,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let roleAuthc: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
 
-  describe('RATE - GROUP_BY - BYTES - FIRED', () => {
+  describe('RATE - GROUP_BY - BYTES - FIRED', function () {
+    // see details: https://github.com/elastic/kibana/issues/207792
+    this.tags(['failsOnMKI']);
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
     const DATE_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
