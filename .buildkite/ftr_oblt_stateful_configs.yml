@@ -6,10 +6,7 @@ disabled:
   - x-pack/solutions/observability/plugins/observability_onboarding/e2e/ftr_config.ts
   - x-pack/solutions/observability/plugins/inventory/e2e/ftr_config_run.ts
   - x-pack/solutions/observability/plugins/inventory/e2e/ftr_config.ts
-  - x-pack/solutions/observability/plugins/profiling/e2e/ftr_config_open.ts
-  - x-pack/solutions/observability/plugins/profiling/e2e/ftr_config_runner.ts
-  - x-pack/solutions/observability/plugins/profiling/e2e/ftr_config.ts
-
+  - x-pack/test/profiling_cypress/cli_config.ts
   #FTR configs
   - x-pack/solutions/observability/plugins/uptime/e2e/config.ts
 

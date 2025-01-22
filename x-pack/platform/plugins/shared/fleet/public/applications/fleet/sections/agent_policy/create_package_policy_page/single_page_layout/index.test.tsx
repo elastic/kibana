@@ -83,7 +83,13 @@ jest.mock('../../../../hooks', () => {
       data: { item: {} },
     }),
     sendCreatePackagePolicy: jest.fn().mockResolvedValue({
-      data: { item: { id: 'policy-1', inputs: [], policy_ids: ['agent-policy-1'] } },
+      data: {
+        item: {
+          id: 'policy-1',
+          inputs: [],
+          policy_ids: ['agent-policy-1'],
+        },
+      },
     }),
     sendCreateAgentPolicy: jest.fn().mockResolvedValue({
       data: { item: { id: 'agent-policy-2', name: 'Agent policy 2', namespace: 'default' } },
@@ -190,7 +196,16 @@ describe('When on the package policy create page', () => {
                 },
               ],
               multiple: true,
-              deployment_modes: { agentless: { enabled: options?.agentlessEnabled } },
+              deployment_modes: options?.agentlessEnabled
+                ? {
+                    agentless: {
+                      enabled: true,
+                      organization: 'org',
+                      division: 'division',
+                      team: 'team',
+                    },
+                  }
+                : { agentless: { enabled: false } },
             },
           ],
           data_streams: [
@@ -725,14 +740,16 @@ describe('When on the package policy create page', () => {
           fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
         });
 
-        expect(sendCreateAgentPolicy).toHaveBeenCalledWith(
-          expect.objectContaining({
-            monitoring_enabled: ['logs', 'metrics', 'traces'],
-            name: 'Agent policy 2',
-          }),
-          { withSysMonitoring: true }
-        );
-        expect(sendCreatePackagePolicy).toHaveBeenCalled();
+        await waitFor(() => {
+          expect(sendCreateAgentPolicy).toHaveBeenCalledWith(
+            expect.objectContaining({
+              monitoring_enabled: ['logs', 'metrics', 'traces'],
+              name: 'Agent policy 2',
+            }),
+            { withSysMonitoring: true }
+          );
+          expect(sendCreatePackagePolicy).toHaveBeenCalled();
+        });
 
         await waitFor(() => {
           expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();
@@ -740,21 +757,28 @@ describe('When on the package policy create page', () => {
       });
 
       test('should create agentless agent policy and package policy when in cloud and agentless API url is set', async () => {
+        await waitFor(() => {
+          expect(renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ)).toBeInTheDocument();
+        });
+
         fireEvent.click(renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ));
         fireEvent.click(renderResult.getAllByText('Agentless')[0]);
+
         await act(async () => {
           fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
         });
 
-        expect(sendCreateAgentPolicy).toHaveBeenCalledWith(
-          expect.objectContaining({
-            monitoring_enabled: ['logs', 'metrics'],
-            name: 'Agentless policy for nginx-1',
-            supports_agentless: true,
-          }),
-          { withSysMonitoring: false }
-        );
-        expect(sendCreatePackagePolicy).toHaveBeenCalled();
+        await waitFor(() => {
+          expect(sendCreateAgentPolicy).toHaveBeenCalledWith(
+            expect.objectContaining({
+              monitoring_enabled: ['logs', 'metrics'],
+              name: 'Agentless policy for nginx-1',
+              supports_agentless: true,
+            }),
+            { withSysMonitoring: false }
+          );
+          expect(sendCreatePackagePolicy).toHaveBeenCalled();
+        });
 
         await waitFor(() => {
           expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();

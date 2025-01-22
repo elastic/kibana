@@ -849,7 +849,7 @@ x-pack/solutions/security/packages/kbn-securitysolution-list-utils @elastic/secu
 x-pack/solutions/security/packages/kbn-securitysolution-lists-common @elastic/security-detection-engine
 src/platform/packages/shared/kbn-securitysolution-rules @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-t-grid @elastic/security-detection-engine
-x-pack/solutions/security/packages/kbn-securitysolution-utils @elastic/security-detection-engine
+x-pack/solutions/security/packages/kbn-securitysolution-utils @elastic/security-detection-engine @elastic/security-detection-rule-management
 src/platform/packages/shared/kbn-server-http-tools @elastic/kibana-core
 src/platform/packages/shared/kbn-server-route-repository @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-server-route-repository-client @elastic/obs-knowledge-team
@@ -1967,6 +1967,9 @@ x-pack/solutions/security/plugins/security_solution/server/lib/security_integrat
 
 # Changes to translation files should not ping code reviewers
 x-pack/plugins/translations/translations
+
+# Profiling cypress tests
+x-pack/test/profiling_cypress @elastic/obs-ux-infra_services-team
 
 # Profiling api integration testing
 x-pack/test/profiling_api_integration @elastic/obs-ux-infra_services-team
