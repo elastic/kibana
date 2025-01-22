@@ -117,14 +117,14 @@ export const BODY_LABEL = i18n.translate(
 );
 
 export const BODY_DESCRIPTION = i18n.translate(
-  'xpack.stackConnectors.components.thehive.bodyFieldLabel',
+  'xpack.stackConnectors.components.thehive.bodyFieldDescription',
   {
     defaultMessage: 'Code Editor',
   }
 );
 
 export const BODY_HELP_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.thehive.bodyFieldHelpText',
+  'xpack.stackConnectors.components.thehive.bodyFieldHelpLabel',
   {
     defaultMessage: 'Body Help',
   }

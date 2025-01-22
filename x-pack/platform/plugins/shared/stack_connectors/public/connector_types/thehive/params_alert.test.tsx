@@ -24,7 +24,7 @@ describe('TheHiveParamsFields renders', () => {
     type: 'sourceType test',
     sourceRef: 'sourceRef test',
     template: 0,
-    body: null,
+    body: '{}',
   };
   const actionParams: ExecutorParams = {
     subAction: SUB_ACTION.CREATE_ALERT,
@@ -67,10 +67,12 @@ describe('TheHiveParamsFields renders', () => {
     expect(getByTestId('sourceInput')).toBeInTheDocument();
     expect(getByTestId('sourceRefInput')).toBeInTheDocument();
     expect(getByTestId('templateSelectInput')).toBeInTheDocument();
+    expect(getByTestId('bodyJsonEditor')).toBeInTheDocument();
 
     expect(getByTestId('severitySelectInput')).toHaveValue('2');
     expect(getByTestId('tlpSelectInput')).toHaveValue('2');
     expect(getByTestId('templateSelectInput')).toHaveValue('0');
+    expect(getByTestId('bodyJsonEditor')).toHaveProperty('value', bodyOptions[0]);
   });
 
   it('changes the content of json editor when template is changed', () => {
