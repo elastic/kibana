@@ -1677,9 +1677,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        const {
-          body: { item: agentPolicy },
-        } = await supertest
+        const agentPolicyResponse = await supertest
           .post(`/api/fleet/agent_policies?sys_monitoring=false`)
           .set('kbn-xsrf', 'xxxx')
           .send({
@@ -1688,6 +1686,11 @@ export default function (providerContext: FtrProviderContext) {
             supports_agentless: true,
           })
           .expect(200);
+
+        // eslint-disable-next-line no-console
+        console.log(agentPolicyResponse);
+
+        const agentPolicy = agentPolicyResponse.body.item;
 
         const response = await supertest
           .put(`/api/fleet/agent_policies/${agentPolicy.id}`)
