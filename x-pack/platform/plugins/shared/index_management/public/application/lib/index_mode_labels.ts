@@ -33,26 +33,26 @@ export const indexModeDescriptions = {
     'xpack.idxMgmt.indexModeDescriptions.standardIndexModeDescription',
     {
       defaultMessage:
-        'Standard indexing with default settings, for data other than logs or metrics',
+        'Standard indexing with default settings, for data other than logs or metrics.',
     }
   ),
   [LOGSDB_INDEX_MODE]: i18n.translate(
     'xpack.idxMgmt.indexModeDescriptions.logsdbIndexModeDescription',
     {
       defaultMessage:
-        'Optimized for storing logs data, with reduced storage and default settings that help reduce the chance of logs being rejected by Elasticsearch',
+        'Optimized for storing logs data, with reduced storage and default settings that help reduce the chance of logs being rejected by Elasticsearch.',
     }
   ),
   [TIME_SERIES_MODE]: i18n.translate(
     'xpack.idxMgmt.indexModeDescriptions.timeSeriesIndexModeDescription',
     {
-      defaultMessage: 'Optimized for metrics data with reduced storage',
+      defaultMessage: 'Optimized for metrics data with reduced storage.',
     }
   ),
   [LOOKUP_INDEX_MODE]: i18n.translate(
     'xpack.idxMgmt.indexModeDescriptions.lookupIndexModeDescription',
     {
-      defaultMessage: 'Optimized for ES|QL join operations',
+      defaultMessage: 'Optimized for ES|QL join operations.',
     }
   ),
 };
