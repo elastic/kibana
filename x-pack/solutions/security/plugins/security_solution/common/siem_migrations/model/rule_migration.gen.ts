@@ -91,6 +91,10 @@ export const ElasticRule = z.object({
    */
   severity: z.string().optional(),
   /**
+   * The migrated rule risk_score value, integer between 0 and 100.
+   */
+  risk_score: z.number().optional(),
+  /**
    * The translated elastic query.
    */
   query: z.string().optional(),
@@ -103,9 +107,9 @@ export const ElasticRule = z.object({
    */
   prebuilt_rule_id: NonEmptyString.optional(),
   /**
-   * The Elastic integration ID found to be most relevant to the splunk rule.
+   * The IDs of the Elastic integrations suggested to be installed for this rule.
    */
-  integration_id: z.string().optional(),
+  integration_ids: z.array(z.string()).optional(),
   /**
    * The Elastic rule id installed as a result.
    */

@@ -29,7 +29,7 @@
             "label": "indices",
             "description": [],
             "signature": [
-              "{ readonly error: string; readonly transaction: string; readonly span: string; readonly metric: string; readonly onboarding: string; readonly sourcemap: string; }"
+              "{ readonly error: string; readonly span: string; readonly transaction: string; readonly metric: string; readonly onboarding: string; readonly sourcemap: string; }"
             ],
             "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
             "deprecated": false,
@@ -496,7 +496,7 @@
             "label": "getApmIndices",
             "description": [],
             "signature": [
-              "() => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>"
+              "() => Promise<Readonly<{} & { error: string; span: string; transaction: string; metric: string; onboarding: string; sourcemap: string; }>>"
             ],
             "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/check_privileges.ts",
             "deprecated": false,
@@ -1854,7 +1854,7 @@
             "label": "indices",
             "description": [],
             "signature": [
-              "{ readonly error: string; readonly transaction: string; readonly span: string; readonly metric: string; readonly onboarding: string; readonly sourcemap: string; }"
+              "{ readonly error: string; readonly span: string; readonly transaction: string; readonly metric: string; readonly onboarding: string; readonly sourcemap: string; }"
             ],
             "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
             "deprecated": false,
@@ -2183,7 +2183,7 @@
         "label": "APMDataAccessConfig",
         "description": [],
         "signature": [
-          "{ readonly indices: Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>; }"
+          "{ readonly indices: Readonly<{} & { error: string; span: string; transaction: string; metric: string; onboarding: string; sourcemap: string; }>; }"
         ],
         "path": "x-pack/solutions/observability/plugins/apm_data_access/server/index.ts",
         "deprecated": false,
@@ -2288,7 +2288,7 @@
         "label": "APMIndices",
         "description": [],
         "signature": [
-          "{ readonly error: string; readonly transaction: string; readonly span: string; readonly metric: string; readonly onboarding: string; readonly sourcemap: string; }"
+          "{ readonly error: string; readonly span: string; readonly transaction: string; readonly metric: string; readonly onboarding: string; readonly sourcemap: string; }"
         ],
         "path": "x-pack/solutions/observability/plugins/apm_data_access/server/index.ts",
         "deprecated": false,
@@ -2333,7 +2333,7 @@
           "label": "apmIndicesFromConfigFile",
           "description": [],
           "signature": [
-            "{ readonly error: string; readonly transaction: string; readonly span: string; readonly metric: string; readonly onboarding: string; readonly sourcemap: string; }"
+            "{ readonly error: string; readonly span: string; readonly transaction: string; readonly metric: string; readonly onboarding: string; readonly sourcemap: string; }"
           ],
           "path": "x-pack/solutions/observability/plugins/apm_data_access/server/types.ts",
           "deprecated": false,
@@ -2349,7 +2349,7 @@
           "signature": [
             "(soClient: ",
             "SavedObjectsClientContract",
-            ") => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>"
+            ") => Promise<Readonly<{} & { error: string; span: string; transaction: string; metric: string; onboarding: string; sourcemap: string; }>>"
           ],
           "path": "x-pack/solutions/observability/plugins/apm_data_access/server/types.ts",
           "deprecated": false,

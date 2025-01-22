@@ -415,7 +415,10 @@ function case4FeatureExtract(deps: PluginSetupDependencies) {
   for (const suffix of ['A', 'B']) {
     // Step 1: mark existing feature A and feature B as deprecated.
     deps.features.registerKibanaFeature({
-      deprecated: { notice: 'Case #4 is deprecated.' },
+      deprecated: {
+        notice: 'Case #4 is deprecated.',
+        ...(suffix === 'B' ? { replacedBy: [`case_4_feature_${suffix.toLowerCase()}_v2`] } : {}),
+      },
 
       scope: [KibanaFeatureScope.Security, KibanaFeatureScope.Spaces],
 

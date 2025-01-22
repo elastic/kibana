@@ -17,11 +17,9 @@ import {
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { skip } from 'rxjs';
-import { DASHBOARD_ACTION_GROUP } from '.';
 
 import { dashboardExpandPanelActionStrings } from './_dashboard_actions_strings';
-
-export const ACTION_EXPAND_PANEL = 'togglePanel';
+import { ACTION_EXPAND_PANEL, DASHBOARD_ACTION_GROUP } from './constants';
 
 export type ExpandPanelActionApi = HasUniqueId & HasParentApi<CanExpandPanels>;
 

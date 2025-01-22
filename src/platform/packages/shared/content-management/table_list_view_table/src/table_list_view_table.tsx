@@ -64,6 +64,13 @@ import type { RowActions, SearchQueryError, TableItemsRowActions } from './types
 import { sortByRecentlyAccessed } from './components/table_sort_select';
 import { ContentEditorActivityRow } from './components/content_editor_activity_row';
 
+const disabledEditAction = {
+  enabled: false,
+  reason: i18n.translate('contentManagement.tableList.managedItemNoEdit', {
+    defaultMessage: 'Elastic manages this item. Clone it to make changes.',
+  }),
+};
+
 interface ContentEditorConfig
   extends Pick<OpenContentEditorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
   enabled?: boolean;
@@ -527,24 +534,17 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
   const tableItemsRowActions = useMemo(() => {
     return items.reduce<TableItemsRowActions>((acc, item) => {
-      const ret = {
-        ...acc,
-        [item.id]: rowItemActions ? rowItemActions(item) : undefined,
-      };
+      acc[item.id] = rowItemActions ? rowItemActions(item) : undefined;
 
       if (item.managed) {
-        ret[item.id] = {
-          edit: {
-            enabled: false,
-            reason: i18n.translate('contentManagement.tableList.managedItemNoEdit', {
-              defaultMessage: 'Elastic manages this item. Clone it to make changes.',
-            }),
-          },
-          ...ret[item.id],
-        };
+        if (acc[item.id]) {
+          acc[item.id]!.edit = disabledEditAction;
+        } else {
+          acc[item.id] = { edit: disabledEditAction };
+        }
       }
 
-      return ret;
+      return acc;
     }, {});
   }, [items, rowItemActions]);
 

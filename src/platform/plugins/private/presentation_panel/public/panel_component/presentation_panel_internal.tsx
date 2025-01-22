@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import './_presentation_panel.scss';
+
 import { EuiErrorBoundary, EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import { PanelLoader } from '@kbn/panel-loader';
 import {
@@ -20,6 +22,7 @@ import { PresentationPanelHeader } from './panel_header/presentation_panel_heade
 import { PresentationPanelHoverActions } from './panel_header/presentation_panel_hover_actions';
 import { PresentationPanelErrorInternal } from './presentation_panel_error_internal';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
+import { usePanelErrorCss } from './use_panel_error_css';
 
 export const PresentationPanelInternal = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
@@ -40,6 +43,7 @@ export const PresentationPanelInternal = <
 
   setDragHandles,
 }: PresentationPanelInternalProps<ApiType, ComponentPropsType>) => {
+  const panelErrorCss = usePanelErrorCss();
   const [api, setApi] = useState<ApiType | null>(null);
   const headerId = useMemo(() => htmlIdGenerator()(), []);
 
@@ -143,7 +147,8 @@ export const PresentationPanelInternal = <
         {blockingError && api && (
           <EuiFlexGroup
             alignItems="center"
-            className="eui-fullHeight embPanel__error"
+            css={panelErrorCss}
+            className="eui-fullHeight"
             data-test-subj="embeddableError"
             justifyContent="center"
           >
