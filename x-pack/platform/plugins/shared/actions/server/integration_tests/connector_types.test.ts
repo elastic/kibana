@@ -11,7 +11,7 @@ import { setupTestServers } from './lib';
 import { connectorTypes } from './mocks/connector_types';
 import { actionsConfigMock } from '../actions_config.mock';
 import { loggerMock } from '@kbn/logging-mocks';
-import { ActionTypeConfig, Services } from '../types';
+import type { ActionTypeConfig, Services } from '../types';
 
 jest.mock('../action_type_registry', () => {
   const actual = jest.requireActual('../action_type_registry');

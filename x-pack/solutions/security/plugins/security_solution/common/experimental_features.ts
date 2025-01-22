@@ -253,6 +253,7 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Enables CrowdStrike's RunScript RTR command
+   * Release: 8.18/9.0
    */
   crowdstrikeRunScriptEnabled: true,
 
