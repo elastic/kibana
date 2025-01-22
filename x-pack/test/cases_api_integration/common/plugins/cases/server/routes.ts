@@ -110,6 +110,34 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
     }
   );
 
+  router.get(
+    {
+      path: '/api/cases_fixture/cases/{id}/comments',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const [_, { cases }] = await core.getStartServices();
+        const client = await cases.getCasesClientWithRequest(request);
+
+        return response.ok({
+          body: await client.attachments.getAll({ caseID: request.params.id }),
+        });
+      } catch (error) {
+        if (error.isBoom && error.output.statusCode === 403) {
+          return response.forbidden({ body: error });
+        }
+
+        logger.error(`Error : ${error}`);
+        throw error;
+      }
+    }
+  );
+
   router.post(
     {
       path: '/api/cases_fixture/cases:bulkCreate',

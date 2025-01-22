@@ -233,7 +233,7 @@ export const getAllComments = async ({
   expectedHttpCode?: number;
 }): Promise<Attachments> => {
   const { body: comments } = await supertest
-    .get(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/comments`)
+    .get(`${getSpaceUrlPrefix(auth.space)}/api/cases_fixture/cases/${caseId}/comments`)
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
 
