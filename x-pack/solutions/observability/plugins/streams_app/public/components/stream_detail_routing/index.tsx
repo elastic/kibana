@@ -39,7 +39,7 @@ import {
   StreamChild,
   ReadStreamDefinition,
   WiredStreamConfigDefinition,
-  isRoot,
+  isWiredRoot,
   isDescendantOf,
 } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
@@ -825,7 +825,9 @@ function CurrentStreamEntry({ definition }: { definition: ReadStreamDefinition }
 
   return (
     <>
-      {!isRoot(definition.name) && <EuiBreadcrumbs breadcrumbs={breadcrumbs} truncate={false} />}
+      {!isWiredRoot(definition.name) && (
+        <EuiBreadcrumbs breadcrumbs={breadcrumbs} truncate={false} />
+      )}
       <EuiFlexItem grow={false}>
         <EuiPanel hasShadow={false} hasBorder paddingSize="s">
           <EuiText size="s">{definition.name}</EuiText>

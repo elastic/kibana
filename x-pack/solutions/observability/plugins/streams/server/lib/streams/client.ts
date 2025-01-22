@@ -669,40 +669,42 @@ export class StreamsClient {
   private async deleteStreamFromDefinition(definition: StreamDefinition): Promise<void> {
     const { logger, scopedClusterClient } = this.dependencies;
 
-    if (!isWiredStream(definition)) {
-      for (const child of definition.stream.ingest.routing) {
-        await this.deleteStream(child.name);
-      }
+    if (isWiredStream(definition)) {
+      await this.removeFromParent(definition);
+    }
+
+    // delete the children first, as this will update
+    // the parent as well
+    for (const child of definition.stream.ingest.routing) {
+      await this.deleteStream(child.name);
+    }
+
+    if (isWiredStream(definition)) {
+      await deleteStreamObjects({ scopedClusterClient, id: definition.name, logger });
+    } else {
       await deleteUnmanagedStreamObjects({
         scopedClusterClient,
         id: definition.name,
         logger,
       });
-    } else {
-      const parentId = getParentId(definition.name);
-
-      // need to update parent first to cut off documents streaming down
-      if (parentId) {
-        const parentDefinition = await this.getStream(parentId);
-
-        await this.updateStreamRouting({
-          definition: parentDefinition,
-          routing: parentDefinition.stream.ingest.routing.filter(
-            (child) => child.name !== definition.name
-          ),
-        });
-      }
-
-      // delete the children first, as this will update
-      // the parent as well
-      for (const child of definition.stream.ingest.routing) {
-        await this.deleteStream(child.name);
-      }
-
-      await deleteStreamObjects({ scopedClusterClient, id: definition.name, logger });
     }
 
     await this.deleteInternalStreamData(definition.name);
+  }
+
+  private async removeFromParent(definition: WiredStreamDefinition) {
+    const parentId = getParentId(definition.name);
+
+    if (parentId) {
+      const parentDefinition = await this.getStream(parentId);
+
+      await this.updateStreamRouting({
+        definition: parentDefinition,
+        routing: parentDefinition.stream.ingest.routing.filter(
+          (child) => child.name !== definition.name
+        ),
+      });
+    }
   }
 
   private async deleteInternalStreamData(name: string) {

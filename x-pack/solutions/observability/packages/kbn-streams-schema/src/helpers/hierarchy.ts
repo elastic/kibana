@@ -31,11 +31,6 @@ export function isDescendantOf(parent: string, child: string) {
   return false;
 }
 
-export function isRoot(name: string) {
-  const streamName = parseStreamName(name);
-  return streamName.type === 'wired' && streamName.segments.length === 1;
-}
-
 export function isChildOf(parent: string, child: string) {
   const parentStreamName = parseStreamName(parent);
   const childStreamName = parseStreamName(child);
@@ -107,7 +102,7 @@ export function getAncestors(id: string, unwiredRootId?: string) {
   }
   const unwiredRootStreamName = parseStreamName(unwiredRootId);
   if (unwiredRootStreamName.type === 'unknown' || unwiredRootStreamName.type === 'wired') {
-    throw new Error('Invalid unwired root id');
+    throw new Error('Invalid unwired root id (needs to be a dsns stream name)');
   }
   const datasetSegments = streamName.datasetSegments;
   const unwiredRootDatasetSegments = unwiredRootStreamName.datasetSegments;
