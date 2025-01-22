@@ -7,9 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ACTION_INVESTIGATE_IN_TIMELINE = i18n.translate(
-  'xpack.securitySolution.threatIntelligence.investigateInTimelineTitle',
-  {
-    defaultMessage: 'Investigate in timeline',
-  }
-);
+export const LINK_SWITCH_ARIA_LABEL = (name: string) =>
+  i18n.translate(
+    'xpack.securitySolution.rule_exceptions.flyoutComponents.addToRulesTableSelection.linkSwitch.ariaLabel',
+    {
+      values: { name },
+      defaultMessage: 'Link "{name}"',
+    }
+  );

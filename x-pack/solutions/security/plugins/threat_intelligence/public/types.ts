@@ -140,6 +140,11 @@ export interface SecuritySolutionPluginContext {
     to,
   }: UseInvestigateInTimelineProps) => () => Promise<void>;
 
+  /**
+   * Whether the current user has access to timeline
+   */
+  hasAccessToTimeline: boolean;
+
   useQuery: () => Query;
 
   useFilters: () => Filter[];
