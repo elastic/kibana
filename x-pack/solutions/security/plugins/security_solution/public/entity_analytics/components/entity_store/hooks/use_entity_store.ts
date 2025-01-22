@@ -11,7 +11,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { GetEntityStoreStatusResponse } from '../../../../../common/api/entity_analytics/entity_store/status.gen';
 import type {
-  InitEntityStoreRequestBody,
+  InitEntityStoreRequestBodyInput,
   InitEntityStoreResponse,
 } from '../../../../../common/api/entity_analytics/entity_store/enable.gen';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
@@ -21,7 +21,7 @@ import {
   type InitEntityEngineResponse,
   type StopEntityEngineResponse,
 } from '../../../../../common/api/entity_analytics';
-import { DEFAULT_FIELD_HISTORY_LENGTH, useEntityStoreRoutes } from '../../../api/entity_store';
+import { useEntityStoreRoutes } from '../../../api/entity_store';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
 
 const ENTITY_STORE_STATUS = ['GET', 'ENTITY_STORE_STATUS'];
@@ -54,23 +54,24 @@ export const useEnableEntityStoreMutation = (
   options?: UseMutationOptions<
     InitEntityStoreResponse,
     ResponseError,
-    Partial<InitEntityStoreRequestBody>
+    InitEntityStoreRequestBodyInput
   >
 ) => {
   const { telemetry } = useKibana().services;
   const queryClient = useQueryClient();
   const { enableEntityStore } = useEntityStoreRoutes();
 
-  return useMutation<InitEntityStoreResponse, ResponseError, Partial<InitEntityStoreRequestBody>>(
-    ({ fieldHistoryLength, ...otherParams }) => {
+  return useMutation<
+    InitEntityStoreResponse,
+    ResponseError,
+    Partial<InitEntityStoreRequestBodyInput>
+  >(
+    (params) => {
       telemetry?.reportEvent(EntityEventTypes.EntityStoreEnablementToggleClicked, {
         timestamp: new Date().toISOString(),
         action: 'start',
       });
-      return enableEntityStore({
-        ...otherParams,
-        fieldHistoryLength: fieldHistoryLength ?? DEFAULT_FIELD_HISTORY_LENGTH,
-      });
+      return enableEntityStore(params);
     },
     {
       mutationKey: ENABLE_STORE_STATUS_KEY,

@@ -7,7 +7,7 @@
 import { useMemo } from 'react';
 import type { GetEntityStoreStatusResponse } from '../../../common/api/entity_analytics/entity_store/status.gen';
 import type {
-  InitEntityStoreRequestBody,
+  InitEntityStoreRequestBodyInput,
   InitEntityStoreResponse,
 } from '../../../common/api/entity_analytics/entity_store/enable.gen';
 import type {
@@ -20,15 +20,11 @@ import type {
 import { API_VERSIONS } from '../../../common/entity_analytics/constants';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 
-export const DEFAULT_FIELD_HISTORY_LENGTH = 10;
-
 export const useEntityStoreRoutes = () => {
   const http = useKibana().services.http;
 
   return useMemo(() => {
-    const enableEntityStore = async (
-      options: InitEntityStoreRequestBody = { fieldHistoryLength: DEFAULT_FIELD_HISTORY_LENGTH }
-    ) => {
+    const enableEntityStore = async (options: InitEntityStoreRequestBodyInput = {}) => {
       return http.fetch<InitEntityStoreResponse>('/api/entity_store/enable', {
         method: 'POST',
         version: API_VERSIONS.public.v1,
