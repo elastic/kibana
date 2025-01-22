@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiToken } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { FieldDefinitionConfig } from '@kbn/streams-schema';
+import { FieldIcon } from '@kbn/react-field';
 import { FIELD_TYPE_MAP } from './configuration_maps';
 
 export const FieldType = ({ type }: { type: FieldDefinitionConfig['type'] }) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiToken iconType={FIELD_TYPE_MAP[type].icon} />
+        <FieldIcon type={type} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{`${FIELD_TYPE_MAP[type].label}`}</EuiFlexItem>
     </EuiFlexGroup>

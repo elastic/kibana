@@ -9,43 +9,36 @@ import { i18n } from '@kbn/i18n';
 
 export const FIELD_TYPE_MAP = {
   boolean: {
-    icon: 'tokenBoolean',
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableBooleanType', {
       defaultMessage: 'Boolean',
     }),
   },
   date: {
-    icon: 'tokenDate',
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableDateType', {
       defaultMessage: 'Date',
     }),
   },
   keyword: {
-    icon: 'tokenKeyword',
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableKeywordType', {
       defaultMessage: 'Keyword',
     }),
   },
   match_only_text: {
-    icon: 'tokenText',
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableTextType', {
       defaultMessage: 'Text',
     }),
   },
   long: {
-    icon: 'tokenNumber',
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableNumberType', {
       defaultMessage: 'Number (long)',
     }),
   },
   double: {
-    icon: 'tokenNumber',
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableNumberType', {
       defaultMessage: 'Number (double)',
     }),
   },
   ip: {
-    icon: 'tokenIP',
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableIpType', {
       defaultMessage: 'IP',
     }),
@@ -72,3 +65,5 @@ export const FIELD_STATUS_MAP = {
     }),
   },
 };
+
+export type FieldStatus = keyof typeof FIELD_STATUS_MAP;

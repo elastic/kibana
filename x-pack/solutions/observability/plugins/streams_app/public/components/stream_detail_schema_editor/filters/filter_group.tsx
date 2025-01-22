@@ -46,32 +46,30 @@ export const FilterGroup = ({
   );
 
   return (
-    <>
-      <EuiFilterGroup>
-        <EuiPopover
-          id={filterGroupPopoverId}
-          button={button}
-          isOpen={isPopoverOpen}
-          closePopover={() => togglePopover(false)}
-          panelPaddingSize="none"
+    <EuiFilterGroup>
+      <EuiPopover
+        id={filterGroupPopoverId}
+        button={button}
+        isOpen={isPopoverOpen}
+        closePopover={() => togglePopover(false)}
+        panelPaddingSize="none"
+      >
+        <EuiSelectable
+          aria-label={filterGroupButtonLabel}
+          options={items}
+          onChange={(...args) => onChange(...args)}
         >
-          <EuiSelectable
-            aria-label={filterGroupButtonLabel}
-            options={items}
-            onChange={(...args) => onChange(...args)}
-          >
-            {(list) => (
-              <div
-                css={{
-                  minWidth: '200px',
-                }}
-              >
-                {list}
-              </div>
-            )}
-          </EuiSelectable>
-        </EuiPopover>
-      </EuiFilterGroup>
-    </>
+          {(list) => (
+            <div
+              css={{
+                minWidth: '200px',
+              }}
+            >
+              {list}
+            </div>
+          )}
+        </EuiSelectable>
+      </EuiPopover>
+    </EuiFilterGroup>
   );
 };

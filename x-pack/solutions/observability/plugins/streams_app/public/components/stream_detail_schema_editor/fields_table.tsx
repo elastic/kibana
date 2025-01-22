@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenu,
@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
 import { isRootStream, isWiredReadStream, ReadStreamDefinition } from '@kbn/streams-schema';
 import { FieldType } from './field_type';
-import { FieldStatus } from './field_status';
+import { FieldStatusBadge } from './field_status';
 import { FieldEntry, SchemaEditorEditingState } from './hooks/use_editing_state';
 import { SchemaEditorUnpromotingState } from './hooks/use_unpromoting_state';
 import { FieldParent } from './field_parent';
@@ -181,13 +181,6 @@ const FieldsTable = ({ definition, fields, editingState, unpromotingState }: Fie
   // Column sorting
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridColumnSortingConfig[]>([]);
 
-  const onSort = useCallback(
-    (nextSortingColumns: EuiDataGridColumnSortingConfig[]) => {
-      setSortingColumns(nextSortingColumns);
-    },
-    [setSortingColumns]
-  );
-
   const trailingColumns = useMemo(() => {
     return !isRootStream(definition)
       ? ([
@@ -316,7 +309,7 @@ const FieldsTable = ({ definition, fields, editingState, unpromotingState }: Fie
         setVisibleColumns,
         canDragAndDropColumns: false,
       }}
-      sorting={{ columns: sortingColumns, onSort }}
+      sorting={{ columns: sortingColumns, onSort: setSortingColumns }}
       toolbarVisibility={true}
       rowCount={fields.length}
       renderCellValue={({ rowIndex, columnId }) => {
@@ -332,7 +325,7 @@ const FieldsTable = ({ definition, fields, editingState, unpromotingState }: Fie
             <FieldParent parent={field.parent} linkEnabled={field.parent !== definition.name} />
           );
         } else if (columnId === 'status') {
-          return <FieldStatus status={field.status} />;
+          return <FieldStatusBadge status={field.status} />;
         } else {
           return field[columnId as keyof FieldEntry] || EMPTY_CONTENT;
         }

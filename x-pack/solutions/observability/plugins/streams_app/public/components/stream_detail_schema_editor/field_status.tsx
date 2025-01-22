@@ -7,11 +7,9 @@
 
 import { EuiBadge } from '@elastic/eui';
 import React from 'react';
-import { FIELD_STATUS_MAP } from './configuration_maps';
+import { FIELD_STATUS_MAP, FieldStatus } from './configuration_maps';
 
-export type FieldStatus = 'inherited' | 'mapped' | 'unmapped';
-
-export const FieldStatus = ({ status }: { status: FieldStatus }) => {
+export const FieldStatusBadge = ({ status }: { status: FieldStatus }) => {
   return (
     <>
       <EuiBadge color={FIELD_STATUS_MAP[status].color}>{FIELD_STATUS_MAP[status].label}</EuiBadge>
