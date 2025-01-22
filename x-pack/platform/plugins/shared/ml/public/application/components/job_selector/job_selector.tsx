@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlyout,
   EuiHorizontalRule,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,10 +28,8 @@ import { BADGE_LIMIT, JobSelectorFlyoutContent } from './job_selector_flyout';
 import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 import { ML_APPLY_TIME_RANGE_CONFIG } from '../../../../common/types/storage';
 import { FeedBackButton } from '../feedback_button';
-import {
-  JobDetailsFlyoutProvider,
-  JobDetailsFlyout,
-} from '../../jobs/components/job_details_flyout';
+import { JobInfoFlyoutsProvider } from '../../jobs/components/job_details_flyout';
+import { JobInfoFlyoutsManager } from '../../jobs/components/job_details_flyout/job_details_context_manager';
 
 export interface GroupObj {
   groupId: string;
@@ -105,6 +104,7 @@ export function JobSelector({
   selectedGroups = [],
   onSelectionChange,
 }: JobSelectorProps) {
+  const { euiTheme } = useEuiTheme();
   const [applyTimeRangeConfig, setApplyTimeRangeConfig] = useStorage(
     ML_APPLY_TIME_RANGE_CONFIG,
     true
@@ -149,6 +149,10 @@ export function JobSelector({
     return singleSelection ? ML_PAGES.SINGLE_METRIC_VIEWER : ML_PAGES.ANOMALY_EXPLORER;
   }, [singleSelection]);
 
+  const removeJobId = (jobId: string) => {
+    const newSelection = selectedIds.filter((id) => id !== jobId);
+    applySelection({ newSelection, jobIds: newSelection });
+  };
   function renderJobSelectionBar() {
     return (
       <>
@@ -169,6 +173,7 @@ export function JobSelector({
                   selectedGroups={selectedGroups}
                   showAllBarBadges={showAllBarBadges}
                   page={page}
+                  onRemoveJobId={removeJobId}
                 />
               </EuiFlexGroup>
             ) : (
@@ -229,11 +234,11 @@ export function JobSelector({
 
   return (
     <div>
-      <JobDetailsFlyoutProvider>
+      <JobInfoFlyoutsProvider>
         {renderJobSelectionBar()}
         {renderFlyout()}
-        <JobDetailsFlyout />
-      </JobDetailsFlyoutProvider>
+        <JobInfoFlyoutsManager />
+      </JobInfoFlyoutsProvider>
     </div>
   );
 }

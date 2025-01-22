@@ -15,12 +15,15 @@ import { EuiButton, EuiContextMenu, EuiPopover, useGeneratedHtmlId } from '@elas
 import { i18n } from '@kbn/i18n';
 import type { MlPages } from '../../../../../common/constants/locator';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../common/constants/locator';
-import { useJobDetailFlyout } from '../../../jobs/components/job_details_flyout';
+import { useJobInfoFlyouts } from '../../../jobs/components/job_details_flyout';
 import { useMlKibana } from '../../../contexts/kibana';
+import { FlyoutType } from '../../../jobs/components/job_details_flyout/job_details_flyout_context';
 
 interface Props {
   jobId: string;
   page: MlPages;
+  onRemoveJobId: (jobId: string) => void;
+  removeJobIdDisabled: boolean;
 }
 
 const ANOMALY_EXPLORER_TITLE = i18n.translate('xpack.ml.deepLink.anomalyExplorer', {
@@ -29,7 +32,12 @@ const ANOMALY_EXPLORER_TITLE = i18n.translate('xpack.ml.deepLink.anomalyExplorer
 const SINGLE_METRIC_VIEWER_TITLE = i18n.translate('xpack.ml.deepLink.singleMetricViewer', {
   defaultMessage: 'Single metric viewer',
 });
-export const AnomalyDetectionInfoButton: FC<Props> = ({ jobId, page }) => {
+export const AnomalyDetectionInfoButton: FC<Props> = ({
+  jobId,
+  page,
+  onRemoveJobId,
+  removeJobIdDisabled,
+}) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const {
     services: {
@@ -48,7 +56,7 @@ export const AnomalyDetectionInfoButton: FC<Props> = ({ jobId, page }) => {
     setPopover(false);
   };
 
-  const { setIsFlyoutOpen, setActiveJobId } = useJobDetailFlyout();
+  const { setActiveFlyout, setActiveJobId } = useJobInfoFlyouts();
   const panels = useMemo(() => {
     const pageToNavigateTo =
       page === ML_PAGES.SINGLE_METRIC_VIEWER ? ANOMALY_EXPLORER_TITLE : SINGLE_METRIC_VIEWER_TITLE;
@@ -94,8 +102,6 @@ export const AnomalyDetectionInfoButton: FC<Props> = ({ jobId, page }) => {
         navigateToUrl(singleMetricViewerLink);
 
         closePopover();
-        setActiveJobId(jobId);
-        setIsFlyoutOpen(true);
       },
     };
     return [
@@ -109,50 +115,61 @@ export const AnomalyDetectionInfoButton: FC<Props> = ({ jobId, page }) => {
             icon: 'editorTable',
             onClick: () => {
               setActiveJobId(jobId);
-              setIsFlyoutOpen(true);
+              setActiveFlyout(FlyoutType.JOB_DETAILS);
               closePopover();
             },
           },
-          // @TODO: Temporarily disable below options until ML management page is implemented
-          // {
-          //   name: i18n.translate('xpack.ml.overview.anomalyDetection.jobContextMenu.editJob', {
-          //     defaultMessage: 'Edit job',
-          //   }),
-          //   icon: 'pencil',
-          //   onClick: closePopover,
-          // },
-          // {
-          //   name: i18n.translate('xpack.ml.overview.anomalyDetection.jobContextMenu.removeJob', {
-          //     defaultMessage: 'Remove from {page}',
-          //     values: {
-          //       page:
-          //         page === ML_PAGES.ANOMALY_EXPLORER
-          //           ? ANOMALY_EXPLORER_TITLE
-          //           : SINGLE_METRIC_VIEWER_TITLE,
-          //     },
-          //   }),
-          //   icon: 'minusInCircle',
-          //   onClick: closePopover,
-          // },
-          // {
-          //   isSeparator: true,
-          //   key: 'sep',
-          // } as EuiContextMenuPanelItemDescriptor,
+          {
+            name: i18n.translate('xpack.ml.overview.anomalyDetection.jobContextMenu.removeJob', {
+              defaultMessage: 'Remove from {page}',
+              values: {
+                page:
+                  page === ML_PAGES.ANOMALY_EXPLORER
+                    ? ANOMALY_EXPLORER_TITLE
+                    : SINGLE_METRIC_VIEWER_TITLE,
+              },
+            }),
+            disabled: removeJobIdDisabled,
+            icon: 'minusInCircle',
+            onClick: () => {
+              if (onRemoveJobId) {
+                onRemoveJobId(jobId);
+              }
+              closePopover();
+            },
+          },
+          {
+            isSeparator: true,
+            key: 'sep',
+          } as EuiContextMenuPanelItemDescriptor,
           viewInMenu,
-          // {
-          //   name: i18n.translate(
-          //     'xpack.ml.overview.anomalyDetection.jobContextMenu.viewDatafeedCounts',
-          //     {
-          //       defaultMessage: 'View datafeed counts',
-          //     }
-          //   ),
-          //   icon: 'visAreaStacked',
-          //   onClick: closePopover,
-          // },
+          {
+            name: i18n.translate(
+              'xpack.ml.overview.anomalyDetection.jobContextMenu.viewDatafeedCounts',
+              {
+                defaultMessage: 'View datafeed counts',
+              }
+            ),
+            icon: 'visAreaStacked',
+            onClick: () => {
+              setActiveJobId(jobId);
+              setActiveFlyout(FlyoutType.DATAFEED_CHART);
+              closePopover();
+            },
+          },
         ],
       },
     ] as EuiContextMenuPanelDescriptor[];
-  }, [jobId, page, setActiveJobId, setIsFlyoutOpen, navigateToUrl, share.url.locators]);
+  }, [
+    jobId,
+    page,
+    setActiveJobId,
+    setActiveFlyout,
+    navigateToUrl,
+    share.url.locators,
+    removeJobIdDisabled,
+    onRemoveJobId,
+  ]);
 
   const button = (
     <EuiButton

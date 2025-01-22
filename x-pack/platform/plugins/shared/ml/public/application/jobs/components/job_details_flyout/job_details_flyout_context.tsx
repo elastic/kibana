@@ -5,38 +5,58 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useMemo, useState, useCallback } from 'react';
 
-interface JobDetailsContextValue {
+export enum FlyoutType {
+  JOB_DETAILS = 'jobDetails',
+  DATAFEED_CHART = 'datafeedChart',
+}
+interface JobInfoFlyoutsContextValue {
   activeJobId: string | null;
   setActiveJobId: (jobId: string | null) => void;
-  isFlyoutOpen: boolean;
-  setIsFlyoutOpen: (isOpen: boolean) => void;
+  activeFlyout: FlyoutType | null;
+  setActiveFlyout: (flyout: FlyoutType | null) => void;
+  isDetailFlyoutOpen: boolean;
+  isDatafeedChartFlyoutOpen: boolean;
+  closeActiveFlyout: () => void;
 }
 
-export const JobDetailsContext = createContext<JobDetailsContextValue>({
+export const JobInfoFlyoutsContext = createContext<JobInfoFlyoutsContextValue>({
   activeJobId: null,
   setActiveJobId: () => {},
-  isFlyoutOpen: false,
-  setIsFlyoutOpen: () => {},
+  activeFlyout: null,
+  setActiveFlyout: () => {},
+  isDetailFlyoutOpen: false,
+  isDatafeedChartFlyoutOpen: false,
 });
 
-export const useJobDetailFlyout = () => useContext(JobDetailsContext);
+export const useJobInfoFlyouts = () => useContext(JobInfoFlyoutsContext);
 
-export const JobDetailsFlyoutProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const JobInfoFlyoutsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const [activeFlyout, setActiveFlyout] = useState<FlyoutType | null>(null);
+  const isDetailFlyoutOpen = useMemo(() => activeFlyout === FlyoutType.JOB_DETAILS, [activeFlyout]);
+  const isDatafeedChartFlyoutOpen = useMemo(
+    () => activeFlyout === FlyoutType.DATAFEED_CHART,
+    [activeFlyout]
+  );
+  const closeActiveFlyout = useCallback(() => {
+    setActiveFlyout(null);
+  }, [setActiveFlyout]);
 
   return (
-    <JobDetailsContext.Provider
+    <JobInfoFlyoutsContext.Provider
       value={{
         activeJobId,
         setActiveJobId,
-        isFlyoutOpen,
-        setIsFlyoutOpen,
+        isDetailFlyoutOpen,
+        isDatafeedChartFlyoutOpen,
+        setActiveFlyout,
+        activeFlyout,
+        closeActiveFlyout,
       }}
     >
       {children}
-    </JobDetailsContext.Provider>
+    </JobInfoFlyoutsContext.Provider>
   );
 };

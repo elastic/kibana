@@ -12,24 +12,28 @@ import {
   EuiFlyoutBody,
   EuiText,
   EuiTitle,
+  EuiFlexItem,
+  EuiButton,
+  EuiFlexGroup,
   useGeneratedHtmlId,
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CombinedJobWithStats } from '../../../../../common/types/anomaly_detection_jobs';
-import { useJobDetailFlyout } from './job_details_flyout_context';
+import { useJobInfoFlyouts } from './job_details_flyout_context';
 import { useMlApi } from '../../../contexts/kibana';
 import { JobDetails } from '../../jobs_list/components/job_details';
 import { loadFullJob } from '../../jobs_list/components/utils';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
 
+const doNothing = () => {};
 export const JobDetailsFlyout = () => {
   const {
-    isFlyoutOpen,
-    setIsFlyoutOpen,
+    isDetailFlyoutOpen,
     activeJobId: jobId,
     setActiveJobId,
-  } = useJobDetailFlyout();
+    closeActiveFlyout,
+  } = useJobInfoFlyouts();
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'jobDetailsFlyout',
   });
@@ -70,22 +74,32 @@ export const JobDetailsFlyout = () => {
     return null;
   }
 
-  return isFlyoutOpen ? (
+  return isDetailFlyoutOpen ? (
     <EuiFlyout
       data-test-subj="jobDetailsFlyout"
       type="overlay"
       size="m"
       ownFocus={false}
       onClose={() => {
-        setIsFlyoutOpen(false);
+        closeActiveFlyout();
         setActiveJobId(null);
       }}
       aria-labelledby={flyoutTitleId}
     >
       <EuiFlyoutHeader hasBorder data-test-subj={`jobDetailsFlyout-${jobId}`}>
-        <EuiTitle size="s">
-          <h2 id={flyoutTitleId}>{jobId}</h2>
-        </EuiTitle>
+        <EuiFlexGroup>
+          <EuiTitle size="s">
+            <h2 id={flyoutTitleId}>{jobId}</h2>
+          </EuiTitle>
+          <EuiFlexItem grow={false}>
+            <EuiButton onClick={closeActiveFlyout} iconType="popout">
+              <FormattedMessage
+                id="xpack.ml.jobDetailsFlyout.openJobsListButton"
+                defaultMessage="Open jobs list"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {isLoading ? (
@@ -99,9 +113,10 @@ export const JobDetailsFlyout = () => {
                 mode="flyout"
                 jobId={jobId}
                 job={jobDetails}
-                addYourself={() => {}}
-                removeYourself={() => {}}
-                refreshJobList={() => {}}
+                // No need to add or remove from the job list
+                addYourself={doNothing}
+                removeYourself={doNothing}
+                refreshJobList={doNothing}
                 showClearButton={false}
               />
             ) : null}

@@ -20,6 +20,7 @@ export interface IdBadgesProps {
   onLinkClick: () => void;
   showAllBarBadges: boolean;
   page: MlPages;
+  setSelectedIds: (ids: string[]) => void;
 }
 
 export function IdBadges({
@@ -29,6 +30,7 @@ export function IdBadges({
   selectedJobIds,
   showAllBarBadges,
   page,
+  onRemoveJobId,
 }: IdBadgesProps) {
   const badges = [];
 
@@ -53,7 +55,12 @@ export function IdBadges({
     }
     badges.push(
       <EuiFlexItem grow={false} key={currentId}>
-        <AnomalyDetectionInfoButton jobId={currentId} page={page} />
+        <AnomalyDetectionInfoButton
+          jobId={currentId}
+          page={page}
+          onRemoveJobId={onRemoveJobId}
+          removeJobIdDisabled={selectedJobIds.length < 2}
+        />
       </EuiFlexItem>
     );
   }
