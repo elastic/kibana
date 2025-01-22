@@ -66,7 +66,7 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
             });
           }
           const conversation = await dataClient?.updateConversation({
-            conversationUpdateProps: request.body,
+            conversationUpdateProps: { ...request.body, id },
           });
           if (conversation == null) {
             return assistantResponse.error({

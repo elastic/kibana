@@ -160,7 +160,11 @@ export const getStructuredToolForIndexEntry = ({
   }, {});
 
   return new DynamicStructuredTool({
-    name: indexEntry.name.replace(/[^a-zA-Z0-9-]/g, ''), // // Tool names expects a string that matches the pattern '^[a-zA-Z0-9-]+$'
+    name: indexEntry.name
+      // Replace invalid characters with an empty string
+      .replace(/[^a-zA-Z0-9_]/g, '')
+      // Ensure it starts with a letter. If not, prepend 'a'
+      .replace(/^[^a-zA-Z]/, 'a'),
     description: indexEntry.description,
     schema: z.object({
       query: z.string().describe(indexEntry.queryDescription),
