@@ -56,17 +56,35 @@ export const SHOW_REAL_VALUES = i18n.translate(
   }
 );
 
-export const HIDE_CONTENT_REFERENCES = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.hideContentReferencesLabel',
+export const ANONYMIZE_VALUES = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.anonymizeValues',
   {
-    defaultMessage: 'Hide citations',
+    defaultMessage: 'Anonymize values',
   }
 );
 
-export const SHOW_CONTENT_REFERENCES = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.showContentReferencesLabel',
+export const SHOW_CITATIONS = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.showCitationsLabel',
   {
     defaultMessage: 'Show citations',
+  }
+);
+
+const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
+
+export const ANONYMIZE_VALUES_SHORTCUT = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.anonymizeValues.keyboardShortcut',
+  {
+    values: { keyboardShortcut: isMac ? '⌥ a' : 'Alt a' },
+    defaultMessage: 'Keyboard shortcut: {keyboardShortcut}',
+  }
+);
+
+export const SHOW_CITATIONS_SHORTCUT = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.showCitationsLabel.keyboardShortcut',
+  {
+    values: { keyboardShortcut: isMac ? '⌥ c' : 'Alt c' },
+    defaultMessage: 'Keyboard shortcut: {keyboardShortcut}',
   }
 );
 

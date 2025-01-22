@@ -82,6 +82,7 @@ describe('contentReferenceComponentFactory', () => {
       const Component = contentReferenceComponentFactory({
         contentReferences,
         contentReferencesVisible: true,
+        loading: false,
       });
 
       render(<Component {...contentReferenceNode} />);
@@ -94,6 +95,7 @@ describe('contentReferenceComponentFactory', () => {
     const Component = contentReferenceComponentFactory({
       contentReferences: {},
       contentReferencesVisible: true,
+      loading: false,      
     });
 
     const { container } = render(
@@ -106,10 +108,11 @@ describe('contentReferenceComponentFactory', () => {
     expect(screen.queryByText('[1]')).not.toBeInTheDocument();
   });
 
-  it('renders placeholder if contentReferences are undefined', async () => {
+  it('renders placeholder if contentReferences are undefined and is loading', async () => {
     const Component = contentReferenceComponentFactory({
       contentReferences: undefined,
       contentReferencesVisible: true,
+      loading: true,
     });
 
     render(
@@ -120,5 +123,22 @@ describe('contentReferenceComponentFactory', () => {
 
     expect(screen.getByTestId('ContentReferenceButton')).toBeInTheDocument();
     expect(screen.getByText('[1]')).toBeInTheDocument();
+  });
+
+  it('renders nothing if contentReferences are undefined and is not loading', async () => {
+    const Component = contentReferenceComponentFactory({
+      contentReferences: undefined,
+      contentReferencesVisible: true,
+      loading: false,
+    });
+
+    const { container } = render(
+      <Component
+        {...({ contentReferenceId: '1', contentReferenceCount: 1 } as ContentReferenceNode)}
+      />
+    );
+
+    expect(container).toBeEmptyDOMElement();
+    expect(screen.queryByText('[1]')).not.toBeInTheDocument();
   });
 });

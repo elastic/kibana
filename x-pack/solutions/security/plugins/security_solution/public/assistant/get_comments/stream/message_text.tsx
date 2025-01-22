@@ -105,12 +105,14 @@ const loadingCursorPlugin = () => {
 
 interface GetPluginDependencies {
   contentReferences?: ContentReferences;
+  loading: boolean;
   contentReferencesVisible: boolean;
 }
 
 const getPluginDependencies = ({
   contentReferences,
   contentReferencesVisible,
+  loading
 }: GetPluginDependencies) => {
   const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
 
@@ -123,6 +125,7 @@ const getPluginDependencies = ({
     contentReference: contentReferenceComponentFactory({
       contentReferences,
       contentReferencesVisible,
+      loading
     }),
     cursor: Cursor,
     customCodeBlock: (props) => {
@@ -180,6 +183,7 @@ export function MessageText({
   const { parsingPluginList, processingPluginList } = getPluginDependencies({
     contentReferences,
     contentReferencesVisible,
+    loading
   });
 
   return (

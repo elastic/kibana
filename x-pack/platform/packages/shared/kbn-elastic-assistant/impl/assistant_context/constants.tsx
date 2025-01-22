@@ -20,6 +20,7 @@ export const SHOW_SETTINGS_TOUR_LOCAL_STORAGE_KEY = 'showSettingsTour';
 export const START_LOCAL_STORAGE_KEY = 'start';
 export const STREAMING_LOCAL_STORAGE_KEY = 'streaming';
 export const CONTENT_REFERENCES_VISIBLE_LOCAL_STORAGE_KEY = 'contentReferencesVisible';
+export const SHOW_ANONYMIZED_VALUES_LOCAL_STORAGE_KEY = 'showAnonymizedValues';
 export const TRACE_OPTIONS_SESSION_STORAGE_KEY = 'traceOptions';
 export const CONVERSATION_TABLE_SESSION_STORAGE_KEY = 'conversationTable';
 export const QUICK_PROMPT_TABLE_SESSION_STORAGE_KEY = 'quickPromptTable';

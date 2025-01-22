@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,6 +17,10 @@ import {
   EuiButtonIcon,
   useEuiTheme,
   EuiSwitch,
+  EuiPanel,
+  EuiTitle,
+  EuiHorizontalRule,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { KnowledgeBaseTour } from '../../../tour/knowledge_base';
@@ -34,7 +38,7 @@ interface Params {
 export const SettingsContextMenu: React.FC<Params> = React.memo(
   ({ isDisabled = false, onChatCleared }: Params) => {
     const { euiTheme } = useEuiTheme();
-    const { navigateToApp, knowledgeBase, setContentReferencesVisible, contentReferencesVisible } =
+    const { navigateToApp, knowledgeBase, setContentReferencesVisible, contentReferencesVisible, showAnonymizedValues, setShowAnonymizedValues } =
       useAssistantContext();
 
     const [isPopoverOpen, setPopover] = useState(false);
@@ -106,20 +110,9 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
           key={'knowledge-base'}
           icon={'documents'}
           data-test-subj={'knowledge-base'}
+          onClick={handleNavigateToKnowledgeBase}
         >
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow onClick={handleNavigateToKnowledgeBase}>
-              {i18n.KNOWLEDGE_BASE}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiSwitch
-                label="Citations"
-                checked={contentReferencesVisible}
-                onChange={(value) => setContentReferencesVisible(value.target.checked)}
-                compressed
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          {i18n.KNOWLEDGE_BASE}
         </EuiContextMenuItem>,
         <EuiContextMenuItem
           aria-label={'anonymization'}
@@ -146,23 +139,67 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiContextMenuItem>,
-        <EuiContextMenuItem
-          aria-label={'clear-chat'}
-          key={'clear-chat'}
-          onClick={showDestroyModal}
-          icon={'refresh'}
-          data-test-subj={'clear-chat'}
-          css={css`
-            color: ${euiTheme.colors.textDanger};
-          `}
-        >
-          {i18n.RESET_CONVERSATION}
-        </EuiContextMenuItem>,
+        <EuiPanel color="transparent" paddingSize="s" key={'chat-options-panel'}>
+          <EuiTitle size="xxxs" key={'chat-options-title'}>
+            <h3>Chat options</h3>
+          </EuiTitle>
+          <EuiHorizontalRule margin="none" />
+          <EuiToolTip
+            position="left"
+            key={'anonymize-values-tooltip'}
+            content={i18n.ANONYMIZE_VALUES_SHORTCUT}
+          >
+            <EuiContextMenuItem
+              aria-label={'anonymize-values'}
+              key={'anonymize-values'}
+              data-test-subj={'anonymize-values'}
+            >
+              <EuiSwitch
+                label={i18n.ANONYMIZE_VALUES}
+                checked={showAnonymizedValues}
+                onChange={(e) => setShowAnonymizedValues(e.target.checked)}
+                compressed
+              />
+            </EuiContextMenuItem>
+          </EuiToolTip>
+          <EuiToolTip
+            position="left"
+            key={'show-citations-tooltip'}
+            content={i18n.SHOW_CITATIONS_SHORTCUT}
+          >
+            <EuiContextMenuItem
+              aria-label={'show-citations'}
+              key={'show-citations'}
+              data-test-subj={'show-citations'}
+            >
+              <EuiSwitch
+                label={i18n.SHOW_CITATIONS}
+                checked={contentReferencesVisible}
+                onChange={(e) => setContentReferencesVisible(e.target.checked)}
+                compressed
+              />
+            </EuiContextMenuItem>
+          </EuiToolTip>
+          <EuiHorizontalRule margin="none" />
+          <EuiContextMenuItem
+            aria-label={'clear-chat'}
+            key={'clear-chat'}
+            onClick={showDestroyModal}
+            icon={'refresh'}
+            data-test-subj={'clear-chat'}
+            css={css`
+              color: ${euiTheme.colors.textDanger};
+            `}
+          >
+            {i18n.RESET_CONVERSATION}
+          </EuiContextMenuItem>
+        </EuiPanel>,
       ],
-
       [
         contentReferencesVisible,
         setContentReferencesVisible,
+        showAnonymizedValues,
+        setShowAnonymizedValues,
         euiTheme.colors.textDanger,
         handleNavigateToAnonymization,
         handleNavigateToKnowledgeBase,

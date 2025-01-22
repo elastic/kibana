@@ -92,7 +92,9 @@ const AssistantComponent: React.FC<Props> = ({
     currentUserAvatar,
     setLastConversationId,
     contentReferencesVisible,
+    showAnonymizedValues, 
     setContentReferencesVisible,
+    setShowAnonymizedValues,
   } = useAssistantContext();
 
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
@@ -206,7 +208,6 @@ const AssistantComponent: React.FC<Props> = ({
   ]);
 
   const [autoPopulatedOnce, setAutoPopulatedOnce] = useState<boolean>(false);
-  const [showAnonymizedValues, setShowAnonymizedValues] = useState<boolean>(false);
 
   const [messageCodeBlocks, setMessageCodeBlocks] = useState<CodeBlockDetails[][]>();
   const [_, setCodeBlockControlsVisible] = useState(false);
@@ -218,6 +219,24 @@ const AssistantComponent: React.FC<Props> = ({
       }, 0);
     }
   }, [augmentMessageCodeBlocks, currentConversation, showAnonymizedValues]);
+
+
+  // Keyboard shortcuts to toggle the visibility of content references and anonymized values
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.altKey && event.code === 'KeyC') {
+        event.preventDefault();
+        setContentReferencesVisible(!contentReferencesVisible)
+      }
+      if (event.altKey && event.code === 'KeyA') {
+        event.preventDefault();
+        setShowAnonymizedValues(!showAnonymizedValues)
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [setContentReferencesVisible, contentReferencesVisible, setShowAnonymizedValues, showAnonymizedValues]);
 
   // Show missing connector callout if no connectors are configured
 
@@ -267,10 +286,6 @@ const AssistantComponent: React.FC<Props> = ({
   // @ts-ignore-expect-error
   codeBlockContainers.forEach((e) => (e.style.minHeight = '85px'));
   ////
-
-  const onToggleShowAnonymizedValues = useCallback(() => {
-    setShowAnonymizedValues((prevValue) => !prevValue);
-  }, [setShowAnonymizedValues]);
 
   const {
     abortStream,
@@ -467,9 +482,7 @@ const AssistantComponent: React.FC<Props> = ({
                   defaultConnector={defaultConnector}
                   isDisabled={isDisabled || isLoadingChatSend}
                   isSettingsModalVisible={isSettingsModalVisible}
-                  onToggleShowAnonymizedValues={onToggleShowAnonymizedValues}
                   setIsSettingsModalVisible={setIsSettingsModalVisible}
-                  showAnonymizedValues={showAnonymizedValues}
                   onCloseFlyout={onCloseFlyout}
                   onChatCleared={handleOnChatCleared}
                   chatHistoryVisible={chatHistoryVisible}
@@ -481,8 +494,6 @@ const AssistantComponent: React.FC<Props> = ({
                   onConversationCreate={handleCreateConversation}
                   isAssistantEnabled={isAssistantEnabled}
                   refetchPrompts={refetchPrompts}
-                  setContentReferencesVisible={setContentReferencesVisible}
-                  contentReferencesVisible={contentReferencesVisible}
                 />
 
                 {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}

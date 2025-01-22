@@ -39,6 +39,7 @@ import {
   DEFAULT_KNOWLEDGE_BASE_SETTINGS,
   KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,
   LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY,
+  SHOW_ANONYMIZED_VALUES_LOCAL_STORAGE_KEY,
   STREAMING_LOCAL_STORAGE_KEY,
   TRACE_OPTIONS_SESSION_STORAGE_KEY,
 } from './constants';
@@ -117,7 +118,9 @@ export interface UseAssistantContext {
   registerPromptContext: RegisterPromptContext;
   selectedSettingsTab: SettingsTabs | null;
   contentReferencesVisible: boolean;
-  setContentReferencesVisible: React.Dispatch<React.SetStateAction<boolean | undefined>>;
+  showAnonymizedValues: boolean;
+  setShowAnonymizedValues: React.Dispatch<React.SetStateAction<boolean>>;
+  setContentReferencesVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean | undefined>>;
   setKnowledgeBase: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig | undefined>>;
   setLastConversationId: React.Dispatch<React.SetStateAction<string | undefined>>;
@@ -207,6 +210,15 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   const [contentReferencesVisible, setContentReferencesVisible] = useLocalStorage<boolean>(
     `${nameSpace}.${CONTENT_REFERENCES_VISIBLE_LOCAL_STORAGE_KEY}`,
     true
+  );
+
+  /**
+   * Local storage for anonymized values, prefixed by assistant nameSpace
+   */
+  // can be undefined from localStorage, if not defined, default to false
+  const [showAnonymizedValues, setShowAnonymizedValues] = useLocalStorage<boolean>(
+    `${nameSpace}.${SHOW_ANONYMIZED_VALUES_LOCAL_STORAGE_KEY}`,
+    false
   );
 
   /**
@@ -315,7 +327,9 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       setAssistantStreamingEnabled: setLocalStorageStreaming,
       setKnowledgeBase: setLocalStorageKnowledgeBase,
       contentReferencesVisible: contentReferencesVisible ?? true,
-      setContentReferencesVisible,
+      setContentReferencesVisible: setContentReferencesVisible as React.Dispatch<React.SetStateAction<boolean>>,
+      showAnonymizedValues: showAnonymizedValues ?? false, 
+      setShowAnonymizedValues: setShowAnonymizedValues as React.Dispatch<React.SetStateAction<boolean>>,
       setSelectedSettingsTab,
       setShowAssistantOverlay,
       setTraceOptions: setSessionStorageTraceOptions,
@@ -356,6 +370,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       localStorageStreaming,
       setLocalStorageStreaming,
       setLocalStorageKnowledgeBase,
+      showAnonymizedValues,
+      setShowAnonymizedValues,
       contentReferencesVisible,
       setContentReferencesVisible,
       setSessionStorageTraceOptions,

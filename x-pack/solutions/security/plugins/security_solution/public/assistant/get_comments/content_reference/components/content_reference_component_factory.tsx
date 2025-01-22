@@ -15,14 +15,16 @@ import { ContentReferenceButton } from './content_reference_button';
 import { ProductDocumentationReference } from './product_documentation_reference';
 import { EsqlQueryReference } from './esql_query_reference';
 
-interface ContentReferenceComponentFactory {
-  contentReferences?: ContentReferences;
+export interface ContentReferenceComponentFactory {
+  contentReferences?: ContentReferences ;
   contentReferencesVisible: boolean;
+  loading: boolean;
 }
 
 export const contentReferenceComponentFactory = ({
   contentReferences,
   contentReferencesVisible,
+  loading
 }: ContentReferenceComponentFactory) => {
   const ContentReferenceComponent = (
     contentReferenceNode: ContentReferenceNode
@@ -36,9 +38,9 @@ export const contentReferenceComponentFactory = ({
       />
     );
 
-    if (contentReferences === undefined) return defaultNode;
+    if (contentReferences === undefined && loading) return defaultNode;
 
-    const contentReference = contentReferences[contentReferenceNode.contentReferenceId];
+    const contentReference = contentReferences?.[contentReferenceNode.contentReferenceId];
 
     if (contentReference === undefined) return null;
 

@@ -10,10 +10,10 @@ const YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT =
 const IF_YOU_DONT_KNOW_THE_ANSWER = 'Do not answer questions unrelated to Elastic Security.';
 export const KNOWLEDGE_HISTORY =
   'If available, use the Knowledge History provided to try and answer the question. If not provided, you can try and query for additional knowledge via the KnowledgeBaseRetrievalTool.';
-export const INCLUDE_CITATIONS = `In your response, cite sources using this citation format: \`{{reference(<reference id>)}}\`. Citations appear after the punctuation marks. Please only use the citations provided by the tools and don't invent reference ids.  
+export const INCLUDE_CITATIONS = `In your response, include citations using the format: \`{{reference(...)}}\`. Only use the reference blocks provided by the tools and do not create reference blocks using other information. The reference should be placed after the punctuation marks.  
 Example citation: 
 \`\`\`
-This vulnerability emerged due to issues in Log4j.{{reference(HMCxq)}} This vulnerability impacted various companies running Java services.{{reference(prSit)}}
+This vulnerability emerged due to issues in Log4j. {{reference(HMCxq)}} This vulnerability impacted various companies running Java services. {{reference(prSit)}}
 \`\`\``;
 
 export const DEFAULT_SYSTEM_PROMPT = `${YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT} ${IF_YOU_DONT_KNOW_THE_ANSWER} ${KNOWLEDGE_HISTORY} ${INCLUDE_CITATIONS}`;

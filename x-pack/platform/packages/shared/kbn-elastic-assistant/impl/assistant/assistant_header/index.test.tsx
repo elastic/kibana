@@ -9,7 +9,7 @@ import React from 'react';
 import { act, fireEvent, render } from '@testing-library/react';
 import { AssistantHeader } from '.';
 import { TestProviders } from '../../mock/test_providers/test_providers';
-import { alertConvo, emptyWelcomeConvo, welcomeConvo } from '../../mock/conversation';
+import { alertConvo, welcomeConvo } from '../../mock/conversation';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
 import { mockConnectors } from '../../mock/connectors';
 
@@ -72,59 +72,6 @@ jest.mock('../use_conversation', () => ({
 describe('AssistantHeader', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-  it('showAnonymizedValues is not checked when selectedConversation.replacements is null', () => {
-    const { getByText, getByTestId } = render(<AssistantHeader {...testProps} />, {
-      wrapper: TestProviders,
-    });
-    expect(getByText(welcomeConvo.title)).toBeInTheDocument();
-    expect(getByTestId('showAnonymizedValues').firstChild).toHaveAttribute(
-      'data-euiicon-type',
-      'eyeClosed'
-    );
-  });
-
-  it('showAnonymizedValues is not checked when selectedConversation.replacements is empty', () => {
-    const { getByText, getByTestId } = render(
-      <AssistantHeader
-        {...testProps}
-        selectedConversation={{ ...emptyWelcomeConvo, replacements: {} }}
-      />,
-      {
-        wrapper: TestProviders,
-      }
-    );
-    expect(getByText(welcomeConvo.title)).toBeInTheDocument();
-    expect(getByTestId('showAnonymizedValues').firstChild).toHaveAttribute(
-      'data-euiicon-type',
-      'eyeClosed'
-    );
-  });
-
-  it('showAnonymizedValues is not checked when selectedConversation.replacements has values and showAnonymizedValues is false', () => {
-    const { getByTestId } = render(
-      <AssistantHeader {...testProps} selectedConversation={alertConvo} />,
-      {
-        wrapper: TestProviders,
-      }
-    );
-    expect(getByTestId('showAnonymizedValues').firstChild).toHaveAttribute(
-      'data-euiicon-type',
-      'eyeClosed'
-    );
-  });
-
-  it('showAnonymizedValues is checked when selectedConversation.replacements has values and showAnonymizedValues is true', () => {
-    const { getByTestId } = render(
-      <AssistantHeader {...testProps} selectedConversation={alertConvo} showAnonymizedValues />,
-      {
-        wrapper: TestProviders,
-      }
-    );
-    expect(getByTestId('showAnonymizedValues').firstChild).toHaveAttribute(
-      'data-euiicon-type',
-      'eye'
-    );
   });
 
   it('Conversation is updated when connector change occurs', async () => {
