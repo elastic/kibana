@@ -152,7 +152,7 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
               fullWidth
               hasDividers
               name="indexMode"
-              value={indexMode}
+              valueOfSelected={indexMode}
               onChange={(mode) => setIndexMode(mode)}
               data-test-subj="indexModeField"
               options={[
