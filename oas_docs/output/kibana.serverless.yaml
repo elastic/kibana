@@ -33639,7 +33639,9 @@ paths:
                 type:
                   $ref: '#/components/schemas/Security_Lists_API_ListType'
                 version:
-                  $ref: '#/components/schemas/Security_Lists_API_ListVersion'
+                  default: 1
+                  minimum: 1
+                  type: integer
               required:
                 - name
                 - description
@@ -50937,7 +50939,6 @@ components:
         - text
       type: string
     Security_Lists_API_ListVersion:
-      default: 1
       description: The document version number.
       example: 1
       minimum: 1
