@@ -23,7 +23,8 @@ const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <TestProviders>{children}</TestProviders>
 );
 
-describe('useGetCaseMetrics', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/207384
+describe.skip('useGetCaseMetrics', () => {
   const abortCtrl = new AbortController();
   const features: SingleCaseMetricsFeature[] = [CaseMetricsFeature.ALERTS_COUNT];
 
