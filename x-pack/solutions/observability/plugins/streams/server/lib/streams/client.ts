@@ -860,7 +860,7 @@ export class StreamsClient {
     const streamName = parseStreamName(definition.name);
     if (isWiredStream(definition) && streamName.type === 'dsns' && ancestors.length === 0) {
       // We have a DSNS stream, which means it is not connected to the root logs stream, but no ancestors.
-      // This can happen if the classic stream for the unwired root hasn't been created yet.
+      // This can happen if the classic stream definition for the unwired root hasn't been created yet.
       // In this case, we need to fetch unmanaged streams and check for a match there.
       const unmanagedStreams = await this.getUnmanagedDataStreams();
       unwiredRoot = unmanagedStreams.find((candidateStream) => {
