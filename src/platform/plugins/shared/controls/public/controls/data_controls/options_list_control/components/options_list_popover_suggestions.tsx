@@ -151,7 +151,7 @@ export const OptionsListPopoverSuggestions = ({
     if (scrollTop + clientHeight >= scrollHeight - parseInt(euiTheme.size.xxl, 10)) {
       // reached the "bottom" of the list, where euiSizeXXL acts as a "margin of error" so that the user doesn't
       // have to scroll **all the way** to the bottom in order to load more options
-      stateManager.requestSize.next(totalCardinality ?? MAX_OPTIONS_LIST_REQUEST_SIZE);
+      stateManager.requestSize.next(Math.min(totalCardinality, MAX_OPTIONS_LIST_REQUEST_SIZE));
       api.loadMoreSubject.next(null); // trigger refetch with loadMoreSubject
     }
   }, [api.loadMoreSubject, euiTheme.size.xxl, stateManager.requestSize, totalCardinality]);
