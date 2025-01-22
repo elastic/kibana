@@ -22,7 +22,8 @@ export default ({ getService }: FtrProviderContext) => {
 
   const applyOperatorToDoc = async (operator: FieldDescription, docSource: any): Promise<any> => {
     const step = fieldOperatorToIngestProcessor(operator, { enrichField: 'historical' });
-
+    console.log('BADGER');
+    console.log('step', JSON.stringify(step));
     return applyIngestProcessorToDoc([step], docSource, es, log);
   };
 
@@ -169,7 +170,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
     describe('prefer_newest_value operator', () => {
-      it('should return latest value if no history value', async () => {
+      it.only('should return latest value if no history value', async () => {
         const op: FieldDescription = {
           retention: { operation: 'prefer_newest_value' },
           destination: 'test_field',

@@ -16,45 +16,43 @@
 
 import { z } from '@kbn/zod';
 
+export type PrivilegedUserObservation = z.infer<typeof PrivilegedUserObservation>;
+export const PrivilegedUserObservation = z.object({
+  observation_type: z.string().optional(),
+  summary: z.string().optional(),
+  raw_event: z.object({}).optional(),
+  timestamp: z.string().optional(),
+  ingested: z.string().optional(),
+});
+
 export type PrivilegedUserDoc = z.infer<typeof PrivilegedUserDoc>;
 export const PrivilegedUserDoc = z.object({
   '@timestamp': z.string(),
   created_at: z.string(),
   is_privileged: z.boolean(),
+  observations: z.array(PrivilegedUserObservation).optional(),
   user: z.object({
     id: z.string().optional(),
     name: z.string(),
   }),
-  linked_identities: z
-    .array(
-      z.object({
-        user: z
-          .object({
-            email: z.string().optional(),
-          })
-          .optional(),
-      })
-    )
-    .optional(),
 });
 
 export type PrivmonLoginDoc = z.infer<typeof PrivmonLoginDoc>;
 export const PrivmonLoginDoc = z.object({
   '@timestamp': z.string(),
-  event: z
-    .object({
-      action: z.string().optional(),
-      category: z.array(z.string()).optional(),
-      type: z.array(z.string()).optional(),
-      outcome: z.string().optional(),
-      kind: z.string().optional(),
-      id: z.string().optional(),
-      provider: z.string().optional(),
-    })
-    .optional(),
+  event: z.object({
+    action: z.string().optional(),
+    category: z.array(z.string()).optional(),
+    type: z.array(z.string()).optional(),
+    outcome: z.string().optional(),
+    kind: z.string().optional(),
+    id: z.string().optional(),
+    provider: z.string().optional(),
+    ingested: z.string(),
+  }),
   user: z.object({
     id: z.string().optional(),
-    name: z.string().optional(),
+    name: z.string(),
     type: z.string().optional(),
     domain: z.string().optional(),
   }),
@@ -109,17 +107,16 @@ export const PrivmonLoginDoc = z.object({
 export type PrivmonPrivilegeDoc = z.infer<typeof PrivmonPrivilegeDoc>;
 export const PrivmonPrivilegeDoc = z.object({
   '@timestamp': z.string(),
-  event: z
-    .object({
-      action: z.string().optional(),
-      category: z.array(z.string()).optional(),
-      type: z.array(z.string()).optional(),
-      outcome: z.string().optional(),
-      kind: z.string().optional(),
-      id: z.string().optional(),
-      provider: z.string().optional(),
-    })
-    .optional(),
+  event: z.object({
+    action: z.string().optional(),
+    category: z.array(z.string()).optional(),
+    type: z.array(z.string()).optional(),
+    outcome: z.string().optional(),
+    kind: z.string().optional(),
+    id: z.string().optional(),
+    provider: z.string().optional(),
+    ingested: z.string(),
+  }),
   user: z.object({
     id: z.string().optional(),
     name: z.string().optional(),

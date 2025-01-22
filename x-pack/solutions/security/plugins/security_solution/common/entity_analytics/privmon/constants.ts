@@ -18,3 +18,13 @@ export const PRIVMON_PRIVILEGES_INDEX_TEMPLATE_NAME = `${PRIVMON_INDEX_PREFIX}.p
 
 export const PRIVMON_USERS_INDEX_PATTERN = `${PRIVMON_INDEX_PREFIX}.users.*`;
 export const PRIVMON_USERS_INDEX_TEMPLATE_NAME = `${PRIVMON_INDEX_PREFIX}.users`;
+
+export const OBSERVATION_TYPES = {
+  LOGIN: {
+    CRITICAL_HOST: 'critical_host_login',
+    MANY_IPS: 'many_ips_login',
+  },
+  PRIVILEGE: {
+    ESCALATION: 'privilege_escalation',
+  },
+} as const;

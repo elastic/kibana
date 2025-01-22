@@ -26,6 +26,8 @@ import {
 } from '../../../../common/entity_analytics/privmon';
 import { startPrivmonTask } from './task';
 import type { EntityAnalyticsConfig } from '../types';
+import { createPrivmonIngestPipeline } from './utils';
+import { PRIVILEGED_USER_MAPPING } from './mappings';
 
 interface PrivMonClientOpts {
   logger: Logger;
@@ -69,39 +71,74 @@ export class PrivmonDataClient {
   }): Promise<InitPrivmonResult> {
     const { esClient, logger, namespace } = this.options;
 
-    // logins
-    await esClient.indices.putIndexTemplate({
-      name: PRIVMON_LOGINS_INDEX_TEMPLATE_NAME,
-      index_patterns: [PRIVMON_LOGINS_INDEX_PATTERN],
-      data_stream: {},
-      composed_of: ['ecs@mappings'],
-      template: {
-        mappings: {},
-      },
+    const { id: pipelineId } = await createPrivmonIngestPipeline({
+      esClient,
+      logger,
     });
 
-    await esClient.indices.createDataStream({
-      name: getPrivmonLoginsIndex(namespace),
-    });
+    // logins
+    await esClient.indices.putIndexTemplate(
+      {
+        name: PRIVMON_LOGINS_INDEX_TEMPLATE_NAME,
+        index_patterns: [PRIVMON_LOGINS_INDEX_PATTERN],
+        data_stream: {},
+        composed_of: ['ecs@mappings'],
+        template: {
+          mappings: {},
+          settings: {
+            index: {
+              default_pipeline: pipelineId,
+            },
+          },
+        },
+      },
+      {
+        ignore: [400], // PoC only, ignore if it already exists
+      }
+    );
+
+    await esClient.indices.createDataStream(
+      {
+        name: getPrivmonLoginsIndex(namespace),
+      },
+      {
+        ignore: [400], // PoC only, ignore if it already exists
+      }
+    );
 
     logger.debug(
       `[PrivmonDataClient] Created index template ${PRIVMON_LOGINS_INDEX_TEMPLATE_NAME}`
     );
 
     // privileges
-    await esClient.indices.putIndexTemplate({
-      name: PRIVMON_PRIVILEGES_INDEX_TEMPLATE_NAME,
-      index_patterns: [PRIVMON_PRIVILEGES_INDEX_PATTERN],
-      data_stream: {},
-      composed_of: ['ecs@mappings'],
-      template: {
-        mappings: {},
+    await esClient.indices.putIndexTemplate(
+      {
+        name: PRIVMON_PRIVILEGES_INDEX_TEMPLATE_NAME,
+        index_patterns: [PRIVMON_PRIVILEGES_INDEX_PATTERN],
+        data_stream: {},
+        composed_of: ['ecs@mappings'],
+        template: {
+          mappings: {},
+          settings: {
+            index: {
+              default_pipeline: pipelineId,
+            },
+          },
+        },
       },
-    });
+      {
+        ignore: [400], // PoC only, ignore if it already exists
+      }
+    );
 
-    await esClient.indices.createDataStream({
-      name: getPrivmonPrivilegesIndex(namespace),
-    });
+    await esClient.indices.createDataStream(
+      {
+        name: getPrivmonPrivilegesIndex(namespace),
+      },
+      {
+        ignore: [400], // PoC only, ignore if it already exists
+      }
+    );
 
     logger.debug(
       `[PrivmonDataClient] Created index template ${PRIVMON_PRIVILEGES_INDEX_TEMPLATE_NAME}`
@@ -113,14 +150,24 @@ export class PrivmonDataClient {
         index_patterns: [PRIVMON_USERS_INDEX_PATTERN],
         composed_of: ['ecs@mappings'],
         template: {
-          mappings: {},
+          mappings: PRIVILEGED_USER_MAPPING,
+          settings: {
+            index: {
+              default_pipeline: pipelineId,
+            },
+          },
         },
       },
     });
 
-    await esClient.indices.create({
-      index: getPrivmonUsersIndex(namespace),
-    });
+    await esClient.indices.create(
+      {
+        index: getPrivmonUsersIndex(namespace),
+      },
+      {
+        ignore: [400], // PoC only, ignore if it already exists
+      }
+    );
 
     logger.debug(`[PrivmonDataClient] Created index template ${PRIVMON_USERS_INDEX_TEMPLATE_NAME}`);
 
@@ -177,5 +224,29 @@ export class PrivmonDataClient {
       index: getPrivmonUsersIndex(this.options.namespace),
       ...opts,
     });
+  }
+
+  public async bulkUpsertUsers(users: PrivilegedUserDoc[]): Promise<void> {
+    const { esClient } = this.options;
+
+    if (users.length === 0) {
+      return;
+    }
+
+    const body = users.flatMap((doc) => [
+      { index: { _index: getPrivmonUsersIndex(this.options.namespace) } },
+      doc,
+    ]);
+
+    const result = await esClient.bulk({
+      body,
+    });
+
+    if (result.errors) {
+      this.options.logger.error(
+        `[PrivmonDataClient] Error upserting users: ${JSON.stringify(result.items)}`
+      );
+      throw new Error(`Error upserting users`);
+    }
   }
 }

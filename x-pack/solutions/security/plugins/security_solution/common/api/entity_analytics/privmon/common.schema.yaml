@@ -6,6 +6,19 @@ info:
 paths: {}
 components:
   schemas:
+    PrivilegedUserObservation:
+      type: object
+      properties:
+        observation_type:
+          type: string
+        summary:
+          type: string
+        raw_event:
+          type: object
+        timestamp:
+          type: string
+        ingested:
+          type: string
     PrivilegedUserDoc:
       type: object
       required:
@@ -20,6 +33,10 @@ components:
           type: string
         is_privileged:
           type: boolean
+        observations:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrivilegedUserObservation'
         user:
           type: object
           required:
@@ -29,16 +46,16 @@ components:
               type: string
             name:
               type: string
-        linked_identities:
-          type: array
-          items:
-            type: object
-            properties:
-              user:
-                type: object
-                properties:
-                  email:
-                    type: string
+        # linked_identities:
+        #   type: array
+        #   items:
+        #     type: object
+        #     properties:
+        #       user:
+        #         type: object
+        #         properties:
+        #           email:
+        #             type: string
     PrivmonLoginDoc:
       type: object
       required:
@@ -46,11 +63,14 @@ components:
         - user
         - host
         - source
+        - event
       properties:
         "@timestamp":
           type: string
         event:
           type: object
+          required:
+            - ingested
           properties:
             action:
               type: string
@@ -70,8 +90,12 @@ components:
               type: string
             provider:
               type: string
+            ingested:
+              type: string
         user:
           type: object
+          required:
+            - name
           properties:
             id:
               type: string
@@ -153,11 +177,14 @@ components:
         - "@timestamp"
         - user
         - target
+        - event
       properties:
         "@timestamp":
           type: string
         event:
           type: object
+          required:
+            - ingested
           properties:
             action:
               type: string
@@ -176,6 +203,8 @@ components:
             id:
               type: string
             provider:
+              type: string
+            ingested:
               type: string
         user:
           type: object
