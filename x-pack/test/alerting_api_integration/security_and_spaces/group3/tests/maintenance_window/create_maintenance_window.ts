@@ -110,7 +110,7 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
       });
     }
 
-    describe.skip('rRuleSchema validation', () => {
+    describe('rRuleSchema validation', () => {
       it('should create maintenance window with byweekday', async () => {
         const rrule = {
           dtstart: new Date().toISOString(),
