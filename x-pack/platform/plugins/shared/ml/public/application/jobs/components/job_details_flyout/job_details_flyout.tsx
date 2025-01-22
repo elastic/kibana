@@ -13,18 +13,20 @@ import {
   EuiText,
   EuiTitle,
   EuiFlexItem,
-  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   useGeneratedHtmlId,
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { CombinedJobWithStats } from '../../../../../common/types/anomaly_detection_jobs';
 import { useJobInfoFlyouts } from './job_details_flyout_context';
-import { useMlApi } from '../../../contexts/kibana';
+import { useMlApi, useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
 import { JobDetails } from '../../jobs_list/components/job_details';
 import { loadFullJob } from '../../jobs_list/components/utils';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
+import { ML_PAGES } from '../../../../../common/constants/locator';
 
 const doNothing = () => {};
 export const JobDetailsFlyout = () => {
@@ -70,9 +72,23 @@ export const JobDetailsFlyout = () => {
     };
   }, [jobId, mlApi, displayErrorToast]);
 
+  const navigateToPath = useNavigateToPath();
+  const mlLocator = useMlLocator();
+
   if (!jobId) {
     return null;
   }
+
+  const openJobsList = async () => {
+    const pageState: AnomalyDetectionQueryState = { jobId };
+    if (mlLocator) {
+      const url = await mlLocator.getUrl({
+        page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+        pageState,
+      });
+      await navigateToPath(url);
+    }
+  };
 
   return isDetailFlyoutOpen ? (
     <EuiFlyout
@@ -88,16 +104,19 @@ export const JobDetailsFlyout = () => {
     >
       <EuiFlyoutHeader hasBorder data-test-subj={`jobDetailsFlyout-${jobId}`}>
         <EuiFlexGroup>
-          <EuiTitle size="s">
-            <h2 id={flyoutTitleId}>{jobId}</h2>
-          </EuiTitle>
+          <EuiFlexItem grow={true}>
+            <EuiTitle size="s">
+              <h2 id={flyoutTitleId}>{jobId}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={closeActiveFlyout} iconType="popout">
+            <EuiButtonEmpty onClick={openJobsList} iconType="popout">
               <FormattedMessage
                 id="xpack.ml.jobDetailsFlyout.openJobsListButton"
                 defaultMessage="Open jobs list"
               />
-            </EuiButton>
+            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
