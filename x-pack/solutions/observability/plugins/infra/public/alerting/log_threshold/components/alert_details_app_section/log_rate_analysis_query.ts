@@ -8,12 +8,11 @@
 import type { TopAlert } from '@kbn/observability-plugin/public';
 import { ALERT_CONTEXT } from '@kbn/rule-data-utils';
 import { get } from 'lodash';
-import type { LogThresholdParams } from '@kbn/response-ops-rule-params/log_threshold';
-import type { CountCriteria } from '../../../../../common/alerting/logs/log_threshold';
+import type { RuleParams, CountCriteria } from '../../../../../common/alerting/logs/log_threshold';
 import { buildFiltersFromCriteria } from '../../../../../common/alerting/logs/log_threshold/query_helpers';
 
 export const getESQueryForLogRateAnalysis = (
-  params: Pick<LogThresholdParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
+  params: Pick<RuleParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
   timestampField: string,
   alert: TopAlert<Record<string, any>>,
   groupBy?: string[] | undefined

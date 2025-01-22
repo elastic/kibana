@@ -18,7 +18,6 @@ import type {
   UngroupedSearchQueryResponse,
   GroupedSearchQueryResponse,
 } from '../../../../common/alerting/logs/log_threshold';
-// import type { LogThresholdParams } from '@kbn/response-ops-rule-params/log_threshold';
 import { Comparator } from '../../../../common/alerting/logs/log_threshold';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {

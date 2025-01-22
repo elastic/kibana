@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { isFinite, isNumber } from 'lodash';
 import React, { useState } from 'react';
 import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
-import type { LogThresholdParams } from '@kbn/response-ops-rule-params/log_threshold';
+import type { RuleParams } from '../../../../../common/alerting/logs/log_threshold/types';
 import {
   Comparator,
   ComparatorToi18nMap,
@@ -48,7 +48,7 @@ const getComparatorOptions = (): Array<{
 interface Props {
   comparator?: Comparator;
   value?: number;
-  updateThreshold: (params: Partial<LogThresholdParams['count']>) => void;
+  updateThreshold: (params: Partial<RuleParams['count']>) => void;
   errors: IErrorObject;
 }
 

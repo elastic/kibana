@@ -37,6 +37,7 @@ import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { getChartGroupNames } from '../../../../common/utils/get_chart_group_names';
 import type {
+  RuleParams,
   CountRuleParams,
   CountCriteria,
   GroupedSearchQueryResponse,
@@ -44,7 +45,6 @@ import type {
   UngroupedSearchQueryResponse,
   ExecutionTimeRange,
   Criterion,
-  RuleParams,
 } from '../../../../common/alerting/logs/log_threshold';
 import {
   ruleParamsRT,
