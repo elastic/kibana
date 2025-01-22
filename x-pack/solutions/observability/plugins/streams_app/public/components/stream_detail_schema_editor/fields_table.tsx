@@ -23,7 +23,11 @@ import type {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
-import { isRootStream, isWiredReadStream, ReadStreamDefinition } from '@kbn/streams-schema';
+import {
+  isRootStreamDefinition,
+  isWiredReadStream,
+  ReadStreamDefinition,
+} from '@kbn/streams-schema';
 import { FieldType } from './field_type';
 import { FieldStatusBadge } from './field_status';
 import { FieldEntry, SchemaEditorEditingState } from './hooks/use_editing_state';
@@ -182,7 +186,7 @@ const FieldsTable = ({ definition, fields, editingState, unpromotingState }: Fie
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridColumnSortingConfig[]>([]);
 
   const trailingColumns = useMemo(() => {
-    return !isRootStream(definition)
+    return !isRootStreamDefinition(definition.stream)
       ? ([
           {
             id: 'actions',

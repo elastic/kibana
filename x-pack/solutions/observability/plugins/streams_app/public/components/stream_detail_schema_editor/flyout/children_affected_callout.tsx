@@ -8,19 +8,21 @@
 import React from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { StreamConfigDefinition } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { RoutingDefinition } from '@kbn/streams-schema';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 
 export const ChildrenAffectedCallout = ({
   childStreams,
 }: {
-  childStreams: StreamConfigDefinition['ingest']['routing'];
+  childStreams: RoutingDefinition[];
 }) => {
   const router = useStreamsAppRouter();
   const childStreamLinks = childStreams.map((stream) => {
     return (
-      <EuiLink href={router.link('/{key}', { path: { key: stream.name } })}>{stream.name}</EuiLink>
+      <EuiLink href={router.link('/{key}', { path: { key: stream.destination } })}>
+        {stream.destination}
+      </EuiLink>
     );
   });
   return (
