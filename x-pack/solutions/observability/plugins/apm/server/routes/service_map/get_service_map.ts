@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { Logger } from '@kbn/core/server';
 import { chunk } from 'lodash';
+import { getRequestBase } from '@kbn/apm-data-access-plugin/server/lib/helpers/create_es_client/create_apm_event_client/get_request_base';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { APMConfig } from '../..';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import type { MlClient } from '../../lib/helpers/get_ml_client';
@@ -17,6 +18,7 @@ import { getServiceStats } from './get_service_stats';
 import { getTraceSampleIds } from './get_trace_sample_ids';
 import type { TransformServiceMapResponse } from './transform_service_map_responses';
 import { transformServiceMapResponses } from './transform_service_map_responses';
+import type { EsClient } from '../../lib/helpers/get_esql_client';
 
 export interface IEnvOptions {
   mlClient?: MlClient;
@@ -30,6 +32,7 @@ export interface IEnvOptions {
   end: number;
   serviceGroupKuery?: string;
   kuery?: string;
+  esqlClient: EsClient;
 }
 
 export interface ServiceMapTelemetry {
@@ -47,6 +50,7 @@ async function getConnectionData({
   serviceGroupKuery,
   kuery,
   logger,
+  esqlClient,
 }: IEnvOptions) {
   return withApmSpan('get_service_map_connections', async () => {
     logger.debug('Getting trace sample IDs');
@@ -78,30 +82,22 @@ async function getConnectionData({
 
     logger.debug(`Executing scripted metric agg (${chunks.length} chunks)`);
 
-    const chunkedResponses = await withApmSpan('get_service_paths_from_all_trace_ids', () =>
-      Promise.all(
-        chunks.map((traceIdsChunk) =>
-          getServiceMapFromTraceIds({
-            apmEventClient,
-            traceIds: traceIdsChunk,
-            start,
-            end,
-            terminateAfter: config.serviceMapTerminateAfter,
-            serviceMapMaxAllowableBytes: config.serviceMapMaxAllowableBytes,
-            numOfRequests: chunks.length,
-            logger,
-          })
-        )
-      )
-    );
+    const { index, filters } = getRequestBase({
+      apm: { events: [ProcessorEvent.span, ProcessorEvent.transaction] },
+      indices: esqlClient.indices,
+    });
 
-    logger.debug('Received chunk responses');
-
-    const mergedResponses = chunkedResponses.reduce((prev, current) => {
-      return {
-        connections: prev.connections.concat(current.connections),
-        discoveredServices: prev.discoveredServices.concat(current.discoveredServices),
-      };
+    const mergedResponses = await withApmSpan('get_service_paths_from_all_trace_ids', async () => {
+      return getServiceMapFromTraceIds({
+        index,
+        filters,
+        traceIdChunks: chunks,
+        start,
+        end,
+        terminateAfter: config.serviceMapTerminateAfter,
+        logger,
+        esqlClient,
+      });
     });
 
     logger.debug('Merged responses');

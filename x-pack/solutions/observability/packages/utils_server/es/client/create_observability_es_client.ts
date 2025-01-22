@@ -93,14 +93,11 @@ export interface ObservabilityElasticsearchClient {
     operationName: string,
     request: Required<FieldCapsRequest, 'index_filter' | 'fields' | 'index'>
   ): Promise<FieldCapsResponse>;
-  esql<TOutput extends EsqlOutput = EsqlOutput>(
+  esql<TOutput extends {} = EsqlOutput>(
     operationName: string,
     parameters: ObservabilityEsQueryRequest
   ): Promise<InferEsqlResponseOf<TOutput, { transform: 'none' }>>;
-  esql<
-    TOutput extends EsqlOutput = EsqlOutput,
-    TEsqlOptions extends EsqlOptions = { transform: 'none' }
-  >(
+  esql<TOutput extends {} = EsqlOutput, TEsqlOptions extends EsqlOptions = { transform: 'none' }>(
     operationName: string,
     parameters: ObservabilityEsQueryRequest,
     options: TEsqlOptions

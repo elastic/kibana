@@ -12,7 +12,7 @@ import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { uniqueId } from 'lodash';
 import React, { useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useFetcher, isPending } from '../../../hooks/use_fetcher';
 import { CriticalPathFlamegraphTooltip } from './critical_path_flamegraph_tooltip';
 import { criticalPathToFlamegraph } from './critical_path_to_flamegraph';
@@ -44,7 +44,7 @@ export function CriticalPathFlamegraph(
   const { data: { criticalPath } = { criticalPath: null }, status: criticalPathFetchStatus } =
     useFetcher(
       (callApmApi) => {
-        if (!traceIds.length) {
+        if (!traceIds.length || traceIdsFetchStatus === FETCH_STATUS.LOADING) {
           return Promise.resolve({ criticalPath: null });
         }
 
@@ -60,7 +60,7 @@ export function CriticalPathFlamegraph(
           },
         });
       },
-      [timerange, traceIds, serviceName, transactionName]
+      [timerange, traceIdsFetchStatus, traceIds, serviceName, transactionName]
     );
 
   const chartThemes = useChartThemes();

@@ -6,10 +6,11 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Connection, ConnectionNode } from '../../../common/service_map';
-import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { fetchServicePathsFromTraceIds } from './fetch_service_paths_from_trace_ids';
 import { getConnectionId } from './transform_service_map_responses';
+import type { EsClient } from '../../lib/helpers/get_esql_client';
 
 export function getConnections({ paths }: { paths: ConnectionNode[][] | undefined }): Connection[] {
   if (!paths) {
@@ -41,43 +42,40 @@ export function getConnections({ paths }: { paths: ConnectionNode[][] | undefine
 }
 
 export async function getServiceMapFromTraceIds({
-  apmEventClient,
-  traceIds,
+  traceIdChunks,
   start,
   end,
-  terminateAfter,
-  serviceMapMaxAllowableBytes,
-  numOfRequests,
+  index,
+  filters,
   logger,
+  esqlClient,
+  terminateAfter,
 }: {
-  apmEventClient: APMEventClient;
-  traceIds: string[];
+  traceIdChunks: string[][];
   start: number;
   end: number;
-  terminateAfter: number;
-  serviceMapMaxAllowableBytes: number;
-  numOfRequests: number;
   logger: Logger;
+  esqlClient: EsClient;
+  terminateAfter: number;
+  index: string[];
+  filters: QueryDslQueryContainer[];
 }) {
   const serviceMapFromTraceIdsScriptResponse = await fetchServicePathsFromTraceIds({
-    apmEventClient,
-    traceIds,
+    traceIdChunks,
     start,
     end,
+    esqlClient,
     terminateAfter,
-    serviceMapMaxAllowableBytes,
-    numOfRequests,
+    index,
+    filters,
   });
 
   logger.debug('Received scripted metric agg response');
 
-  const serviceMapScriptedAggValue =
-    serviceMapFromTraceIdsScriptResponse.aggregations?.service_map.value;
-
   return {
     connections: getConnections({
-      paths: serviceMapScriptedAggValue?.paths,
+      paths: serviceMapFromTraceIdsScriptResponse?.paths,
     }),
-    discoveredServices: serviceMapScriptedAggValue?.discoveredServices ?? [],
+    discoveredServices: serviceMapFromTraceIdsScriptResponse?.discoveredServices ?? [],
   };
 }

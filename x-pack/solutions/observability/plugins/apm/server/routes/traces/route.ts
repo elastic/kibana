@@ -30,6 +30,7 @@ import { getSpan } from '../transactions/get_span';
 import type { Transaction } from '../../../typings/es_schemas/ui/transaction';
 import type { Span } from '../../../typings/es_schemas/ui/span';
 import { getTransactionByName } from '../transactions/get_transaction_by_name';
+import { getEsClient } from '../../lib/helpers/get_esql_client';
 
 const tracesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces',
@@ -267,16 +268,16 @@ const aggregatedCriticalPathRoute = createApmServerRoute({
       },
     } = resources;
 
-    const apmEventClient = await getApmEventClient(resources);
+    const esqlClient = await getEsClient(resources);
 
     return getAggregatedCriticalPath({
       traceIds,
       start,
       end,
-      apmEventClient,
       serviceName,
       transactionName,
       logger: resources.logger,
+      esqlClient,
     });
   },
 });

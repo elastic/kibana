@@ -24,6 +24,7 @@ import { getServiceGroup } from '../service_groups/get_service_group';
 import { offsetRt } from '../../../common/comparison_rt';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import type { ServiceMapResponse } from './get_service_map';
+import { getEsClient } from '../../lib/helpers/get_esql_client';
 
 const serviceMapRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-map',
@@ -63,17 +64,20 @@ const serviceMapRoute = createApmServerRoute({
       savedObjects: { client: savedObjectsClient },
       uiSettings: { client: uiSettingsClient },
     } = await context.core;
-    const [mlClient, apmEventClient, serviceGroup, maxNumberOfServices] = await Promise.all([
-      getMlClient(resources),
-      getApmEventClient(resources),
-      serviceGroupId
-        ? getServiceGroup({
-            savedObjectsClient,
-            serviceGroupId,
-          })
-        : Promise.resolve(null),
-      uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
-    ]);
+
+    const [mlClient, apmEventClient, serviceGroup, maxNumberOfServices, esqlClient] =
+      await Promise.all([
+        getMlClient(resources),
+        getApmEventClient(resources),
+        serviceGroupId
+          ? getServiceGroup({
+              savedObjectsClient,
+              serviceGroupId,
+            })
+          : Promise.resolve(null),
+        uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
+        getEsClient(resources),
+      ]);
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient,
@@ -95,6 +99,7 @@ const serviceMapRoute = createApmServerRoute({
       maxNumberOfServices,
       serviceGroupKuery: serviceGroup?.kuery,
       kuery,
+      esqlClient,
     });
   },
 });
