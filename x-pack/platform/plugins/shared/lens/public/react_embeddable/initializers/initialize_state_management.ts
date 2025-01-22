@@ -53,7 +53,7 @@ export function initializeStateManagement(
     LensRuntimeState['savedObjectId']
   >(initialState.savedObjectId);
 
-  const [dataViews$] = buildObservableVariable<DataView[] | undefined>(internalApi.dataViews);
+  const [dataViews$] = buildObservableVariable<DataView[] | undefined>(internalApi.dataViews$);
   const [dataLoading$] = buildObservableVariable<boolean | undefined>(internalApi.dataLoading$);
   const [rendered$] = buildObservableVariable<boolean>(internalApi.hasRenderCompleted$);
   const [abortController$, abortControllerComparator] = buildObservableVariable<
@@ -69,10 +69,10 @@ export function initializeStateManagement(
       updateAttributes: internalApi.updateAttributes,
       updateSavedObjectId: (newSavedObjectId: LensRuntimeState['savedObjectId']) =>
         savedObjectId$.next(newSavedObjectId),
-      savedObjectId: savedObjectId$,
-      dataViews: dataViews$,
-      dataLoading: dataLoading$,
-      blockingError: blockingError$,
+      savedObjectId$,
+      dataViews$,
+      dataLoading$,
+      blockingError$,
       rendered$,
     },
     serialize: () => {
