@@ -148,7 +148,7 @@ describe('Upgrade Agentless Deployments', () => {
       {
         id: 'agent-1',
         policy_id: '93c46720-c217-11ea-9906-b5b8a21b268e',
-        status: 'active',
+        status: 'online',
         agent: {
           version: '8.16.0',
         },
@@ -206,7 +206,7 @@ describe('Upgrade Agentless Deployments', () => {
           {
             id: 'agent-1',
             policy_id: '93c46720-c217-11ea-9906-b5b8a21b268e',
-            status: 'healthy',
+            status: 'online',
             agent: {
               version: '8.17.0',
             },
@@ -219,7 +219,7 @@ describe('Upgrade Agentless Deployments', () => {
       expect(agentlessAgentService.upgradeAgentlessDeployment).not.toHaveBeenCalled();
     });
 
-    it('should upgrade agentless deployments when patch version is up to date', async () => {
+    it('should upgrade agentless deployments when agent version is up to date', async () => {
       mockedGetLatestAvailableAgentVersion.mockResolvedValue('8.17.1');
 
       mockedGetAgentsByKuery.mockResolvedValue({
@@ -227,7 +227,7 @@ describe('Upgrade Agentless Deployments', () => {
           {
             id: 'agent-1',
             policy_id: '93c46720-c217-11ea-9906-b5b8a21b268e',
-            status: 'healthy',
+            status: 'online',
             agent: {
               version: '8.17.0',
             },

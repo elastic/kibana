@@ -400,8 +400,10 @@ describe('Agentless Agent service', () => {
   });
 
   it('should upgraded agentless agent for ESS', async () => {
-    const returnValue = {};
-
+    const returnValue = {
+      id: 'mocked',
+      regional_id: 'mocked',
+    };
     (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(returnValue);
     jest.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: {

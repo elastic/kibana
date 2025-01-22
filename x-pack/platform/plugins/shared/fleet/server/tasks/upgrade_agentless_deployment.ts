@@ -176,7 +176,7 @@ export class UpgradeAgentlessDeploymentsTask {
         try {
           const kuery = `(${AGENTS_PREFIX}.policy_id:${agentlessPolicies
             .map((policy) => `"${policy.id}"`)
-            .join(' or ')}) and ${AGENTS_PREFIX}.active:true`;
+            .join(' or ')}) and ${AGENTS_PREFIX}.status:online`;
 
           const res = await getAgentsByKuery(esClient, soClient, {
             kuery,
