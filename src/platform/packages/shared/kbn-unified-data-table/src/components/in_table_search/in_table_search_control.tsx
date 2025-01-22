@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState, useEffect, useRef } from 'react';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import React, { useCallback, useState, useEffect, useRef, useMemo } from 'react';
+import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css, type SerializedStyles } from '@emotion/react';
 import {
@@ -16,7 +16,6 @@ import {
   UseInTableSearchMatchesProps,
 } from './use_in_table_search_matches';
 import { InTableSearchInput, INPUT_TEST_SUBJ } from './in_table_search_input';
-import './in_table_search.scss';
 
 const BUTTON_TEST_SUBJ = 'startInTableSearchButton';
 
@@ -39,6 +38,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
   onChangeToExpectedPage,
   ...props
 }) => {
+  const { euiTheme } = useEuiTheme();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const shouldReturnFocusToButtonRef = useRef<boolean>(false);
   const [isInputVisible, setIsInputVisible] = useState<boolean>(false);
@@ -54,7 +54,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
       onChangeCss(css`
         .euiDataGridRowCell[data-gridcell-row-index='${rowIndex}'][data-gridcell-column-id='${columnId}']
           .unifiedDataTable__inTableSearchMatch[data-match-index='${matchIndexWithinCell}'] {
-          background-color: #ffc30e;
+          background-color: #ffc30e !important;
         }
       `);
 
@@ -138,10 +138,42 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
     }
   }, [isInputVisible]);
 
+  const innerCss = useMemo(
+    () => css`
+      .unifiedDataTable__inTableSearchMatchesCounter {
+        font-variant-numeric: tabular-nums;
+      }
+
+      .unifiedDataTable__inTableSearchButton {
+        /* to make the transition between the button and input more seamless for cases where a custom toolbar is not used */
+        min-height: 2 * ${euiTheme.size.base}; // input height
+      }
+
+      .unifiedDataTable__inTableSearchInput {
+        /* to prevent the width from changing when entering the search term */
+        min-width: 210px;
+      }
+
+      .euiFormControlLayout__append {
+        padding-inline-end: 0 !important;
+        background: none;
+      }
+
+      /* override borders style only if it's under the custom grid toolbar */
+      .unifiedDataTableToolbarControlIconButton & .euiFormControlLayout,
+      .unifiedDataTableToolbarControlIconButton & .unifiedDataTable__inTableSearchInput {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        border-right: 0;
+      }
+    `,
+    [euiTheme]
+  );
+
   return (
-    <div ref={(node) => (containerRef.current = node)}>
+    <div ref={(node) => (containerRef.current = node)} css={innerCss}>
       {isInputVisible ? (
-        <div className="unifiedDataTable__inTableSearchInputContainer">
+        <>
           <InTableSearchInput
             matchesCount={matchesCount}
             activeMatchPosition={activeMatchPosition}
@@ -152,7 +184,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
             onHideInput={hideInput}
           />
           {renderCellsShadowPortal ? renderCellsShadowPortal() : null}
-        </div>
+        </>
       ) : (
         <EuiToolTip
           content={i18n.translate('unifiedDataTable.inTableSearch.inputPlaceholder', {

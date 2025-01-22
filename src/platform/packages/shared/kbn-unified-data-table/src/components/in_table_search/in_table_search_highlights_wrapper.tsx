@@ -79,6 +79,8 @@ function modifyDOMAndAddSearchHighlights(
           if (searchTermRegExp.test(part)) {
             const mark = document.createElement('mark');
             mark.textContent = part;
+            mark.style.backgroundColor = '#e5ffc0'; // TODO: Use a named color token
+            mark.style.transition = 'background-color 0.3s ease-in-out';
             mark.setAttribute('class', 'unifiedDataTable__inTableSearchMatch');
             mark.setAttribute('data-match-index', `${matchIndex++}`);
             nodeWithHighlights.appendChild(mark);
