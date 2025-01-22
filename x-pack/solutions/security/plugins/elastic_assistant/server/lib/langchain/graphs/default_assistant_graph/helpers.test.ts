@@ -220,7 +220,7 @@ describe('streamGraph', () => {
       await waitFor(() => {
         expect(mockPush).toHaveBeenCalledWith({ payload: 'content', type: 'content' });
         expect(mockOnLlmResponse).not.toHaveBeenCalled();
-      })
+      });
     });
   });
 
