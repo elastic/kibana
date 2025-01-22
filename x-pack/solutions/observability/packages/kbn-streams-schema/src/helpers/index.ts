@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export * from './processing';
 export * from './stream_name';
 export * from './type_guards';
 export * from './hierarchy';

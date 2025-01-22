@@ -7,11 +7,12 @@
 
 import {
   IngestStreamDefinition,
+  isDSNS,
   StreamDefinition,
   WiredStreamDefinition,
-  isDSNS,
-  isRootStream,
-  isWiredStream,
+  isUnwiredStreamDefinition,
+  isWiredStreamDefinition,
+  isRootStreamDefinition,
 } from '@kbn/streams-schema';
 import { difference, isEqual } from 'lodash';
 import { RootStreamImmutabilityException } from '../errors';
@@ -28,8 +29,8 @@ export function validateRootStreamChanges(
   nextStreamDefinition: WiredStreamDefinition
 ) {
   const hasFieldChanges = !isEqual(
-    currentStreamDefinition.stream.ingest.wired.fields,
-    nextStreamDefinition.stream.ingest.wired.fields
+    currentStreamDefinition.ingest.wired.fields,
+    nextStreamDefinition.ingest.wired.fields
   );
 
   if (hasFieldChanges) {
@@ -37,8 +38,8 @@ export function validateRootStreamChanges(
   }
 
   const hasProcessingChanges = !isEqual(
-    currentStreamDefinition.stream.ingest.processing,
-    nextStreamDefinition.stream.ingest.processing
+    currentStreamDefinition.ingest.processing,
+    nextStreamDefinition.ingest.processing
   );
 
   if (hasProcessingChanges) {
@@ -53,23 +54,25 @@ export function validateStreamTypeChanges(
   currentStreamDefinition: StreamDefinition,
   nextStreamDefinition: StreamDefinition
 ) {
-  const fromIngestToWired =
-    !isWiredStream(currentStreamDefinition) && isWiredStream(nextStreamDefinition);
+  const fromUnwiredToWired =
+    isUnwiredStreamDefinition(currentStreamDefinition) &&
+    isWiredStreamDefinition(nextStreamDefinition);
 
-  if (fromIngestToWired) {
-    throw new MalformedStream('Cannot change ingest stream to wired stream');
+  if (fromUnwiredToWired) {
+    throw new MalformedStream('Cannot change unwired stream to wired stream');
   }
 
-  const fromWiredToIngest =
-    isWiredStream(currentStreamDefinition) && !isWiredStream(nextStreamDefinition);
+  const fromWiredToUnwired =
+    isWiredStreamDefinition(currentStreamDefinition) &&
+    isUnwiredStreamDefinition(nextStreamDefinition);
 
-  if (fromWiredToIngest) {
-    throw new MalformedStream('Cannot change wired stream to ingest stream');
+  if (fromWiredToUnwired) {
+    throw new MalformedStream('Cannot change wired stream to unwired stream');
   }
 }
 
 export function validateUnwiredStreamChildren(streamDefinition: IngestStreamDefinition) {
-  if (streamDefinition.stream.ingest.routing.length > 0 && !isDSNS(streamDefinition.name)) {
+  if (streamDefinition.ingest.routing.length > 0 && !isDSNS(streamDefinition.name)) {
     throw new MalformedStreamId('Only streams following the DSNS can be forked');
   }
 }
@@ -81,9 +84,13 @@ export function validateStreamChildrenChanges(
   currentStreamDefinition: WiredStreamDefinition,
   nextStreamDefinition: WiredStreamDefinition
 ) {
-  const existingChildren = currentStreamDefinition.stream.ingest.routing.map((child) => child.name);
+  const existingChildren = currentStreamDefinition.ingest.routing.map(
+    (routingDefinition) => routingDefinition.destination
+  );
 
-  const nextChildren = nextStreamDefinition.stream.ingest.routing.map((child) => child.name);
+  const nextChildren = nextStreamDefinition.ingest.routing.map(
+    (routingDefinition) => routingDefinition.destination
+  );
 
   const removedChildren = difference(existingChildren, nextChildren);
 
@@ -93,17 +100,18 @@ export function validateStreamChildrenChanges(
 }
 
 export function validateAncestorChain(ancestors: StreamDefinition[], stream: StreamDefinition) {
-  if (!isWiredStream(stream)) {
+  if (!isWiredStreamDefinition(stream)) {
     // Ingest streams do not have ancestors
     return;
   }
-  if (ancestors.length === 0 && !isRootStream(stream)) {
+  if (ancestors.length === 0 && !isRootStreamDefinition(stream)) {
     throw new MalformedStream(
       `Root for stream ${(stream as StreamDefinition).name} could not be found`
     );
   }
+  // the very first ancestor is the root, which can be unwired
   ancestors.slice(1).forEach((ancestor, index) => {
-    if (!isWiredStream(ancestor)) {
+    if (!isWiredStreamDefinition(ancestor)) {
       throw new MalformedStream(
         `Stream ${ancestors[index].name} is not a wired stream and cannot be an ancestor`
       );

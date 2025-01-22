@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { badRequest, internal, notFound } from '@hapi/boom';
-import { conditionSchema, isCompleteCondition } from '@kbn/streams-schema';
+import { conditionSchema } from '@kbn/streams-schema';
 import { errors } from '@elastic/elasticsearch';
 import { MalformedStream } from '../../../lib/streams/errors/malformed_stream';
 import {
@@ -20,7 +20,6 @@ import {
 import { createServerRoute } from '../../create_server_route';
 import { checkAccess } from '../../../lib/streams/stream_crud';
 import { MalformedStreamId } from '../../../lib/streams/errors/malformed_stream_id';
-import { validateCondition } from '../../../lib/streams/helpers/condition_fields';
 import { conditionToQueryDsl } from '../../../lib/streams/helpers/condition_to_query_dsl';
 import { getFields } from '../../../lib/streams/helpers/condition_fields';
 import { ResyncStreamsResponse } from '../../../lib/streams/client';
@@ -42,15 +41,13 @@ export const forkStreamsRoute = createServerRoute({
     path: z.object({
       id: z.string(),
     }),
-    body: z.object({ stream: z.object({ name: z.string() }), condition: conditionSchema }),
+    body: z.object({ stream: z.object({ name: z.string() }), if: conditionSchema }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<{ acknowledged: true }> => {
     try {
-      if (!params.body.condition) {
+      if (!params.body.if) {
         throw new ForkConditionMissing('You must provide a condition to fork a stream');
       }
-
-      validateCondition(params.body.condition);
 
       const { streamsClient } = await getScopedClients({
         request,
@@ -58,7 +55,7 @@ export const forkStreamsRoute = createServerRoute({
 
       return await streamsClient.forkStream({
         parent: params.path.id,
-        condition: params.body.condition,
+        if: params.body.if,
         name: params.body.stream.name,
       });
     } catch (e) {
@@ -136,7 +133,7 @@ export const sampleStreamRoute = createServerRoute({
   params: z.object({
     path: z.object({ id: z.string() }),
     body: z.object({
-      condition: z.optional(conditionSchema),
+      if: z.optional(conditionSchema),
       start: z.optional(z.number()),
       end: z.optional(z.number()),
       size: z.optional(z.number()),
@@ -151,14 +148,12 @@ export const sampleStreamRoute = createServerRoute({
         throw new DefinitionNotFound(`Stream definition for ${params.path.id} not found.`);
       }
 
-      const { condition, start, end, size } = params.body;
+      const { if: condition, start, end, size } = params.body;
       const searchBody = {
         query: {
           bool: {
             must: [
-              Boolean(condition && isCompleteCondition(condition))
-                ? conditionToQueryDsl(condition)
-                : { match_all: {} },
+              condition ? conditionToQueryDsl(condition) : { match_all: {} },
               {
                 range: {
                   '@timestamp': {

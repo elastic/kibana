@@ -16,7 +16,7 @@ export function generateIngestPipeline(id: string, definition: StreamDefinition)
     id: getProcessingPipelineName(id),
     processors: [
       ...(isWiredRoot(definition.name) ? logsDefaultPipelineProcessors : []),
-      ...formatToIngestProcessors(definition.stream.ingest.processing),
+      ...formatToIngestProcessors(definition.ingest.processing),
       {
         pipeline: {
           name: `${id}@stream.reroutes`,

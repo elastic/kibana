@@ -7,7 +7,7 @@
 import { z } from '@kbn/zod';
 import { internal, notFound } from '@hapi/boom';
 import { getFlattenedObject } from '@kbn/std';
-import { fieldDefinitionConfigSchema, isWiredStream } from '@kbn/streams-schema';
+import { fieldDefinitionConfigSchema, isWiredStreamDefinition } from '@kbn/streams-schema';
 import { DefinitionNotFound } from '../../../lib/streams/errors';
 import { checkAccess } from '../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../create_server_route';
@@ -65,17 +65,13 @@ export const unmappedFieldsRoute = createServerRoute({
       // Mapped fields from the stream's definition and inherited from ancestors
       const mappedFields = new Set<string>();
 
-      if (isWiredStream(streamDefinition)) {
-        Object.keys(streamDefinition.stream.ingest.wired.fields).forEach((name) =>
-          mappedFields.add(name)
-        );
+      if (isWiredStreamDefinition(streamDefinition)) {
+        Object.keys(streamDefinition.ingest.wired.fields).forEach((name) => mappedFields.add(name));
       }
 
       for (const ancestor of ancestors) {
-        if (isWiredStream(ancestor)) {
-          Object.keys(ancestor.stream.ingest.wired.fields).forEach((name) =>
-            mappedFields.add(name)
-          );
+        if (isWiredStreamDefinition(ancestor)) {
+          Object.keys(ancestor.ingest.wired.fields).forEach((name) => mappedFields.add(name));
         }
       }
 
@@ -111,7 +107,9 @@ export const schemaFieldsSimulationRoute = createServerRoute({
   params: z.object({
     path: z.object({ id: z.string() }),
     body: z.object({
-      field_definitions: z.array(fieldDefinitionConfigSchema.extend({ name: z.string() })),
+      field_definitions: z.array(
+        z.intersection(fieldDefinitionConfigSchema, z.object({ name: z.string() }))
+      ),
     }),
   }),
   handler: async ({

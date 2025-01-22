@@ -17,15 +17,17 @@ import {
   Condition,
   IngestStreamDefinition,
   StreamDefinition,
+  StreamUpsertRequest,
+  UnwiredStreamDefinition,
   WiredStreamDefinition,
   assertsSchema,
   getAncestors,
   getParentId,
   isChildOf,
   isDescendantOf,
-  isIngestStream,
-  isRootStream,
-  isWiredStream,
+  isRootStreamDefinition,
+  isUnwiredStreamDefinition,
+  isWiredStreamDefinition,
   streamDefinitionSchema,
 } from '@kbn/streams-schema';
 import { cloneDeep, keyBy, omit, orderBy } from 'lodash';
@@ -34,7 +36,7 @@ import { AssetClient } from './assets/asset_client';
 import { DefinitionNotFound, SecurityException } from './errors';
 import { MalformedStreamId } from './errors/malformed_stream_id';
 import {
-  syncIngestStreamDefinitionObjects,
+  syncUnwiredStreamDefinitionObjects,
   syncWiredStreamDefinitionObjects,
 } from './helpers/sync';
 import { validateAncestorFields, validateDescendantFields } from './helpers/validate_fields';
@@ -52,7 +54,6 @@ import {
   checkAccessBulk,
   deleteStreamObjects,
   deleteUnmanagedStreamObjects,
-  getUnmanagedElasticsearchAssets,
 } from './stream_crud';
 import { MalformedStream } from './errors/malformed_stream';
 
@@ -97,7 +98,7 @@ export class StreamsClient {
    */
   async isStreamsEnabled(): Promise<boolean> {
     const rootLogsStreamExists = await this.getStream(LOGS_ROOT_STREAM_NAME)
-      .then((definition) => isWiredStream(definition))
+      .then((definition) => isWiredStreamDefinition(definition))
       .catch((error) => {
         if (isDefinitionNotFoundError(error)) {
           return false;
@@ -120,7 +121,11 @@ export class StreamsClient {
     }
 
     await this.upsertStream({
-      definition: rootStreamDefinition,
+      request: {
+        dashboards: [],
+        stream: omit(rootStreamDefinition, 'name'),
+      },
+      name: rootStreamDefinition.name,
     });
 
     return { acknowledged: true, result: 'created' };
@@ -145,9 +150,13 @@ export class StreamsClient {
     await this.deleteStreamFromDefinition(definition);
 
     const unwiredStreams = (await this.getStreamDefinitions()).filter(
-      (stream) => !isWiredStream(stream)
+      ((stream) => !isWiredStreamDefinition(stream)) as (
+        stream: StreamDefinition
+      ) => stream is UnwiredStreamDefinition
     );
     await Promise.all(unwiredStreams.map((stream) => this.ejectUnwiredStream(stream)));
+    const { assetClient, storageClient } = this.dependencies;
+    await Promise.all([assetClient.clean(), storageClient.clean()]);
 
     return { acknowledged: true, result: 'deleted' };
   }
@@ -182,9 +191,9 @@ export class StreamsClient {
   }
 
   private async syncStreamObjects({ definition }: { definition: StreamDefinition }) {
-    const { assetClient, logger, scopedClusterClient } = this.dependencies;
+    const { logger, scopedClusterClient } = this.dependencies;
 
-    if (isWiredStream(definition)) {
+    if (isWiredStreamDefinition(definition)) {
       await syncWiredStreamDefinitionObjects({
         definition,
         logger,
@@ -192,25 +201,18 @@ export class StreamsClient {
         unwiredRoot: await this.getUnwiredRootForStream(definition),
         isServerless: this.dependencies.isServerless,
       });
-    } else if (isIngestStream(definition)) {
+    } else if (isUnwiredStreamDefinition(definition)) {
       const dataStream = await this.getDataStream(definition.name);
       if (!dataStream) {
         throw new MalformedStream(`Data stream ${definition.name} could not be found`);
       }
-      await syncIngestStreamDefinitionObjects({
+      await syncUnwiredStreamDefinitionObjects({
         definition,
         scopedClusterClient,
         logger,
         dataStream,
       });
     }
-
-    await assetClient.syncAssetList({
-      entityId: definition.name,
-      entityType: 'stream',
-      assetType: 'dashboard',
-      assetIds: definition.dashboards ?? [],
-    });
   }
 
   /**
@@ -218,17 +220,21 @@ export class StreamsClient {
    * also updated (including syncing to Elasticsearch).
    */
   async upsertStream({
-    definition,
+    name,
+    request,
   }: {
-    definition: StreamDefinition;
+    name: string;
+    request: StreamUpsertRequest;
   }): Promise<UpsertStreamResponse> {
+    const stream: StreamDefinition = { ...request.stream, name };
+    const { dashboards } = request;
     const { result, parentDefinition } = await this.validateAndUpsertStream({
-      definition,
+      definition: stream,
     });
 
     if (parentDefinition) {
-      const isRoutingToChild = parentDefinition.stream.ingest.routing.find(
-        (item) => item.name === definition.name
+      const isRoutingToChild = parentDefinition.ingest.routing.find(
+        (item) => item.destination === name
       );
 
       if (!isRoutingToChild) {
@@ -237,26 +243,29 @@ export class StreamsClient {
         // The user can set the condition later on the parent
         await this.updateStreamRouting({
           definition: parentDefinition,
-          routing: parentDefinition.stream.ingest.routing.concat({
-            name: definition.name,
+          routing: parentDefinition.ingest.routing.concat({
+            destination: name,
+            if: { never: {} },
           }),
         });
       }
-    } else if (isWiredStream(definition)) {
+    } else if (isWiredStreamDefinition(stream)) {
       // if there is no parent, this is either the root stream, or
       // there are intermediate streams missing in the tree.
       // In the latter case, we need to create the intermediate streams first.
-      const parentId = getParentId(definition.name);
+      const parentId = getParentId(stream.name);
       if (parentId) {
         await this.upsertStream({
-          definition: {
-            name: parentId,
+          name: parentId,
+          request: {
+            dashboards: [],
             stream: {
               ingest: {
                 processing: [],
                 routing: [
                   {
-                    name: definition.name,
+                    destination: stream.name,
+                    if: { never: {} },
                   },
                 ],
                 wired: {
@@ -269,9 +278,15 @@ export class StreamsClient {
       }
     }
 
+    await this.dependencies.assetClient.syncAssetList({
+      entityId: stream.name,
+      entityType: 'stream',
+      assetIds: dashboards,
+      assetType: 'dashboard',
+    });
+
     return { acknowledged: true, result };
   }
-
   /**
    * `validateAndUpsertStream` does the following things:
    * - determining whether the given definition is valid
@@ -298,7 +313,7 @@ export class StreamsClient {
       validateStreamTypeChanges(existingDefinition, definition);
     }
 
-    if (isRootStream(definition)) {
+    if (isRootStreamDefinition(definition)) {
       // only allow selective updates to a root stream
       validateRootStreamChanges(
         (existingDefinition as undefined | WiredStreamDefinition) || rootStreamDefinition,
@@ -306,11 +321,11 @@ export class StreamsClient {
       );
     }
 
-    if (!isWiredStream(definition)) {
+    if (!isWiredStreamDefinition(definition)) {
       validateUnwiredStreamChildren(definition);
     }
 
-    if (isWiredStream(definition)) {
+    if (isWiredStreamDefinition(definition)) {
       const validateWiredStreamResult = await this.validateWiredStream({
         existingDefinition: existingDefinition as WiredStreamDefinition,
         definition,
@@ -364,12 +379,12 @@ export class StreamsClient {
 
     validateAncestorFields({
       ancestors,
-      fields: definition.stream.ingest.wired.fields,
+      fields: definition.ingest.wired.fields,
     });
 
     validateDescendantFields({
       descendants,
-      fields: definition.stream.ingest.wired.fields,
+      fields: definition.ingest.wired.fields,
     });
 
     if (existingDefinition) {
@@ -391,25 +406,23 @@ export class StreamsClient {
 
     const descendantsById = keyBy(descendants, (stream) => stream.name);
 
-    for (const child of definition.stream.ingest.routing) {
-      if (descendantsById[child.name]) {
+    for (const item of definition.ingest.routing) {
+      if (descendantsById[item.destination]) {
         continue;
       }
-      if (!isChildOf(definition.name, child.name)) {
+      if (!isChildOf(definition.name, item.destination)) {
         throw new MalformedStreamId(
-          `The ID (${child.name}) from the child stream must start with the parent's id (${definition.name}), followed by a dot and a name`
+          `The ID (${item.destination}) from the child stream must start with the parent's id (${definition.name}), followed by a dot and a name`
         );
       }
       await this.validateAndUpsertStream({
         definition: {
-          name: child.name,
-          stream: {
-            ingest: {
-              processing: [],
-              routing: [],
-              wired: {
-                fields: {},
-              },
+          name: item.destination,
+          ingest: {
+            processing: [],
+            routing: [],
+            wired: {
+              fields: {},
             },
           },
         },
@@ -432,28 +445,26 @@ export class StreamsClient {
   async forkStream({
     parent,
     name,
-    condition,
+    if: condition,
   }: {
     parent: string;
     name: string;
-    condition: Condition;
+    if: Condition;
   }): Promise<ForkStreamResponse> {
     const parentDefinition = await this.getStream(parent);
 
     const childDefinition: WiredStreamDefinition = {
       name,
-      stream: { ingest: { processing: [], routing: [], wired: { fields: {} } } },
+      ingest: { processing: [], routing: [], wired: { fields: {} } },
     };
 
     // check whether root stream has a child of the given name already
-    if (
-      parentDefinition.stream.ingest.routing.some((child) => child.name === childDefinition.name)
-    ) {
+    if (parentDefinition.ingest.routing.some((item) => item.destination === childDefinition.name)) {
       throw new MalformedStreamId(
         `The stream with ID (${name}) already exists as a child of the parent stream`
       );
     }
-    if (!isWiredStream(parentDefinition) && !isDSNS(parentDefinition.name)) {
+    if (!isWiredStreamDefinition(parentDefinition) && !isDSNS(parentDefinition.name)) {
       throw new MalformedStreamId('Only streams following the DSNS can be forked');
     }
     if (!isChildOf(parentDefinition.name, childDefinition.name)) {
@@ -468,9 +479,9 @@ export class StreamsClient {
 
     await this.updateStreamRouting({
       definition: updatedParentDefinition!,
-      routing: parentDefinition.stream.ingest.routing.concat({
-        name,
-        condition,
+      routing: parentDefinition.ingest.routing.concat({
+        destination: name,
+        if: condition,
       }),
     });
 
@@ -541,21 +552,15 @@ export class StreamsClient {
    */
   private async getDataStreamAsIngestStream(
     dataStream: IndicesDataStream
-  ): Promise<IngestStreamDefinition> {
-    const definition: IngestStreamDefinition = {
+  ): Promise<UnwiredStreamDefinition> {
+    const definition: UnwiredStreamDefinition = {
       name: dataStream.name,
-      stream: {
-        ingest: {
-          routing: [],
-          processing: [],
-        },
+      ingest: {
+        routing: [],
+        processing: [],
+        unwired: {},
       },
     };
-
-    definition.elasticsearch_assets = await getUnmanagedElasticsearchAssets({
-      dataStream,
-      scopedClusterClient: this.dependencies.scopedClusterClient,
-    });
 
     return definition;
   }
@@ -600,20 +605,19 @@ export class StreamsClient {
   }
 
   /**
-   * Lists all unmanaged streams (ingest streams without a
+   * Lists all unmanaged streams (unwired streams without a
    * stored definition).
    */
-  private async getUnmanagedDataStreams(): Promise<IngestStreamDefinition[]> {
+  private async getUnmanagedDataStreams(): Promise<UnwiredStreamDefinition[]> {
     const response =
       await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream();
 
     return response.data_streams.map((dataStream) => ({
       name: dataStream.name,
-      stream: {
-        ingest: {
-          processing: [],
-          routing: [],
-        },
+      ingest: {
+        processing: [],
+        routing: [],
+        unwired: {},
       },
     }));
   }
@@ -654,9 +658,9 @@ export class StreamsClient {
    * * Delete the stream definition, but not the data
    * * Delete all wired children completely
    */
-  private async ejectUnwiredStream(definition: IngestStreamDefinition) {
-    for (const child of definition.stream.ingest.routing) {
-      await this.deleteStream(child.name);
+  private async ejectUnwiredStream(definition: UnwiredStreamDefinition) {
+    for (const child of definition.ingest.routing) {
+      await this.deleteStream(child.destination);
     }
     await this.deleteInternalStreamData(definition.name);
   }
@@ -669,17 +673,17 @@ export class StreamsClient {
   private async deleteStreamFromDefinition(definition: StreamDefinition): Promise<void> {
     const { logger, scopedClusterClient } = this.dependencies;
 
-    if (isWiredStream(definition)) {
+    if (isWiredStreamDefinition(definition)) {
       await this.removeFromParent(definition);
     }
 
     // delete the children first, as this will update
     // the parent as well
-    for (const child of definition.stream.ingest.routing) {
-      await this.deleteStream(child.name);
+    for (const child of definition.ingest.routing) {
+      await this.deleteStream(child.destination);
     }
 
-    if (isWiredStream(definition)) {
+    if (isWiredStreamDefinition(definition)) {
       await deleteStreamObjects({ scopedClusterClient, id: definition.name, logger });
     } else {
       await deleteUnmanagedStreamObjects({
@@ -700,8 +704,8 @@ export class StreamsClient {
 
       await this.updateStreamRouting({
         definition: parentDefinition,
-        routing: parentDefinition.stream.ingest.routing.filter(
-          (child) => child.name !== definition.name
+        routing: parentDefinition.ingest.routing.filter(
+          (child) => child.destination !== definition.name
         ),
       });
     }
@@ -729,11 +733,11 @@ export class StreamsClient {
     definition,
     routing,
   }: {
-    definition: StreamDefinition;
-    routing: StreamDefinition['stream']['ingest']['routing'];
+    definition: IngestStreamDefinition;
+    routing: WiredStreamDefinition['ingest']['routing'];
   }) {
     const update = cloneDeep(definition);
-    update.stream.ingest.routing = routing;
+    update.ingest.routing = routing;
 
     await this.updateStoredStream(update);
 
@@ -766,7 +770,7 @@ export class StreamsClient {
     }
 
     const parentId = getParentId(name);
-    if (isWiredStream(definition) && !parentId) {
+    if (isWiredStreamDefinition(definition) && !parentId) {
       throw new MalformedStreamId('Cannot delete root stream');
     }
 
@@ -775,12 +779,7 @@ export class StreamsClient {
     return { acknowledged: true, result: 'deleted' };
   }
 
-  private async updateStoredStream(
-    definition: Omit<
-      StreamDefinition,
-      'dashboards' | 'elasticsearch_assets' | 'inherited_fields' | 'lifecycle'
-    >
-  ) {
+  private async updateStoredStream(definition: StreamDefinition) {
     return this.dependencies.storageClient.index({
       id: definition.name,
       document: omit(
@@ -824,7 +823,7 @@ export class StreamsClient {
       });
 
       streams
-        .filter((candidateStream) => !isWiredStream(candidateStream))
+        .filter((candidateStream) => !isWiredStreamDefinition(candidateStream))
         .forEach((candidateStream) => {
           const candidateStreamName = parseStreamName(candidateStream.name);
           // The longest unwired stream with a matching prefix is the classic root
@@ -846,7 +845,7 @@ export class StreamsClient {
   }
 
   async getAncestors(definition: StreamDefinition): Promise<StreamDefinition[]> {
-    let unwiredRoot = isWiredStream(definition)
+    let unwiredRoot = isWiredStreamDefinition(definition)
       ? await this.getUnwiredRootForStream(definition)
       : undefined;
 
@@ -860,7 +859,11 @@ export class StreamsClient {
       },
     });
     const streamName = parseStreamName(definition.name);
-    if (isWiredStream(definition) && streamName.type === 'dsns' && ancestors.length === 0) {
+    if (
+      isWiredStreamDefinition(definition) &&
+      streamName.type === 'dsns' &&
+      ancestors.length === 0
+    ) {
       // We have a DSNS stream, which means it is not connected to the root logs stream, but no ancestors.
       // This can happen if the classic stream for the unwired root hasn't been created yet.
       // In this case, we need to fetch unmanaged streams and check for a match there.
@@ -910,7 +913,9 @@ export class StreamsClient {
         },
       },
     }).then((streams) =>
-      streams.filter(isWiredStream).filter((stream) => isDescendantOf(definition.name, stream.name))
+      streams
+        .filter(isWiredStreamDefinition)
+        .filter((stream) => isDescendantOf(definition.name, stream.name))
     );
   }
 }

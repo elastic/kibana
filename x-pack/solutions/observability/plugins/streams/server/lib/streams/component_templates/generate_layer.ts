@@ -10,7 +10,7 @@ import {
   MappingDateProperty,
   MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
-import { StreamDefinition, isWiredRoot, isWiredStream } from '@kbn/streams-schema';
+import { StreamDefinition, isWiredRoot, isWiredStreamDefinition } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { logsSettings, logsLifecycle } from './logs_layer';
 import { getComponentTemplateName } from './name';
@@ -21,8 +21,8 @@ export function generateLayer(
   isUnwiredRoot: boolean
 ): ClusterPutComponentTemplateRequest {
   const properties: Record<string, MappingProperty> = {};
-  if (isWiredStream(definition)) {
-    Object.entries(definition.stream.ingest.wired.fields).forEach(([field, props]) => {
+  if (isWiredStreamDefinition(definition)) {
+    Object.entries(definition.ingest.wired.fields).forEach(([field, props]) => {
       const property: MappingProperty = {
         type: props.type,
       };
@@ -36,7 +36,6 @@ export function generateLayer(
       properties[field] = property;
     });
   }
-  // a stream is considered the root if
   const isRootStream = isWiredRoot(definition.name) || isUnwiredRoot;
   return {
     name: getComponentTemplateName(id),

@@ -7,8 +7,8 @@
 
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import {
-  IngestStreamDefinition,
   StreamDefinition,
+  UnwiredStreamDefinition,
   WiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { isResponseError } from '@kbn/es-errors';
@@ -186,14 +186,14 @@ async function ensureStreamManagedPipelineReference(
   }
 }
 
-export async function syncIngestStreamDefinitionObjects({
+export async function syncUnwiredStreamDefinitionObjects({
   definition,
   dataStream,
   scopedClusterClient,
   logger,
 }: SyncStreamParamsBase & {
   dataStream: IndicesDataStream;
-  definition: IngestStreamDefinition;
+  definition: UnwiredStreamDefinition;
 }) {
   const unmanagedAssets = await getUnmanagedElasticsearchAssets({
     dataStream,
@@ -215,7 +215,7 @@ export async function syncIngestStreamDefinitionObjects({
     executionPlan
   );
 
-  if (definition.stream.ingest.processing.length || definition.stream.ingest.routing.length) {
+  if (definition.ingest.processing.length || definition.ingest.routing.length) {
     // if the stream has processing, we need to create or update the stream managed pipeline
     const { id: processingPipelineId, ...processingPipeline } = generateIngestPipeline(
       definition.name,

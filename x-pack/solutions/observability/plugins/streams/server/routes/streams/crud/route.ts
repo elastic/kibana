@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { badRequest, internal, notFound } from '@hapi/boom';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import {
-  streamConfigDefinitionSchema,
-  ListStreamsResponse,
-  FieldDefinitionConfig,
-  ReadStreamDefinition,
-  WiredReadStreamDefinition,
-  isWiredStream,
-} from '@kbn/streams-schema';
+import { badRequest, internal, notFound } from '@hapi/boom';
 import { isResponseError } from '@kbn/es-errors';
+import {
+  StreamDefinition,
+  StreamGetResponse,
+  streamUpsertRequestSchema,
+} from '@kbn/streams-schema';
+import { z } from '@kbn/zod';
 import { MalformedStream } from '../../../lib/streams/errors/malformed_stream';
 import { MalformedFields } from '../../../lib/streams/errors/malformed_fields';
 import { MalformedStreamId } from '../../../lib/streams/errors/malformed_stream_id';
@@ -28,7 +25,7 @@ import {
   SecurityException,
 } from '../../../lib/streams/errors';
 import { createServerRoute } from '../../create_server_route';
-import { getDataStreamLifecycle } from '../../../lib/streams/stream_crud';
+import { readStream } from './read_stream';
 
 export const readStreamRoute = createServerRoute({
   endpoint: 'GET /api/streams/{id}',
@@ -45,55 +42,18 @@ export const readStreamRoute = createServerRoute({
   params: z.object({
     path: z.object({ id: z.string() }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<ReadStreamDefinition> => {
+  handler: async ({ params, request, getScopedClients }): Promise<StreamGetResponse> => {
     try {
-      const { assetClient, streamsClient } = await getScopedClients({
+      const { assetClient, streamsClient, scopedClusterClient } = await getScopedClients({
         request,
       });
 
-      const name = params.path.id;
-
-      const [streamDefinition, dashboards, dataStream] = await Promise.all([
-        streamsClient.getStream(name),
-        assetClient.getAssetIds({
-          entityId: name,
-          entityType: 'stream',
-          assetType: 'dashboard',
-        }),
-        streamsClient.getDataStream(name),
-      ]);
-
-      const ancestors = await streamsClient.getAncestors(streamDefinition);
-
-      const lifecycle = dataStream
-        ? getDataStreamLifecycle(dataStream)
-        : { type: 'error' as const, message: 'missing_data_stream' };
-
-      if (!isWiredStream(streamDefinition)) {
-        return {
-          ...streamDefinition,
-          lifecycle,
-          dashboards,
-          inherited_fields: {},
-        };
-      }
-
-      const body: WiredReadStreamDefinition = {
-        ...streamDefinition,
-        dashboards,
-        lifecycle,
-        root: (await streamsClient.getUnwiredRootForStream(streamDefinition))?.name ?? 'logs',
-        inherited_fields: ancestors.reduce((acc, def) => {
-          if (!isWiredStream(def)) {
-            return acc;
-          }
-          Object.entries(def.stream.ingest.wired.fields).forEach(([key, fieldDef]) => {
-            acc[key] = { ...fieldDef, from: def.name };
-          });
-          return acc;
-          // TODO: replace this with a proper type
-        }, {} as Record<string, FieldDefinitionConfig & { from: string }>),
-      };
+      const body = await readStream({
+        name: params.path.id,
+        assetClient,
+        scopedClusterClient,
+        streamsClient,
+      });
 
       return body;
     } catch (e) {
@@ -183,7 +143,7 @@ export const listStreamsRoute = createServerRoute({
     },
   },
   params: z.object({}),
-  handler: async ({ request, getScopedClients }): Promise<ListStreamsResponse> => {
+  handler: async ({ request, getScopedClients }): Promise<{ streams: StreamDefinition[] }> => {
     try {
       const { streamsClient } = await getScopedClients({ request });
       return {
@@ -215,14 +175,16 @@ export const editStreamRoute = createServerRoute({
     path: z.object({
       id: z.string(),
     }),
-    body: streamConfigDefinitionSchema,
+    body: streamUpsertRequestSchema,
   }),
   handler: async ({ params, request, getScopedClients }) => {
     try {
       const { streamsClient } = await getScopedClients({ request });
-      const streamDefinition = { stream: params.body, name: params.path.id };
 
-      return await streamsClient.upsertStream({ definition: streamDefinition });
+      return await streamsClient.upsertStream({
+        request: params.body,
+        name: params.path.id,
+      });
     } catch (e) {
       if (e instanceof IndexTemplateNotFound || e instanceof DefinitionNotFound) {
         throw notFound(e);
