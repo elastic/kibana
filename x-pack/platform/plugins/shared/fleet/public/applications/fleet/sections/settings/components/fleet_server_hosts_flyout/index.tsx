@@ -26,6 +26,7 @@ import {
   EuiSwitch,
   EuiComboBox,
   EuiCallOut,
+  EuiFieldText,
 } from '@elastic/eui';
 
 import { MultiRowInput } from '../multi_row_input';
@@ -231,90 +232,126 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
             />
           </EuiFormRow>
           <EuiSpacer size="l" />
-          <TextInput
+          <EuiFormRow
+            fullWidth
+            {...inputs.certificateInput.formRowProps}
             label={
               <FormattedMessage
                 id="xpack.fleet.settings.fleetServerHostsFlyout.certificateLabel"
                 defaultMessage="Client SSL Certificate"
               />
             }
-            dataTestSubj="fleetServerHostsFlyout.certificateInput"
-            inputProps={inputs.certificateInput}
-            placeholder={i18n.translate(
-              'xpack.fleet.settings.fleetServerHostsFlyout.certificatePlaceholder',
-              { defaultMessage: 'Specify ssl certificate' }
-            )}
-          />
-          <TextInput
+          >
+            <EuiFieldText
+              fullWidth
+              data-test-subj="fleetServerHostsFlyout.certificateInput"
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.fleetServerHostsFlyout.certificatePlaceholder',
+                { defaultMessage: 'Specify ssl certificate' }
+              )}
+              {...inputs.certificateInput.props}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            fullWidth
+            {...inputs.certificateKeyInput.formRowProps}
             label={
               <FormattedMessage
                 id="xpack.fleet.settings.fleetServerHostsFlyout.certificateKeyLabel"
                 defaultMessage="Client SSL Certificate key"
               />
             }
-            dataTestSubj="fleetServerHostsFlyout.certificateKeyInput"
-            inputProps={inputs.certificateKeyInput}
-            placeholder={i18n.translate(
-              'xpack.fleet.settings.fleetServerHostsFlyout.certificateKeyPlaceholder',
-              { defaultMessage: 'Specify SSL certificate key' }
-            )}
-          />
-          <TextInput
+          >
+            <EuiFieldText
+              fullWidth
+              data-test-subj="fleetServerHostsFlyout.certificateKeyInput"
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.fleetServerHostsFlyout.certificateKeyPlaceholder',
+                { defaultMessage: 'Specify SSL certificate key' }
+              )}
+              {...inputs.certificateKeyInput.props}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            fullWidth
+            {...inputs.certificateAuthoritiesInput.formRowProps}
             label={
               <FormattedMessage
                 id="xpack.fleet.settings.fleetServerHostsFlyout.certificateAuthoritiesLabel"
                 defaultMessage="Server SSL certificate authorities (optional)"
               />
             }
-            dataTestSubj="fleetServerHostsFlyout.certificateAuthoritiesInput"
-            inputProps={inputs.certificateAuthoritiesInput}
-            placeholder={i18n.translate(
-              'xpack.fleet.settings.fleetServerHostsFlyout.certificateAuthoritiesPlaceholder',
-              { defaultMessage: 'Specify certificate authorities' }
-            )}
-          />
-          <TextInput
+          >
+            <EuiFieldText
+              fullWidth
+              data-test-subj="fleetServerHostsFlyout.certificateAuthoritiesInput"
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.fleetServerHostsFlyout.certificateAuthoritiesPlaceholder',
+                { defaultMessage: 'Specify certificate authorities' }
+              )}
+              {...inputs.certificateAuthoritiesInput.props}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            fullWidth
+            {...inputs.esCertificateInput.formRowProps}
             label={
               <FormattedMessage
                 id="xpack.fleet.settings.fleetServerHostsFlyout.EScertificateLabel"
                 defaultMessage="SSL certificate for Elasticsearch"
               />
             }
-            dataTestSubj="fleetServerHostsFlyout.esCertificateInput"
-            inputProps={inputs.esCertificateInput}
-            placeholder={i18n.translate(
-              'xpack.fleet.settings.fleetServerHostsFlyout.esCertificatePlaceholder',
-              { defaultMessage: 'Specify Elasticsearch SSL certificate' }
-            )}
-          />
-          <TextInput
+          >
+            <EuiFieldText
+              fullWidth
+              data-test-subj="fleetServerHostsFlyout.esCertificateInput"
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.fleetServerHostsFlyout.esCertificatePlaceholder',
+                { defaultMessage: 'Specify Elasticsearch SSL certificate' }
+              )}
+              {...inputs.esCertificateInput.props}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            fullWidth
+            {...inputs.esCertificateKeyInput.formRowProps}
             label={
               <FormattedMessage
                 id="xpack.fleet.settings.fleetServerHostsFlyout.esCertificateKeyLabel"
                 defaultMessage="SSL certificate key for Elasticsearch"
               />
             }
-            dataTestSubj="fleetServerHostsFlyout.esCertificateKeyInput"
-            inputProps={inputs.esCertificateKeyInput}
-            placeholder={i18n.translate(
-              'xpack.fleet.settings.fleetServerHostsFlyout.esCertificateKeyPlaceholder',
-              { defaultMessage: 'Specify Elasticsearch SSL certificate key' }
-            )}
-          />
-          <TextInput
+          >
+            <EuiFieldText
+              fullWidth
+              data-test-subj="fleetServerHostsFlyout.esCertificateKeyInput"
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.fleetServerHostsFlyout.esCertificateKeyPlaceholder',
+                { defaultMessage: 'Specify Elasticsearch SSL certificate key' }
+              )}
+              {...inputs.esCertificateKeyInput.props}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            fullWidth
+            {...inputs.esCertificateAuthoritiesInput.formRowProps}
             label={
               <FormattedMessage
                 id="xpack.fleet.settings.fleetServerHostsFlyout.esCertificateAuthoritiesLabel"
                 defaultMessage="Elasticsearch Certificate Authorities (optional)"
               />
             }
-            dataTestSubj="fleetServerHostsFlyout.esCertificateAuthoritiesInput"
-            inputProps={inputs.esCertificateAuthoritiesInput}
-            placeholder={i18n.translate(
-              'xpack.fleet.settings.fleetServerHostsFlyout.esCertificateAuthoritiesPlaceholder',
-              { defaultMessage: 'Specify Elasticsearch certificate authorities' }
-            )}
-          />
+          >
+            <EuiFieldText
+              fullWidth
+              data-test-subj="fleetServerHostsFlyout.esCertificateAuthoritiesInput"
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.fleetServerHostsFlyout.esCertificateAuthoritiesPlaceholder',
+                { defaultMessage: 'Specify Elasticsearch certificate authorities' }
+              )}
+              {...inputs.esCertificateAuthoritiesInput.props}
+            />
+          </EuiFormRow>
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

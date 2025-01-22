@@ -271,13 +271,12 @@ export function useFleetServerHostsForm(
     onSuccess,
   ]);
 
+  const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
+
   const isDisabled =
     isEditDisabled ||
     isLoading ||
-    (!hostUrlsInput.hasChanged &&
-      !isDefaultInput.hasChanged &&
-      !nameInput.hasChanged &&
-      !proxyIdInput.hasChanged) ||
+    !hasChanged ||
     hostUrlsInput.props.isInvalid ||
     nameInput.props.isInvalid;
 
