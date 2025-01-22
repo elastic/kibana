@@ -105,14 +105,14 @@ export const performBulkGet = async <T>(
         namespaces = await getAvailableSpaces();
       }
 
-      const getFields = () => {
-        const isEmpty = !fields || fields.length === 0;
+      const getFields = (savedObjectFields?: string[]) => {
+        const isEmpty = !savedObjectFields || savedObjectFields.length === 0;
 
         if (securityExtension && securityExtension.includeSavedObjectNames() && !isEmpty) {
           const nameAttribute = registry.getNameAttribute(type);
           const nameFields = nameAttribute ? [nameAttribute] : ['name', 'title'];
 
-          return [...fields, ...nameFields];
+          return [...savedObjectFields, ...nameFields];
         }
 
         return fields;
@@ -121,7 +121,7 @@ export const performBulkGet = async <T>(
       return right({
         type,
         id,
-        fields: getFields(),
+        fields: getFields(fields),
         namespaces,
         esRequestIndex: bulkGetRequestIndexCounter++,
       });
