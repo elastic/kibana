@@ -73,7 +73,7 @@ const compatibleEmbeddableApi = {
   supportedTriggers: () => {
     return ['VALUE_CLICK_TRIGGER'];
   },
-  viewMode: new BehaviorSubject<ViewMode>('edit'),
+  viewMode$: new BehaviorSubject<ViewMode>('edit'),
 };
 
 test('title is a string', () => {
@@ -114,7 +114,7 @@ describe('isCompatible', () => {
     const action = createAction();
     const embeddableApi = {
       ...compatibleEmbeddableApi,
-      viewMode: new BehaviorSubject<ViewMode>('view'),
+      viewMode$: new BehaviorSubject<ViewMode>('view'),
     };
     expect(await action.isCompatible({ embeddable: embeddableApi })).toBe(false);
   });

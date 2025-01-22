@@ -202,6 +202,13 @@ export const RISK_ENGINE_NEXT_RUN_TIME = (timeInMinutes: string) =>
     values: { timeInMinutes },
   });
 
+export const RISK_ENGINE_STATUS_SWITCH_LABEL = i18n.translate(
+  'xpack.securitySolution.riskScore.riskEngineStatus',
+  {
+    defaultMessage: 'Risk engine status',
+  }
+);
+
 export const RUN_RISK_SCORE_ENGINE = i18n.translate('xpack.securitySolution.riskScore.runEngine', {
   defaultMessage: 'Run Engine',
 });
