@@ -22,6 +22,7 @@ import {
   submitRulePreview,
   toggleLoggedRequestsAccordion,
   toggleLoggedRequestsItemAccordion,
+  selectIndicatorMatchType,
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 
@@ -69,7 +70,8 @@ describe(
         });
       });
 
-      it('does not show preview logged requests checkbox', () => {
+      it('does not show preview logged requests checkbox fro Indicator Match rule', () => {
+        selectIndicatorMatchType();
         cy.get(RULES_CREATION_PREVIEW_REFRESH_BUTTON).should('be.visible');
         cy.get(PREVIEW_LOGGED_REQUESTS_CHECKBOX).should('not.exist');
       });

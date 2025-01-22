@@ -72,14 +72,14 @@ export const FIND_ALL_NEW_TERMS_FIELDS_DESCRIPTION = (afterKey?: string) =>
     ? i18n.translate(
         'xpack.securitySolution.detectionEngine.newTermsRuleType.findAllNewTermsFieldsAfterDescription',
         {
-          defaultMessage: 'Find all values in history window after {afterKey}',
+          defaultMessage: 'Find all values after {afterKey}',
           values: { afterKey },
         }
       )
     : i18n.translate(
         'xpack.securitySolution.detectionEngine.newTermsRuleType.findAllNewTermsFieldsDescription',
         {
-          defaultMessage: 'Find all values in history window',
+          defaultMessage: 'Find all values',
         }
       );
 
