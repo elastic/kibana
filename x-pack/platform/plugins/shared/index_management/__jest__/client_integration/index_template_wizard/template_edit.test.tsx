@@ -167,6 +167,7 @@ describe('<TemplateEdit />', () => {
           body: JSON.stringify({
             name: 'test',
             indexPatterns: ['myPattern*'],
+            indexMode: 'standard',
             version: 1,
             allowAutoCreate: 'NO_OVERWRITE',
             indexMode: 'standard',
@@ -287,6 +288,7 @@ describe('<TemplateEdit />', () => {
             body: JSON.stringify({
               name: TEMPLATE_NAME,
               indexPatterns: UPDATED_INDEX_PATTERN,
+              indexMode: 'standard',
               priority: 3,
               version: templateToEdit.version,
               allowAutoCreate: 'TRUE',
@@ -386,6 +388,7 @@ describe('<TemplateEdit />', () => {
           body: JSON.stringify({
             name: TEMPLATE_NAME,
             indexPatterns: INDEX_PATTERNS,
+            indexMode: templateToEdit.indexMode,
             version: templateToEdit.version,
             allowAutoCreate: templateToEdit.allowAutoCreate,
             _kbnMeta: templateToEdit._kbnMeta,

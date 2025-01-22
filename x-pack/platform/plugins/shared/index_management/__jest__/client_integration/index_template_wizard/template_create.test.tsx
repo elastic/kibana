@@ -476,8 +476,8 @@ describe('<TemplateCreate />', () => {
           body: JSON.stringify({
             name: 'my_logs_template',
             indexPatterns: ['logs-*-*'],
-            allowAutoCreate: 'NO_OVERWRITE',
             indexMode: 'logsdb',
+            allowAutoCreate: 'NO_OVERWRITE',
             dataStream: {},
             _kbnMeta: {
               type: 'default',
@@ -622,6 +622,7 @@ describe('<TemplateCreate />', () => {
           body: JSON.stringify({
             name: TEMPLATE_NAME,
             indexPatterns: DEFAULT_INDEX_PATTERNS,
+            indexMode: 'standard',
             allowAutoCreate: 'TRUE',
             indexMode: 'time_series',
             dataStream: {},

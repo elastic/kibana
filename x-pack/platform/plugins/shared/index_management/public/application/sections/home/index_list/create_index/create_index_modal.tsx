@@ -159,7 +159,7 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
                 {
                   value: STANDARD_INDEX_MODE,
                   inputDisplay: indexModeLabels[STANDARD_INDEX_MODE],
-                  'data-test-subj': 'index_mode_standard',
+                  'data-test-subj': 'indexModeStandardOption',
                   dropdownDisplay: (
                     <Fragment>
                       <strong>{indexModeLabels[STANDARD_INDEX_MODE]}</strong>
@@ -172,7 +172,7 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
                 {
                   value: TIME_SERIES_MODE,
                   inputDisplay: indexModeLabels[TIME_SERIES_MODE],
-                  'data-test-subj': 'index_mode_time_series',
+                  'data-test-subj': 'indexModeTimeSeriesOption',
                   dropdownDisplay: (
                     <Fragment>
                       <strong>{indexModeLabels[TIME_SERIES_MODE]}</strong>
@@ -185,7 +185,7 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
                 {
                   value: LOGSDB_INDEX_MODE,
                   inputDisplay: indexModeLabels[LOGSDB_INDEX_MODE],
-                  'data-test-subj': 'index_mode_logsdb',
+                  'data-test-subj': 'indexModeLogsdbOption',
                   dropdownDisplay: (
                     <Fragment>
                       <strong>{indexModeLabels[LOGSDB_INDEX_MODE]}</strong>
@@ -198,7 +198,7 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
                 {
                   value: LOOKUP_INDEX_MODE,
                   inputDisplay: indexModeLabels[LOOKUP_INDEX_MODE],
-                  'data-test-subj': 'index_mode_logsdb',
+                  'data-test-subj': 'indexModeLookupOption',
                   dropdownDisplay: (
                     <Fragment>
                       <strong>{indexModeLabels[LOOKUP_INDEX_MODE]}</strong>
