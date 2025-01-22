@@ -70,7 +70,6 @@
     "@kbn/es-errors",
     "@kbn/search-connectors-plugin",
     "@kbn/search-playground",
-    "@kbn/search-indices",
     "@kbn/utility-types",
     "@kbn/index-management-shared-types",
     "@kbn/deeplinks-search",
@@ -88,6 +87,7 @@
     "@kbn/cell-actions",
     "@kbn/ui-actions-plugin",
     "@kbn/fleet-plugin",
-    "@kbn/search-shared-ui"
+    "@kbn/search-shared-ui",
+    "@kbn/search-indices",
   ]
 }
