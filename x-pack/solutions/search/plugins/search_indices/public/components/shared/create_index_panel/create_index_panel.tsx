@@ -22,9 +22,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { docLinks } from '../../../common/doc_links';
-import { useKibana } from '../../hooks/use_kibana';
-import { CreateIndexViewMode } from '../../types';
+import { docLinks } from '../../../../common/doc_links';
+import { useKibana } from '../../../hooks/use_kibana';
+import { CreateIndexViewMode } from '../../../types';
+import { CreateIndexCalloutBrowseIntegrationBtn } from './callout_browse_integration_stack';
+import { CreateIndexPanelCreateO11ySpaceBtn } from './callout_create_o11y_space_stack';
 
 const MAX_WIDTH = '650px';
 
@@ -48,9 +50,7 @@ export const CreateIndexPanel = ({
   const { cloud, http } = useKibana().services;
   const { euiTheme } = useEuiTheme();
 
-  const isServerless: boolean = useMemo(() => {
-    return cloud ? cloud.isServerlessEnabled : false;
-  }, [cloud]);
+  const isServerless: boolean = cloud?.isServerlessEnabled ?? false;
 
   const o11yTrialLink = useMemo(() => {
     if (cloud && cloud.isServerlessEnabled) {
@@ -59,14 +59,6 @@ export const CreateIndexPanel = ({
     }
     return http.basePath.prepend('/app/observability/onboarding');
   }, [cloud, http]);
-
-  const o11yCreateSpaceLink = useMemo(() => {
-    return http.basePath.prepend('/app/management/kibana/spaces/create');
-  }, [http]);
-
-  const analyzeLogsIntegration = useMemo(() => {
-    return http.basePath.prepend('/app/integrations/browse/observability');
-  }, [http]);
 
   return (
     <>
@@ -202,21 +194,26 @@ export const CreateIndexPanel = ({
           <EuiSpacer size="m" />
           <EuiFlexGroup alignItems="center" justifyContent="center">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                color="text"
-                iconSide="right"
-                iconType="popout"
-                data-test-subj="analyzeLogsBtn"
-                href={isServerless ? docLinks.analyzeLogs : analyzeLogsIntegration}
-                target="_blank"
-              >
-                {i18n.translate(
-                  'xpack.searchIndices.shared.createIndex.observabilityCallout.logs.button',
-                  {
-                    defaultMessage: 'Collect and analyze logs',
-                  }
-                )}
-              </EuiButtonEmpty>
+              {isServerless ? (
+                <EuiButtonEmpty
+                  color="text"
+                  iconSide="right"
+                  iconType="popout"
+                  data-test-subj="analyzeLogsBtn"
+                  href={docLinks.analyzeLogs}
+                  target="_blank"
+                >
+                  {i18n.translate(
+                    'xpack.searchIndices.shared.createIndex.observabilityCallout.logs.button',
+                    {
+                      defaultMessage: 'Collect and analyze logs',
+                    }
+                  )}
+                </EuiButtonEmpty>
+              ) : (
+                <CreateIndexCalloutBrowseIntegrationBtn />
+              )}
+
               <EuiText color="subdued" size="s" textAlign="center">
                 <small>
                   {i18n.translate(
@@ -249,21 +246,7 @@ export const CreateIndexPanel = ({
                   )}
                 </EuiButtonEmpty>
               ) : (
-                <EuiButtonEmpty
-                  color="text"
-                  iconSide="right"
-                  iconType="popout"
-                  data-test-subj="createO11ySpaceBtn"
-                  href={o11yCreateSpaceLink}
-                  target="_blank"
-                >
-                  {i18n.translate(
-                    'xpack.searchIndices.shared.createIndex.observabilityCallout.createO11ySpace.button',
-                    {
-                      defaultMessage: 'Create an Observability space',
-                    }
-                  )}
-                </EuiButtonEmpty>
+                <CreateIndexPanelCreateO11ySpaceBtn />
               )}
               <EuiText color="subdued" size="s" textAlign="center">
                 <small>
