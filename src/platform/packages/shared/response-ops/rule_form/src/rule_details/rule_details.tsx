@@ -22,6 +22,7 @@ import {
   RULE_NAME_INPUT_TITLE,
   RULE_TAG_INPUT_TITLE,
   RULE_TAG_PLACEHOLDER,
+  ADD_ACTION_OPTIONAL_TEXT,
 } from '../translations';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 
@@ -103,6 +104,11 @@ export const RuleDetails = () => {
       <EuiFormRow
         fullWidth
         label={RULE_TAG_INPUT_TITLE}
+        labelAppend={
+          <EuiText size="xs" color="subdued">
+            {ADD_ACTION_OPTIONAL_TEXT}
+          </EuiText>
+        }
         isInvalid={!!baseErrors?.tags?.length}
         error={baseErrors?.tags}
       >

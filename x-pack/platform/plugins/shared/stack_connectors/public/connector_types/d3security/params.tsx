@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ActionConnectorMode, ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiFormRow } from '@elastic/eui';
+import { EuiFormRow, EuiText } from '@elastic/eui';
 import { EuiFieldText } from '@elastic/eui';
 import { D3SecurityRunActionParams } from '../../../common/d3security/types';
 import { SUB_ACTION } from '../../../common/d3security/constants';
@@ -50,6 +50,16 @@ const D3ParamsFields: React.FunctionComponent<ActionParamsProps<D3SecurityAction
         label={i18n.translate('xpack.stackConnectors.components.d3security.eventTypeFieldLabel', {
           defaultMessage: 'Event Type',
         })}
+        labelAppend={
+          <EuiText size="xs" color="subdued">
+            {i18n.translate(
+              'xpack.stackConnectors.components.d3security.optionalEventTypeFieldLabel',
+              {
+                defaultMessage: 'Optional',
+              }
+            )}
+          </EuiText>
+        }
       >
         <EuiFieldText
           data-test-subj="eventTypeInput"
@@ -69,6 +79,16 @@ const D3ParamsFields: React.FunctionComponent<ActionParamsProps<D3SecurityAction
         label={i18n.translate('xpack.stackConnectors.components.d3security.severityFieldLabel', {
           defaultMessage: 'Severity',
         })}
+        labelAppend={
+          <EuiText size="xs" color="subdued">
+            {i18n.translate(
+              'xpack.stackConnectors.components.d3security.optionalSeverityFieldLabel',
+              {
+                defaultMessage: 'Optional',
+              }
+            )}
+          </EuiText>
+        }
       >
         <EuiFieldText
           data-test-subj="severityInput"

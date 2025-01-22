@@ -136,3 +136,10 @@ export const SOURCE_REF_REQUIRED = i18n.translate(
     defaultMessage: 'Source reference is required.',
   }
 );
+
+export const OPTIONAL_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.thehive.fieldOptionalLabel',
+  {
+    defaultMessage: 'Optional',
+  }
+);

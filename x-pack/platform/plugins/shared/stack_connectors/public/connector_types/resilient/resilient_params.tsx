@@ -174,6 +174,16 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
           'xpack.stackConnectors.components.resilient.urgencySelectFieldLabel',
           { defaultMessage: 'Incident type' }
         )}
+        labelAppend={
+          <EuiText size="xs" color="subdued">
+            {i18n.translate(
+              'xpack.stackConnectors.components.resilient.incidentTypeOptionalFieldLabel',
+              {
+                defaultMessage: 'Optional',
+              }
+            )}
+          </EuiText>
+        }
       >
         <EuiComboBox
           fullWidth
@@ -193,6 +203,16 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
         label={i18n.translate('xpack.stackConnectors.components.resilient.severity', {
           defaultMessage: 'Severity',
         })}
+        labelAppend={
+          <EuiText size="xs" color="subdued">
+            {i18n.translate(
+              'xpack.stackConnectors.components.resilient.severityOptionalFieldLabel',
+              {
+                defaultMessage: 'Optional',
+              }
+            )}
+          </EuiText>
+        }
       >
         <EuiSelect
           data-test-subj="severitySelect"
@@ -217,11 +237,6 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
         label={i18n.translate('xpack.stackConnectors.components.resilient.nameFieldLabel', {
           defaultMessage: 'Name',
         })}
-        labelAppend={
-          <EuiText size="xs" color="subdued">
-            Required
-          </EuiText>
-        }
       >
         <TextFieldWithMessageVariables
           index={index}
@@ -232,28 +247,55 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
           errors={(errors['subActionParams.incident.name'] ?? []) as string[]}
         />
       </EuiFormRow>
-      <TextAreaWithMessageVariables
-        index={index}
-        editAction={editSubActionProperty}
-        messageVariables={messageVariables}
-        paramsProperty={'description'}
-        inputTargetValue={incident.description ?? undefined}
+      <EuiSpacer size="m" />
+      <EuiFormRow
+        fullWidth
         label={i18n.translate(
           'xpack.stackConnectors.components.resilient.descriptionTextAreaFieldLabel',
           { defaultMessage: 'Description' }
         )}
-      />
-      <TextAreaWithMessageVariables
-        index={index}
-        editAction={editComment}
-        messageVariables={messageVariables}
-        paramsProperty={'comments'}
-        inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
+        labelAppend={
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.stackConnectors.components.resilient.descriptionOptionalField', {
+              defaultMessage: 'Optional',
+            })}
+          </EuiText>
+        }
+      >
+        <TextAreaWithMessageVariables
+          index={index}
+          editAction={editSubActionProperty}
+          messageVariables={messageVariables}
+          paramsProperty={'description'}
+          inputTargetValue={incident.description ?? undefined}
+        />
+      </EuiFormRow>
+      <EuiSpacer size="m" />
+      <EuiFormRow
+        fullWidth
         label={i18n.translate(
           'xpack.stackConnectors.components.resilient.commentsTextAreaFieldLabel',
           { defaultMessage: 'Additional comments' }
         )}
-      />
+        labelAppend={
+          <EuiText size="xs" color="subdued">
+            {i18n.translate(
+              'xpack.stackConnectors.components.resilient.additionalCommentsOptionalField',
+              {
+                defaultMessage: 'Optional',
+              }
+            )}
+          </EuiText>
+        }
+      >
+        <TextAreaWithMessageVariables
+          index={index}
+          editAction={editComment}
+          messageVariables={messageVariables}
+          paramsProperty={'comments'}
+          inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
+        />
+      </EuiFormRow>
     </>
   );
 };

@@ -11,7 +11,7 @@ import {
   TextAreaWithMessageVariables,
   ActionParamsProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiFormRow, EuiSelect, EuiComboBox } from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiComboBox, EuiText } from '@elastic/eui';
 import { ExecutorParams, ExecutorSubActionPushParams } from '../../../common/thehive/types';
 import { severityOptions, tlpOptions } from './constants';
 import * as translations from './translations';
@@ -131,7 +131,15 @@ export const TheHiveParamsCaseFields: React.FC<ActionParamsProps<ExecutorParams>
           }}
         />
       </EuiFormRow>
-      <EuiFormRow fullWidth label={translations.TAGS_LABEL}>
+      <EuiFormRow
+        fullWidth
+        label={translations.TAGS_LABEL}
+        labelAppend={
+          <EuiText size="xs" color="subdued">
+            {translations.OPTIONAL_LABEL}
+          </EuiText>
+        }
+      >
         <EuiComboBox
           data-test-subj="tagsInput"
           fullWidth
@@ -141,14 +149,24 @@ export const TheHiveParamsCaseFields: React.FC<ActionParamsProps<ExecutorParams>
           noSuggestions
         />
       </EuiFormRow>
-      <TextAreaWithMessageVariables
-        index={index}
-        editAction={editComment}
-        messageVariables={messageVariables}
-        paramsProperty={'comments'}
-        inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
+
+      <EuiFormRow
+        fullWidth
         label={translations.COMMENTS_LABEL}
-      />
+        labelAppend={
+          <EuiText size="xs" color="subdued">
+            {translations.OPTIONAL_LABEL}
+          </EuiText>
+        }
+      >
+        <TextAreaWithMessageVariables
+          index={index}
+          editAction={editComment}
+          messageVariables={messageVariables}
+          paramsProperty={'comments'}
+          inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
+        />
+      </EuiFormRow>
     </>
   );
 };

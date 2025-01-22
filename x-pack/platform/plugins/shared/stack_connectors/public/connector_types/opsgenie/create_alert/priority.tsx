@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 
-import { EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiText } from '@elastic/eui';
 
 import type { OpsgenieCreateAlertParams } from '../../../../server/connector_types';
 import * as i18n from './translations';
@@ -27,7 +27,16 @@ const PriorityComponent: React.FC<PriorityComponentProps> = ({ priority, onChang
   );
 
   return (
-    <EuiFormRow fullWidth label={i18n.PRIORITY_LABEL} data-test-subj="opsgenie-priority-row">
+    <EuiFormRow
+      fullWidth
+      label={i18n.PRIORITY_LABEL}
+      data-test-subj="opsgenie-priority-row"
+      labelAppend={
+        <EuiText size="xs" color="subdued">
+          {i18n.OPTIONAL_LABEL}
+        </EuiText>
+      }
+    >
       <EuiSelect
         fullWidth
         data-test-subj="opsgenie-prioritySelect"

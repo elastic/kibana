@@ -18,6 +18,7 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiComboBox,
+  EuiText,
 } from '@elastic/eui';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import * as i18n from './translations';
@@ -179,13 +180,20 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     <>
       <EuiFlexGroup>
         <EuiFlexItem grow={true}>
-          <EuiFormRow fullWidth>
+          <EuiFormRow
+            fullWidth
+            label={i18n.GROUP_BY_ALERT}
+            labelAppend={
+              <EuiText size="xs" color="subdued">
+                {i18n.GROUP_BY_ALERT_OPTIONAL_LABEL}
+              </EuiText>
+            }
+          >
             <EuiComboBox
               fullWidth
               isClearable={true}
               singleSelection
               data-test-subj="group-by-alert-field-combobox"
-              prepend={i18n.GROUP_BY_ALERT}
               isLoading={loadingAlertDataViews}
               isDisabled={loadingAlertDataViews}
               options={options}

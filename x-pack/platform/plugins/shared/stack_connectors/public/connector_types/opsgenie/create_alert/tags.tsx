@@ -15,6 +15,7 @@ import {
   EuiFormRow,
   EuiHighlight,
   EuiTextColor,
+  EuiText,
 } from '@elastic/eui';
 
 import { ActionConnectorMode, ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
@@ -82,6 +83,11 @@ const TagsComponent: React.FC<TagsProps> = ({ onChange, values, executionMode })
       data-test-subj="opsgenie-tags-row"
       fullWidth
       label={i18n.TAGS_FIELD_LABEL}
+      labelAppend={
+        <EuiText size="xs" color="subdued">
+          {i18n.OPTIONAL_LABEL}
+        </EuiText>
+      }
       helpText={i18n.TAGS_HELP}
     >
       <EuiComboBox

@@ -62,11 +62,6 @@ const FormView: React.FC<FormViewProps> = ({
         error={errors['subActionParams.message'] as string}
         label={i18n.MESSAGE_FIELD_LABEL}
         isInvalid={isMessageInvalid}
-        labelAppend={
-          <EuiText size="xs" color="subdued">
-            {i18n.REQUIRED_LABEL}
-          </EuiText>
-        }
       >
         <TextFieldWithMessageVariables
           index={index}
@@ -91,19 +86,35 @@ const FormView: React.FC<FormViewProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size={'m'} />
-      <TextAreaWithMessageVariables
-        index={index}
-        editAction={editOptionalSubAction}
-        messageVariables={messageVariables}
-        paramsProperty={'description'}
-        inputTargetValue={subActionParams?.description}
+
+      <EuiFormRow
+        fullWidth
         label={i18n.DESCRIPTION_FIELD_LABEL}
-      />
+        labelAppend={
+          <EuiText size="xs" color="subdued">
+            {i18n.OPTIONAL_LABEL}
+          </EuiText>
+        }
+      >
+        <TextAreaWithMessageVariables
+          index={index}
+          editAction={editOptionalSubAction}
+          messageVariables={messageVariables}
+          paramsProperty={'description'}
+          inputTargetValue={subActionParams?.description}
+        />
+      </EuiFormRow>
+      <EuiSpacer size={'m'} />
       <EuiFormRow
         data-test-subj="opsgenie-alias-row"
         fullWidth
         label={i18n.ALIAS_FIELD_LABEL}
         helpText={i18n.OPSGENIE_ALIAS_HELP}
+        labelAppend={
+          <EuiText size="xs" color="subdued">
+            {i18n.OPTIONAL_LABEL}
+          </EuiText>
+        }
       >
         <TextFieldWithMessageVariables
           index={index}
