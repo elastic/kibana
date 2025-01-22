@@ -114,6 +114,18 @@ describe('GridLayout', () => {
     expect(mockRenderPanelContents).toHaveBeenCalledTimes(0); // renderPanelContents should not be called after reordering
   });
 
+
+  it('panel gets active when dragged', () => {
+    renderGridLayout();
+    const panel1DragHandle = screen.getAllByRole('button', { name: /drag to move/i })[0];
+    expect(screen.getByLabelText('panelId:panel1').closest("div")).toHaveClass('kbnGridPanel');
+    mouseStartDragging(panel1DragHandle);
+    mouseMoveTo({ clientX: 256, clientY: 128 });
+    expect(screen.getByLabelText('panelId:panel1').closest("div")).toHaveClass('kbnGridPanel kbnGridPanel--active');
+    mouseDrop(panel1DragHandle);
+    expect(screen.getByLabelText('panelId:panel1').closest("div")).toHaveClass('kbnGridPanel');
+  });
+
   describe('panels order: panels are rendered from left to right, from top to bottom', () => {
     it('focus management - tabbing through the panels', async () => {
       renderGridLayout();
