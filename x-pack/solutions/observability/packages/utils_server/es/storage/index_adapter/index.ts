@@ -32,6 +32,8 @@ import {
   StorageClientExistsIndex,
   StorageDocumentOf,
   StorageClientSearchResponse,
+  StorageClientClean,
+  StorageClientCleanResponse,
 } from '..';
 import { getSchemaVersion } from '../get_schema_version';
 import { StorageMappingProperty } from '../types';
@@ -446,6 +448,36 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings> 
     });
   };
 
+  private clean: StorageClientClean = async (): Promise<StorageClientCleanResponse> => {
+    const allIndices = await this.getExistingIndices();
+    const hasIndices = Object.keys(allIndices).length > 0;
+    // Delete all indices
+    await Promise.all(
+      Object.keys(allIndices).map((index) =>
+        wrapEsCall(
+          this.esClient.indices.delete({
+            index,
+          })
+        )
+      )
+    );
+    // Delete the index template
+    const template = await this.getExistingIndexTemplate();
+    const hasTemplate = !!template;
+    if (template) {
+      await wrapEsCall(
+        this.esClient.indices.deleteIndexTemplate({
+          name: getIndexTemplateName(this.storage.name),
+        })
+      );
+    }
+
+    return {
+      acknowledged: true,
+      result: hasIndices || hasTemplate ? 'deleted' : 'noop',
+    };
+  };
+
   private delete: StorageClientDelete = async ({
     id,
     refresh = 'wait_for',
@@ -546,6 +578,7 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings> 
     return {
       bulk: this.bulk,
       delete: this.delete,
+      clean: this.clean,
       index: this.index,
       search: this.search,
       get: this.get,
