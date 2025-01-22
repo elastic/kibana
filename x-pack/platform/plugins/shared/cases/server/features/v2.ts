@@ -81,7 +81,7 @@ export const getV2 = (): KibanaFeatureConfig => {
           minimal: [
             {
               feature: FEATURE_ID_V3,
-              privileges: ['minimal_all', 'create_comment', 'case_reopen'],
+              privileges: ['minimal_all', 'create_comment', 'case_reopen', 'cases_assign'],
             },
           ],
         },

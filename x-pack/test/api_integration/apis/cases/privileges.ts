@@ -298,6 +298,9 @@ export default ({ getService }: FtrProviderContext): void => {
       { user: casesV2NoCreateCommentWithReopenUser, owner: CASES_APP_ID },
       { user: obsCasesV2NoCreateCommentWithReopenUser, owner: OBSERVABILITY_APP_ID },
       { user: secCasesV2NoCreateCommentWithReopenUser, owner: SECURITY_SOLUTION_APP_ID },
+      { user: secReadUser, owner: SECURITY_SOLUTION_APP_ID },
+      { user: casesOnlyDeleteUser, owner: CASES_APP_ID },
+      { user: obsCasesOnlyDeleteUser, owner: OBSERVABILITY_APP_ID },
     ]) {
       it(`User ${
         user.username
@@ -315,6 +318,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
     for (const { user, owner } of [
       { user: casesV3ReadAndAssignUser, owner: CASES_APP_ID },
+      { user: secAllUser, owner: SECURITY_SOLUTION_APP_ID },
+      { user: casesAllUser, owner: CASES_APP_ID },
       { user: casesV2AllUser, owner: CASES_APP_ID },
       { user: secCasesV2AllUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: obsCasesV2AllUser, owner: OBSERVABILITY_APP_ID },

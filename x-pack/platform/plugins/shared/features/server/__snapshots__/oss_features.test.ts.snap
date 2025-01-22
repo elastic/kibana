@@ -558,7 +558,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
-        "assignCase": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -723,7 +723,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
-        "assignCase": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -1077,7 +1077,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
-        "assignCase": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -1225,7 +1225,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
-        "assignCase": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -1390,7 +1390,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
-        "assignCase": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -1744,7 +1744,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
-        "assignCase": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],

@@ -550,7 +550,13 @@ export const casesV3NoAssignee: Role = {
         spaces: ['*'],
         base: [],
         feature: {
-          generalCasesV3: ['read', 'update', 'create', 'delete', 'create_comment', 'case_reopen'],
+          generalCasesV3: [
+            'minimal_all',
+            'create_comment',
+            'case_reopen',
+            'cases_delete',
+            'cases_settings',
+          ],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
