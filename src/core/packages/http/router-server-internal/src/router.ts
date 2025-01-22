@@ -173,6 +173,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     postValidateConext: PostValidationMetadata = {
       isInternalApiRequest: true,
       isPublicAccess: false,
+      isHttpResource: false,
     }
   ) => {
     const postValidate: RouterEvents = 'onPostValidate';

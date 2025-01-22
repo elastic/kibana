@@ -66,6 +66,7 @@ describe('handle', () => {
         deprecated: undefined,
         isInternalApiRequest: false,
         isPublicAccess: false,
+        isHttpResource: false,
       });
       expect(router.emitPostValidate).toHaveBeenNthCalledWith(2, expect.any(Object), {
         deprecated: {
@@ -75,6 +76,7 @@ describe('handle', () => {
         },
         isInternalApiRequest: false,
         isPublicAccess: false,
+        isHttpResource: false,
       });
     });
 
@@ -109,6 +111,7 @@ describe('handle', () => {
         },
         isInternalApiRequest: false,
         isPublicAccess: false,
+        isHttpResource: false,
       });
     });
   });
@@ -168,6 +171,7 @@ describe('validateHapiRequest', () => {
         deprecated: undefined,
         isInternalApiRequest: false,
         isPublicAccess: true,
+        isHttpResource: false,
       });
     }
     {
@@ -182,6 +186,7 @@ describe('validateHapiRequest', () => {
         deprecated: undefined,
         isInternalApiRequest: false,
         isPublicAccess: true,
+        isHttpResource: false,
       });
     }
   });

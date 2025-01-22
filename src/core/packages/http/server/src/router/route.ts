@@ -532,4 +532,5 @@ export interface PostValidationMetadata {
   deprecated?: RouteDeprecationInfo;
   isInternalApiRequest: boolean;
   isPublicAccess: boolean;
+  isHttpResource: boolean;
 }

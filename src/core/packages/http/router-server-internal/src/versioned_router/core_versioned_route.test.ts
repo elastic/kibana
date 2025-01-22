@@ -743,6 +743,7 @@ describe('Versioned route', () => {
           },
           isInternalApiRequest: false,
           isPublicAccess: false,
+          isHttpResource: false,
         }
       );
       expect(router.emitPostValidate).toHaveBeenNthCalledWith(
@@ -756,6 +757,7 @@ describe('Versioned route', () => {
           },
           isInternalApiRequest: false,
           isPublicAccess: false,
+          isHttpResource: false,
         }
       );
     });
@@ -789,6 +791,7 @@ describe('Versioned route', () => {
           },
           isInternalApiRequest: false,
           isPublicAccess: false,
+          isHttpResource: false,
         }
       );
     });

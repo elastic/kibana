@@ -23,11 +23,13 @@ import {
 export const getIsAccessApiDeprecation = ({
   isInternalApiRequest,
   isPublicAccess,
+  isHttpResource,
 }: PostValidationMetadata): boolean => {
   const isNotPublicAccess = !isPublicAccess;
   const isNotInternalRequest = !isInternalApiRequest;
+  const isNotHttpResource = !isHttpResource;
 
-  return !!(isNotPublicAccess && isNotInternalRequest);
+  return isNotPublicAccess && isNotInternalRequest && isNotHttpResource;
 };
 
 export const buildApiAccessDeprecationDetails = ({

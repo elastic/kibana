@@ -12,6 +12,7 @@ import {
   type SafeRouteMethod,
   type RouteConfig,
   getRequestValidation,
+  type PostValidationMetadata,
 } from '@kbn/core-http-server';
 import type {
   RouteSecurityGetter,
@@ -205,10 +206,14 @@ function routeSchemasFromRouteConfig<P, Q, B>(
   }
 }
 
-function getPostValidateEventMetadata(request: AnyKibanaRequest, routeInfo: RouteInfo) {
+function getPostValidateEventMetadata(
+  request: AnyKibanaRequest,
+  routeInfo: RouteInfo
+): PostValidationMetadata {
   return {
     deprecated: routeInfo.deprecated,
     isInternalApiRequest: request.isInternalApiRequest,
     isPublicAccess: isPublicAccessApiRoute(routeInfo),
+    isHttpResource: !!routeInfo.httpResource,
   };
 }
