@@ -151,9 +151,9 @@ export const EsqlQueryExpression: React.FC<
 
   const refreshTimeFields = useCallback(
     async (q: AggregateQuery) => {
-      const fetchTimeFieldsData = async (query: AggregateQuery) => {
+      const fetchTimeFieldsData = async (queryObj: AggregateQuery) => {
         try {
-          const esqlDataView = await getESQLAdHocDataview(query.esql, dataViews);
+          const esqlDataView = await getESQLAdHocDataview(queryObj.esql, dataViews);
           const indexPattern: string = esqlDataView.getIndexPattern();
           const currentEsFields = await getFields(http, [indexPattern]);
           const newTimeFieldOptions = getTimeFieldOptions(currentEsFields);
