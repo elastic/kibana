@@ -133,25 +133,25 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return basic configuration of task manager', async () => {
       const health = await getHealth();
       expect(health.status).to.eql('OK');
-      expect(health.stats.configuration.value).to.eql({
-        poll_interval: 500,
-        monitored_aggregated_stats_refresh_rate: monitoredAggregatedStatsRefreshRate,
-        monitored_stats_running_average_window: 50,
-        monitored_task_execution_thresholds: {
-          custom: {},
-          default: {
-            error_threshold: 90,
-            warn_threshold: 80,
-          },
+      expect(health.stats.configuration.value.monitored_aggregated_stats_refresh_rate).to.eql(
+        monitoredAggregatedStatsRefreshRate
+      );
+      expect(health.stats.configuration.value.monitored_stats_running_average_window).to.eql(50);
+      expect(health.stats.configuration.value.monitored_task_execution_thresholds).to.eql({
+        custom: {},
+        default: {
+          error_threshold: 90,
+          warn_threshold: 80,
         },
-        request_capacity: 1000,
-        capacity: {
-          config: 10,
-          as_workers: 10,
-          as_cost: 20,
-        },
-        claim_strategy: 'mget',
       });
+      expect(health.stats.configuration.value.request_capacity).to.eql(1000);
+      expect(health.stats.configuration.value.capacity).to.eql({
+        config: 10,
+        as_workers: 10,
+        as_cost: 20,
+      });
+      expect(health.stats.configuration.value.claim_strategy).to.eql('mget');
+      expect(typeof health.stats.configuration.value.poll_interval).to.eql('number');
     });
 
     it('should return the task manager workload', async () => {

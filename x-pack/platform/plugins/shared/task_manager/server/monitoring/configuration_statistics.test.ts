@@ -9,8 +9,20 @@ import { Subject } from 'rxjs';
 import { take, bufferCount } from 'rxjs';
 import { createConfigurationAggregator } from './configuration_statistics';
 import { TaskManagerConfig } from '../config';
+import { taskPollingLifecycleMock } from '../polling_lifecycle.mock';
 
 describe('Configuration Statistics Aggregator', () => {
+  let mockTaskPollingLifecycle = taskPollingLifecycleMock.create({});
+  const capacityConfiguration$ = new Subject<number>();
+  const pollIntervalConfiguration$ = new Subject<number>();
+
+  beforeEach(() => {
+    mockTaskPollingLifecycle = taskPollingLifecycleMock.create({
+      capacityConfiguration$,
+      pollIntervalConfiguration$,
+    });
+  });
+
   test('merges the static config with the merged configs', async () => {
     const configuration: TaskManagerConfig = {
       discovery: {
@@ -55,15 +67,9 @@ describe('Configuration Statistics Aggregator', () => {
       auto_calculate_default_ech_capacity: false,
     };
 
-    const managedConfig = {
-      startingCapacity: 10,
-      capacityConfiguration$: new Subject<number>(),
-      pollIntervalConfiguration$: new Subject<number>(),
-    };
-
     return new Promise<void>(async (resolve, reject) => {
       try {
-        createConfigurationAggregator(configuration, managedConfig)
+        createConfigurationAggregator(configuration, 10, mockTaskPollingLifecycle)
           .pipe(take(3), bufferCount(3))
           .subscribe(([initial, updatedWorkers, updatedInterval]) => {
             expect(initial.value).toEqual({
@@ -125,8 +131,8 @@ describe('Configuration Statistics Aggregator', () => {
             });
             resolve();
           }, reject);
-        managedConfig.capacityConfiguration$.next(8);
-        managedConfig.pollIntervalConfiguration$.next(3000);
+        capacityConfiguration$.next(8);
+        pollIntervalConfiguration$.next(3000);
       } catch (error) {
         reject(error);
       }
