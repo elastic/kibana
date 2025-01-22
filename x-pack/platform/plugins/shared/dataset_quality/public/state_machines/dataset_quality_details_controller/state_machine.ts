@@ -838,6 +838,10 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         return false;
       },
       loadFailedDocsDetails: (context) => {
+        if (!context.dataStreamSettings.datasetUserPrivileges.canReadFailureStore) {
+          return Promise.resolve();
+        }
+
         const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
 
         return dataStreamDetailsClient.getFailedDocsDetails({

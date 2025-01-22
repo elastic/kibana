@@ -8,7 +8,7 @@
 import { badRequest } from '@hapi/boom';
 import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
 import { DataStreamDetails } from '../../../../common/api_types';
-import { MAX_HOSTS_METRIC_VALUE } from '../../../../common/constants';
+import { FAILURE_STORE_PRIVILEGE, MAX_HOSTS_METRIC_VALUE } from '../../../../common/constants';
 import { _IGNORED } from '../../../../common/es_fields';
 import { datasetQualityPrivileges } from '../../../services';
 import { createDatasetQualityESClient } from '../../../utils';
@@ -36,15 +36,15 @@ export async function getDataStreamDetails({
   const esClientAsCurrentUser = esClient.asCurrentUser;
   const esClientAsSecondaryAuthUser = esClient.asSecondaryAuthUser;
 
-  const hasAccessToDataStream = (
+  const dataStreamPrivileges = (
     await datasetQualityPrivileges.getHasIndexPrivileges(
       esClientAsCurrentUser,
       [dataStream],
-      ['monitor']
+      ['monitor', FAILURE_STORE_PRIVILEGE]
     )
   )[dataStream];
 
-  const esDataStream = hasAccessToDataStream
+  const esDataStream = dataStreamPrivileges.monitor
     ? (
         await getDataStreams({
           esClient: esClientAsCurrentUser,
@@ -72,7 +72,7 @@ export async function getDataStreamDetails({
         });
 
     const avgDocSizeInBytes =
-      hasAccessToDataStream && dataStreamSummaryStats.docsCount > 0
+      dataStreamPrivileges.monitor && dataStreamSummaryStats.docsCount > 0
         ? isServerless
           ? await getMeteringAvgDocSizeInBytes(esClientAsSecondaryAuthUser, dataStream)
           : await getAvgDocSizeInBytes(esClientAsCurrentUser, dataStream)
@@ -86,7 +86,8 @@ export async function getDataStreamDetails({
       sizeBytes,
       lastActivity: esDataStream?.lastActivity,
       userPrivileges: {
-        canMonitor: hasAccessToDataStream,
+        canMonitor: dataStreamPrivileges.monitor,
+        canReadFailureStore: dataStreamPrivileges[FAILURE_STORE_PRIVILEGE],
       },
     };
   } catch (e) {

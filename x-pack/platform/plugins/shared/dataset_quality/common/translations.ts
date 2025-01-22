@@ -701,3 +701,11 @@ export const failedDocsErrorsColumnName = i18n.translate(
     defaultMessage: 'Error messages',
   }
 );
+
+export const noAccessToFailureStoreWarningDescription = i18n.translate(
+  'xpack.datasetQuality.noAccessToFailureStore.title',
+  {
+    defaultMessage:
+      'Some documents might have been sent to the Failure store. Access is restricted due to potential sensitive information. Please contact your administrator for access',
+  }
+);

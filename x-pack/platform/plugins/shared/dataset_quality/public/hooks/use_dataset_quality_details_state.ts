@@ -99,6 +99,12 @@ export const useDatasetQualityDetailsState = () => {
     dataStreamSettings?.datasetUserPrivileges?.canViewIntegrations
   );
 
+  const canUserReadFailureStore = Boolean(
+    dataStreamSettings?.datasetUserPrivileges?.canReadFailureStore
+  );
+
+  const isFailureStoreEnabled = !isServerless && canUserReadFailureStore;
+
   const dataStreamDetails = useSelector(service, (state) =>
     state.matches('initializing.dataStreamDetails.done')
       ? state.context.dataStreamDetails
@@ -159,7 +165,6 @@ export const useDatasetQualityDetailsState = () => {
   return {
     service,
     telemetryClient,
-    isServerless,
     fieldFormats,
     isIndexNotFoundError,
     dataStream,
@@ -178,7 +183,9 @@ export const useDatasetQualityDetailsState = () => {
     integrationDetails,
     canUserAccessDashboards,
     canUserViewIntegrations,
+    canUserReadFailureStore,
     expandedQualityIssue,
     isQualityIssueFlyoutOpen,
+    isFailureStoreEnabled,
   };
 };
