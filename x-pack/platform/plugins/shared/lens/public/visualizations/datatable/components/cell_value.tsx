@@ -10,6 +10,10 @@ import { EuiDataGridCellValueElementProps, EuiLink } from '@elastic/eui';
 import classNames from 'classnames';
 import { PaletteOutput } from '@kbn/coloring';
 import { CustomPaletteState } from '@kbn/charts-plugin/common';
+import {
+  InTableSearchHighlightsWrapper,
+  InTableSearchHighlightsWrapperProps,
+} from '@kbn/data-grid-in-table-search';
 import type { FormatFactory } from '../../../../common/types';
 import type { DatatableColumnConfig } from '../../../../common/expressions';
 import type { DataContextType } from './types';
@@ -40,7 +44,15 @@ export const createGridCell = (
   ) => CellColorFn,
   fitRowToContent?: boolean
 ) => {
-  return ({ rowIndex, columnId, setCellProps, isExpanded }: EuiDataGridCellValueElementProps) => {
+  return ({
+    rowIndex,
+    columnId,
+    setCellProps,
+    isExpanded,
+    inTableSearchTerm,
+    onHighlightsCountFound,
+  }: EuiDataGridCellValueElementProps &
+    Pick<InTableSearchHighlightsWrapperProps, 'inTableSearchTerm' | 'onHighlightsCountFound'>) => {
     const { table, alignments, handleFilterClick } = useContext(DataContext);
     const rawRowValue = table?.rows[rowIndex]?.[columnId];
     const rowValue = getParsedValue(rawRowValue);
@@ -84,40 +96,52 @@ export const createGridCell = (
       }
     }, [rowValue, columnId, setCellProps, colorMode, palette, colorMapping, isExpanded]);
 
-    if (filterOnClick) {
+    const render = () => {
+      if (filterOnClick) {
+        return (
+          <div
+            data-test-subj="lnsTableCellContent"
+            className={classNames({
+              'lnsTableCell--multiline': fitRowToContent,
+              [`lnsTableCell--${currentAlignment}`]: true,
+            })}
+          >
+            <EuiLink
+              onClick={() => {
+                handleFilterClick?.(columnId, rawRowValue, colIndex, rowIndex);
+              }}
+            >
+              {content}
+            </EuiLink>
+          </div>
+        );
+      }
+
       return (
         <div
+          /*
+           * dangerouslySetInnerHTML is necessary because the field formatter might produce HTML markup
+           * which is produced in a safe way.
+           */
+          dangerouslySetInnerHTML={{ __html: content }} // eslint-disable-line react/no-danger
           data-test-subj="lnsTableCellContent"
           className={classNames({
             'lnsTableCell--multiline': fitRowToContent,
+            'lnsTableCell--colored': colorMode !== 'none',
             [`lnsTableCell--${currentAlignment}`]: true,
           })}
-        >
-          <EuiLink
-            onClick={() => {
-              handleFilterClick?.(columnId, rawRowValue, colIndex, rowIndex);
-            }}
-          >
-            {content}
-          </EuiLink>
-        </div>
+        />
       );
-    }
+    };
 
     return (
-      <div
-        /*
-         * dangerouslySetInnerHTML is necessary because the field formatter might produce HTML markup
-         * which is produced in a safe way.
-         */
-        dangerouslySetInnerHTML={{ __html: content }} // eslint-disable-line react/no-danger
-        data-test-subj="lnsTableCellContent"
-        className={classNames({
-          'lnsTableCell--multiline': fitRowToContent,
-          'lnsTableCell--colored': colorMode !== 'none',
-          [`lnsTableCell--${currentAlignment}`]: true,
-        })}
-      />
+      <InTableSearchHighlightsWrapper
+        key={`cell-${inTableSearchTerm || ''}`} // it's very important to have a unique key for each inTableSearchTerm change so it can add the highlights again
+        inTableSearchTerm={inTableSearchTerm}
+        onHighlightsCountFound={onHighlightsCountFound}
+      >
+        {render()}
+      </InTableSearchHighlightsWrapper>
     );
   };
 };
