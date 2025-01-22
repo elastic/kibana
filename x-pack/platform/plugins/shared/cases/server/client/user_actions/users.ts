@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isString } from 'lodash';
+import { isEmpty, isString } from 'lodash';
 import type { UserProfileAvatarData, UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { GetCaseUsersResponse } from '../../../common/types/api';
 import { GetCaseUsersResponseRt } from '../../../common/types/api';
@@ -63,7 +63,7 @@ export const getUsers = async (
         ...participantsUids,
         ...assigneesUids,
         ...reporterProfileIdAsArray,
-      ].filter((uid) => uid !== '')
+      ].filter((uid) => !isEmpty(uid))
     );
 
     const userProfiles = await getUserProfiles(securityStartPlugin, userProfileUids, 'avatar');
