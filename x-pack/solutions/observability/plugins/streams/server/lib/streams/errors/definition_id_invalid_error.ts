@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-export class MalformedStreamId extends Error {
+import { StatusError } from './status_error';
+
+export class DefinitionIdInvalidError extends StatusError {
   constructor(message: string) {
-    super(message);
-    this.name = 'MalformedStreamId';
+    super(message, 400);
+    this.name = 'DefinitionIdInvalidError';
   }
 }
