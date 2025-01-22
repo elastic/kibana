@@ -14,8 +14,8 @@ export const isTouchEvent = (e: Event | React.UIEvent<HTMLElement>): e is UserTo
 };
 
 /*
- * This function should be attached to `touchstart` event listener. 
- * It follows the flow of `touchstart` -> `touchmove` -> `touchend` where the consumer is responsible for handling the interaction logic and defining what happens on each event. 
+ * This function should be attached to `touchstart` event listener.
+ * It follows the flow of `touchstart` -> `touchmove` -> `touchend` where the consumer is responsible for handling the interaction logic and defining what happens on each event.
  */
 
 export const startTouchInteraction = ({
