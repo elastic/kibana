@@ -19,10 +19,10 @@ import {
   MISCONFIGURATION_STATUS,
   buildMisconfigurationEntityFlyoutPreviewQuery,
 } from '@kbn/cloud-security-posture-common';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common/schema/rules/latest';
-import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
+import { CspEvaluationBadge, getMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
+
 import {
   ENTITY_FLYOUT_EXPAND_MISCONFIGURATION_VIEW_VISITS,
   NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT,
@@ -34,6 +34,7 @@ import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
+import type { CloudPostureEntityIdentifier } from '../entity_insight';
 
 type MisconfigurationSortFieldType =
   | MISCONFIGURATION.RESULT_EVALUATION
@@ -57,7 +58,7 @@ const getFindingsStats = (
         }
       ),
       count: passedFindingsStats,
-      color: euiThemeVars.euiColorSuccess,
+      color: getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.PASSED),
       filter: () => {
         filterFunction(MISCONFIGURATION_STATUS.PASSED);
       },
@@ -75,7 +76,7 @@ const getFindingsStats = (
         }
       ),
       count: failedFindingsStats,
-      color: euiThemeVars.euiColorVis9,
+      color: getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.FAILED),
       filter: () => {
         filterFunction(MISCONFIGURATION_STATUS.FAILED);
       },
@@ -92,7 +93,7 @@ const getFindingsStats = (
  * Insights view displayed in the document details expandable flyout left section
  */
 export const MisconfigurationFindingsDetailsTable = memo(
-  ({ field, value }: { field: 'host.name' | 'user.name'; value: string }) => {
+  ({ field, value }: { field: CloudPostureEntityIdentifier; value: string }) => {
     useEffect(() => {
       uiMetricService.trackUiMetric(
         METRIC_TYPE.COUNT,
@@ -178,14 +179,14 @@ export const MisconfigurationFindingsDetailsTable = memo(
       return getNavUrlParams({ 'rule.id': ruleId, 'resource.id': resourceId }, 'configurations');
     };
 
-    const getFindingsPageUrl = (name: string, queryField: 'host.name' | 'user.name') => {
+    const getFindingsPageUrl = (name: string, queryField: CloudPostureEntityIdentifier) => {
       return getNavUrlParams({ [queryField]: name }, 'configurations', ['rule.name']);
     };
 
     const linkWidth = 40;
     const resultWidth = 74;
 
-    const misconfgurationStats = getFindingsStats(
+    const misconfigurationStats = getFindingsStats(
       passedFindings,
       failedFindings,
       setCurrentFilter,
@@ -271,7 +272,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
             <EuiIcon type={'popout'} />
           </SecuritySolutionLinkAnchor>
           <EuiSpacer size="xl" />
-          <DistributionBar stats={misconfgurationStats} />
+          <DistributionBar stats={misconfigurationStats} />
           <EuiSpacer size="l" />
           <EuiBasicTable
             items={pageOfItems || []}

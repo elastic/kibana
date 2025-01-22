@@ -96,7 +96,7 @@ export const CALLOUT_PARTIALLY_TRANSLATED_RULE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.partiallyTranslatedRuleCalloutDescription',
   {
     defaultMessage:
-      'To save this rule, finish the query and define its severity. If you need help, please contact Elastic support.',
+      'To save this rule, finish writing the query. If you need help, please contact Elastic support.',
   }
 );
 
