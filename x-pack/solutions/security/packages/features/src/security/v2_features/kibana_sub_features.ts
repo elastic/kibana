@@ -670,7 +670,7 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
       privileges: [
         {
           id: 'endpoint_exceptions_all',
-          includeIn: 'none',
+          includeIn: 'all',
           name: 'All',
           savedObject: {
             all: [],
@@ -681,7 +681,7 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
         },
         {
           id: 'endpoint_exceptions_read',
-          includeIn: 'none',
+          includeIn: 'read',
           name: 'Read',
           savedObject: {
             all: [],
@@ -721,11 +721,11 @@ export const getSecurityV2SubFeaturesMap = ({
   };
 
   const securitySubFeaturesList: Array<[SecuritySubFeatureId, SubFeatureConfig]> = [
-    [SecuritySubFeatureId.endpointList, enableSpaceAwarenessIfNeeded(endpointListSubFeature())],
     [
       SecuritySubFeatureId.endpointExceptions,
       enableSpaceAwarenessIfNeeded(endpointExceptionsSubFeature()),
     ],
+    [SecuritySubFeatureId.endpointList, enableSpaceAwarenessIfNeeded(endpointListSubFeature())],
     [
       SecuritySubFeatureId.trustedApplications,
       enableSpaceAwarenessIfNeeded(trustedApplicationsSubFeature()),
