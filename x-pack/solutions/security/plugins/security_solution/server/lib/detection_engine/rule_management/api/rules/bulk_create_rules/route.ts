@@ -68,7 +68,7 @@ export const bulkCreateRulesRoute = (
         options: {
           deprecated: {
             documentationUrl: docLinks.links.securitySolution.legacyBulkApiDeprecations,
-            severity: 'warning',
+            severity: 'critical',
             reason: {
               type: 'migrate',
               newApiMethod: 'POST',

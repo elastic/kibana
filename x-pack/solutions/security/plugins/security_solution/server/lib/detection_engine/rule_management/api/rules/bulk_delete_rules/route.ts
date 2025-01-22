@@ -141,7 +141,7 @@ export const bulkDeleteRulesRoute = (
       options: {
         deprecated: {
           documentationUrl: docLinks.links.securitySolution.legacyBulkApiDeprecations,
-          severity: 'warning',
+          severity: 'critical',
           reason: {
             type: 'migrate',
             newApiMethod: 'POST',
@@ -163,7 +163,7 @@ export const bulkDeleteRulesRoute = (
       options: {
         deprecated: {
           documentationUrl: docLinks.links.securitySolution.legacyBulkApiDeprecations,
-          severity: 'warning',
+          severity: 'critical',
           reason: {
             type: 'migrate',
             newApiMethod: 'POST',
