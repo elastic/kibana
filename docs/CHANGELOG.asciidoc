@@ -3048,7 +3048,7 @@ You can mitigate the issue by completing the following steps:
 
 . Search the `.kibana_*` index for `type: inventory_view`.
 
-. Capture the `_id` field, which will be formatted as `inventory-view:<id>`. For example, `inventory-view:3d3d06b0-f873-4373-8446-f6a8341cd8b1`.
+. Copy the `_id` field, which will be formatted as `inventory-view:<id>`. For example, `inventory-view:3d3d06b0-f873-4373-8446-f6a8341cd8b1`. Omit the `inventory-view:` portion and copy only the string of `_id` characters.
 
 . The offending documents are those with fields `inventory-view.legend.steps` > 18. Delete these documents by running the following in *Console*:
 
@@ -3056,9 +3056,6 @@ You can mitigate the issue by completing the following steps:
 ----------------------------------
 DELETE kbn:/api/infra/inventory-views/<id> 
 ----------------------------------
-
-As a result, the `inventory-view:` portion of the `_id` field will be removed.
-
 ====
 // end::known-issue-187254[]
 
