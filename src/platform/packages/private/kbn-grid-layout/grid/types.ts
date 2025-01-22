@@ -57,8 +57,8 @@ export interface ActivePanel {
 }
 
 export interface GridLayoutStateManager {
+  proposedGridLayout$: BehaviorSubject<GridLayoutData>;
   gridLayout$: BehaviorSubject<GridLayoutData>;
-  stableGridLayout$: BehaviorSubject<GridLayoutData>;
   expandedPanelId$: BehaviorSubject<string | undefined>;
   isMobileView$: BehaviorSubject<boolean>;
   accessMode$: BehaviorSubject<GridAccessMode>;

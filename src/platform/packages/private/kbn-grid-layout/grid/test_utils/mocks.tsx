@@ -24,7 +24,7 @@ import { getSampleLayout } from './sample_layout';
 const DASHBOARD_MARGIN_SIZE = 8;
 const DASHBOARD_GRID_HEIGHT = 20;
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
-const gridLayout$ = new BehaviorSubject<GridLayoutData>(getSampleLayout());
+const proposedGridLayout$ = new BehaviorSubject<GridLayoutData>(getSampleLayout());
 
 export const gridSettings = {
   gutterSize: DASHBOARD_MARGIN_SIZE,
@@ -44,8 +44,8 @@ const runtimeSettings$ = new BehaviorSubject<RuntimeGridSettings>({
 export const gridLayoutStateManagerMock: GridLayoutStateManager = {
   expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
   isMobileView$: new BehaviorSubject<boolean>(false),
-  gridLayout$,
-  stableGridLayout$: cloneDeep(gridLayout$),
+  proposedGridLayout$,
+  gridLayout$: cloneDeep(proposedGridLayout$),
   runtimeSettings$,
   panelRefs: { current: [] },
   rowRefs: { current: [] },

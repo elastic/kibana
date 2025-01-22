@@ -29,7 +29,7 @@ export interface GridRowProps {
 
 export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
   ({ rowIndex, renderPanelContents, gridLayoutStateManager }, gridRef) => {
-    const currentRow = gridLayoutStateManager.gridLayout$.value[rowIndex];
+    const currentRow = gridLayoutStateManager.proposedGridLayout$.value[rowIndex];
 
     const [panelIds, setPanelIds] = useState<string[]>(Object.keys(currentRow.panels));
     const [panelIdsInOrder, setPanelIdsInOrder] = useState<string[]>(() =>
@@ -73,7 +73,7 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
          * - Collapsed state
          * - Panel IDs (adding/removing/replacing, but not reordering)
          */
-        const rowStateSubscription = gridLayoutStateManager.gridLayout$
+        const rowStateSubscription = gridLayoutStateManager.proposedGridLayout$
           .pipe(
             map((gridLayout) => {
               return {
@@ -97,7 +97,7 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
             ) {
               setPanelIds(newRowData.panelIds);
               setPanelIdsInOrder(
-                getKeysInOrder(gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels)
+                getKeysInOrder(gridLayoutStateManager.proposedGridLayout$.getValue()[rowIndex].panels)
               );
             }
           });
@@ -107,9 +107,9 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
          * the order of rendered panels need to be aligned with how they are displayed in the grid for accessibility
          * reasons (screen readers and focus management).
          */
-        const stableGridLayoutSubscription = gridLayoutStateManager.stableGridLayout$.subscribe(
-          (stableGridLayout) => {
-            const newPanelIdsInOrder = getKeysInOrder(stableGridLayout[rowIndex].panels);
+        const gridLayoutSubscription = gridLayoutStateManager.gridLayout$.subscribe(
+          (gridLayout) => {
+            const newPanelIdsInOrder = getKeysInOrder(gridLayout[rowIndex].panels);
             if (panelIdsInOrder.join() !== newPanelIdsInOrder.join()) {
               setPanelIdsInOrder(newPanelIdsInOrder);
             }
@@ -118,7 +118,7 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
 
         return () => {
           interactionStyleSubscription.unsubscribe();
-          stableGridLayoutSubscription.unsubscribe();
+          gridLayoutSubscription.unsubscribe();
           rowStateSubscription.unsubscribe();
         };
       },
@@ -165,8 +165,9 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
           <GridRowHeader
             isCollapsed={isCollapsed}
             toggleIsCollapsed={() => {
-              const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
+              const newLayout = cloneDeep(gridLayoutStateManager.proposedGridLayout$.value);
               newLayout[rowIndex].isCollapsed = !newLayout[rowIndex].isCollapsed;
+              gridLayoutStateManager.proposedGridLayout$.next(newLayout);
               gridLayoutStateManager.gridLayout$.next(newLayout);
             }}
             rowTitle={rowTitle}

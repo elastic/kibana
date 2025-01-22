@@ -34,7 +34,7 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
 
     /** Set initial styles based on state at mount to prevent styles from "blipping" */
     const initialStyles = useMemo(() => {
-      const initialPanel = gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels[panelId];
+      const initialPanel = gridLayoutStateManager.proposedGridLayout$.getValue()[rowIndex].panels[panelId];
       return css`
         position: relative;
         height: calc(
@@ -56,7 +56,7 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
         /** Update the styles of the panel via a subscription to prevent re-renders */
         const activePanelStyleSubscription = combineLatest([
           gridLayoutStateManager.activePanel$,
-          gridLayoutStateManager.gridLayout$,
+          gridLayoutStateManager.proposedGridLayout$,
         ])
           .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
           .subscribe(([activePanel, gridLayout]) => {

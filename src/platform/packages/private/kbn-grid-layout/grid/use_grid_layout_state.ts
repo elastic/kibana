@@ -88,8 +88,8 @@ export const useGridLayoutState = ({
       resolvedLayout[rowIndex] = resolveGridRow(row);
     });
 
-    const gridLayout$ = new BehaviorSubject<GridLayoutData>(resolvedLayout);
-    const stableGridLayout$ = new BehaviorSubject<GridLayoutData>(cloneDeep(resolvedLayout));
+    const proposedGridLayout$ = new BehaviorSubject<GridLayoutData>(resolvedLayout);
+    const gridLayout$ = new BehaviorSubject<GridLayoutData>(cloneDeep(resolvedLayout));
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const interactionEvent$ = new BehaviorSubject<PanelInteractionEvent | undefined>(undefined);
     const activePanel$ = new BehaviorSubject<ActivePanel | undefined>(undefined);
@@ -101,8 +101,8 @@ export const useGridLayoutState = ({
       rowRefs,
       panelRefs,
       panelIds$,
+      proposedGridLayout$,
       gridLayout$,
-      stableGridLayout$,
       activePanel$,
       accessMode$,
       gridDimensions$,

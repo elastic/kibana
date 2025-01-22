@@ -40,13 +40,13 @@ export const startAction = (
 export const commitAction = ({
   activePanel$,
   interactionEvent$,
-  stableGridLayout$,
   gridLayout$,
+  proposedGridLayout$,
 }: GridLayoutStateManager) => {
   activePanel$.next(undefined);
   interactionEvent$.next(undefined);
-  if (!deepEqual(gridLayout$.getValue(), stableGridLayout$.getValue())) {
-    stableGridLayout$.next(cloneDeep(gridLayout$.getValue()));
+  if (!deepEqual(proposedGridLayout$.getValue(), gridLayout$.getValue())) {
+    gridLayout$.next(cloneDeep(proposedGridLayout$.getValue()));
   }
 };
 
@@ -58,7 +58,7 @@ export const moveAction = (
   const {
     runtimeSettings$: { value: runtimeSettings },
     interactionEvent$,
-    gridLayout$,
+    proposedGridLayout$,
     activePanel$,
     rowRefs: { current: gridRowElements },
   } = gridLayoutStateManager;
@@ -68,7 +68,7 @@ export const moveAction = (
     return;
   }
 
-  const currentLayout = gridLayout$.value;
+  const currentLayout = proposedGridLayout$.value;
 
   const currentPanelData =
     currentLayout[interactionEvent.targetRowIndex].panels[interactionEvent.id];
@@ -180,7 +180,7 @@ export const moveAction = (
       nextLayout[lastRowIndex] = resolvedOriginGrid;
     }
     if (!deepEqual(currentLayout, nextLayout)) {
-      gridLayout$.next(nextLayout);
+      proposedGridLayout$.next(nextLayout);
     }
   }
 };

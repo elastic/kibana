@@ -28,7 +28,7 @@ export const DragPreview = ({
       /** Update the styles of the drag preview via a subscription to prevent re-renders */
       const styleSubscription = combineLatest([
         gridLayoutStateManager.activePanel$,
-        gridLayoutStateManager.gridLayout$,
+        gridLayoutStateManager.proposedGridLayout$,
       ])
         .pipe(skip(1)) // skip the first emit because the drag preview is only rendered after a user action
         .subscribe(([activePanel, gridLayout]) => {

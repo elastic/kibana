@@ -53,14 +53,14 @@ export const GridLayout = ({
   });
 
   const [rowCount, setRowCount] = useState<number>(
-    gridLayoutStateManager.gridLayout$.getValue().length
+    gridLayoutStateManager.proposedGridLayout$.getValue().length
   );
 
   /**
-   * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
+   * Update the `proposedGridLayout$` behaviour subject in response to the `layout` prop changing
    */
   useEffect(() => {
-    if (!isLayoutEqual(layout, gridLayoutStateManager.gridLayout$.getValue())) {
+    if (!isLayoutEqual(layout, gridLayoutStateManager.proposedGridLayout$.getValue())) {
       const newLayout = cloneDeep(layout);
       /**
        * the layout sent in as a prop is not guaranteed to be valid (i.e it may have floating panels) -
@@ -69,6 +69,7 @@ export const GridLayout = ({
       newLayout.forEach((row, rowIndex) => {
         newLayout[rowIndex] = resolveGridRow(row);
       });
+      gridLayoutStateManager.proposedGridLayout$.next(newLayout);
       gridLayoutStateManager.gridLayout$.next(newLayout);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -82,7 +83,7 @@ export const GridLayout = ({
      * The only thing that should cause the entire layout to re-render is adding a new row;
      * this subscription ensures this by updating the `rowCount` state when it changes.
      */
-    const rowCountSubscription = gridLayoutStateManager.gridLayout$
+    const rowCountSubscription = gridLayoutStateManager.proposedGridLayout$
       .pipe(
         skip(1), // we initialized `rowCount` above, so skip the initial emit
         map((newLayout) => newLayout.length),
@@ -95,7 +96,7 @@ export const GridLayout = ({
     /**
      * This subscription calls the passed `onLayoutChange` callback when the layout changes
      */
-    const onLayoutChangeSubscription = gridLayoutStateManager.stableGridLayout$
+    const onLayoutChangeSubscription = gridLayoutStateManager.gridLayout$
       .pipe(pairwise())
       .subscribe(([layoutBefore, layoutAfter]) => {
         if (!isLayoutEqual(layoutBefore, layoutAfter)) {
