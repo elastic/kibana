@@ -13,6 +13,7 @@ export default createTestConfig({
   junit: {
     reportName: 'Serverless Observability Discover Context Awareness Functional Tests',
   },
+  suiteTags: { exclude: ['skipSvlOblt'] },
   kbnServerArgs: [
     `--discover.experimental.enabledProfiles=${JSON.stringify([
       'example-root-profile',

@@ -78,8 +78,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('fallback behaviour', function () {
-      // Search projects have a default data view, so these don't apply
-      this.tags(['skipSvlSearch']);
+      // Search and Security projects have a default data view, so these don't apply
+      this.tags(['skipSvlSearch', 'skipSvlSec']);
 
       after(async () => {
         await esArchiver.load('test/functional/fixtures/es_archiver/discover/context_awareness');
