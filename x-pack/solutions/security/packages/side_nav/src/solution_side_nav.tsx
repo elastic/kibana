@@ -168,7 +168,7 @@ const SolutionSideNavItems: React.FC<SolutionSideNavItemsProps> = React.memo(
       return (
         <>
           {items.map((item) => (
-            <SolutionSideNavItem
+            <SolutionSideNavItemComponent
               key={item.id}
               item={item}
               isSelected={selectedId === item.id}
@@ -200,7 +200,7 @@ const SolutionSideNavItems: React.FC<SolutionSideNavItemsProps> = React.memo(
             <React.Fragment key={categoryIndex}>
               {categoryIndex !== 0 && <EuiSpacer size="s" />}
               {categoryItems.map((item) => (
-                <SolutionSideNavItem
+                <SolutionSideNavItemComponent
                   key={item.id}
                   item={item}
                   isSelected={selectedId === item.id}
@@ -230,9 +230,14 @@ interface SolutionSideNavItemProps {
  * Renders a single item for the main side navigation panel,
  * and it adds a button to open the item secondary panel if needed.
  */
-const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  function SolutionSideNavItem({ item, isSelected, isActive, isMobileSize, onOpenPanelNav }) {
+const SolutionSideNavItemComponent: React.FC<SolutionSideNavItemProps> = React.memo(
+  function SolutionSideNavItemFactory({
+    item,
+    isSelected,
+    isActive,
+    isMobileSize,
+    onOpenPanelNav,
+  }) {
     const { euiTheme } = useEuiTheme();
     const { tracker } = useTelemetryContext();
 
