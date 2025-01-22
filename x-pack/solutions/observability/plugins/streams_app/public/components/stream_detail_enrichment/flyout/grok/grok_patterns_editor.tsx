@@ -132,7 +132,10 @@ const DraggablePatternInput = ({
               color="transparent"
               paddingSize="xs"
               {...provided.dragHandleProps}
-              aria-label="Drag Handle"
+              aria-label={i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.grokEditor.dragHandleLabel',
+                { defaultMessage: 'Drag Handle' }
+              )}
             >
               <EuiIcon type="grab" />
             </EuiPanel>

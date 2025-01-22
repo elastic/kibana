@@ -560,7 +560,7 @@
               "\nCommon set of properties used by most actions."
             ],
             "signature": [
-              "string[] | undefined[] | boolean[] | number[] | ",
+              "string[] | number[] | undefined[] | boolean[] | ",
               {
                 "pluginId": "@kbn/utility-types",
                 "scope": "common",
@@ -822,7 +822,7 @@
         "label": "CellActionFieldValue",
         "description": [],
         "signature": [
-          "string[] | undefined[] | boolean[] | number[] | ",
+          "string[] | number[] | undefined[] | boolean[] | ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -918,7 +918,7 @@
         "label": "DefaultActionsSupportedValue",
         "description": [],
         "signature": [
-          "string[] | boolean[] | number[]"
+          "string[] | number[] | boolean[]"
         ],
         "path": "src/platform/packages/shared/kbn-cell-actions/src/actions/types.ts",
         "deprecated": false,
