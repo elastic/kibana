@@ -9,19 +9,30 @@ import type { FC } from 'react';
 import React from 'react';
 import type { IconType } from '@elastic/eui';
 import { EuiCallOut } from '@elastic/eui';
+import type { RuleMigration } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import {
   RuleMigrationTranslationResultEnum,
   type RuleMigrationTranslationResult,
 } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 
+enum MappedTranslationResult {
+  MAPPED = 'mapped',
+}
+
 const getCallOutInfo = (
-  translationResult: RuleMigrationTranslationResult
+  translationResult: RuleMigrationTranslationResult | MappedTranslationResult
 ): { title: string; message?: string; icon: IconType; color: 'success' | 'warning' | 'danger' } => {
   switch (translationResult) {
     case RuleMigrationTranslationResultEnum.full:
       return {
         title: i18n.CALLOUT_TRANSLATED_RULE_TITLE,
+        icon: 'checkInCircleFilled',
+        color: 'success',
+      };
+    case MappedTranslationResult.MAPPED:
+      return {
+        title: i18n.CALLOUT_MAPPED_TRANSLATED_RULE_TITLE,
         icon: 'checkInCircleFilled',
         color: 'success',
       };
@@ -43,23 +54,29 @@ const getCallOutInfo = (
 };
 
 export interface TranslationCallOutProps {
-  translationResult: RuleMigrationTranslationResult;
+  ruleMigration: RuleMigration;
 }
 
-export const TranslationCallOut: FC<TranslationCallOutProps> = React.memo(
-  ({ translationResult }) => {
-    const { title, message, icon, color } = getCallOutInfo(translationResult);
-
-    return (
-      <EuiCallOut
-        color={color}
-        title={title}
-        iconType={icon}
-        data-test-subj={`ruleMigrationCallOut-${translationResult}`}
-      >
-        {message}
-      </EuiCallOut>
-    );
+export const TranslationCallOut: FC<TranslationCallOutProps> = React.memo(({ ruleMigration }) => {
+  if (!ruleMigration.translation_result) {
+    return null;
   }
-);
+
+  const translationResult = ruleMigration.elastic_rule?.prebuilt_rule_id
+    ? MappedTranslationResult.MAPPED
+    : ruleMigration.translation_result;
+  const { title, message, icon, color } = getCallOutInfo(translationResult);
+
+  return (
+    <EuiCallOut
+      color={color}
+      title={title}
+      iconType={icon}
+      size={'s'}
+      data-test-subj={`ruleMigrationCallOut-${translationResult}`}
+    >
+      {message}
+    </EuiCallOut>
+  );
+});
 TranslationCallOut.displayName = 'TranslationCallOut';
