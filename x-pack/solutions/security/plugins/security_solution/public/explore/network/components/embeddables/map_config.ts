@@ -17,6 +17,13 @@ import type {
 } from './types';
 import * as i18n from './translations';
 
+const amsterdam2BorealisColorMap = new Map<number, number>([
+  [0, 0],
+  [1, 2],
+  [5, 9],
+  [7, 8],
+]);
+
 // Update field mappings to modify what fields will be returned to map tooltip
 const sourceFieldMappings: Record<string, string> = {
   'host.name': i18n.HOST,
@@ -122,10 +129,6 @@ export const getLayerList = (
   dependencies: LayerProviderDependencies,
   indexPatternIds: IndexPatternMapping[]
 ) => {
-  // NOTE: Condition to check between Borealis and Amsterdam as per
-  // https://elastic.slack.com/archives/C7QC1JV6F/p1734342538935879?thread_ts=1734342127.301789&cid=C7QC1JV6F
-  const isAmsterdam = dependencies.euiTheme.flags.hasVisColorAdjustment;
-
   return [
     ...indexPatternIds.reduce((acc: object[], { title, id }) => {
       const layerGroupDescriptor = {
@@ -176,9 +179,9 @@ export const getSourceLayer = (
 ) => {
   const euiVisColorPalette = euiPaletteColorBlind();
 
-  const borealis = dependencies.euiTheme.themeName === 'EUI_THEME_BOREALIS';
-
-  console.log('theme name', borealis);
+  // NOTE: Condition to check between Borealis and Amsterdam as per
+  // https://elastic.slack.com/archives/C7QC1JV6F/p1734342538935879?thread_ts=1734342127.301789&cid=C7QC1JV6F
+  const isAmsterdam = dependencies.euiTheme.flags.hasVisColorAdjustment;
 
   return {
     sourceDescriptor: {
@@ -198,7 +201,9 @@ export const getSourceLayer = (
       properties: {
         fillColor: {
           type: 'STATIC',
-          options: { color: euiVisColorPalette[1] },
+          options: {
+            color: euiVisColorPalette[isAmsterdam ? amsterdam2BorealisColorMap.get(1) ?? 1 : 1],
+          },
         },
         lineColor: {
           type: 'STATIC',
