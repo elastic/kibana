@@ -29,11 +29,11 @@ export const scoutPageParallelFixture = base.extend<
   ) => {
     const extendedPage = extendPlaywrightPage({ page, kbnUrl });
 
-    // Overriding navigation to specific Kibana apps to take into account the worker space
+    // Overriding navigation to specific Kibana apps: url should respect the Kibana Space id
     extendedPage.gotoApp = (appName: string) =>
       page.goto(kbnUrl.app(appName, { space: scoutSpace.id }));
-    // Method to wait for global loading indicator to be hidden
-    log.debug(serviceLoadedMsg(`scoutPageParallel`));
+
+    log.debug(serviceLoadedMsg(`scoutPage:${scoutSpace.id}`));
     await use(extendedPage);
   },
 });

@@ -50,7 +50,7 @@ export const browserAuthParallelFixture = coreWorkerFixtures.extend<
       return loginAs(roleName);
     };
 
-    log.debug(serviceLoadedMsg('browserAuth'));
+    log.debug(serviceLoadedMsg(`browserAuth:${scoutSpace.id}`));
     await use({ loginAsAdmin, loginAsViewer, loginAsPrivilegedUser });
   },
 });

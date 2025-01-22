@@ -126,6 +126,7 @@ export const scoutPageFixture = coreWorkerFixtures.extend<
     use: (extendedPage: ScoutPage) => Promise<void>
   ) => {
     const extendedPage = extendPlaywrightPage({ page, kbnUrl });
+
     log.debug(serviceLoadedMsg(`scoutPage`));
     await use(extendedPage);
   },

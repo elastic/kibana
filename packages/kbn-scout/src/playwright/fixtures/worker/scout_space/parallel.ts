@@ -18,13 +18,13 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
 >({
   scoutSpace: [
     async ({ log, kbnClient }, use, workerInfo) => {
-      const id = `test-space-${workerInfo.workerIndex}`;
+      const spaceId = `test-space-${workerInfo.workerIndex}`;
       const spacePayload = {
-        id,
-        name: id,
+        id: spaceId,
+        name: spaceId,
         disabledFeatures: [],
       };
-      log.debug(`Creating space ${id}`);
+      log.debug(`[scoutSpace] creating space ${spaceId}`);
       await kbnClient.spaces.create(spacePayload);
 
       // cache saved objects ids in space
@@ -32,7 +32,7 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
 
       const load = async (path: string) => {
         const response = await kbnClient.importExport.load(path, {
-          space: id,
+          space: spaceId,
           createNewCopies: true,
         });
 
@@ -48,8 +48,10 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
       };
 
       const cleanStandardList = async () => {
+        // reset cache
+        savedObjectsCache.clear();
         return kbnClient.savedObjects.cleanStandardList({
-          space: id,
+          space: spaceId,
         });
       };
 
@@ -59,21 +61,20 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
             {
               defaultIndex: savedObjectsCache.get(dataViewName)!,
             },
-            { space: id }
+            { space: spaceId }
           );
         } else {
-          throw new Error(`Data view id ${dataViewName} not found in space ${id}`);
+          throw new Error(`Data view id ${dataViewName} not found in space ${spaceId}`);
         }
       };
 
       const set = async (values: UiSettingValues) => {
-        log.info(`Setting UI settings for space ${id}: ${JSON.stringify(values)}`);
-        return kbnClient.uiSettings.update(values, { space: id });
+        log.info(`Setting UI settings for space ${spaceId}: ${JSON.stringify(values)}`);
+        return kbnClient.uiSettings.update(values, { space: spaceId });
       };
 
       const unset = async (...keys: string[]) => {
-        log.info(`Unsetting UI settings for space ${id}: ${keys}`);
-        return Promise.all(keys.map((key) => kbnClient.uiSettings.unset(key, { space: id })));
+        return Promise.all(keys.map((key) => kbnClient.uiSettings.unset(key, { space: spaceId })));
       };
       const setDefaultTime = async ({ from, to }: { from: string; to: string }) => {
         const utcFrom = isValidUTCDate(from) ? from : formatTime(from);
@@ -82,7 +83,7 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
           {
             'timepicker:timeDefaults': `{ "from": "${utcFrom}", "to": "${untcTo}"}`,
           },
-          { space: id }
+          { space: spaceId }
         );
       };
 
@@ -98,12 +99,12 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
         setDefaultTime,
       };
 
-      log.debug(serviceLoadedMsg(`scoutSpace`));
-      await use({ savedObjects, uiSettings, id });
+      log.debug(serviceLoadedMsg(`scoutSpace:${spaceId}`));
+      await use({ savedObjects, uiSettings, id: spaceId });
 
       // Cleanup space after tests via API call
-      log.debug(`Deleting space ${id}`);
-      await kbnClient.spaces.delete(id);
+      log.debug(`[scoutSpace] deleting space ${spaceId}`);
+      await kbnClient.spaces.delete(spaceId);
     },
     { scope: 'worker', auto: true },
   ],
