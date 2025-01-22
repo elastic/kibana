@@ -43,7 +43,7 @@ export const getExternalRoutes = ({
   [
     deleteCaseRoute,
     findCaseRoute,
-    getCaseRoute({ isServerless }),
+    getCaseRoute(),
     resolveCaseRoute,
     patchCaseRoute,
     postCaseRoute,
