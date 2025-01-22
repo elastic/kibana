@@ -31,7 +31,7 @@ describe('util tests', () => {
       expect(isCCSRemoteIndexName('*:logstash-{now/d-2d}')).toBe(true);
     });
 
-    it('should not validate selctor with wildcard', () => {
+    it('should not validate selector with wildcard', () => {
       expect(isCCSRemoteIndexName('my-data-stream::*')).toBe(false);
     });
 
