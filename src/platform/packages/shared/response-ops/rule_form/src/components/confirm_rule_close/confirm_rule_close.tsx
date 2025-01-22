@@ -10,32 +10,33 @@
 import React from 'react';
 import { EuiConfirmModal, EuiText } from '@elastic/eui';
 import {
-  CONFIRMATION_RULE_SAVE_TITLE,
-  CONFIRM_RULE_SAVE_CONFIRM_BUTTON_TEXT,
-  CONFIRM_RULE_SAVE_CANCEL_BUTTON_TEXT,
-  CONFIRM_RULE_SAVE_MESSAGE_TEXT,
+  RULE_FORM_CANCEL_MODAL_TITLE,
+  RULE_FORM_CANCEL_MODAL_CONFIRM,
+  RULE_FORM_CANCEL_MODAL_CANCEL,
+  RULE_FORM_CANCEL_MODAL_DESCRIPTION,
 } from '../../translations';
 
-export interface ConfirmCreateRuleProps {
+export interface ConfirmRuleCloseRuleProps {
   onCancel: () => void;
   onConfirm: () => void;
 }
 
-export const ConfirmCreateRule = (props: ConfirmCreateRuleProps) => {
+export const ConfirmRuleClose = (props: ConfirmRuleCloseRuleProps) => {
   const { onCancel, onConfirm } = props;
 
   return (
     <EuiConfirmModal
-      data-test-subj="confirmCreateRuleModal"
-      title={CONFIRMATION_RULE_SAVE_TITLE}
       onCancel={onCancel}
       onConfirm={onConfirm}
-      confirmButtonText={CONFIRM_RULE_SAVE_CONFIRM_BUTTON_TEXT}
-      cancelButtonText={CONFIRM_RULE_SAVE_CANCEL_BUTTON_TEXT}
+      data-test-subj="confirmRuleCloseModal"
+      buttonColor="danger"
       defaultFocusedButton="confirm"
+      title={RULE_FORM_CANCEL_MODAL_TITLE}
+      confirmButtonText={RULE_FORM_CANCEL_MODAL_CONFIRM}
+      cancelButtonText={RULE_FORM_CANCEL_MODAL_CANCEL}
     >
       <EuiText>
-        <p>{CONFIRM_RULE_SAVE_MESSAGE_TEXT}</p>
+        <p>{RULE_FORM_CANCEL_MODAL_DESCRIPTION}</p>
       </EuiText>
     </EuiConfirmModal>
   );
