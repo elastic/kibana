@@ -117,7 +117,6 @@ async function getAllHelper({
       id: inMemoryConnector.id,
       actionTypeId: inMemoryConnector.actionTypeId,
       name: inMemoryConnector.name,
-      config: inMemoryConnector.config,
       isPreconfigured: inMemoryConnector.isPreconfigured,
       isDeprecated: isConnectorDeprecated(inMemoryConnector),
       isSystemAction: inMemoryConnector.isSystemAction,
