@@ -278,7 +278,8 @@ export interface Profile {
   getDefaultAppState: (params: DefaultAppStateExtensionParams) => DefaultAppStateExtension;
 
   /**
-   * Gets an array of default ad hoc data views to display in the data view picker (e.g. "All logs")
+   * Gets an array of default ad hoc data views to display in the data view picker (e.g. "All logs").
+   * The returned specs must include consistent IDs across resolutions for Discover to manage them correctly.
    * @returns The default data views to display in the data view picker
    */
   getDefaultAdHocDataViews: () => Array<

@@ -14,6 +14,11 @@ import type { RootProfileState } from './use_root_profile';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
 
+/**
+ * Hook to retrieve and initialize the default profile ad hoc data views
+ * @param Options The options object
+ * @returns An object containing the initialization function
+ */
 export const useDefaultAdHocDataViews = ({
   stateContainer,
   rootProfileState,

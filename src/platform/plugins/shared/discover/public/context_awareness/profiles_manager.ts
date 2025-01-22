@@ -60,7 +60,7 @@ export interface ResolveRootProfileResult {
    */
   getRenderAppWrapper: AppliedProfile['getRenderAppWrapper'];
   /**
-   * Default ad-hoc data views accessor
+   * Default ad hoc data views accessor
    */
   getDefaultAdHocDataViews: AppliedProfile['getDefaultAdHocDataViews'];
 }
