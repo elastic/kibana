@@ -22,16 +22,19 @@ import {
   EuiTitle,
   EuiIcon,
   EuiLink,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, lazy, Suspense } from 'react';
 
-import { InferenceFlyoutWrapper } from '@kbn/inference-endpoint-ui-common';
+// import { InferenceFlyoutWrapper } from '@kbn/inference-endpoint-ui-common';
 import { useAddEndpoint } from '../../../../../hooks/use_add_endpoint';
 import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
 import { useLoadInferenceEndpoints } from '../../../../../services/api';
 import { UseField } from '../../../shared_imports';
+
+const InferenceFlyoutWrapper = lazy(() => import('@kbn/inference-endpoint-ui-common'));
 export interface SelectInferenceIdProps {
   'data-test-subj'?: string;
 }
@@ -277,14 +280,16 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
         <EuiFlexItem grow={false}>
           {inferencePopover()}
           {isInferenceFlyoutVisible ? (
-            <InferenceFlyoutWrapper
-              onFlyoutClose={onFlyoutClose}
-              onSubmitSuccess={onSubmitSuccess}
-              isEdit={false}
-              http={http}
-              toasts={toasts}
-              addInferenceEndpoint={addInferenceEndpoint}
-            />
+            <Suspense fallback={<EuiLoadingSpinner size="l" />}>
+              <InferenceFlyoutWrapper
+                onFlyoutClose={onFlyoutClose}
+                onSubmitSuccess={onSubmitSuccess}
+                isEdit={false}
+                http={http}
+                toasts={toasts}
+                addInferenceEndpoint={addInferenceEndpoint}
+              />
+            </Suspense>
           ) : null}
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
