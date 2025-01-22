@@ -7,6 +7,7 @@
 
 import { API_BASE_PATH } from '../constants';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { getRandomString } from "@kbn/test-suites-xpack/api_integration/apis/management/index_management/lib/random";
 
 export function indicesApi(getService: FtrProviderContext['getService']) {
   const supertest = getService('supertest');
@@ -47,6 +48,12 @@ export function indicesApi(getService: FtrProviderContext['getService']) {
   const reload = (indexNames?: string[]) =>
     supertest.post(`${API_BASE_PATH}/indices/reload`).set('kbn-xsrf', 'xxx').send({ indexNames });
 
+  const create = (indexName?: string, indexMode?: string) =>
+    supertest
+      .put(`${API_BASE_PATH}/indices/create`)
+      .set('kbn-xsrf', 'xxx')
+      .send({ indexName, indexMode });
+
   return {
     closeIndex,
     openIndex,
@@ -57,5 +64,6 @@ export function indicesApi(getService: FtrProviderContext['getService']) {
     list,
     reload,
     clearCache,
+    create,
   };
 }
