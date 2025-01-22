@@ -64,6 +64,7 @@ export class InspectPanelAction implements Action<EmbeddableApiContext> {
       });
     const session = inspector.open(adapters, {
       title: panelTitle,
+      flyoutType: 'push',
       options: {
         fileName: panelTitle,
       },
