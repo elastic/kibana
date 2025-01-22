@@ -114,16 +114,22 @@ describe('GridLayout', () => {
     expect(mockRenderPanelContents).toHaveBeenCalledTimes(0); // renderPanelContents should not be called after reordering
   });
 
-
   it('panel gets active when dragged', () => {
     renderGridLayout();
     const panel1DragHandle = screen.getAllByRole('button', { name: /drag to move/i })[0];
-    expect(screen.getByLabelText('panelId:panel1').closest("div")).toHaveClass('kbnGridPanel');
+    expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass('kbnGridPanel', {
+      exact: true,
+    });
     mouseStartDragging(panel1DragHandle);
     mouseMoveTo({ clientX: 256, clientY: 128 });
-    expect(screen.getByLabelText('panelId:panel1').closest("div")).toHaveClass('kbnGridPanel kbnGridPanel--active');
+    expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass(
+      'kbnGridPanel kbnGridPanel--active',
+      { exact: true }
+    );
     mouseDrop(panel1DragHandle);
-    expect(screen.getByLabelText('panelId:panel1').closest("div")).toHaveClass('kbnGridPanel');
+    expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass('kbnGridPanel', {
+      exact: true,
+    });
   });
 
   describe('panels order: panels are rendered from left to right, from top to bottom', () => {
