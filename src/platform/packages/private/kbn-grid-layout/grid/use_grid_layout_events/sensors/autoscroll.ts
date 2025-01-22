@@ -14,7 +14,25 @@ const MAX_SPEED = 150;
 
 let scrollInterval: NodeJS.Timeout | null = null;
 
-const scrollOnInterval = (direction: 'up' | 'down') => {
+// Automatically scrolls the screen when the user drags or resizes a panel near the top or bottom edge.
+export function handleAutoscroll (e: UserMouseEvent){
+  const heightPercentage = 100 - ((window.innerHeight - e.clientY) / window.innerHeight) * 100;
+  const atTheTop = window.scrollY <= 0;
+  const atTheBottom = window.innerHeight + window.scrollY >= document.body.scrollHeight;
+
+  const startScrollingUp = heightPercentage < 5 && !atTheTop; // don't scroll up when resizing
+  const startScrollingDown = heightPercentage > 95 && !atTheBottom;
+  if (startScrollingUp || startScrollingDown) {
+    if (!scrollInterval) {
+      // only start scrolling if it's not already happening
+      scrollInterval = scrollOnInterval(startScrollingUp ? 'up' : 'down');
+    }
+  } else {
+    stopAutoScroll();
+  }
+};
+
+function scrollOnInterval (direction: 'up' | 'down') {
   let count = 0;
   let currentSpeed = MIN_SPEED;
   let maxSpeed = MIN_SPEED;
@@ -50,27 +68,9 @@ const scrollOnInterval = (direction: 'up' | 'down') => {
   return scrollInterval;
 };
 
-export const stopAutoScroll = () => {
+export function stopAutoScroll () {
   if (scrollInterval) {
     clearInterval(scrollInterval);
     scrollInterval = null;
-  }
-};
-
-export const handleAutoscroll = (e: UserMouseEvent) => {
-  // auto scroll when an event is happening close to the top or bottom of the screen
-  const heightPercentage = 100 - ((window.innerHeight - e.clientY) / window.innerHeight) * 100;
-  const atTheTop = window.scrollY <= 0;
-  const atTheBottom = window.innerHeight + window.scrollY >= document.body.scrollHeight;
-
-  const startScrollingUp = heightPercentage < 5 && !atTheTop; // don't scroll up when resizing
-  const startScrollingDown = heightPercentage > 95 && !atTheBottom;
-  if (startScrollingUp || startScrollingDown) {
-    if (!scrollInterval) {
-      // only start scrolling if it's not already happening
-      scrollInterval = scrollOnInterval(startScrollingUp ? 'up' : 'down');
-    }
-  } else {
-    stopAutoScroll();
   }
 };

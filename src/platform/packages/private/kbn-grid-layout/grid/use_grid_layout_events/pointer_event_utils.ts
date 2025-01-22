@@ -16,6 +16,7 @@ const getGridWidth = (runtimeSettings: RuntimeGridSettings) => {
   return (gutterSize + columnPixelWidth) * columnCount + gutterSize * 2;
 };
 
+// Calculates the preview rect coordinates for a resized panel  
 export const getResizePreviewRect = ({
   interactionEvent,
   pointerPixel,
@@ -37,6 +38,7 @@ export const getResizePreviewRect = ({
   };
 };
 
+// Calculates the preview rect coordinates for a dragged panel  
 export const getDragPreviewRect = ({
   pointerPixel,
   interactionEvent,
@@ -52,6 +54,8 @@ export const getDragPreviewRect = ({
   };
 };
 
+// Calculates the cursor's offset relative to the active panel's edges (top, left, right, bottom).
+// This ensures the dragged or resized panel maintains its position under the cursor during the interaction.
 export function getPointerOffsets(e: UserInteractionEvent, panelRect: DOMRect) {
   const { clientX, clientY } = getPointerPosition(e);
   return {
