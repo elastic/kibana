@@ -93,6 +93,14 @@ function DocumentationContent({
       </EuiPopoverTitle>
       <EuiFlexGroup
         css={css`
+          .documentation__docs--overlay & {
+            height: 40vh;
+            width: min(75vh, 90vw);
+          }
+          .documentation__docs--inline & {
+            flex: 1;
+            min-height: 0;
+          }
           & > * + * {
             border-left: ${theme.euiTheme.border.thin};
           }

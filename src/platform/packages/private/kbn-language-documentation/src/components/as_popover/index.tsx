@@ -54,7 +54,6 @@ function DocumentationPopover({
     >
       <EuiPopover
         panelClassName="documentation__docs--overlay"
-        panelProps={{ css: { height: '40vh', width: 'min(75vh, 90vw)' } }}
         panelPaddingSize="none"
         isOpen={isHelpMenuOpen}
         closePopover={() => onHelpMenuVisibilityChange(false)}

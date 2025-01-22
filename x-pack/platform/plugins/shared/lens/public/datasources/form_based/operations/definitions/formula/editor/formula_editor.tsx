@@ -926,10 +926,8 @@ export function FormulaEditor({
         {/* fix the css here */}
         {isFullscreen && isHelpOpen ? (
           <div
-            className="lnsFormula__docs"
+            className="lnsFormula__docs documentation__docs--inline"
             css={css`
-              flex: 1;
-              min-height: 0;
               display: flex;
               flex-direction: column;
               // make sure docs are rendered in front of monaco
