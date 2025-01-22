@@ -10,19 +10,33 @@
 import React, { useCallback, useState, useEffect, useRef, useMemo } from 'react';
 import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css, type SerializedStyles } from '@emotion/react';
+import { css, type SerializedStyles, keyframes } from '@emotion/react';
 import {
   useInTableSearchMatches,
   UseInTableSearchMatchesProps,
 } from './use_in_table_search_matches';
 import { InTableSearchInput, INPUT_TEST_SUBJ } from './in_table_search_input';
 
+// An animation to highlight the active cell.
+// It's useful when the active match is not visible due to the cell height.
+const fadeOutIn = keyframes`
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+  }
+`;
+
 const BUTTON_TEST_SUBJ = 'startInTableSearchButton';
 
 export interface InTableSearchControlProps
   extends Omit<UseInTableSearchMatchesProps, 'onScrollToActiveMatch'> {
   pageSize: number | null; // null when the pagination is disabled
-  scrollToCell: (params: { rowIndex: number; columnIndex: number; align: 'auto' }) => void;
+  scrollToCell: (params: { rowIndex: number; columnIndex: number; align: 'smart' }) => void;
   shouldOverrideCmdF: (element: HTMLElement) => boolean;
   onChange: (searchTerm: string | undefined) => void;
   onChangeCss: (styles: SerializedStyles) => void;
@@ -52,9 +66,13 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
 
       // TODO: use a named color token
       onChangeCss(css`
-        .euiDataGridRowCell[data-gridcell-row-index='${rowIndex}'][data-gridcell-column-id='${columnId}']
+        .euiDataGridRowCell[data-gridcell-row-index='${rowIndex}'][data-gridcell-column-id='${columnId}'] {
+          .euiDataGridRowCell__content {
+            animation: 0.3s 1 forwards ${fadeOutIn};
+          }
           .unifiedDataTable__inTableSearchMatch[data-match-index='${matchIndexWithinCell}'] {
-          background-color: #ffc30e !important;
+            background-color: #ffc30e !important;
+          }
         }
       `);
 
@@ -71,7 +89,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
       scrollToCell({
         rowIndex: visibleRowIndex,
         columnIndex: Number(columnIndex),
-        align: 'auto',
+        align: 'smart',
       });
     },
     [scrollToCell, onChangeCss, onChangeToExpectedPage, pageSize]
