@@ -1112,7 +1112,7 @@
         "label": "BinaryFilterCondition",
         "description": [],
         "signature": [
-          "{ value: string | number | boolean; field: string; operator: \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"contains\" | \"gt\" | \"lt\" | \"eq\" | \"neq\"; }"
+          "{ value: string | number | boolean; field: string; operator: \"contains\" | \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"gt\" | \"lt\" | \"eq\" | \"neq\"; }"
         ],
         "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
@@ -1127,7 +1127,7 @@
         "label": "Condition",
         "description": [],
         "signature": [
-          "{ field: string; operator: \"exists\" | \"notExists\"; } | { value: string | number | boolean; field: string; operator: \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"contains\" | \"gt\" | \"lt\" | \"eq\" | \"neq\"; } | ",
+          "{ field: string; operator: \"exists\" | \"notExists\"; } | { value: string | number | boolean; field: string; operator: \"contains\" | \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"gt\" | \"lt\" | \"eq\" | \"neq\"; } | ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -1233,7 +1233,7 @@
         "label": "FilterCondition",
         "description": [],
         "signature": [
-          "{ field: string; operator: \"exists\" | \"notExists\"; } | { value: string | number | boolean; field: string; operator: \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"contains\" | \"gt\" | \"lt\" | \"eq\" | \"neq\"; }"
+          "{ field: string; operator: \"exists\" | \"notExists\"; } | { value: string | number | boolean; field: string; operator: \"contains\" | \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"gt\" | \"lt\" | \"eq\" | \"neq\"; }"
         ],
         "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
@@ -1792,7 +1792,7 @@
         "label": "binaryConditionSchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ field: Zod.ZodString; operator: Zod.ZodEnum<[\"eq\", \"neq\", \"lt\", \"lte\", \"gt\", \"gte\", \"contains\", \"startsWith\", \"endsWith\"]>; value: Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>; }, \"strip\", Zod.ZodTypeAny, { value: string | number | boolean; field: string; operator: \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"contains\" | \"gt\" | \"lt\" | \"eq\" | \"neq\"; }, { value: string | number | boolean; field: string; operator: \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"contains\" | \"gt\" | \"lt\" | \"eq\" | \"neq\"; }>"
+          "Zod.ZodObject<{ field: Zod.ZodString; operator: Zod.ZodEnum<[\"eq\", \"neq\", \"lt\", \"lte\", \"gt\", \"gte\", \"contains\", \"startsWith\", \"endsWith\"]>; value: Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>; }, \"strip\", Zod.ZodTypeAny, { value: string | number | boolean; field: string; operator: \"contains\" | \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"gt\" | \"lt\" | \"eq\" | \"neq\"; }, { value: string | number | boolean; field: string; operator: \"contains\" | \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"gt\" | \"lt\" | \"eq\" | \"neq\"; }>"
         ],
         "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
@@ -1928,7 +1928,7 @@
         "label": "filterConditionSchema",
         "description": [],
         "signature": [
-          "Zod.ZodDiscriminatedUnion<\"operator\", [Zod.ZodObject<{ field: Zod.ZodString; operator: Zod.ZodEnum<[\"exists\", \"notExists\"]>; }, \"strip\", Zod.ZodTypeAny, { field: string; operator: \"exists\" | \"notExists\"; }, { field: string; operator: \"exists\" | \"notExists\"; }>, Zod.ZodObject<{ field: Zod.ZodString; operator: Zod.ZodEnum<[\"eq\", \"neq\", \"lt\", \"lte\", \"gt\", \"gte\", \"contains\", \"startsWith\", \"endsWith\"]>; value: Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>; }, \"strip\", Zod.ZodTypeAny, { value: string | number | boolean; field: string; operator: \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"contains\" | \"gt\" | \"lt\" | \"eq\" | \"neq\"; }, { value: string | number | boolean; field: string; operator: \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"contains\" | \"gt\" | \"lt\" | \"eq\" | \"neq\"; }>]>"
+          "Zod.ZodDiscriminatedUnion<\"operator\", [Zod.ZodObject<{ field: Zod.ZodString; operator: Zod.ZodEnum<[\"exists\", \"notExists\"]>; }, \"strip\", Zod.ZodTypeAny, { field: string; operator: \"exists\" | \"notExists\"; }, { field: string; operator: \"exists\" | \"notExists\"; }>, Zod.ZodObject<{ field: Zod.ZodString; operator: Zod.ZodEnum<[\"eq\", \"neq\", \"lt\", \"lte\", \"gt\", \"gte\", \"contains\", \"startsWith\", \"endsWith\"]>; value: Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>; }, \"strip\", Zod.ZodTypeAny, { value: string | number | boolean; field: string; operator: \"contains\" | \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"gt\" | \"lt\" | \"eq\" | \"neq\"; }, { value: string | number | boolean; field: string; operator: \"contains\" | \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"gt\" | \"lt\" | \"eq\" | \"neq\"; }>]>"
         ],
         "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
