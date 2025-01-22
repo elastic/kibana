@@ -51,11 +51,12 @@ import { StartStep } from './start_step';
 
 export type ConnectorCreationSteps = 'start' | 'deployment' | 'configure' | 'finish';
 export type SelfManagePreference = 'native' | 'selfManaged';
+
 export const CreateConnector: React.FC = () => {
   const { overlays } = useKibana().services;
 
   const { http } = useValues(HttpLogic);
-  const { application, history } = useValues(KibanaLogic);
+  const { application, history, isAgentlessEnabled } = useValues(KibanaLogic);
 
   const { error } = useValues(AddConnectorApiLogic);
   const { euiTheme } = useEuiTheme();
@@ -65,13 +66,10 @@ export const CreateConnector: React.FC = () => {
   const { setCurrentStep } = useActions(NewConnectorLogic);
   const stepStates = generateStepState(currentStep);
 
-  const { config } = useValues(KibanaLogic);
-  const isRunningLocally = (config.host ?? '').includes('localhost');
-
   useEffect(() => {
     if (
       (selectedConnector && !selectedConnector.isNative && selfManagePreference === 'native') ||
-      isRunningLocally
+      !isAgentlessEnabled
     ) {
       setSelfManagePreference('selfManaged');
     }
@@ -146,7 +144,6 @@ export const CreateConnector: React.FC = () => {
           setSelfManagePreference(preference);
         }}
         error={errorToText(error)}
-        isRunningLocally={isRunningLocally}
       />
     ),
   };

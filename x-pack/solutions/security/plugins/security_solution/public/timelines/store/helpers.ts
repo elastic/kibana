@@ -22,7 +22,7 @@ import {
   TimelineStatusEnum,
   TimelineTypeEnum,
 } from '../../../common/api/timeline';
-import { TimelineId } from '../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
 import type {
   ColumnHeaderOptions,
   TimelineEventsType,
@@ -248,7 +248,10 @@ export const updateTimelineGraphEventId = ({
     [id]: {
       ...timeline,
       graphEventId,
-      ...(graphEventId === '' && id === TimelineId.active
+      // if use click close analyzer button, it will go back to the previous tab
+      ...(graphEventId === '' &&
+      id === TimelineId.active &&
+      timeline.activeTab === TimelineTabs.graph
         ? { activeTab: timeline.prevActiveTab, prevActiveTab: timeline.activeTab }
         : {}),
     },

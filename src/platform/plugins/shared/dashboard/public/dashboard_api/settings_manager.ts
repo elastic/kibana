@@ -11,7 +11,7 @@ import fastIsEqual from 'fast-deep-equal';
 import { StateComparators, initializeTitles } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { DashboardSettings, DashboardState } from './types';
-import { DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
+import { DEFAULT_DASHBOARD_INPUT } from './default_dashboard_input';
 
 export function initializeSettingsManager(initialState?: DashboardState) {
   const syncColors$ = new BehaviorSubject<boolean>(

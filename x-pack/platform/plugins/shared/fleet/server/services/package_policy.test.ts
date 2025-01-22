@@ -208,6 +208,10 @@ jest.mock('./upgrade_sender', () => {
 jest.mock('./audit_logging');
 const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 
+jest.mock('./secrets', () => ({
+  isSecretStorageEnabled: jest.fn(),
+}));
+
 type CombinedExternalCallback = PutPackagePolicyUpdateCallback | PostPackagePolicyCreateCallback;
 
 const mockAgentPolicyGet = (spaceIds: string[] = ['default']) => {
@@ -227,7 +231,7 @@ const mockAgentPolicyGet = (spaceIds: string[] = ['default']) => {
       });
     }
   );
-  mockAgentPolicyService.getByIDs.mockImplementation(
+  mockAgentPolicyService.getByIds.mockImplementation(
     // @ts-ignore
     (_soClient: SavedObjectsClientContract, ids: string[]) => {
       return Promise.resolve(

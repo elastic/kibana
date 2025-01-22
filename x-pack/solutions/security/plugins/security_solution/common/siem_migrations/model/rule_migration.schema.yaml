@@ -72,6 +72,9 @@ components:
         severity:
           type: string
           description: The migrated rule severity.
+        risk_score:
+          type: number
+          description: The migrated rule risk_score value, integer between 0 and 100.
         query:
           type: string
           description: The translated elastic query.
@@ -83,9 +86,11 @@ components:
         prebuilt_rule_id:
           description: The Elastic prebuilt rule id matched.
           $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
-        integration_id:
-          type: string
-          description: The Elastic integration ID found to be most relevant to the splunk rule.
+        integration_ids:
+          type: array
+          description: The IDs of the Elastic integrations suggested to be installed for this rule.
+          items:
+            type: string
         id:
           description: The Elastic rule id installed as a result.
           $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
@@ -313,12 +318,16 @@ components:
         elastic_rule:
           description: The migrated elastic rule attributes to update.
           $ref: '#/components/schemas/ElasticRulePartial'
-        translation_result:
-          description: The rule translation result.
-          $ref: '#/components/schemas/RuleMigrationTranslationResult'
         comments:
           description: The comments for the migration including a summary from the LLM in markdown.
           $ref: '#/components/schemas/RuleMigrationComments'
+
+    RuleMigrationRetryFilter:
+      type: string
+      description: Indicates the filter to retry the migrations rules translation
+      enum: # should match SiemMigrationRetryFilter enum at ../constants.ts
+        - failed
+        - not_fully_translated
 
     ## Rule migration resources
 

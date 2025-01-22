@@ -15,6 +15,7 @@ import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { ChromeStart, NavigateToAppOptions, UserProfileService } from '@kbn/core/public';
+import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import { useQuery } from '@tanstack/react-query';
 import { updatePromptContexts } from './helpers';
 import type {
@@ -78,6 +79,7 @@ export interface AssistantProviderProps {
   title?: string;
   toasts?: IToasts;
   currentAppId: string;
+  productDocBase: ProductDocBasePluginStart;
   userProfileService: UserProfileService;
   chrome: ChromeStart;
 }
@@ -131,6 +133,7 @@ export interface UseAssistantContext {
   unRegisterPromptContext: UnRegisterPromptContext;
   currentAppId: string;
   codeBlockRef: React.MutableRefObject<(codeBlock: string) => void>;
+  productDocBase: ProductDocBasePluginStart;
   userProfileService: UserProfileService;
   chrome: ChromeStart;
 }
@@ -153,6 +156,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   baseConversations,
   navigateToApp,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
+  productDocBase,
   title = DEFAULT_ASSISTANT_TITLE,
   toasts,
   currentAppId,
@@ -291,6 +295,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       promptContexts,
       navigateToApp,
       nameSpace,
+      productDocBase,
       registerPromptContext,
       selectedSettingsTab,
       // can be undefined from localStorage, if not defined, default to true
@@ -331,6 +336,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       promptContexts,
       navigateToApp,
       nameSpace,
+      productDocBase,
       registerPromptContext,
       selectedSettingsTab,
       localStorageStreaming,

@@ -8,7 +8,7 @@
 import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import * as i18n from './translations';
-import { EntityAnalyticsLearnMoreLink } from '../../entity_analytics/components/risk_score_onboarding/entity_analytics_doc_link';
+import { EntityAnalyticsLearnMoreLink } from '../../entity_analytics/components/entity_analytics_learn_more_link';
 
 export const RiskScoreInfoTooltip: React.FC<{
   toolTipContent: React.ReactNode;

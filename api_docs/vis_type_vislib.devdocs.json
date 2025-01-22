@@ -32,7 +32,7 @@
         "signature": [
           "\"visualization:heatmap:maxBuckets\""
         ],
-        "path": "src/plugins/vis_types/vislib/common/index.ts",
+        "path": "src/platform/plugins/private/vis_types/vislib/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

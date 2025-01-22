@@ -108,7 +108,6 @@
     "@kbn/observability-alerting-rule-utils",
     "@kbn/core-application-browser",
     "@kbn/shared-ux-page-no-data-types",
-    "@kbn/xstate-utils",
     "@kbn/entityManager-plugin",
     "@kbn/zod",
     "@kbn/observability-utils-server",

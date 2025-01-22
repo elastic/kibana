@@ -23,7 +23,7 @@ import type {
   SearchRequest as SearchRequestWithBody,
   AggregationsAggregate,
   EqlSearchRequest as EqlSearchRequestWithBody,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { SearchMetrics, RuleInfo } from './types';
 

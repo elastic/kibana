@@ -856,7 +856,7 @@ export const MODIFIED_TOOLTIP = i18n.translate(
   }
 );
 
-export const RULE_EXECTION_STATUS_FILTER = i18n.translate(
+export const RULE_EXECUTION_STATUS_FILTER = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.ruleExecutionStatusFilter',
   {
     defaultMessage: 'Select rule execution status to filter by',
