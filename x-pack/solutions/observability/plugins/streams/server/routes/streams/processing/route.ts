@@ -7,30 +7,30 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { z } from '@kbn/zod';
-import { notFound, internal, badRequest } from '@hapi/boom';
+import { badRequest, internal, notFound } from '@hapi/boom';
+import { IScopedClusterClient } from '@kbn/core/server';
+import { calculateObjectDiff, flattenObject } from '@kbn/object-utils';
 import {
   FieldDefinitionConfig,
-  fieldDefinitionConfigSchema,
-  processingDefinitionSchema,
+  namedFieldDefinitionConfigSchema,
+  processorDefinitionSchema,
 } from '@kbn/streams-schema';
-import { calculateObjectDiff, flattenObject } from '@kbn/object-utils';
+import { z } from '@kbn/zod';
 import { isEmpty } from 'lodash';
-import { IScopedClusterClient } from '@kbn/core/server';
+import { DefinitionNotFound } from '../../../lib/streams/errors';
 import { DetectedMappingFailure } from '../../../lib/streams/errors/detected_mapping_failure';
 import { NonAdditiveProcessor } from '../../../lib/streams/errors/non_additive_processor';
 import { SimulationFailed } from '../../../lib/streams/errors/simulation_failed';
 import { formatToIngestProcessors } from '../../../lib/streams/helpers/processing';
-import { createServerRoute } from '../../create_server_route';
-import { DefinitionNotFound } from '../../../lib/streams/errors';
 import { checkAccess } from '../../../lib/streams/stream_crud';
+import { createServerRoute } from '../../create_server_route';
 
 const paramsSchema = z.object({
   path: z.object({ id: z.string() }),
   body: z.object({
-    processing: z.array(processingDefinitionSchema),
+    processing: z.array(processorDefinitionSchema),
     documents: z.array(z.record(z.unknown())),
-    detected_fields: z.array(fieldDefinitionConfigSchema.extend({ name: z.string() })).optional(),
+    detected_fields: z.array(namedFieldDefinitionConfigSchema).optional(),
   }),
 });
 

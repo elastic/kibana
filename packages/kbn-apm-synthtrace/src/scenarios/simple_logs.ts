@@ -144,7 +144,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 .defaults({
                   ...commonLongEntryFields,
                   'error.message': message,
-                  'error.exception.stacktrace': 'Error message in error.exception.stacktrace',
+                  'error.stack_trace': 'Stacktrace',
                 })
                 .timestamp(timestamp);
             });
@@ -174,7 +174,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 .defaults({
                   ...commonLongEntryFields,
                   'event.original': message,
-                  'error.log.stacktrace': 'Error message in error.log.stacktrace',
+                  'error.stack_trace': 'Stacktrace',
                   'event.start': eventDate,
                   'event.end': moment(eventDate).add(1, 'm').toDate(),
                 })
@@ -203,7 +203,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 .setHostIp(getIpAddress())
                 .defaults({
                   ...commonLongEntryFields,
-                  'error.stack_trace': 'Error message in error.stack_trace',
+                  'error.stack_trace': 'Stacktrace',
                 })
                 .timestamp(timestamp);
             });
