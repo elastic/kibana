@@ -55,7 +55,7 @@ export const PresentationPanelTitle = ({
 
     if (viewMode !== 'edit' || !isApiCompatibleWithCustomizePanelAction(api)) {
       return (
-        <span data-test-subj="embeddablePanelTitleInner" css={titleStyles}>
+        <span data-test-subj="embeddablePanelTitle" css={titleStyles}>
           {panelTitle}
         </span>
       );
@@ -70,7 +70,7 @@ export const PresentationPanelTitle = ({
           defaultMessage: 'Click to edit title: {title}',
           values: { title: panelTitle },
         })}
-        data-test-subj="embeddablePanelTitleLink"
+        data-test-subj="embeddablePanelTitle"
       >
         {panelTitle}
       </EuiLink>
