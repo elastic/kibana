@@ -37,7 +37,7 @@ const YELLOW = 'rgb(256, 256, 0)';
 const RED = 'rgb(256, 0, 0)';
 const HEATMAP_PALETTE = [ROYAL_BLUE, CYAN, LIME, YELLOW, RED];
 
-type COLOR_PALETTE = Omit<EuiColorPalettePickerPaletteProps, 'title'> & {
+type COLOR_PALETTE = EuiColorPalettePickerPaletteProps & {
   getPalette: (steps: number) => string[];
 };
 
@@ -49,6 +49,7 @@ function getColorBlindPalette(steps: number) {
 
 const COLOR_PALETTES: COLOR_PALETTE[] = [
   {
+    title: 'Blues',
     value: 'Blues',
     getPalette: (steps: number) => {
       return euiPaletteCool(steps);
@@ -57,6 +58,7 @@ const COLOR_PALETTES: COLOR_PALETTE[] = [
     type: 'gradient',
   },
   {
+    title: 'Greens',
     value: 'Greens',
     getPalette: (steps: number) => {
       return euiPaletteGreen(steps);
@@ -65,6 +67,7 @@ const COLOR_PALETTES: COLOR_PALETTE[] = [
     type: 'gradient',
   },
   {
+    title: 'Greys',
     value: 'Greys',
     getPalette: (steps: number) => {
       return euiPaletteGray(steps);
@@ -73,6 +76,7 @@ const COLOR_PALETTES: COLOR_PALETTE[] = [
     type: 'gradient',
   },
   {
+    title: 'Reds',
     value: 'Reds',
     getPalette: (steps: number) => {
       return euiPaletteRed(steps);
@@ -81,6 +85,7 @@ const COLOR_PALETTES: COLOR_PALETTE[] = [
     type: 'gradient',
   },
   {
+    title: 'Yellow to Red',
     value: 'Yellow to Red',
     getPalette: (steps: number) => {
       return euiPaletteWarm(steps);
@@ -89,6 +94,7 @@ const COLOR_PALETTES: COLOR_PALETTE[] = [
     type: 'gradient',
   },
   {
+    title: 'Green to Red',
     value: 'Green to Red',
     getPalette: (steps: number) => {
       return euiPaletteForStatus(steps);
@@ -97,6 +103,7 @@ const COLOR_PALETTES: COLOR_PALETTE[] = [
     type: 'gradient',
   },
   {
+    title: 'Blue to Red',
     value: 'Blue to Red',
     getPalette: (steps: number) => {
       return euiPaletteForTemperature(steps);
@@ -105,6 +112,7 @@ const COLOR_PALETTES: COLOR_PALETTE[] = [
     type: 'gradient',
   },
   {
+    title: 'Heatmap',
     value: DEFAULT_HEATMAP_COLOR_RAMP_NAME,
     getPalette: (steps: number) => {
       return colorPaletteGenerator(HEATMAP_PALETTE, steps, true, true);
@@ -113,18 +121,21 @@ const COLOR_PALETTES: COLOR_PALETTE[] = [
     type: 'gradient',
   },
   {
+    title: 'Color Blind',
     value: 'palette_0',
     getPalette: getColorBlindPalette,
     palette: euiPaletteColorBlind(),
     type: 'fixed',
   },
   {
+    title: 'Color Blind (20)',
     value: 'palette_20',
     getPalette: getColorBlindPalette,
     palette: euiPaletteColorBlind({ rotations: 2 }),
     type: 'fixed',
   },
   {
+    title: 'Color Blind (30)',
     value: 'palette_30',
     getPalette: getColorBlindPalette,
     palette: euiPaletteColorBlind({ rotations: 3 }),
