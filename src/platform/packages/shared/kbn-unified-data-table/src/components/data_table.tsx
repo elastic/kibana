@@ -533,13 +533,11 @@ export const UnifiedDataTable = ({
   } = selectedDocsState;
 
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
-  const currentPageIndexRef = useRef<number>(0);
 
   const changeCurrentPageIndex = useCallback(
     (value: number) => {
       setCurrentPageIndex(value);
       onUpdatePageIndex?.(value);
-      currentPageIndexRef.current = value;
     },
     [setCurrentPageIndex, onUpdatePageIndex]
   );
@@ -638,7 +636,6 @@ export const UnifiedDataTable = ({
       const calculatedPageIndex = previousPageIndex > pageCount - 1 ? 0 : previousPageIndex;
       if (calculatedPageIndex !== previousPageIndex) {
         onUpdatePageIndex?.(calculatedPageIndex);
-        currentPageIndexRef.current = calculatedPageIndex;
       }
       return calculatedPageIndex;
     });
