@@ -28,7 +28,8 @@ export const useAvailableCasesOwners = (
         return availableOwners;
       }
       for (const cap of capabilities) {
-        const hasCapability = !!kibanaCapability[`${cap}_cases`];
+        const hasCapability =
+          !!kibanaCapability[`${cap}_cases`] || !!kibanaCapability[`cases_${cap}`];
         if (!hasCapability) {
           return availableOwners;
         }

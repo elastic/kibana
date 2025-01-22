@@ -326,7 +326,7 @@ export interface CasesPermissions {
   settings: boolean;
   reopenCase: boolean;
   createComment: boolean;
-  assignCases: boolean;
+  assign: boolean;
 }
 
 export interface CasesCapabilities {

@@ -19,7 +19,7 @@ export const noCasesPermissions = () =>
     settings: false,
     createComment: false,
     reopenCase: false,
-    assignCases: false,
+    assign: false,
   });
 
 export const readCasesPermissions = () =>
@@ -33,14 +33,14 @@ export const readCasesPermissions = () =>
     settings: false,
     createComment: false,
     reopenCase: false,
-    assignCases: false,
+    assign: false,
   });
 export const noCreateCasesPermissions = () => buildCasesPermissions({ create: false });
 export const noCreateCommentCasesPermissions = () =>
   buildCasesPermissions({ createComment: false });
 export const noUpdateCasesPermissions = () =>
   buildCasesPermissions({ update: false, reopenCase: false });
-export const noAssignCasesPermissions = () => buildCasesPermissions({ assignCases: false });
+export const noAssignCasesPermissions = () => buildCasesPermissions({ assign: false });
 export const noPushCasesPermissions = () => buildCasesPermissions({ push: false });
 export const noDeleteCasesPermissions = () => buildCasesPermissions({ delete: false });
 export const noReopenCasesPermissions = () => buildCasesPermissions({ reopenCase: false });
@@ -54,7 +54,7 @@ export const onlyCreateCommentPermissions = () =>
     push: false,
     createComment: true,
     reopenCase: false,
-    assignCases: false,
+    assign: false,
   });
 export const onlyDeleteCasesPermission = () =>
   buildCasesPermissions({
@@ -65,7 +65,7 @@ export const onlyDeleteCasesPermission = () =>
     push: false,
     createComment: false,
     reopenCase: false,
-    assignCases: false,
+    assign: false,
   });
 // In practice, a real life user should never have this configuration, but testing for thoroughness
 export const onlyReopenCasesPermission = () =>
@@ -77,7 +77,7 @@ export const onlyReopenCasesPermission = () =>
     push: false,
     createComment: false,
     reopenCase: true,
-    assignCases: false,
+    assign: false,
   });
 export const noConnectorsCasePermission = () => buildCasesPermissions({ connectors: false });
 export const noCasesSettingsPermission = () => buildCasesPermissions({ settings: false });
@@ -93,7 +93,7 @@ export const buildCasesPermissions = (overrides: Partial<Omit<CasesPermissions, 
   const settings = overrides.settings ?? true;
   const reopenCase = overrides.reopenCase ?? true;
   const createComment = overrides.createComment ?? true;
-  const assignCases = overrides.assignCases ?? true;
+  const assign = overrides.assign ?? true;
   const all =
     create &&
     read &&
@@ -103,7 +103,7 @@ export const buildCasesPermissions = (overrides: Partial<Omit<CasesPermissions, 
     settings &&
     connectors &&
     reopenCase &&
-    assignCases &&
+    assign &&
     createComment;
 
   return {
@@ -117,7 +117,7 @@ export const buildCasesPermissions = (overrides: Partial<Omit<CasesPermissions, 
     settings,
     reopenCase,
     createComment,
-    assignCases,
+    assign,
   };
 };
 

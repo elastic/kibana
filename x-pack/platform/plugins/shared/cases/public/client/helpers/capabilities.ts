@@ -56,6 +56,6 @@ export const getUICapabilities = (
     settings,
     reopenCase,
     createComment,
-    assignCases,
+    assign: assignCases,
   };
 };

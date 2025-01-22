@@ -75,7 +75,7 @@ export const useBulkActions = ({
 
   const canDelete = deleteAction.canDelete;
   const canUpdate = statusAction.canUpdateStatus;
-  const canAssign = permissions.assignCases;
+  const canAssign = permissions.assign;
 
   const panels = useMemo((): EuiContextMenuPanelDescriptor[] => {
     const mainPanelItems: EuiContextMenuPanelItemDescriptor[] = [];

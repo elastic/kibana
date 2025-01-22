@@ -100,7 +100,7 @@ export const CasesProvider: FC<
         update: permissions.update,
         reopenCase: permissions.reopenCase,
         createComment: permissions.createComment,
-        assignCases: permissions.assignCases,
+        assign: permissions.assign,
       },
       basePath,
       /**
@@ -132,7 +132,7 @@ export const CasesProvider: FC<
       permissions.update,
       permissions.reopenCase,
       permissions.createComment,
-      permissions.assignCases,
+      permissions.assign,
     ]
   );
 

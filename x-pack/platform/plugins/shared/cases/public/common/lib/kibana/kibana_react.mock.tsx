@@ -93,7 +93,7 @@ export const createStartServicesMock = ({ license }: StartServiceArgs = {}): Sta
       cases_settings: true,
       case_reopen: true,
       create_comment: true,
-      assign: true,
+      cases_assign: true,
     },
     visualize: { save: true, show: true },
     dashboard: { show: true, createNew: true },

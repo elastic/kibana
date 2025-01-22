@@ -195,7 +195,7 @@ export const useApplicationCapabilities = (): UseApplicationCapabilities => {
         settings: permissions.settings,
         reopenCase: permissions.reopenCase,
         createComment: permissions.createComment,
-        assignCases: permissions.assignCases,
+        assign: permissions.assign,
       },
       visualize: { crud: !!capabilities.visualize?.save, read: !!capabilities.visualize?.show },
       dashboard: {
@@ -220,7 +220,7 @@ export const useApplicationCapabilities = (): UseApplicationCapabilities => {
       permissions.settings,
       permissions.reopenCase,
       permissions.createComment,
-      permissions.assignCases,
+      permissions.assign,
     ]
   );
 };
