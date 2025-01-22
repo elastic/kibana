@@ -26,7 +26,7 @@ EXIT_CODE=0
 
 # Discovery Enhanced parallel run
 for run_mode in "--stateful" "--serverless=es" "--serverless=oblt" "--serverless=security"; do
-  run_tests "Discovery Enhanced" "x-pack/platform/plugins/private/discover_enhanced/ui_tests/parallel.playwright.config.ts" "$run_mode"
+  run_tests "Discovery Enhanced: Parallel Run" "x-pack/platform/plugins/private/discover_enhanced/ui_tests/parallel.playwright.config.ts" "$run_mode"
 done
 
 # Discovery Enhanced
