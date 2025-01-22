@@ -20,7 +20,7 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { DatePickerWrapper } from '@kbn/ml-date-picker';
 
 import * as routes from '../../routing/routes';
-import * as overviewRoutes from '../../routing/routes/overview';
+import * as overviewRoutes from '../../routing/routes/overview_management';
 import * as anomalyDetectionRoutes from '../../routing/routes/anomaly_detection_management';
 import * as dfaRoutes from '../../routing/routes/data_frame_analytics_management';
 import * as suppliedConfigsRoutes from '../../routing/routes/supplied_configurations';

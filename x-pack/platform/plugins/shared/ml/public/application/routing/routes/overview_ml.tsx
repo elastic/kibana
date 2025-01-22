@@ -21,7 +21,7 @@ import { createPath, PageLoader } from '../router';
 import { useRouteResolver } from '../use_resolver';
 import { initSavedObjects } from '../resolvers';
 
-const OverviewPage = React.lazy(() => import('../../overview/overview_ml_page'));
+const OverviewMlPage = React.lazy(() => import('../../overview/overview_ml_page'));
 
 export const overviewRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -58,7 +58,7 @@ const PageWrapper: FC<PageProps> = () => {
     <PageLoader context={context}>
       {/* No fallback yet, we don't show a loading spinner on an outer level until context is available either. */}
       <Suspense fallback={null}>
-        <OverviewPage />
+        <OverviewMlPage />
       </Suspense>
     </PageLoader>
   );

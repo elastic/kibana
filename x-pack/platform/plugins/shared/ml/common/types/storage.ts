@@ -15,6 +15,7 @@ export const ML_FROZEN_TIER_PREFERENCE = 'ml.frozenDataTierPreference';
 export const ML_ANOMALY_EXPLORER_PANELS = 'ml.anomalyExplorerPanels';
 export const ML_NOTIFICATIONS_LAST_CHECKED_AT = 'ml.notificationsLastCheckedAt';
 export const ML_OVERVIEW_PANELS = 'ml.overviewPanels';
+export const ML_OVERVIEW_PANELS_EXTENDED = 'ml.overviewPanelsExtended';
 export const ML_ELSER_CALLOUT_DISMISSED = 'ml.elserUpdateCalloutDismissed';
 
 export type PartitionFieldConfig =
@@ -61,6 +62,10 @@ export interface OverviewPanelsState {
   dfaJobs: boolean;
 }
 
+export interface OverviewPanelsExtendedState {
+  memoryUsage: boolean;
+}
+
 export interface MlStorageRecord {
   [key: string]: unknown;
   [ML_ENTITY_FIELDS_CONFIG]: PartitionFieldsConfig;
@@ -70,6 +75,7 @@ export interface MlStorageRecord {
   [ML_ANOMALY_EXPLORER_PANELS]: AnomalyExplorerPanelsState | undefined;
   [ML_NOTIFICATIONS_LAST_CHECKED_AT]: number | undefined;
   [ML_OVERVIEW_PANELS]: OverviewPanelsState;
+  [ML_OVERVIEW_PANELS_EXTENDED]: OverviewPanelsExtendedState;
   [ML_ELSER_CALLOUT_DISMISSED]: boolean | undefined;
 }
 
@@ -91,6 +97,8 @@ export type TMlStorageMapped<T extends MlStorageKey> = T extends typeof ML_ENTIT
   ? number | undefined
   : T extends typeof ML_OVERVIEW_PANELS
   ? OverviewPanelsState | undefined
+  : T extends typeof ML_OVERVIEW_PANELS_EXTENDED
+  ? OverviewPanelsExtendedState | undefined
   : T extends typeof ML_ELSER_CALLOUT_DISMISSED
   ? boolean | undefined
   : null;
