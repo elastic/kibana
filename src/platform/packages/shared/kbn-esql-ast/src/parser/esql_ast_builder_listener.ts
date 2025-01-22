@@ -121,15 +121,13 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
     this.ast.push(commandAst);
     commandAst.args.push(...collectAllSourceIdentifiers(ctx));
     const metadataContext = ctx.metadata();
-    const metadataContent =
-      metadataContext?.deprecated_metadata()?.metadataOption() || metadataContext?.metadataOption();
-    if (metadataContent && metadataContent.METADATA()) {
+    if (metadataContext && metadataContext.METADATA()) {
       const option = createOption(
-        metadataContent.METADATA().getText().toLowerCase(),
-        metadataContent
+        metadataContext.METADATA().getText().toLowerCase(),
+        metadataContext
       );
       commandAst.args.push(option);
-      option.args.push(...collectAllColumnIdentifiers(metadataContent));
+      option.args.push(...collectAllColumnIdentifiers(metadataContext));
     }
   }
 
