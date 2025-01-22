@@ -20,6 +20,7 @@ import {
   toolChoiceToOpenAI,
   messagesToOpenAI,
   processOpenAIStream,
+  emitTokenCountEstimateIfMissing,
 } from '../openai';
 
 export const inferenceAdapter: InferenceConnectorAdapter = {
@@ -72,7 +73,7 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
       switchMap((response) => {
         if (response.status === 'error') {
           return throwError(() =>
-            createInferenceInternalError('Error calling the inference API', {
+            createInferenceInternalError(`Error calling connector: ${response.serviceMessage}`, {
               rootError: response.serviceMessage,
             })
           );
@@ -85,6 +86,7 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
         );
       }),
       processOpenAIStream(),
+      emitTokenCountEstimateIfMissing({ request }),
       simulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
     );
   },
