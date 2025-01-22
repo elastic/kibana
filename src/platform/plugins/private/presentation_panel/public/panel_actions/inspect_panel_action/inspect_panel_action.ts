@@ -15,6 +15,7 @@ import {
   getPanelTitle,
   PublishesPanelTitle,
   HasParentApi,
+  apiHasUniqueId,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { ACTION_INSPECT_PANEL } from './constants';
@@ -72,6 +73,12 @@ export class InspectPanelAction implements Action<EmbeddableApiContext> {
     });
 
     // send the overlay ref to the parent API if it is capable of tracking overlays
-    if (tracksOverlays(embeddable.parentApi)) embeddable.parentApi?.openOverlay(session);
+    if (tracksOverlays(embeddable.parentApi)) {
+      const openOverlayOptions = apiHasUniqueId(embeddable)
+        ? { focusedPanelId: embeddable.uuid }
+        : undefined;
+
+      embeddable.parentApi?.openOverlay(session, openOverlayOptions);
+    }
   }
 }
