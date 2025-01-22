@@ -23,7 +23,6 @@ import {
   getAncestors,
   getParentId,
   isChildOf,
-  isDescendantOf,
   isIngestStream,
   isRootStream,
   isWiredStream,
