@@ -11,12 +11,14 @@ import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-server-int
 import type { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { PostValidationMetadata } from '@kbn/core-http-server';
+import { Logger } from '@kbn/logging';
 import { buildApiDeprecationId } from '../deprecations';
 import { getIsRouteApiDeprecation, getIsAccessApiDeprecation } from '../deprecations';
 
 interface Dependencies {
   coreUsageData: InternalCoreUsageDataSetup;
   http: InternalHttpServiceSetup;
+  logger: Logger;
 }
 
 /**
@@ -26,14 +28,17 @@ interface Dependencies {
 export const registerApiDeprecationsPostValidationHandler = ({
   coreUsageData,
   http,
+  logger,
 }: Dependencies) => {
-  http.registerOnPostValidation(createRouteDeprecationsHandler({ coreUsageData }));
+  http.registerOnPostValidation(createRouteDeprecationsHandler({ coreUsageData, logger }));
 };
 
 export function createRouteDeprecationsHandler({
   coreUsageData,
+  logger,
 }: {
   coreUsageData: InternalCoreUsageDataSetup;
+  logger: Logger;
 }) {
   return (req: CoreKibanaRequest, metadata: PostValidationMetadata) => {
     const hasRouteDeprecation = getIsRouteApiDeprecation(metadata);
@@ -49,6 +54,7 @@ export function createRouteDeprecationsHandler({
       const client = coreUsageData.getClient();
       // no await we just fire it off.
       void client.incrementDeprecatedApi(counterName, { resolved: false });
+      logger.warn(`LOOK FOR THIS ${req.route.routePath} ${counterName} ${hasAccessDeprecation}`);
     }
   };
 }

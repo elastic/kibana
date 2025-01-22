@@ -81,7 +81,7 @@ export class DeprecationsService
       },
     });
 
-    registerRoutes({ http, coreUsageData });
+    registerRoutes({ http, coreUsageData, logger: this.logger.get('http') });
 
     registerConfigDeprecationsInfo({
       deprecationsFactory: this.deprecationsFactory,
