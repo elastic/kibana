@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-
 import { EuiHealth, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import styled from '@emotion/styled';
 import { css } from '@emotion/react';
