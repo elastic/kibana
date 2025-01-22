@@ -38,7 +38,7 @@ export function getDataStreamLifecycle(dataStream: IndicesDataStream): StreamLif
     };
   }
 
-  if (dataStream.lifecycle) {
+  if (dataStream.lifecycle && dataStream.lifecycle.enabled) {
     return {
       type: 'dlm',
       data_retention: dataStream.lifecycle.data_retention
