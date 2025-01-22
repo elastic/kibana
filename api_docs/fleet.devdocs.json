@@ -26163,6 +26163,21 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.NewAgentPolicy.agentless",
+            "type": "Object",
+            "tags": [],
+            "label": "agentless",
+            "description": [],
+            "signature": [
+              "AgentlessPolicy",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.NewAgentPolicy.monitoring_pprof_enabled",
             "type": "CompoundType",
             "tags": [],
@@ -30588,7 +30603,7 @@
         "signature": [
           "{ type?: ",
           "PackageSpecPackageType",
-          " | undefined; version: string; name: string; title: string; description?: string | undefined; path?: string | undefined; internal?: boolean | undefined; download?: string | undefined; icons?: (",
+          " | undefined; version: string; internal?: boolean | undefined; name: string; title: string; description?: string | undefined; path?: string | undefined; download?: string | undefined; icons?: (",
           {
             "pluginId": "fleet",
             "scope": "common",

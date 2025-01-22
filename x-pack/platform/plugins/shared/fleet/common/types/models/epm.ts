@@ -203,6 +203,12 @@ export interface DeploymentsModesAgentless extends DeploymentsModesDefault {
   organization?: string;
   division?: string;
   team?: string;
+  resources?: {
+    requests: {
+      cpu: string;
+      memory: string;
+    };
+  };
 }
 export interface DeploymentsModes {
   agentless: DeploymentsModesAgentless;

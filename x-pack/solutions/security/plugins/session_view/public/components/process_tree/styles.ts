@@ -6,7 +6,6 @@
  */
 
 import { useMemo } from 'react';
-import { transparentize } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
 import { useEuiTheme } from '../../hooks';
 
@@ -14,8 +13,7 @@ export const useStyles = () => {
   const { euiTheme, euiVars } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { colors, font, size } = euiTheme;
-    const defaultSelectionColor = colors.primary;
+    const { font } = euiTheme;
 
     const sessionViewProcessTree: CSSObject = {
       position: 'relative',
@@ -25,26 +23,8 @@ export const useStyles = () => {
       backgroundColor: euiVars.euiColorLightestShade,
     };
 
-    const selectionArea: CSSObject = {
-      position: 'absolute',
-      display: 'none',
-      marginLeft: '-50%',
-      width: '150%',
-      height: '100%',
-      backgroundColor: defaultSelectionColor,
-      pointerEvents: 'none',
-      opacity: 0.1,
-      transform: `translateY(-${size.xs})`,
-    };
-
-    const defaultSelected = transparentize(colors.primary, 0.008);
-    const alertSelected = transparentize(colors.danger, 0.008);
-
     return {
       sessionViewProcessTree,
-      selectionArea,
-      defaultSelected,
-      alertSelected,
     };
   }, [euiTheme, euiVars]);
 
