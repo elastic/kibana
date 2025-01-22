@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { registerCoreObjectTypes } from './registration';
+import { useContext } from 'react';
+import { RuleFormScreenContext } from '../rule_form_screen_context';
 
-// set minimum number of registered saved objects to ensure no object types are removed after 8.8
-// declared in internal implementation exclicilty to prevent unintended changes.
-export const SAVED_OBJECT_TYPES_COUNT = 127 as const;
+export const useRuleFormScreenContext = () => {
+  return useContext(RuleFormScreenContext);
+};
