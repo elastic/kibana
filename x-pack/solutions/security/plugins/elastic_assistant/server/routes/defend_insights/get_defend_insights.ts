@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { IKibanaResponse } from '@kbn/core/server';
-
-import type { IRouter, Logger } from '@kbn/core/server';
+import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import {
   DEFEND_INSIGHTS,
