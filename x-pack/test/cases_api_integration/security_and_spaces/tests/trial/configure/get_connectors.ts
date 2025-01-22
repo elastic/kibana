@@ -117,7 +117,6 @@ export default ({ getService }: FtrProviderContext): void => {
           isDeprecated: false,
           name: 'preconfigured-servicenow',
           referencedByCount: 0,
-          config: { apiUrl: 'https://example.com', usesTableApi: false },
         },
         {
           id: resilientConnector.id,

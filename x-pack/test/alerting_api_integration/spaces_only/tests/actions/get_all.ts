@@ -54,9 +54,6 @@ export default function getAllConnectorsTests({ getService }: FtrProviderContext
           is_preconfigured: true,
           is_deprecated: false,
           is_system_action: false,
-          config: {
-            index: 'kibana-alert-history-default',
-          },
           referenced_by_count: 0,
         },
         {
@@ -89,17 +86,11 @@ export default function getAllConnectorsTests({ getService }: FtrProviderContext
           is_system_action: false,
           connector_type_id: '.index',
           name: 'preconfigured_es_index_action',
-          config: {
-            index: 'functional-test-actions-index-preconfigured',
-            refresh: true,
-            executionTimeField: 'timestamp',
-          },
           referenced_by_count: 0,
         },
         {
           connector_type_id: '.servicenow',
           id: 'my-deprecated-servicenow',
-          config: { apiUrl: 'https://ven04334.service-now.com', usesTableApi: true },
           is_deprecated: true,
           is_preconfigured: true,
           is_system_action: false,
@@ -113,7 +104,6 @@ export default function getAllConnectorsTests({ getService }: FtrProviderContext
           is_deprecated: true,
           is_system_action: false,
           name: 'ServiceNow#xyz',
-          config: { apiUrl: 'https://ven04334.service-now.com' },
           referenced_by_count: 0,
         },
         {
@@ -124,7 +114,6 @@ export default function getAllConnectorsTests({ getService }: FtrProviderContext
           is_system_action: false,
           name: 'Slack#xyz',
           referenced_by_count: 0,
-          config: {},
         },
         {
           id: 'custom-system-abc-connector',
@@ -134,11 +123,6 @@ export default function getAllConnectorsTests({ getService }: FtrProviderContext
           is_system_action: false,
           name: 'SystemABC',
           referenced_by_count: 0,
-          config: {
-            xyzConfig1: 'value1',
-            xyzConfig2: 'value2',
-            listOfThings: ['a', 'b', 'c', 'd'],
-          },
         },
         {
           id: 'preconfigured.test.index-record',
@@ -148,7 +132,6 @@ export default function getAllConnectorsTests({ getService }: FtrProviderContext
           is_system_action: false,
           name: 'Test:_Preconfigured_Index_Record',
           referenced_by_count: 0,
-          config: { unencrypted: 'ignored-but-required' },
         },
         {
           id: 'my-test-email',
@@ -158,7 +141,6 @@ export default function getAllConnectorsTests({ getService }: FtrProviderContext
           connector_type_id: '.email',
           name: 'TestEmail#xyz',
           referenced_by_count: 0,
-          config: { from: 'me@test.com', service: '__json' },
         },
       ]);
     });
