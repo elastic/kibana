@@ -29,7 +29,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('AddProjectMonitors', function () {
     this.tags(['skipCloud', 'skipMKI']);
     const supertest = getService('supertestWithoutAuth');
-    const supertestWithAuth = getService('supertest');
     const kibanaServer = getService('kibanaServer');
     const monitorTestService = new SyntheticsMonitorTestService(getService);
     const testPrivateLocations = new PrivateLocationTestService(getService);
@@ -40,7 +39,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     let tcpProjectMonitors: ProjectMonitorsRequest;
     let icmpProjectMonitors: ProjectMonitorsRequest;
     let editorUser: RoleCredentials;
-    let viewerUser: RoleCredentials;
     let privateLocations: PrivateLocation[] = [];
 
     let testPolicyId1 = '';
@@ -82,7 +80,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
-      viewerUser = await samlAuth.createM2mApiKeyWithRoleScope('viewer');
       await supertest
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
         .set(editorUser.apiKeyHeader)
