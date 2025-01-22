@@ -17,13 +17,6 @@ import type {
 } from './types';
 import * as i18n from './translations';
 
-const amsterdam2BorealisColorMap = new Map<number, number>([
-  [0, 0],
-  [1, 2],
-  [5, 9],
-  [7, 8],
-]);
-
 // Update field mappings to modify what fields will be returned to map tooltip
 const sourceFieldMappings: Record<string, string> = {
   'host.name': i18n.HOST,
@@ -202,7 +195,7 @@ export const getSourceLayer = (
         fillColor: {
           type: 'STATIC',
           options: {
-            color: euiVisColorPalette[isAmsterdam ? amsterdam2BorealisColorMap.get(1) ?? 1 : 1],
+            color: euiVisColorPalette[isAmsterdam ? 1 : 2],
           },
         },
         lineColor: {
