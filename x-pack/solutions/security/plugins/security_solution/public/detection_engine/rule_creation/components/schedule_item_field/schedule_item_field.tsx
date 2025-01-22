@@ -29,7 +29,7 @@ interface ScheduleItemProps {
   isDisabled?: boolean;
   minValue?: number;
   maxValue?: number;
-  timeTypes?: string[];
+  units?: string[];
   fullWidth?: boolean;
 }
 
@@ -47,10 +47,10 @@ export function ScheduleItemField({
   idAria,
   minValue = Number.MIN_SAFE_INTEGER,
   maxValue = Number.MAX_SAFE_INTEGER,
-  timeTypes = DEFAULT_TIME_DURATION_UNITS,
+  units = DEFAULT_TIME_DURATION_UNITS,
   fullWidth = false,
 }: ScheduleItemProps): JSX.Element {
-  const [timeType, setTimeType] = useState(timeTypes[0]);
+  const [timeType, setTimeType] = useState(units[0]);
   const [timeVal, setTimeVal] = useState<number>(0);
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const { value, setValue } = field;
@@ -104,7 +104,7 @@ export function ScheduleItemField({
     }
 
     const isNegative = value.startsWith('-');
-    const durationRegexp = new RegExp(`^\\-?(\\d+)(${timeTypes.join('|')})$`);
+    const durationRegexp = new RegExp(`^\\-?(\\d+)(${units.join('|')})$`);
     const durationMatchArray = value.match(durationRegexp);
 
     if (!durationMatchArray) {
@@ -116,7 +116,7 @@ export function ScheduleItemField({
 
     setTimeVal(time);
     setTimeType(unit);
-  }, [timeType, timeTypes, timeVal, value]);
+  }, [timeType, units, timeVal, value]);
 
   const label = useMemo(
     () => (
@@ -148,7 +148,7 @@ export function ScheduleItemField({
           <EuiSelect
             css={timeUnitSelectStyles}
             fullWidth
-            options={timeTypeOptions.filter((type) => timeTypes.includes(type.value))}
+            options={timeTypeOptions.filter((type) => units.includes(type.value))}
             value={timeType}
             onChange={onChangeTimeType}
             disabled={isDisabled}
