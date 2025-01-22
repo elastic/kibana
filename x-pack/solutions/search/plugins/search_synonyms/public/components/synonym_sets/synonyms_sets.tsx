@@ -6,19 +6,14 @@
  */
 
 import { SynonymsGetSynonymsSetsSynonymsSetItem } from '@elastic/elasticsearch/lib/api/types';
-import { EuiBasicTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { PLUGIN_ROUTE_ROOT } from '../../../common/api_routes';
 import { DEFAULT_PAGE_VALUE, paginationToPage } from '../../../common/pagination';
 import { useFetchSynonymsSets } from '../../hooks/use_fetch_synonyms_sets';
 import { DeleteSynonymsSetModal } from './delete_synonyms_set_modal';
 
 export const SynonymSets = () => {
-  const {
-    services: { application },
-  } = useKibana();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_VALUE.size);
   const { from } = paginationToPage({ pageIndex, pageSize, totalItemCount: 0 });
@@ -42,15 +37,7 @@ export const SynonymSets = () => {
       name: i18n.translate('xpack.searchSynonyms.synonymsSetTable.nameColumn', {
         defaultMessage: 'Synonyms Set',
       }),
-      render: (name: string) => (
-        <div data-test-subj="synonyms-set-item-name">
-          <EuiLink
-            onClick={() => application?.navigateToUrl(`${PLUGIN_ROUTE_ROOT}/synonym/${name}`)}
-          >
-            {name}
-          </EuiLink>
-        </div>
-      ),
+      render: (name: string) => <div data-test-subj="synonyms-set-item-name">{name}</div>,
     },
     {
       field: 'count',

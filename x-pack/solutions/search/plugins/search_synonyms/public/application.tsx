@@ -15,6 +15,7 @@ import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AppPluginStartDependencies } from './types';
 import { SearchSynonymsOverview } from './components/overview/overview';
+import { SynonymsSetDetail } from './components/synonyms_set_detail/synonyms_set_detail';
 
 const queryClient = new QueryClient({});
 export const renderApp = async (
@@ -29,6 +30,9 @@ export const renderApp = async (
           <QueryClientProvider client={queryClient}>
             <Router history={services.history}>
               <Routes>
+                <Route path="/synonym/:synonymsSetId">
+                  <SynonymsSetDetail />
+                </Route>
                 <Route path="/">
                   <SearchSynonymsOverview />
                 </Route>

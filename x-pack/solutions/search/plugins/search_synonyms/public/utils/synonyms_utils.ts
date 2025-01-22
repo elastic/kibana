@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-export const PLUGIN_ROUTE_ROOT = '/app/elasticsearch/synonyms';
+export const isExplicitSynonym = (synonym: string) => {
+  return synonym.trim().includes('=>');
+};
 
-export enum APIRoutes {
-  SYNONYM_SETS = '/internal/search_synonyms/synonyms',
-  SYNONYM_SET_ID = '/internal/search_synonyms/synonyms/{synonymsSetId}',
-}
+export const getExplicitSynonym = (synonym: string) => {
+  return [synonym.split('=>')[0].trim(), synonym.split('=>')[1].trim()];
+};
