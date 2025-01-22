@@ -8,7 +8,7 @@
  */
 
 import _ from 'lodash';
-import { Datatable } from '@kbn/expressions-plugin/public';
+import { Datatable, isSourceParamsESQL } from '@kbn/expressions-plugin/public';
 import {
   compareFilters,
   COMPARE_ALL_OPTIONS,
@@ -21,7 +21,6 @@ import {
   buildSimpleExistFilter,
   buildSimpleNumberRangeFilter,
 } from '@kbn/es-query/src/filters/build_filters';
-import { isSourceParamsESQL } from '@kbn/expressions-plugin/common/expression_types';
 import { getIndexPatterns, getSearchService } from '../../services';
 import { AggConfigSerialized } from '../../../common/search/aggs';
 import { mapAndFlattenFilters } from '../../query';
