@@ -53,7 +53,7 @@ describe('Presentation panel', () => {
   it('renders a blocking error when one is present', async () => {
     const api: DefaultPresentationPanelApi = {
       uuid: 'test',
-      blockingError: new BehaviorSubject<Error | undefined>(new Error('UH OH')),
+      blockingError$: new BehaviorSubject<Error | undefined>(new Error('UH OH')),
     };
     render(<PresentationPanel Component={getMockPresentationPanelCompatibleComponent(api)} />);
     await waitFor(() => expect(screen.getByTestId('embeddableStackError')).toBeInTheDocument());
@@ -93,7 +93,7 @@ describe('Presentation panel', () => {
     it('gets compatible actions for the given API', async () => {
       const api: DefaultPresentationPanelApi = {
         uuid: 'test',
-        panelTitle: new BehaviorSubject<string | undefined>('superTest'),
+        title$: new BehaviorSubject<string | undefined>('superTest'),
       };
       await renderPresentationPanel({ api });
       expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith('CONTEXT_MENU_TRIGGER', {
@@ -118,7 +118,7 @@ describe('Presentation panel', () => {
     it('does not show actions which are disabled by the API', async () => {
       const api: DefaultPresentationPanelApi = {
         uuid: 'test',
-        disabledActionIds: new BehaviorSubject<string[] | undefined>(['actionA']),
+        disabledActionIds$: new BehaviorSubject<string[] | undefined>(['actionA']),
       };
       const getActions = jest.fn().mockReturnValue([mockAction('actionA'), mockAction('actionB')]);
       await renderPresentationPanel({ api, props: { getActions } });
@@ -163,8 +163,8 @@ describe('Presentation panel', () => {
     it('renders the panel title from the api and not the default title', async () => {
       const api: DefaultPresentationPanelApi = {
         uuid: 'test',
-        panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
-        defaultPanelTitle: new BehaviorSubject<string | undefined>('SO Title'),
+        title$: new BehaviorSubject<string | undefined>('SUPER TITLE'),
+        defaultTitle$: new BehaviorSubject<string | undefined>('SO Title'),
       };
       await renderPresentationPanel({ api });
       await waitFor(() => {
@@ -175,7 +175,7 @@ describe('Presentation panel', () => {
     it('renders the default title from the api when a panel title is not provided', async () => {
       const api: DefaultPresentationPanelApi = {
         uuid: 'test',
-        defaultPanelTitle: new BehaviorSubject<string | undefined>('SO Title'),
+        defaultTitle$: new BehaviorSubject<string | undefined>('SO Title'),
       };
       await renderPresentationPanel({ api });
       await waitFor(() => {
@@ -186,7 +186,7 @@ describe('Presentation panel', () => {
     it("does not render an info icon when the api doesn't provide a panel description or default description", async () => {
       const api: DefaultPresentationPanelApi = {
         uuid: 'test',
-        panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
+        title$: new BehaviorSubject<string | undefined>('SUPER TITLE'),
       };
       await renderPresentationPanel({ api });
       await waitFor(() => {
@@ -197,8 +197,8 @@ describe('Presentation panel', () => {
     it('renders an info icon when the api provides a panel description', async () => {
       const api: DefaultPresentationPanelApi = {
         uuid: 'test',
-        panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
-        panelDescription: new BehaviorSubject<string | undefined>('SUPER DESCRIPTION'),
+        title$: new BehaviorSubject<string | undefined>('SUPER TITLE'),
+        description$: new BehaviorSubject<string | undefined>('SUPER DESCRIPTION'),
       };
       await renderPresentationPanel({ api });
       await waitFor(() => {
@@ -209,8 +209,8 @@ describe('Presentation panel', () => {
     it('renders an info icon when the api provides a default description', async () => {
       const api: DefaultPresentationPanelApi = {
         uuid: 'test',
-        panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
-        defaultPanelDescription: new BehaviorSubject<string | undefined>('SO Description'),
+        title$: new BehaviorSubject<string | undefined>('SUPER TITLE'),
+        defaultDescription$: new BehaviorSubject<string | undefined>('SO Description'),
       };
       await renderPresentationPanel({ api });
       await waitFor(() => {
@@ -221,8 +221,8 @@ describe('Presentation panel', () => {
     it('does not render a title when in view mode when the provided title is blank', async () => {
       const api: DefaultPresentationPanelApi & PublishesViewMode = {
         uuid: 'test',
-        panelTitle: new BehaviorSubject<string | undefined>(''),
-        viewMode: new BehaviorSubject<ViewMode>('view'),
+        title$: new BehaviorSubject<string | undefined>(''),
+        viewMode$: new BehaviorSubject<ViewMode>('view'),
       };
       await renderPresentationPanel({ api });
       expect(screen.queryByTestId('presentationPanelTitle')).not.toBeInTheDocument();
@@ -231,9 +231,9 @@ describe('Presentation panel', () => {
     it('does not render a title when in edit mode and the provided title is blank', async () => {
       const api: DefaultPresentationPanelApi & PublishesDataViews & PublishesViewMode = {
         uuid: 'test',
-        panelTitle: new BehaviorSubject<string | undefined>(''),
-        viewMode: new BehaviorSubject<ViewMode>('edit'),
-        dataViews: new BehaviorSubject<DataView[] | undefined>([]),
+        title$: new BehaviorSubject<string | undefined>(''),
+        viewMode$: new BehaviorSubject<ViewMode>('edit'),
+        dataViews$: new BehaviorSubject<DataView[] | undefined>([]),
       };
       await renderPresentationPanel({ api });
       expect(screen.queryByTestId('presentationPanelTitle')).not.toBeInTheDocument();
@@ -244,9 +244,9 @@ describe('Presentation panel', () => {
 
       const api: DefaultPresentationPanelApi & PublishesDataViews & PublishesViewMode = {
         uuid: 'test',
-        panelTitle: new BehaviorSubject<string | undefined>('TITLE'),
-        viewMode: new BehaviorSubject<ViewMode>('edit'),
-        dataViews: new BehaviorSubject<DataView[] | undefined>([]),
+        title$: new BehaviorSubject<string | undefined>('TITLE'),
+        viewMode$: new BehaviorSubject<ViewMode>('edit'),
+        dataViews$: new BehaviorSubject<DataView[] | undefined>([]),
       };
       await renderPresentationPanel({ api });
       await waitFor(() => {
@@ -265,9 +265,9 @@ describe('Presentation panel', () => {
 
       const api: DefaultPresentationPanelApi & PublishesDataViews & PublishesViewMode = {
         uuid: 'test',
-        panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
-        viewMode: new BehaviorSubject<ViewMode>('view'),
-        dataViews: new BehaviorSubject<DataView[] | undefined>([]),
+        title$: new BehaviorSubject<string | undefined>('SUPER TITLE'),
+        viewMode$: new BehaviorSubject<ViewMode>('view'),
+        dataViews$: new BehaviorSubject<DataView[] | undefined>([]),
       };
       await renderPresentationPanel({ api });
       await waitFor(() => {
@@ -284,9 +284,9 @@ describe('Presentation panel', () => {
     it('hides title in view mode when API hide title option is true', async () => {
       const api: DefaultPresentationPanelApi & PublishesViewMode = {
         uuid: 'test',
-        panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
-        hidePanelTitle: new BehaviorSubject<boolean | undefined>(true),
-        viewMode: new BehaviorSubject<ViewMode>('view'),
+        title$: new BehaviorSubject<string | undefined>('SUPER TITLE'),
+        hideTitle$: new BehaviorSubject<boolean | undefined>(true),
+        viewMode$: new BehaviorSubject<ViewMode>('view'),
       };
       await renderPresentationPanel({ api });
       expect(screen.queryByTestId('presentationPanelTitle')).not.toBeInTheDocument();
@@ -295,9 +295,9 @@ describe('Presentation panel', () => {
     it('hides title in edit mode when API hide title option is true', async () => {
       const api: DefaultPresentationPanelApi & PublishesViewMode = {
         uuid: 'test',
-        panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
-        hidePanelTitle: new BehaviorSubject<boolean | undefined>(true),
-        viewMode: new BehaviorSubject<ViewMode>('edit'),
+        title$: new BehaviorSubject<string | undefined>('SUPER TITLE'),
+        hideTitle$: new BehaviorSubject<boolean | undefined>(true),
+        viewMode$: new BehaviorSubject<ViewMode>('edit'),
       };
       await renderPresentationPanel({ api });
       expect(screen.queryByTestId('presentationPanelTitle')).not.toBeInTheDocument();
@@ -306,10 +306,10 @@ describe('Presentation panel', () => {
     it('hides title in view mode when parent hide title option is true', async () => {
       const api: DefaultPresentationPanelApi & PublishesViewMode = {
         uuid: 'test',
-        panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
-        viewMode: new BehaviorSubject<ViewMode>('view'),
+        title$: new BehaviorSubject<string | undefined>('SUPER TITLE'),
+        viewMode$: new BehaviorSubject<ViewMode>('view'),
         parentApi: {
-          viewMode: new BehaviorSubject<ViewMode>('view'),
+          viewMode$: new BehaviorSubject<ViewMode>('view'),
           ...getMockPresentationContainer(),
         },
       };
@@ -320,10 +320,10 @@ describe('Presentation panel', () => {
     it('hides title in edit mode when parent hide title option is true', async () => {
       const api: DefaultPresentationPanelApi & PublishesViewMode = {
         uuid: 'test',
-        panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
-        viewMode: new BehaviorSubject<ViewMode>('edit'),
+        title$: new BehaviorSubject<string | undefined>('SUPER TITLE'),
+        viewMode$: new BehaviorSubject<ViewMode>('edit'),
         parentApi: {
-          viewMode: new BehaviorSubject<ViewMode>('edit'),
+          viewMode$: new BehaviorSubject<ViewMode>('edit'),
           ...getMockPresentationContainer(),
         },
       };

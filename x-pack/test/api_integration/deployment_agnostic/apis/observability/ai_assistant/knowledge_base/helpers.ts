@@ -55,7 +55,7 @@ export async function waitForKnowledgeBaseReady({
   log: ToolingLog;
   retry: RetryService;
 }) {
-  await retry.try(async () => {
+  await retry.tryForTime(5 * 60 * 1000, async () => {
     log.debug(`Waiting for knowledge base to be ready...`);
     const res = await observabilityAIAssistantAPIClient.editor({
       endpoint: 'GET /internal/observability_ai_assistant/kb/status',

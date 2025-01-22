@@ -49,8 +49,8 @@ export const PresentationPanelInternal = <
   const dragHandles = useRef<{ [dragHandleKey: string]: HTMLElement | null }>({});
 
   const viewModeSubject = (() => {
-    if (apiPublishesViewMode(api)) return api.viewMode;
-    if (apiHasParentApi(api) && apiPublishesViewMode(api.parentApi)) return api.parentApi.viewMode;
+    if (apiPublishesViewMode(api)) return api.viewMode$;
+    if (apiHasParentApi(api) && apiPublishesViewMode(api.parentApi)) return api.parentApi.viewMode$;
   })();
 
   const [
@@ -64,20 +64,20 @@ export const PresentationPanelInternal = <
     rawViewMode,
     parentHidePanelTitle,
   ] = useBatchedOptionalPublishingSubjects(
-    api?.dataLoading,
-    api?.blockingError,
-    api?.panelTitle,
-    api?.hidePanelTitle,
-    api?.panelDescription,
-    api?.defaultPanelTitle,
-    api?.defaultPanelDescription,
+    api?.dataLoading$,
+    api?.blockingError$,
+    api?.title$,
+    api?.hideTitle$,
+    api?.description$,
+    api?.defaultTitle$,
+    api?.defaultDescription$,
     viewModeSubject,
-    api?.parentApi?.hidePanelTitle
+    api?.parentApi?.hideTitle$
   );
   const viewMode = rawViewMode ?? 'view';
 
   const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);
-  if (!initialLoadComplete && (dataLoading === false || (api && !api.dataLoading))) {
+  if (!initialLoadComplete && (dataLoading === false || (api && !api.dataLoading$))) {
     setInitialLoadComplete(true);
   }
 

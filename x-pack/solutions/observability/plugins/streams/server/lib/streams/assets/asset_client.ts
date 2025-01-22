@@ -177,6 +177,10 @@ export class AssetClient {
     await this.clients.storageClient.delete({ id });
   }
 
+  async clean() {
+    await this.clients.storageClient.clean();
+  }
+
   async getAssetIds({
     entityId,
     entityType,
