@@ -6,14 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { RuleForm } from '@kbn/response-ops-rule-form';
-import { ChromeBreadcrumb, HttpSetup } from '@kbn/core/public';
 import { useLocation, useParams } from 'react-router-dom';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { useKibana } from '../../utils/kibana_react';
-import { OBSERVABILITY_BASE_PATH, paths } from '../../../common/locators/paths';
+import { paths } from '../../../common/locators/paths';
 import { observabilityRuleCreationValidConsumers } from '../../../common/constants';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 
@@ -22,33 +22,8 @@ interface RulePageProps {
   id?: string;
 }
 
-const getExistingBreadCrumbs = (http: HttpSetup): ChromeBreadcrumb[] => {
-  return [
-    {
-      text: i18n.translate('xpack.observability.nameFeatureTitle', {
-        defaultMessage: 'Observability',
-      }),
-      href: http.basePath.prepend(OBSERVABILITY_BASE_PATH),
-      deepLinkId: 'observability-overview',
-    },
-    {
-      text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
-        defaultMessage: 'Alerts',
-      }),
-      href: http.basePath.prepend(paths.observability.alerts),
-      deepLinkId: 'observability-overview:alerts',
-    },
-    {
-      href: http.basePath.prepend(paths.observability.rules),
-      text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
-        defaultMessage: 'Rules',
-      }),
-    },
-  ];
-};
-
 export function RulePage() {
-  const { ruleTypeId, id } = useParams<RulePageProps>();
+  const { id } = useParams<RulePageProps>();
   const {
     http,
     docLinks,
@@ -70,49 +45,36 @@ export function RulePage() {
   const location = useLocation<{ returnApp?: string; returnPath?: string }>();
   const { returnApp, returnPath } = location.state || {};
 
-  useEffect(() => {
-    if (id) {
-      chrome.setBreadcrumbs([
-        ...getExistingBreadCrumbs(http),
-        {
-          text: i18n.translate('xpack.observability.breadcrumbs.editLinkText', {
-            defaultMessage: 'Edit',
-          }),
-        },
-      ]);
-      chrome.docTitle.change(
-        i18n.translate('xpack.observability.breadcrumbs.editLinkText', {
-          defaultMessage: 'Edit Rule',
-        })
-      );
-    }
-    if (ruleTypeId) {
-      chrome.setBreadcrumbs([
-        ...getExistingBreadCrumbs(http),
-        {
-          text: i18n.translate('xpack.observability.breadcrumbs.createLinkText', {
-            defaultMessage: 'Create',
-          }),
-        },
-      ]);
-      chrome.docTitle.change(
-        i18n.translate('xpack.observability.breadcrumbs.editLinkText', {
-          defaultMessage: 'Create Rule',
-        })
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useBreadcrumbs(
+    [
+      {
+        text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
+          defaultMessage: 'Alerts',
+        }),
+        href: http.basePath.prepend(paths.observability.alerts),
+        deepLinkId: 'observability-overview:alerts',
+      },
+      {
+        href: http.basePath.prepend(paths.observability.rules),
+        text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
+          defaultMessage: 'Rules',
+        }),
+      },
+      {
+        text: id
+          ? i18n.translate('xpack.observability.breadcrumbs.editLinkText', {
+              defaultMessage: 'Edit',
+            })
+          : i18n.translate('xpack.observability.breadcrumbs.createLinkText', {
+              defaultMessage: 'Create',
+            }),
+      },
+    ],
+    { serverless }
+  );
 
   return (
-    <ObservabilityPageTemplate
-      pageHeader={{
-        pageTitle: i18n.translate('xpack.observability.rules.CreateTitle', {
-          defaultMessage: id ? 'Edit' : 'Create',
-        }),
-      }}
-      data-test-subj="rulePage"
-    >
+    <ObservabilityPageTemplate data-test-subj="rulePage">
       <HeaderMenu />
       <RuleForm
         plugins={{
