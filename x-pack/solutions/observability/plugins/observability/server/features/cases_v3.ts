@@ -36,6 +36,8 @@ export const getCasesFeatureV3 = (
         read: [observabilityFeatureId],
         update: [observabilityFeatureId],
         push: [observabilityFeatureId],
+        createComment: [observabilityFeatureId],
+        reopenCase: [observabilityFeatureId],
         assign: [observabilityFeatureId],
       },
       savedObject: {

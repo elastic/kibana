@@ -42,6 +42,9 @@ export const getCasesBaseKibanaFeatureV3 = ({
           read: [APP_ID],
           update: [APP_ID],
           push: [APP_ID],
+          createComment: [APP_ID],
+          reopenCase: [APP_ID],
+          assign: [APP_ID],
         },
         savedObject: {
           all: [...savedObjects.files],
