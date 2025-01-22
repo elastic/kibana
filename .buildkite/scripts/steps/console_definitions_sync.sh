@@ -69,7 +69,7 @@ main () {
   gh pr create \
     --title "$PR_TITLE" \
     --body "$PR_BODY" \
-    --base main \
+    --base "$BUILDKITE_BRANCH" \
     --head "$BRANCH_NAME" \
     --label 'backport:skip' \
     --label 'release_note:skip' \
