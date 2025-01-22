@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StreamDefinition, isWiredStream } from '@kbn/streams-schema';
+import { StreamDefinition, isWiredStreamDefinition } from '@kbn/streams-schema';
 import { parseStreamName } from '@kbn/streams-schema/src/helpers/stream_name';
 import { stringifyStreamName } from '@kbn/streams-schema/src/helpers/stream_name/stringify';
 import { ASSET_VERSION } from '../../../../common/constants';
@@ -21,7 +21,7 @@ export function generateIndexTemplate(
   const streamName = parseStreamName(name);
   let composedOf: string[] = [];
 
-  if (!isWiredStream(definition)) {
+  if (!isWiredStreamDefinition(definition)) {
     throw new Error(`Can only generate index templates for wired streams`);
   }
 

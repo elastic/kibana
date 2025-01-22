@@ -8,7 +8,7 @@ import { Client } from '@elastic/elasticsearch';
 import { JsonObject } from '@kbn/utility-types';
 import expect from '@kbn/expect';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { StreamUpsertRequest } from '@kbn/streams-schema';
+import { StreamDefinition, StreamUpsertRequest } from '@kbn/streams-schema';
 import { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import { StreamsRouteRepository } from '@kbn/streams-plugin/server';
 import { StreamsSupertestRepositoryClient } from './repository_client';
@@ -78,7 +78,7 @@ export async function putStream(
 export async function assertStreamInList(
   client: StreamsSupertestRepositoryClient,
   streamName: string,
-  expectedStream: JsonObject
+  expectedStream: StreamDefinition
 ) {
   const {
     body: { streams },

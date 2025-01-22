@@ -52,7 +52,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           body: {
             stream: { name: 'logs-test.nested.myfork-default' },
-            condition: {
+            if: {
               field: 'abc',
               operator: 'exists',
             },
@@ -64,13 +64,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       await assertStreamInList(apiClient, 'logs-test.nested.myfork-default', {
         name: 'logs-test.nested.myfork-default',
-        stream: {
-          ingest: {
-            processing: [],
-            routing: [],
-            wired: {
-              fields: {},
-            },
+        ingest: {
+          processing: [],
+          routing: [],
+          wired: {
+            fields: {},
           },
         },
       });
@@ -98,7 +96,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           body: {
             stream: { name: 'logs-test.nested.myfork.doublefork-default' },
-            condition: {
+            if: {
               field: 'xyz',
               operator: 'exists',
             },
@@ -126,22 +124,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('Allows adding processing and fields to wired child', async () => {
       await putStream(apiClient, 'logs-test.nested.myfork.doublefork-default', {
-        ingest: {
-          processing: [
-            {
-              config: {
+        dashboards: [],
+        stream: {
+          ingest: {
+            processing: [
+              {
                 grok: {
                   field: 'message',
                   patterns: ['%{WORD:firstword}'],
+                  if: { always: {} },
                 },
               },
-            },
-          ],
-          routing: [],
-          wired: {
-            fields: {
-              firstword: {
-                type: 'keyword',
+            ],
+            routing: [],
+            wired: {
+              fields: {
+                firstword: {
+                  type: 'keyword',
+                },
               },
             },
           },
@@ -184,13 +184,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         apiClient,
         'logs-test.nested.myfork.doublefork.evendeeper-default',
         {
-          ingest: {
-            processing: [],
-            routing: [],
-            wired: {
-              fields: {
-                firstword: {
-                  type: 'long',
+          dashboards: [],
+          stream: {
+            ingest: {
+              processing: [],
+              routing: [],
+              wired: {
+                fields: {
+                  firstword: {
+                    type: 'long',
+                  },
                 },
               },
             },
@@ -202,21 +205,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('Allows creating a wired child for classic stream via PUT', async () => {
       await putStream(apiClient, 'logs-test.nested.myfork2-default', {
-        ingest: {
-          processing: [],
-          routing: [],
-          wired: {
-            fields: {
-              atest: {
-                type: 'long',
-              },
-            },
-          },
-        },
-      });
-
-      await assertStreamInList(apiClient, 'logs-test.nested.myfork2-default', {
-        name: 'logs-test.nested.myfork2-default',
+        dashboards: [],
         stream: {
           ingest: {
             processing: [],
@@ -231,28 +220,47 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         },
       });
+
+      await assertStreamInList(apiClient, 'logs-test.nested.myfork2-default', {
+        name: 'logs-test.nested.myfork2-default',
+        ingest: {
+          processing: [],
+          routing: [],
+          wired: {
+            fields: {
+              atest: {
+                type: 'long',
+              },
+            },
+          },
+        },
+      });
     });
 
     it('Allows creating a wired child for classic stream via PUT and extending routing array', async () => {
       await putStream(apiClient, 'logs-test.nested-default', {
-        ingest: {
-          processing: [],
-          routing: [
-            {
-              name: 'logs-test.nested.myfork-default',
-              condition: {
-                field: 'abc',
-                operator: 'exists',
+        dashboards: [],
+        stream: {
+          ingest: {
+            processing: [],
+            routing: [
+              {
+                destination: 'logs-test.nested.myfork-default',
+                if: {
+                  field: 'abc',
+                  operator: 'exists',
+                },
               },
-            },
-            {
-              name: 'logs-test.nested.myfork2-default',
-              condition: {
-                field: 'otherfield',
-                operator: 'exists',
+              {
+                destination: 'logs-test.nested.myfork2-default',
+                if: {
+                  field: 'otherfield',
+                  operator: 'exists',
+                },
               },
-            },
-          ],
+            ],
+            unwired: {},
+          },
         },
       });
 
@@ -271,11 +279,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('Allows creating multi-nested wired children via PUT API', async () => {
       await putStream(apiClient, 'logs-test.nested.myfork3.deeply.nested-default', {
-        ingest: {
-          processing: [],
-          routing: [],
-          wired: {
-            fields: {},
+        dashboards: [],
+        stream: {
+          ingest: {
+            processing: [],
+            routing: [],
+            wired: {
+              fields: {},
+            },
           },
         },
       });
@@ -300,11 +311,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         apiClient,
         'logs-woopy.doopy-default',
         {
-          ingest: {
-            processing: [],
-            routing: [],
-            wired: {
-              fields: {},
+          dashboards: [],
+          stream: {
+            ingest: {
+              processing: [],
+              routing: [],
+              wired: {
+                fields: {},
+              },
             },
           },
         },
