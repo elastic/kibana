@@ -37,7 +37,7 @@ const YELLOW = 'rgb(256, 256, 0)';
 const RED = 'rgb(256, 0, 0)';
 const HEATMAP_PALETTE = [ROYAL_BLUE, CYAN, LIME, YELLOW, RED];
 
-type COLOR_PALETTE = EuiColorPalettePickerPaletteProps & {
+type COLOR_PALETTE = Omit<EuiColorPalettePickerPaletteProps, 'title'> & {
   getPalette: (steps: number) => string[];
 };
 
