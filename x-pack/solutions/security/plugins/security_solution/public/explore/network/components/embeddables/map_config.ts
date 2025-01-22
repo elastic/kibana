@@ -122,6 +122,10 @@ export const getLayerList = (
   dependencies: LayerProviderDependencies,
   indexPatternIds: IndexPatternMapping[]
 ) => {
+  // NOTE: Condition to check between Borealis and Amsterdam as per
+  // https://elastic.slack.com/archives/C7QC1JV6F/p1734342538935879?thread_ts=1734342127.301789&cid=C7QC1JV6F
+  const isAmsterdam = dependencies.euiTheme.flags.hasVisColorAdjustment;
+
   return [
     ...indexPatternIds.reduce((acc: object[], { title, id }) => {
       const layerGroupDescriptor = {
@@ -171,6 +175,10 @@ export const getSourceLayer = (
   layerDetails: LayerMappingDetails
 ) => {
   const euiVisColorPalette = euiPaletteColorBlind();
+
+  const borealis = dependencies.euiTheme.themeName === 'EUI_THEME_BOREALIS';
+
+  console.log('theme name', borealis);
 
   return {
     sourceDescriptor: {
