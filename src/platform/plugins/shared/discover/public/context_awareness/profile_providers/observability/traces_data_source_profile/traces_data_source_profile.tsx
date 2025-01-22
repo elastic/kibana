@@ -8,10 +8,7 @@
  */
 
 import React from 'react';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import { isDataSourceType, DataSourceType } from '../../../../../common/data_sources';
 import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
 import { ServiceLink } from './components/service_link';
 import { SpanLink } from './components/span_link';
@@ -44,68 +41,175 @@ export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvid
       (params) => {
         const recordId = params.record.id;
         const prevValue = prev(params);
+        const dataStreamTypes = params.record.flattened['data_stream.type'];
+        const dataStreamType = Array.isArray(dataStreamTypes)
+          ? dataStreamTypes[0]
+          : dataStreamTypes;
+
+        const isLog = dataStreamType === 'logs';
+        const isSpan = dataStreamType === 'traces';
+        const isError = !!params.record.flattened['error.id'];
+
+        const tabTitle = isError
+          ? 'Error'
+          : isSpan
+          ? `${params.record.flattened['parent.id'] ? 'Span' : 'Transaction'}`
+          : isLog
+          ? 'Log'
+          : '';
+
         return {
           title: `Record #${recordId}`,
           docViewsRegistry: (registry) => {
             registry.add({
               id: 'doc_view_overview',
-              title: `${params.record.flattened['parent.id'] ? 'Span' : 'Transaction'} overview`,
+              title: `${tabTitle} overview`,
               order: 0,
               component: () => {
-                const spanName = params.record.flattened['span.name'];
-                const spanId = params.record.flattened['span.id'];
-                const transactionName = params.record.flattened['transaction.name'];
                 const serviceName = params.record.flattened['service.name'];
                 const agentName = params.record.flattened['agent.name']?.toString();
+
                 const traceId = params.record.flattened['trace.id'];
-                const isRootSpan = !params.record.flattened['parent.id'];
-                return (
-                  <EuiPanel color="transparent" hasShadow={false}>
-                    <EuiFlexGroup>
-                      <EuiFlexItem>
-                        <EuiText color="subdued" size="xs">
-                          Name
-                        </EuiText>
-                        {isRootSpan ? (
-                          <TransactionLink
-                            traceId={traceId as string}
-                            transactionName={transactionName as string}
-                          />
-                        ) : (
-                          <SpanLink
-                            spanId={spanId as string}
-                            spanName={spanName as string}
-                            traceId={traceId as string}
-                          />
-                        )}
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                    <EuiSpacer size="l" />
-                    <EuiFlexGroup>
-                      <EuiFlexItem>
-                        <EuiText color="subdued" size="xs">
-                          Service
-                        </EuiText>
-                        <ServiceLink
-                          serviceName={serviceName as string}
-                          agentName={agentName as string}
-                        />
-                      </EuiFlexItem>
-                      {!isRootSpan && (
+                const transactionName = params.record.flattened['transaction.name'];
+
+                if (isError) {
+                  const errorId = params.record.flattened['error.id'];
+                  const errorMessage = params.record.flattened.message;
+                  return (
+                    <EuiPanel color="transparent" hasShadow={false}>
+                      <EuiFlexGroup>
                         <EuiFlexItem>
                           <EuiText color="subdued" size="xs">
-                            Transaction
+                            Message (TODO ADD LINK)
                           </EuiText>
-                          <TransactionLink
-                            traceId={traceId as string}
-                            transactionName={transactionName as string}
-                            indexPattern={context.indexPattern}
+                          <p>{errorMessage as string}</p>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                      <EuiSpacer size="l" />
+                      <EuiFlexGroup>
+                        <EuiFlexItem>
+                          <EuiText color="subdued" size="xs">
+                            Service
+                          </EuiText>
+                          <ServiceLink
+                            serviceName={serviceName as string}
+                            agentName={agentName as string}
                           />
                         </EuiFlexItem>
-                      )}
-                    </EuiFlexGroup>
-                  </EuiPanel>
-                );
+                        {!!traceId && (
+                          <EuiFlexItem>
+                            <EuiText color="subdued" size="xs">
+                              Transaction
+                            </EuiText>
+                            <TransactionLink
+                              traceId={traceId as string}
+                              transactionName={transactionName as string}
+                              serviceName={serviceName as string}
+                              indexPattern={context.indexPattern}
+                            />
+                          </EuiFlexItem>
+                        )}
+                      </EuiFlexGroup>
+                    </EuiPanel>
+                  );
+                }
+
+                if (isSpan) {
+                  const spanName = params.record.flattened['span.name'];
+                  const spanId = params.record.flattened['span.id'];
+                  const isRootSpan = !params.record.flattened['parent.id'];
+                  return (
+                    <EuiPanel color="transparent" hasShadow={false}>
+                      <EuiFlexGroup>
+                        <EuiFlexItem>
+                          <EuiText color="subdued" size="xs">
+                            Name
+                          </EuiText>
+                          {isRootSpan ? (
+                            <TransactionLink
+                              traceId={traceId as string}
+                              transactionName={transactionName as string}
+                              serviceName={serviceName as string}
+                              indexPattern={context.indexPattern}
+                            />
+                          ) : (
+                            <SpanLink
+                              spanId={spanId as string}
+                              spanName={spanName as string}
+                              traceId={traceId as string}
+                            />
+                          )}
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                      <EuiSpacer size="l" />
+                      <EuiFlexGroup>
+                        <EuiFlexItem>
+                          <EuiText color="subdued" size="xs">
+                            Service
+                          </EuiText>
+                          <ServiceLink
+                            serviceName={serviceName as string}
+                            agentName={agentName as string}
+                          />
+                        </EuiFlexItem>
+                        {!isRootSpan && (
+                          <EuiFlexItem>
+                            <EuiText color="subdued" size="xs">
+                              Transaction
+                            </EuiText>
+                            <TransactionLink
+                              traceId={traceId as string}
+                              transactionName={transactionName as string}
+                              serviceName={serviceName as string}
+                              indexPattern={context.indexPattern}
+                            />
+                          </EuiFlexItem>
+                        )}
+                      </EuiFlexGroup>
+                    </EuiPanel>
+                  );
+                }
+
+                if (isLog) {
+                  const logMessage = params.record.flattened.message;
+                  return (
+                    <EuiPanel color="transparent" hasShadow={false}>
+                      <EuiFlexGroup>
+                        <EuiFlexItem>
+                          <EuiText color="subdued" size="xs">
+                            Message (TODO ADD LINK)
+                          </EuiText>
+                          <p>{logMessage as string}</p>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                      <EuiSpacer size="l" />
+                      <EuiFlexGroup>
+                        <EuiFlexItem>
+                          <EuiText color="subdued" size="xs">
+                            Service
+                          </EuiText>
+                          <ServiceLink
+                            serviceName={serviceName as string}
+                            agentName={agentName as string}
+                          />
+                        </EuiFlexItem>
+                        {!!traceId && (
+                          <EuiFlexItem>
+                            <EuiText color="subdued" size="xs">
+                              Transaction
+                            </EuiText>
+                            <TransactionLink
+                              traceId={traceId as string}
+                              transactionName={transactionName as string}
+                              serviceName={serviceName as string}
+                              indexPattern={context.indexPattern}
+                            />
+                          </EuiFlexItem>
+                        )}
+                      </EuiFlexGroup>
+                    </EuiPanel>
+                  );
+                }
               },
             });
 
@@ -116,20 +220,9 @@ export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvid
   },
 
   resolve: (params) => {
-    let indexPattern: string | undefined;
+    const dataViewId = params.dataView?.id;
 
-    if (isDataSourceType(params.dataSource, DataSourceType.Esql)) {
-      if (!isOfAggregateQueryType(params.query)) {
-        return { isMatch: false };
-      }
-
-      indexPattern = getIndexPatternFromESQLQuery(params.query.esql);
-    } else if (isDataSourceType(params.dataSource, DataSourceType.DataView) && params.dataView) {
-      indexPattern = params.dataView.getIndexPattern();
-    }
-
-    if (!indexPattern?.includes('traces')) {
-      // TODO Define a better way to enable traces data source
+    if (dataViewId !== 'apm_static_data_view_id_default') {
       return { isMatch: false };
     }
 
