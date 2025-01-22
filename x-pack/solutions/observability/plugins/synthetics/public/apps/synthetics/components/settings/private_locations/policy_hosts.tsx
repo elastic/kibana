@@ -18,9 +18,11 @@ import {
   EuiText,
   EuiToolTip,
   EuiSpacer,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { useSyntheticsSettingsContext } from '../../../contexts';
 import { AgentPolicyCallout } from './agent_policy_callout';
 import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { selectAgentPolicies } from '../../../state/agent_policies';
@@ -29,6 +31,8 @@ export const AGENT_POLICY_FIELD_NAME = 'agentPolicyId';
 
 export const PolicyHostsField = ({ privateLocations }: { privateLocations: PrivateLocation[] }) => {
   const { data } = useSelector(selectAgentPolicies);
+  const { basePath } = useSyntheticsSettingsContext();
+
   const {
     control,
     formState: { isSubmitted },
@@ -99,6 +103,13 @@ export const PolicyHostsField = ({ privateLocations }: { privateLocations: Priva
       <EuiFormRow
         fullWidth
         label={POLICY_HOST_LABEL}
+        labelAppend={
+          <EuiButtonEmpty size="xs" href={basePath + '/app/fleet/policies?create'}>
+            {i18n.translate('xpack.synthetics.policyHostsField.createButtonEmptyLabel', {
+              defaultMessage: 'Create policy',
+            })}
+          </EuiButtonEmpty>
+        }
         helpText={showFieldInvalid ? SELECT_POLICY_HOSTS_HELP_TEXT : undefined}
         isInvalid={showFieldInvalid}
         error={showFieldInvalid ? SELECT_POLICY_HOSTS : undefined}
