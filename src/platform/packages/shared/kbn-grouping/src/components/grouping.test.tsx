@@ -207,6 +207,7 @@ describe('Grouping', () => {
       );
       expect(screen.getByTestId('group-count').textContent).toBe('3 groups');
     });
+
     it('calls custom groupsUnit callback correctly', () => {
       // Provide a custom groupsUnit function in testProps
       const customGroupsUnit = jest.fn(
@@ -224,7 +225,7 @@ describe('Grouping', () => {
       expect(screen.getByTestId('group-count').textContent).toBe('3 custom units');
     });
 
-    it('calls custom groupsUnit callback with hasNullGroup = false', () => {
+    it('calls custom groupsUnit callback with hasNullGroup = false and null group in current page', () => {
       const customGroupsUnit = jest.fn(
         (n, parentSelectedGroup, hasNullGroup) => `${n} custom units`
       );
@@ -247,8 +248,35 @@ describe('Grouping', () => {
         </I18nProvider>
       );
 
-      expect(customGroupsUnit).toHaveBeenCalledWith(3, testProps.selectedGroup, false);
+      expect(customGroupsUnit).toHaveBeenCalledWith(3, testProps.selectedGroup, true);
       expect(screen.getByTestId('group-count').textContent).toBe('3 custom units');
     });
+  });
+
+  it('calls custom groupsUnit callback with hasNullGroup = true and no null group in current page', () => {
+    const customGroupsUnit = jest.fn((n, parentSelectedGroup, hasNullGroup) => `${n} custom units`);
+
+    const customProps = {
+      ...testProps,
+      groupsUnit: customGroupsUnit,
+      data: {
+        ...testProps.data,
+        groupByFields: {
+          ...testProps.data.groupByFields,
+          buckets: testProps?.data?.groupByFields?.buckets?.map(
+            (bucket, index) => (index === 2 ? { ...bucket, isNullGroup: undefined } : bucket) as any
+          ),
+        },
+      },
+    };
+
+    render(
+      <I18nProvider>
+        <Grouping {...customProps} />
+      </I18nProvider>
+    );
+
+    expect(customGroupsUnit).toHaveBeenCalledWith(3, testProps.selectedGroup, true);
+    expect(screen.getByTestId('group-count').textContent).toBe('3 custom units');
   });
 });
