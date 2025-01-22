@@ -21,7 +21,7 @@ import type {
 } from '@kbn/core-deprecations-server';
 import { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { InternalLoggingServiceSetup } from '@kbn/core-logging-server-internal';
+import { type InternalLoggingServiceSetup } from '@kbn/core-logging-server-internal';
 import { DeprecationsFactory } from './deprecations_factory';
 import { registerRoutes } from './routes';
 import { config as deprecationConfig, DeprecationConfigType } from './deprecation_config';
