@@ -19,6 +19,7 @@ Object {
         "type": "dlm",
       },
       "name": "logs.nginx",
+      "root": "logs",
       "stream": Object {
         "ingest": Object {
           "processing": Array [
@@ -73,7 +74,7 @@ Object {
       "lifecycle": Object {
         "type": "dlm",
       },
-      "name": "logs.nginx",
+      "name": "logs-nginx-default",
       "stream": Object {
         "ingest": Object {
           "processing": Array [
