@@ -19,13 +19,13 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 
-import type { CreateEndpointListItemRequestBodyInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/create_endpoint_list_item/create_endpoint_list_item.gen';
-import type { DeleteEndpointListItemRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/delete_endpoint_list_item/delete_endpoint_list_item.gen';
-import type { FindEndpointListItemsRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/find_endpoint_list_item/find_endpoint_list_item.gen';
-import type { ReadEndpointListItemRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/read_endpoint_list_item/read_endpoint_list_item.gen';
-import type { UpdateEndpointListItemRequestBodyInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/update_endpoint_list_item/update_endpoint_list_item.gen';
+import { CreateEndpointListItemRequestBodyInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/create_endpoint_list_item/create_endpoint_list_item.gen';
+import { DeleteEndpointListItemRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/delete_endpoint_list_item/delete_endpoint_list_item.gen';
+import { FindEndpointListItemsRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/find_endpoint_list_item/find_endpoint_list_item.gen';
+import { ReadEndpointListItemRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/read_endpoint_list_item/read_endpoint_list_item.gen';
+import { UpdateEndpointListItemRequestBodyInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/update_endpoint_list_item/update_endpoint_list_item.gen';
 import { routeWithNamespace } from '../../common/utils/security_solution';
-import type { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
