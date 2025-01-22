@@ -12,7 +12,7 @@ If you are using `EuiDataGrid` directly, you can enable in-table search by impor
 4. update your `renderCellValue` to accept `inTableSearchTerm` and `onHighlightsCountFound` props
 5. update your `renderCellValue` to wrap the cell content with `InTableSearchHighlightsWrapper` component.
 
-Examples could be found inside `kbn-unified-data-table` package.
+Examples could be found inside `kbn-unified-data-table` package or in this [tmp commit](https://github.com/elastic/kibana/pull/206454/commits/2c56de09341ee9ce20c0f78ee6a89da0347014f0).
 
 
 
