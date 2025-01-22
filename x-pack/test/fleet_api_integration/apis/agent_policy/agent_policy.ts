@@ -47,6 +47,7 @@ export default function (providerContext: FtrProviderContext) {
         .send({
           name: 'Test policy 1',
           namespace: 'default',
+          force: true,
         })
         .expect(200);
       agentPolicyWithPPId = agentPolicyResponse.item.id;
