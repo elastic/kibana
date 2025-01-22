@@ -54,11 +54,7 @@ async function getTransactionData(
   );
 }
 
-export const TransactionLink: React.FC<Props> = ({
-  traceId,
-  transactionName,
-  indexPattern,
-}: Props) => {
+export const TraceLink: React.FC<Props> = ({ traceId, transactionName, indexPattern }: Props) => {
   const { share, data } = useDiscoverServices();
   const transactionLocator = share?.url.locators.get<{ traceId: string }>(
     'TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR'
