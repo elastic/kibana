@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { Response as SupertestResponse } from 'supertest';
 import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { TaskRunning, TaskRunningStage } from '@kbn/task-manager-plugin/server/task_running';

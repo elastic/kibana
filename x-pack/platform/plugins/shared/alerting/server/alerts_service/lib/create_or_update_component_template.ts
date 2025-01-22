@@ -8,7 +8,7 @@
 import {
   ClusterPutComponentTemplateRequest,
   IndicesGetIndexTemplateIndexTemplateItem,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { asyncForEach } from '@kbn/std';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
@@ -50,14 +50,12 @@ const getIndexTemplatesUsingComponentTemplate = async (
         () =>
           esClient.indices.putIndexTemplate({
             name: template.name,
-            body: {
-              ...template.index_template,
-              template: {
-                ...template.index_template.template,
-                settings: {
-                  ...template.index_template.template?.settings,
-                  'index.mapping.total_fields.limit': totalFieldsLimit,
-                },
+            ...template.index_template,
+            template: {
+              ...template.index_template.template,
+              settings: {
+                ...template.index_template.template?.settings,
+                'index.mapping.total_fields.limit': totalFieldsLimit,
               },
             },
           }),
