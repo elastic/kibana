@@ -28,7 +28,7 @@ export function createEmptyLensState(
   description?: LensSerializedState['description'],
   query?: LensSerializedState['query'],
   filters?: LensSerializedState['filters']
-) {
+): LensRuntimeState {
   const isTextBased = query && isOfAggregateQueryType(query);
   return {
     attributes: {
