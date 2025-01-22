@@ -8,15 +8,16 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { v4 as uuidV4 } from 'uuid';
-import { ResourceIdentifier } from '../../../../../common/siem_migrations/rules/resources';
 import { SIEM_RULE_MIGRATION_CREATE_PATH } from '../../../../../common/siem_migrations/constants';
 import {
   CreateRuleMigrationRequestBody,
   CreateRuleMigrationRequestParams,
   type CreateRuleMigrationResponse,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import { ResourceIdentifier } from '../../../../../common/siem_migrations/rules/resources';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import type { CreateRuleMigrationInput } from '../data/rule_migrations_data_rules_client';
+import { SiemMigrationsAuditActions, siemMigrationAuditEvent } from './util/audit';
 import { withLicense } from './util/with_license';
 
 export const registerSiemRuleMigrationsCreateRoute = (
@@ -51,7 +52,13 @@ export const registerSiemRuleMigrationsCreateRoute = (
 
             const ctx = await context.resolve(['securitySolution']);
             const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
-
+            const auditLogger = ctx.securitySolution.getAuditLogger();
+            auditLogger?.log(
+              siemMigrationAuditEvent({
+                action: SiemMigrationsAuditActions.SIEM_MIGRATION_CREATED,
+                id: migrationId,
+              })
+            );
             const ruleMigrations = originalRules.map<CreateRuleMigrationInput>((originalRule) => ({
               migration_id: migrationId,
               original_rule: originalRule,

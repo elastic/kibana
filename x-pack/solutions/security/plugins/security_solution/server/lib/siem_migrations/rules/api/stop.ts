@@ -7,12 +7,13 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { SIEM_RULE_MIGRATION_STOP_PATH } from '../../../../../common/siem_migrations/constants';
 import {
   StopRuleMigrationRequestParams,
   type StopRuleMigrationResponse,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import { SIEM_RULE_MIGRATION_STOP_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { SiemMigrationsAuditActions, siemMigrationAuditEvent } from './util/audit';
 import { withLicense } from './util/with_license';
 
 export const registerSiemRuleMigrationsStopRoute = (
@@ -37,6 +38,7 @@ export const registerSiemRuleMigrationsStopRoute = (
           const migrationId = req.params.migration_id;
           try {
             const ctx = await context.resolve(['securitySolution']);
+            const auditLogger = ctx.securitySolution.getAuditLogger();
             const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
 
             const { exists, stopped } = await ruleMigrationsClient.task.stop(migrationId);
@@ -44,6 +46,12 @@ export const registerSiemRuleMigrationsStopRoute = (
             if (!exists) {
               return res.noContent();
             }
+            auditLogger?.log(
+              siemMigrationAuditEvent({
+                action: SiemMigrationsAuditActions.SIEM_MIGRATION_STOPPED,
+                id: migrationId,
+              })
+            );
             return res.ok({ body: { stopped } });
           } catch (err) {
             logger.error(err);

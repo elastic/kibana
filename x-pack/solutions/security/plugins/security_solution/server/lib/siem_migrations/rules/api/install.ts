@@ -14,8 +14,9 @@ import {
   InstallMigrationRulesRequestParams,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { withLicense } from './util/with_license';
+import { SiemMigrationsAuditActions, siemMigrationAuditEvent } from './util/audit';
 import { installTranslated } from './util/installation';
+import { withLicense } from './util/with_license';
 
 export const registerSiemRuleMigrationsInstallRoute = (
   router: SecuritySolutionPluginRouter,
@@ -48,7 +49,13 @@ export const registerSiemRuleMigrationsInstallRoute = (
             const securitySolutionContext = ctx.securitySolution;
             const savedObjectsClient = ctx.core.savedObjects.client;
             const rulesClient = await ctx.alerting.getRulesClient();
-
+            const auditLogger = ctx.securitySolution.getAuditLogger();
+            auditLogger?.log(
+              siemMigrationAuditEvent({
+                action: SiemMigrationsAuditActions.SIEM_MIGRATION_INSTALLED_RULE,
+                id: migrationId,
+              })
+            );
             const installed = await installTranslated({
               migrationId,
               ids,
