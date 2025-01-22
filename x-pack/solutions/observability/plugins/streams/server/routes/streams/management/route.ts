@@ -187,6 +187,8 @@ export const sampleStreamRoute = createServerRoute({
             },
           },
         ],
+        terminate_after: size,
+        track_total_hits: false,
         size,
       };
       const results = await scopedClusterClient.asCurrentUser.search({
