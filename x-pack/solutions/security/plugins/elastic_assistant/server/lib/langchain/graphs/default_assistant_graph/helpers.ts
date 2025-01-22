@@ -64,7 +64,7 @@ export const streamGraph = async ({
 
   let didEnd = false;
   const handleStreamEnd = (finalResponse: string, isError = false) => {
-    if(didEnd){
+    if (didEnd) {
       return;
     }
     if (onLlmResponse) {
@@ -124,13 +124,13 @@ export const streamGraph = async ({
           }
         }
       }
-    }
+    };
 
     pushStreamUpdate().catch((err) => {
       logger.error(`Error streaming graph: ${err}`);
       handleStreamEnd(err.message, true);
     });
-    
+
     return responseWithHeaders;
   }
 
@@ -180,7 +180,7 @@ export const streamGraph = async ({
         }
       }
     }
-  }
+  };
 
   pushStreamUpdate().catch((err) => {
     logger.error(`Error streaming graph: ${err}`);
