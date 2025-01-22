@@ -7,18 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import * as rt from 'io-ts';
-import {
-  Comparator,
-  criterionRT,
-  RequiredRuleParamsRT,
-  OptionalRuleParamsRT,
-} from '@kbn/response-ops-rule-params/log_threshold';
-import type {
-  LogThresholdParams,
-  RatioRuleParams,
-  countCriteriaRT,
-  ratioCriteriaRT,
-} from '@kbn/response-ops-rule-params/log_threshold';
+import { persistedLogViewReferenceRT } from '@kbn/logs-shared-plugin/common';
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 
 export { LOG_THRESHOLD_ALERT_TYPE_ID as LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
@@ -29,6 +18,33 @@ const ThresholdTypeRT = rt.keyof({
 });
 
 export type ThresholdType = rt.TypeOf<typeof ThresholdTypeRT>;
+
+// Comparators //
+export enum Comparator {
+  GT = 'more than',
+  GT_OR_EQ = 'more than or equals',
+  LT = 'less than',
+  LT_OR_EQ = 'less than or equals',
+  EQ = 'equals',
+  NOT_EQ = 'does not equal',
+  MATCH = 'matches',
+  NOT_MATCH = 'does not match',
+  MATCH_PHRASE = 'matches phrase',
+  NOT_MATCH_PHRASE = 'does not match phrase',
+}
+
+const ComparatorRT = rt.keyof({
+  [Comparator.GT]: null,
+  [Comparator.GT_OR_EQ]: null,
+  [Comparator.LT]: null,
+  [Comparator.LT_OR_EQ]: null,
+  [Comparator.EQ]: null,
+  [Comparator.NOT_EQ]: null,
+  [Comparator.MATCH]: null,
+  [Comparator.NOT_MATCH]: null,
+  [Comparator.MATCH_PHRASE]: null,
+  [Comparator.NOT_MATCH_PHRASE]: null,
+});
 
 // Maps our comparators to i18n strings, some comparators have more specific wording
 // depending on the field type the comparator is being used with.
@@ -116,16 +132,30 @@ export enum AlertStates {
   ERROR,
 }
 
+export const ThresholdRT = rt.type({
+  comparator: ComparatorRT,
+  value: rt.number,
+});
+
+export type Threshold = rt.TypeOf<typeof ThresholdRT>;
+
+export const criterionRT = rt.type({
+  field: rt.string,
+  comparator: ComparatorRT,
+  value: rt.union([rt.string, rt.number]),
+});
 export type Criterion = rt.TypeOf<typeof criterionRT>;
 
 export const partialCriterionRT = rt.partial(criterionRT.props);
 export type PartialCriterion = rt.TypeOf<typeof partialCriterionRT>;
 
+export const countCriteriaRT = rt.array(criterionRT);
 export type CountCriteria = rt.TypeOf<typeof countCriteriaRT>;
 
 export const partialCountCriteriaRT = rt.array(partialCriterionRT);
 export type PartialCountCriteria = rt.TypeOf<typeof partialCountCriteriaRT>;
 
+export const ratioCriteriaRT = rt.tuple([countCriteriaRT, countCriteriaRT]);
 export type RatioCriteria = rt.TypeOf<typeof ratioCriteriaRT>;
 
 export const partialRatioCriteriaRT = rt.tuple([partialCountCriteriaRT, partialCountCriteriaRT]);
@@ -134,8 +164,43 @@ export type PartialRatioCriteria = rt.TypeOf<typeof partialRatioCriteriaRT>;
 export const partialCriteriaRT = rt.union([partialCountCriteriaRT, partialRatioCriteriaRT]);
 export type PartialCriteria = rt.TypeOf<typeof partialCriteriaRT>;
 
+export const timeUnitRT = rt.union([
+  rt.literal('s'),
+  rt.literal('m'),
+  rt.literal('h'),
+  rt.literal('d'),
+]);
+export type TimeUnit = rt.TypeOf<typeof timeUnitRT>;
+
+export const timeSizeRT = rt.number;
+export const groupByRT = rt.array(rt.string);
+
+const RequiredRuleParamsRT = rt.type({
+  // NOTE: "count" would be better named as "threshold", but this would require a
+  // migration of encrypted saved objects, so we'll keep "count" until it's problematic.
+  count: ThresholdRT,
+  timeUnit: timeUnitRT,
+  timeSize: timeSizeRT,
+  logView: persistedLogViewReferenceRT, // Alerts are only compatible with persisted Log Views
+});
+
 const partialRequiredRuleParamsRT = rt.partial(RequiredRuleParamsRT.props);
 export type PartialRequiredRuleParams = rt.TypeOf<typeof partialRequiredRuleParamsRT>;
+
+const OptionalRuleParamsRT = rt.partial({
+  groupBy: groupByRT,
+});
+
+export const countRuleParamsRT = rt.intersection([
+  rt.type({
+    criteria: countCriteriaRT,
+    ...RequiredRuleParamsRT.props,
+  }),
+  rt.partial({
+    ...OptionalRuleParamsRT.props,
+  }),
+]);
+export type CountRuleParams = rt.TypeOf<typeof countRuleParamsRT>;
 
 export const partialCountRuleParamsRT = rt.intersection([
   rt.type({
@@ -148,6 +213,17 @@ export const partialCountRuleParamsRT = rt.intersection([
 ]);
 export type PartialCountRuleParams = rt.TypeOf<typeof partialCountRuleParamsRT>;
 
+export const ratioRuleParamsRT = rt.intersection([
+  rt.type({
+    criteria: ratioCriteriaRT,
+    ...RequiredRuleParamsRT.props,
+  }),
+  rt.partial({
+    ...OptionalRuleParamsRT.props,
+  }),
+]);
+export type RatioRuleParams = rt.TypeOf<typeof ratioRuleParamsRT>;
+
 export const partialRatioRuleParamsRT = rt.intersection([
   rt.type({
     criteria: partialRatioCriteriaRT,
@@ -159,6 +235,9 @@ export const partialRatioRuleParamsRT = rt.intersection([
 ]);
 export type PartialRatioRuleParams = rt.TypeOf<typeof partialRatioRuleParamsRT>;
 
+export const ruleParamsRT = rt.union([countRuleParamsRT, ratioRuleParamsRT]);
+export type RuleParams = rt.TypeOf<typeof ruleParamsRT>;
+
 export const partialRuleParamsRT = rt.union([partialCountRuleParamsRT, partialRatioRuleParamsRT]);
 export type PartialRuleParams = rt.TypeOf<typeof partialRuleParamsRT>;
 
@@ -166,7 +245,7 @@ export const isRatioRule = (criteria: PartialCriteria): criteria is PartialRatio
   return criteria.length > 0 && Array.isArray(criteria[0]) ? true : false;
 };
 
-export const isRatioRuleParams = (params: LogThresholdParams): params is RatioRuleParams => {
+export const isRatioRuleParams = (params: RuleParams): params is RatioRuleParams => {
   return isRatioRule(params.criteria);
 };
 
@@ -180,7 +259,7 @@ export const getDenominator = <C extends RatioCriteria | PartialRatioCriteria>(
   return criteria[1];
 };
 
-export const hasGroupBy = (params: LogThresholdParams) => {
+export const hasGroupBy = (params: RuleParams) => {
   const { groupBy } = params;
   return groupBy && groupBy.length > 0 ? true : false;
 };
@@ -307,8 +386,8 @@ export const isOptimizedGroupedSearchQueryResponse = (
 };
 
 export const isOptimizableGroupedThreshold = (
-  selectedComparator: LogThresholdParams['count']['comparator'],
-  selectedValue?: LogThresholdParams['count']['value']
+  selectedComparator: RuleParams['count']['comparator'],
+  selectedValue?: RuleParams['count']['value']
 ) => {
   if (selectedComparator === Comparator.GT) {
     return true;

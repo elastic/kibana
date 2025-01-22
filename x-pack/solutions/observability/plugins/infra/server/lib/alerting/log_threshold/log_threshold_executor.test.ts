@@ -13,11 +13,13 @@ import {
   getUngroupedESQuery,
 } from './log_threshold_executor';
 import type {
+  RuleParams,
   Criterion,
   UngroupedSearchQueryResponse,
   GroupedSearchQueryResponse,
 } from '../../../../common/alerting/logs/log_threshold';
-import { Comparator, type LogThresholdParams } from '@kbn/response-ops-rule-params/log_threshold';
+// import type { LogThresholdParams } from '@kbn/response-ops-rule-params/log_threshold';
+import { Comparator } from '../../../../common/alerting/logs/log_threshold';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   positiveComparators,
@@ -125,7 +127,7 @@ const expectedNegativeFilterClauses = [
   },
 ];
 
-const baseRuleParams: Pick<LogThresholdParams, 'count' | 'timeSize' | 'timeUnit' | 'logView'> = {
+const baseRuleParams: Pick<RuleParams, 'count' | 'timeSize' | 'timeUnit' | 'logView'> = {
   logView: {
     logViewId: 'Default',
     type: 'log-view-reference',
@@ -171,7 +173,7 @@ describe('Log threshold executor', () => {
   });
   describe('Criteria filter building', () => {
     test('Handles positive criteria', () => {
-      const ruleParams: LogThresholdParams = {
+      const ruleParams: RuleParams = {
         ...baseRuleParams,
         criteria: positiveCriteria,
       };
@@ -180,7 +182,7 @@ describe('Log threshold executor', () => {
     });
 
     test('Handles negative criteria', () => {
-      const ruleParams: LogThresholdParams = {
+      const ruleParams: RuleParams = {
         ...baseRuleParams,
         criteria: negativeCriteria,
       };
@@ -190,7 +192,7 @@ describe('Log threshold executor', () => {
     });
 
     test('Handles time range', () => {
-      const ruleParams: LogThresholdParams = { ...baseRuleParams, criteria: [] };
+      const ruleParams: RuleParams = { ...baseRuleParams, criteria: [] };
       const filters = buildFiltersFromCriteria(ruleParams, TIMESTAMP_FIELD, EXECUTION_TIMERANGE);
       expect(typeof filters.rangeFilter.range[TIMESTAMP_FIELD].gte).toBe('number');
       expect(typeof filters.rangeFilter.range[TIMESTAMP_FIELD].lte).toBe('number');
@@ -205,7 +207,7 @@ describe('Log threshold executor', () => {
   describe('ES queries', () => {
     describe('Query generation', () => {
       it('Correctly generates ungrouped queries', () => {
-        const ruleParams: LogThresholdParams = {
+        const ruleParams: RuleParams = {
           ...baseRuleParams,
           criteria: [...positiveCriteria, ...negativeCriteria],
         };
@@ -256,7 +258,7 @@ describe('Log threshold executor', () => {
 
       describe('Correctly generates grouped queries', () => {
         it('When using an optimizable threshold comparator', () => {
-          const ruleParams: LogThresholdParams = {
+          const ruleParams: RuleParams = {
             ...baseRuleParams,
             groupBy: ['host.name'],
             criteria: [...positiveCriteria, ...negativeCriteria],
@@ -331,7 +333,7 @@ describe('Log threshold executor', () => {
         });
 
         it('When not using an optimizable threshold comparator', () => {
-          const ruleParams: LogThresholdParams = {
+          const ruleParams: RuleParams = {
             ...baseRuleParams,
             count: {
               ...baseRuleParams.count,

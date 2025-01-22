@@ -19,8 +19,11 @@ import { i18n } from '@kbn/i18n';
 import { isFinite, isNumber } from 'lodash';
 import React, { useState } from 'react';
 import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
-import { Comparator, type LogThresholdParams } from '@kbn/response-ops-rule-params/log_threshold';
-import { ComparatorToi18nMap } from '../../../../../common/alerting/logs/log_threshold/types';
+import type { LogThresholdParams } from '@kbn/response-ops-rule-params/log_threshold';
+import {
+  Comparator,
+  ComparatorToi18nMap,
+} from '../../../../../common/alerting/logs/log_threshold/types';
 
 const thresholdPrefix = i18n.translate('xpack.infra.logs.alertFlyout.thresholdPrefix', {
   defaultMessage: 'is',

@@ -8,12 +8,12 @@
 import * as rt from 'io-ts';
 import { persistedLogViewReferenceRT } from '@kbn/logs-shared-plugin/common';
 import {
+  ThresholdRT,
   countCriteriaRT,
   timeUnitRT,
   timeSizeRT,
   groupByRT,
-  ThresholdRT,
-} from '@kbn/response-ops-rule-params/log_threshold';
+} from '../../../alerting/logs/log_threshold/types';
 
 export const LOG_ALERTS_CHART_PREVIEW_DATA_PATH = '/api/infra/log_alerts/chart_preview_data';
 

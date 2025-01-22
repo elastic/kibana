@@ -12,8 +12,7 @@ import type {
   AlertingServerSetup,
 } from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
-import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { logThresholdParamsRT } from '@kbn/response-ops-rule-params/log_threshold';
+import { logThresholdParamsSchema } from '@kbn/response-ops-rule-params/log_threshold';
 import type { InfraConfig } from '../../../../common/plugin_config_types';
 import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
@@ -124,9 +123,7 @@ export function registerLogThresholdRuleType(
       defaultMessage: 'Log threshold',
     }),
     validate: {
-      params: {
-        validate: (params) => decodeOrThrow(logThresholdParamsRT)(params),
-      },
+      params: logThresholdParamsSchema,
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
     actionGroups: [FIRED_ACTIONS],

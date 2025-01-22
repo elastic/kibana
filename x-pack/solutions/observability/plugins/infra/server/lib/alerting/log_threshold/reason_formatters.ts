@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { TimeUnitChar } from '@kbn/observability-plugin/common';
 import { formatDurationFromTimeUnitChar } from '@kbn/observability-plugin/common';
-import type { Comparator, TimeUnit } from '@kbn/response-ops-rule-params/log_threshold';
+import type { Comparator, TimeUnit } from '../../../../common/alerting/logs/log_threshold/types';
 import { ComparatorToi18nSymbolsMap } from '../../../../common/alerting/logs/log_threshold/types';
 
 export const getReasonMessageForUngroupedCountAlert = (

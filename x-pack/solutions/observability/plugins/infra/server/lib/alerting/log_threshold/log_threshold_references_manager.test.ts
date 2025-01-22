@@ -6,10 +6,11 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
-import { Comparator, type LogThresholdParams } from '@kbn/response-ops-rule-params/log_threshold';
+import type { RuleParams } from '../../../../common/alerting/logs/log_threshold';
+import { Comparator } from '../../../../common/alerting/logs/log_threshold';
 import { extractReferences, injectReferences } from './log_threshold_references_manager';
 
-const params: LogThresholdParams = {
+const params: RuleParams = {
   logView: {
     logViewId: 'Default',
     type: 'log-view-reference',
@@ -63,7 +64,7 @@ describe('Log threshold references manager', () => {
     });
 
     it('should return the input params and an empty references when params are not valid', () => {
-      expect(extractReferences(brokenParams as LogThresholdParams)).toEqual({
+      expect(extractReferences(brokenParams as RuleParams)).toEqual({
         params: brokenParams,
         references: [],
       });

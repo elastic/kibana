@@ -20,9 +20,9 @@ import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-tim
 import { get, identity } from 'lodash';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { useLogView } from '@kbn/logs-shared-plugin/public';
-import { Comparator } from '@kbn/response-ops-rule-params/log_threshold';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import {
+  Comparator,
   ComparatorToi18nMap,
   ComparatorToi18nSymbolsMap,
   isRatioRule,

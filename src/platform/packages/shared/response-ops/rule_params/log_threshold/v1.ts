@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as rt from 'io-ts';
+import { schema } from '@kbn/config-schema';
 
-const persistedLogViewReferenceRT = rt.type({
-  logViewId: rt.string,
-  type: rt.literal('log-view-reference'),
+export const persistedLogViewReferenceSchema = schema.object({
+  logViewId: schema.string(),
+  type: schema.literal('log-view-reference'),
 });
 
 // Comparators //
@@ -28,80 +28,80 @@ export enum Comparator {
   NOT_MATCH_PHRASE = 'does not match phrase',
 }
 
-const ComparatorRT = rt.keyof({
-  [Comparator.GT]: null,
-  [Comparator.GT_OR_EQ]: null,
-  [Comparator.LT]: null,
-  [Comparator.LT_OR_EQ]: null,
-  [Comparator.EQ]: null,
-  [Comparator.NOT_EQ]: null,
-  [Comparator.MATCH]: null,
-  [Comparator.NOT_MATCH]: null,
-  [Comparator.MATCH_PHRASE]: null,
-  [Comparator.NOT_MATCH_PHRASE]: null,
-});
-
-export const ThresholdRT = rt.type({
-  comparator: ComparatorRT,
-  value: rt.number,
-});
-
-export type Threshold = rt.TypeOf<typeof ThresholdRT>;
-
-export const criterionRT = rt.type({
-  field: rt.string,
-  comparator: ComparatorRT,
-  value: rt.union([rt.string, rt.number]),
-});
-
-export const countCriteriaRT = rt.array(criterionRT);
-export const ratioCriteriaRT = rt.tuple([countCriteriaRT, countCriteriaRT]);
-
-export const timeUnitRT = rt.union([
-  rt.literal('s'),
-  rt.literal('m'),
-  rt.literal('h'),
-  rt.literal('d'),
+export const ComparatorSchema = schema.oneOf([
+  schema.literal(Comparator.GT),
+  schema.literal(Comparator.GT_OR_EQ),
+  schema.literal(Comparator.LT),
+  schema.literal(Comparator.LT_OR_EQ),
+  schema.literal(Comparator.EQ),
+  schema.literal(Comparator.NOT_EQ),
+  schema.literal(Comparator.MATCH),
+  schema.literal(Comparator.NOT_MATCH),
+  schema.literal(Comparator.MATCH_PHRASE),
+  schema.literal(Comparator.NOT_MATCH_PHRASE),
 ]);
-export type TimeUnit = rt.TypeOf<typeof timeUnitRT>;
 
-export const timeSizeRT = rt.number;
-export const groupByRT = rt.array(rt.string);
+export const ThresholdSchema = schema.object({
+  comparator: ComparatorSchema,
+  value: schema.number(),
+});
 
-export const RequiredRuleParamsRT = rt.type({
+export const criterionSchema = schema.object({
+  field: schema.string(),
+  comparator: ComparatorSchema,
+  value: schema.oneOf([schema.string(), schema.number()]),
+});
+
+export const countCriteriaSchema = schema.arrayOf(criterionSchema);
+export const ratioCriteriaSchema = schema.arrayOf(countCriteriaSchema);
+
+export const timeUnitSchema = schema.oneOf([
+  schema.literal('s'),
+  schema.literal('m'),
+  schema.literal('h'),
+  schema.literal('d'),
+]);
+
+export const timeSizeSchema = schema.number();
+export const groupBySchema = schema.arrayOf(schema.string());
+
+export const RequiredRuleParamsSchema = schema.object({
   // NOTE: "count" would be better named as "threshold", but this would require a
   // migration of encrypted saved objects, so we'll keep "count" until it's problematic.
-  count: ThresholdRT,
-  timeUnit: timeUnitRT,
-  timeSize: timeSizeRT,
-  logView: persistedLogViewReferenceRT, // Alerts are only compatible with persisted Log Views
+  count: ThresholdSchema,
+  timeUnit: timeUnitSchema,
+  timeSize: timeSizeSchema,
+  logView: persistedLogViewReferenceSchema, // Alerts are only compatible with persisted Log Views
 });
 
-export const OptionalRuleParamsRT = rt.partial({
-  groupBy: groupByRT,
+export const OptionalRuleParamsSchema = schema.object({
+  groupBy: schema.maybe(groupBySchema),
 });
 
-export const countRuleParamsRT = rt.intersection([
-  rt.type({
-    criteria: countCriteriaRT,
-    ...RequiredRuleParamsRT.props,
+const countRuleParamsSchema = schema.intersection([
+  schema.object({
+    criteria: countCriteriaSchema,
   }),
-  rt.partial({
-    ...OptionalRuleParamsRT.props,
-  }),
+  RequiredRuleParamsSchema,
+  OptionalRuleParamsSchema,
 ]);
-export type CountRuleParams = rt.TypeOf<typeof countRuleParamsRT>;
 
-const ratioRuleParamsRT = rt.intersection([
-  rt.type({
-    criteria: ratioCriteriaRT,
-    ...RequiredRuleParamsRT.props,
+const ratioRuleParamsSchema = schema.intersection([
+  schema.object({
+    criteria: ratioCriteriaSchema,
   }),
-  rt.partial({
-    ...OptionalRuleParamsRT.props,
-  }),
+  RequiredRuleParamsSchema,
+  OptionalRuleParamsSchema,
 ]);
-export type RatioRuleParams = rt.TypeOf<typeof ratioRuleParamsRT>;
 
-export const logThresholdParamsRT = rt.union([countRuleParamsRT, ratioRuleParamsRT]);
-export type LogThresholdParams = rt.TypeOf<typeof logThresholdParamsRT>;
+export const logThresholdParamsSchema = schema.oneOf([
+  countRuleParamsSchema,
+  ratioRuleParamsSchema,
+]);
+
+// Export types for TypeScript
+export type TimeUnit = ReturnType<typeof timeUnitSchema.validate>;
+export type Threshold = ReturnType<typeof ThresholdSchema.validate>;
+export type CountRuleParams = ReturnType<typeof countRuleParamsSchema.validate>;
+export type RatioRuleParams = ReturnType<typeof ratioRuleParamsSchema.validate>;
+export type LogThresholdParams = ReturnType<typeof logThresholdParamsSchema.validate>;
