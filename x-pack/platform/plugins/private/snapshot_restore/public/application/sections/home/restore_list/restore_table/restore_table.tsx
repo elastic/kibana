@@ -107,6 +107,7 @@ export const RestoreTable: React.FunctionComponent<Props> = React.memo(({ restor
       }),
       truncateText: true,
       sortable: true,
+      'data-test-subj': 'restoreTableIndex',
     },
     {
       field: 'isComplete',
@@ -115,6 +116,7 @@ export const RestoreTable: React.FunctionComponent<Props> = React.memo(({ restor
       }),
       truncateText: true,
       sortable: true,
+      'data-test-subj': 'restoreTableIsComplete',
       render: (isComplete: SnapshotRestore['isComplete']) =>
         isComplete ? (
           <EuiHealth color="success">
