@@ -14,10 +14,8 @@ import { RouteContext } from '../routes/types';
 import { privateLocationSavedObjectName } from '../../common/saved_objects/private_locations';
 
 export class PrivateLocationRepository {
-  routeContext: RouteContext;
   internalSOClient: ISavedObjectsRepository;
-  constructor(routeContext: RouteContext) {
-    this.routeContext = {} as RouteContext;
+  constructor(private routeContext: RouteContext) {
     const { server } = routeContext;
     this.internalSOClient = server.coreStart.savedObjects.createInternalRepository();
   }
