@@ -17,7 +17,7 @@ import {
 } from '../translations';
 import { useRuleFormScreenContext, useRuleFormState } from '../hooks';
 import { hasRuleErrors } from '../validation';
-import { RulePageConfirmCreateRule } from './rule_page_confirm_create_rule';
+import { RulePageConfirmCreateRule } from '../components';
 
 export interface RulePageFooterProps {
   isEdit?: boolean;
