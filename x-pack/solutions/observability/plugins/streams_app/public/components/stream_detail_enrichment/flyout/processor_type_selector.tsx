@@ -13,6 +13,7 @@ import { useController, useFormContext, useWatch } from 'react-hook-form';
 import { ProcessorType } from '@kbn/streams-schema';
 import { useKibana } from '../../../hooks/use_kibana';
 import { getDefaultFormState } from '../utils';
+import { ProcessorFormState } from '../types';
 
 interface TAvailableProcessor {
   value: ProcessorType;
@@ -28,8 +29,11 @@ export const ProcessorTypeSelector = ({
   const { core } = useKibana();
   const esDocUrl = core.docLinks.links.elasticsearch.docsBase;
 
-  const { control, reset } = useFormContext();
-  const { field, fieldState } = useController({ name: 'type', control, rules: { required: true } });
+  const { reset } = useFormContext();
+  const { field, fieldState } = useController<ProcessorFormState, 'type'>({
+    name: 'type',
+    rules: { required: true },
+  });
 
   const processorType = useWatch<{ type: ProcessorType }>({ name: 'type' });
 
@@ -74,7 +78,9 @@ const availableProcessors: TAvailableProcessors = {
         values={{
           dissectLink: (
             <EuiLink external target="_blank" href={esDocUrl + 'dissect-processor.html'}>
-              dissect
+              {i18n.translate('xpack.streams.availableProcessors.dissectLinkLabel', {
+                defaultMessage: 'dissect',
+              })}
             </EuiLink>
           ),
         }}
@@ -91,7 +97,9 @@ const availableProcessors: TAvailableProcessors = {
         values={{
           grokLink: (
             <EuiLink external target="_blank" href={esDocUrl + 'grok-processor.html'}>
-              grok
+              {i18n.translate('xpack.streams.availableProcessors.grokLinkLabel', {
+                defaultMessage: 'grok',
+              })}
             </EuiLink>
           ),
         }}
