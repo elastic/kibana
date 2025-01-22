@@ -6,10 +6,8 @@
  */
 
 import axios from 'axios';
-import type cypress from 'cypress';
-import path from 'path';
 import Url from 'url';
-import type { FtrProviderContext } from './ftr_provider_context';
+import type { FtrProviderContext } from '../common/ftr_provider_context';
 import { loadProfilingData } from './load_profiling_data';
 import { setupProfilingResources } from './setup_profiling_resources';
 
@@ -17,13 +15,8 @@ const DEFAULT_HEADERS = {
   'kbn-xsrf': true,
   'x-elastic-internal-origin': 'Kibana',
 };
-export async function cypressTestRunner({
-  ftrProviderContext: { getService },
-  cypressExecution,
-}: {
-  ftrProviderContext: FtrProviderContext;
-  cypressExecution: typeof cypress.run | typeof cypress.open;
-}) {
+
+export async function cypressTestRunner({ getService }: FtrProviderContext) {
   const config = getService('config');
 
   const username = config.get('servers.elasticsearch.username');
@@ -53,12 +46,12 @@ export async function cypressTestRunner({
     { headers: DEFAULT_HEADERS }
   );
 
-  // Only runs the setup once. This is useful when runing the tests with --times args
+  // Only runs the setup once. This is useful when running the tests with --times args
   if (!profilingResources.data.has_setup) {
     await setupProfilingResources({ kibanaUrlWithAuth });
   }
 
-  // Only loads profiling data once. This is useful when runing the tests with --times args
+  // Only loads profiling data once. This is useful when running the tests with --times args
   if (!profilingResources.data.has_data) {
     await loadProfilingData({ esNode, esRequestTimeout });
   }
@@ -69,42 +62,21 @@ export async function cypressTestRunner({
     port: config.get('servers.kibana.port'),
   });
 
-  const cypressProjectPath = path.join(__dirname);
-  const { open, ...cypressCliArgs } = getCypressCliArgs();
-
-  const res = await cypressExecution({
-    ...cypressCliArgs,
-    project: cypressProjectPath,
-    config: {
-      e2e: {
-        baseUrl: kibanaUrlWithoutAuth,
-      },
-    },
-    env: {
-      KIBANA_URL: kibanaUrlWithoutAuth,
-      ES_NODE: esNode,
-      ES_REQUEST_TIMEOUT: esRequestTimeout,
-      TEST_CLOUD: process.env.TEST_CLOUD,
-    },
-  });
-
-  return res;
-}
-
-function getCypressCliArgs(): Record<string, unknown> {
-  if (!process.env.CYPRESS_CLI_ARGS) {
-    return {};
-  }
-
-  const { $0, _, ...cypressCliArgs } = JSON.parse(process.env.CYPRESS_CLI_ARGS) as Record<
-    string,
-    unknown
-  >;
-
-  const spec =
-    typeof cypressCliArgs.spec === 'string' && !cypressCliArgs.spec.includes('**')
-      ? `**/${cypressCliArgs.spec}*`
-      : cypressCliArgs.spec;
-
-  return { ...cypressCliArgs, spec };
+  return {
+    KIBANA_URL: kibanaUrlWithoutAuth,
+    ES_NODE: esNode,
+    ES_REQUEST_TIMEOUT: esRequestTimeout,
+    TEST_CLOUD: process.env.TEST_CLOUD,
+    baseUrl: Url.format({
+      protocol: config.get('servers.kibana.protocol'),
+      hostname: config.get('servers.kibana.hostname'),
+      port: config.get('servers.kibana.port'),
+    }),
+    protocol: config.get('servers.kibana.protocol'),
+    hostname: config.get('servers.kibana.hostname'),
+    configport: config.get('servers.kibana.port'),
+    ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
+    ELASTICSEARCH_USERNAME: config.get('servers.kibana.username'),
+    ELASTICSEARCH_PASSWORD: config.get('servers.kibana.password'),
+  };
 }
