@@ -10,6 +10,8 @@ import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { getCalculateAutoTimeExpression, getUserTimeZone } from '@kbn/data-plugin/common';
 import { convertIntervalToEsInterval } from '@kbn/data-plugin/public';
 import moment from 'moment';
+import { partition } from 'lodash';
+import { isColumnOfType } from './operations/definitions/helpers';
 import { ValueFormatConfig } from './operations/definitions/column_types';
 import { convertToAbsoluteDateRange } from '../../utils';
 import { DateRange, OriginalColumn } from '../../../common/types';
@@ -48,6 +50,7 @@ export function getESQLForLayer(
   )
     return;
 
+  // indexPattern.title is the actual es pattern
   const esql = [`FROM ${indexPattern.title}`];
   if (indexPattern.timeFieldName) {
     esql.push(
@@ -65,58 +68,189 @@ export function getESQLForLayer(
 
   const esAggsIdMap: Record<string, OriginalColumn[]> = {};
 
-  const metrics = esAggEntries
-    .filter(([id, col]) => !col.isBucketed)
-    .map(([colId, col], index) => {
-      const def = operationDefinitionMap[col.operationType];
+  const [metricEsAggsEntries, bucketEsAggsEntries] = partition(
+    esAggEntries,
+    ([_, col]) => !col.isBucketed
+  );
 
-      if (!def.toESQL) return undefined;
+  const metrics = metricEsAggsEntries.map(([colId, col], index) => {
+    const def = operationDefinitionMap[col.operationType];
 
-      const aggId = String(index);
-      const wrapInFilter = Boolean(def.filterable && col.filter?.query);
-      const wrapInTimeFilter =
-        def.canReduceTimeRange &&
-        !hasDateHistogram &&
-        col.reducedTimeRange &&
-        indexPattern.timeFieldName;
+    if (!def.toESQL) return undefined;
 
-      const esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
-        ? `bucket_${index + (col.isBucketed ? 0 : 1)}_${aggId}`
-        : `bucket_${index}_${aggId}`;
+    const aggId = String(index);
+    const wrapInFilter = Boolean(def.filterable && col.filter?.query);
+    const wrapInTimeFilter =
+      def.canReduceTimeRange &&
+      !hasDateHistogram &&
+      col.reducedTimeRange &&
+      indexPattern.timeFieldName;
 
-      const format =
-        operationDefinitionMap[col.operationType].getSerializedFormat?.(
-          col,
-          col,
-          indexPattern,
-          uiSettings,
-          dateRange
-        ) ??
-        ('sourceField' in col
-          ? col.sourceField === '___records___'
-            ? { id: 'number' }
-            : indexPattern.getFormatterForField(col.sourceField)
-          : undefined);
+    const esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
+      ? `bucket_${index + 1}_${aggId}`
+      : `bucket_${index}_${aggId}`;
 
-      esAggsIdMap[esAggsId] = [
-        {
-          ...col,
-          id: colId,
-          format: format as unknown as ValueFormatConfig,
-          interval: undefined as never,
-          label: col.customLabel
-            ? col.label
-            : operationDefinitionMap[col.operationType].getDefaultLabel(
-                col,
-                layer.columns,
-                indexPattern,
-                uiSettings,
-                dateRange
-              ),
-        },
-      ];
+    const format =
+      operationDefinitionMap[col.operationType].getSerializedFormat?.(
+        col,
+        col,
+        indexPattern,
+        uiSettings,
+        dateRange
+      ) ??
+      ('sourceField' in col
+        ? col.sourceField === '___records___'
+          ? { id: 'number' }
+          : indexPattern.getFormatterForField(col.sourceField)
+        : undefined);
 
-      let metricESQL = def.toESQL(
+    esAggsIdMap[esAggsId] = [
+      {
+        ...col,
+        id: colId,
+        format: format as unknown as ValueFormatConfig,
+        interval: undefined as never,
+        label: col.customLabel
+          ? col.label
+          : operationDefinitionMap[col.operationType].getDefaultLabel(
+              col,
+              layer.columns,
+              indexPattern,
+              uiSettings,
+              dateRange
+            ),
+      },
+    ];
+
+    let metricESQL = def.toESQL(
+      {
+        ...col,
+        timeShift: resolveTimeShift(
+          col.timeShift,
+          absDateRange,
+          histogramBarsTarget,
+          hasDateHistogram
+        ),
+      },
+      wrapInFilter || wrapInTimeFilter ? `${aggId}-metric` : aggId,
+      indexPattern,
+      layer,
+      uiSettings,
+      dateRange
+    );
+
+    if (!metricESQL) return undefined;
+
+    metricESQL = `${esAggsId} = ` + metricESQL;
+
+    if (wrapInFilter || wrapInTimeFilter) {
+      if (wrapInFilter) {
+        if (col.filter?.language === 'kquery') {
+          return;
+        }
+        return;
+      }
+      if (wrapInTimeFilter) {
+        return undefined;
+      }
+    }
+
+    return metricESQL;
+  });
+
+  if (metrics.some((m) => !m)) return;
+  let stats = `STATS ${metrics.join(', ')}`;
+
+  const buckets = bucketEsAggsEntries.map(([colId, col], index) => {
+    const def = operationDefinitionMap[col.operationType];
+
+    if (!def.toESQL) return undefined;
+
+    const aggId = String(index);
+    const wrapInFilter = Boolean(def.filterable && col.filter?.query);
+    const wrapInTimeFilter =
+      def.canReduceTimeRange &&
+      !hasDateHistogram &&
+      col.reducedTimeRange &&
+      indexPattern.timeFieldName;
+
+    let esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
+      ? `col_${index}-${aggId}`
+      : `col_${index}_${aggId}`;
+
+    let interval: number | undefined;
+    if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
+      const dateHistogramColumn = col as DateHistogramIndexPatternColumn;
+      const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
+
+      const cleanInterval = (i: string) => {
+        switch (i) {
+          case 'd':
+            return '1d';
+          case 'h':
+            return '1h';
+          case 'm':
+            return '1m';
+          case 's':
+            return '1s';
+          case 'ms':
+            return '1ms';
+          default:
+            return i;
+        }
+      };
+      esAggsId = dateHistogramColumn.sourceField;
+      const kibanaInterval =
+        dateHistogramColumn.params?.interval === 'auto'
+          ? calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }) || '1h'
+          : dateHistogramColumn.params?.interval || '1h';
+      const esInterval = convertIntervalToEsInterval(cleanInterval(kibanaInterval));
+      interval = moment.duration(esInterval.value, esInterval.unit).as('ms');
+    }
+
+    const format =
+      operationDefinitionMap[col.operationType].getSerializedFormat?.(
+        col,
+        col,
+        indexPattern,
+        uiSettings,
+        dateRange
+      ) ?? ('sourceField' in col ? indexPattern.getFormatterForField(col.sourceField) : undefined);
+
+    esAggsIdMap[esAggsId] = [
+      {
+        ...col,
+        id: colId,
+        format: format as unknown as ValueFormatConfig,
+        interval: interval as never,
+        ...('sourceField' in col ? { sourceField: col.sourceField! } : {}),
+        label: col.customLabel
+          ? col.label
+          : operationDefinitionMap[col.operationType].getDefaultLabel(
+              col,
+              layer.columns,
+              indexPattern,
+              uiSettings,
+              dateRange
+            ),
+      },
+    ];
+
+    if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
+      const column = col;
+      if (
+        column.params?.dropPartials &&
+        // set to false when detached from time picker
+        (indexPattern.timeFieldName === indexPattern.getFieldByName(column.sourceField)?.name ||
+          !column.params?.ignoreTimeRange)
+      ) {
+        return undefined;
+      }
+    }
+
+    return (
+      `${esAggsId} = ` +
+      def.toESQL(
         {
           ...col,
           timeShift: resolveTimeShift(
@@ -131,140 +265,9 @@ export function getESQLForLayer(
         layer,
         uiSettings,
         dateRange
-      );
-
-      if (!metricESQL) return undefined;
-
-      metricESQL = `${esAggsId} = ` + metricESQL;
-
-      if (wrapInFilter || wrapInTimeFilter) {
-        if (wrapInFilter) {
-          if (col.filter?.language === 'kquery') {
-            return;
-          }
-          return;
-        }
-        if (wrapInTimeFilter) {
-          return undefined;
-        }
-      }
-
-      return metricESQL;
-    });
-
-  if (metrics.some((m) => !m)) return;
-  let stats = `STATS ${metrics.join(', ')}`;
-
-  const buckets = esAggEntries
-    .filter(([id, col]) => col.isBucketed)
-    .map(([colId, col], index) => {
-      const def = operationDefinitionMap[col.operationType];
-
-      if (!def.toESQL) return undefined;
-
-      const aggId = String(index);
-      const wrapInFilter = Boolean(def.filterable && col.filter?.query);
-      const wrapInTimeFilter =
-        def.canReduceTimeRange &&
-        !hasDateHistogram &&
-        col.reducedTimeRange &&
-        indexPattern.timeFieldName;
-
-      let esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
-        ? `col_${index + (col.isBucketed ? 0 : 1)}-${aggId}`
-        : `col_${index}_${aggId}`;
-
-      let interval: number | undefined;
-      if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
-        const dateHistogramColumn = col as DateHistogramIndexPatternColumn;
-        const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
-
-        const cleanInterval = (i: string) => {
-          switch (i) {
-            case 'd':
-              return '1d';
-            case 'h':
-              return '1h';
-            case 'm':
-              return '1m';
-            case 's':
-              return '1s';
-            case 'ms':
-              return '1ms';
-            default:
-              return i;
-          }
-        };
-        esAggsId = dateHistogramColumn.sourceField;
-        const kibanaInterval =
-          dateHistogramColumn.params?.interval === 'auto'
-            ? calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }) || '1h'
-            : dateHistogramColumn.params?.interval || '1h';
-        const esInterval = convertIntervalToEsInterval(cleanInterval(kibanaInterval));
-        interval = moment.duration(esInterval.value, esInterval.unit).as('ms');
-      }
-
-      const format =
-        operationDefinitionMap[col.operationType].getSerializedFormat?.(
-          col,
-          col,
-          indexPattern,
-          uiSettings,
-          dateRange
-        ) ??
-        ('sourceField' in col ? indexPattern.getFormatterForField(col.sourceField) : undefined);
-
-      esAggsIdMap[esAggsId] = [
-        {
-          ...col,
-          id: colId,
-          format: format as unknown as ValueFormatConfig,
-          interval: interval as never,
-          ...('sourceField' in col ? { sourceField: col.sourceField! } : {}),
-          label: col.customLabel
-            ? col.label
-            : operationDefinitionMap[col.operationType].getDefaultLabel(
-                col,
-                layer.columns,
-                indexPattern,
-                uiSettings,
-                dateRange
-              ),
-        },
-      ];
-
-      if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
-        const column = col;
-        if (
-          column.params?.dropPartials &&
-          // set to false when detached from time picker
-          (indexPattern.timeFieldName === indexPattern.getFieldByName(column.sourceField)?.name ||
-            !column.params?.ignoreTimeRange)
-        ) {
-          return undefined;
-        }
-      }
-
-      return (
-        `${esAggsId} = ` +
-        def.toESQL(
-          {
-            ...col,
-            timeShift: resolveTimeShift(
-              col.timeShift,
-              absDateRange,
-              histogramBarsTarget,
-              hasDateHistogram
-            ),
-          },
-          wrapInFilter || wrapInTimeFilter ? `${aggId}-metric` : aggId,
-          indexPattern,
-          layer,
-          uiSettings,
-          dateRange
-        )
-      );
-    });
+      )
+    );
+  });
 
   if (buckets.some((m) => !m)) return;
 
@@ -274,20 +277,18 @@ export function getESQLForLayer(
 
     if (buckets.some((b) => !b || b.includes('undefined'))) return;
 
-    const sorts = esAggEntries
-      .filter(([id, col]) => col.isBucketed)
-      .map(([colId, col], index) => {
-        const aggId = String(index);
-        let esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
-          ? `col_${index + (col.isBucketed ? 0 : 1)}-${aggId}`
-          : `col_${index}_${aggId}`;
+    const sorts = bucketEsAggsEntries.map(([colId, col], index) => {
+      const aggId = String(index);
+      let esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
+        ? `col_${index}-${aggId}`
+        : `col_${index}_${aggId}`;
 
-        if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
-          esAggsId = col.sourceField;
-        }
+      if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
+        esAggsId = col.sourceField;
+      }
 
-        return `${esAggsId} ASC`;
-      });
+      return `${esAggsId} ASC`;
+    });
 
     esql.push(`SORT ${sorts.join(', ')}`);
   } else {

@@ -191,7 +191,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     return field?.format ?? { id: 'number' };
   },
   toESQL: (column, columnId, indexPattern) => {
-    if (column.params?.emptyAsNull === false || column.timeShift) return;
+    if (column.params?.emptyAsNull === false || column.timeShift || !column.filter) return;
 
     const field = indexPattern.getFieldByName(column.sourceField);
     let esql = '';
@@ -199,9 +199,6 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       esql = `COUNT(*)`;
     } else {
       esql = `COUNT(${sanitazeESQLInput(field.name)})`;
-    }
-    if (column.filter) {
-      return undefined;
     }
 
     return esql;

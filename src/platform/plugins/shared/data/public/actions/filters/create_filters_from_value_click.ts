@@ -21,6 +21,7 @@ import {
   buildSimpleExistFilter,
   buildSimpleNumberRangeFilter,
 } from '@kbn/es-query/src/filters/build_filters';
+import { isSourceParamsESQL } from '@kbn/expressions-plugin/common/expression_types';
 import { getIndexPatterns, getSearchService } from '../../services';
 import { AggConfigSerialized } from '../../../common/search/aggs';
 import { mapAndFlattenFilters } from '../../query';
@@ -138,39 +139,37 @@ export const createFilterESQL = async (
   columnIndex: number,
   rowIndex: number
 ) => {
+  const column = table?.columns?.[columnIndex];
   if (
-    !table?.columns?.[columnIndex]?.meta?.sourceParams?.sourceField ||
-    table.columns[columnIndex].meta.sourceParams?.sourceField === '___records___'
+    !column?.meta?.sourceParams?.sourceField ||
+    column.meta.sourceParams?.sourceField === '___records___'
   ) {
-    return;
+    return [];
   }
-  const column = table.columns[columnIndex];
-  const { indexPattern, sourceField, operationType, interval } = table.columns[columnIndex].meta
-    .sourceParams as {
-    indexPattern: string;
-    sourceField: string;
-    operationType: string;
-    interval: number;
-  };
+  const sourceParams = column.meta.sourceParams;
+  if (!isSourceParamsESQL(sourceParams)) {
+    return [];
+  }
+  const { indexPattern, sourceField, operationType, interval } = sourceParams;
 
   const value = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
   if (value == null) {
-    return;
+    return [];
   }
 
   const filters: Filter[] = [];
 
-  if (operationType === ['date_histogram', 'histogram'].includes(operationType)) {
+  if (['date_histogram', 'histogram'].includes(operationType)) {
     filters.push(
       buildSimpleNumberRangeFilter(
         sourceField,
         {
           gte: value,
           lt: value + interval,
-          (...operationType === 'date_hisotgram' ? { format: 'strict_date_optional_time'} : {}),
+          ...(operationType === 'date_hisotgram' ? { format: 'strict_date_optional_time' } : {}),
         },
-        indexPattern,
-        value
+        value,
+        indexPattern
       )
     );
   } else {

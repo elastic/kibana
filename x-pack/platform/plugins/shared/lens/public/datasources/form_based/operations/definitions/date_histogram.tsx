@@ -172,7 +172,13 @@ export const dateHistogramOperation: OperationDefinition<
       interval =
         calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }, interval, false)
           ?.description || 'hour';
-      return `${field} per ${interval}`;
+      return i18n.translate('xpack.lens.dateHistogram.interval', {
+        defaultMessage: `{{field}} per ({interval})`,
+        values: {
+          field,
+          interval,
+        },
+      });
     }
     return field;
   },
@@ -232,10 +238,8 @@ export const dateHistogramOperation: OperationDefinition<
     return { id: 'date', params: { pattern: uiSettings?.get('dateFormat') } };
   },
   toESQL: (column, columnId, indexPattern, layer, uiSettings, dateRange) => {
-    const { interval } = getTimeZoneAndInterval(column, indexPattern);
-
     if (column.params?.includeEmptyRows) return;
-
+    const { interval } = getTimeZoneAndInterval(column, indexPattern);
     const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
 
     if (interval === 'auto') {
