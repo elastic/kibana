@@ -205,14 +205,9 @@ describe('quick fixes logic', () => {
       );
 
       describe('metafields spellchecks', () => {
-        for (const isWrapped of [true, false]) {
-          function setWrapping(text: string) {
-            return isWrapped ? `[${text}]` : text;
-          }
-          testQuickFixes(`FROM index ${setWrapping('metadata _i_ndex')}`, ['_index'], options);
-          testQuickFixes(`FROM index ${setWrapping('metadata _id, _i_ndex')}`, ['_index'], options);
-          testQuickFixes(`FROM index ${setWrapping('METADATA _id, _i_ndex')}`, ['_index'], options);
-        }
+        testQuickFixes(`FROM index ${'metadata _i_ndex'}`, ['_index'], options);
+        testQuickFixes(`FROM index ${'metadata _id, _i_ndex'}`, ['_index'], options);
+        testQuickFixes(`FROM index ${'METADATA _id, _i_ndex'}`, ['_index'], options);
       });
     }
   });

@@ -6798,7 +6798,7 @@
                 "label": "validNormalizedTypes",
                 "description": [],
                 "signature": [
-                  "(\"date\" | \"number\")[]"
+                  "(\"number\" | \"date\")[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false,
@@ -6864,7 +6864,7 @@
                 "label": "validNormalizedTypes",
                 "description": [],
                 "signature": [
-                  "(\"date\" | \"number\")[]"
+                  "(\"number\" | \"date\")[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false,
