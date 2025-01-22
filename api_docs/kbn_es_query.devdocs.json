@@ -1781,7 +1781,7 @@
             "section": "def-common.RangeFilter",
             "text": "RangeFilter"
           },
-          ") => { from: moment.Moment; to: moment.Moment; }"
+          ") => { from: string | moment.Moment; to: string | moment.Moment; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-query/src/filters/helpers/convert_range_filter.ts",
         "deprecated": false,
