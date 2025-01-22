@@ -4032,7 +4032,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/apm-types@link:x-pack/solutions/observability/packages/kbn-apm-types":
+"@kbn/apm-types@link:x-pack/platform/packages/shared/kbn-apm-types":
   version "0.0.0"
   uid ""
 
@@ -5640,6 +5640,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/event-stacktrace@link:x-pack/platform/packages/shared/kbn-event-stacktrace":
+  version "0.0.0"
+  uid ""
+
 "@kbn/expandable-flyout@link:x-pack/solutions/security/packages/expandable-flyout":
   version "0.0.0"
   uid ""
@@ -6089,6 +6093,10 @@
   uid ""
 
 "@kbn/kbn-tp-run-pipeline-plugin@link:test/interpreter_functional/plugins/kbn_tp_run_pipeline":
+  version "0.0.0"
+  uid ""
+
+"@kbn/key-value-metadata-table@link:x-pack/platform/packages/shared/kbn-key-value-metadata-table":
   version "0.0.0"
   uid ""
 
