@@ -374,13 +374,15 @@ const BasicTable = styled(EuiBasicTable as BasicTableType)`
 
 BasicTable.displayName = 'BasicTable';
 
-const FooterAction = styled(EuiFlexGroup, {
-  shouldForwardProp: (prop) => prop !== 'alignItems' && prop !== 'responsive',
-})(({ theme }) => ({
-  marginTop: theme.euiTheme.size.xs,
+const FooterAction = styled(EuiFlexGroup)`
+  margin-top: ${({ theme }) => theme.euiTheme.size.xs};
+  align-items: center;
+`;
+
+FooterAction.defaultProps = {
   alignItems: 'center',
   responsive: false,
-}));
+};
 
 FooterAction.displayName = 'FooterAction';
 

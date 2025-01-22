@@ -90,10 +90,19 @@ exports[`Paginated Table Component rendering it renders the default load more ta
           },
         ]
       }
+      noItemsMessage={
+        <EuiI18n
+          default="No items found"
+          token="euiBasicTable.noItemsMessage"
+        />
+      }
       onChange={[Function]}
+      tableLayout="fixed"
     />
     <FooterAction
+      alignItems="center"
       justifyContent="spaceBetween"
+      responsive={false}
     >
       <EuiFlexItem
         grow={false}
