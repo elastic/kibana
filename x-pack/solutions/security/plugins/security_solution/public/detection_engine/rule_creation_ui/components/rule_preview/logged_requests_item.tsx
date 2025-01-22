@@ -8,7 +8,7 @@
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 
-import { useEuiPaddingSize } from '@elastic/eui';
+import { useEuiPaddingSize, EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { RulePreviewLogs } from '../../../../../common/api/detection_engine';
@@ -50,6 +50,21 @@ const LoggedRequestsItemComponent: FC<PropsWithChildren<RulePreviewLogs & { rule
         ...cssStyles,
       }}
     >
+      {requests.length > 2 ? (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText
+            color="warning"
+            size="s"
+            css={{
+              marginLeft: paddingLarge,
+            }}
+          >
+            {i18n.REQUESTS_SAMPLE_WARNING}
+          </EuiText>
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
       {isPageViewSupported(ruleType) ? (
         <LoggedRequestsPages requests={requests} ruleType={ruleType} />
       ) : (

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getEsqlRule, getSimpleCustomQueryRule } from '../../../../objects/rule';
+import { getEsqlRule, getNewThreatIndicatorRule } from '../../../../objects/rule';
 
 import {
   PREVIEW_LOGGED_REQUEST_DESCRIPTION,
@@ -22,7 +22,6 @@ import {
   submitRulePreview,
   toggleLoggedRequestsAccordion,
   toggleLoggedRequestsItemAccordion,
-  selectIndicatorMatchType,
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 
@@ -65,13 +64,12 @@ describe(
 
     describe('does not support preview logged requests', () => {
       beforeEach(() => {
-        createRule(getSimpleCustomQueryRule()).then((createdRule) => {
+        createRule(getNewThreatIndicatorRule()).then((createdRule) => {
           visitEditRulePage(createdRule.body.id);
         });
       });
 
       it('does not show preview logged requests checkbox fro Indicator Match rule', () => {
-        selectIndicatorMatchType();
         cy.get(RULES_CREATION_PREVIEW_REFRESH_BUTTON).should('be.visible');
         cy.get(PREVIEW_LOGGED_REQUESTS_CHECKBOX).should('not.exist');
       });
