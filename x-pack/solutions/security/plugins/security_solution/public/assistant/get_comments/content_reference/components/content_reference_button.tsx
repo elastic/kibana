@@ -26,11 +26,13 @@ export const ContentReferenceButton: React.FC<Props> = ({
       data-test-subj="ContentReferenceButton"
       {...euiButtonEmptyProps}
     >
-      <sup style={{
-        verticalAlign: 'baseline',
-        position: 'relative',
-        top: '-0.3em',
-      }}>{`[${contentReferenceCount}]`}</sup>
+      <sup
+        style={{
+          verticalAlign: 'baseline',
+          position: 'relative',
+          top: '-0.3em',
+        }}
+      >{`[${contentReferenceCount}]`}</sup>
     </EuiButtonEmpty>
   );
 };

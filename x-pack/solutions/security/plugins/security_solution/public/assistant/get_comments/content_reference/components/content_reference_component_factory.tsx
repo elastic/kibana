@@ -16,7 +16,7 @@ import { ProductDocumentationReference } from './product_documentation_reference
 import { EsqlQueryReference } from './esql_query_reference';
 
 export interface ContentReferenceComponentFactory {
-  contentReferences?: ContentReferences ;
+  contentReferences?: ContentReferences;
   contentReferencesVisible: boolean;
   loading: boolean;
 }
@@ -24,7 +24,7 @@ export interface ContentReferenceComponentFactory {
 export const contentReferenceComponentFactory = ({
   contentReferences,
   contentReferencesVisible,
-  loading
+  loading,
 }: ContentReferenceComponentFactory) => {
   const ContentReferenceComponent = (
     contentReferenceNode: ContentReferenceNode

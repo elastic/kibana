@@ -92,7 +92,7 @@ const AssistantComponent: React.FC<Props> = ({
     currentUserAvatar,
     setLastConversationId,
     contentReferencesVisible,
-    showAnonymizedValues, 
+    showAnonymizedValues,
     setContentReferencesVisible,
     setShowAnonymizedValues,
   } = useAssistantContext();
@@ -220,23 +220,27 @@ const AssistantComponent: React.FC<Props> = ({
     }
   }, [augmentMessageCodeBlocks, currentConversation, showAnonymizedValues]);
 
-
   // Keyboard shortcuts to toggle the visibility of content references and anonymized values
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.altKey && event.code === 'KeyC') {
         event.preventDefault();
-        setContentReferencesVisible(!contentReferencesVisible)
+        setContentReferencesVisible(!contentReferencesVisible);
       }
       if (event.altKey && event.code === 'KeyA') {
         event.preventDefault();
-        setShowAnonymizedValues(!showAnonymizedValues)
+        setShowAnonymizedValues(!showAnonymizedValues);
       }
-    }
+    };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [setContentReferencesVisible, contentReferencesVisible, setShowAnonymizedValues, showAnonymizedValues]);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [
+    setContentReferencesVisible,
+    contentReferencesVisible,
+    setShowAnonymizedValues,
+    showAnonymizedValues,
+  ]);
 
   // Show missing connector callout if no connectors are configured
 

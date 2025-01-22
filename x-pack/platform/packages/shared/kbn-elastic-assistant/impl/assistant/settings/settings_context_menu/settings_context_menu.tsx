@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -38,8 +38,14 @@ interface Params {
 export const SettingsContextMenu: React.FC<Params> = React.memo(
   ({ isDisabled = false, onChatCleared }: Params) => {
     const { euiTheme } = useEuiTheme();
-    const { navigateToApp, knowledgeBase, setContentReferencesVisible, contentReferencesVisible, showAnonymizedValues, setShowAnonymizedValues } =
-      useAssistantContext();
+    const {
+      navigateToApp,
+      knowledgeBase,
+      setContentReferencesVisible,
+      contentReferencesVisible,
+      showAnonymizedValues,
+      setShowAnonymizedValues,
+    } = useAssistantContext();
 
     const [isPopoverOpen, setPopover] = useState(false);
 

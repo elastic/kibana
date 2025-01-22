@@ -95,7 +95,7 @@ describe('contentReferenceComponentFactory', () => {
     const Component = contentReferenceComponentFactory({
       contentReferences: {},
       contentReferencesVisible: true,
-      loading: false,      
+      loading: false,
     });
 
     const { container } = render(

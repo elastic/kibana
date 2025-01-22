@@ -327,9 +327,13 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       setAssistantStreamingEnabled: setLocalStorageStreaming,
       setKnowledgeBase: setLocalStorageKnowledgeBase,
       contentReferencesVisible: contentReferencesVisible ?? true,
-      setContentReferencesVisible: setContentReferencesVisible as React.Dispatch<React.SetStateAction<boolean>>,
-      showAnonymizedValues: showAnonymizedValues ?? false, 
-      setShowAnonymizedValues: setShowAnonymizedValues as React.Dispatch<React.SetStateAction<boolean>>,
+      setContentReferencesVisible: setContentReferencesVisible as React.Dispatch<
+        React.SetStateAction<boolean>
+      >,
+      showAnonymizedValues: showAnonymizedValues ?? false,
+      setShowAnonymizedValues: setShowAnonymizedValues as React.Dispatch<
+        React.SetStateAction<boolean>
+      >,
       setSelectedSettingsTab,
       setShowAssistantOverlay,
       setTraceOptions: setSessionStorageTraceOptions,
