@@ -24,6 +24,7 @@ import type {
   ESQLColumn,
   ESQLCommandOption,
   ESQLDecimalLiteral,
+  ESQLField,
   ESQLFunction,
   ESQLIdentifier,
   ESQLInlineCast,
@@ -46,6 +47,7 @@ import type {
   VisitorOutput,
 } from './types';
 import { Builder } from '../builder';
+import { isProperNode } from '../ast/helpers';
 
 const isNodeWithArgs = (x: unknown): x is ESQLAstNodeWithArgs =>
   !!x && typeof x === 'object' && Array.isArray((x as any).args);
@@ -85,13 +87,7 @@ export class VisitorContext<
   ): Iterable<VisitorOutput<Methods, 'visitExpression'>> {
     this.ctx.assertMethodExists('visitExpression');
 
-    const node = this.node;
-
-    if (!isNodeWithArgs(node)) {
-      return;
-    }
-
-    for (const arg of singleItems(node.args)) {
+    for (const arg of this.arguments()) {
       if (arg.type === 'option' && arg.name !== 'as') {
         continue;
       }
@@ -107,7 +103,7 @@ export class VisitorContext<
   public arguments(): ESQLAstExpressionNode[] {
     const node = this.node;
 
-    if (!isNodeWithChildren(node)) {
+    if (!isProperNode(node)) {
       return [];
     }
 
@@ -128,12 +124,12 @@ export class VisitorContext<
 
     const node = this.node;
 
-    if (!isNodeWithArgs(node)) {
+    if (!isProperNode(node)) {
       throw new Error('Node does not have arguments');
     }
 
     let i = 0;
-    for (const arg of singleItems(node.args)) {
+    for (const arg of this.arguments()) {
       if (i === index) {
         return this.visitExpression(arg, input as any);
       }
@@ -580,3 +576,8 @@ export class IdentifierExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > extends VisitorContext<Methods, Data, ESQLIdentifier> {}
+
+export class FieldExpressionVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends VisitorContext<Methods, Data, ESQLField> {}
