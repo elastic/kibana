@@ -33,6 +33,7 @@ import {
   StorageDocumentOf,
   StorageClientSearchResponse,
   StorageClientClean,
+  StorageClientCleanResponse,
 } from '..';
 import { getSchemaVersion } from '../get_schema_version';
 import { StorageMappingProperty } from '../types';
@@ -447,8 +448,9 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings> 
     });
   };
 
-  private clean: StorageClientClean = async (): Promise<void> => {
+  private clean: StorageClientClean = async (): Promise<StorageClientCleanResponse> => {
     const allIndices = await this.getExistingIndices();
+    const hasIndices = Object.keys(allIndices).length > 0;
     // Delete all indices
     await Promise.all(
       Object.keys(allIndices).map((index) =>
@@ -461,6 +463,7 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings> 
     );
     // Delete the index template
     const template = await this.getExistingIndexTemplate();
+    const hasTemplate = !!template;
     if (template) {
       await wrapEsCall(
         this.esClient.indices.deleteIndexTemplate({
@@ -468,6 +471,11 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings> 
         })
       );
     }
+
+    return {
+      acknowledged: true,
+      result: hasIndices || hasTemplate ? 'deleted' : 'noop',
+    };
   };
 
   private delete: StorageClientDelete = async ({

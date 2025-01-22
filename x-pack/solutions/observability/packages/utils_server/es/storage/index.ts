@@ -67,6 +67,11 @@ export interface StorageClientDeleteResponse {
   result: Extract<Result, 'deleted' | 'not_found'>;
 }
 
+export interface StorageClientCleanResponse {
+  acknowledged: boolean;
+  result: Extract<Result, 'deleted' | 'noop'>;
+}
+
 export type StorageClientIndexRequest<TDocument = unknown> = Omit<
   IndexRequest<Omit<TDocument, '_id'>>,
   'index'
@@ -96,7 +101,7 @@ export type StorageClientDelete = (
   request: StorageClientDeleteRequest
 ) => Promise<StorageClientDeleteResponse>;
 
-export type StorageClientClean = () => Promise<void>;
+export type StorageClientClean = () => Promise<StorageClientCleanResponse>;
 
 export type StorageClientGet<TStorageSettings extends StorageSettings = never> = (
   request: StorageClientGetRequest
