@@ -71,7 +71,7 @@ Deprecated endpoints will fail with a 404 status code starting from version 9.0.
 Update your implementations to use the new endpoints:
 
 * **For bulk creation of rules:**
-   - Use `POST /api/detection_engine/rules/_import` (link:https://www.elastic.co/docs/api/doc/kibana/v8/operation/operation-importrules[API documentation]) to create multiple rules along with their associated entities (e.g., exceptions and action connectors).
+   - Use `POST /api/detection_engine/rules/_import` (link:https://www.elastic.co/docs/api/doc/kibana/v8/operation/operation-importrules[API documentation]) to create multiple rules along with their associated entities (for example, exceptions and action connectors).
    - Alternatively, create rules individually using `POST /api/detection_engine/rules` (link:https://www.elastic.co/docs/api/doc/kibana/v8/operation/operation-createrule[API documentation]).
 
 * **For bulk updates of rules:**
