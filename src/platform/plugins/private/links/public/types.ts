@@ -9,7 +9,7 @@
 
 import {
   HasEditCapabilities,
-  HasInPlaceLibraryTransforms,
+  HasLibraryTransforms,
   HasType,
   PublishesPanelDescription,
   PublishesPanelTitle,
@@ -40,7 +40,7 @@ export type LinksParentApi = PresentationContainer &
 export type LinksApi = HasType<typeof CONTENT_ID> &
   DefaultEmbeddableApi<LinksSerializedState, LinksRuntimeState> &
   HasEditCapabilities &
-  HasInPlaceLibraryTransforms<LinksRuntimeState>;
+  HasLibraryTransforms<LinksByReferenceSerializedState, LinksByValueSerializedState>;
 
 export interface LinksByReferenceSerializedState {
   savedObjectId: string;

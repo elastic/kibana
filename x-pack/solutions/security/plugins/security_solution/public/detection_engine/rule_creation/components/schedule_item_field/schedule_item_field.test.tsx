@@ -15,27 +15,17 @@ describe('ScheduleItemField', () => {
   it('renders correctly', () => {
     const mockField = useFormFieldMock<string>();
     const wrapper = shallow(
-      <ScheduleItemField
-        dataTestSubj="schedule-item"
-        idAria="idAria"
-        isDisabled={false}
-        field={mockField}
-      />
+      <ScheduleItemField field={mockField} dataTestSubj="schedule-item" idAria="idAria" />
     );
 
     expect(wrapper.find('[data-test-subj="schedule-item"]')).toHaveLength(1);
   });
 
-  it('accepts a large number via user input', () => {
+  it('accepts user input', () => {
     const mockField = useFormFieldMock<string>();
     const wrapper = mount(
       <TestProviders>
-        <ScheduleItemField
-          dataTestSubj="schedule-item"
-          idAria="idAria"
-          isDisabled={false}
-          field={mockField}
-        />
+        <ScheduleItemField field={mockField} dataTestSubj="schedule-item" idAria="idAria" />
       </TestProviders>
     );
 
@@ -47,17 +37,20 @@ describe('ScheduleItemField', () => {
     expect(mockField.setValue).toHaveBeenCalledWith('5000000s');
   });
 
-  it('clamps a number value greater than MAX_SAFE_INTEGER to MAX_SAFE_INTEGER', () => {
-    const unsafeInput = '99999999999999999999999';
-
+  it.each([
+    [-10, -5],
+    [-5, 0],
+    [5, 10],
+    [60, 90],
+  ])('saturates a value "%s" lower than minValue', (unsafeInput, expected) => {
     const mockField = useFormFieldMock<string>();
     const wrapper = mount(
       <TestProviders>
         <ScheduleItemField
+          field={mockField}
+          minValue={expected}
           dataTestSubj="schedule-item"
           idAria="idAria"
-          isDisabled={false}
-          field={mockField}
         />
       </TestProviders>
     );
@@ -67,22 +60,42 @@ describe('ScheduleItemField', () => {
       .last()
       .simulate('change', { target: { value: unsafeInput } });
 
-    const expectedValue = `${Number.MAX_SAFE_INTEGER}s`;
-    expect(mockField.setValue).toHaveBeenCalledWith(expectedValue);
+    expect(mockField.setValue).toHaveBeenCalledWith(`${expected}s`);
   });
 
-  it('converts a non-numeric value to 0', () => {
+  it.each([
+    [-5, -10],
+    [5, 0],
+    [10, 5],
+    [90, 60],
+  ])('saturates a value "%s" greater than maxValue', (unsafeInput, expected) => {
+    const mockField = useFormFieldMock<string>();
+    const wrapper = mount(
+      <TestProviders>
+        <ScheduleItemField
+          field={mockField}
+          maxValue={expected}
+          dataTestSubj="schedule-item"
+          idAria="idAria"
+        />
+      </TestProviders>
+    );
+
+    wrapper
+      .find('[data-test-subj="interval"]')
+      .last()
+      .simulate('change', { target: { value: unsafeInput } });
+
+    expect(mockField.setValue).toHaveBeenCalledWith(`${expected}s`);
+  });
+
+  it('skips updating a non-numeric values', () => {
     const unsafeInput = 'this is not a number';
 
     const mockField = useFormFieldMock<string>();
     const wrapper = mount(
       <TestProviders>
-        <ScheduleItemField
-          dataTestSubj="schedule-item"
-          idAria="idAria"
-          isDisabled={false}
-          field={mockField}
-        />
+        <ScheduleItemField field={mockField} dataTestSubj="schedule-item" idAria="idAria" />
       </TestProviders>
     );
 
@@ -91,6 +104,6 @@ describe('ScheduleItemField', () => {
       .last()
       .simulate('change', { target: { value: unsafeInput } });
 
-    expect(mockField.setValue).toHaveBeenCalledWith('0s');
+    expect(mockField.setValue).not.toHaveBeenCalled();
   });
 });

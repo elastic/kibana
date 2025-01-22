@@ -68,7 +68,7 @@ export function AddProcessorFlyout({
   const handleSubmit: SubmitHandler<ProcessorFormState> = async (data) => {
     const processingDefinition = convertFormStateToProcessing(data);
 
-    simulate(processingDefinition).then((responseBody) => {
+    simulate(processingDefinition, data.detected_fields).then((responseBody) => {
       if (responseBody instanceof Error) return;
 
       onAddProcessor(processingDefinition, data.detected_fields);

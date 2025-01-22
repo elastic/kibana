@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { filter, from, map, switchMap, tap } from 'rxjs';
-import { Readable } from 'stream';
+import { filter, from, map, switchMap, tap, throwError } from 'rxjs';
+import { isReadable, Readable } from 'stream';
 import {
   Message,
   MessageRole,
@@ -56,8 +56,19 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
       })
     ).pipe(
       switchMap((response) => {
-        const readable = response.data as Readable;
-        return serdeEventstreamIntoObservable(readable);
+        if (response.status === 'error') {
+          return throwError(() =>
+            createInferenceInternalError(`Error calling connector: ${response.serviceMessage}`, {
+              rootError: response.serviceMessage,
+            })
+          );
+        }
+        if (isReadable(response.data as any)) {
+          return serdeEventstreamIntoObservable(response.data as Readable);
+        }
+        return throwError(() =>
+          createInferenceInternalError('Unexpected error', response.data as Record<string, any>)
+        );
       }),
       tap((eventData) => {
         if ('modelStreamErrorException' in eventData) {
