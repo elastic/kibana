@@ -19,6 +19,7 @@ import {
 } from './translations';
 import { RuleFormPlugins } from './types';
 import './rule_form.scss';
+import { RuleFormScreenContextProvider } from './rule_form_screen_context';
 
 const queryClient = new QueryClient();
 
@@ -117,7 +118,9 @@ export const RuleForm = (props: RuleFormProps) => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="ruleForm__container">{ruleFormComponent}</div>
+      <RuleFormScreenContextProvider>
+        <div className="ruleForm__container">{ruleFormComponent}</div>
+      </RuleFormScreenContextProvider>
     </QueryClientProvider>
   );
 };

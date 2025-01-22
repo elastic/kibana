@@ -103,7 +103,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; }>, \"many\">; documents: Zod.ZodArray<Zod.ZodRecord<Zod.ZodString, Zod.ZodUnknown>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { documents: Record<string, unknown>[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+            "; }>, \"many\">; documents: Zod.ZodArray<Zod.ZodRecord<Zod.ZodString, Zod.ZodUnknown>, \"many\">; detected_fields: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<Zod.objectUtil.extendShape<{ type: Zod.ZodEnum<[\"keyword\", \"match_only_text\", \"long\", \"double\", \"date\", \"boolean\", \"ip\"]>; format: Zod.ZodOptional<Zod.ZodString>; }, { name: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }>, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { documents: Record<string, unknown>[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
             {
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
@@ -111,7 +111,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; }[]; }, { documents: Record<string, unknown>[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+            "; }[]; detected_fields?: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }[] | undefined; }, { documents: Record<string, unknown>[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
             {
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
@@ -119,7 +119,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; }[]; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { documents: Record<string, unknown>[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+            "; }[]; detected_fields?: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { documents: Record<string, unknown>[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
             {
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
@@ -127,7 +127,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; }[]; }; }, { path: { id: string; }; body: { documents: Record<string, unknown>[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+            "; }[]; detected_fields?: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }[] | undefined; }; }, { path: { id: string; }; body: { documents: Record<string, unknown>[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
             {
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
@@ -135,9 +135,9 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; }[]; }; }>, ",
+            "; }[]; detected_fields?: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }[] | undefined; }; }>, ",
             "StreamsRouteHandlerResources",
-            ", { documents: { value: Record<PropertyKey, unknown>; isMatch: boolean; }[]; success_rate: number; failure_rate: number; detected_fields: { name: string; type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\" | \"unmapped\"; }[]; }, undefined>; \"POST /api/streams/{id}/schema/fields_simulation\": ",
+            ", { documents: { isMatch: boolean; value: Record<string, unknown>; }[]; success_rate: number; failure_rate: number; detected_fields: { name: string; type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\" | \"unmapped\"; }[]; }, undefined>; \"POST /api/streams/{id}/schema/fields_simulation\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -181,7 +181,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            ">>; start: Zod.ZodOptional<Zod.ZodNumber>; end: Zod.ZodOptional<Zod.ZodNumber>; number: Zod.ZodOptional<Zod.ZodNumber>; }, \"strip\", Zod.ZodTypeAny, { number?: number | undefined; start?: number | undefined; end?: number | undefined; condition?: ",
+            ">>; start: Zod.ZodOptional<Zod.ZodNumber>; end: Zod.ZodOptional<Zod.ZodNumber>; size: Zod.ZodOptional<Zod.ZodNumber>; }, \"strip\", Zod.ZodTypeAny, { start?: number | undefined; end?: number | undefined; size?: number | undefined; condition?: ",
             {
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
@@ -189,7 +189,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; }, { number?: number | undefined; start?: number | undefined; end?: number | undefined; condition?: ",
+            "; }, { start?: number | undefined; end?: number | undefined; size?: number | undefined; condition?: ",
             {
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
@@ -197,7 +197,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { number?: number | undefined; start?: number | undefined; end?: number | undefined; condition?: ",
+            "; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { start?: number | undefined; end?: number | undefined; size?: number | undefined; condition?: ",
             {
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
@@ -205,7 +205,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; }; }, { path: { id: string; }; body: { number?: number | undefined; start?: number | undefined; end?: number | undefined; condition?: ",
+            "; }; }, { path: { id: string; }; body: { start?: number | undefined; end?: number | undefined; size?: number | undefined; condition?: ",
             {
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
@@ -920,7 +920,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; }>, \"many\">; documents: Zod.ZodArray<Zod.ZodRecord<Zod.ZodString, Zod.ZodUnknown>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { documents: Record<string, unknown>[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+          "; }>, \"many\">; documents: Zod.ZodArray<Zod.ZodRecord<Zod.ZodString, Zod.ZodUnknown>, \"many\">; detected_fields: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<Zod.objectUtil.extendShape<{ type: Zod.ZodEnum<[\"keyword\", \"match_only_text\", \"long\", \"double\", \"date\", \"boolean\", \"ip\"]>; format: Zod.ZodOptional<Zod.ZodString>; }, { name: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }>, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { documents: Record<string, unknown>[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -928,7 +928,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; }[]; }, { documents: Record<string, unknown>[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+          "; }[]; detected_fields?: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }[] | undefined; }, { documents: Record<string, unknown>[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -936,7 +936,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; }[]; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { documents: Record<string, unknown>[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+          "; }[]; detected_fields?: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { documents: Record<string, unknown>[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -944,7 +944,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; }[]; }; }, { path: { id: string; }; body: { documents: Record<string, unknown>[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
+          "; }[]; detected_fields?: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }[] | undefined; }; }, { path: { id: string; }; body: { documents: Record<string, unknown>[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -952,9 +952,9 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; }[]; }; }>, ",
+          "; }[]; detected_fields?: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }[] | undefined; }; }>, ",
           "StreamsRouteHandlerResources",
-          ", { documents: { value: Record<PropertyKey, unknown>; isMatch: boolean; }[]; success_rate: number; failure_rate: number; detected_fields: { name: string; type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\" | \"unmapped\"; }[]; }, undefined>; \"POST /api/streams/{id}/schema/fields_simulation\": ",
+          ", { documents: { isMatch: boolean; value: Record<string, unknown>; }[]; success_rate: number; failure_rate: number; detected_fields: { name: string; type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\" | \"unmapped\"; }[]; }, undefined>; \"POST /api/streams/{id}/schema/fields_simulation\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -998,7 +998,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ">>; start: Zod.ZodOptional<Zod.ZodNumber>; end: Zod.ZodOptional<Zod.ZodNumber>; number: Zod.ZodOptional<Zod.ZodNumber>; }, \"strip\", Zod.ZodTypeAny, { number?: number | undefined; start?: number | undefined; end?: number | undefined; condition?: ",
+          ">>; start: Zod.ZodOptional<Zod.ZodNumber>; end: Zod.ZodOptional<Zod.ZodNumber>; size: Zod.ZodOptional<Zod.ZodNumber>; }, \"strip\", Zod.ZodTypeAny, { start?: number | undefined; end?: number | undefined; size?: number | undefined; condition?: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -1006,7 +1006,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; }, { number?: number | undefined; start?: number | undefined; end?: number | undefined; condition?: ",
+          "; }, { start?: number | undefined; end?: number | undefined; size?: number | undefined; condition?: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -1014,7 +1014,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { number?: number | undefined; start?: number | undefined; end?: number | undefined; condition?: ",
+          "; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { start?: number | undefined; end?: number | undefined; size?: number | undefined; condition?: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -1022,7 +1022,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; }; }, { path: { id: string; }; body: { number?: number | undefined; start?: number | undefined; end?: number | undefined; condition?: ",
+          "; }; }, { path: { id: string; }; body: { start?: number | undefined; end?: number | undefined; size?: number | undefined; condition?: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
