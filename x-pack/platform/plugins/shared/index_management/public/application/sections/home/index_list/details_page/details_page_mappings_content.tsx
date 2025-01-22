@@ -235,6 +235,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
               .map((field) => field.inference_id)
               .filter(
                 (inferenceId: string) =>
+                  inferenceId &&
                   inferenceToModelIdMap?.[inferenceId].trainedModelId && // third-party inference models don't have trainedModelId
                   !inferenceToModelIdMap?.[inferenceId].isDeployed &&
                   !isInferencePreconfigured(inferenceId)

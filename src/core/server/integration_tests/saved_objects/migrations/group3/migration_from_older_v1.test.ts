@@ -24,6 +24,7 @@ import {
 } from '@kbn/core-test-helpers-kbn-server';
 import { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';
+import { EsVersion } from '@kbn/test';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 
@@ -59,7 +60,11 @@ async function fetchDocuments(esClient: ElasticsearchClient, index: string) {
     .sort(sortByTypeAndId);
 }
 
-describe('migrating from 7.3.0-xpack which used v1 migrations', () => {
+const willRunESv8 = EsVersion.getDefault({ integrationTest: true }).matchRange('8');
+
+const describeIf = willRunESv8 ? describe : describe.skip;
+
+describeIf('migrating from 7.3.0-xpack which used v1 migrations', () => {
   const migratedIndex = `.kibana_${kibanaVersion}_001`;
   const originalIndex = `.kibana_1`; // v1 migrations index
 

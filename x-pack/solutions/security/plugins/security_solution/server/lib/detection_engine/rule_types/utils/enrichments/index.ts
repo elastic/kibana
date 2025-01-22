@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getHostRiskIndex, getUserRiskIndex } from '../../../../../../common/search_strategy';
 import { createHostRiskEnrichments } from './enrichment_by_type/host_risk';
 
 import { createUserRiskEnrichments } from './enrichment_by_type/user_risk';
@@ -21,7 +22,6 @@ import type {
 } from './types';
 import { applyEnrichmentsToEvents } from './utils/transforms';
 import { isIndexExist } from './utils/is_index_exist';
-import { getHostRiskIndex, getUserRiskIndex } from '../../../../../../common/search_strategy';
 
 export const enrichEvents: EnrichEventsFunction = async ({
   services,

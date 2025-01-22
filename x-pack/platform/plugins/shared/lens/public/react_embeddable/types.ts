@@ -15,7 +15,6 @@ import type {
 import type { Adapters, InspectorOptions } from '@kbn/inspector-plugin/public';
 import type {
   HasEditCapabilities,
-  HasInPlaceLibraryTransforms,
   HasLibraryTransforms,
   HasParentApi,
   HasSupportedTriggers,
@@ -385,8 +384,7 @@ export type LensApi = Simplify<
     HasSupportedTriggers &
     PublishesDisabledActionIds &
     // Offers methods to operate from/on the linked saved object
-    HasInPlaceLibraryTransforms &
-    HasLibraryTransforms<LensRuntimeState> &
+    HasLibraryTransforms<LensSerializedState, LensSerializedState> &
     // Let the container know the view mode
     PublishesViewMode &
     // forward the parentApi, note that will be exposed only if it satisfy the PresentationContainer interface
@@ -427,6 +425,8 @@ export type LensInternalApi = Simplify<
       updateMessages: (newMessages: UserMessage[]) => void;
       validationMessages$: PublishingSubject<UserMessage[]>;
       updateValidationMessages: (newMessages: UserMessage[]) => void;
+      blockingError$: PublishingSubject<Error | undefined>;
+      updateBlockingError: (newBlockingError: Error | undefined) => void;
       resetAllMessages: () => void;
       getDisplayOptions: () => VisualizationDisplayOptions;
     }

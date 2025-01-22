@@ -10,25 +10,34 @@
 import { calculateObjectDiff } from './calculate_object_diff';
 
 describe('calculateObjectDiff', () => {
-  it('should return the added and removed parts between 2 objects', () => {
-    const { added, removed } = calculateObjectDiff({ alpha: 1, beta: 2 }, { alpha: 1, gamma: 3 });
+  it('should return the added, removed and updated parts between 2 objects', () => {
+    const { added, removed, updated } = calculateObjectDiff(
+      { alpha: 1, beta: 2, sigma: 4 },
+      { alpha: 1, gamma: 3, sigma: 5 }
+    );
     expect(added).toEqual({ gamma: 3 });
     expect(removed).toEqual({ beta: 2 });
+    expect(updated).toEqual({ sigma: 5 });
   });
 
   it('should work on nested objects', () => {
-    const { added, removed } = calculateObjectDiff(
-      { alpha: 1, beta: { gamma: 2, delta: { sigma: 7 } } },
-      { alpha: 1, beta: { gamma: 2, eta: 4 } }
+    const { added, removed, updated } = calculateObjectDiff(
+      { alpha: 1, beta: { gamma: 2, delta: { sigma: 7, omega: 8 } } },
+      { alpha: 1, beta: { gamma: 2, delta: { omega: 9 }, eta: 4 } }
     );
 
     expect(added).toEqual({ beta: { eta: 4 } });
     expect(removed).toEqual({ beta: { delta: { sigma: 7 } } });
+    expect(updated).toEqual({ beta: { delta: { omega: 9 } } });
   });
 
-  it('should return empty added/removed when the objects are the same', () => {
-    const { added, removed } = calculateObjectDiff({ alpha: 1, beta: 2 }, { alpha: 1, beta: 2 });
+  it('should return empty added/removed/updated when the objects are the same', () => {
+    const { added, removed, updated } = calculateObjectDiff(
+      { alpha: 1, beta: 2 },
+      { alpha: 1, beta: 2 }
+    );
     expect(added).toEqual({});
     expect(removed).toEqual({});
+    expect(updated).toEqual({});
   });
 });

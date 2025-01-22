@@ -39,6 +39,7 @@ interface GroupedEdge {
 
 export interface GroupResourceNodesResponse {
   elements: Array<GroupedNode | GroupedEdge | ConnectionElement>;
+  nodesCount: number;
 }
 
 export function groupResourceNodes(responseData: {
@@ -151,5 +152,6 @@ export function groupResourceNodes(responseData: {
 
   return {
     elements: [...ungroupedNodes, ...groupedNodes, ...ungroupedEdges, ...groupedEdges],
+    nodesCount: ungroupedNodes.length,
   };
 }

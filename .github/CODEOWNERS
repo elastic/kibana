@@ -506,7 +506,7 @@ x-pack/platform/plugins/private/global_search_providers @elastic/appex-sharedux
 x-pack/test/plugin_functional/plugins/global_search_test @elastic/kibana-core
 x-pack/platform/plugins/private/graph @elastic/kibana-visualizations
 examples/grid_example @elastic/kibana-presentation
-packages/kbn-grid-layout @elastic/kibana-presentation
+src/platform/packages/private/kbn-grid-layout @elastic/kibana-presentation
 x-pack/platform/plugins/private/grokdebugger @elastic/kibana-management
 src/platform/packages/shared/kbn-grouping @elastic/response-ops
 src/platform/packages/shared/kbn-guided-onboarding @elastic/appex-sharedux
@@ -849,7 +849,7 @@ x-pack/solutions/security/packages/kbn-securitysolution-list-utils @elastic/secu
 x-pack/solutions/security/packages/kbn-securitysolution-lists-common @elastic/security-detection-engine
 src/platform/packages/shared/kbn-securitysolution-rules @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-t-grid @elastic/security-detection-engine
-x-pack/solutions/security/packages/kbn-securitysolution-utils @elastic/security-detection-engine
+x-pack/solutions/security/packages/kbn-securitysolution-utils @elastic/security-detection-engine @elastic/security-detection-rule-management
 src/platform/packages/shared/kbn-server-http-tools @elastic/kibana-core
 src/platform/packages/shared/kbn-server-route-repository @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-server-route-repository-client @elastic/obs-knowledge-team
@@ -1266,6 +1266,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 # APM
 /x-pack/test/functional/apps/apm/  @elastic/obs-ux-infra_services-team
 /x-pack/test/apm_api_integration/ @elastic/obs-ux-infra_services-team
+/x-pack/test/apm_cypress/ @elastic/obs-ux-infra_services-team
 /src/apm.js @elastic/kibana-core @vigneshshanmugam
 /src/platform/packages/shared/kbn-utility-types/src/dot.ts @dgieselaar
 /src/platform/packages/shared/kbn-utility-types/src/dot_test.ts @dgieselaar
@@ -1302,6 +1303,9 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 
 # Observability settings
 /x-pack/plugins/observability_solution/observability/server/ui_settings.ts @elastic/obs-docs
+
+# Streams
+/x-pack/test/api_integration/deployment_agnostic/apis/observability/streams @elastic/streams-program-team
 
 ### END Observability Plugins
 
@@ -1628,6 +1632,7 @@ x-pack/test/security_solution_api_integration/test_suites/detections_response/te
 x-pack/test/security_solution_api_integration/test_suites/detections_response/user_roles @elastic/security-detections-response
 x-pack/test/security_solution_api_integration/test_suites/explore @elastic/security-threat-hunting-explore
 x-pack/test/security_solution_api_integration/test_suites/investigations @elastic/security-threat-hunting-investigations
+x-pack/test/security_solution_api_integration/test_suites/siem_migrations @elastic/security-threat-hunting
 x-pack/test/security_solution_api_integration/test_suites/sources @elastic/security-detections-response
 
 # Security Solution sub teams
@@ -1750,8 +1755,15 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/sentinelone @elastic/security-defend-workflows
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/sentinelone @elastic/security-defend-workflows
 /x-pack/platform/plugins/shared/stack_connectors/common/sentinelone @elastic/security-defend-workflows
+/x-pack/test/alerting_api_integration/security_and_spaces/group2/tests/actions/connector_types/sentinelone.ts @elastic/security-defend-workflows
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/crowdstrike @elastic/security-defend-workflows
 /x-pack/platform/plugins/shared/stack_connectors/common/crowdstrike @elastic/security-defend-workflows
+/x-pack/test/alerting_api_integration/security_and_spaces/group2/tests/actions/connector_types/crowdstrike.ts @elastic/security-defend-workflows
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/microsoft_defender_endpoint @elastic/security-defend-workflows
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/microsoft_defender_endpoint @elastic/security-defend-workflows
+/x-pack/platform/plugins/shared/stack_connectors/common/microsoft_defender_endpoint @elastic/security-defend-workflows
+/x-pack/test/alerting_api_integration/security_and_spaces/group2/tests/actions/connector_types/microsoft_defender_endpoint.ts @elastic/security-defend-workflows
+
 
 ## Security Solution shared OAS schemas
 /x-pack/solutions/security/plugins/security_solution/common/api/model @elastic/security-detection-rule-management @elastic/security-detection-engine
@@ -1955,6 +1967,9 @@ x-pack/solutions/security/plugins/security_solution/server/lib/security_integrat
 
 # Changes to translation files should not ping code reviewers
 x-pack/plugins/translations/translations
+
+# Profiling cypress tests
+x-pack/test/profiling_cypress @elastic/obs-ux-infra_services-team
 
 # Profiling api integration testing
 x-pack/test/profiling_api_integration @elastic/obs-ux-infra_services-team

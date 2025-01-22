@@ -52,6 +52,9 @@
     "intialize-server:explore": "node scripts/index.js server explore trial_license_complete_tier",
     "run-tests:explore": "node scripts/index.js runner explore trial_license_complete_tier",
 
+    "initialize-server:siem_migrations:trial_complete": "node ./scripts/index.js server siem_migrations trial_license_complete_tier",
+    "run-tests:siem_migrations:trial_complete": "node ./scripts/index.js runner siem_migrations trial_license_complete_tier",
+
     "genai_kb_entries:server:serverless": "npm run initialize-server:genai:trial_complete knowledge_base/entries serverless",
     "genai_kb_entries:runner:serverless": "npm run run-tests:genai:trial_complete knowledge_base/entries serverless serverlessEnv",
     "genai_kb_entries:qa:serverless": "npm run run-tests:genai:trial_complete knowledge_base/entries serverless qaPeriodicEnv",
@@ -517,6 +520,13 @@
     "explore:users:runner:qa:serverless": "npm run run-tests:explore users serverless qaPeriodicEnv",
     "explore:users:runner:qa:serverless:release": "npm run run-tests:explore users serverless qaEnv",
     "explore:users:server:ess": "npm run intialize-server:explore users ess",
-    "explore:users:runner:ess": "npm run run-tests:explore users ess essEnv"
+    "explore:users:runner:ess": "npm run run-tests:explore users ess essEnv",
+
+    "siem_migrations_rules:server:serverless": "npm run initialize-server:siem_migrations:trial_complete rules serverless",
+    "siem_migrations_rules:runner:serverless": "npm run run-tests:siem_migrations:trial_complete rules serverless serverlessEnv",
+    "siem_migrations_rules:qa:serverless": "npm run run-tests:siem_migrations:trial_complete rules serverless qaPeriodicEnv",
+    "siem_migrations_rules:qa:serverless:release": "npm run run-tests:siem_migrations:trial_complete rules serverless qaEnv",
+    "siem_migrations_rules:server:ess": "npm run initialize-server:siem_migrations:trial_complete rules ess",
+    "siem_migrations_rules:runner:ess": "npm run run-tests:siem_migrations:trial_complete rules ess essEnv"
   }
 }

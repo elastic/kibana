@@ -28,7 +28,7 @@ import type {
   AssetCriticalityRecord,
   EntityAnalyticsPrivileges,
 } from '../../../common/api/entity_analytics';
-import type { RiskScoreEntity } from '../../../common/search_strategy';
+import type { EntityType } from '../../../common/search_strategy';
 import {
   RISK_ENGINE_STATUS_URL,
   RISK_SCORE_PREVIEW_URL,
@@ -90,7 +90,7 @@ export const useEntityAnalyticsRoutes = () => {
         version: API_VERSIONS.public.v1,
         method: 'GET',
         query: {
-          entities_types: params.entitiesTypes,
+          entity_types: params.entityTypes,
           sort_field: params.sortField,
           sort_order: params.sortOrder,
           page: params.page,
@@ -264,7 +264,7 @@ export const useEntityAnalyticsRoutes = () => {
     }: {
       query: {
         indexName: string;
-        entity: RiskScoreEntity;
+        entity: EntityType;
       };
       signal?: AbortSignal;
     }): Promise<{

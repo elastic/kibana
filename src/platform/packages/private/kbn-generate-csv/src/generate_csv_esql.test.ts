@@ -32,11 +32,8 @@ import {
 } from '../constants';
 import { CsvESQLGenerator, JobParamsCsvESQL } from './generate_csv_esql';
 
-const createMockJob = (
-  params: Partial<JobParamsCsvESQL> = { query: { esql: '' } }
-): JobParamsCsvESQL => ({
+const createMockJob = (params: JobParamsCsvESQL): JobParamsCsvESQL => ({
   ...params,
-  query: { esql: '' },
 });
 
 const mockTaskInstanceFields = { startedAt: null, retryAt: null };
@@ -107,7 +104,7 @@ describe('CsvESQLGenerator', () => {
 
   it('formats an empty search result to CSV content', async () => {
     const generateCsv = new CsvESQLGenerator(
-      createMockJob({ columns: ['date', 'ip', 'message'] }),
+      createMockJob({ query: { esql: '' }, columns: ['date', 'ip', 'message'] }),
       mockConfig,
       mockTaskInstanceFields,
       {
@@ -139,7 +136,7 @@ describe('CsvESQLGenerator', () => {
     });
 
     const generateCsv = new CsvESQLGenerator(
-      createMockJob(),
+      createMockJob({ query: { esql: '' } }),
       mockConfig,
       mockTaskInstanceFields,
       {
@@ -167,7 +164,7 @@ describe('CsvESQLGenerator', () => {
     });
 
     const generateCsv = new CsvESQLGenerator(
-      createMockJob(),
+      createMockJob({ query: { esql: '' } }),
       mockConfig,
       mockTaskInstanceFields,
       {
@@ -197,7 +194,7 @@ describe('CsvESQLGenerator', () => {
     });
 
     const generateCsv = new CsvESQLGenerator(
-      createMockJob(),
+      createMockJob({ query: { esql: '' } }),
       mockConfig,
       mockTaskInstanceFields,
       {
@@ -287,7 +284,7 @@ describe('CsvESQLGenerator', () => {
       });
 
       const generateCsvPromise = new CsvESQLGenerator(
-        createMockJob(),
+        createMockJob({ query: { esql: '' } }),
         mockConfigWithAutoScrollDuration,
         taskInstanceFields,
         {
@@ -363,7 +360,7 @@ describe('CsvESQLGenerator', () => {
       });
 
       const generateCsvPromise = new CsvESQLGenerator(
-        createMockJob(),
+        createMockJob({ query: { esql: '' } }),
         mockConfigWithAutoScrollDuration,
         taskInstanceFields,
         {
@@ -414,7 +411,7 @@ describe('CsvESQLGenerator', () => {
       });
 
       const generateCsv = new CsvESQLGenerator(
-        createMockJob({ columns: ['message', 'date', 'something else'] }),
+        createMockJob({ query: { esql: '' }, columns: ['message', 'date', 'something else'] }),
         mockConfig,
         mockTaskInstanceFields,
         {
@@ -485,7 +482,80 @@ describe('CsvESQLGenerator', () => {
               },
             },
             locale: 'en',
-            query: '',
+            query: query.esql,
+          },
+        },
+        {
+          strategy: 'esql',
+          transport: {
+            requestTimeout: '30s',
+          },
+          abortSignal: expect.any(AbortSignal),
+        }
+      );
+    });
+
+    it('passes params to the query', async () => {
+      const query = {
+        esql: 'FROM custom-metrics-without-timestamp | WHERE event.ingested >= ?_tstart AND event.ingested <= ?_tend',
+      };
+      const filters = [
+        {
+          meta: {},
+          query: {
+            range: {
+              'event.ingested': { format: 'strict_date_optional_time', gte: 'now-15m', lte: 'now' },
+            },
+          },
+        },
+      ];
+
+      const generateCsv = new CsvESQLGenerator(
+        createMockJob({ query, filters }),
+        mockConfig,
+        mockTaskInstanceFields,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream
+      );
+      await generateCsv.generateData();
+
+      expect(mockDataClient.search).toHaveBeenCalledWith(
+        {
+          params: {
+            filter: {
+              bool: {
+                filter: [
+                  {
+                    range: {
+                      'event.ingested': {
+                        format: 'strict_date_optional_time',
+                        gte: 'now-15m',
+                        lte: 'now',
+                      },
+                    },
+                  },
+                ],
+                must: [],
+                must_not: [],
+                should: [],
+              },
+            },
+            params: expect.arrayContaining([
+              expect.objectContaining({
+                _tstart: expect.any(String),
+              }),
+              expect.objectContaining({
+                _tend: expect.any(String),
+              }),
+            ]),
+            locale: 'en',
+            query: query.esql,
           },
         },
         {
@@ -509,7 +579,7 @@ describe('CsvESQLGenerator', () => {
       });
 
       const generateCsv = new CsvESQLGenerator(
-        createMockJob(),
+        createMockJob({ query: { esql: '' } }),
         mockConfig,
         mockTaskInstanceFields,
         {
@@ -539,7 +609,7 @@ describe('CsvESQLGenerator', () => {
       });
 
       const generateCsv = new CsvESQLGenerator(
-        createMockJob(),
+        createMockJob({ query: { esql: '' } }),
         mockConfig,
         mockTaskInstanceFields,
         {
@@ -578,7 +648,7 @@ describe('CsvESQLGenerator', () => {
       });
 
       const generateCsv = new CsvESQLGenerator(
-        createMockJob(),
+        createMockJob({ query: { esql: '' } }),
         mockConfig,
         mockTaskInstanceFields,
         {
@@ -607,7 +677,7 @@ describe('CsvESQLGenerator', () => {
       throw new Error('An unknown error');
     });
     const generateCsv = new CsvESQLGenerator(
-      createMockJob(),
+      createMockJob({ query: { esql: '' } }),
       mockConfig,
       mockTaskInstanceFields,
       {
@@ -644,7 +714,7 @@ describe('CsvESQLGenerator', () => {
       });
 
       const generateCsv = new CsvESQLGenerator(
-        createMockJob(),
+        createMockJob({ query: { esql: '' } }),
         mockConfig,
         mockTaskInstanceFields,
         {

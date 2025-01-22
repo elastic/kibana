@@ -8,8 +8,6 @@ import { ApmSynthtraceEsClient, createLogger, LogLevel } from '@kbn/apm-synthtra
 import { createEsClientForTesting } from '@kbn/test';
 // eslint-disable-next-line @kbn/imports/no_unresolvable_imports
 import { initPlugin } from '@frsource/cypress-plugin-visual-regression-diff/plugins';
-import del from 'del';
-import { some } from 'lodash';
 import { Readable } from 'stream';
 
 export function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) {
@@ -50,18 +48,6 @@ export function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.Plugin
       await synthtraceEsClient.clean();
       return null;
     },
-  });
-
-  on('after:spec', (spec, results) => {
-    // Delete videos that have no failures or retries
-    if (results && results.video) {
-      const failures = some(results.tests, (test) => {
-        return some(test.attempts, { state: 'failed' });
-      });
-      if (!failures) {
-        del(results.video);
-      }
-    }
   });
 
   on('before:browser:launch', (browser, launchOptions) => {

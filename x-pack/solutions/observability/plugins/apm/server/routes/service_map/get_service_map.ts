@@ -32,6 +32,11 @@ export interface IEnvOptions {
   kuery?: string;
 }
 
+export interface ServiceMapTelemetry {
+  tracesCount: number;
+  nodesCount: number;
+}
+
 async function getConnectionData({
   config,
   apmEventClient,
@@ -63,6 +68,8 @@ async function getConnectionData({
     const init = {
       connections: [],
       discoveredServices: [],
+      tracesCount: 0,
+      servicesCount: 0,
     };
 
     if (!traceIds.length) {
@@ -99,16 +106,17 @@ async function getConnectionData({
 
     logger.debug('Merged responses');
 
-    return mergedResponses;
+    return { ...mergedResponses, tracesCount: traceIds.length };
   });
 }
 
 export type ConnectionsResponse = Awaited<ReturnType<typeof getConnectionData>>;
 export type ServicesResponse = Awaited<ReturnType<typeof getServiceStats>>;
+export type ServiceMapResponse = TransformServiceMapResponse & ServiceMapTelemetry;
 
 export function getServiceMap(
   options: IEnvOptions & { maxNumberOfServices: number }
-): Promise<TransformServiceMapResponse> {
+): Promise<ServiceMapResponse> {
   return withApmSpan('get_service_map', async () => {
     const { logger } = options;
     const anomaliesPromise = getServiceAnomalies(
@@ -137,8 +145,10 @@ export function getServiceMap(
       },
     });
 
-    logger.debug('Transformed service map response');
-
-    return transformedResponse;
+    return {
+      ...transformedResponse,
+      tracesCount: connectionData.tracesCount,
+      nodesCount: transformedResponse.nodesCount,
+    };
   });
 }

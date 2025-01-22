@@ -151,7 +151,7 @@ export function initializeFetch({
             // Request ES|QL data
             const result = await fetchEsql({
               query: searchSourceQuery,
-              inputTimeRange: getTimeRangeFromFetchContext(fetchContext),
+              timeRange: getTimeRangeFromFetchContext(fetchContext),
               inputQuery: fetchContext.query,
               filters: fetchContext.filters,
               dataView,

@@ -194,6 +194,7 @@ export interface DocLinks {
     readonly trainedModels: string;
     readonly textEmbedding: string;
     readonly troubleshootSetup: string;
+    readonly upgrade9x: string;
     readonly usersAccess: string;
   };
   readonly workplaceSearch: {
@@ -377,6 +378,7 @@ export interface DocLinks {
     };
     readonly detectionEngineOverview: string;
     readonly signalsMigrationApi: string;
+    readonly legacyEndpointManagementApiDeprecations: string;
   };
   readonly query: {
     readonly eql: string;
