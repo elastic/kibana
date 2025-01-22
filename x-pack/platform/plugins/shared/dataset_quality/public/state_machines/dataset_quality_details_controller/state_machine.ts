@@ -45,8 +45,7 @@ import {
 } from './notifications';
 
 export const createPureDatasetQualityDetailsControllerStateMachine = (
-  initialContext: DatasetQualityDetailsControllerContext,
-  isServerless: boolean
+  initialContext: DatasetQualityDetailsControllerContext
 ) =>
   createMachine<
     DatasetQualityDetailsControllerContext,
@@ -207,37 +206,38 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                         },
                       },
                     },
-                    ...(isServerless
-                      ? {}
-                      : {
-                          dataStreamFailedDocs: {
-                            initial: 'fetchingFailedDocs',
-                            states: {
-                              fetchingFailedDocs: {
-                                invoke: {
-                                  src: 'loadFailedDocsDetails',
-                                  onDone: {
-                                    target: 'doneFetchingFailedDocs',
-                                    actions: ['storeFailedDocsDetails'],
-                                  },
-                                  onError: [
-                                    {
-                                      target: '#DatasetQualityDetailsController.indexNotFound',
-                                      cond: 'isIndexNotFoundError',
-                                    },
-                                    {
-                                      target: 'errorFetchingFailedDocs',
-                                    },
-                                  ],
-                                },
-                              },
-                              errorFetchingFailedDocs: {},
-                              doneFetchingFailedDocs: {
-                                type: 'final',
-                              },
+                    dataStreamFailedDocs: {
+                      initial: 'fetchingFailedDocs',
+                      states: {
+                        fetchingFailedDocs: {
+                          invoke: {
+                            src: 'loadFailedDocsDetails',
+                            onDone: {
+                              target: 'doneFetchingFailedDocs',
+                              actions: ['storeFailedDocsDetails'],
                             },
+                            onError: [
+                              {
+                                target: 'unsupported',
+                                cond: 'checkIfUnsupported',
+                              },
+                              {
+                                target: '#DatasetQualityDetailsController.indexNotFound',
+                                cond: 'isIndexNotFoundError',
+                              },
+                              {
+                                target: 'errorFetchingFailedDocs',
+                              },
+                            ],
                           },
-                        }),
+                        },
+                        unsupported: {},
+                        errorFetchingFailedDocs: {},
+                        doneFetchingFailedDocs: {
+                          type: 'final',
+                        },
+                      },
+                    },
                   },
                   onDone: {
                     target:
@@ -325,7 +325,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                   always: [
                     {
                       target: 'closed',
-                      cond: 'hasNoDegradedFieldsSelected',
+                      cond: 'hasNoQualityIssueSelected',
                     },
                   ],
                 },
@@ -355,6 +355,10 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                             },
                             onError: [
                               {
+                                target: 'unsupported',
+                                cond: 'checkIfUnsupported',
+                              },
+                              {
                                 target: '#DatasetQualityDetailsController.indexNotFound',
                                 cond: 'isIndexNotFoundError',
                               },
@@ -372,6 +376,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                             },
                           },
                         },
+                        unsupported: {},
                       },
                     },
                     degradedFieldFlyout: {
@@ -709,6 +714,14 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
             event.data.statusCode === 403
           );
         },
+        checkIfUnsupported: (_context, event) => {
+          return (
+            'data' in event &&
+            typeof event.data === 'object' &&
+            'type' in event.data! &&
+            event.data.type === 'unsupported'
+          );
+        },
         isIndexNotFoundError: (_, event) => {
           return (
             ('data' in event &&
@@ -735,7 +748,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
             context.expandedQualityIssue && context.expandedQualityIssue.type === 'degraded'
           );
         },
-        hasNoDegradedFieldsSelected: (context) => {
+        hasNoQualityIssueSelected: (context) => {
           return !Boolean(context.expandedQualityIssue);
         },
         hasFailedToUpdateLastBackingIndex: (_, event) => {
@@ -775,7 +788,7 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
   dataStreamDetailsClient,
   isServerless,
 }: DatasetQualityDetailsControllerStateMachineDependencies) =>
-  createPureDatasetQualityDetailsControllerStateMachine(initialContext, isServerless).withConfig({
+  createPureDatasetQualityDetailsControllerStateMachine(initialContext).withConfig({
     actions: {
       notifyFailedFetchForAggregatableDatasets: (_context, event: DoneInvokeEvent<Error>) =>
         fetchNonAggregatableDatasetsFailedNotifier(toasts, event.data),
@@ -838,6 +851,14 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         return false;
       },
       loadFailedDocsDetails: (context) => {
+        if (isServerless) {
+          const unsupportedError = {
+            message: 'Failure store is not available in serverless mode',
+            type: 'unsupported',
+          };
+          return Promise.reject(unsupportedError);
+        }
+
         const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
 
         return dataStreamDetailsClient.getFailedDocsDetails({
@@ -892,6 +913,14 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         return Promise.resolve();
       },
       loadfailedDocsErrors: (context) => {
+        if (isServerless) {
+          const unsupportedError = {
+            message: 'Failure store is not available in serverless mode',
+            type: 'unsupported',
+          };
+          return Promise.reject(unsupportedError);
+        }
+
         if ('expandedQualityIssue' in context && context.expandedQualityIssue) {
           const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
 
