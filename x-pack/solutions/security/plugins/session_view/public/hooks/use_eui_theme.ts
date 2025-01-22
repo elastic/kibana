@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { useEuiTheme as useEuiThemeHook } from '@elastic/eui';
-import { euiLightVars, euiDarkVars } from '@kbn/ui-theme'; // TODO: Borealis migration - replace to use vars from useEuiTheme?
 import { useMemo } from 'react';
+import { useEuiTheme as useEuiThemeHook } from '@elastic/eui';
+
+// TODO: Borealis migration - euiLightVars and euiDarkVars are depricated.
+// Options: lock <EuiThemeProvider colorMode="dark"> or use hardcoded colors outside of theme colors
+import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 
 type EuiThemeProps = Parameters<typeof useEuiThemeHook>;
 type ExtraEuiVars = {
