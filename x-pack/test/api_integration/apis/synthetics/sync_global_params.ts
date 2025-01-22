@@ -30,6 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
     const kServer = getService('kibanaServer');
 
     let testFleetPolicyID: string;
+    let loc: any;
     let _browserMonitorJson: HTTPFields;
     let browserMonitorJson: HTTPFields;
 
@@ -61,8 +62,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('add a test private location', async () => {
-      const loc = await testPrivateLocations.addPrivateLocation();
-      testFleetPolicyID = loc.id;
+      loc = await testPrivateLocations.addPrivateLocation();
+      testFleetPolicyID = loc.agentPolicyId;
 
       const apiResponse = await supertestAPI.get(SYNTHETICS_API_URLS.SERVICE_LOCATIONS);
 
@@ -86,7 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
           isInvalid: false,
         },
         {
-          id: testFleetPolicyID,
+          id: loc.id,
           isInvalid: false,
           isServiceManaged: false,
           label: 'Test private location 0',
@@ -106,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
       const newMonitor = browserMonitorJson;
 
       const pvtLoc = {
-        id: testFleetPolicyID,
+        id: loc.id,
         agentPolicyId: testFleetPolicyID,
         label: 'Test private location 0',
         isServiceManaged: false,
@@ -137,8 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       const packagePolicy = apiResponse.body.items.find(
-        (pkgPolicy: PackagePolicy) =>
-          pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID + '-default'
+        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitorId + '-' + loc.id + '-default'
       );
 
       expect(packagePolicy?.policy_id).eql(
@@ -194,8 +194,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       const packagePolicy = apiResponse.body.items.find(
-        (pkgPolicy: PackagePolicy) =>
-          pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID + '-default'
+        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitorId + '-' + loc.id + '-default'
       );
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID);
@@ -215,7 +214,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('add a http monitor using param', async () => {
       const newMonitor = httpMonitorJson;
       const pvtLoc = {
-        id: testFleetPolicyID,
+        id: loc.id,
         agentPolicyId: testFleetPolicyID,
         label: 'Test private location 0',
         isServiceManaged: false,
@@ -247,8 +246,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       const packagePolicy = apiResponse.body.items.find(
-        (pkgPolicy: PackagePolicy) =>
-          pkgPolicy.id === newHttpMonitorId + '-' + testFleetPolicyID + '-default'
+        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newHttpMonitorId + '-' + loc.id + '-default'
       );
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID);
@@ -258,7 +256,7 @@ export default function ({ getService }: FtrProviderContext) {
         id: newHttpMonitorId,
         isTLSEnabled: false,
         namespace: 'testnamespace',
-        location: { id: testFleetPolicyID },
+        location: { id: loc.id },
       });
 
       comparePolicies(packagePolicy, pPolicy);
@@ -305,8 +303,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       const packagePolicy = apiResponse.body.items.find(
-        (pkgPolicy: PackagePolicy) =>
-          pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID + '-default'
+        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitorId + '-' + loc.id + '-default'
       );
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID);
@@ -317,7 +314,7 @@ export default function ({ getService }: FtrProviderContext) {
           name: browserMonitorJson.name,
           id: newMonitorId,
           isBrowser: true,
-          location: { id: testFleetPolicyID },
+          location: { id: loc.id },
         })
       );
     });
