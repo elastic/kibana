@@ -373,7 +373,7 @@ const AllAssets = ({
         loading={loadingState === DataLoadingState.loading}
       />
       <EuiPageTemplate.Section>
-        <EuiTitle size="l">
+        <EuiTitle size="l" data-test-subj="all_assets_title">
           <h1>
             <FormattedMessage
               id="xpack.securitySolution.assetInventory.allAssets"
