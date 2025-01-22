@@ -141,8 +141,8 @@ export class StreamsClient {
 
     const { assetClient, storageClient } = this.dependencies;
     await Promise.all([
-      assetClient.removeAllAssetLinks(),
-      storageClient.deleteByQuery({ query: { match_all: {} } }),
+      assetClient.clean(),
+      storageClient.clean(),
     ]);
 
     return { acknowledged: true, result: 'deleted' };

@@ -177,14 +177,8 @@ export class AssetClient {
     await this.clients.storageClient.delete({ id });
   }
 
-  async removeAllAssetLinks() {
-    await this.clients.storageClient.deleteByQuery({
-      query: {
-        bool: {
-          filter: [...termQuery(ASSET_ENTITY_TYPE, 'dashboard')],
-        },
-      },
-    });
+  async clean() {
+    await this.clients.storageClient.clean();
   }
 
   async getAssetIds({

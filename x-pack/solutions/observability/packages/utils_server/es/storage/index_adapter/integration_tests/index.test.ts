@@ -179,7 +179,7 @@ describe('StorageIndexAdapter', () => {
     });
 
     it('deletes the document', async () => {
-      await verifyDeleteByQuery();
+      await verifyClean();
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/206482
@@ -322,7 +322,7 @@ describe('StorageIndexAdapter', () => {
       });
 
       it('deletes the documents', async () => {
-        await verifyDeleteByQuery();
+        await verifyClean();
       });
     });
   });
@@ -359,7 +359,7 @@ describe('StorageIndexAdapter', () => {
     });
 
     it('deletes the documents', async () => {
-      await verifyDeleteByQuery();
+      await verifyClean();
     });
   });
 
@@ -401,7 +401,7 @@ describe('StorageIndexAdapter', () => {
     });
 
     it('deletes the documents', async () => {
-      await verifyDeleteByQuery();
+      await verifyClean();
     });
   });
 
@@ -584,15 +584,27 @@ describe('StorageIndexAdapter', () => {
     });
   }
 
-  async function verifyDeleteByQuery() {
-    await client.deleteByQuery({ query: { match_all: {} } });
-    const searchResponse = await client.search({
-      track_total_hits: true,
-      size: 1,
-      query: {
-        match_all: {},
-      },
+  async function verifyClean() {
+    await client.clean();
+
+    // verify that the index template is removed
+    const templates = await esClient.indices
+      .getIndexTemplate({
+        name: TEST_INDEX_NAME,
+      })
+      .catch((error) => {
+        if (isResponseError(error) && error.statusCode === 404) {
+          return { index_templates: [] };
+        }
+        throw error;
+      });
+
+    expect(templates.index_templates).toEqual([]);
+
+    // verify that the backing indices are removed
+    const indices = await esClient.indices.get({
+      index: `${TEST_INDEX_NAME}*`,
     });
-    expect(searchResponse.hits.total.value).toBe(0);
+    expect(Object.keys(indices)).toEqual([]);
   }
 });

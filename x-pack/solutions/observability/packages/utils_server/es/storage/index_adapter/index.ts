@@ -32,8 +32,7 @@ import {
   StorageClientExistsIndex,
   StorageDocumentOf,
   StorageClientSearchResponse,
-  StorageClientDeleteByQuery,
-  StorageClientDeleteByQueryResponse,
+  StorageClientClean,
 } from '..';
 import { getSchemaVersion } from '../get_schema_version';
 import { StorageMappingProperty } from '../types';
@@ -448,20 +447,27 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings> 
     });
   };
 
-  private deleteByQuery: StorageClientDeleteByQuery = async ({
-    ...request
-  }): Promise<StorageClientDeleteByQueryResponse> => {
-    await wrapEsCall(
-      this.esClient.deleteByQuery({
-        refresh: true,
-        ...request,
-        index: this.getSearchIndexPattern(),
-        ignore_unavailable: true,
-        allow_no_indices: true,
-      })
+  private clean: StorageClientClean = async (): Promise<void> => {
+    const allIndices = await this.getExistingIndices();
+    // Delete all indices
+    await Promise.all(
+      Object.keys(allIndices).map((index) =>
+        wrapEsCall(
+          this.esClient.indices.delete({
+            index,
+          })
+        )
+      )
     );
-
-    return { acknowledged: true };
+    // Delete the index template
+    const template = await this.getExistingIndexTemplate();
+    if (template) {
+      await wrapEsCall(
+        this.esClient.indices.deleteIndexTemplate({
+          name: getIndexTemplateName(this.storage.name),
+        })
+      );
+    }
   };
 
   private delete: StorageClientDelete = async ({
@@ -564,7 +570,7 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings> 
     return {
       bulk: this.bulk,
       delete: this.delete,
-      deleteByQuery: this.deleteByQuery,
+      clean: this.clean,
       index: this.index,
       search: this.search,
       get: this.get,
