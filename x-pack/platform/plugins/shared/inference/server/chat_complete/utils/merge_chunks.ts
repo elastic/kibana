@@ -12,8 +12,11 @@ interface UnvalidatedMessage {
   tool_calls: UnvalidatedToolCall[];
 }
 
+/**
+ * Merges chunks into a message, concatenating the content and tool calls.
+ */
 export const mergeChunks = (chunks: ChatCompletionChunkEvent[]): UnvalidatedMessage => {
-  return chunks.reduce<UnvalidatedMessage>(
+  const message = chunks.reduce<UnvalidatedMessage>(
     (prev, chunk) => {
       prev.content += chunk.content ?? '';
 
@@ -40,4 +43,9 @@ export const mergeChunks = (chunks: ChatCompletionChunkEvent[]): UnvalidatedMess
     },
     { content: '', tool_calls: [] }
   );
+
+  // some models (Claude not to name it) can have their toolCall index not start at 0, so we remove the null elements
+  message.tool_calls = message.tool_calls.filter((call) => !!call);
+
+  return message;
 };
