@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const security = getService('security');
   const deployment = getService('deployment');
   const pageObjects = getPageObjects(['common', 'remoteClusters']);
   const testSubjects = getService('testSubjects');
@@ -20,6 +21,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let isCloud: boolean;
     before(async () => {
       isCloud = await deployment.isCloud();
+      await security.testUser.setRoles(['global_ccr_role']);
       await pageObjects.common.navigateToApp('remoteClusters');
       await pageObjects.remoteClusters.createNewRemoteCluster(
         REMOTE_CLUSTER_NAME,
