@@ -54,7 +54,7 @@ import {
 } from './stream_crud';
 import { updateDataStreamsLifecycle } from './data_streams/manage_data_streams';
 import { MalformedStream } from './errors/malformed_stream';
-import { findInheritedLifecycle } from './helpers/lifecycle';
+import { findInheritedLifecycle, findInheritingStreams } from './helpers/lifecycle';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -797,24 +797,11 @@ export class StreamsClient {
   private async updateStreamLifecycle(root: WiredStreamDefinition, lifecycle?: StreamLifecycle) {
     const { logger, scopedClusterClient } = this.dependencies;
     const descendants = await this.getDescendants(root.name);
-
-    const toUpdate = [];
-    const queue = [root];
-    while (queue.length > 0) {
-      const definition = queue.shift()!;
-
-      if (isDescendantOf(root.name, definition.name) && definition.stream.ingest.lifecycle) {
-        // ignore subtrees with a lifecycle override
-        continue;
-      }
-
-      toUpdate.push(definition.name);
-      queue.push(...descendants.filter((child) => isChildOf(definition.name, child.name)));
-    }
+    const inheritingStreams = findInheritingStreams(root, descendants);
 
     await updateDataStreamsLifecycle({
       esClient: scopedClusterClient.asCurrentUser,
-      names: toUpdate,
+      names: inheritingStreams,
       isServerless: this.dependencies.isServerless,
       lifecycle,
       logger,

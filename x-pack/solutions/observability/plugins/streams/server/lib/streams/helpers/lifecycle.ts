@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { InheritedStreamLifecycle, WiredStreamDefinition } from '@kbn/streams-schema';
+import {
+  InheritedStreamLifecycle,
+  WiredStreamDefinition,
+  isChildOf,
+  isDescendantOf,
+} from '@kbn/streams-schema';
 import { orderBy } from 'lodash';
 
 export function findInheritedLifecycle(
@@ -23,4 +28,26 @@ export function findInheritedLifecycle(
   }
 
   return { ...originDefinition.stream.ingest.lifecycle!, from: originDefinition.name };
+}
+
+export function findInheritingStreams(
+  root: WiredStreamDefinition,
+  descendants: WiredStreamDefinition[]
+): string[] {
+  const inheriting = [];
+  const queue = [root];
+
+  while (queue.length > 0) {
+    const definition = queue.shift()!;
+
+    if (isDescendantOf(root.name, definition.name) && definition.stream.ingest.lifecycle) {
+      // ignore subtrees with a lifecycle override
+      continue;
+    }
+
+    inheriting.push(definition.name);
+    queue.push(...descendants.filter((child) => isChildOf(definition.name, child.name)));
+  }
+
+  return inheriting;
 }
