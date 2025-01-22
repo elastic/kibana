@@ -138,7 +138,6 @@ export const qualityIssueRT = rt.intersection([
     indexFieldWasLastPresentIn: rt.string,
   }),
   rt.type({
-    name: rt.string,
     type: rt.keyof({
       degraded: null,
       failed: null,

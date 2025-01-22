@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { DataStreamDocsStat } from '../api_types';
 import { DEFAULT_DATASET_QUALITY, DEFAULT_QUALITY_DOC_STATS } from '../constants';
 import { DataStreamType, QualityIndicators } from '../types';
 import { indexNameToDataStreamParts, mapPercentageToQuality } from '../utils';
 import { Integration } from './integration';
 import { DataStreamStatType } from './types';
 
-type QualityStat = Omit<DataStreamDocsStat, 'dataset'> & { percentage: number };
+interface QualityStat {
+  percentage: number;
+  count: number;
+}
 
 export class DataStreamStat {
   rawName: string;

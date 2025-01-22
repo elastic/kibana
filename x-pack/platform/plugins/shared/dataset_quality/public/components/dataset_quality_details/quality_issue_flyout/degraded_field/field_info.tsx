@@ -15,6 +15,7 @@ import {
   EuiTextColor,
   EuiTitle,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { useQualityIssues } from '../../../../hooks';
 import {
@@ -25,6 +26,7 @@ import {
 } from '../../../../../common/translations';
 
 export const DegradedFieldInfo = () => {
+  const { euiTheme } = useEuiTheme();
   const {
     degradedFieldValues,
     isAnalysisInProgress,
@@ -115,7 +117,7 @@ export const DegradedFieldInfo = () => {
                 <EuiBadgeGroup gutterSize="s">
                   {degradedFieldValues?.values.map((value, idx) => (
                     <EuiBadge color="hollow" key={idx}>
-                      <EuiTextColor color="#765B96">
+                      <EuiTextColor color={euiTheme.colors.vis.euiColorVis3}>
                         <strong>{value}</strong>
                       </EuiTextColor>
                     </EuiBadge>

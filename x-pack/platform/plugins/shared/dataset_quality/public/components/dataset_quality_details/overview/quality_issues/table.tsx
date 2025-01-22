@@ -15,7 +15,7 @@ import {
 import { useQualityIssues } from '../../../../hooks/use_quality_issues';
 import { getQualityIssuesColumns } from './columns';
 
-export const DegradedFieldTable = () => {
+export const QualityIssuesTable = () => {
   const {
     isDegradedFieldsLoading,
     pagination,

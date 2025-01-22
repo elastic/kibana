@@ -107,7 +107,14 @@ export default function QualityIssueFlyout() {
                   <span style={{ fontWeight: 400 }}>{fieldIgnoredText}</span>
                 </>
               ) : (
-                <span style={{ fontWeight: 400 }}>{'Documents indexing failed'}</span>
+                <span style={{ fontWeight: 400 }}>
+                  {i18n.translate(
+                    'xpack.datasetQuality.datasetQualityDetails.qualityIssueFlyout.failedDocsTitle',
+                    {
+                      defaultMessage: 'Documents indexing failed',
+                    }
+                  )}
+                </span>
               )}
             </EuiText>
           </EuiTitle>
