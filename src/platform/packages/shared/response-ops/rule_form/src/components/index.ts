@@ -9,4 +9,4 @@
 
 export * from './request_code_block';
 export * from './confirm_create_rule';
-export * from './confirm_cancel_create_rule';
+export * from './confirm_rule_close';

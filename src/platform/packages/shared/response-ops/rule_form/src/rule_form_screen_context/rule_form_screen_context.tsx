@@ -17,10 +17,8 @@ import React, { createContext, useState } from 'react';
 const initialRuleFormScreenContextState = {
   isConnectorsScreenVisible: false,
   isShowRequestScreenVisible: false,
-  isConfirmCancelScreenVisible: false,
   setIsConnectorsScreenVisible: (show: boolean) => {},
   setIsShowRequestScreenVisible: (show: boolean) => {},
-  setIsConfirmCancelScreenVisible: (show: boolean) => {},
 };
 
 export const RuleFormScreenContext = createContext(initialRuleFormScreenContextState);
@@ -28,16 +26,13 @@ export const RuleFormScreenContext = createContext(initialRuleFormScreenContextS
 export const RuleFormScreenContextProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const [isConnectorsScreenVisible, setIsConnectorsScreenVisible] = useState(false);
   const [isShowRequestScreenVisible, setIsShowRequestScreenVisible] = useState(false);
-  const [isConfirmCancelScreenVisible, setIsConfirmCancelScreenVisible] = useState(false);
   return (
     <RuleFormScreenContext.Provider
       value={{
         isConnectorsScreenVisible,
         isShowRequestScreenVisible,
-        isConfirmCancelScreenVisible,
         setIsConnectorsScreenVisible,
         setIsShowRequestScreenVisible,
-        setIsConfirmCancelScreenVisible,
       }}
     >
       {children}

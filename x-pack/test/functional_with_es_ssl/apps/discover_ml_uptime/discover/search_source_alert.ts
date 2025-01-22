@@ -661,7 +661,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('rulePageFooterSaveButton');
 
       await retry.waitFor('confirmation modal', async () => {
-        return await testSubjects.exists('rulePageConfirmCreateRule');
+        return await testSubjects.exists('confirmCreateRuleModal');
       });
 
       await testSubjects.click('confirmModalConfirmButton');
