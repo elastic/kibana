@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { badRequest, internal, notFound } from '@hapi/boom';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import {
-  streamConfigDefinitionSchema,
-  ListStreamsResponse,
-  ReadStreamDefinition,
-  WiredReadStreamDefinition,
-  isWiredStream,
-  InheritedFieldDefinition,
-} from '@kbn/streams-schema';
+import { badRequest, internal, notFound } from '@hapi/boom';
 import { isResponseError } from '@kbn/es-errors';
-import { findInheritedLifecycle } from '../../../lib/streams/helpers/lifecycle';
+import {
+  StreamDefinition,
+  StreamGetResponse,
+  streamUpsertRequestSchema,
+} from '@kbn/streams-schema';
+import { z } from '@kbn/zod';
 import {
   DefinitionNotFound,
   ForkConditionMissing,
@@ -28,7 +24,7 @@ import {
   SecurityException,
 } from '../../../lib/streams/errors';
 import { createServerRoute } from '../../create_server_route';
-import { getDataStreamLifecycle } from '../../../lib/streams/stream_crud';
+import { readStream } from './read_stream';
 
 export const readStreamRoute = createServerRoute({
   endpoint: 'GET /api/streams/{id}',
@@ -45,46 +41,18 @@ export const readStreamRoute = createServerRoute({
   params: z.object({
     path: z.object({ id: z.string() }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<ReadStreamDefinition> => {
+  handler: async ({ params, request, getScopedClients }): Promise<StreamGetResponse> => {
     try {
-      const { assetClient, streamsClient } = await getScopedClients({
+      const { assetClient, streamsClient, scopedClusterClient } = await getScopedClients({
         request,
       });
 
-      const name = params.path.id;
-
-      const [streamDefinition, dashboards, ancestors, dataStream] = await Promise.all([
-        streamsClient.getStream(name),
-        assetClient.getAssetIds({
-          entityId: name,
-          entityType: 'stream',
-          assetType: 'dashboard',
-        }),
-        streamsClient.getAncestors(name),
-        streamsClient.getDataStream(name),
-      ]);
-
-      if (!isWiredStream(streamDefinition)) {
-        const effectiveLifecycle = getDataStreamLifecycle(dataStream);
-        return {
-          ...streamDefinition,
-          dashboards,
-          effective_lifecycle: effectiveLifecycle,
-          inherited_fields: {},
-        };
-      }
-
-      const body: WiredReadStreamDefinition = {
-        ...streamDefinition,
-        dashboards,
-        effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
-        inherited_fields: ancestors.reduce((acc, def) => {
-          Object.entries(def.stream.ingest.wired.fields).forEach(([key, fieldDef]) => {
-            acc[key] = { ...fieldDef, from: def.name };
-          });
-          return acc;
-        }, {} as InheritedFieldDefinition),
-      };
+      const body = await readStream({
+        name: params.path.id,
+        assetClient,
+        scopedClusterClient,
+        streamsClient,
+      });
 
       return body;
     } catch (e) {
@@ -174,7 +142,7 @@ export const listStreamsRoute = createServerRoute({
     },
   },
   params: z.object({}),
-  handler: async ({ request, getScopedClients }): Promise<ListStreamsResponse> => {
+  handler: async ({ request, getScopedClients }): Promise<{ streams: StreamDefinition[] }> => {
     try {
       const { streamsClient } = await getScopedClients({ request });
       return {
@@ -206,14 +174,16 @@ export const editStreamRoute = createServerRoute({
     path: z.object({
       id: z.string(),
     }),
-    body: streamConfigDefinitionSchema,
+    body: streamUpsertRequestSchema,
   }),
   handler: async ({ params, request, getScopedClients }) => {
     try {
       const { streamsClient } = await getScopedClients({ request });
-      const streamDefinition = { stream: params.body, name: params.path.id };
 
-      return await streamsClient.upsertStream({ definition: streamDefinition });
+      return await streamsClient.upsertStream({
+        request: params.body,
+        name: params.path.id,
+      });
     } catch (e) {
       if (e instanceof IndexTemplateNotFound || e instanceof DefinitionNotFound) {
         throw notFound(e);
