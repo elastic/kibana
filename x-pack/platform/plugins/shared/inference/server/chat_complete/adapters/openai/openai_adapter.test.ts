@@ -355,7 +355,7 @@ describe('openAIAdapter', () => {
       });
     });
 
-    it('propagates the temperature', () => {
+    it('propagates the temperature parameter', () => {
       openAIAdapter.chatComplete({
         logger,
         executor: executorMock,
@@ -365,6 +365,18 @@ describe('openAIAdapter', () => {
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(getRequest().body.temperature).toBe(0.7);
+    });
+
+    it('propagates the modelName parameter', () => {
+      openAIAdapter.chatComplete({
+        logger,
+        executor: executorMock,
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        modelName: 'gpt-4o',
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(getRequest().body.model).toBe('gpt-4o');
     });
   });
 
@@ -381,6 +393,30 @@ describe('openAIAdapter', () => {
           data: observableIntoEventSourceStream(source$, logger),
         };
       });
+    });
+
+    it('throws an error if the connector response is in error', async () => {
+      executorMock.invoke.mockImplementation(async () => {
+        return {
+          actionId: 'actionId',
+          status: 'error',
+          serviceMessage: 'something went wrong',
+          data: undefined,
+        };
+      });
+
+      await expect(
+        lastValueFrom(
+          openAIAdapter
+            .chatComplete({
+              ...defaultArgs,
+              messages: [{ role: MessageRole.User, content: 'Hello' }],
+            })
+            .pipe(toArray())
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Error calling connector: something went wrong"`
+      );
     });
 
     it('emits chunk events', async () => {
