@@ -68,7 +68,7 @@ export const mockData = [
     flattened: {
       'asset.risk': 65,
       'asset.name': 'kube-controller-cspm-monitor',
-      'asset.criticality': null,
+      'asset.criticality': 'unassigned_impact',
       'asset.source': 'cloud-sec-dev',
       '@timestamp': '2025-01-01T00:00:00.000Z',
     },
@@ -101,7 +101,7 @@ export const mockData = [
     flattened: {
       'asset.risk': 85,
       'asset.name': 'DNS-controller-azure-sec',
-      'asset.criticality': null,
+      'asset.criticality': 'unassigned_impact',
       'asset.source': 'cloud-sec-dev',
       '@timestamp': '2025-01-01T00:00:00.000Z',
     },

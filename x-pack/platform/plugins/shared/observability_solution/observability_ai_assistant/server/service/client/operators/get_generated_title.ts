@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { catchError, last, map, Observable, of, tap } from 'rxjs';
+import { catchError, mergeMap, Observable, of, tap, from } from 'rxjs';
 import { Logger } from '@kbn/logging';
+import { ChatCompleteResponse } from '@kbn/inference-common';
 import type { ObservabilityAIAssistantClient } from '..';
-import { Message, MessageRole } from '../../../../common';
-import { concatenateChatCompletionChunks } from '../../../../common/utils/concatenate_chat_completion_chunks';
-import { hideTokenCountEvents } from './hide_token_count_events';
-import { ChatEvent, TokenCountEvent } from '../../../../common/conversation_complete';
+import { Message, MessageRole, StreamingChatResponseEventType } from '../../../../common';
+import { TokenCountEvent } from '../../../../common/conversation_complete';
 import { LangTracer } from '../instrumentation/lang_tracer';
 
 export const TITLE_CONVERSATION_FUNCTION_NAME = 'title_conversation';
@@ -22,7 +21,7 @@ type ChatFunctionWithoutConnectorAndTokenCount = (
     Parameters<ObservabilityAIAssistantClient['chat']>[1],
     'connectorId' | 'signal' | 'simulateFunctionCalling'
   >
-) => Observable<ChatEvent>;
+) => Promise<ChatCompleteResponse>;
 
 export function getGeneratedTitle({
   messages,
@@ -35,7 +34,7 @@ export function getGeneratedTitle({
   logger: Pick<Logger, 'debug' | 'error'>;
   tracer: LangTracer;
 }): Observable<string | TokenCountEvent> {
-  return hideTokenCountEvents((hide) =>
+  return from(
     chat('generate_title', {
       messages: [
         {
@@ -75,32 +74,44 @@ export function getGeneratedTitle({
       ],
       functionCall: TITLE_CONVERSATION_FUNCTION_NAME,
       tracer,
-    }).pipe(
-      hide(),
-      concatenateChatCompletionChunks(),
-      last(),
-      map((concatenatedMessage) => {
-        const title: string =
-          (concatenatedMessage.message.function_call.name
-            ? JSON.parse(concatenatedMessage.message.function_call.arguments).title
-            : concatenatedMessage.message?.content) || '';
-
-        // This captures a string enclosed in single or double quotes.
-        // It extracts the string content without the quotes.
-        // Example matches:
-        // - "Hello, World!" => Captures: Hello, World!
-        // - 'Another Example' => Captures: Another Example
-        // - JustTextWithoutQuotes => Captures: JustTextWithoutQuotes
-
-        return title.replace(/^"(.*)"$/g, '$1').replace(/^'(.*)'$/g, '$1');
-      }),
-      tap((event) => {
-        if (typeof event === 'string') {
-          logger.debug(`Generated title: ${event}`);
-        }
-      })
-    )
+      stream: false,
+    })
   ).pipe(
+    mergeMap((response) => {
+      let title: string =
+        (response.toolCalls[0].function.name
+          ? (response.toolCalls[0].function.arguments as { title: string }).title
+          : response.content) || '';
+
+      // This captures a string enclosed in single or double quotes.
+      // It extracts the string content without the quotes.
+      // Example matches:
+      // - "Hello, World!" => Captures: Hello, World!
+      // - 'Another Example' => Captures: Another Example
+      // - JustTextWithoutQuotes => Captures: JustTextWithoutQuotes
+      title = title.replace(/^"(.*)"$/g, '$1').replace(/^'(.*)'$/g, '$1');
+
+      const tokenCount: TokenCountEvent | undefined = response.tokens
+        ? {
+            type: StreamingChatResponseEventType.TokenCount,
+            tokens: {
+              completion: response.tokens.completion,
+              prompt: response.tokens.prompt,
+              total: response.tokens.total,
+            },
+          }
+        : undefined;
+
+      const events: Array<string | TokenCountEvent> = [title];
+      if (tokenCount) events.push(tokenCount);
+
+      return from(events); // Emit each event separately
+    }),
+    tap((event) => {
+      if (typeof event === 'string') {
+        logger.debug(`Generated title: ${event}`);
+      }
+    }),
     catchError((error) => {
       logger.error(`Error generating title`);
       logger.error(error);

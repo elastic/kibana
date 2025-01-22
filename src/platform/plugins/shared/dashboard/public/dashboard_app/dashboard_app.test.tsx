@@ -68,7 +68,7 @@ describe('Dashboard App', () => {
     await waitFor(() => {
       expect(expandPanelSpy).not.toHaveBeenCalled();
       // this value should be undefined by default
-      expect(dashboardApi.expandedPanelId.getValue()).toBe(undefined);
+      expect(dashboardApi.expandedPanelId$.getValue()).toBe(undefined);
       // history should not be called
       expect(historySpy).toHaveBeenCalledTimes(0);
       expect(mockHistory.location.pathname).toBe('/');
@@ -78,7 +78,7 @@ describe('Dashboard App', () => {
     dashboardApi.expandPanel('123');
 
     await waitFor(() => {
-      expect(dashboardApi.expandedPanelId.getValue()).toBe('123');
+      expect(dashboardApi.expandedPanelId$.getValue()).toBe('123');
       expect(historySpy).toHaveBeenCalledTimes(1);
       expect(mockHistory.location.pathname).toBe('/create/123');
     });
@@ -96,7 +96,7 @@ describe('Dashboard App', () => {
     dashboardApi.expandPanel('456');
 
     await waitFor(() => {
-      expect(dashboardApi.expandedPanelId.getValue()).toBe(undefined);
+      expect(dashboardApi.expandedPanelId$.getValue()).toBe(undefined);
       expect(historySpy).toHaveBeenCalledTimes(1);
       expect(mockHistory.location.pathname).toBe('/create');
     });

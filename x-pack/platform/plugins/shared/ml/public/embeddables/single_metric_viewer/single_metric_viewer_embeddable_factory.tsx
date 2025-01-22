@@ -14,7 +14,7 @@ import useUnmount from 'react-use/lib/useUnmount';
 import {
   apiHasExecutionContext,
   initializeTimeRange,
-  initializeTitles,
+  initializeTitleManager,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subscription } from 'rxjs';
@@ -44,23 +44,18 @@ export const getSingleMetricViewerEmbeddableFactory = (
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       const services = await getServices(getStartServices);
       const subscriptions = new Subscription();
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
-
-      const {
-        api: timeRangeApi,
-        comparators: timeRangeComparators,
-        serialize: serializeTimeRange,
-      } = initializeTimeRange(state);
+      const titleManager = initializeTitleManager(state);
+      const timeRangeManager = initializeTimeRange(state);
 
       const {
         singleMetricViewerControlsApi,
         serializeSingleMetricViewerState,
         singleMetricViewerComparators,
         onSingleMetricViewerDestroy,
-      } = initializeSingleMetricViewerControls(state, titlesApi);
+      } = initializeSingleMetricViewerControls(state, titleManager.api);
 
-      const dataLoading = new BehaviorSubject<boolean | undefined>(true);
-      const blockingError = new BehaviorSubject<Error | undefined>(undefined);
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+      const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
       const api = buildApi(
         {
@@ -82,7 +77,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
                 { data, share },
                 mlApi,
                 {
-                  ...serializeTitles(),
+                  ...titleManager.serialize(),
                   ...serializeSingleMetricViewerState(),
                 }
               );
@@ -92,17 +87,17 @@ export const getSingleMetricViewerEmbeddableFactory = (
               return Promise.reject();
             }
           },
-          ...titlesApi,
-          ...timeRangeApi,
+          ...titleManager.api,
+          ...timeRangeManager.api,
           ...singleMetricViewerControlsApi,
-          dataLoading,
-          blockingError,
+          dataLoading$,
+          blockingError$,
           serializeState: () => {
             return {
               rawState: {
                 timeRange: undefined,
-                ...serializeTitles(),
-                ...serializeTimeRange(),
+                ...titleManager.serialize(),
+                ...timeRangeManager.serialize(),
                 ...serializeSingleMetricViewerState(),
               },
               references: [],
@@ -110,16 +105,14 @@ export const getSingleMetricViewerEmbeddableFactory = (
           },
         },
         {
-          ...timeRangeComparators,
-          ...titleComparators,
+          ...timeRangeManager.comparators,
+          ...titleManager.comparators,
           ...singleMetricViewerComparators,
         }
       );
 
       const { singleMetricViewerData$, onDestroy } = initializeSingleMetricViewerDataFetcher(
         api,
-        dataLoading,
-        blockingError,
         services[1].data.query.timefilter.timefilter
       );
 
@@ -161,7 +154,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
               bounds={bounds}
               functionDescription={functionDescription}
               lastRefresh={lastRefresh}
-              onError={(error) => blockingError.next(error)}
+              onError={(error) => blockingError$.next(error)}
               selectedDetectorIndex={singleMetricViewerData?.selectedDetectorIndex}
               selectedEntities={singleMetricViewerData?.selectedEntities}
               selectedJobId={singleMetricViewerData?.jobIds[0]}
@@ -169,7 +162,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
               uuid={api.uuid}
               onForecastIdChange={api.updateForecastId}
               onRenderComplete={() => {
-                dataLoading.next(false);
+                dataLoading$.next(false);
               }}
             />
           );
