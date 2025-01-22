@@ -10,7 +10,7 @@
 import classNames from 'classnames';
 import { cloneDeep } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { combineLatest, distinctUntilChanged, filter, map, pairwise, skip } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map, pairwise, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
 
@@ -95,17 +95,8 @@ export const GridLayout = ({
     /**
      * This subscription calls the passed `onLayoutChange` callback when the layout changes
      */
-    const onLayoutChangeSubscription = combineLatest([
-      gridLayoutStateManager.gridLayout$,
-      gridLayoutStateManager.interactionEvent$,
-    ])
-      .pipe(
-        // if an interaction event is happening, then ignore any "draft" layout changes
-        filter(([_, event]) => !Boolean(event)),
-        // once no interaction event, create pairs of "old" and "new" layouts for comparison
-        map(([newLayout]) => newLayout),
-        pairwise()
-      )
+    const onLayoutChangeSubscription = gridLayoutStateManager.stableGridLayout$
+      .pipe(pairwise())
       .subscribe(([layoutBefore, layoutAfter]) => {
         if (!isLayoutEqual(layoutBefore, layoutAfter)) {
           onLayoutChange(layoutAfter);
