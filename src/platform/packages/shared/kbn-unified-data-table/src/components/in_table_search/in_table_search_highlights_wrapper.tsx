@@ -22,6 +22,7 @@ export const InTableSearchHighlightsWrapper: React.FC<InTableSearchHighlightsWra
   children,
 }) => {
   const cellValueRef = useRef<HTMLDivElement | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const dryRun = Boolean(onHighlightsCountFound); // only to count highlights, not to modify the DOM
   const shouldCallCallbackRef = useRef<boolean>(dryRun);
@@ -29,13 +30,20 @@ export const InTableSearchHighlightsWrapper: React.FC<InTableSearchHighlightsWra
   useEffect(() => {
     if (inTableSearchTerm && cellValueRef.current) {
       const cellNode = cellValueRef.current;
-      setTimeout(() => {
+
+      const searchForMatches = () => {
         const count = modifyDOMAndAddSearchHighlights(cellNode, inTableSearchTerm, dryRun);
         if (shouldCallCallbackRef.current) {
           shouldCallCallbackRef.current = false;
           onHighlightsCountFound?.(count);
         }
-      }, 0);
+      };
+
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+
+      timerRef.current = setTimeout(searchForMatches, 0);
     }
   }, [dryRun, inTableSearchTerm, children, onHighlightsCountFound]);
 
@@ -75,7 +83,7 @@ function modifyDOMAndAddSearchHighlights(
       if (parts.length > 1) {
         const nodeWithHighlights = document.createDocumentFragment();
 
-        parts.forEach((part) => {
+        parts.forEach(function insertHighlights(part) {
           if (searchTermRegExp.test(part)) {
             const mark = document.createElement('mark');
             mark.textContent = part;

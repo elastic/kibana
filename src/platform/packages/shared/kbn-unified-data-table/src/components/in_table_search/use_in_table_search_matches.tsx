@@ -61,6 +61,14 @@ const INITIAL_STATE: UseInTableSearchMatchesState = {
   renderCellsShadowPortal: null,
 };
 
+type AllCellsProps = Pick<
+  UseInTableSearchMatchesProps,
+  'renderCellValue' | 'visibleColumns' | 'inTableSearchTerm'
+> & {
+  rowsCount: number;
+  onFinish: (params: { matchesList: RowMatches[]; totalMatchesCount: number }) => void;
+};
+
 export const useInTableSearchMatches = (
   props: UseInTableSearchMatchesProps
 ): UseInTableSearchMatchesReturn => {
@@ -79,42 +87,49 @@ export const useInTableSearchMatches = (
 
     const numberOfRuns = numberOfRunsRef.current;
 
+    const onFinish: AllCellsProps['onFinish'] = ({
+      matchesList: nextMatchesList,
+      totalMatchesCount,
+    }) => {
+      if (numberOfRuns < numberOfRunsRef.current) {
+        return;
+      }
+
+      const nextActiveMatchPosition = totalMatchesCount > 0 ? 1 : null;
+      setState({
+        matchesList: nextMatchesList,
+        matchesCount: totalMatchesCount,
+        activeMatchPosition: nextActiveMatchPosition,
+        columns: visibleColumns,
+        isProcessing: false,
+        renderCellsShadowPortal: null,
+      });
+
+      if (totalMatchesCount > 0) {
+        updateActiveMatchPosition({
+          matchPosition: nextActiveMatchPosition,
+          matchesList: nextMatchesList,
+          columns: visibleColumns,
+          onScrollToActiveMatch,
+        });
+      }
+    };
+
+    const RenderCellsShadowPortal: UseInTableSearchMatchesState['renderCellsShadowPortal'] = () => (
+      <AllCellsHighlightsCounter
+        key={numberOfRuns}
+        inTableSearchTerm={inTableSearchTerm}
+        rowsCount={rows.length}
+        visibleColumns={visibleColumns}
+        renderCellValue={renderCellValue}
+        onFinish={onFinish}
+      />
+    );
+
     setState((prevState) => ({
       ...prevState,
       isProcessing: true,
-      renderCellsShadowPortal: () => (
-        <AllCellsHighlightsCounter
-          key={numberOfRuns}
-          inTableSearchTerm={inTableSearchTerm}
-          rowsCount={rows.length}
-          visibleColumns={visibleColumns}
-          renderCellValue={renderCellValue}
-          onFinish={({ matchesList: nextMatchesList, totalMatchesCount }) => {
-            if (numberOfRuns < numberOfRunsRef.current) {
-              return;
-            }
-
-            const nextActiveMatchPosition = totalMatchesCount > 0 ? 1 : null;
-            setState({
-              matchesList: nextMatchesList,
-              matchesCount: totalMatchesCount,
-              activeMatchPosition: nextActiveMatchPosition,
-              columns: visibleColumns,
-              isProcessing: false,
-              renderCellsShadowPortal: null,
-            });
-
-            if (totalMatchesCount > 0) {
-              updateActiveMatchPosition({
-                matchPosition: nextActiveMatchPosition,
-                matchesList: nextMatchesList,
-                columns: visibleColumns,
-                onScrollToActiveMatch,
-              });
-            }
-          }}
-        />
-      ),
+      renderCellsShadowPortal: RenderCellsShadowPortal,
     }));
   }, [setState, renderCellValue, visibleColumns, rows, inTableSearchTerm, onScrollToActiveMatch]);
 
@@ -198,6 +213,8 @@ function getActiveMatch({
   return null;
 }
 
+let prevJumpTimer: NodeJS.Timeout | null = null;
+
 function updateActiveMatchPosition({
   matchPosition,
   matchesList,
@@ -213,7 +230,11 @@ function updateActiveMatchPosition({
     return;
   }
 
-  setTimeout(() => {
+  if (prevJumpTimer) {
+    clearTimeout(prevJumpTimer);
+  }
+
+  prevJumpTimer = setTimeout(() => {
     const activeMatch = getActiveMatch({
       matchPosition,
       matchesList,
@@ -261,14 +282,6 @@ function changeActiveMatchInState(
   };
 }
 
-type AllCellsProps = Pick<
-  UseInTableSearchMatchesProps,
-  'renderCellValue' | 'visibleColumns' | 'inTableSearchTerm'
-> & {
-  rowsCount: number;
-  onFinish: (params: { matchesList: RowMatches[]; totalMatchesCount: number }) => void;
-};
-
 function AllCellsHighlightsCounter(props: AllCellsProps) {
   const [container] = useState(() => document.createDocumentFragment());
   const containerRef = useRef<DocumentFragment>();
@@ -285,23 +298,50 @@ function AllCellsHighlightsCounter(props: AllCellsProps) {
   return createPortal(<AllCells {...props} />, container);
 }
 
+const ROWS_CHUNK_SIZE = 10; // process 10 rows at the time
+
 function AllCells(props: AllCellsProps) {
   const { inTableSearchTerm, visibleColumns, renderCellValue, rowsCount, onFinish } = props;
   const matchesListRef = useRef<RowMatches[]>([]);
   const totalMatchesCountRef = useRef<number>(0);
-  const [rowIndex, setRowIndex] = useState<number>(0);
+  const initialChunkSize = Math.min(ROWS_CHUNK_SIZE, rowsCount);
+  const [{ chunkStartRowIndex, chunkSize }, setChunk] = useState<{
+    chunkStartRowIndex: number;
+    chunkSize: number;
+  }>({ chunkStartRowIndex: 0, chunkSize: initialChunkSize });
+  const chunkRowResultsMapRef = useRef<Record<number, RowMatches>>({});
+  const chunkRemainingRowsCountRef = useRef<number>(initialChunkSize);
 
   const onRowHighlightsCountFound = useCallback(
     (rowMatches: RowMatches) => {
       if (rowMatches.rowMatchesCount > 0) {
         totalMatchesCountRef.current += rowMatches.rowMatchesCount;
-        matchesListRef.current.push(rowMatches);
+        chunkRowResultsMapRef.current[rowMatches.rowIndex] = rowMatches;
       }
 
-      const nextRowIndex = rowIndex + 1;
+      chunkRemainingRowsCountRef.current -= 1;
+
+      if (chunkRemainingRowsCountRef.current > 0) {
+        // still waiting for more rows within the chunk to finish
+        return;
+      }
+
+      // all rows within the chunk have been processed
+      // saving the results in the right order
+      Object.keys(chunkRowResultsMapRef.current)
+        .sort((a, b) => Number(a) - Number(b))
+        .forEach((finishedRowIndex) => {
+          matchesListRef.current.push(chunkRowResultsMapRef.current[Number(finishedRowIndex)]);
+        });
+
+      // moving to the next chunk if there are more rows to process
+      const nextRowIndex = chunkStartRowIndex + ROWS_CHUNK_SIZE;
 
       if (nextRowIndex < rowsCount) {
-        setRowIndex(nextRowIndex);
+        const nextChunkSize = Math.min(ROWS_CHUNK_SIZE, rowsCount - nextRowIndex);
+        chunkRowResultsMapRef.current = {};
+        chunkRemainingRowsCountRef.current = nextChunkSize;
+        setChunk({ chunkStartRowIndex: nextRowIndex, chunkSize: nextChunkSize });
       } else {
         onFinish({
           matchesList: matchesListRef.current,
@@ -309,20 +349,27 @@ function AllCells(props: AllCellsProps) {
         });
       }
     },
-    [setRowIndex, rowIndex, rowsCount, onFinish]
+    [setChunk, chunkStartRowIndex, rowsCount, onFinish]
   );
 
-  // Iterating through rows one at the time to avoid blocking the main thread.
+  // Iterating through rows one chunk at the time to avoid blocking the main thread.
   // If user changes inTableSearchTerm, this component would unmount and the processing would be interrupted right away. Next time it would start from rowIndex 0.
   return (
-    <RowCells
-      key={rowIndex}
-      rowIndex={rowIndex}
-      inTableSearchTerm={inTableSearchTerm}
-      visibleColumns={visibleColumns}
-      renderCellValue={renderCellValue}
-      onRowHighlightsCountFound={onRowHighlightsCountFound}
-    />
+    <>
+      {Array.from({ length: chunkSize }).map((_, index) => {
+        const rowIndex = chunkStartRowIndex + index;
+        return (
+          <RowCells
+            key={rowIndex}
+            rowIndex={rowIndex}
+            inTableSearchTerm={inTableSearchTerm}
+            visibleColumns={visibleColumns}
+            renderCellValue={renderCellValue}
+            onRowHighlightsCountFound={onRowHighlightsCountFound}
+          />
+        );
+      })}
+    </>
   );
 }
 
