@@ -11,7 +11,7 @@ import {
   isOfAggregateQueryType,
 } from '@kbn/es-query';
 import { noop } from 'lodash';
-import type { HasSerializableState } from '@kbn/presentation-containers';
+import type { HasSerializableState } from '@kbn/presentation-publishing';
 import { emptySerializer, isTextBasedLanguage } from '../helper';
 import type { GetStateType, LensEmbeddableStartServices } from '../types';
 import type { IntegrationCallbacks } from '../types';
@@ -37,9 +37,17 @@ export function initializeIntegrations(
 } {
   return {
     api: {
+      /**
+       * This API is used by the dashboard to serialize the panel state to save it into its saved object.
+       * Make sure to remove the attributes when the panel is by reference.
+       */
       serializeState: () => {
         const currentState = getLatestState();
-        return attributeService.extractReferences(currentState);
+        const cleanedState = attributeService.extractReferences(currentState);
+        if (cleanedState.rawState.savedObjectId) {
+          return { ...cleanedState, rawState: { ...cleanedState.rawState, attributes: undefined } };
+        }
+        return cleanedState;
       },
       // TODO: workout why we have this duplicated
       getFullAttributes: () => getLatestState().attributes,

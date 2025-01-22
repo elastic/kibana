@@ -26,7 +26,6 @@ import {
 } from '../../errors';
 import { licenseService } from '../license';
 import { outputService } from '../output';
-import { appContextService } from '../app_context';
 
 export const mapPackagePolicySavedObjectToPackagePolicy = (
   { id, version, attributes }: SavedObject<PackagePolicySOAttributes>,
@@ -75,10 +74,9 @@ export async function preflightCheckPackagePolicy(
 
 export function canUseMultipleAgentPolicies() {
   const hasEnterpriseLicence = licenseService.hasAtLeast(LICENCE_FOR_MULTIPLE_AGENT_POLICIES);
-  const { enableReusableIntegrationPolicies } = appContextService.getExperimentalFeatures();
 
   return {
-    canUseReusablePolicies: hasEnterpriseLicence && enableReusableIntegrationPolicies,
+    canUseReusablePolicies: hasEnterpriseLicence,
     errorMessage: !hasEnterpriseLicence
       ? 'Reusable integration policies are only available with an Enterprise license'
       : 'Reusable integration policies are not supported',

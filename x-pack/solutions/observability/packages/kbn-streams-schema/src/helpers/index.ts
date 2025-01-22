@@ -7,3 +7,4 @@
 
 export * from './processing';
 export * from './type_guards';
+export * from './hierarchy';

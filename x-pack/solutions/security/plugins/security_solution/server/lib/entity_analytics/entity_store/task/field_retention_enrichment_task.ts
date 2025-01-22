@@ -13,6 +13,8 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { ExperimentalFeatures } from '../../../../../common';
+import { getEnabledStoreEntityTypes } from '../../../../../common/entity_analytics/entity_store/utils';
 import {
   EngineComponentResourceEnum,
   type EntityType,
@@ -33,7 +35,6 @@ import {
   ENTITY_STORE_USAGE_EVENT,
 } from '../../../telemetry/event_based/events';
 import { VERSIONS_BY_ENTITY_TYPE } from '../entity_definitions/constants';
-import { getAvailableEntityDescriptions } from '../installation/engine_description';
 
 const logFactory =
   (logger: Logger, taskId: string) =>
@@ -60,11 +61,13 @@ export const registerEntityStoreFieldRetentionEnrichTask = ({
   logger,
   telemetry,
   taskManager,
+  experimentalFeatures,
 }: {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   logger: Logger;
   telemetry: AnalyticsServiceSetup;
   taskManager: TaskManagerSetupContract | undefined;
+  experimentalFeatures: ExperimentalFeatures;
 }): void => {
   if (!taskManager) {
     logger.info(
@@ -107,6 +110,7 @@ export const registerEntityStoreFieldRetentionEnrichTask = ({
         telemetry,
         getStoreSize,
         executeEnrichPolicy,
+        experimentalFeatures,
       }),
     },
   });
@@ -174,6 +178,7 @@ export const runTask = async ({
   logger,
   taskInstance,
   telemetry,
+  experimentalFeatures,
 }: {
   logger: Logger;
   isCancelled: () => boolean;
@@ -181,6 +186,7 @@ export const runTask = async ({
   getStoreSize: GetStoreSize;
   taskInstance: ConcreteTaskInstance;
   telemetry: AnalyticsServiceSetup;
+  experimentalFeatures: ExperimentalFeatures;
 }): Promise<{
   state: EntityStoreFieldRetentionTaskState;
 }> => {
@@ -203,7 +209,7 @@ export const runTask = async ({
       return { state: updatedState };
     }
 
-    const entityTypes = getAvailableEntityDescriptions();
+    const entityTypes = getEnabledStoreEntityTypes(experimentalFeatures);
 
     for (const entityType of entityTypes) {
       const start = Date.now();
@@ -253,11 +259,13 @@ const createTaskRunnerFactory =
     telemetry,
     executeEnrichPolicy,
     getStoreSize,
+    experimentalFeatures,
   }: {
     logger: Logger;
     telemetry: AnalyticsServiceSetup;
     executeEnrichPolicy: ExecuteEnrichPolicy;
     getStoreSize: GetStoreSize;
+    experimentalFeatures: ExperimentalFeatures;
   }) =>
   ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
     let cancelled = false;
@@ -271,6 +279,7 @@ const createTaskRunnerFactory =
           logger,
           taskInstance,
           telemetry,
+          experimentalFeatures,
         }),
       cancel: async () => {
         cancelled = true;

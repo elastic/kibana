@@ -5,13 +5,14 @@
  * 2.0.
  */
 import type {
-  BulkOperationContainer,
   BulkRequest,
   BulkResponse,
   DeleteRequest,
-  DeleteResponse,
+  GetRequest,
+  GetResponse,
   IndexRequest,
   IndexResponse,
+  Result,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { InferSearchResponseOf } from '@kbn/es-types';
@@ -35,57 +36,86 @@ export interface IndexStorageSettings extends StorageSettingsBase {
 
 export type StorageSettings = IndexStorageSettings;
 
-export type StorageAdapterSearchRequest = Omit<SearchRequest, 'index'>;
-export type StorageAdapterSearchResponse<
+export type StorageClientSearchRequest = Omit<SearchRequest, 'index'> & {
+  track_total_hits: boolean | number;
+  size: number;
+};
+
+export type StorageClientSearchResponse<
   TDocument,
   TSearchRequest extends Omit<SearchRequest, 'index'>
 > = InferSearchResponseOf<TDocument, TSearchRequest>;
 
-export type StorageAdapterBulkOperation = Pick<BulkOperationContainer, 'delete' | 'index'>;
+export type StorageClientBulkOperation<TDocument extends { _id?: string }> =
+  | {
+      index: { document: Omit<TDocument, '_id'>; _id?: string };
+    }
+  | { delete: { _id: string } };
 
-export type StorageAdapterBulkRequest<TDocument extends Record<string, any>> = Omit<
+export type StorageClientBulkRequest<TDocument extends Record<string, any>> = Omit<
   BulkRequest,
   'operations' | 'index'
 > & {
-  operations: Array<StorageAdapterBulkOperation | TDocument>;
+  operations: Array<StorageClientBulkOperation<TDocument>>;
 };
-export type StorageAdapterBulkResponse = BulkResponse;
+export type StorageClientBulkResponse = BulkResponse;
 
-export type StorageAdapterDeleteRequest = DeleteRequest;
-export type StorageAdapterDeleteResponse = DeleteResponse;
+export type StorageClientDeleteRequest = Omit<DeleteRequest, 'index'>;
 
-export type StorageAdapterIndexRequest<TDocument = unknown> = Omit<
-  IndexRequest<TDocument>,
-  'index'
->;
-export type StorageAdapterIndexResponse = IndexResponse;
-
-export interface IStorageAdapter<TStorageSettings extends StorageSettings = never> {
-  bulk<TDocument extends Record<string, any>>(
-    request: StorageAdapterBulkRequest<TDocument>
-  ): Promise<StorageAdapterBulkResponse>;
-  search<TDocument, TSearchRequest extends Omit<SearchRequest, 'index'>>(
-    request: StorageAdapterSearchRequest
-  ): Promise<StorageAdapterSearchResponse<TDocument, TSearchRequest>>;
-  index<TDocument>(
-    request: StorageAdapterIndexRequest<TDocument>
-  ): Promise<StorageAdapterIndexResponse>;
-  delete(request: StorageAdapterDeleteRequest): Promise<StorageAdapterDeleteResponse>;
+export interface StorageClientDeleteResponse {
+  acknowledged: boolean;
+  result: Extract<Result, 'deleted' | 'not_found'>;
 }
 
-export type StorageSettingsOf<TStorageAdapter extends IStorageAdapter<StorageSettings>> =
-  TStorageAdapter extends IStorageAdapter<infer TStorageSettings>
-    ? TStorageSettings extends StorageSettings
-      ? TStorageSettings
-      : never
-    : never;
+export type StorageClientIndexRequest<TDocument = unknown> = Omit<
+  IndexRequest<Omit<TDocument, '_id'>>,
+  'index'
+>;
 
-export type StorageDocumentOf<TStorageSettings extends StorageSettings> = {
-  [TKey in keyof TStorageSettings['schema']['properties']]: StorageFieldTypeOf<
-    TStorageSettings['schema']['properties'][TKey]
-  >;
-} & { _id: string };
+export type StorageClientIndexResponse = IndexResponse;
+
+export type StorageClientGetRequest = Omit<GetRequest & SearchRequest, 'index'>;
+export type StorageClientGetResponse<TDocument extends Record<string, any>> =
+  GetResponse<TDocument>;
+
+export type StorageClientSearch<TStorageSettings extends StorageSettings = never> = <
+  TSearchRequest extends StorageClientSearchRequest
+>(
+  request: TSearchRequest
+) => Promise<StorageClientSearchResponse<StorageDocumentOf<TStorageSettings>, TSearchRequest>>;
+
+export type StorageClientBulk<TStorageSettings extends StorageSettings = never> = (
+  request: StorageClientBulkRequest<StorageDocumentOf<TStorageSettings>>
+) => Promise<StorageClientBulkResponse>;
+
+export type StorageClientIndex<TStorageSettings extends StorageSettings = never> = (
+  request: StorageClientIndexRequest<StorageDocumentOf<TStorageSettings>>
+) => Promise<StorageClientIndexResponse>;
+
+export type StorageClientDelete = (
+  request: StorageClientDeleteRequest
+) => Promise<StorageClientDeleteResponse>;
+
+export type StorageClientGet<TStorageSettings extends StorageSettings = never> = (
+  request: StorageClientGetRequest
+) => Promise<StorageClientGetResponse<StorageDocumentOf<TStorageSettings>>>;
+
+export type StorageClientExistsIndex = () => Promise<boolean>;
+
+export interface IStorageClient<TStorageSettings extends StorageSettings = never> {
+  search: StorageClientSearch<TStorageSettings>;
+  bulk: StorageClientBulk<TStorageSettings>;
+  index: StorageClientIndex<TStorageSettings>;
+  delete: StorageClientDelete;
+  get: StorageClientGet<TStorageSettings>;
+  existsIndex: StorageClientExistsIndex;
+}
+
+export type StorageDocumentOf<TStorageSettings extends StorageSettings> = StorageFieldTypeOf<{
+  type: 'object';
+  properties: TStorageSettings['schema']['properties'];
+}> & { _id: string };
 
 export { StorageIndexAdapter } from './index_adapter';
-export { StorageClient } from './storage_client';
+
 export { types } from './types';

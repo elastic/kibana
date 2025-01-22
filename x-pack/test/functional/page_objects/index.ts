@@ -55,6 +55,7 @@ import { WatcherPageObject } from './watcher_page';
 import { SearchProfilerPageProvider } from './search_profiler_page';
 import { SearchPlaygroundPageProvider } from './search_playground_page';
 import { SearchClassicNavigationProvider } from './search_classic_navigation';
+import { SearchStartProvider } from './search_start';
 import { SearchApiKeysProvider } from './search_api_keys';
 import { SearchIndexDetailPageProvider } from './search_index_details_page';
 import { SearchNavigationProvider } from './search_navigation';
@@ -99,6 +100,7 @@ export const pageObjects = {
   rollup: RollupPageObject,
   searchApiKeys: SearchApiKeysProvider,
   searchClassicNavigation: SearchClassicNavigationProvider,
+  searchStart: SearchStartProvider,
   searchIndexDetailsPage: SearchIndexDetailPageProvider,
   searchNavigation: SearchNavigationProvider,
   searchProfiler: SearchProfilerPageProvider,

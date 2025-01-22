@@ -2854,6 +2854,344 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.isBinaryExpression",
+        "type": "Function",
+        "tags": [],
+        "label": "isBinaryExpression",
+        "description": [
+          "\nReturns true if the given node is a binary expression, i.e. an operator\nsurrounded by two operands:\n\n```\n1 + 1\ncolumn LIKE \"foo\"\nfoo = \"bar\"\n```\n"
+        ],
+        "signature": [
+          "(node: unknown) => node is ",
+          "ESQLBinaryExpression"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.isBinaryExpression.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "node",
+            "description": [
+              "Any ES|QL AST node."
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.isColumn",
+        "type": "Function",
+        "tags": [],
+        "label": "isColumn",
+        "description": [],
+        "signature": [
+          "(node: unknown) => node is ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLColumn",
+            "text": "ESQLColumn"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.isColumn.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.isDoubleLiteral",
+        "type": "Function",
+        "tags": [],
+        "label": "isDoubleLiteral",
+        "description": [],
+        "signature": [
+          "(node: unknown) => node is ",
+          "ESQLIntegerLiteral"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.isDoubleLiteral.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.isFunctionExpression",
+        "type": "Function",
+        "tags": [],
+        "label": "isFunctionExpression",
+        "description": [],
+        "signature": [
+          "(node: unknown) => node is ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLFunction",
+            "text": "ESQLFunction"
+          },
+          "<",
+          "FunctionSubtype",
+          ", string>"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.isFunctionExpression.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.isIdentifier",
+        "type": "Function",
+        "tags": [],
+        "label": "isIdentifier",
+        "description": [],
+        "signature": [
+          "(node: unknown) => node is ",
+          "ESQLIdentifier"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.isIdentifier.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.isIntegerLiteral",
+        "type": "Function",
+        "tags": [],
+        "label": "isIntegerLiteral",
+        "description": [],
+        "signature": [
+          "(node: unknown) => node is ",
+          "ESQLIntegerLiteral"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.isIntegerLiteral.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.isLiteral",
+        "type": "Function",
+        "tags": [],
+        "label": "isLiteral",
+        "description": [],
+        "signature": [
+          "(node: unknown) => node is ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLLiteral",
+            "text": "ESQLLiteral"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.isLiteral.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.isParamLiteral",
+        "type": "Function",
+        "tags": [],
+        "label": "isParamLiteral",
+        "description": [],
+        "signature": [
+          "(node: unknown) => node is ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLParamLiteral",
+            "text": "ESQLParamLiteral"
+          },
+          "<string>"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.isParamLiteral.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.isProperNode",
+        "type": "Function",
+        "tags": [],
+        "label": "isProperNode",
+        "description": [],
+        "signature": [
+          "(node: unknown) => node is ",
+          "ESQLProperNode"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.isProperNode.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
         "id": "def-common.parse",
         "type": "Function",
         "tags": [],

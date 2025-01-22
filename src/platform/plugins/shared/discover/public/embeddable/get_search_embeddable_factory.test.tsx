@@ -244,6 +244,31 @@ describe('saved search embeddable', () => {
       expect(resolveRootProfileSpy).not.toHaveBeenCalled();
     });
 
+    it('should allow overriding the solutionNavId used to resolve the root profile', async () => {
+      const resolveRootProfileSpy = jest.spyOn(
+        discoverServiceMock.profilesManager,
+        'resolveRootProfile'
+      );
+      const initialRuntimeState = {
+        ...getInitialRuntimeState(),
+        nonPersistedDisplayOptions: {
+          solutionNavIdOverride: 'search' as const,
+        },
+      };
+      await factory.buildEmbeddable(
+        initialRuntimeState,
+        buildApiMock,
+        uuid,
+        mockedDashboardApi,
+        jest.fn().mockImplementation((newApi) => newApi),
+        initialRuntimeState // initialRuntimeState only contains lastSavedRuntimeState
+      );
+      await waitOneTick(); // wait for build to complete
+      expect(resolveRootProfileSpy).toHaveBeenCalledWith({
+        solutionNavId: 'search',
+      });
+    });
+
     it('should resolve data source profile when fetching', async () => {
       const resolveDataSourceProfileSpy = jest.spyOn(
         discoverServiceMock.profilesManager,

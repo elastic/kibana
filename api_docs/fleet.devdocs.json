@@ -6412,7 +6412,7 @@
               "\nReturn the status by the Agent's id"
             ],
             "signature": [
-              "(agentId: string) => Promise<\"error\" | \"offline\" | \"online\" | \"inactive\" | \"degraded\" | \"enrolling\" | \"unenrolling\" | \"unenrolled\" | \"updating\">"
+              "(agentId: string) => Promise<\"error\" | \"offline\" | \"online\" | \"inactive\" | \"degraded\" | \"enrolling\" | \"unenrolling\" | \"unenrolled\" | \"updating\" | \"uninstalled\" | \"orphaned\">"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/server/services/agents/agent_service.ts",
             "deprecated": false,
@@ -6507,7 +6507,7 @@
                 "section": "def-common.Agent",
                 "text": "Agent"
               },
-              "[]; total: number; page: number; perPage: number; statusSummary?: Record<\"error\" | \"offline\" | \"online\" | \"inactive\" | \"degraded\" | \"enrolling\" | \"unenrolling\" | \"unenrolled\" | \"updating\", number> | undefined; aggregations?: Record<string, ",
+              "[]; total: number; page: number; perPage: number; statusSummary?: Record<\"error\" | \"offline\" | \"online\" | \"inactive\" | \"degraded\" | \"enrolling\" | \"unenrolling\" | \"unenrolled\" | \"updating\" | \"uninstalled\" | \"orphaned\", number> | undefined; aggregations?: Record<string, ",
               "AggregationsAggregate",
               "> | undefined; }>"
             ],
@@ -22369,7 +22369,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"error\" | \"offline\" | \"online\" | \"inactive\" | \"degraded\" | \"enrolling\" | \"unenrolling\" | \"unenrolled\" | \"updating\" | undefined"
+              "\"error\" | \"offline\" | \"online\" | \"inactive\" | \"degraded\" | \"enrolling\" | \"unenrolling\" | \"unenrolled\" | \"updating\" | \"uninstalled\" | \"orphaned\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent.ts",
             "deprecated": false,
@@ -24727,7 +24727,7 @@
             "label": "statusSummary",
             "description": [],
             "signature": [
-              "Record<\"error\" | \"offline\" | \"online\" | \"inactive\" | \"degraded\" | \"enrolling\" | \"unenrolling\" | \"unenrolled\" | \"updating\", number> | undefined"
+              "Record<\"error\" | \"offline\" | \"online\" | \"inactive\" | \"degraded\" | \"enrolling\" | \"unenrolling\" | \"unenrolled\" | \"updating\" | \"uninstalled\" | \"orphaned\", number> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/agent.ts",
             "deprecated": false,
@@ -26163,6 +26163,21 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.NewAgentPolicy.agentless",
+            "type": "Object",
+            "tags": [],
+            "label": "agentless",
+            "description": [],
+            "signature": [
+              "AgentlessPolicy",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.NewAgentPolicy.monitoring_pprof_enabled",
             "type": "CompoundType",
             "tags": [],
@@ -26198,6 +26213,21 @@
             "description": [],
             "signature": [
               "{ limit?: { interval?: string | undefined; burst?: number | undefined; } | undefined; uploader?: { max_retries?: number | undefined; init_dur?: string | undefined; max_dur?: string | undefined; } | undefined; } | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewAgentPolicy.required_versions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "required_versions",
+            "description": [],
+            "signature": [
+              "AgentTargetVersion",
+              "[] | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
@@ -29189,7 +29219,7 @@
         "label": "AgentStatus",
         "description": [],
         "signature": [
-          "\"error\" | \"offline\" | \"online\" | \"inactive\" | \"degraded\" | \"enrolling\" | \"unenrolling\" | \"unenrolled\" | \"updating\""
+          "\"error\" | \"offline\" | \"online\" | \"inactive\" | \"degraded\" | \"enrolling\" | \"unenrolling\" | \"unenrolled\" | \"updating\" | \"uninstalled\" | \"orphaned\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent.ts",
         "deprecated": false,
@@ -30573,7 +30603,7 @@
         "signature": [
           "{ type?: ",
           "PackageSpecPackageType",
-          " | undefined; version: string; name: string; title: string; description?: string | undefined; path?: string | undefined; internal?: boolean | undefined; download?: string | undefined; icons?: (",
+          " | undefined; version: string; internal?: boolean | undefined; name: string; title: string; description?: string | undefined; path?: string | undefined; download?: string | undefined; icons?: (",
           {
             "pluginId": "fleet",
             "scope": "common",

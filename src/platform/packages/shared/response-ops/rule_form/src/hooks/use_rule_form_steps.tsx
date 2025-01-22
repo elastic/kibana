@@ -18,6 +18,8 @@ import {
   RULE_FORM_PAGE_RULE_ACTIONS_TITLE,
   RULE_FORM_PAGE_RULE_DEFINITION_TITLE,
   RULE_FORM_PAGE_RULE_DETAILS_TITLE,
+  RULE_FORM_PAGE_RULE_DEFINITION_TITLE_SHORT,
+  RULE_FORM_PAGE_RULE_DETAILS_TITLE_SHORT,
 } from '../translations';
 import { hasActionsError, hasActionsParamsErrors, hasParamsErrors } from '../validation';
 import { RuleFormStepId } from '../constants';
@@ -27,6 +29,7 @@ interface UseRuleFormStepsOptions {
   touchedSteps: Record<RuleFormStepId, boolean>;
   /* Used to track the current step in horizontal steps, not used for vertical steps */
   currentStep?: RuleFormStepId;
+  shortTitles?: boolean;
 }
 
 /**
@@ -69,7 +72,11 @@ const getStepStatus = ({
 };
 
 // Create a common hook for both horizontal and vertical steps
-const useCommonRuleFormSteps = ({ touchedSteps, currentStep }: UseRuleFormStepsOptions) => {
+const useCommonRuleFormSteps = ({
+  touchedSteps,
+  currentStep,
+  shortTitles,
+}: UseRuleFormStepsOptions) => {
   const {
     plugins: { application },
     baseErrors = {},
@@ -132,7 +139,9 @@ const useCommonRuleFormSteps = ({ touchedSteps, currentStep }: UseRuleFormStepsO
   const steps = useMemo(
     () => ({
       [RuleFormStepId.DEFINITION]: {
-        title: RULE_FORM_PAGE_RULE_DEFINITION_TITLE,
+        title: shortTitles
+          ? RULE_FORM_PAGE_RULE_DEFINITION_TITLE_SHORT
+          : RULE_FORM_PAGE_RULE_DEFINITION_TITLE,
         status: ruleDefinitionStatus,
         children: <RuleDefinition />,
       },
@@ -150,7 +159,9 @@ const useCommonRuleFormSteps = ({ touchedSteps, currentStep }: UseRuleFormStepsO
           }
         : null,
       [RuleFormStepId.DETAILS]: {
-        title: RULE_FORM_PAGE_RULE_DETAILS_TITLE,
+        title: shortTitles
+          ? RULE_FORM_PAGE_RULE_DETAILS_TITLE_SHORT
+          : RULE_FORM_PAGE_RULE_DETAILS_TITLE,
         status: ruleDetailsStatus,
         children: (
           <>
@@ -161,7 +172,7 @@ const useCommonRuleFormSteps = ({ touchedSteps, currentStep }: UseRuleFormStepsO
         ),
       },
     }),
-    [ruleDefinitionStatus, canReadConnectors, actionsStatus, ruleDetailsStatus]
+    [ruleDefinitionStatus, canReadConnectors, actionsStatus, ruleDetailsStatus, shortTitles]
   );
 
   const stepOrder: RuleFormStepId[] = useMemo(
@@ -247,6 +258,7 @@ export const useRuleFormHorizontalSteps: () => RuleFormHorizontalSteps = () => {
   const { steps, stepOrder } = useCommonRuleFormSteps({
     touchedSteps,
     currentStep,
+    shortTitles: true,
   });
 
   // Determine current navigation position

@@ -26,9 +26,9 @@ export interface ContentInsightsConfig {
   domainId: string;
 
   /**
-   * Can control created routes access via access tags
+   * Can control created routes access via security access control
    */
-  routeTags?: string[];
+  routePrivileges?: string[];
 
   /**
    * Retention period in days for usage counter data
@@ -89,9 +89,15 @@ export const registerContentInsights = (
     {
       path: `/internal/content_management/insights/${config.domainId}/{id}/{eventType}`,
       validate,
-      options: {
-        tags: config.routeTags,
-      },
+      ...(config.routePrivileges
+        ? {
+            security: {
+              authz: {
+                requiredPrivileges: config.routePrivileges,
+              },
+            },
+          }
+        : {}),
     },
     async (context, req, res) => {
       const { id, eventType } = req.params;
@@ -108,9 +114,15 @@ export const registerContentInsights = (
     {
       path: `/internal/content_management/insights/${config.domainId}/{id}/{eventType}/stats`,
       validate,
-      options: {
-        tags: config.routeTags,
-      },
+      ...(config.routePrivileges
+        ? {
+            security: {
+              authz: {
+                requiredPrivileges: config.routePrivileges,
+              },
+            },
+          }
+        : {}),
     },
     async (context, req, res) => {
       const { id, eventType } = req.params;
