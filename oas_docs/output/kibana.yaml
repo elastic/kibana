@@ -15074,6 +15074,22 @@ paths:
                               - name
                               - enabled
                           type: array
+                        agentless:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            resources:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                requests:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    cpu:
+                                      type: string
+                                    memory:
+                                      type: string
                         agents:
                           type: number
                         data_output_id:
@@ -15617,6 +15633,22 @@ paths:
                       - name
                       - enabled
                   type: array
+                agentless:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    resources:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        requests:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            cpu:
+                              type: string
+                            memory:
+                              type: string
                 data_output_id:
                   nullable: true
                   type: string
@@ -15812,6 +15844,22 @@ paths:
                             - name
                             - enabled
                         type: array
+                      agentless:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          resources:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              requests:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  cpu:
+                                    type: string
+                                  memory:
+                                    type: string
                       agents:
                         type: number
                       data_output_id:
@@ -16374,6 +16422,22 @@ paths:
                               - name
                               - enabled
                           type: array
+                        agentless:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            resources:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                requests:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    cpu:
+                                      type: string
+                                    memory:
+                                      type: string
                         agents:
                           type: number
                         data_output_id:
@@ -16915,6 +16979,22 @@ paths:
                             - name
                             - enabled
                         type: array
+                      agentless:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          resources:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              requests:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  cpu:
+                                    type: string
+                                  memory:
+                                    type: string
                       agents:
                         type: number
                       data_output_id:
@@ -17456,6 +17536,22 @@ paths:
                       - name
                       - enabled
                   type: array
+                agentless:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    resources:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        requests:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            cpu:
+                              type: string
+                            memory:
+                              type: string
                 data_output_id:
                   nullable: true
                   type: string
@@ -17651,6 +17747,22 @@ paths:
                             - name
                             - enabled
                         type: array
+                      agentless:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          resources:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              requests:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  cpu:
+                                    type: string
+                                  memory:
+                                    type: string
                       agents:
                         type: number
                       data_output_id:
@@ -18212,6 +18324,22 @@ paths:
                             - name
                             - enabled
                         type: array
+                      agentless:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          resources:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              requests:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  cpu:
+                                    type: string
+                                  memory:
+                                    type: string
                       agents:
                         type: number
                       data_output_id:
@@ -18842,6 +18970,7 @@ paths:
                                 additionalProperties: false
                                 type: object
                                 properties:
+                                  apm: {}
                                   enabled:
                                     type: boolean
                                   logs:
@@ -18859,6 +18988,7 @@ paths:
                                   - metrics
                                   - logs
                                   - traces
+                                  - apm
                               protection:
                                 additionalProperties: false
                                 type: object
