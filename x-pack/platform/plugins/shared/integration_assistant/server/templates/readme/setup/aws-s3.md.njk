@@ -22,5 +22,3 @@ The SQS notification method is enabled setting `queue_url` configuration value. 
   - A separate SQS queue and S3 bucket notification is required for each enabled data stream.
   - Permissions for the above AWS S3 bucket and SQS queues should be configured according to the [Filebeat S3 input documentation](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-aws-s3.html#_aws_permissions_2)
   - Data collection via AWS S3 Bucket and AWS SQS are mutually exclusive in this case.
-
-  {% include "ssl-tls.md.njk" %}

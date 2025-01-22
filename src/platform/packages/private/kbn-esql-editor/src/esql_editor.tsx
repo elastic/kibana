@@ -125,15 +125,6 @@ export const ESQLEditor = memo(function ESQLEditor({
     errors: serverErrors ? parseErrors(serverErrors, code) : [],
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
-  // contains only client side validation messages
-  const [clientParserMessages, setClientParserMessages] = useState<{
-    errors: MonacoMessage[];
-    warnings: MonacoMessage[];
-  }>({
-    errors: [],
-    warnings: [],
-  });
-  const hideHistoryComponent = hideQueryHistory;
   const onQueryUpdate = useCallback(
     (value: string) => {
       onTextLangQueryChange({ esql: value } as AggregateQuery);
@@ -382,6 +373,7 @@ export const ESQLEditor = memo(function ESQLEditor({
       },
       // @ts-expect-error To prevent circular type import, type defined here is partial of full client
       getFieldsMetadata: fieldsMetadata?.getClient(),
+      getJoinIndices: kibana.services?.esql?.getJoinIndicesAutocomplete,
     };
     return callbacks;
   }, [
@@ -397,6 +389,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     indexManagementApiService,
     histogramBarTarget,
     fieldsMetadata,
+    kibana.services?.esql?.getJoinIndicesAutocomplete,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {
@@ -437,30 +430,26 @@ export const ESQLEditor = memo(function ESQLEditor({
     };
   }, [esqlCallbacks, code]);
 
-  const clientParserStatus = clientParserMessages.errors?.length
-    ? 'error'
-    : clientParserMessages.warnings.length
-    ? 'warning'
-    : 'success';
-
   useEffect(() => {
-    const validateQuery = async () => {
+    const setQueryToTheCache = async () => {
       if (editor1?.current) {
         const parserMessages = await parseMessages();
-        setClientParserMessages({
-          errors: parserMessages?.errors ?? [],
-          warnings: parserMessages?.warnings ?? [],
+        const clientParserStatus = parserMessages.errors?.length
+          ? 'error'
+          : parserMessages.warnings.length
+          ? 'warning'
+          : 'success';
+
+        addQueriesToCache({
+          queryString: code,
+          status: clientParserStatus,
         });
       }
     };
     if (isQueryLoading || isLoading) {
-      validateQuery();
-      addQueriesToCache({
-        queryString: code,
-        status: clientParserStatus,
-      });
+      setQueryToTheCache();
     }
-  }, [clientParserStatus, isLoading, isQueryLoading, parseMessages, code]);
+  }, [isLoading, isQueryLoading, parseMessages, code]);
 
   const queryValidation = useCallback(
     async ({ active }: { active: boolean }) => {
@@ -497,11 +486,6 @@ export const ESQLEditor = memo(function ESQLEditor({
           'Unified search',
           parsedErrors.length ? parsedErrors : []
         );
-        const parserMessages = await parseMessages();
-        setClientParserMessages({
-          errors: parserMessages?.errors ?? [],
-          warnings: parserMessages?.warnings ?? [],
-        });
         return;
       } else {
         queryValidation(subscription).catch(() => {});
@@ -774,7 +758,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         isLanguageComponentOpen={isLanguageComponentOpen}
         setIsLanguageComponentOpen={setIsLanguageComponentOpen}
         measuredContainerWidth={measuredEditorWidth}
-        hideQueryHistory={hideHistoryComponent}
+        hideQueryHistory={hideQueryHistory}
         resizableContainerButton={resizableContainerButton}
         resizableContainerHeight={resizableContainerHeight}
         displayDocumentationAsFlyout={displayDocumentationAsFlyout}

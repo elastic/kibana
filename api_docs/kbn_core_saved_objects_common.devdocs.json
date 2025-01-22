@@ -1487,35 +1487,35 @@
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
           }
         ],
         "initialIsOpen": false

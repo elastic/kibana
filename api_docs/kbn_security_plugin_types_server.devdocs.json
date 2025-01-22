@@ -4403,11 +4403,11 @@
               },
               {
                 "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/api_keys/security.ts"
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/api_keys/transform_api_keys.ts"
               },
               {
                 "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/api_keys/transform_api_keys.ts"
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/api_keys/security.ts"
               },
               {
                 "plugin": "fleet",

@@ -19,6 +19,8 @@ export {
   SEARCH_SEMANTIC_SEARCH,
   SEARCH_AI_SEARCH,
   ES_SEARCH_PLAYGROUND_ID,
+  SEARCH_INDICES_START,
+  SEARCH_INDICES,
 } from './constants';
 
 export type {

@@ -68,5 +68,25 @@ export const HostEntity = z.object({
     .optional(),
 });
 
-export type Entity = z.infer<typeof Entity>;
-export const Entity = z.union([UserEntity, HostEntity]);
+export type ServiceEntity = z.infer<typeof ServiceEntity>;
+export const ServiceEntity = z.object({
+  '@timestamp': z.string().datetime(),
+  entity: z.object({
+    name: z.string(),
+    source: z.string(),
+  }),
+  service: z.object({
+    name: z.string(),
+    risk: EntityRiskScoreRecord.optional(),
+  }),
+  asset: z
+    .object({
+      criticality: AssetCriticalityLevel,
+    })
+    .optional(),
+});
+
+export const EntityInternal = z.union([UserEntity, HostEntity, ServiceEntity]);
+
+export type Entity = z.infer<typeof EntityInternal>;
+export const Entity = EntityInternal as z.ZodType<Entity>;

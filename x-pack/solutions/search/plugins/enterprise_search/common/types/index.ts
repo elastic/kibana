@@ -15,7 +15,6 @@ import {
 } from './workplace_search';
 
 export interface InitialAppData {
-  access?: ProductAccess;
   appSearch?: AppSearchAccount;
   configuredLimits?: ConfiguredLimits;
   enterpriseSearchVersion?: string;
@@ -29,11 +28,6 @@ export interface InitialAppData {
 export interface ConfiguredLimits {
   appSearch: AppSearchConfiguredLimits;
   workplaceSearch: WorkplaceSearchConfiguredLimits;
-}
-
-export interface ProductAccess {
-  hasAppSearchAccess: boolean;
-  hasWorkplaceSearchAccess: boolean;
 }
 
 export interface ProductFeatures {

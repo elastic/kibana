@@ -2632,7 +2632,7 @@
             "signature": [
               "((actionId: string, key: string, value: ",
               "RawValue",
-              ") => void) | undefined"
+              ") => Promise<void>) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,

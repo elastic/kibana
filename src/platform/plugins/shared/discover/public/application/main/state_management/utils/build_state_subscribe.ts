@@ -85,10 +85,9 @@ export const buildStateSubscribe =
       }
     }
 
-    const { hideChart, interval, breakdownField, sampleSize, sort, dataSource } = prevState;
+    const { interval, breakdownField, sampleSize, sort, dataSource } = prevState;
     // Cast to boolean to avoid false positives when comparing
     // undefined and false, which would trigger a refetch
-    const chartDisplayChanged = Boolean(nextState.hideChart) !== Boolean(hideChart);
     const chartIntervalChanged = nextState.interval !== interval && !isEsqlMode;
     const breakdownFieldChanged = nextState.breakdownField !== breakdownField;
     const sampleSizeChanged = nextState.sampleSize !== sampleSize;
@@ -137,7 +136,6 @@ export const buildStateSubscribe =
     }
 
     if (
-      chartDisplayChanged ||
       chartIntervalChanged ||
       breakdownFieldChanged ||
       sampleSizeChanged ||
@@ -146,7 +144,6 @@ export const buildStateSubscribe =
       queryChanged
     ) {
       const logData = {
-        chartDisplayChanged: logEntry(chartDisplayChanged, hideChart, nextState.hideChart),
         chartIntervalChanged: logEntry(chartIntervalChanged, interval, nextState.interval),
         breakdownFieldChanged: logEntry(
           breakdownFieldChanged,

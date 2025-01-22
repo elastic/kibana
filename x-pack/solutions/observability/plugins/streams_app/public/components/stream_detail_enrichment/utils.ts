@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import {
   DissectProcessingDefinition,
   GrokProcessingDefinition,
@@ -84,7 +86,8 @@ export const convertFormStateToProcessing = (
   formState: ProcessorFormState
 ): ProcessingDefinition => {
   if (formState.type === 'grok') {
-    const { condition, patterns, ...grokConfig } = formState;
+    const { condition, patterns, field, pattern_definitions, ignore_failure, ignore_missing } =
+      formState;
 
     return {
       condition: isCompleteCondition(condition) ? condition : undefined,
@@ -93,19 +96,29 @@ export const convertFormStateToProcessing = (
           patterns: patterns
             .filter(({ value }) => value.trim().length > 0)
             .map(({ value }) => value),
-          ...grokConfig,
+          field,
+          pattern_definitions,
+          ignore_failure,
+          ignore_missing,
         },
       },
     };
   }
 
   if (formState.type === 'dissect') {
-    const { condition, ...dissectConfig } = formState;
+    const { condition, field, pattern, append_separator, ignore_failure, ignore_missing } =
+      formState;
 
     return {
       condition: isCompleteCondition(condition) ? condition : undefined,
       config: {
-        dissect: dissectConfig,
+        dissect: {
+          field,
+          pattern,
+          append_separator,
+          ignore_failure,
+          ignore_missing,
+        },
       },
     };
   }

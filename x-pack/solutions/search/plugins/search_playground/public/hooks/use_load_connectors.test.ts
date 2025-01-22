@@ -77,6 +77,12 @@ describe('useLoadConnectors', () => {
         isMissingSecrets: false,
         config: { apiProvider: OpenAiProviderType.Other },
       },
+      {
+        id: '6',
+        actionTypeId: '.inference',
+        isMissingSecrets: false,
+        config: { provider: 'openai', taskType: 'completion' },
+      },
     ];
     mockedLoadConnectors.mockResolvedValue(connectors);
 
@@ -119,6 +125,17 @@ describe('useLoadConnectors', () => {
           isMissingSecrets: false,
           title: 'OpenAI Other',
           type: 'openai_other',
+        },
+        {
+          actionTypeId: '.inference',
+          config: {
+            provider: 'openai',
+            taskType: 'completion',
+          },
+          id: '6',
+          isMissingSecrets: false,
+          title: 'AI Connector',
+          type: 'inference',
         },
       ])
     );
