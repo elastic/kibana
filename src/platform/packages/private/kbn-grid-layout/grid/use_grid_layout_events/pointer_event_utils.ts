@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PanelInteractionEvent, RuntimeGridSettings, UserInteractionEvent } from '../types';
+import { PanelInteractionEvent, RuntimeGridSettings } from '../types';
 import { getPointerPosition } from './sensors';
+import { UserInteractionEvent } from './types';
 
 const getGridWidth = (runtimeSettings: RuntimeGridSettings) => {
   const { columnCount, gutterSize, columnPixelWidth } = runtimeSettings;

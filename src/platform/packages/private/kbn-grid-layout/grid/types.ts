@@ -123,4 +123,3 @@ export interface PanelPlacementSettings {
 
 export type GridAccessMode = 'VIEW' | 'EDIT';
 
-export type UserInteractionEvent = React.UIEvent<HTMLElement> | Event;

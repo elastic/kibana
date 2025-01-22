@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UserInteractionEvent } from '../../types';
+import { UserInteractionEvent } from '../types';
 import { handleAutoscroll, stopAutoScroll } from './autoscroll';
 
 export type UserMouseEvent = MouseEvent | React.MouseEvent<HTMLButtonElement, MouseEvent>;

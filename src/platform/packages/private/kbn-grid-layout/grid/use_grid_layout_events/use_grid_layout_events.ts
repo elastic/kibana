@@ -12,7 +12,6 @@ import {
   GridPanelData,
   GridLayoutStateManager,
   PanelInteractionEvent,
-  UserInteractionEvent,
 } from '../types';
 import {
   getPointerPosition,
@@ -22,6 +21,7 @@ import {
   startTouchInteraction,
 } from './sensors';
 import { commitAction, moveAction, startAction } from './state_manager_actions';
+import { UserInteractionEvent } from './types';
 
 export const useGridLayoutEvents = ({
   interactionType,

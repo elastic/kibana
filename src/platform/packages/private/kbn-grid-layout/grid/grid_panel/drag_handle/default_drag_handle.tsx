@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { UserInteractionEvent } from '../../types';
+import { UserInteractionEvent } from '../../use_grid_layout_events/types';
 
 export const DefaultDragHandle = ({
   onDragStart,
