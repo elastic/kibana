@@ -30,9 +30,11 @@ import {
 import type { EndpointMetadataService } from '../metadata';
 import {
   buildEsQueryParams,
+  checkIfRemediationExists,
   createDatastream,
   createPipeline,
   generateInsightId,
+  generateTrustedAppsFilter,
   groupEndpointIdsByOS,
 } from './helpers';
 import {
@@ -44,6 +46,7 @@ import {
 } from './constants';
 import { securityWorkflowInsightsFieldMap } from './field_map_configurations';
 import { createMockEndpointAppContext } from '../../mocks';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 
 jest.mock('@kbn/data-stream-adapter', () => ({
   DataStreamSpacesAdapter: jest.fn().mockImplementation(() => ({
@@ -260,6 +263,162 @@ describe('helpers', () => {
       const result = generateInsightId(insight);
       const expectedHash = '6b1a7a9625decbf899db4fbf78105a0eff9ef98e3f2dadc2781d59996b55445e';
       expect(result).toBe(expectedHash);
+    });
+  });
+
+  describe('generateTrustedAppsFilter', () => {
+    it('should generate a filter for process.executable.caseless entries', () => {
+      const insight = getDefaultInsight({
+        remediation: {
+          exception_list_items: [
+            {
+              entries: [
+                {
+                  field: 'process.executable.caseless',
+                  operator: 'included',
+                  type: 'match',
+                  value: 'example-value',
+                },
+              ],
+            },
+          ],
+        },
+      } as Partial<SecurityWorkflowInsight>);
+
+      const filter = generateTrustedAppsFilter(insight);
+
+      expect(filter).toBe('exception-list-agnostic.attributes.entries.value:"example-value"');
+    });
+
+    it('should generate a filter for process.code_signature entries', () => {
+      const insight = getDefaultInsight({
+        remediation: {
+          exception_list_items: [
+            {
+              entries: [
+                {
+                  field: 'process.code_signature',
+                  operator: 'included',
+                  type: 'match',
+                  value: 'Example, Inc.',
+                },
+              ],
+            },
+          ],
+        },
+      } as Partial<SecurityWorkflowInsight>);
+
+      const filter = generateTrustedAppsFilter(insight);
+
+      expect(filter).toContain(
+        'exception-list-agnostic.attributes.entries.entries.value:(*Example*Inc.*)'
+      );
+    });
+
+    it('should generate a filter for combined process.Ext.code_signature and process.executable.caseless', () => {
+      const insight = getDefaultInsight({
+        remediation: {
+          exception_list_items: [
+            {
+              entries: [
+                {
+                  field: 'process.Ext.code_signature',
+                  operator: 'included',
+                  type: 'match',
+                  value: 'Example, (Inc.) http://example.com [example]',
+                },
+                {
+                  field: 'process.executable.caseless',
+                  operator: 'included',
+                  type: 'match',
+                  value: 'example-value',
+                },
+              ],
+            },
+          ],
+        },
+      } as Partial<SecurityWorkflowInsight>);
+
+      const filter = generateTrustedAppsFilter(insight);
+
+      expect(filter).toContain(
+        'exception-list-agnostic.attributes.entries.entries.value:(*Example*Inc.*http//example.com*[example]*) AND exception-list-agnostic.attributes.entries.value:"example-value"'
+      );
+    });
+
+    it('should return empty string if no valid entries are present', () => {
+      const insight = getDefaultInsight({
+        remediation: {
+          exception_list_items: [
+            {
+              entries: [
+                {
+                  field: 'unknown-field',
+                  operator: 'included',
+                  type: 'match',
+                  value: 'example-value',
+                },
+              ],
+            },
+          ],
+        },
+      } as Partial<SecurityWorkflowInsight>);
+
+      const filter = generateTrustedAppsFilter(insight);
+
+      expect(filter).toBe('');
+    });
+  });
+  describe('checkIfRemediationExists', () => {
+    it('should return false for non-incompatible_antivirus types', async () => {
+      const insight = getDefaultInsight({
+        type: 'other-type' as DefendInsightType,
+      });
+
+      const result = await checkIfRemediationExists({
+        insight,
+        exceptionListsClient: jest.fn() as unknown as ExceptionListClient,
+      });
+
+      expect(result).toBe(false);
+    });
+
+    it('should call exceptionListsClient with the correct filter', async () => {
+      const findExceptionListItemMock = jest.fn().mockResolvedValue({ total: 1 });
+      const insight = getDefaultInsight({
+        remediation: {
+          exception_list_items: [
+            {
+              entries: [
+                {
+                  field: 'process.executable.caseless',
+                  operator: 'included',
+                  type: 'match',
+                  value: 'example-value',
+                },
+              ],
+            },
+          ],
+        },
+      } as Partial<SecurityWorkflowInsight>);
+
+      const result = await checkIfRemediationExists({
+        insight,
+        exceptionListsClient: {
+          findExceptionListItem: findExceptionListItemMock,
+        } as unknown as ExceptionListClient,
+      });
+
+      expect(findExceptionListItemMock).toHaveBeenCalledWith({
+        listId: 'endpoint_trusted_apps',
+        page: 1,
+        perPage: 1,
+        namespaceType: 'agnostic',
+        filter: expect.any(String),
+        sortField: 'created_at',
+        sortOrder: 'desc',
+      });
+      expect(result).toBe(true);
     });
   });
 });

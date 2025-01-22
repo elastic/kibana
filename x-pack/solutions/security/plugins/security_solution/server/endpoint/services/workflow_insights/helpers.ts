@@ -163,6 +163,33 @@ export function getUniqueInsights(insights: SecurityWorkflowInsight[]): Security
   return Object.values(uniqueInsights);
 }
 
+export const generateTrustedAppsFilter = (insight: SecurityWorkflowInsight): string | undefined => {
+  return insight.remediation.exception_list_items
+    ?.flatMap((item) =>
+      item.entries.map((entry) => {
+        if (!('value' in entry)) return '';
+
+        if (entry.field === 'process.executable.caseless') {
+          return `exception-list-agnostic.attributes.entries.value:"${entry.value}"`;
+        }
+
+        if (
+          entry.field === 'process.code_signature' ||
+          (entry.field === 'process.Ext.code_signature' && typeof entry.value === 'string')
+        ) {
+          const sanitizedValue = (entry.value as string)
+            .replace(/[\)\(\<\>\}\{\"\:\\,]/gm, '')
+            .replace(/\s/gm, '*');
+          return `exception-list-agnostic.attributes.entries.entries.value:(*${sanitizedValue}*)`;
+        }
+
+        return '';
+      })
+    )
+    .filter(Boolean)
+    .join(' AND ');
+};
+
 export const checkIfRemediationExists = async ({
   insight,
   exceptionListsClient,
@@ -174,18 +201,7 @@ export const checkIfRemediationExists = async ({
     return false;
   }
 
-  const filter = insight.remediation.exception_list_items
-    ?.flatMap((item) =>
-      item.entries
-        .map((entry) => {
-          if ('value' in entry) {
-            return `exception-list-agnostic.attributes.entries.value:\"${entry.value}\"`;
-          }
-          return '';
-        })
-        .filter(Boolean)
-    )
-    .join(' AND ');
+  const filter = generateTrustedAppsFilter(insight);
 
   if (!filter) return false;
 
