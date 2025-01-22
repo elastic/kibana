@@ -6,7 +6,7 @@
  */
 
 import {
-  InheritedStreamLifecycle,
+  InheritedIngestStreamLifecycle,
   WiredStreamDefinition,
   isChildOf,
   isDescendantOf,
@@ -16,18 +16,18 @@ import { orderBy } from 'lodash';
 export function findInheritedLifecycle(
   definition: WiredStreamDefinition,
   ancestors: WiredStreamDefinition[]
-): InheritedStreamLifecycle | undefined {
+): InheritedIngestStreamLifecycle | undefined {
   const originDefinition = orderBy(
     [...ancestors, definition],
     (parent) => parent.name.split('.').length,
     'asc'
-  ).findLast(({ stream }) => stream.ingest.lifecycle);
+  ).findLast(({ ingest }) => ingest.lifecycle);
 
   if (!originDefinition) {
     return undefined;
   }
 
-  return { ...originDefinition.stream.ingest.lifecycle!, from: originDefinition.name };
+  return { ...originDefinition.ingest.lifecycle!, from: originDefinition.name };
 }
 
 export function findInheritingStreams(
@@ -40,7 +40,7 @@ export function findInheritingStreams(
   while (queue.length > 0) {
     const definition = queue.shift()!;
 
-    if (isDescendantOf(root.name, definition.name) && definition.stream.ingest.lifecycle) {
+    if (isDescendantOf(root.name, definition.name) && definition.ingest.lifecycle) {
       // ignore subtrees with a lifecycle override
       continue;
     }

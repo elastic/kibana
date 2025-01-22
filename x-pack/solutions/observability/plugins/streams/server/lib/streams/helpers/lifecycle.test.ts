@@ -13,12 +13,12 @@ describe(__filename, () => {
     describe('picks the definition lifecycle', () => {
       const definition = {
         name: 'one.two',
-        stream: { ingest: { lifecycle: { type: 'dlm', data_retention: '1d' } } },
+        ingest: { lifecycle: { type: 'dlm', data_retention: '1d' } },
       } as WiredStreamDefinition;
       const ascendants = [
         {
           name: 'one',
-          stream: { ingest: { lifecycle: { type: 'ilm', policy: 'policy' } } },
+          ingest: { lifecycle: { type: 'ilm', policy: 'policy' } },
         } as WiredStreamDefinition,
       ] as WiredStreamDefinition[];
 
@@ -34,20 +34,20 @@ describe(__filename, () => {
     describe('picks the nearest parent lifecycle', () => {
       const definition = {
         name: 'one.two.three.four',
-        stream: { ingest: {} },
+        ingest: {},
       } as WiredStreamDefinition;
       const ascendants = [
         {
           name: 'one',
-          stream: { ingest: { lifecycle: { type: 'ilm', policy: 'one' } } },
+          ingest: { lifecycle: { type: 'ilm', policy: 'one' } },
         } as WiredStreamDefinition,
         {
           name: 'one.two.three',
-          stream: { ingest: {} },
+          ingest: {},
         } as WiredStreamDefinition,
         {
           name: 'one.two',
-          stream: { ingest: { lifecycle: { type: 'dlm', data_retention: '1d' } } },
+          ingest: { lifecycle: { type: 'dlm', data_retention: '1d' } },
         } as WiredStreamDefinition,
       ] as WiredStreamDefinition[];
 
@@ -61,10 +61,10 @@ describe(__filename, () => {
     });
 
     describe('return undefined', () => {
-      const definition = { name: 'one.two.three', stream: { ingest: {} } } as WiredStreamDefinition;
+      const definition = { name: 'one.two.three', ingest: {} } as WiredStreamDefinition;
       const ascendants = [
-        { name: 'one.two', stream: { ingest: {} } } as WiredStreamDefinition,
-        { name: 'one', stream: { ingest: {} } } as WiredStreamDefinition,
+        { name: 'one.two', ingest: {} } as WiredStreamDefinition,
+        { name: 'one', ingest: {} } as WiredStreamDefinition,
       ] as WiredStreamDefinition[];
 
       const lifecycle = findInheritedLifecycle(definition, ascendants);
@@ -77,18 +77,16 @@ describe(__filename, () => {
     it('returns all streams', () => {
       const definition = {
         name: 'one',
-        stream: {
-          ingest: {
-            lifecycle: { type: 'dlm', data_retention: '1d' },
-          },
+        ingest: {
+          lifecycle: { type: 'dlm', data_retention: '1d' },
         },
       } as WiredStreamDefinition;
       const descendants = [
-        { name: 'one.two.three', stream: { ingest: {} } } as WiredStreamDefinition,
-        { name: 'one.two2', stream: { ingest: {} } } as WiredStreamDefinition,
-        { name: 'one.two', stream: { ingest: {} } } as WiredStreamDefinition,
-        { name: 'one.two2.three', stream: { ingest: {} } } as WiredStreamDefinition,
-        { name: 'one.two2.three.four', stream: { ingest: {} } } as WiredStreamDefinition,
+        { name: 'one.two.three', ingest: {} } as WiredStreamDefinition,
+        { name: 'one.two2', ingest: {} } as WiredStreamDefinition,
+        { name: 'one.two', ingest: {} } as WiredStreamDefinition,
+        { name: 'one.two2.three', ingest: {} } as WiredStreamDefinition,
+        { name: 'one.two2.three.four', ingest: {} } as WiredStreamDefinition,
       ] as WiredStreamDefinition[];
 
       const inheritingStreams = findInheritingStreams(definition, descendants);
@@ -108,25 +106,23 @@ describe(__filename, () => {
     it('ignores subtrees with overrides', () => {
       const definition = {
         name: 'one',
-        stream: {
-          ingest: {
-            lifecycle: { type: 'dlm', data_retention: '1d' },
-          },
+        ingest: {
+          lifecycle: { type: 'dlm', data_retention: '1d' },
         },
       } as WiredStreamDefinition;
       const descendants = [
         {
           name: 'one.override',
-          stream: { ingest: { lifecycle: { type: 'ilm', policy: 'policy ' } } },
+          ingest: { lifecycle: { type: 'ilm', policy: 'policy ' } },
         } as WiredStreamDefinition,
-        { name: 'one.override.deeply', stream: { ingest: {} } } as WiredStreamDefinition,
-        { name: 'one.override.deeply.nested', stream: { ingest: {} } } as WiredStreamDefinition,
-        { name: 'one.inheriting', stream: { ingest: {} } } as WiredStreamDefinition,
-        { name: 'one.inheriting.deeply', stream: { ingest: {} } } as WiredStreamDefinition,
-        { name: 'one.inheriting.deeply.nested', stream: { ingest: {} } } as WiredStreamDefinition,
+        { name: 'one.override.deeply', ingest: {} } as WiredStreamDefinition,
+        { name: 'one.override.deeply.nested', ingest: {} } as WiredStreamDefinition,
+        { name: 'one.inheriting', ingest: {} } as WiredStreamDefinition,
+        { name: 'one.inheriting.deeply', ingest: {} } as WiredStreamDefinition,
+        { name: 'one.inheriting.deeply.nested', ingest: {} } as WiredStreamDefinition,
         {
           name: 'one.override2',
-          stream: { ingest: { lifecycle: { type: 'dlm', data_retention: '10d' } } },
+          ingest: { lifecycle: { type: 'dlm', data_retention: '10d' } },
         } as WiredStreamDefinition,
       ] as WiredStreamDefinition[];
 
@@ -145,10 +141,8 @@ describe(__filename, () => {
     it('handles leaf node', () => {
       const definition = {
         name: 'one',
-        stream: {
-          ingest: {
-            lifecycle: { type: 'dlm', data_retention: '1d' },
-          },
+        ingest: {
+          lifecycle: { type: 'dlm', data_retention: '1d' },
         },
       } as WiredStreamDefinition;
       const descendants = [] as WiredStreamDefinition[];

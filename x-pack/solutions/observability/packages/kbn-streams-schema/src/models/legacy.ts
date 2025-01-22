@@ -18,8 +18,10 @@ import {
 import {
   ElasticsearchAsset,
   IngestStreamLifecycle,
+  InheritedIngestStreamLifecycle,
   elasticsearchAssetSchema,
   ingestStreamLifecycleSchema,
+  inheritedIngestStreamLifecycleSchema,
 } from './ingest/common';
 import { createIsNarrowSchema } from '../helpers';
 
@@ -31,16 +33,17 @@ interface ReadStreamDefinitionBase {
   name: string;
   dashboards: string[];
   elasticsearch_assets: ElasticsearchAsset[];
-  effective_lifecycle?: IngestStreamLifecycle;
   inherited_fields: InheritedFieldDefinition;
 }
 
 interface WiredReadStreamDefinition extends ReadStreamDefinitionBase {
   stream: WiredStreamDefinition;
+  effective_lifecycle?: InheritedIngestStreamLifecycle;
 }
 
 interface UnwiredReadStreamDefinition extends ReadStreamDefinitionBase {
   stream: UnwiredStreamDefinition;
+  effective_lifecycle?: IngestStreamLifecycle;
 }
 
 type ReadStreamDefinition = WiredReadStreamDefinition | UnwiredReadStreamDefinition;
@@ -50,13 +53,13 @@ const readStreamDefinitionSchemaBase: z.Schema<ReadStreamDefinitionBase> = z.obj
   dashboards: z.array(NonEmptyString),
   elasticsearch_assets: z.array(elasticsearchAssetSchema),
   inherited_fields: inheritedFieldDefinitionSchema,
-  lifecycle: ingestStreamLifecycleSchema,
 });
 
 const wiredReadStreamDefinitionSchema: z.Schema<WiredReadStreamDefinition> = z.intersection(
   readStreamDefinitionSchemaBase,
   z.object({
     stream: wiredStreamDefinitionSchema,
+    effective_lifecycle: inheritedIngestStreamLifecycleSchema,
   })
 );
 
@@ -64,6 +67,7 @@ const unwiredReadStreamDefinitionSchema: z.Schema<UnwiredReadStreamDefinition> =
   readStreamDefinitionSchemaBase,
   z.object({
     stream: unwiredStreamDefinitionSchema,
+    effective_lifecycle: ingestStreamLifecycleSchema,
   })
 );
 

@@ -45,3 +45,8 @@ export const ingestStreamLifecycleSchema: z.Schema<IngestStreamLifecycle> = z.di
     z.object({ type: z.literal('ilm'), policy: NonEmptyString }),
   ]
 );
+
+export type InheritedIngestStreamLifecycle = IngestStreamLifecycle & { from: string };
+
+export const inheritedIngestStreamLifecycleSchema: z.Schema<InheritedIngestStreamLifecycle> =
+  ingestStreamLifecycleSchema.and(z.object({ from: NonEmptyString }));

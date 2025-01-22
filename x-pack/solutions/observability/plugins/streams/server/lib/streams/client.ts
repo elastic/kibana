@@ -795,7 +795,10 @@ export class StreamsClient {
    * inherited, any updates to a given data stream also triggers an update
    * to existing children data streams that do not specify an override.
    */
-  private async updateStreamLifecycle(root: WiredStreamDefinition, lifecycle?: IngestStreamLifecycle) {
+  private async updateStreamLifecycle(
+    root: WiredStreamDefinition,
+    lifecycle?: IngestStreamLifecycle
+  ) {
     const { logger, scopedClusterClient } = this.dependencies;
     const descendants = await this.getDescendants(root.name);
     const inheritingStreams = findInheritingStreams(root, descendants);

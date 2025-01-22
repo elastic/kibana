@@ -11,7 +11,7 @@ import { StreamDefinitionBase } from '../base';
 import { FieldDefinition, fieldDefinitionSchema } from './fields';
 import { ProcessorDefinition, processorDefinitionSchema } from './processors';
 import { RoutingDefinition, routingDefinitionSchema } from './routing';
-import { ingestStreamLifecycleSchema } from './common';
+import { IngestStreamLifecycle, ingestStreamLifecycleSchema } from './common';
 
 interface IngestBase {
   processing: ProcessorDefinition[];
@@ -22,6 +22,7 @@ interface WiredIngest extends IngestBase {
   wired: {
     fields: FieldDefinition;
   };
+  lifecycle?: IngestStreamLifecycle;
 }
 
 interface UnwiredIngest extends IngestBase {

@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import { StreamLifecycle } from '@kbn/streams-schema';
+import { IngestStreamLifecycle } from '@kbn/streams-schema';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface DataStreamManagementOptions {
@@ -104,7 +104,7 @@ export async function updateDataStreamsLifecycle({
   esClient: ElasticsearchClient;
   logger: Logger;
   names: string[];
-  lifecycle?: StreamLifecycle;
+  lifecycle?: IngestStreamLifecycle;
   isServerless: boolean;
 }) {
   try {

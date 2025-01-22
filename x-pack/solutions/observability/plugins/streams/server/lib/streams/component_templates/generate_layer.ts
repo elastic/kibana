@@ -57,15 +57,15 @@ export function generateLayer(
 function getTemplateLifecycle(definition: WiredStreamDefinition, isServerless: boolean) {
   if (isServerless) {
     // dlm cannot be disabled in serverless
-    const lifecycle = definition.stream.ingest.lifecycle;
+    const lifecycle = definition.ingest.lifecycle;
     return { data_retention: lifecycle?.type === 'dlm' ? lifecycle.data_retention : undefined };
   }
 
-  if (!definition.stream.ingest.lifecycle || definition.stream.ingest.lifecycle.type === 'ilm') {
+  if (!definition.ingest.lifecycle || definition.ingest.lifecycle.type === 'ilm') {
     return { enabled: false };
   }
 
-  return { enabled: true, data_retention: definition.stream.ingest.lifecycle.data_retention };
+  return { enabled: true, data_retention: definition.ingest.lifecycle.data_retention };
 }
 
 function getTemplateSettings(definition: WiredStreamDefinition, isServerless: boolean) {
@@ -75,15 +75,15 @@ function getTemplateSettings(definition: WiredStreamDefinition, isServerless: bo
     return baseSettings;
   }
 
-  if (!definition.stream.ingest.lifecycle) {
+  if (!definition.ingest.lifecycle) {
     return baseSettings;
   }
 
-  if (definition.stream.ingest.lifecycle.type === 'ilm') {
+  if (definition.ingest.lifecycle.type === 'ilm') {
     return {
       ...baseSettings,
       'index.lifecycle.prefer_ilm': true,
-      'index.lifecycle.name': definition.stream.ingest.lifecycle.policy,
+      'index.lifecycle.name': definition.ingest.lifecycle.policy,
     };
   }
 
