@@ -1880,9 +1880,9 @@
           },
           " & ",
           {
-            "pluginId": "@kbn/presentation-containers",
+            "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
+            "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-public.HasSerializableState",
             "text": "HasSerializableState"
           },

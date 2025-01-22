@@ -7,9 +7,8 @@
 
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
-import { commonFunctionalUIServices } from '@kbn/ftr-common-functional-ui-services';
 import path from 'path';
+import { cypressTestRunner } from './runner';
 
 const kibanaYamlFilePath = path.join(__dirname, './ftr_kibana.yml');
 
@@ -18,16 +17,11 @@ async function ftrConfig({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('@kbn/test-suites-src/common/config')
   );
   const xpackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('@kbn/test-suites-xpack/functional/config.base')
+    require.resolve('../functional/config.base.js')
   );
 
   return {
     ...kibanaCommonTestsConfig.getAll(),
-
-    services: {
-      ...commonFunctionalServices,
-      ...commonFunctionalUIServices,
-    },
 
     esTestCluster: {
       ...xpackFunctionalTestsConfig.get('esTestCluster'),
@@ -51,8 +45,8 @@ async function ftrConfig({ readConfigFile }: FtrConfigProviderContext) {
         `--config=${kibanaYamlFilePath}`,
       ],
     },
+    testRunner: cypressTestRunner,
   };
 }
 
-// eslint-disable-next-line import/no-default-export
 export default ftrConfig;
