@@ -116,7 +116,9 @@ export function SearchStartProvider({ getService }: FtrProviderContext) {
         /^https?\:\/\/.*\/app\/integrations\/browse\/observability/
       );
 
-      expect(await testSubjects.getAttribute('analyzeLogsBrowseIntegrations', 'target')).equal('_blank');
+      expect(await testSubjects.getAttribute('analyzeLogsBrowseIntegrations', 'target')).equal(
+        '_blank'
+      );
     },
     async expectCreateO11ySpaceBtn() {
       await testSubjects.existOrFail('createO11ySpaceBtn');
