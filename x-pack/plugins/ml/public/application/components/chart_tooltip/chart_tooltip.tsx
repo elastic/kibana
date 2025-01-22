@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
-import TooltipTrigger from 'react-popper-tooltip';
+import { usePopperTooltip } from 'react-popper-tooltip';
+
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { TooltipValueFormatter } from '@elastic/charts';
 
 import './_index.scss';
 
-import { ChildrenArg, TooltipTriggerProps } from 'react-popper-tooltip/dist/types';
 import { ChartTooltipService, ChartTooltipValue, TooltipData } from './chart_tooltip_service';
 
 const renderHeader = (headerData?: ChartTooltipValue, formatter?: TooltipValueFormatter) => {
@@ -77,13 +78,29 @@ export const FormattedTooltip: FC<{ tooltipData: TooltipData }> = ({ tooltipData
  */
 const Tooltip: FC<{ service: ChartTooltipService }> = React.memo(({ service }) => {
   const [tooltipData, setData] = useState<TooltipData>([]);
-  const refCallback = useRef<ChildrenArg['triggerRef']>();
+
+  const { getTooltipProps, setTooltipRef, setTriggerRef } = usePopperTooltip(
+    {
+      placement: 'right-start',
+      trigger: null,
+    },
+    {
+      modifiers: [
+        {
+          name: 'preventOverflow',
+          options: {
+            rootBoundary: 'viewport',
+          },
+        },
+      ],
+    }
+  );
 
   useEffect(() => {
     const subscription = service.tooltipState$.subscribe((tooltipState) => {
-      if (refCallback.current && typeof refCallback.current === 'function') {
+      if (setTriggerRef && typeof setTriggerRef === 'function') {
         // update trigger
-        refCallback.current(tooltipState.target);
+        setTriggerRef(tooltipState.target);
       }
       setData(tooltipState.tooltipData);
     });
@@ -92,48 +109,16 @@ const Tooltip: FC<{ service: ChartTooltipService }> = React.memo(({ service }) =
     };
   }, []);
 
-  const triggerCallback = useCallback(
-    (({ triggerRef }) => {
-      // obtain the reference to the trigger setter callback
-      // to update the target based on changes from the service.
-      refCallback.current = triggerRef;
-      // actual trigger is resolved by the service, hence don't render
-      return null;
-    }) as TooltipTriggerProps['children'],
-    []
-  );
-
-  const tooltipCallback = useCallback(
-    (({ tooltipRef, getTooltipProps }) => {
-      return (
-        <div
-          {...getTooltipProps({
-            ref: tooltipRef,
-          })}
-        >
-          <FormattedTooltip tooltipData={tooltipData} />
-        </div>
-      );
-    }) as TooltipTriggerProps['tooltip'],
-    [tooltipData]
-  );
-
   const isTooltipShown = tooltipData.length > 0;
 
   return (
-    <TooltipTrigger
-      modifiers={{
-        preventOverflow: {
-          boundariesElement: 'window',
-        },
-      }}
-      placement="right-start"
-      trigger="none"
-      tooltipShown={isTooltipShown}
-      tooltip={tooltipCallback}
-    >
-      {triggerCallback}
-    </TooltipTrigger>
+    <>
+      {isTooltipShown && (
+        <div ref={setTooltipRef} {...getTooltipProps({ className: 'tooltip-container' })}>
+          <FormattedTooltip tooltipData={tooltipData} />
+        </div>
+      )}
+    </>
   );
 });
 
