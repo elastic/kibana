@@ -28,13 +28,7 @@
         "description": [],
         "signature": [
           "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ", syncJobId: string) => Promise<",
           {
             "pluginId": "@kbn/search-connectors",
@@ -57,13 +51,7 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/lib/cancel_sync.ts",
             "deprecated": false,
@@ -98,13 +86,7 @@
         "description": [],
         "signature": [
           "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ", connectorId: string) => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-search-connectors/lib/cancel_syncs.ts",
@@ -119,13 +101,7 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/lib/cancel_syncs.ts",
             "deprecated": false,
@@ -160,13 +136,7 @@
         "description": [],
         "signature": [
           "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ") => Promise<",
           {
             "pluginId": "@kbn/search-connectors",
@@ -189,13 +159,7 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/lib/collect_connector_stats.ts",
             "deprecated": false,
@@ -248,13 +212,7 @@
         "description": [],
         "signature": [
           "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ", input: { configuration?: ",
           {
             "pluginId": "@kbn/search-connectors",
@@ -301,13 +259,7 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/lib/create_connector.ts",
             "deprecated": false,
@@ -662,13 +614,7 @@
         "description": [],
         "signature": [
           "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ", value: string) => Promise<",
           {
             "pluginId": "@kbn/search-connectors",
@@ -691,13 +637,7 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/lib/create_connector_secret.ts",
             "deprecated": false,
@@ -732,13 +672,7 @@
         "description": [],
         "signature": [
           "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ", id: string) => Promise<",
           "AcknowledgedResponseBase",
           ">"
@@ -755,13 +689,7 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/lib/delete_connector.ts",
             "deprecated": false,
@@ -796,13 +724,7 @@
         "description": [],
         "signature": [
           "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ", id: string) => Promise<",
           "Result",
           ">"
@@ -819,13 +741,7 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/lib/delete_connector_secret.ts",
             "deprecated": false,
@@ -860,13 +776,7 @@
         "description": [],
         "signature": [
           "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ", connectorId: string) => Promise<",
           {
             "pluginId": "@kbn/search-connectors",
@@ -889,13 +799,7 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/lib/fetch_connectors.ts",
             "deprecated": false,
@@ -930,13 +834,7 @@
         "description": [],
         "signature": [
           "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ", indexName: string) => Promise<",
           {
             "pluginId": "@kbn/search-connectors",
@@ -959,13 +857,7 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/lib/fetch_connectors.ts",
             "deprecated": false,
@@ -1000,13 +892,7 @@
         "description": [],
         "signature": [
           "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ", indexNames?: string[] | undefined, fetchOnlyCrawlers?: boolean | undefined, searchQuery?: string | undefined) => Promise<",
           {
             "pluginId": "@kbn/search-connectors",
@@ -1029,13 +915,7 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/lib/fetch_connectors.ts",
             "deprecated": false,
@@ -1100,13 +980,7 @@
         "description": [],
         "signature": [
           "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ", connectorId?: string | undefined, from?: number, size?: number, syncJobType?: \"content\" | \"all\" | \"access_control\", syncStatus?: ",
           {
             "pluginId": "@kbn/search-connectors",
@@ -1145,13 +1019,7 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/lib/fetch_sync_jobs.ts",
             "deprecated": false,
@@ -1347,13 +1215,7 @@
         "description": [],
         "signature": [
           "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ", connectorType: string, isNative: boolean, userConnectorName?: string | undefined) => Promise<{ connectorName: string; indexName: string; }>"
         ],
         "path": "src/platform/packages/shared/kbn-search-connectors/lib/generate_connector_name.ts",
@@ -1368,13 +1230,7 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/lib/generate_connector_name.ts",
             "deprecated": false,
@@ -1703,13 +1559,7 @@
         "description": [],
         "signature": [
           "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ", connectorId: string, isNative: boolean) => Promise<",
           "Result",
           ">"
@@ -1726,13 +1576,7 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/lib/update_native.ts",
             "deprecated": false,
@@ -1782,13 +1626,7 @@
         "description": [],
         "signature": [
           "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ", { connectorId, jobType, }: { connectorId: string; jobType?: ",
           {
             "pluginId": "@kbn/search-connectors",
@@ -1811,13 +1649,7 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/lib/start_sync.ts",
             "deprecated": false,
@@ -2056,13 +1888,7 @@
         "description": [],
         "signature": [
           "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ", connectorId: string, apiKeyId: string | null, apiKeySecretId: string | null) => Promise<",
           "Result",
           ">"
@@ -2079,13 +1905,7 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/lib/update_connector_api_key_id.ts",
             "deprecated": false,
@@ -2150,13 +1970,7 @@
         "description": [],
         "signature": [
           "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ", connectorId: string, configuration: Record<string, string | number | boolean>) => Promise<",
           {
             "pluginId": "@kbn/search-connectors",
@@ -2179,13 +1993,7 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/lib/update_connector_configuration.ts",
             "deprecated": false,
@@ -2235,13 +2043,7 @@
         "description": [],
         "signature": [
           "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ", connectorId: string, indexName: string | null) => Promise<",
           "Result",
           ">"
@@ -2258,13 +2060,7 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/lib/update_connector_index_name.ts",
             "deprecated": false,
@@ -2314,13 +2110,7 @@
         "description": [],
         "signature": [
           "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ", connectorId: string, connectorUpdates: Partial<Pick<",
           {
             "pluginId": "@kbn/search-connectors",
@@ -2345,13 +2135,7 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/lib/update_connector_name_and_description.ts",
             "deprecated": false,
@@ -2409,13 +2193,7 @@
         "description": [],
         "signature": [
           "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ", connectorId: string, scheduling: ",
           {
             "pluginId": "@kbn/search-connectors",
@@ -2440,13 +2218,7 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/lib/update_connector_scheduling.ts",
             "deprecated": false,
@@ -2502,13 +2274,7 @@
         "description": [],
         "signature": [
           "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ", value: string, secretId: string) => Promise<",
           "Result",
           ">"
@@ -2525,13 +2291,7 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/lib/update_connector_secret.ts",
             "deprecated": false,
@@ -2581,13 +2341,7 @@
         "description": [],
         "signature": [
           "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ", connectorId: string, serviceType: string) => Promise<",
           "Result",
           ">"
@@ -2604,13 +2358,7 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/lib/update_connector_service_type.ts",
             "deprecated": false,
@@ -2660,13 +2408,7 @@
         "description": [],
         "signature": [
           "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ", connectorId: string, status: ",
           {
             "pluginId": "@kbn/search-connectors",
@@ -2691,13 +2433,7 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/lib/update_connector_status.ts",
             "deprecated": false,
@@ -2753,13 +2489,7 @@
         "description": [],
         "signature": [
           "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ", connectorId: string) => Promise<",
           {
             "pluginId": "@kbn/search-connectors",
@@ -2782,13 +2512,7 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/lib/update_filtering.ts",
             "deprecated": false,
@@ -2823,13 +2547,7 @@
         "description": [],
         "signature": [
           "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ", connectorId: string, { advancedSnippet, filteringRules, }: { advancedSnippet: string; filteringRules: ",
           {
             "pluginId": "@kbn/search-connectors",
@@ -2860,13 +2578,7 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/lib/update_filtering_draft.ts",
             "deprecated": false,
@@ -49524,6 +49236,206 @@
                   },
                   {
                     "parentPluginId": "@kbn/search-connectors",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.auth_method",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "auth_method",
+                    "description": [],
+                    "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.auth_method.default_value",
+                        "type": "Uncategorized",
+                        "tags": [],
+                        "label": "default_value",
+                        "description": [],
+                        "signature": [
+                          "null"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.auth_method.depends_on",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "depends_on",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.auth_method.display",
+                        "type": "string",
+                        "tags": [],
+                        "label": "display",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.DisplayType",
+                            "text": "DisplayType"
+                          },
+                          ".DROPDOWN"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.auth_method.label",
+                        "type": "string",
+                        "tags": [],
+                        "label": "label",
+                        "description": [],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.auth_method.options",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "options",
+                        "description": [],
+                        "signature": [
+                          "{ label: string; value: string; }[]"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.auth_method.order",
+                        "type": "number",
+                        "tags": [],
+                        "label": "order",
+                        "description": [],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.auth_method.required",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "required",
+                        "description": [],
+                        "signature": [
+                          "true"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.auth_method.sensitive",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "sensitive",
+                        "description": [],
+                        "signature": [
+                          "false"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.auth_method.tooltip",
+                        "type": "Uncategorized",
+                        "tags": [],
+                        "label": "tooltip",
+                        "description": [],
+                        "signature": [
+                          "null"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.auth_method.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.FieldType",
+                            "text": "FieldType"
+                          },
+                          ".STRING"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.auth_method.ui_restrictions",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "ui_restrictions",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.auth_method.validations",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "validations",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.auth_method.value",
+                        "type": "string",
+                        "tags": [],
+                        "label": "value",
+                        "description": [],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  },
+                  {
+                    "parentPluginId": "@kbn/search-connectors",
                     "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.secret_value",
                     "type": "Object",
                     "tags": [],
@@ -49709,6 +49621,406 @@
                       {
                         "parentPluginId": "@kbn/search-connectors",
                         "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.secret_value.value",
+                        "type": "string",
+                        "tags": [],
+                        "label": "value",
+                        "description": [],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  },
+                  {
+                    "parentPluginId": "@kbn/search-connectors",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.certificate",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "certificate",
+                    "description": [],
+                    "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.certificate.default_value",
+                        "type": "Uncategorized",
+                        "tags": [],
+                        "label": "default_value",
+                        "description": [],
+                        "signature": [
+                          "null"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.certificate.depends_on",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "depends_on",
+                        "description": [],
+                        "signature": [
+                          "{ field: string; value: string; }[]"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.certificate.display",
+                        "type": "string",
+                        "tags": [],
+                        "label": "display",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.DisplayType",
+                            "text": "DisplayType"
+                          },
+                          ".TEXTAREA"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.certificate.label",
+                        "type": "string",
+                        "tags": [],
+                        "label": "label",
+                        "description": [],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.certificate.options",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "options",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.certificate.order",
+                        "type": "number",
+                        "tags": [],
+                        "label": "order",
+                        "description": [],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.certificate.required",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "required",
+                        "description": [],
+                        "signature": [
+                          "true"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.certificate.sensitive",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "sensitive",
+                        "description": [],
+                        "signature": [
+                          "true"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.certificate.tooltip",
+                        "type": "Uncategorized",
+                        "tags": [],
+                        "label": "tooltip",
+                        "description": [],
+                        "signature": [
+                          "null"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.certificate.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.FieldType",
+                            "text": "FieldType"
+                          },
+                          ".STRING"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.certificate.ui_restrictions",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "ui_restrictions",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.certificate.validations",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "validations",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.certificate.value",
+                        "type": "string",
+                        "tags": [],
+                        "label": "value",
+                        "description": [],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  },
+                  {
+                    "parentPluginId": "@kbn/search-connectors",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.private_key",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "private_key",
+                    "description": [],
+                    "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.private_key.default_value",
+                        "type": "Uncategorized",
+                        "tags": [],
+                        "label": "default_value",
+                        "description": [],
+                        "signature": [
+                          "null"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.private_key.depends_on",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "depends_on",
+                        "description": [],
+                        "signature": [
+                          "{ field: string; value: string; }[]"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.private_key.display",
+                        "type": "string",
+                        "tags": [],
+                        "label": "display",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.DisplayType",
+                            "text": "DisplayType"
+                          },
+                          ".TEXTAREA"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.private_key.label",
+                        "type": "string",
+                        "tags": [],
+                        "label": "label",
+                        "description": [],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.private_key.options",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "options",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.private_key.order",
+                        "type": "number",
+                        "tags": [],
+                        "label": "order",
+                        "description": [],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.private_key.required",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "required",
+                        "description": [],
+                        "signature": [
+                          "true"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.private_key.sensitive",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "sensitive",
+                        "description": [],
+                        "signature": [
+                          "true"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.private_key.tooltip",
+                        "type": "Uncategorized",
+                        "tags": [],
+                        "label": "tooltip",
+                        "description": [],
+                        "signature": [
+                          "null"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.private_key.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.FieldType",
+                            "text": "FieldType"
+                          },
+                          ".STRING"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.private_key.ui_restrictions",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "ui_restrictions",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.private_key.validations",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "validations",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.private_key.value",
                         "type": "string",
                         "tags": [],
                         "label": "value",
@@ -49910,6 +50222,406 @@
                         "tags": [],
                         "label": "value",
                         "description": [],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  },
+                  {
+                    "parentPluginId": "@kbn/search-connectors",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.enumerate_all_sites",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "enumerate_all_sites",
+                    "description": [],
+                    "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.enumerate_all_sites.default_value",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "default_value",
+                        "description": [],
+                        "signature": [
+                          "true"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.enumerate_all_sites.depends_on",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "depends_on",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.enumerate_all_sites.display",
+                        "type": "string",
+                        "tags": [],
+                        "label": "display",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.DisplayType",
+                            "text": "DisplayType"
+                          },
+                          ".TOGGLE"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.enumerate_all_sites.label",
+                        "type": "string",
+                        "tags": [],
+                        "label": "label",
+                        "description": [],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.enumerate_all_sites.options",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "options",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.enumerate_all_sites.order",
+                        "type": "number",
+                        "tags": [],
+                        "label": "order",
+                        "description": [],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.enumerate_all_sites.required",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "required",
+                        "description": [],
+                        "signature": [
+                          "false"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.enumerate_all_sites.sensitive",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "sensitive",
+                        "description": [],
+                        "signature": [
+                          "false"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.enumerate_all_sites.tooltip",
+                        "type": "string",
+                        "tags": [],
+                        "label": "tooltip",
+                        "description": [],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.enumerate_all_sites.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.FieldType",
+                            "text": "FieldType"
+                          },
+                          ".BOOLEAN"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.enumerate_all_sites.ui_restrictions",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "ui_restrictions",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.enumerate_all_sites.validations",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "validations",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.enumerate_all_sites.value",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "value",
+                        "description": [],
+                        "signature": [
+                          "true"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  },
+                  {
+                    "parentPluginId": "@kbn/search-connectors",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.fetch_subsites",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "fetch_subsites",
+                    "description": [],
+                    "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.fetch_subsites.default_value",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "default_value",
+                        "description": [],
+                        "signature": [
+                          "false"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.fetch_subsites.depends_on",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "depends_on",
+                        "description": [],
+                        "signature": [
+                          "{ field: string; value: false; }[]"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.fetch_subsites.display",
+                        "type": "string",
+                        "tags": [],
+                        "label": "display",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.DisplayType",
+                            "text": "DisplayType"
+                          },
+                          ".TOGGLE"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.fetch_subsites.label",
+                        "type": "string",
+                        "tags": [],
+                        "label": "label",
+                        "description": [],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.fetch_subsites.options",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "options",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.fetch_subsites.order",
+                        "type": "number",
+                        "tags": [],
+                        "label": "order",
+                        "description": [],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.fetch_subsites.required",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "required",
+                        "description": [],
+                        "signature": [
+                          "false"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.fetch_subsites.sensitive",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "sensitive",
+                        "description": [],
+                        "signature": [
+                          "false"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.fetch_subsites.tooltip",
+                        "type": "string",
+                        "tags": [],
+                        "label": "tooltip",
+                        "description": [],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.fetch_subsites.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.FieldType",
+                            "text": "FieldType"
+                          },
+                          ".BOOLEAN"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.fetch_subsites.ui_restrictions",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "ui_restrictions",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.fetch_subsites.validations",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "validations",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.fetch_subsites.value",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "value",
+                        "description": [],
+                        "signature": [
+                          "true"
+                        ],
                         "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
                         "deprecated": false,
                         "trackAdoption": false
@@ -51103,406 +51815,6 @@
                       {
                         "parentPluginId": "@kbn/search-connectors",
                         "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.fetch_unique_list_item_permissions.value",
-                        "type": "boolean",
-                        "tags": [],
-                        "label": "value",
-                        "description": [],
-                        "signature": [
-                          "true"
-                        ],
-                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      }
-                    ]
-                  },
-                  {
-                    "parentPluginId": "@kbn/search-connectors",
-                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.enumerate_all_sites",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "enumerate_all_sites",
-                    "description": [],
-                    "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
-                    "deprecated": false,
-                    "trackAdoption": false,
-                    "children": [
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.enumerate_all_sites.default_value",
-                        "type": "boolean",
-                        "tags": [],
-                        "label": "default_value",
-                        "description": [],
-                        "signature": [
-                          "true"
-                        ],
-                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.enumerate_all_sites.depends_on",
-                        "type": "Array",
-                        "tags": [],
-                        "label": "depends_on",
-                        "description": [],
-                        "signature": [
-                          "never[]"
-                        ],
-                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.enumerate_all_sites.display",
-                        "type": "string",
-                        "tags": [],
-                        "label": "display",
-                        "description": [],
-                        "signature": [
-                          {
-                            "pluginId": "@kbn/search-connectors",
-                            "scope": "common",
-                            "docId": "kibKbnSearchConnectorsPluginApi",
-                            "section": "def-common.DisplayType",
-                            "text": "DisplayType"
-                          },
-                          ".TOGGLE"
-                        ],
-                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.enumerate_all_sites.label",
-                        "type": "string",
-                        "tags": [],
-                        "label": "label",
-                        "description": [],
-                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.enumerate_all_sites.options",
-                        "type": "Array",
-                        "tags": [],
-                        "label": "options",
-                        "description": [],
-                        "signature": [
-                          "never[]"
-                        ],
-                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.enumerate_all_sites.order",
-                        "type": "number",
-                        "tags": [],
-                        "label": "order",
-                        "description": [],
-                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.enumerate_all_sites.required",
-                        "type": "boolean",
-                        "tags": [],
-                        "label": "required",
-                        "description": [],
-                        "signature": [
-                          "false"
-                        ],
-                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.enumerate_all_sites.sensitive",
-                        "type": "boolean",
-                        "tags": [],
-                        "label": "sensitive",
-                        "description": [],
-                        "signature": [
-                          "false"
-                        ],
-                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.enumerate_all_sites.tooltip",
-                        "type": "string",
-                        "tags": [],
-                        "label": "tooltip",
-                        "description": [],
-                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.enumerate_all_sites.type",
-                        "type": "string",
-                        "tags": [],
-                        "label": "type",
-                        "description": [],
-                        "signature": [
-                          {
-                            "pluginId": "@kbn/search-connectors",
-                            "scope": "common",
-                            "docId": "kibKbnSearchConnectorsPluginApi",
-                            "section": "def-common.FieldType",
-                            "text": "FieldType"
-                          },
-                          ".BOOLEAN"
-                        ],
-                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.enumerate_all_sites.ui_restrictions",
-                        "type": "Array",
-                        "tags": [],
-                        "label": "ui_restrictions",
-                        "description": [],
-                        "signature": [
-                          "never[]"
-                        ],
-                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.enumerate_all_sites.validations",
-                        "type": "Array",
-                        "tags": [],
-                        "label": "validations",
-                        "description": [],
-                        "signature": [
-                          "never[]"
-                        ],
-                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.enumerate_all_sites.value",
-                        "type": "boolean",
-                        "tags": [],
-                        "label": "value",
-                        "description": [],
-                        "signature": [
-                          "true"
-                        ],
-                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      }
-                    ]
-                  },
-                  {
-                    "parentPluginId": "@kbn/search-connectors",
-                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.fetch_subsites",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "fetch_subsites",
-                    "description": [],
-                    "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
-                    "deprecated": false,
-                    "trackAdoption": false,
-                    "children": [
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.fetch_subsites.default_value",
-                        "type": "boolean",
-                        "tags": [],
-                        "label": "default_value",
-                        "description": [],
-                        "signature": [
-                          "false"
-                        ],
-                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.fetch_subsites.depends_on",
-                        "type": "Array",
-                        "tags": [],
-                        "label": "depends_on",
-                        "description": [],
-                        "signature": [
-                          "{ field: string; value: false; }[]"
-                        ],
-                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.fetch_subsites.display",
-                        "type": "string",
-                        "tags": [],
-                        "label": "display",
-                        "description": [],
-                        "signature": [
-                          {
-                            "pluginId": "@kbn/search-connectors",
-                            "scope": "common",
-                            "docId": "kibKbnSearchConnectorsPluginApi",
-                            "section": "def-common.DisplayType",
-                            "text": "DisplayType"
-                          },
-                          ".TOGGLE"
-                        ],
-                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.fetch_subsites.label",
-                        "type": "string",
-                        "tags": [],
-                        "label": "label",
-                        "description": [],
-                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.fetch_subsites.options",
-                        "type": "Array",
-                        "tags": [],
-                        "label": "options",
-                        "description": [],
-                        "signature": [
-                          "never[]"
-                        ],
-                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.fetch_subsites.order",
-                        "type": "number",
-                        "tags": [],
-                        "label": "order",
-                        "description": [],
-                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.fetch_subsites.required",
-                        "type": "boolean",
-                        "tags": [],
-                        "label": "required",
-                        "description": [],
-                        "signature": [
-                          "false"
-                        ],
-                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.fetch_subsites.sensitive",
-                        "type": "boolean",
-                        "tags": [],
-                        "label": "sensitive",
-                        "description": [],
-                        "signature": [
-                          "false"
-                        ],
-                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.fetch_subsites.tooltip",
-                        "type": "string",
-                        "tags": [],
-                        "label": "tooltip",
-                        "description": [],
-                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.fetch_subsites.type",
-                        "type": "string",
-                        "tags": [],
-                        "label": "type",
-                        "description": [],
-                        "signature": [
-                          {
-                            "pluginId": "@kbn/search-connectors",
-                            "scope": "common",
-                            "docId": "kibKbnSearchConnectorsPluginApi",
-                            "section": "def-common.FieldType",
-                            "text": "FieldType"
-                          },
-                          ".BOOLEAN"
-                        ],
-                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.fetch_subsites.ui_restrictions",
-                        "type": "Array",
-                        "tags": [],
-                        "label": "ui_restrictions",
-                        "description": [],
-                        "signature": [
-                          "never[]"
-                        ],
-                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.fetch_subsites.validations",
-                        "type": "Array",
-                        "tags": [],
-                        "label": "validations",
-                        "description": [],
-                        "signature": [
-                          "never[]"
-                        ],
-                        "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_online.configuration.fetch_subsites.value",
                         "type": "boolean",
                         "tags": [],
                         "label": "value",

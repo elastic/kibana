@@ -11,6 +11,7 @@ import type { SyntheticEvent, MouseEvent } from 'react';
 import React, { useMemo, useCallback } from 'react';
 import { isArray, isNil } from 'lodash/fp';
 import type { NavigateToAppOptions } from '@kbn/core-application-browser';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import { IP_REPUTATION_LINKS_SETTING, APP_UI_ID } from '../../../../common/constants';
 import { encodeIpv6 } from '../../lib/helpers';
 import {
@@ -95,7 +96,7 @@ const UserDetailsLinkComponent: React.FC<{
 
   const onClick = useCallback(
     (e: SyntheticEvent) => {
-      telemetry.reportEvent(EntityEventTypes.EntityDetailsClicked, { entity: 'user' });
+      telemetry.reportEvent(EntityEventTypes.EntityDetailsClicked, { entity: EntityType.user });
       const callback = onClickParam ?? goToUsersDetails;
       callback(e);
     },
@@ -172,7 +173,7 @@ const HostDetailsLinkComponent: React.FC<HostDetailsLinkProps> = ({
 
   const onClick = useCallback(
     (e: SyntheticEvent) => {
-      telemetry.reportEvent(EntityEventTypes.EntityDetailsClicked, { entity: 'host' });
+      telemetry.reportEvent(EntityEventTypes.EntityDetailsClicked, { entity: EntityType.host });
 
       const callback = onClickParam ?? goToHostDetails;
       callback(e);
@@ -199,6 +200,32 @@ const HostDetailsLinkComponent: React.FC<HostDetailsLinkProps> = ({
 };
 
 export const HostDetailsLink = React.memo(HostDetailsLinkComponent);
+
+export interface EntityDetailsLinkProps {
+  children?: React.ReactNode;
+  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+  entityName: string;
+  isButton?: boolean;
+  onClick?: (e: SyntheticEvent) => void;
+  tab?: HostsTableType | UsersTableType;
+  title?: string;
+  entityType: EntityType;
+}
+export const EntityDetailsLink = ({
+  entityType,
+  tab,
+  entityName,
+  ...props
+}: EntityDetailsLinkProps) => {
+  if (entityType === EntityType.host) {
+    return <HostDetailsLink {...props} hostTab={tab as HostsTableType} hostName={entityName} />;
+  } else if (entityType === EntityType.user) {
+    return <UserDetailsLink {...props} userTab={tab as UsersTableType} userName={entityName} />;
+  }
+
+  return entityName;
+};
 
 const allowedUrlSchemes = ['http://', 'https://'];
 export const ExternalLink = React.memo<{

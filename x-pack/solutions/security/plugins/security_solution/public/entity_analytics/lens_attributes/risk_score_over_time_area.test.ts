@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { XYState } from '@kbn/lens-plugin/public';
 
 import { getRiskScoreOverTimeAreaAttributes } from './risk_score_over_time_area';

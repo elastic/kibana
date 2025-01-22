@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiContextMenuPanelDescriptor, EuiPopover, EuiContextMenu } from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiPopover, EuiContextMenu } from '@elastic/eui';
 import React, { useCallback, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DropdownButton } from '../dropdown_button';

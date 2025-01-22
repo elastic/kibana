@@ -8,6 +8,9 @@
 import React, { memo, useCallback } from 'react';
 import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
 import { useEuiTheme } from '@elastic/eui';
+import { SessionViewPanelProvider } from './document_details/session_view/context';
+import type { SessionViewPanelProps } from './document_details/session_view';
+import { SessionViewPanel } from './document_details/session_view';
 import type { NetworkExpandableFlyoutProps } from './network_details';
 import { Flyouts } from './document_details/shared/constants/flyouts';
 import {
@@ -17,6 +20,7 @@ import {
   DocumentDetailsPreviewPanelKey,
   DocumentDetailsAlertReasonPanelKey,
   DocumentDetailsAnalyzerPanelKey,
+  DocumentDetailsSessionViewPanelKey,
 } from './document_details/shared/constants/panel_keys';
 import type { IsolateHostPanelProps } from './document_details/isolate_host';
 import { IsolateHostPanel } from './document_details/isolate_host';
@@ -32,16 +36,17 @@ import { AlertReasonPanelProvider } from './document_details/alert_reason/contex
 import type { RulePanelExpandableFlyoutProps } from './rule_details/right';
 import { RulePanel, RulePanelKey, RulePreviewPanelKey } from './rule_details/right';
 import type { UserPanelExpandableFlyoutProps } from './entity_details/user_right';
-import { UserPanel, UserPanelKey, UserPreviewPanelKey } from './entity_details/user_right';
+import { UserPanel, UserPreviewPanelKey } from './entity_details/user_right';
 import type { UserDetailsExpandableFlyoutProps } from './entity_details/user_details_left';
 import { UserDetailsPanel, UserDetailsPanelKey } from './entity_details/user_details_left';
 import type { HostPanelExpandableFlyoutProps } from './entity_details/host_right';
-import { HostPanel, HostPanelKey, HostPreviewPanelKey } from './entity_details/host_right';
+import { HostPanel, HostPreviewPanelKey } from './entity_details/host_right';
 import type { HostDetailsExpandableFlyoutProps } from './entity_details/host_details_left';
 import { HostDetailsPanel, HostDetailsPanelKey } from './entity_details/host_details_left';
 import { NetworkPanel, NetworkPanelKey, NetworkPreviewPanelKey } from './network_details';
 import type { AnalyzerPanelExpandableFlyoutProps } from './document_details/analyzer_panels';
 import { AnalyzerPanel } from './document_details/analyzer_panels';
+import { UserPanelKey, HostPanelKey } from './entity_details/shared/constants';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -102,6 +107,14 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     key: DocumentDetailsAnalyzerPanelKey,
     component: (props) => (
       <AnalyzerPanel {...(props as AnalyzerPanelExpandableFlyoutProps).params} />
+    ),
+  },
+  {
+    key: DocumentDetailsSessionViewPanelKey,
+    component: (props) => (
+      <SessionViewPanelProvider {...(props as SessionViewPanelProps).params}>
+        <SessionViewPanel path={props.path as SessionViewPanelProps['path']} />
+      </SessionViewPanelProvider>
     ),
   },
   {

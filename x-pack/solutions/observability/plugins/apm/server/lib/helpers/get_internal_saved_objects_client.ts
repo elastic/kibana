@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/server';
+import type { CoreStart } from '@kbn/core/server';
 
 export async function getInternalSavedObjectsClient(coreStart: CoreStart) {
   return coreStart.savedObjects.createInternalRepository();

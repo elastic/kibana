@@ -7,6 +7,7 @@
 
 import React, { FC, Fragment, memo, useState } from 'react';
 import {
+  EuiAccordion,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,11 +19,10 @@ import {
 
 import { useDataQualityContext } from '../../../../../../data_quality_context';
 import { useHistoricalResultsContext } from '../../../contexts/historical_results_context';
-import { StyledAccordion } from './styles';
+import { accordionCss } from './styles';
 import { getFormattedCheckTime } from '../../utils/get_formatted_check_time';
 import { IndexResultBadge } from '../../../index_result_badge';
 import { HistoricalResult } from './historical_result';
-import { StyledText } from '../styles';
 import { getCheckTextColor } from '../../../utils/get_check_text_color';
 import {
   CHANGE_YOUR_SEARCH_CRITERIA_OR_RUN,
@@ -30,6 +30,7 @@ import {
   NO_RESULTS_MATCH_YOUR_SEARCH_CRITERIA,
   TOGGLE_HISTORICAL_RESULT_CHECKED_AT,
 } from './translations';
+import { textCss } from '../styles';
 
 interface Props {
   indexName: string;
@@ -51,7 +52,8 @@ export const HistoricalResultsListComponent: FC<Props> = ({ indexName }) => {
           {results.map((result) => (
             <Fragment key={result.checkedAt}>
               <EuiSpacer size="m" />
-              <StyledAccordion
+              <EuiAccordion
+                css={accordionCss}
                 id={historicalResultsAccordionId}
                 buttonProps={{
                   'aria-label': TOGGLE_HISTORICAL_RESULT_CHECKED_AT(
@@ -71,7 +73,9 @@ export const HistoricalResultsListComponent: FC<Props> = ({ indexName }) => {
                       <IndexResultBadge incompatible={result.incompatibleFieldCount} />
                     </EuiFlexItem>
                     <EuiFlexItem grow={true}>
-                      <StyledText size="s">{getFormattedCheckTime(result.checkedAt)}</StyledText>
+                      <EuiText css={textCss} size="s">
+                        {getFormattedCheckTime(result.checkedAt)}
+                      </EuiText>
                     </EuiFlexItem>
                     {!accordionState[result.checkedAt] && (
                       <EuiFlexItem grow={false}>
@@ -87,7 +91,7 @@ export const HistoricalResultsListComponent: FC<Props> = ({ indexName }) => {
                 }
               >
                 <HistoricalResult indexName={indexName} historicalResult={result} />
-              </StyledAccordion>
+              </EuiAccordion>
             </Fragment>
           ))}
         </>

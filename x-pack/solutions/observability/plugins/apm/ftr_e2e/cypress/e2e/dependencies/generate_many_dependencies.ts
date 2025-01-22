@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { apm, Instance, timerange } from '@kbn/apm-synthtrace-client';
+import type { Instance } from '@kbn/apm-synthtrace-client';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 
 const MAX_DEPENDENCIES = 10000;
 const MAX_DEPENDENCIES_PER_SERVICE = 500;

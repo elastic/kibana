@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import { StatsRollup } from '../stats_rollup';
 import { SummaryActions } from './summary_actions';
@@ -18,53 +18,57 @@ import { useResultsRollupContext } from '../contexts/results_rollup_context';
 const MAX_SUMMARY_ACTIONS_CONTAINER_WIDTH = 400;
 const MIN_SUMMARY_ACTIONS_CONTAINER_WIDTH = 235;
 
-const StyledFlexGroup = styled(EuiFlexGroup)`
-  min-height: calc(174px - ${({ theme }) => theme.eui.euiSizeL} * 2);
-`;
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
 
-const StyledFlexItem = styled(EuiFlexItem)`
-  gap: ${({ theme }) => theme.eui.euiSizeL};
-`;
-
-const SummaryActionsContainerFlexItem = styled(EuiFlexItem)`
-  max-width: ${MAX_SUMMARY_ACTIONS_CONTAINER_WIDTH}px;
-  min-width: ${MIN_SUMMARY_ACTIONS_CONTAINER_WIDTH}px;
-`;
-
-const StyledIlmPhaseFilterContainer = styled.div`
-  width: 100%;
-  max-width: 432px;
-  align-self: flex-end;
-`;
-
-const StyledRollupContainer = styled.div`
-  margin-top: auto;
-`;
+  return {
+    flexGroup: css({
+      minHeight: `calc(174px - ${euiTheme.size.l} * 2)`,
+    }),
+    flexItem: css({
+      gap: euiTheme.size.l,
+    }),
+    summaryActionsContainer: css({
+      maxWidth: MAX_SUMMARY_ACTIONS_CONTAINER_WIDTH,
+      minWidth: MIN_SUMMARY_ACTIONS_CONTAINER_WIDTH,
+    }),
+    ilmPhaseFilterContainer: css({
+      width: '100%',
+      maxWidth: 432,
+      alignSelf: 'flex-end',
+    }),
+    rollupContainer: css({
+      marginTop: 'auto',
+    }),
+  };
+};
 
 const DataQualitySummaryComponent: React.FC = () => {
+  const styles = useStyles();
   const { isILMAvailable } = useDataQualityContext();
   const { totalIndices, totalDocsCount, totalIndicesChecked, totalIncompatible, totalSizeInBytes } =
     useResultsRollupContext();
 
   return (
     <EuiPanel paddingSize="l" data-test-subj="dataQualitySummary" hasShadow={true}>
-      <StyledFlexGroup
+      <EuiFlexGroup
+        css={styles.flexGroup}
         alignItems="stretch"
         gutterSize="none"
         justifyContent="spaceBetween"
         wrap={true}
       >
-        <SummaryActionsContainerFlexItem grow={false}>
+        <EuiFlexItem css={styles.summaryActionsContainer} grow={false}>
           <SummaryActions />
-        </SummaryActionsContainerFlexItem>
+        </EuiFlexItem>
 
-        <StyledFlexItem grow={false}>
+        <EuiFlexItem css={styles.flexItem} grow={false}>
           {isILMAvailable && (
-            <StyledIlmPhaseFilterContainer>
+            <div css={styles.ilmPhaseFilterContainer}>
               <IlmPhaseFilter />
-            </StyledIlmPhaseFilterContainer>
+            </div>
           )}
-          <StyledRollupContainer>
+          <div css={styles.rollupContainer}>
             <StatsRollup
               docsCount={totalDocsCount}
               incompatible={totalIncompatible}
@@ -72,9 +76,9 @@ const DataQualitySummaryComponent: React.FC = () => {
               indicesChecked={totalIndicesChecked}
               sizeInBytes={totalSizeInBytes}
             />
-          </StyledRollupContainer>
-        </StyledFlexItem>
-      </StyledFlexGroup>
+          </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPanel>
   );
 };

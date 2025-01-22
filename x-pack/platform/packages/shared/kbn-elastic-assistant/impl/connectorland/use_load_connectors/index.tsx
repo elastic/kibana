@@ -25,18 +25,20 @@ const QUERY_KEY = ['elastic-assistant, load-connectors'];
 export interface Props {
   http: HttpSetup;
   toasts?: IToasts;
+  inferenceEnabled?: boolean;
 }
 
-const actionTypeKey = {
-  bedrock: '.bedrock',
-  openai: '.gen-ai',
-  gemini: '.gemini',
-};
+const actionTypes = ['.bedrock', '.gen-ai', '.gemini'];
 
 export const useLoadConnectors = ({
   http,
   toasts,
+  inferenceEnabled = false,
 }: Props): UseQueryResult<AIConnector[], IHttpFetchError> => {
+  if (inferenceEnabled) {
+    actionTypes.push('.inference');
+  }
+
   return useQuery(
     QUERY_KEY,
     async () => {
@@ -45,9 +47,9 @@ export const useLoadConnectors = ({
         (acc: AIConnector[], connector) => [
           ...acc,
           ...(!connector.isMissingSecrets &&
-          [actionTypeKey.bedrock, actionTypeKey.openai, actionTypeKey.gemini].includes(
-            connector.actionTypeId
-          )
+          actionTypes.includes(connector.actionTypeId) &&
+          // only include preconfigured .inference connectors
+          (connector.actionTypeId !== '.inference' || connector.isPreconfigured)
             ? [
                 {
                   ...connector,

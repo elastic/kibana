@@ -45,6 +45,7 @@ import {
   GetUninstallTokensMetadataResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
 import { SimplifiedPackagePolicy } from '@kbn/fleet-plugin/common/services/simplified_package_policy_helper';
+import { type FleetUsage } from '@kbn/fleet-plugin/server/collectors/register';
 import { testUsers } from '../test_users';
 
 export class SpaceTestApiClient {
@@ -70,7 +71,7 @@ export class SpaceTestApiClient {
     spaceId?: string,
     data: Partial<CreateAgentPolicyRequest['body']> = {}
   ): Promise<CreateAgentPolicyResponse> {
-    const { body: res } = await this.supertest
+    const { body: res, statusCode } = await this.supertest
       .post(`${this.getBaseUrl(spaceId)}/api/fleet/agent_policies`)
       .auth(this.auth.username, this.auth.password)
       .set('kbn-xsrf', 'xxxx')
@@ -80,10 +81,17 @@ export class SpaceTestApiClient {
         namespace: 'default',
         inactivity_timeout: 24 * 1000,
         ...data,
-      })
-      .expect(200);
+      });
 
-    return res;
+    if (statusCode === 200) {
+      return res;
+    }
+
+    if (statusCode === 404) {
+      throw new Error('404 "Not Found"');
+    } else {
+      throw new Error(`${statusCode} ${res?.error} ${res.message}`);
+    }
   }
   async createPackagePolicy(
     spaceId?: string,
@@ -364,6 +372,16 @@ export class SpaceTestApiClient {
   async getEnrollmentSettings(spaceId?: string): Promise<GetEnrollmentSettingsResponse> {
     const { body: res } = await this.supertest
       .get(`${this.getBaseUrl(spaceId)}/internal/fleet/settings/enrollment`)
+      .expect(200);
+
+    return res;
+  }
+  // Fleet Usage
+  async getFleetUsage(spaceId?: string): Promise<{ usage: FleetUsage }> {
+    const { body: res } = await this.supertest
+      .get(`${this.getBaseUrl(spaceId)}/internal/fleet/telemetry/usage`)
+      .set('kbn-xsrf', 'xxxx')
+      .set('elastic-api-version', '1')
       .expect(200);
 
     return res;

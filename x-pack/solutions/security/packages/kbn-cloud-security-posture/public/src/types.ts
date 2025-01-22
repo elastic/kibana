@@ -64,7 +64,9 @@ export interface CspBaseEsQuery {
 }
 
 export interface UseCspOptions extends CspBaseEsQuery {
-  sort: string[][];
+  sort: Array<{
+    [key: string]: string;
+  }>;
   enabled: boolean;
   pageSize: number;
   ignore_unavailable?: boolean;

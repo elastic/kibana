@@ -12,7 +12,7 @@ import styled from '@emotion/styled';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { getLegacyApmHref } from '../../shared/links/apm/apm_link';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
-import { APMQueryParams } from '../../shared/links/url_helpers';
+import type { APMQueryParams } from '../../shared/links/url_helpers';
 import { CytoscapeContext } from './cytoscape';
 import { getAnimationOptions, getNodeHeight } from './cytoscape_options';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
@@ -85,7 +85,7 @@ function useDebugDownloadUrl(cy?: cytoscape.Core) {
 
     return () => {
       if (cy) {
-        cy.off('add remove', undefined, elementsHandler);
+        cy.off('add remove', elementsHandler);
       }
     };
   }, [cy, debug]);
@@ -130,7 +130,7 @@ export function Controls() {
 
     return () => {
       if (cy) {
-        cy.off('zoom', undefined, zoomHandler);
+        cy.off('zoom', zoomHandler);
       }
     };
   }, [cy]);

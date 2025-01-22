@@ -256,6 +256,92 @@ describe('bedrockClaudeAdapter', () => {
       expect(system).toEqual('Some system message');
     });
 
+    it('correctly formats messages with content parts', () => {
+      bedrockClaudeAdapter.chatComplete({
+        executor: executorMock,
+        logger,
+        messages: [
+          {
+            role: MessageRole.User,
+            content: [
+              {
+                type: 'text',
+                text: 'question',
+              },
+            ],
+          },
+          {
+            role: MessageRole.Assistant,
+            content: 'answer',
+          },
+          {
+            role: MessageRole.User,
+            content: [
+              {
+                type: 'image',
+                source: {
+                  data: 'aaaaaa',
+                  mimeType: 'image/png',
+                },
+              },
+              {
+                type: 'image',
+                source: {
+                  data: 'bbbbbb',
+                  mimeType: 'image/png',
+                },
+              },
+            ],
+          },
+        ],
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+
+      const { messages } = getCallParams();
+      expect(messages).toEqual([
+        {
+          rawContent: [
+            {
+              text: 'question',
+              type: 'text',
+            },
+          ],
+          role: 'user',
+        },
+        {
+          rawContent: [
+            {
+              text: 'answer',
+              type: 'text',
+            },
+          ],
+          role: 'assistant',
+        },
+        {
+          rawContent: [
+            {
+              type: 'image',
+              source: {
+                data: 'aaaaaa',
+                mediaType: 'image/png',
+                type: 'base64',
+              },
+            },
+            {
+              type: 'image',
+              source: {
+                data: 'bbbbbb',
+                mediaType: 'image/png',
+                type: 'base64',
+              },
+            },
+          ],
+          role: 'user',
+        },
+      ]);
+    });
+
     it('correctly format tool choice', () => {
       bedrockClaudeAdapter.chatComplete({
         executor: executorMock,
@@ -341,6 +427,23 @@ describe('bedrockClaudeAdapter', () => {
         subAction: 'invokeStream',
         subActionParams: expect.objectContaining({
           signal: abortController.signal,
+        }),
+      });
+    });
+
+    it('propagates the temperature parameter', () => {
+      bedrockClaudeAdapter.chatComplete({
+        logger,
+        executor: executorMock,
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        temperature: 0.9,
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(executorMock.invoke).toHaveBeenCalledWith({
+        subAction: 'invokeStream',
+        subActionParams: expect.objectContaining({
+          temperature: 0.9,
         }),
       });
     });

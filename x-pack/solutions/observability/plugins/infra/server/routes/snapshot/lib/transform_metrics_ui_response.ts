@@ -13,7 +13,7 @@ import type {
   MetricsAPISeries,
   SnapshotMetricType,
 } from '@kbn/metrics-data-access-plugin/common';
-import {
+import type {
   SnapshotNodeResponse,
   SnapshotRequest,
   SnapshotNode,

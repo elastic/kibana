@@ -8,14 +8,16 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import type { HttpHandler } from '@kbn/core/public';
-import { IdFormat } from '../../../../../../common/http_api/latest';
+import type { IdFormat } from '../../../../../../common/http_api/latest';
+import type {
+  DatasetFilter,
+  LogEntryCategoriesJobType,
+} from '../../../../../../common/log_analysis';
 import {
   bucketSpan,
   categoriesMessageField,
-  DatasetFilter,
   getJobId,
   logEntryCategoriesJobType,
-  LogEntryCategoriesJobType,
   logEntryCategoriesJobTypes,
   partitionField,
 } from '../../../../../../common/log_analysis';
@@ -25,7 +27,7 @@ import { callSetupMlModuleAPI } from '../../api/ml_setup_module_api';
 import { callValidateDatasetsAPI } from '../../api/validate_datasets';
 import { callValidateIndicesAPI } from '../../api/validate_indices';
 import { cleanUpJobsAndDatafeeds } from '../../log_analysis_cleanup';
-import { ModuleDescriptor, ModuleSourceConfiguration } from '../../log_analysis_module_types';
+import type { ModuleDescriptor, ModuleSourceConfiguration } from '../../log_analysis_module_types';
 
 const moduleId = 'logs_ui_categories';
 const moduleName = i18n.translate('xpack.infra.logs.analysis.logEntryCategoriesModuleName', {

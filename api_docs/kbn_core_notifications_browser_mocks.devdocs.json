@@ -27,13 +27,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-notifications-browser-internal",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserInternalPluginApi",
-                "section": "def-public.NotificationsServiceContract",
-                "text": "NotificationsServiceContract"
-              },
+              "NotificationsServiceContract",
               ">"
             ],
             "path": "packages/core/notifications/core-notifications-browser-mocks/src/notifications_service.mock.ts",
@@ -59,13 +53,7 @@
                 "text": "MockedKeys"
               },
               "<",
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.NotificationsSetup",
-                "text": "NotificationsSetup"
-              },
+              "NotificationsSetup",
               ">"
             ],
             "path": "packages/core/notifications/core-notifications-browser-mocks/src/notifications_service.mock.ts",
@@ -91,13 +79,7 @@
                 "text": "DeeplyMockedKeys"
               },
               "<",
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.NotificationsStart",
-                "text": "NotificationsStart"
-              },
+              "NotificationsStart",
               ">"
             ],
             "path": "packages/core/notifications/core-notifications-browser-mocks/src/notifications_service.mock.ts",

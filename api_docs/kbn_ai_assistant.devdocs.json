@@ -14,13 +14,7 @@
           "({\n  connectors,\n  currentUser,\n  flyoutPositionMode,\n  initialConversationId,\n  initialMessages,\n  initialTitle,\n  knowledgeBase,\n  showLinkToConversationsApp,\n  onConversationUpdate,\n  onToggleFlyoutPositionMode,\n  navigateToConversation,\n}: { connectors: ",
           "UseGenAIConnectorsResult",
           "; currentUser?: Pick<",
-          {
-            "pluginId": "@kbn/core-security-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSecurityCommonPluginApi",
-            "section": "def-common.AuthenticatedUser",
-            "text": "AuthenticatedUser"
-          },
+          "AuthenticatedUser",
           ", \"username\" | \"full_name\"> | undefined; flyoutPositionMode?: ",
           {
             "pluginId": "@kbn/ai-assistant",
@@ -95,13 +89,7 @@
                 "description": [],
                 "signature": [
                   "Pick<",
-                  {
-                    "pluginId": "@kbn/core-security-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSecurityCommonPluginApi",
-                    "section": "def-common.AuthenticatedUser",
-                    "text": "AuthenticatedUser"
-                  },
+                  "AuthenticatedUser",
                   ", \"username\" | \"full_name\"> | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
@@ -349,7 +337,7 @@
         "label": "ChatFlyout",
         "description": [],
         "signature": [
-          "({\n  initialTitle,\n  initialMessages,\n  initialFlyoutPositionMode,\n  isOpen,\n  onClose,\n  navigateToConversation,\n  hideConversationList,\n}: { initialTitle: string; initialMessages: ",
+          "({\n  initialTitle,\n  initialMessages,\n  initialFlyoutPositionMode,\n  onFlyoutPositionModeChange,\n  isOpen,\n  onClose,\n  navigateToConversation,\n  hideConversationList,\n}: { initialTitle: string; initialMessages: ",
           {
             "pluginId": "observabilityAIAssistant",
             "scope": "common",
@@ -365,7 +353,15 @@
             "section": "def-public.FlyoutPositionMode",
             "text": "FlyoutPositionMode"
           },
-          " | undefined; isOpen: boolean; onClose: () => void; navigateToConversation?: ((conversationId?: string | undefined) => void) | undefined; hideConversationList?: boolean | undefined; }) => React.JSX.Element | null"
+          " | undefined; onFlyoutPositionModeChange?: ((next: ",
+          {
+            "pluginId": "@kbn/ai-assistant",
+            "scope": "public",
+            "docId": "kibKbnAiAssistantPluginApi",
+            "section": "def-public.FlyoutPositionMode",
+            "text": "FlyoutPositionMode"
+          },
+          ") => void) | undefined; isOpen: boolean; onClose: () => void; navigateToConversation?: ((conversationId?: string | undefined) => void) | undefined; hideConversationList?: boolean | undefined; }) => React.JSX.Element | null"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
         "deprecated": false,
@@ -376,7 +372,7 @@
             "id": "def-public.ChatFlyout.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  initialTitle,\n  initialMessages,\n  initialFlyoutPositionMode,\n  isOpen,\n  onClose,\n  navigateToConversation,\n  hideConversationList,\n}",
+            "label": "{\n  initialTitle,\n  initialMessages,\n  initialFlyoutPositionMode,\n  onFlyoutPositionModeChange,\n  isOpen,\n  onClose,\n  navigateToConversation,\n  hideConversationList,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
             "deprecated": false,
@@ -434,6 +430,52 @@
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
                 "deprecated": false,
                 "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatFlyout.$1.onFlyoutPositionModeChange",
+                "type": "Function",
+                "tags": [],
+                "label": "onFlyoutPositionModeChange",
+                "description": [],
+                "signature": [
+                  "((next: ",
+                  {
+                    "pluginId": "@kbn/ai-assistant",
+                    "scope": "public",
+                    "docId": "kibKbnAiAssistantPluginApi",
+                    "section": "def-public.FlyoutPositionMode",
+                    "text": "FlyoutPositionMode"
+                  },
+                  ") => void) | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/ai-assistant",
+                    "id": "def-public.ChatFlyout.$1.onFlyoutPositionModeChange.$1",
+                    "type": "Enum",
+                    "tags": [],
+                    "label": "next",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/ai-assistant",
+                        "scope": "public",
+                        "docId": "kibKbnAiAssistantPluginApi",
+                        "section": "def-public.FlyoutPositionMode",
+                        "text": "FlyoutPositionMode"
+                      }
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
               },
               {
                 "parentPluginId": "@kbn/ai-assistant",
@@ -1031,6 +1073,24 @@
       },
       {
         "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.useGenAIConnectors",
+        "type": "Function",
+        "tags": [],
+        "label": "useGenAIConnectors",
+        "description": [],
+        "signature": [
+          "() => ",
+          "UseGenAIConnectorsResult"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_genai_connectors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant",
         "id": "def-public.useKnowledgeBase",
         "type": "Function",
         "tags": [],
@@ -1101,11 +1161,11 @@
             "signature": [
               "State<{ errorMessage?: string | undefined; ready: boolean; enabled: boolean; endpoint?: Partial<",
               "InferenceInferenceEndpointInfo",
-              "> | undefined; model_stats?: { deployment_state: ",
+              "> | undefined; model_stats?: { deployment_state?: ",
               "MlDeploymentAssignmentState",
-              " | undefined; allocation_state: ",
+              " | undefined; allocation_state?: ",
               "MlDeploymentAllocationState",
-              " | undefined; } | undefined; }> & { refresh: () => void; }"
+              " | undefined; allocation_count?: number | undefined; } | undefined; }> & { refresh: () => void; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
             "deprecated": false,
@@ -1188,6 +1248,18 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/service/create_app_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.UseGenAIConnectorsResult",
+        "type": "Type",
+        "tags": [],
+        "label": "UseGenAIConnectorsResult",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_genai_connectors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

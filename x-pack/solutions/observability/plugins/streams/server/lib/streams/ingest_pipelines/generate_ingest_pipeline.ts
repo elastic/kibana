@@ -5,48 +5,18 @@
  * 2.0.
  */
 
-import {
-  isDissectProcessor,
-  isGrokProcessor,
-  ProcessingDefinition,
-  StreamDefinition,
-} from '@kbn/streams-schema';
-import { get } from 'lodash';
+import { StreamDefinition, isRoot } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
-import { conditionToPainless } from '../helpers/condition_to_painless';
 import { logsDefaultPipelineProcessors } from './logs_default_pipeline';
-import { isRoot } from '../helpers/hierarchy';
 import { getProcessingPipelineName } from './name';
-
-function getProcessorType(processor: ProcessingDefinition) {
-  if (isGrokProcessor(processor.config)) {
-    return 'grok';
-  }
-  if (isDissectProcessor(processor.config)) {
-    return 'dissect';
-  }
-  throw new Error('Unknown processor type');
-}
-
-function generateProcessingSteps(definition: StreamDefinition) {
-  return definition.stream.ingest.processing.map((processor) => {
-    const type = getProcessorType(processor);
-    const config = get(processor.config, type);
-    return {
-      [type]: {
-        ...config,
-        if: processor.condition ? conditionToPainless(processor.condition) : undefined,
-      },
-    };
-  });
-}
+import { formatToIngestProcessors } from '../helpers/processing';
 
 export function generateIngestPipeline(id: string, definition: StreamDefinition) {
   return {
     id: getProcessingPipelineName(id),
     processors: [
       ...(isRoot(definition.name) ? logsDefaultPipelineProcessors : []),
-      ...generateProcessingSteps(definition),
+      ...formatToIngestProcessors(definition.stream.ingest.processing),
       {
         pipeline: {
           name: `${id}@stream.reroutes`,
@@ -64,7 +34,7 @@ export function generateIngestPipeline(id: string, definition: StreamDefinition)
 
 export function generateClassicIngestPipelineBody(definition: StreamDefinition) {
   return {
-    processors: generateProcessingSteps(definition),
+    processors: formatToIngestProcessors(definition.stream.ingest.processing),
     _meta: {
       description: `Stream-managed pipeline for the ${definition.name} stream`,
       managed: true,

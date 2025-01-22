@@ -25,7 +25,7 @@ function createInlineStyles(content) {
 }
 
 // must be kept in sync with
-// packages/core/rendering/core-rendering-server-internal/src/views/styles.tsx
+// src/core/packages/rendering/server-internal/src/views/styles.tsx
 
 var lightStyles = [
   'html { background-color: #F8FAFD; }',

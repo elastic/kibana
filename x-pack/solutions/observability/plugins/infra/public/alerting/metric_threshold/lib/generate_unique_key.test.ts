@@ -6,7 +6,7 @@
  */
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { Aggregators } from '../../../../common/alerting/metrics';
-import { MetricExpression } from '../types';
+import type { MetricExpression } from '../types';
 import { generateUniqueKey } from './generate_unique_key';
 
 describe('generateUniqueKey', () => {

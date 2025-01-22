@@ -7,7 +7,7 @@
 
 import { getResponseTimeTickFormatter, getMaxY } from './helper';
 
-import { TimeSeries, Coordinate } from '../../../../../typings/timeseries';
+import type { TimeSeries, Coordinate } from '../../../../../typings/timeseries';
 import { getDurationFormatter, toMicroseconds } from '../../../../../common/utils/formatters';
 
 describe('transaction chart helper', () => {

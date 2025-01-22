@@ -259,7 +259,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
                 <EuiButton
                   fill
                   iconType={isSaved ? 'check' : undefined}
-                  color="success"
+                  color="primary"
                   data-test-subj="edit-connector-flyout-save-btn"
                   isLoading={isSaving}
                   onClick={onClickSave}
@@ -346,12 +346,12 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
         <FlyoutHeader
           isPreconfigured={connector.isPreconfigured}
           connectorName={connector.name}
-          connectorTypeId={connector.actionTypeId}
           connectorTypeDesc={actionTypeModel?.selectMessage}
           setTab={handleSetTab}
           selectedTab={selectedTab}
           icon={actionTypeModel?.iconClass}
           isExperimental={actionTypeModel?.isExperimental}
+          subFeature={actionTypeModel?.subFeature}
         />
         <EuiFlyoutBody>
           {selectedTab === EditConnectorTabs.Configuration && renderConfigurationTab()}

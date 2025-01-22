@@ -6,7 +6,8 @@
  */
 
 import { render } from '@testing-library/react';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { expectTextsInDocument, expectTextsNotInDocument } from '../../../utils/test_helpers';
 import { TimeComparison } from '.';

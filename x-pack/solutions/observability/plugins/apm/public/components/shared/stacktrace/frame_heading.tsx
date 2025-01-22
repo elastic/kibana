@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { ComponentType } from 'react';
+import type { ComponentType } from 'react';
+import React from 'react';
 import styled from '@emotion/styled';
 import { useEuiFontSize } from '@elastic/eui';
-import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
+import type { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
+import type { FrameHeadingRendererProps } from './frame_heading_renderers';
 import {
   CSharpFrameHeadingRenderer,
   DefaultFrameHeadingRenderer,
-  FrameHeadingRendererProps,
   JavaFrameHeadingRenderer,
   JavaScriptFrameHeadingRenderer,
   RubyFrameHeadingRenderer,

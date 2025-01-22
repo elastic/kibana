@@ -21,7 +21,7 @@
         "description": [
           "\nDeprecation Service: Internal Start contract"
         ],
-        "path": "packages/core/deprecations/core-deprecations-server-internal/src/deprecations_service.ts",
+        "path": "src/core/packages/deprecations/server-internal/src/deprecations_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,39 +36,15 @@
             ],
             "signature": [
               "(esClient: ",
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.IScopedClusterClient",
-                "text": "IScopedClusterClient"
-              },
+              "IScopedClusterClient",
               ", savedObjectsClient: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
-              },
+              "SavedObjectsClientContract",
               ", request: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => ",
-              {
-                "pluginId": "@kbn/core-deprecations-server",
-                "scope": "server",
-                "docId": "kibKbnCoreDeprecationsServerPluginApi",
-                "section": "def-server.DeprecationsClient",
-                "text": "DeprecationsClient"
-              }
+              "DeprecationsClient"
             ],
-            "path": "packages/core/deprecations/core-deprecations-server-internal/src/deprecations_service.ts",
+            "path": "src/core/packages/deprecations/server-internal/src/deprecations_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -82,15 +58,9 @@
                   "Scoped Elasticsearch client"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-elasticsearch-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                    "section": "def-server.IScopedClusterClient",
-                    "text": "IScopedClusterClient"
-                  }
+                  "IScopedClusterClient"
                 ],
-                "path": "packages/core/deprecations/core-deprecations-server-internal/src/deprecations_service.ts",
+                "path": "src/core/packages/deprecations/server-internal/src/deprecations_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -105,15 +75,9 @@
                   "Scoped SO Client"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsClientContract",
-                    "text": "SavedObjectsClientContract"
-                  }
+                  "SavedObjectsClientContract"
                 ],
-                "path": "packages/core/deprecations/core-deprecations-server-internal/src/deprecations_service.ts",
+                "path": "src/core/packages/deprecations/server-internal/src/deprecations_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -126,16 +90,10 @@
                 "label": "request",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
-                "path": "packages/core/deprecations/core-deprecations-server-internal/src/deprecations_service.ts",
+                "path": "src/core/packages/deprecations/server-internal/src/deprecations_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true

@@ -4,14 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Chart, Datum, Flame, Settings, Tooltip } from '@elastic/charts';
+import type { Datum } from '@elastic/charts';
+import { Chart, Flame, Settings, Tooltip } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, euiPaletteColorBlind } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { uniqueId } from 'lodash';
 import React, { useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FETCH_STATUS, useFetcher, isPending } from '../../../hooks/use_fetcher';
+import type { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useFetcher, isPending } from '../../../hooks/use_fetcher';
 import { CriticalPathFlamegraphTooltip } from './critical_path_flamegraph_tooltip';
 import { criticalPathToFlamegraph } from './critical_path_to_flamegraph';
 

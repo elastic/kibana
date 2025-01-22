@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { notFound, internal } from '@hapi/boom';
+import { internal, notFound } from '@hapi/boom';
 import {
   FieldDefinitionConfig,
-  isIngestStream,
-  isWiredStream,
   ReadStreamDefinition,
+  WiredReadStreamDefinition,
+  isWiredStream,
 } from '@kbn/streams-schema';
-import { createServerRoute } from '../create_server_route';
+import { z } from '@kbn/zod';
+import { isResponseError } from '@kbn/es-errors';
 import { DefinitionNotFound } from '../../lib/streams/errors';
-import { readAncestors, readStream } from '../../lib/streams/stream_crud';
+import { createServerRoute } from '../create_server_route';
+import { getDataStreamLifecycle } from '../../lib/streams/stream_crud';
 
 export const readStreamRoute = createServerRoute({
   endpoint: 'GET /api/streams/{id}',
@@ -34,28 +35,38 @@ export const readStreamRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients }): Promise<ReadStreamDefinition> => {
     try {
-      const { scopedClusterClient } = await getScopedClients({ request });
-      const streamEntity = await readStream({
-        scopedClusterClient,
-        id: params.path.id,
+      const { assetClient, streamsClient } = await getScopedClients({
+        request,
       });
 
-      // TODO: I have no idea why I can just do `isIngestStream` here but when I do,
-      // streamEntity becomes `streamEntity: never` in the statements afterwards
-      if (!isWiredStream(streamEntity) && isIngestStream(streamEntity)) {
+      const name = params.path.id;
+
+      const [streamDefinition, dashboards, ancestors, dataStream] = await Promise.all([
+        streamsClient.getStream(name),
+        assetClient.getAssetIds({
+          entityId: name,
+          entityType: 'stream',
+          assetType: 'dashboard',
+        }),
+        streamsClient.getAncestors(name),
+        streamsClient.getDataStream(name),
+      ]);
+
+      const lifecycle = getDataStreamLifecycle(dataStream);
+
+      if (!isWiredStream(streamDefinition)) {
         return {
-          ...streamEntity,
+          ...streamDefinition,
+          lifecycle,
+          dashboards,
           inherited_fields: {},
         };
       }
 
-      const { ancestors } = await readAncestors({
-        id: streamEntity.name,
-        scopedClusterClient,
-      });
-
-      const body = {
-        ...streamEntity,
+      const body: WiredReadStreamDefinition = {
+        ...streamDefinition,
+        dashboards,
+        lifecycle,
         inherited_fields: ancestors.reduce((acc, def) => {
           Object.entries(def.stream.ingest.wired.fields).forEach(([key, fieldDef]) => {
             acc[key] = { ...fieldDef, from: def.name };
@@ -67,7 +78,7 @@ export const readStreamRoute = createServerRoute({
 
       return body;
     } catch (e) {
-      if (e instanceof DefinitionNotFound) {
+      if (e instanceof DefinitionNotFound || (isResponseError(e) && e.statusCode === 404)) {
         throw notFound(e);
       }
 

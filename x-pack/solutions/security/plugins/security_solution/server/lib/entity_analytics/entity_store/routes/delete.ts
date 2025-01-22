@@ -10,6 +10,7 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
+import { EntityType } from '../../../../../common/search_strategy';
 import type { DeleteEntityEngineResponse } from '../../../../../common/api/entity_analytics/entity_store/engine/delete.gen';
 import {
   DeleteEntityEngineRequestQuery,
@@ -58,7 +59,7 @@ export const deleteEntityEngineRoute = (
           const secSol = await context.securitySolution;
           const body = await secSol
             .getEntityStoreDataClient()
-            .delete(request.params.entityType, taskManager, {
+            .delete(EntityType[request.params.entityType], taskManager, {
               deleteData: !!request.query.data,
               deleteEngine: true,
             });

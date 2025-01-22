@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiTabbedContent,
-  EuiTabbedContentProps,
-} from '@elastic/eui';
+import type { EuiTabbedContentProps } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSpacer, EuiTabbedContent } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {

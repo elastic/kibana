@@ -35,9 +35,8 @@ import {
 } from './related_entities/related_entities';
 
 import {
-  hostsRiskScoreRequestOptionsSchema,
+  riskScoreRequestOptionsSchema,
   riskScoreKpiRequestOptionsSchema,
-  usersRiskScoreRequestOptionsSchema,
 } from './risk_score/risk_score';
 
 import {
@@ -77,8 +76,7 @@ export const searchStrategyRequestSchema = z.discriminatedUnion('factoryQueryTyp
   observedUserDetailsSchema,
   managedUserDetailsSchema,
   userAuthenticationsSchema,
-  hostsRiskScoreRequestOptionsSchema,
-  usersRiskScoreRequestOptionsSchema,
+  riskScoreRequestOptionsSchema,
   riskScoreKpiRequestOptionsSchema,
   relatedHostsRequestOptionsSchema,
   relatedUsersRequestOptionsSchema,

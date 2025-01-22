@@ -15,8 +15,6 @@ import {
   ENTERPRISE_SEARCH_CONTENT_APP_ID,
   ENTERPRISE_SEARCH_APPLICATIONS_APP_ID,
   ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
-  ENTERPRISE_SEARCH_APPSEARCH_APP_ID,
-  ENTERPRISE_SEARCH_WORKPLACESEARCH_APP_ID,
   ES_SEARCH_PLAYGROUND_ID,
   SERVERLESS_ES_SEARCH_INFERENCE_ENDPOINTS_ID,
   SEARCH_HOMEPAGE,
@@ -27,19 +25,19 @@ import {
   SEARCH_VECTOR_SEARCH,
   SEARCH_SEMANTIC_SEARCH,
   SEARCH_AI_SEARCH,
+  ES_SEARCH_SYNONYMS_ID,
 } from './constants';
 
 export type EnterpriseSearchApp = typeof ENTERPRISE_SEARCH_APP_ID;
 export type EnterpriseSearchContentApp = typeof ENTERPRISE_SEARCH_CONTENT_APP_ID;
 export type EnterpriseSearchApplicationsApp = typeof ENTERPRISE_SEARCH_APPLICATIONS_APP_ID;
 export type EnterpriseSearchAnalyticsApp = typeof ENTERPRISE_SEARCH_ANALYTICS_APP_ID;
-export type EnterpriseSearchAppsearchApp = typeof ENTERPRISE_SEARCH_APPSEARCH_APP_ID;
-export type EnterpriseSearchWorkplaceSearchApp = typeof ENTERPRISE_SEARCH_WORKPLACESEARCH_APP_ID;
 export type ServerlessSearchApp = typeof SERVERLESS_ES_APP_ID;
 export type ConnectorsId = typeof SERVERLESS_ES_CONNECTORS_ID;
 export type ServerlessWebCrawlers = typeof SERVERLESS_ES_WEB_CRAWLERS_ID;
 export type SearchPlaygroundId = typeof ES_SEARCH_PLAYGROUND_ID;
 export type SearchInferenceEndpointsId = typeof SERVERLESS_ES_SEARCH_INFERENCE_ENDPOINTS_ID;
+export type SearchSynonymsId = typeof ES_SEARCH_SYNONYMS_ID;
 export type SearchHomepage = typeof SEARCH_HOMEPAGE;
 export type SearchStart = typeof SEARCH_INDICES_START;
 export type SearchIndices = typeof SEARCH_INDICES;
@@ -48,13 +46,13 @@ export type SearchVectorSearch = typeof SEARCH_VECTOR_SEARCH;
 export type SearchSemanticSearch = typeof SEARCH_SEMANTIC_SEARCH;
 export type SearchAISearch = typeof SEARCH_AI_SEARCH;
 
-export type ContentLinkId = 'searchIndices' | 'connectors' | 'webCrawlers';
+export type ContentLinkId = 'connectors' | 'webCrawlers';
 
 export type ApplicationsLinkId = 'searchApplications';
 
-export type AppsearchLinkId = 'engines';
-
 export type SearchInferenceEndpointsLinkId = 'inferenceEndpoints';
+
+export type SynonymsLinkId = 'synonyms';
 
 export type SearchIndicesLinkId = typeof SEARCH_INDICES_CREATE_INDEX;
 
@@ -63,18 +61,17 @@ export type DeepLinkId =
   | EnterpriseSearchContentApp
   | EnterpriseSearchApplicationsApp
   | EnterpriseSearchAnalyticsApp
-  | EnterpriseSearchAppsearchApp
-  | EnterpriseSearchWorkplaceSearchApp
   | ServerlessSearchApp
   | ConnectorsId
   | ServerlessWebCrawlers
   | SearchPlaygroundId
   | SearchInferenceEndpointsId
+  | SearchSynonymsId
   | SearchHomepage
   | `${EnterpriseSearchContentApp}:${ContentLinkId}`
   | `${EnterpriseSearchApplicationsApp}:${ApplicationsLinkId}`
-  | `${EnterpriseSearchAppsearchApp}:${AppsearchLinkId}`
   | `${SearchInferenceEndpointsId}:${SearchInferenceEndpointsLinkId}`
+  | `${SearchSynonymsId}:${SynonymsLinkId}`
   | SearchStart
   | SearchIndices
   | SearchElasticsearch

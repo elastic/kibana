@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApmDataSource } from './data_source';
+import type { ApmDataSource } from './data_source';
 
 export interface TimeRangeMetadata {
   isUsingServiceDestinationMetrics: boolean;

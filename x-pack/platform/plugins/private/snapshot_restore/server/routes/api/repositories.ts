@@ -9,7 +9,7 @@ import { TypeOf } from '@kbn/config-schema';
 import type {
   SnapshotGetRepositoryResponse,
   PluginStats,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 
 import {
   ON_PREM_REPOSITORY_TYPES,

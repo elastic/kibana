@@ -100,53 +100,6 @@
     "functions": [
       {
         "parentPluginId": "observabilityAIAssistant",
-        "id": "def-public.AssistantAvatar",
-        "type": "Function",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "AssistantAvatar",
-        "description": [],
-        "signature": [
-          "({ size = 's', css, className }: ",
-          "AssistantAvatarProps",
-          ") => React.JSX.Element"
-        ],
-        "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/public/components/assistant_avatar.tsx",
-        "deprecated": true,
-        "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "observabilityAIAssistantApp",
-            "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/public/components/rca/rca_callout/index.tsx"
-          },
-          {
-            "plugin": "observabilityAIAssistantApp",
-            "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/public/components/rca/rca_callout/index.tsx"
-          }
-        ],
-        "children": [
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-public.AssistantAvatar.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ size = 's', css, className }",
-            "description": [],
-            "signature": [
-              "AssistantAvatarProps"
-            ],
-            "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/public/components/assistant_avatar.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.ChatItemControls",
         "type": "Function",
         "tags": [],
@@ -2476,11 +2429,11 @@
               "ObservabilityAIAssistantRouteHandlerResources",
               ", { errorMessage?: string | undefined; ready: boolean; enabled: boolean; endpoint?: Partial<",
               "InferenceInferenceEndpointInfo",
-              "> | undefined; model_stats?: { deployment_state: ",
+              "> | undefined; model_stats?: { deployment_state?: ",
               "MlDeploymentAssignmentState",
-              " | undefined; allocation_state: ",
+              " | undefined; allocation_state?: ",
               "MlDeploymentAllocationState",
-              " | undefined; } | undefined; }, ",
+              " | undefined; allocation_count?: number | undefined; } | undefined; }, ",
               "ObservabilityAIAssistantRouteCreateOptions",
               ">; \"POST /internal/observability_ai_assistant/kb/reset\": ",
               {
@@ -3163,13 +3116,7 @@
               ", ",
               "ObservabilityAIAssistantRouteCreateOptions",
               ">; }, TEndpoint> & Omit<FetchOptions, \"query\" | \"body\" | \"signal\" | \"pathname\"> & { signal: AbortSignal | null; } & ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpFetchOptions",
-                "text": "HttpFetchOptions"
-              },
+              "HttpFetchOptions",
               ">) => Promise<",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -3454,11 +3401,11 @@
               "ObservabilityAIAssistantRouteHandlerResources",
               ", { errorMessage?: string | undefined; ready: boolean; enabled: boolean; endpoint?: Partial<",
               "InferenceInferenceEndpointInfo",
-              "> | undefined; model_stats?: { deployment_state: ",
+              "> | undefined; model_stats?: { deployment_state?: ",
               "MlDeploymentAssignmentState",
-              " | undefined; allocation_state: ",
+              " | undefined; allocation_state?: ",
               "MlDeploymentAllocationState",
-              " | undefined; } | undefined; }, ",
+              " | undefined; allocation_count?: number | undefined; } | undefined; }, ",
               "ObservabilityAIAssistantRouteCreateOptions",
               ">; \"POST /internal/observability_ai_assistant/kb/reset\": ",
               {
@@ -4179,13 +4126,7 @@
                     "text": "ClientRequestParamsOf"
                   },
                   "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpFetchOptions",
-                    "text": "HttpFetchOptions"
-                  },
+                  "HttpFetchOptions",
                   "> extends never ? [] | [",
                   {
                     "pluginId": "@kbn/server-route-repository-utils",
@@ -4195,13 +4136,7 @@
                     "text": "ClientRequestParamsOf"
                   },
                   "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpFetchOptions",
-                    "text": "HttpFetchOptions"
-                  },
+                  "HttpFetchOptions",
                   "] : [",
                   {
                     "pluginId": "@kbn/server-route-repository-utils",
@@ -4211,13 +4146,7 @@
                     "text": "ClientRequestParamsOf"
                   },
                   "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpFetchOptions",
-                    "text": "HttpFetchOptions"
-                  },
+                  "HttpFetchOptions",
                   "]"
                 ],
                 "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
@@ -5169,11 +5098,11 @@
           "ObservabilityAIAssistantRouteHandlerResources",
           ", { errorMessage?: string | undefined; ready: boolean; enabled: boolean; endpoint?: Partial<",
           "InferenceInferenceEndpointInfo",
-          "> | undefined; model_stats?: { deployment_state: ",
+          "> | undefined; model_stats?: { deployment_state?: ",
           "MlDeploymentAssignmentState",
-          " | undefined; allocation_state: ",
+          " | undefined; allocation_state?: ",
           "MlDeploymentAllocationState",
-          " | undefined; } | undefined; }, ",
+          " | undefined; allocation_count?: number | undefined; } | undefined; }, ",
           "ObservabilityAIAssistantRouteCreateOptions",
           ">; \"POST /internal/observability_ai_assistant/kb/reset\": ",
           {
@@ -5864,23 +5793,11 @@
             "text": "ServerRoute"
           },
           "<any, any, any, infer TReturnType extends ServerRouteHandlerReturnType, any> ? TReturnType extends ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IKibanaResponse",
-            "text": "IKibanaResponse"
-          },
+          "IKibanaResponse",
           "<infer TWrappedResponseType extends string | Record<string, any> | Error | Buffer | ",
           "Stream",
           " | { message: string | Error; attributes?: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.ResponseErrorAttributes",
-            "text": "ResponseErrorAttributes"
-          },
+          "ResponseErrorAttributes",
           " | undefined; } | undefined> ? TWrappedResponseType : TReturnType : never"
         ],
         "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/public/api/index.ts",
@@ -6374,11 +6291,11 @@
           "ObservabilityAIAssistantRouteHandlerResources",
           ", { errorMessage?: string | undefined; ready: boolean; enabled: boolean; endpoint?: Partial<",
           "InferenceInferenceEndpointInfo",
-          "> | undefined; model_stats?: { deployment_state: ",
+          "> | undefined; model_stats?: { deployment_state?: ",
           "MlDeploymentAssignmentState",
-          " | undefined; allocation_state: ",
+          " | undefined; allocation_state?: ",
           "MlDeploymentAllocationState",
-          " | undefined; } | undefined; }, ",
+          " | undefined; allocation_count?: number | undefined; } | undefined; }, ",
           "ObservabilityAIAssistantRouteCreateOptions",
           ">; \"POST /internal/observability_ai_assistant/kb/reset\": ",
           {
@@ -7809,13 +7726,7 @@
                     "label": "core",
                     "description": [],
                     "signature": [
-                      {
-                        "pluginId": "@kbn/core-lifecycle-server",
-                        "scope": "server",
-                        "docId": "kibKbnCoreLifecycleServerPluginApi",
-                        "section": "def-server.CoreSetup",
-                        "text": "CoreSetup"
-                      },
+                      "CoreSetup",
                       "<",
                       "ObservabilityAIAssistantPluginStartDependencies",
                       ", unknown>"
@@ -7918,13 +7829,7 @@
                     "label": "uiSettingsClient",
                     "description": [],
                     "signature": [
-                      {
-                        "pluginId": "@kbn/core-ui-settings-server",
-                        "scope": "server",
-                        "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                        "section": "def-server.IUiSettingsClient",
-                        "text": "IUiSettingsClient"
-                      }
+                      "IUiSettingsClient"
                     ],
                     "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/server/service/client/index.ts",
                     "deprecated": false,
@@ -7950,21 +7855,9 @@
                     "description": [],
                     "signature": [
                       "{ asInternalUser: ",
-                      {
-                        "pluginId": "@kbn/core-elasticsearch-server",
-                        "scope": "server",
-                        "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                        "section": "def-server.ElasticsearchClient",
-                        "text": "ElasticsearchClient"
-                      },
+                      "ElasticsearchClient",
                       "; asCurrentUser: ",
-                      {
-                        "pluginId": "@kbn/core-elasticsearch-server",
-                        "scope": "server",
-                        "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                        "section": "def-server.ElasticsearchClient",
-                        "text": "ElasticsearchClient"
-                      },
+                      "ElasticsearchClient",
                       "; }"
                     ],
                     "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/server/service/client/index.ts",
@@ -9730,11 +9623,11 @@
           "ObservabilityAIAssistantRouteHandlerResources",
           ", { errorMessage?: string | undefined; ready: boolean; enabled: boolean; endpoint?: Partial<",
           "InferenceInferenceEndpointInfo",
-          "> | undefined; model_stats?: { deployment_state: ",
+          "> | undefined; model_stats?: { deployment_state?: ",
           "MlDeploymentAssignmentState",
-          " | undefined; allocation_state: ",
+          " | undefined; allocation_state?: ",
           "MlDeploymentAllocationState",
-          " | undefined; } | undefined; }, ",
+          " | undefined; allocation_count?: number | undefined; } | undefined; }, ",
           "ObservabilityAIAssistantRouteCreateOptions",
           ">; \"POST /internal/observability_ai_assistant/kb/reset\": ",
           {

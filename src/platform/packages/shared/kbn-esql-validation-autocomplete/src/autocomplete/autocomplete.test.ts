@@ -91,30 +91,26 @@ describe('autocomplete', () => {
       ...sourceCommands.map((name) => name.toUpperCase() + ' $0'),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
-    testSuggestions(
-      'from a | /',
-      commandDefinitions
-        .filter(({ name }) => !sourceCommands.includes(name))
-        .map(({ name }) => name.toUpperCase() + ' $0')
-    );
-    testSuggestions(
-      'from a metadata _id | /',
-      commandDefinitions
-        .filter(({ name }) => !sourceCommands.includes(name))
-        .map(({ name }) => name.toUpperCase() + ' $0')
-    );
-    testSuggestions(
-      'from a | eval var0 = a | /',
-      commandDefinitions
-        .filter(({ name }) => !sourceCommands.includes(name))
-        .map(({ name }) => name.toUpperCase() + ' $0')
-    );
-    testSuggestions(
-      'from a metadata _id | eval var0 = a | /',
-      commandDefinitions
-        .filter(({ name }) => !sourceCommands.includes(name))
-        .map(({ name }) => name.toUpperCase() + ' $0')
-    );
+    const commands = commandDefinitions
+      .filter(({ name }) => !sourceCommands.includes(name))
+      .map(({ name, types }) => {
+        if (types && types.length) {
+          const cmds: string[] = [];
+          for (const type of types) {
+            const cmd = type.name.toUpperCase() + ' ' + name.toUpperCase() + ' $0';
+            cmds.push(cmd);
+          }
+          return cmds;
+        } else {
+          return name.toUpperCase() + ' $0';
+        }
+      })
+      .flat();
+
+    testSuggestions('from a | /', commands);
+    testSuggestions('from a metadata _id | /', commands);
+    testSuggestions('from a | eval var0 = a | /', commands);
+    testSuggestions('from a metadata _id | eval var0 = a | /', commands);
   });
 
   describe('show', () => {
@@ -440,13 +436,24 @@ describe('autocomplete', () => {
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
 
+    const commands = commandDefinitions
+      .filter(({ name }) => !sourceCommands.includes(name))
+      .map(({ name, types }) => {
+        if (types && types.length) {
+          const cmds: string[] = [];
+          for (const type of types) {
+            const cmd = type.name.toUpperCase() + ' ' + name.toUpperCase() + ' $0';
+            cmds.push(cmd);
+          }
+          return cmds;
+        } else {
+          return name.toUpperCase() + ' $0';
+        }
+      })
+      .flat();
+
     // pipe command
-    testSuggestions(
-      'FROM k | E/',
-      commandDefinitions
-        .filter(({ name }) => !sourceCommands.includes(name))
-        .map(({ name }) => name.toUpperCase() + ' $0')
-    );
+    testSuggestions('FROM k | E/', commands);
 
     describe('function arguments', () => {
       // function argument
@@ -650,13 +657,26 @@ describe('autocomplete', () => {
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
 
+    const commands = commandDefinitions
+      .filter(({ name }) => !sourceCommands.includes(name))
+      .map(({ name, types }) => {
+        if (types && types.length) {
+          const cmds: string[] = [];
+          for (const type of types) {
+            const cmd = type.name.toUpperCase() + ' ' + name.toUpperCase() + ' $0';
+            cmds.push(cmd);
+          }
+          return cmds;
+        } else {
+          return name.toUpperCase() + ' $0';
+        }
+      })
+      .flat();
+
     // Pipe command
     testSuggestions(
       'FROM a | E/',
-      commandDefinitions
-        .filter(({ name }) => !sourceCommands.includes(name))
-        .map(({ name }) => attachTriggerCommand(name.toUpperCase() + ' $0'))
-        .map(attachAsSnippet) // TODO consider making this check more fundamental
+      commands.map((name) => attachTriggerCommand(name)).map(attachAsSnippet) // TODO consider making this check more fundamental
     );
 
     describe('function arguments', () => {

@@ -6,8 +6,12 @@
  */
 
 import type {
-  RuleMigration,
-  RuleMigrationResource,
+  UpdateRuleMigrationData,
+  RuleMigrationTranslationResult,
+} from '../../../../common/siem_migrations/model/rule_migration.gen';
+import {
+  type RuleMigration,
+  type RuleMigrationResource,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
 
 export type Stored<T extends object> = T & { id: string };
@@ -15,9 +19,9 @@ export type Stored<T extends object> = T & { id: string };
 export type StoredRuleMigration = Stored<RuleMigration>;
 export type StoredRuleMigrationResource = Stored<RuleMigrationResource>;
 
-export interface Integration {
-  title: string;
+export interface RuleMigrationIntegration {
   id: string;
+  title: string;
   description: string;
   data_streams: Array<{ dataset: string; title: string; index_pattern: string }>;
   elser_embedding: string;
@@ -25,9 +29,13 @@ export interface Integration {
 
 export interface RuleMigrationPrebuiltRule {
   rule_id: string;
-  installedRuleId?: string;
+  installed_rule_id?: string;
   name: string;
   description: string;
   elser_embedding: string;
   mitre_attack_ids?: string[];
 }
+
+export type InternalUpdateRuleMigrationData = UpdateRuleMigrationData & {
+  translation_result?: RuleMigrationTranslationResult;
+};

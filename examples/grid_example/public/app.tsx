@@ -69,15 +69,19 @@ export const GridExample = ({
     combineLatest([mockDashboardApi.panels$, mockDashboardApi.rows$])
       .pipe(debounceTime(0)) // debounce to avoid subscribe being called twice when both panels$ and rows$ publish
       .subscribe(([panels, rows]) => {
-        const hasChanges = !(
-          deepEqual(
-            Object.values(panels).map(({ gridData }) => ({ row: 0, ...gridData })),
-            Object.values(savedState.current.panels).map(({ gridData }) => ({
-              row: 0, // if row is undefined, then default to 0
-              ...gridData,
-            }))
-          ) && deepEqual(rows, savedState.current.rows)
-        );
+        const panelIds = Object.keys(panels);
+        let panelsAreEqual = true;
+        for (const panelId of panelIds) {
+          if (!panelsAreEqual) break;
+          const currentPanel = panels[panelId];
+          const savedPanel = savedState.current.panels[panelId];
+          panelsAreEqual = deepEqual(
+            { row: 0, ...currentPanel.gridData },
+            { row: 0, ...savedPanel.gridData }
+          );
+        }
+
+        const hasChanges = !(panelsAreEqual && deepEqual(rows, savedState.current.rows));
         setHasUnsavedChanges(hasChanges);
         setCurrentLayout(dashboardInputToGridLayout({ panels, rows }));
       });
@@ -119,7 +123,7 @@ export const GridExample = ({
         <EuiPageTemplate.Section
           color="subdued"
           contentProps={{
-            css: { flexGrow: 1 },
+            css: { flexGrow: 1, display: 'flex', flexDirection: 'column' },
           }}
         >
           <EuiCallOut

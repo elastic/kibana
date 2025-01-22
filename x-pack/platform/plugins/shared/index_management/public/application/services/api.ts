@@ -9,7 +9,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
 import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import {
   API_BASE_PATH,
   INTERNAL_API_BASE_PATH,
@@ -28,8 +28,6 @@ import {
   UIM_INDEX_OPEN_MANY,
   UIM_INDEX_REFRESH,
   UIM_INDEX_REFRESH_MANY,
-  UIM_INDEX_UNFREEZE,
-  UIM_INDEX_UNFREEZE_MANY,
   UIM_TEMPLATE_DELETE,
   UIM_TEMPLATE_DELETE_MANY,
   UIM_TEMPLATE_CREATE,
@@ -210,17 +208,6 @@ export async function clearCacheIndices(indices: string[]) {
   });
   // Only track successful requests.
   const eventName = indices.length > 1 ? UIM_INDEX_CLEAR_CACHE_MANY : UIM_INDEX_CLEAR_CACHE;
-  uiMetricService.trackMetric(METRIC_TYPE.COUNT, eventName);
-  return response;
-}
-
-export async function unfreezeIndices(indices: string[]) {
-  const body = JSON.stringify({
-    indices,
-  });
-  const response = await httpService.httpClient.post(`${API_BASE_PATH}/indices/unfreeze`, { body });
-  // Only track successful requests.
-  const eventName = indices.length > 1 ? UIM_INDEX_UNFREEZE_MANY : UIM_INDEX_UNFREEZE;
   uiMetricService.trackMetric(METRIC_TYPE.COUNT, eventName);
   return response;
 }

@@ -5,18 +5,28 @@
  * 2.0.
  */
 
-import { sortBy } from 'lodash';
 import React from 'react';
-import { Shard } from './shard';
+import { sortBy } from 'lodash';
+import { css } from '@emotion/react';
+import { EuiFlexGroup, logicalCSS } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup } from '@elastic/eui';
+
+import { Shard } from './shard';
+
+export const unassignedStyle = ({ euiTheme }) => css`
+  vertical-align: middle;
+  width: calc(${euiTheme.size.l} * 10);
+`;
+
+export const unassignedChildrenStyle = ({ euiTheme }) => css`
+  ${logicalCSS('padding-top', euiTheme.size.l)}
+`;
 
 export class Unassigned extends React.Component {
   static displayName = i18n.translate(
     'xpack.monitoring.elasticsearch.shardAllocation.unassignedDisplayName',
-    {
-      defaultMessage: 'Unassigned',
-    }
+    { defaultMessage: 'Unassigned' }
   );
 
   createShard = (shard) => {
@@ -33,14 +43,16 @@ export class Unassigned extends React.Component {
       '.' +
       shard.shard +
       additionId;
+
     return <Shard shard={shard} key={key} />;
   };
 
   render() {
     const shards = sortBy(this.props.shards, 'shard').map(this.createShard);
+
     return (
-      <td className="monUnassigned" data-test-subj="clusterView-Unassigned">
-        <EuiFlexGroup wrap className="monUnassigned__children">
+      <td css={unassignedStyle} data-test-subj="clusterView-Unassigned">
+        <EuiFlexGroup wrap css={unassignedChildrenStyle}>
           {shards}
         </EuiFlexGroup>
       </td>

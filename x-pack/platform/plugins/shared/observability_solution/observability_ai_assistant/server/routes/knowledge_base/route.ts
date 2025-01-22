@@ -13,6 +13,7 @@ import {
   InferenceInferenceEndpointInfo,
   MlDeploymentAllocationState,
   MlDeploymentAssignmentState,
+  MlTrainedModelDeploymentAllocationStatus,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import moment from 'moment';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
@@ -34,8 +35,9 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
     enabled: boolean;
     endpoint?: Partial<InferenceInferenceEndpointInfo>;
     model_stats?: {
-      deployment_state: MlDeploymentAssignmentState | undefined;
-      allocation_state: MlDeploymentAllocationState | undefined;
+      deployment_state?: MlDeploymentAssignmentState;
+      allocation_state?: MlDeploymentAllocationState;
+      allocation_count?: MlTrainedModelDeploymentAllocationStatus['allocation_count'];
     };
   }> => {
     const client = await service.getClient({ request });

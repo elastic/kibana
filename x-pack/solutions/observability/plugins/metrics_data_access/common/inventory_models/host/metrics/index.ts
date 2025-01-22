@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { snapshot } from './snapshot';
-import { InventoryMetricsWithCharts } from '../../types';
+import type { InventoryMetricsWithCharts } from '../../types';
 import type { HostFormulas } from './formulas';
 import type { HostCharts } from './charts';
 

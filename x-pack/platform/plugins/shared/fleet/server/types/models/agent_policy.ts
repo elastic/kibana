@@ -158,6 +158,27 @@ export const AgentPolicyBaseSchema = {
       ),
     })
   ),
+  required_versions: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.arrayOf(
+        schema.object({
+          version: schema.string({
+            meta: {
+              description: 'Target version for automatic agent upgrade',
+            },
+          }),
+          percentage: schema.number({
+            min: 0,
+            max: 100,
+            meta: {
+              description: 'Target percentage of agents to auto upgrade',
+            },
+          }),
+        })
+      ),
+    ])
+  ),
 };
 
 function validateGlobalDataTagInput(tags: GlobalDataTag[]): string | undefined {

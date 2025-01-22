@@ -22,6 +22,12 @@ export const useGetMigrationRules = (params: {
   sortDirection?: 'asc' | 'desc';
   searchTerm?: string;
   ids?: string[];
+  isPrebuilt?: boolean;
+  isInstalled?: boolean;
+  isFullyTranslated?: boolean;
+  isPartiallyTranslated?: boolean;
+  isUntranslatable?: boolean;
+  isFailed?: boolean;
 }) => {
   const { addError } = useAppToasts();
 
@@ -52,20 +58,23 @@ export const useGetMigrationRules = (params: {
  *
  * @returns A rule migrations cache invalidation callback
  */
-export const useInvalidateGetMigrationRules = (migrationId: string) => {
+export const useInvalidateGetMigrationRules = () => {
   const queryClient = useQueryClient();
 
-  const SPECIFIC_MIGRATION_PATH = replaceParams(SIEM_RULE_MIGRATION_PATH, {
-    migration_id: migrationId,
-  });
+  return useCallback(
+    (migrationId: string) => {
+      const SPECIFIC_MIGRATION_PATH = replaceParams(SIEM_RULE_MIGRATION_PATH, {
+        migration_id: migrationId,
+      });
 
-  return useCallback(() => {
-    /**
-     * Invalidate all queries that start with SPECIFIC_MIGRATION_PATH. This
-     * includes the in-memory query cache and paged query cache.
-     */
-    queryClient.invalidateQueries(['GET', SPECIFIC_MIGRATION_PATH], {
-      refetchType: 'active',
-    });
-  }, [SPECIFIC_MIGRATION_PATH, queryClient]);
+      /**
+       * Invalidate all queries that start with SPECIFIC_MIGRATION_PATH. This
+       * includes the in-memory query cache and paged query cache.
+       */
+      queryClient.invalidateQueries(['GET', SPECIFIC_MIGRATION_PATH], {
+        refetchType: 'active',
+      });
+    },
+    [queryClient]
+  );
 };

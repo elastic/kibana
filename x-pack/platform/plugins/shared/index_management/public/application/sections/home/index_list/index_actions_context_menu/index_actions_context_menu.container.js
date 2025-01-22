@@ -17,7 +17,6 @@ import {
   refreshIndices,
   performExtensionAction,
   reloadIndices,
-  unfreezeIndices,
 } from '../../../../store/actions';
 
 import { getIndexStatusByIndexName, getIndicesByName } from '../../../../store/selectors';
@@ -52,9 +51,6 @@ const mapDispatchToProps = (dispatch, { indexNames }) => {
     },
     refreshIndices: () => {
       dispatch(refreshIndices({ indexNames }));
-    },
-    unfreezeIndices: () => {
-      dispatch(unfreezeIndices({ indexNames }));
     },
     forcemergeIndices: (maxNumSegments) => {
       dispatch(forcemergeIndices({ indexNames, maxNumSegments }));

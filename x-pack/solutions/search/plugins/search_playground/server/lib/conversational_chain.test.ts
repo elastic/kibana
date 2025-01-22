@@ -14,17 +14,21 @@ import { ConversationalChain, contextLimitCheck } from './conversational_chain';
 import { ChatMessage, MessageRole } from '../types';
 
 describe('conversational chain', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
   const createTestChain = async ({
     responses,
     chat,
     expectedFinalAnswer,
     expectedDocs,
     expectedTokens,
+    expectedErrorMessage,
     expectedSearchRequest,
     contentField = { index: 'field', website: 'body_content' },
     isChatModel = true,
     docs,
-    expectedHasClipped = false,
     modelLimit,
   }: {
     responses: string[];
@@ -32,6 +36,7 @@ describe('conversational chain', () => {
     expectedFinalAnswer?: string;
     expectedDocs?: any;
     expectedTokens?: any;
+    expectedErrorMessage?: string;
     expectedSearchRequest?: any;
     contentField?: Record<string, string>;
     isChatModel?: boolean;
@@ -39,10 +44,6 @@ describe('conversational chain', () => {
     expectedHasClipped?: boolean;
     modelLimit?: number;
   }) => {
-    if (expectedHasClipped) {
-      expect.assertions(1);
-    }
-
     const searchMock = jest.fn().mockImplementation(() => {
       return {
         hits: {
@@ -109,7 +110,6 @@ describe('conversational chain', () => {
 
       const streamToValue: string[] = await new Promise((resolve, reject) => {
         const reader = stream.getReader();
-        const textDecoder = new TextDecoder();
         const chunks: string[] = [];
 
         const read = () => {
@@ -117,7 +117,7 @@ describe('conversational chain', () => {
             if (done) {
               resolve(chunks);
             } else {
-              chunks.push(textDecoder.decode(value));
+              chunks.push(value);
               read();
             }
           }, reject);
@@ -125,10 +125,11 @@ describe('conversational chain', () => {
         read();
       });
 
-      const textValue = streamToValue
-        .filter((v) => v[0] === '0')
-        .reduce((acc, v) => acc + v.replace(/0:"(.*)"\n/, '$1'), '');
-      expect(textValue).toEqual(expectedFinalAnswer);
+      const textValue =
+        streamToValue
+          .filter((v) => v[0] === '0')
+          .reduce((acc, v) => acc + v.replace(/0:"(.*)"\n/, '$1'), '') || '';
+      expect(textValue).toEqual(expectedFinalAnswer || '');
 
       const annotations = streamToValue
         .filter((v) => v[0] === '8')
@@ -136,19 +137,19 @@ describe('conversational chain', () => {
         .map((entry) => JSON.parse(entry))
         .reduce((acc, v) => acc.concat(v), []);
 
+      const error =
+        streamToValue
+          .filter((v) => v[0] === '3')
+          .reduce((acc, v) => acc + v.replace(/3:"(.*)"\n/, '$1'), '') || '';
+
       const docValues = annotations.filter((v: { type: string }) => v.type === 'retrieved_docs');
       const tokens = annotations.filter((v: { type: string }) => v.type.endsWith('_token_count'));
-      const hasClipped = !!annotations.some((v: { type: string }) => v.type === 'context_clipped');
       expect(docValues).toEqual(expectedDocs);
       expect(tokens).toEqual(expectedTokens);
-      expect(hasClipped).toEqual(expectedHasClipped);
+      if (expectedErrorMessage) expect(error).toEqual(expectedErrorMessage);
       expect(searchMock.mock.calls[0]).toEqual(expectedSearchRequest);
     } catch (error) {
-      if (expectedHasClipped) {
-        expect(error).toMatchInlineSnapshot(`[ContextLimitError: Context exceeds the model limit]`);
-      } else {
-        throw error;
-      }
+      throw error;
     }
   };
 
@@ -444,7 +445,7 @@ describe('conversational chain', () => {
     });
   }, 10000);
 
-  it('should clip the conversation', async () => {
+  it('should error the conversation when over model limit', async () => {
     await createTestChain({
       responses: ['rewrite "the" question', 'the final answer'],
       chat: [
@@ -480,9 +481,30 @@ describe('conversational chain', () => {
           },
         },
       ],
+      expectedDocs: [
+        {
+          documents: [
+            { metadata: { _id: '1', _index: 'index' }, pageContent: '' },
+            {
+              metadata: { _id: '1', _index: 'website' },
+              pageContent: Array.from({ length: 1000 }, (_, i) => `${i}value\n `).join(' '),
+            },
+          ],
+          type: 'retrieved_docs',
+        },
+      ],
+      expectedSearchRequest: [
+        {
+          method: 'POST',
+          path: '/index,website/_search',
+          body: { query: { match: { field: 'rewrite "the" question' } }, size: 3 },
+        },
+      ],
+      expectedTokens: [],
       modelLimit: 100,
       expectedHasClipped: true,
       isChatModel: false,
+      expectedErrorMessage: 'Context exceeds the model limit',
     });
   }, 10000);
 
@@ -501,11 +523,9 @@ describe('conversational chain', () => {
         question: 'This is a test question.',
         chat_history: 'This is a test chat history.',
       };
-      jest.spyOn(prompt, 'format');
       const result = await contextLimitCheck(undefined, prompt)(input);
 
       expect(result).toBe(input);
-      expect(prompt.format).not.toHaveBeenCalled();
     });
 
     it('should return the input if within modelLimit', async () => {
@@ -514,10 +534,8 @@ describe('conversational chain', () => {
         question: 'This is a test question.',
         chat_history: 'This is a test chat history.',
       };
-      jest.spyOn(prompt, 'format');
       const result = await contextLimitCheck(10000, prompt)(input);
       expect(result).toEqual(input);
-      expect(prompt.format).toHaveBeenCalledWith(input);
     });
 
     it('should clip context if exceeds modelLimit', async () => {
@@ -527,7 +545,6 @@ describe('conversational chain', () => {
         question: 'This is a test question.',
         chat_history: 'This is a test chat history.',
       };
-
       await expect(contextLimitCheck(33, prompt)(input)).rejects.toMatchInlineSnapshot(
         `[ContextLimitError: Context exceeds the model limit]`
       );

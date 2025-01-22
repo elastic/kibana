@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
@@ -13,8 +13,8 @@ import {
   SavedObjectsClientContract,
   Logger,
 } from '@kbn/core/server';
-import { APMDataAccessConfig } from '.';
-import {
+import type { APMDataAccessConfig } from '.';
+import type {
   ApmDataAccessPluginSetup,
   ApmDataAccessPluginStart,
   ApmDataAccessServerDependencies,
@@ -25,7 +25,8 @@ import {
   getApmIndicesSavedObject,
 } from './saved_objects/apm_indices';
 import { getServices } from './services/get_services';
-import { ApmDataAccessPrivilegesCheck, checkPrivileges } from './lib/check_privileges';
+import type { ApmDataAccessPrivilegesCheck } from './lib/check_privileges';
+import { checkPrivileges } from './lib/check_privileges';
 
 export class ApmDataAccessPlugin
   implements Plugin<ApmDataAccessPluginSetup, ApmDataAccessPluginStart>

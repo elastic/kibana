@@ -37,12 +37,16 @@ import { SelfManagePreference } from '../create_connector';
 
 interface ChooseConnectorSelectableProps {
   selfManaged: SelfManagePreference;
+  disabled?: boolean;
 }
 interface OptionData {
   secondaryContent?: string;
 }
 
-export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({ selfManaged }) => {
+export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({
+  selfManaged,
+  disabled,
+}) => {
   const { euiTheme } = useEuiTheme();
   const [selectedOption, setSelectedOption] = useState<Array<EuiComboBoxOptionOption<OptionData>>>(
     []
@@ -142,6 +146,7 @@ export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({ self
 
   return (
     <EuiComboBox
+      isDisabled={disabled}
       aria-label={i18n.translate(
         'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.euiComboBox.accessibleScreenReaderLabelLabel',
         { defaultMessage: 'Select a data source for your connector to use.' }

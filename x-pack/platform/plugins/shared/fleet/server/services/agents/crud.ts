@@ -112,7 +112,6 @@ export async function getAgents(
   } else {
     throw new FleetError('Either options.agentIds or options.kuery are required to get agents');
   }
-
   return agents;
 }
 
@@ -267,6 +266,8 @@ export async function getAgentsByKuery(
     degraded: 0,
     enrolling: 0,
     unenrolling: 0,
+    orphaned: 0,
+    uninstalled: 0,
   };
 
   const queryAgents = async (from: number, size: number) => {
@@ -490,7 +491,6 @@ async function _filterAgents(
     appContextService.getLogger().error(`Error querying agents: ${JSON.stringify(err)}`);
     throw err;
   }
-
   const agents = res.hits.hits.map(searchHitToAgent);
   const total = res.hits.total as number;
 

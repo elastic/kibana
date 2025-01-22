@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Location } from 'history';
+import type { Location } from 'history';
 import React from 'react';
 import { getRenderedHref } from '../../../../../utils/test_helpers';
 import { TransactionDetailLink } from '.';

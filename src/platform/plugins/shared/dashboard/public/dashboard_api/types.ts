@@ -41,12 +41,7 @@ import {
   ControlGroupSerializedState,
 } from '@kbn/controls-plugin/public';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
-import {
-  DefaultEmbeddableApi,
-  EmbeddablePackageState,
-  ErrorEmbeddable,
-  IEmbeddable,
-} from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { Observable, Subject } from 'rxjs';
 import { RefreshInterval, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
@@ -145,6 +140,7 @@ export type DashboardApi = CanExpandPanels &
     controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
     fullScreenMode$: PublishingSubject<boolean>;
     focusedPanelId$: PublishingSubject<string | undefined>;
+    setFocusedPanelId: (id: string | undefined) => void;
     forceRefresh: () => void;
     getSettings: () => DashboardSettings;
     getSerializedState: () => {
@@ -175,13 +171,10 @@ export type DashboardApi = CanExpandPanels &
     setTags: (tags: string[]) => void;
     setTimeRange: (timeRange?: TimeRange | undefined) => void;
     unifiedSearchFilters$: PublishesUnifiedSearch['filters$'];
-
-    // TODO remove types below this line - from legacy embeddable system
-    untilEmbeddableLoaded: (id: string) => Promise<IEmbeddable | ErrorEmbeddable>;
+    untilEmbeddableLoaded: (id: string) => Promise<unknown | undefined>;
   };
 
 export interface DashboardInternalApi {
-  animatePanelTransforms$: PublishingSubject<boolean>;
   controlGroupReload$: Subject<void>;
   panelsReload$: Subject<void>;
   getRuntimeStateForControlGroup: () => object | undefined;

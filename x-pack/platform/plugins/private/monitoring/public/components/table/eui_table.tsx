@@ -67,15 +67,15 @@ export const EuiMonitoringTable: FunctionComponent<Record<any, any>> = ({
   }
 
   return (
-    <div data-test-subj={`${props.className}Container`}>
+    <div data-test-subj={`${props['data-test-subj']}Container`}>
       <EuiInMemoryTable
-        data-test-subj={
-          items.length && hasItems === true ? 'monitoringTableHasData' : 'monitoringTableNoData'
-        }
         items={items}
         search={search}
         columns={columns}
         {...props}
+        data-test-subj={
+          items.length && hasItems ? 'monitoringTableHasData' : 'monitoringTableNoData'
+        }
       />
       {footerContent}
     </div>

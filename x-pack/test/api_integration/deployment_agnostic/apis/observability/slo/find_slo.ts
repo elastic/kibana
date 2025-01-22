@@ -65,24 +65,34 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await retry.tryForTime(180 * 1000, async () => {
         let response = await supertestWithoutAuth
           .get(`/api/observability/slos`)
+          .query({ page: 1, perPage: 333 })
           .set(adminRoleAuthc.apiKeyHeader)
           .set(internalHeaders)
           .send();
 
         expect(response.body.results).length(2);
+        expect(response.body.page).eql(1);
+        expect(response.body.perPage).eql(333);
+        expect(response.body.total).eql(2);
 
         response = await supertestWithoutAuth
-          .get(`/api/observability/slos?kqlQuery=slo.name%3Airrelevant`)
+          .get(`/api/observability/slos`)
+          .query({ size: 222, kqlQuery: 'slo.name:irrelevant' })
           .set(adminRoleAuthc.apiKeyHeader)
           .set(internalHeaders)
           .send()
           .expect(200);
 
+        expect(response.body.page).eql(1); // always return page with default value
+        expect(response.body.perPage).eql(25); // always return perPage with default value
+        expect(response.body.size).eql(222);
+        expect(response.body.searchAfter).ok();
         expect(response.body.results).length(1);
         expect(response.body.results[0].id).eql(sloId2);
 
         response = await supertestWithoutAuth
-          .get(`/api/observability/slos?kqlQuery=slo.name%3Aintegration`)
+          .get(`/api/observability/slos`)
+          .query({ kqlQuery: 'slo.name:integration' })
           .set(adminRoleAuthc.apiKeyHeader)
           .set(internalHeaders)
           .send()

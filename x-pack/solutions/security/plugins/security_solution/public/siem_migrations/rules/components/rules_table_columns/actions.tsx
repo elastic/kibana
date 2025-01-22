@@ -7,12 +7,16 @@
 
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
+import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
+import {
+  RuleTranslationResult,
+  SiemMigrationStatus,
+} from '../../../../../common/siem_migrations/constants';
 import { getRuleDetailsUrl } from '../../../../common/components/link_to';
-import { useKibana } from '../../../../common/lib/kibana';
-import { APP_UI_ID, SecurityPageName } from '../../../../../common';
-import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { SecurityPageName } from '../../../../../common';
+import { type RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
-import type { TableColumn } from './constants';
+import { type TableColumn } from './constants';
 
 interface ActionNameProps {
   disableActions?: boolean;
@@ -27,34 +31,26 @@ const ActionName = ({
   openMigrationRuleDetails,
   installMigrationRule,
 }: ActionNameProps) => {
-  const { navigateToApp } = useKibana().services.application;
+  // Failed
+  if (migrationRule.status === SiemMigrationStatus.FAILED) {
+    return null;
+  }
+
+  // Installed
   if (migrationRule.elastic_rule?.id) {
-    const ruleId = migrationRule.elastic_rule.id;
     return (
-      <EuiLink
-        disabled={disableActions}
-        onClick={() => {
-          navigateToApp(APP_UI_ID, {
-            deepLinkId: SecurityPageName.rules,
-            path: getRuleDetailsUrl(ruleId),
-          });
-        }}
+      <SecuritySolutionLinkAnchor
+        deepLinkId={SecurityPageName.rules}
+        path={getRuleDetailsUrl(migrationRule.elastic_rule.id)}
         data-test-subj="viewRule"
       >
         {i18n.ACTIONS_VIEW_LABEL}
-      </EuiLink>
+      </SecuritySolutionLinkAnchor>
     );
   }
 
-  if (migrationRule.status === 'failed') {
-    return (
-      <EuiLink disabled={disableActions} onClick={() => {}} data-test-subj="restartRule">
-        {i18n.ACTIONS_RESTART_LABEL}
-      </EuiLink>
-    );
-  }
-
-  if (migrationRule.translation_result === 'full') {
+  // Installable
+  if (migrationRule.translation_result === RuleTranslationResult.FULL) {
     return (
       <EuiLink
         disabled={disableActions}
@@ -68,6 +64,7 @@ const ActionName = ({
     );
   }
 
+  // Partially translated or untranslated
   return (
     <EuiLink
       disabled={disableActions}
@@ -95,11 +92,11 @@ export const createActionsColumn = ({
   return {
     field: 'elastic_rule',
     name: i18n.COLUMN_ACTIONS,
-    render: (value: RuleMigration['elastic_rule'], migrationRule: RuleMigration) => {
+    render: (_, rule: RuleMigration) => {
       return (
         <ActionName
           disableActions={disableActions}
-          migrationRule={migrationRule}
+          migrationRule={rule}
           openMigrationRuleDetails={openMigrationRuleDetails}
           installMigrationRule={installMigrationRule}
         />

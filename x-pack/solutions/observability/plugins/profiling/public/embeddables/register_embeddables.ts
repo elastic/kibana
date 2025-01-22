@@ -13,7 +13,7 @@ import {
 } from '@kbn/observability-shared-plugin/public';
 import { getEmbeddableFlamegraphComponent } from './flamegraph';
 import { getEmbeddableFunctionsComponent } from './functions';
-import { ProfilingEmbeddablesDependencies } from './profiling_embeddable_provider';
+import type { ProfilingEmbeddablesDependencies } from './profiling_embeddable_provider';
 import { getEmbeddableStackTracesComponent } from './stack_traces';
 import { getEmbeddableSearchBarComponent } from './search_bar';
 

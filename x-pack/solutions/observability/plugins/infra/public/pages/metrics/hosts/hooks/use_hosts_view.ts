@@ -14,16 +14,16 @@
 
 import { useMemo } from 'react';
 import createContainer from 'constate';
-import { BoolQuery } from '@kbn/es-query';
+import type { BoolQuery } from '@kbn/es-query';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from './use_unified_search';
-import {
+import type {
   GetInfraMetricsRequestBodyPayloadClient,
   GetInfraMetricsResponsePayload,
   InfraAssetMetricType,
 } from '../../../../../common/http_api';
-import { StringDateRange } from './use_unified_search_url_state';
+import type { StringDateRange } from './use_unified_search_url_state';
 
 const HOST_TABLE_METRICS: InfraAssetMetricType[] = [
   'cpuV2',

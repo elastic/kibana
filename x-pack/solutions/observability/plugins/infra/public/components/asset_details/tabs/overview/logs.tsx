@@ -14,7 +14,7 @@ import {
   type InventoryItemType,
 } from '@kbn/metrics-data-access-plugin/common';
 import { buildCombinedAssetFilter } from '../../../../utils/filters/build';
-import { useSearchSessionContext } from '../../../../hooks/use_search_session';
+import { useReloadRequestTimeContext } from '../../../../hooks/use_reload_request_time';
 import { useLogsCharts } from '../../hooks/use_log_charts';
 import { Kpi } from '../../components/kpis/kpi';
 
@@ -26,7 +26,7 @@ interface Props {
 }
 
 export const LogsContent = ({ assetId, assetType, dataView, dateRange }: Props) => {
-  const { searchSessionId } = useSearchSessionContext();
+  const { reloadRequestTime } = useReloadRequestTimeContext();
 
   const filters = useMemo(() => {
     return [
@@ -50,7 +50,7 @@ export const LogsContent = ({ assetId, assetType, dataView, dateRange }: Props) 
             {...chartProps}
             dateRange={dateRange}
             filters={filters}
-            searchSessionId={searchSessionId}
+            lastReloadRequestTime={reloadRequestTime}
           />
         </EuiFlexItem>
       ))}

@@ -87,13 +87,13 @@ describe.skip('Home page', () => {
         cy.visitKibana('/app/inventory');
         cy.wait('@getEEMStatus');
         cy.contains('host');
-        cy.getByTestSubj('inventoryGroupTitle_entity.type_host').click();
+        cy.getByTestSubj('inventoryGroupTitle_entityType_host').click();
         cy.wait('@getEntities');
         cy.contains('service');
-        cy.getByTestSubj('inventoryGroupTitle_entity.type_service').click();
+        cy.getByTestSubj('inventoryGroupTitle_entityType_service').click();
         cy.wait('@getEntities');
         cy.contains('container');
-        cy.getByTestSubj('inventoryGroupTitle_entity.type_container').click();
+        cy.getByTestSubj('inventoryGroupTitle_entityType_container').click();
         cy.wait('@getEntities');
         cy.contains('server1');
         cy.contains('synth-node-trace-logs');
@@ -151,21 +151,19 @@ describe.skip('Home page', () => {
         }).as('getEEMStatus');
         cy.intercept('GET', '/internal/inventory/entities?**').as('getEntities');
         cy.intercept('GET', '/internal/inventory/entities/types').as('getEntitiesTypes');
-        cy.intercept('GET', '/internal/inventory/entities/group_by/**').as('getGroups');
         cy.visitKibana('/app/inventory');
         cy.wait('@getEntitiesTypes');
         cy.wait('@getEEMStatus');
-        cy.getByTestSubj('entityTypes_multiSelect_filter').click();
-        cy.getByTestSubj('entityTypes_multiSelect_filter_selection_service').click();
-        cy.wait('@getGroups');
-        cy.getByTestSubj('inventoryGroupTitle_entity.type_service').click();
+        cy.getByTestSubj('entityType_multiSelect_filter').click();
+        cy.getByTestSubj('entityType_multiSelect_filter_selection_service').click();
+        cy.getByTestSubj('inventoryGroupTitle_entityType_service').click();
         cy.wait('@getEntities');
         cy.get('server1').should('not.exist');
         cy.contains('synth-node-trace-logs');
         cy.contains('foo').should('not.exist');
-        cy.getByTestSubj('entityTypes_multiSelect_filter').click();
-        cy.getByTestSubj('entityTypes_multiSelect_filter_selection_service').click();
-        cy.getByTestSubj('inventoryGroupTitle_entity.type_service').should('not.exist');
+        cy.getByTestSubj('entityType_multiSelect_filter').click();
+        cy.getByTestSubj('entityType_multiSelect_filter_selection_service').click();
+        cy.getByTestSubj('inventoryGroupTitle_entityType_service').should('not.exist');
       });
 
       it('Filters entities by host type', () => {
@@ -174,21 +172,19 @@ describe.skip('Home page', () => {
         }).as('getEEMStatus');
         cy.intercept('GET', '/internal/inventory/entities?**').as('getEntities');
         cy.intercept('GET', '/internal/inventory/entities/types').as('getEntitiesTypes');
-        cy.intercept('GET', '/internal/inventory/entities/group_by/**').as('getGroups');
         cy.visitKibana('/app/inventory');
         cy.wait('@getEntitiesTypes');
         cy.wait('@getEEMStatus');
-        cy.getByTestSubj('entityTypes_multiSelect_filter').click();
-        cy.getByTestSubj('entityTypes_multiSelect_filter_selection_host').click();
-        cy.wait('@getGroups');
-        cy.getByTestSubj('inventoryGroupTitle_entity.type_host').click();
+        cy.getByTestSubj('entityType_multiSelect_filter').click();
+        cy.getByTestSubj('entityType_multiSelect_filter_selection_host').click();
+        cy.getByTestSubj('inventoryGroupTitle_entityType_host').click();
         cy.wait('@getEntities');
         cy.contains('server1');
         cy.contains('synth-node-trace-logs').should('not.exist');
         cy.contains('foo').should('not.exist');
-        cy.getByTestSubj('entityTypes_multiSelect_filter').click();
-        cy.getByTestSubj('entityTypes_multiSelect_filter_selection_host').click();
-        cy.getByTestSubj('inventoryGroupTitle_entity.type_host').should('not.exist');
+        cy.getByTestSubj('entityType_multiSelect_filter').click();
+        cy.getByTestSubj('entityType_multiSelect_filter_selection_host').click();
+        cy.getByTestSubj('inventoryGroupTitle_entityType_host').should('not.exist');
       });
 
       it('Filters entities by container type', () => {
@@ -197,21 +193,19 @@ describe.skip('Home page', () => {
         }).as('getEEMStatus');
         cy.intercept('GET', '/internal/inventory/entities?**').as('getEntities');
         cy.intercept('GET', '/internal/inventory/entities/types').as('getEntitiesTypes');
-        cy.intercept('GET', '/internal/inventory/entities/group_by/**').as('getGroups');
         cy.visitKibana('/app/inventory');
         cy.wait('@getEntitiesTypes');
         cy.wait('@getEEMStatus');
-        cy.getByTestSubj('entityTypes_multiSelect_filter').click();
-        cy.getByTestSubj('entityTypes_multiSelect_filter_selection_container').click();
-        cy.wait('@getGroups');
-        cy.getByTestSubj('inventoryGroupTitle_entity.type_container').click();
+        cy.getByTestSubj('entityType_multiSelect_filter').click();
+        cy.getByTestSubj('entityType_multiSelect_filter_selection_container').click();
+        cy.getByTestSubj('inventoryGroupTitle_entityType_container').click();
         cy.wait('@getEntities');
         cy.contains('server1').should('not.exist');
         cy.contains('synth-node-trace-logs').should('not.exist');
         cy.contains('foo');
-        cy.getByTestSubj('entityTypes_multiSelect_filter').click();
-        cy.getByTestSubj('entityTypes_multiSelect_filter_selection_container').click();
-        cy.getByTestSubj('inventoryGroupTitle_entity.type_container').should('not.exist');
+        cy.getByTestSubj('entityType_multiSelect_filter').click();
+        cy.getByTestSubj('entityType_multiSelect_filter_selection_container').click();
+        cy.getByTestSubj('inventoryGroupTitle_entityType_container').should('not.exist');
       });
 
       it('Navigates to discover with actions button in the entities list', () => {
@@ -222,7 +216,7 @@ describe.skip('Home page', () => {
         cy.visitKibana('/app/inventory');
         cy.wait('@getEEMStatus');
         cy.contains('container');
-        cy.getByTestSubj('inventoryGroupTitle_entity.type_container').click();
+        cy.getByTestSubj('inventoryGroupTitle_entityType_container').click();
         cy.wait('@getEntities');
         // cy.getByTestSubj('inventoryEntityActionsButton').click();
         cy.getByTestSubj('inventoryEntityActionsButton-foo').click();

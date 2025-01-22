@@ -20,7 +20,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const objectRemover = new ObjectRemover(supertest);
   const browser = getService('browser');
 
-  describe('Maintenance windows table', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/205269
+  describe.skip('Maintenance windows table', function () {
     beforeEach(async () => {
       await pageObjects.common.navigateToApp('maintenanceWindows');
     });

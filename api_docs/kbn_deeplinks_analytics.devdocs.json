@@ -32,7 +32,7 @@
         "signature": [
           "\"graph\" | \"canvas\" | \"dashboards\" | \"discover\" | \"maps\" | \"visualize\""
         ],
-        "path": "packages/deeplinks/analytics/deep_links.ts",
+        "path": "src/platform/packages/shared/deeplinks/analytics/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -47,7 +47,7 @@
         "signature": [
           "\"dashboards\""
         ],
-        "path": "packages/deeplinks/analytics/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -62,7 +62,7 @@
         "signature": [
           "\"DASHBOARD_APP_LOCATOR\""
         ],
-        "path": "packages/deeplinks/analytics/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -77,7 +77,7 @@
         "signature": [
           "\"graph\" | \"canvas\" | \"dashboards\" | \"discover\" | \"maps\" | \"visualize\""
         ],
-        "path": "packages/deeplinks/analytics/deep_links.ts",
+        "path": "src/platform/packages/shared/deeplinks/analytics/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -92,7 +92,7 @@
         "signature": [
           "\"discover\""
         ],
-        "path": "packages/deeplinks/analytics/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -107,7 +107,7 @@
         "signature": [
           "\"DISCOVER_ESQL_LOCATOR\""
         ],
-        "path": "packages/deeplinks/analytics/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -122,7 +122,7 @@
         "signature": [
           "\"visualize\""
         ],
-        "path": "packages/deeplinks/analytics/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

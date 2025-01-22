@@ -26,6 +26,8 @@ import {
   createNonDataStreamIndex,
 } from './data_streams_tab.helpers';
 
+jest.mock('react-use/lib/useObservable', () => () => jest.fn());
+
 const nonBreakingSpace = ' ';
 
 const urlServiceMock = {
@@ -449,9 +451,64 @@ describe('Data Streams tab', () => {
       });
     });
 
+    describe('bulk delete of data streams', () => {
+      beforeAll(async () => {
+        const { setLoadDataStreamsResponse } = httpRequestsMockHelpers;
+
+        const ds1 = createDataStreamPayload({
+          name: 'dataStream1',
+          privileges: { delete_index: true, manage_data_stream_lifecycle: true },
+        });
+        const ds2 = createDataStreamPayload({
+          name: 'dataStream2',
+          privileges: { delete_index: true, manage_data_stream_lifecycle: true },
+        });
+
+        setLoadDataStreamsResponse([ds1, ds2]);
+
+        testBed = await setup(httpSetup, {
+          history: createMemoryHistory(),
+          url: urlServiceMock,
+        });
+        await act(async () => {
+          testBed.actions.goToDataStreamsList();
+        });
+        testBed.component.update();
+      });
+
+      test('can delete multiple data streams at once', async () => {
+        const {
+          actions: { selectDataStream, clickBulkDeleteDataStreamsButton, clickConfirmDelete },
+        } = testBed;
+
+        selectDataStream('dataStream1', true);
+        selectDataStream('dataStream2', true);
+
+        clickBulkDeleteDataStreamsButton();
+
+        httpRequestsMockHelpers.setDeleteDataStreamResponse({
+          results: {
+            dataStreamsDeleted: ['dataStream1', 'dataStream2'],
+            errors: [],
+          },
+        });
+
+        await clickConfirmDelete();
+
+        testBed.component.update();
+
+        expect(httpSetup.post).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/delete_data_streams`,
+          expect.objectContaining({
+            body: JSON.stringify({ dataStreams: ['dataStream1', 'dataStream2'] }),
+          })
+        );
+      });
+    });
+
     describe('bulk update data retention', () => {
       beforeAll(async () => {
-        const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
+        const { setLoadDataStreamsResponse } = httpRequestsMockHelpers;
 
         const ds1 = createDataStreamPayload({
           name: 'dataStream1',
@@ -467,7 +524,6 @@ describe('Data Streams tab', () => {
         });
 
         setLoadDataStreamsResponse([ds1, ds2]);
-        setLoadDataStreamResponse(ds1.name, ds1);
 
         testBed = await setup(httpSetup, {
           history: createMemoryHistory(),
@@ -481,24 +537,15 @@ describe('Data Streams tab', () => {
 
       test('can set data retention period for mutliple data streams', async () => {
         const {
-          actions: {
-            selectDataStream,
-            clickManageDataStreamsButton,
-            clickBulkEditDataRetentionButton,
-          },
+          actions: { selectDataStream, clickBulkEditDataRetentionButton },
         } = testBed;
 
         selectDataStream('dataStream1', true);
         selectDataStream('dataStream2', true);
-        clickManageDataStreamsButton();
 
         clickBulkEditDataRetentionButton();
 
-        httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream1', {
-          success: true,
-        });
-
-        httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream2', {
+        httpRequestsMockHelpers.setEditDataRetentionResponse({
           success: true,
         });
 
@@ -526,24 +573,15 @@ describe('Data Streams tab', () => {
 
       test('can disable lifecycle', async () => {
         const {
-          actions: {
-            selectDataStream,
-            clickManageDataStreamsButton,
-            clickBulkEditDataRetentionButton,
-          },
+          actions: { selectDataStream, clickBulkEditDataRetentionButton },
         } = testBed;
 
         selectDataStream('dataStream1', true);
         selectDataStream('dataStream2', true);
-        clickManageDataStreamsButton();
 
         clickBulkEditDataRetentionButton();
 
-        httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream1', {
-          success: true,
-        });
-
-        httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream2', {
+        httpRequestsMockHelpers.setEditDataRetentionResponse({
           success: true,
         });
 
@@ -564,24 +602,15 @@ describe('Data Streams tab', () => {
 
       test('allows to set infinite retention period', async () => {
         const {
-          actions: {
-            selectDataStream,
-            clickManageDataStreamsButton,
-            clickBulkEditDataRetentionButton,
-          },
+          actions: { selectDataStream, clickBulkEditDataRetentionButton },
         } = testBed;
 
         selectDataStream('dataStream1', true);
         selectDataStream('dataStream2', true);
-        clickManageDataStreamsButton();
 
         clickBulkEditDataRetentionButton();
 
-        httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream1', {
-          success: true,
-        });
-
-        httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream2', {
+        httpRequestsMockHelpers.setEditDataRetentionResponse({
           success: true,
         });
 
@@ -693,7 +722,7 @@ describe('Data Streams tab', () => {
 
           clickEditDataRetentionButton();
 
-          httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream1', {
+          httpRequestsMockHelpers.setEditDataRetentionResponse({
             success: true,
           });
 
@@ -725,7 +754,7 @@ describe('Data Streams tab', () => {
 
           clickEditDataRetentionButton();
 
-          httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream1', {
+          httpRequestsMockHelpers.setEditDataRetentionResponse({
             success: true,
           });
 
@@ -753,7 +782,7 @@ describe('Data Streams tab', () => {
 
           clickEditDataRetentionButton();
 
-          httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream1', {
+          httpRequestsMockHelpers.setEditDataRetentionResponse({
             success: true,
           });
 
@@ -1135,30 +1164,30 @@ describe('Data Streams tab', () => {
   });
 
   describe('data stream privileges', () => {
+    const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
+
+    const dataStreamFullPermissions = createDataStreamPayload({
+      name: 'dataStreamFullPermissions',
+      privileges: { delete_index: true, manage_data_stream_lifecycle: true },
+    });
+    const dataStreamNoDelete = createDataStreamPayload({
+      name: 'dataStreamNoDelete',
+      privileges: { delete_index: false, manage_data_stream_lifecycle: true },
+    });
+    const dataStreamNoEditRetention = createDataStreamPayload({
+      name: 'dataStreamNoEditRetention',
+      privileges: { delete_index: true, manage_data_stream_lifecycle: false },
+    });
+
+    const dataStreamNoPermissions = createDataStreamPayload({
+      name: 'dataStreamNoPermissions',
+      privileges: { delete_index: false, manage_data_stream_lifecycle: false },
+    });
+
     describe('delete', () => {
-      const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
-
-      const dataStreamWithDelete = createDataStreamPayload({
-        name: 'dataStreamWithDelete',
-        privileges: { delete_index: true, manage_data_stream_lifecycle: true },
-      });
-      const dataStreamNoDelete = createDataStreamPayload({
-        name: 'dataStreamNoDelete',
-        privileges: { delete_index: false, manage_data_stream_lifecycle: true },
-      });
-      const dataStreamNoEditRetention = createDataStreamPayload({
-        name: 'dataStreamNoEditRetention',
-        privileges: { delete_index: true, manage_data_stream_lifecycle: false },
-      });
-
-      const dataStreamNoPermissions = createDataStreamPayload({
-        name: 'dataStreamNoPermissions',
-        privileges: { delete_index: false, manage_data_stream_lifecycle: false },
-      });
-
       beforeEach(async () => {
         setLoadDataStreamsResponse([
-          dataStreamWithDelete,
+          dataStreamFullPermissions,
           dataStreamNoDelete,
           dataStreamNoEditRetention,
           dataStreamNoPermissions,
@@ -1176,10 +1205,10 @@ describe('Data Streams tab', () => {
         const { tableCellsValues } = table.getMetaData('dataStreamTable');
 
         expect(tableCellsValues).toEqual([
+          ['', 'dataStreamFullPermissions', 'green', '1', 'Standard', '7 days', 'Delete'],
           ['', 'dataStreamNoDelete', 'green', '1', 'Standard', '7 days', ''],
           ['', 'dataStreamNoEditRetention', 'green', '1', 'Standard', '7 days', 'Delete'],
           ['', 'dataStreamNoPermissions', 'green', '1', 'Standard', '7 days', ''],
-          ['', 'dataStreamWithDelete', 'green', '1', 'Standard', '7 days', 'Delete'],
         ]);
       });
 
@@ -1193,7 +1222,7 @@ describe('Data Streams tab', () => {
         clickManageDataStreamsButton();
         expect(find('deleteDataStreamsButton').exists()).toBeFalsy();
 
-        selectDataStream('dataStreamWithDelete', true);
+        selectDataStream('dataStreamFullPermissions', true);
         clickManageDataStreamsButton();
         expect(find('deleteDataStreamsButton').exists()).toBeFalsy();
 
@@ -1208,33 +1237,10 @@ describe('Data Streams tab', () => {
           find,
         } = testBed;
         setLoadDataStreamResponse(dataStreamNoDelete.name, dataStreamNoDelete);
-        await clickNameAt(0);
-
-        testBed.find('manageDataStreamButton').simulate('click');
-        expect(find('deleteDataStreamButton').exists()).toBeFalsy();
-      });
-
-      test('hides edit data retention button if no permissions', async () => {
-        const {
-          actions: { clickNameAt },
-          find,
-        } = testBed;
-        setLoadDataStreamResponse(dataStreamNoEditRetention.name, dataStreamNoEditRetention);
         await clickNameAt(1);
 
         testBed.find('manageDataStreamButton').simulate('click');
-        expect(find('editDataRetentionButton').exists()).toBeFalsy();
-      });
-
-      test('hides manage button if no permissions', async () => {
-        const {
-          actions: { clickNameAt },
-          find,
-        } = testBed;
-        setLoadDataStreamResponse(dataStreamNoPermissions.name, dataStreamNoPermissions);
-        await clickNameAt(2);
-
-        expect(find('manageDataStreamButton').exists()).toBeFalsy();
+        expect(find('deleteDataStreamButton').exists()).toBeFalsy();
       });
 
       test('displays delete button in detail panel', async () => {
@@ -1242,11 +1248,110 @@ describe('Data Streams tab', () => {
           actions: { clickNameAt },
           find,
         } = testBed;
-        setLoadDataStreamResponse(dataStreamWithDelete.name, dataStreamWithDelete);
-        await clickNameAt(3);
+        setLoadDataStreamResponse(dataStreamFullPermissions.name, dataStreamFullPermissions);
+        await clickNameAt(0);
 
         testBed.find('manageDataStreamButton').simulate('click');
         expect(find('deleteDataStreamButton').exists()).toBeTruthy();
+      });
+    });
+
+    describe('edit data retention', () => {
+      beforeEach(async () => {
+        setLoadDataStreamsResponse([
+          dataStreamFullPermissions,
+          dataStreamNoDelete,
+          dataStreamNoEditRetention,
+          dataStreamNoPermissions,
+        ]);
+
+        testBed = await setup(httpSetup, { history: createMemoryHistory(), url: urlServiceMock });
+        await act(async () => {
+          testBed.actions.goToDataStreamsList();
+        });
+        testBed.component.update();
+      });
+
+      test('displays/hides bulk edit retention action depending on data streams privileges', async () => {
+        const {
+          actions: { selectDataStream, clickManageDataStreamsButton },
+          find,
+        } = testBed;
+
+        selectDataStream('dataStreamNoEditRetention', true);
+        clickManageDataStreamsButton();
+        expect(find('bulkEditDataRetentionButton').exists()).toBeFalsy();
+
+        selectDataStream('dataStreamFullPermissions', true);
+        clickManageDataStreamsButton();
+        expect(find('bulkEditDataRetentionButton').exists()).toBeFalsy();
+
+        selectDataStream('dataStreamNoEditRetention', false);
+        clickManageDataStreamsButton();
+        expect(find('bulkEditDataRetentionButton').exists()).toBeTruthy();
+      });
+
+      test('hides edit retention button in detail panel', async () => {
+        const {
+          actions: { clickNameAt },
+          find,
+        } = testBed;
+        setLoadDataStreamResponse(dataStreamNoEditRetention.name, dataStreamNoEditRetention);
+        await clickNameAt(2);
+
+        testBed.find('manageDataStreamButton').simulate('click');
+        expect(find('editDataRetentionButton').exists()).toBeFalsy();
+      });
+
+      test('displays edit retention button in detail panel', async () => {
+        const {
+          actions: { clickNameAt },
+          find,
+        } = testBed;
+        setLoadDataStreamResponse(dataStreamFullPermissions.name, dataStreamFullPermissions);
+        await clickNameAt(0);
+
+        testBed.find('manageDataStreamButton').simulate('click');
+        expect(find('editDataRetentionButton').exists()).toBeTruthy();
+      });
+    });
+
+    describe('with no permissions', () => {
+      beforeEach(async () => {
+        setLoadDataStreamsResponse([
+          dataStreamFullPermissions,
+          dataStreamNoDelete,
+          dataStreamNoEditRetention,
+          dataStreamNoPermissions,
+        ]);
+
+        testBed = await setup(httpSetup, { history: createMemoryHistory(), url: urlServiceMock });
+        await act(async () => {
+          testBed.actions.goToDataStreamsList();
+        });
+        testBed.component.update();
+      });
+
+      test('hides manage button in details panel', async () => {
+        const {
+          actions: { clickNameAt },
+          find,
+        } = testBed;
+        setLoadDataStreamResponse(dataStreamNoPermissions.name, dataStreamNoPermissions);
+        await clickNameAt(3);
+
+        expect(find('manageDataStreamButton').exists()).toBeFalsy();
+      });
+
+      test('hides manage button for bulk actions', async () => {
+        const {
+          actions: { selectDataStream },
+          find,
+        } = testBed;
+        setLoadDataStreamResponse(dataStreamNoPermissions.name, dataStreamNoPermissions);
+
+        selectDataStream('dataStreamNoPermissions', true);
+        expect(find('dataStreamActionsPopoverButton').exists()).toBeFalsy();
       });
     });
   });

@@ -22,7 +22,8 @@ import { SearchBar } from '../../../shared/search_bar/search_bar';
 import { ServiceIcons } from '../../../shared/service_icons';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
-import { Tab, useTabs } from './use_tabs';
+import type { Tab } from './use_tabs';
+import { useTabs } from './use_tabs';
 
 interface Props {
   title: string;

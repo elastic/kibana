@@ -12,7 +12,8 @@ import { EntityInsight } from '../../../cloud_security_posture/components/entity
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
-import type { RiskScoreEntity, HostItem } from '../../../../common/search_strategy';
+import { EntityType } from '../../../../common/entity_analytics/types';
+import type { HostItem } from '../../../../common/search_strategy';
 import { ObservedEntity } from '../shared/components/observed_entity';
 import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from '.';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
@@ -21,7 +22,7 @@ import type { EntityDetailsPath } from '../shared/components/left_panel/left_pan
 
 interface HostPanelContentProps {
   observedHost: ObservedEntityData<HostItem>;
-  riskScoreState: RiskScoreState<RiskScoreEntity.user>;
+  riskScoreState: RiskScoreState<EntityType.host>;
   contextID: string;
   scopeId: string;
   isDraggable: boolean;
@@ -50,9 +51,10 @@ export const HostPanelContent = ({
 
   return (
     <FlyoutBody>
-      {riskScoreState.isModuleEnabled && riskScoreState.data?.length !== 0 && (
+      {riskScoreState.hasEngineBeenInstalled && riskScoreState.data?.length !== 0 && (
         <>
           <FlyoutRiskSummary
+            entityType={EntityType.host}
             riskScoreData={riskScoreState}
             recalculatingScore={recalculatingScore}
             queryId={HOST_PANEL_RISK_SCORE_QUERY_ID}

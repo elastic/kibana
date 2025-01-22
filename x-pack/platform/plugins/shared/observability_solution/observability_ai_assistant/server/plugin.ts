@@ -14,11 +14,6 @@ import {
 } from '@kbn/core/server';
 import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-  ACTION_SAVED_OBJECT_TYPE,
-  ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-} from '@kbn/actions-plugin/server/constants/saved_objects';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { OBSERVABILITY_AI_ASSISTANT_FEATURE_ID } from '../common/feature';
 import type { ObservabilityAIAssistantConfig } from './config';
@@ -73,18 +68,14 @@ export class ObservabilityAIAssistantPlugin
       app: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'kibana'],
       catalogue: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID],
       minimumLicense: 'enterprise',
-      // see x-pack/plugins/features/common/feature_kibana_privileges.ts
+      // see x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts
       privileges: {
         all: {
           app: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'kibana'],
           api: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'ai_assistant', 'manage_llm_product_doc'],
           catalogue: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID],
           savedObject: {
-            all: [
-              ACTION_SAVED_OBJECT_TYPE,
-              ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-              CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-            ],
+            all: [],
             read: [],
           },
           ui: [aiAssistantCapabilities.show],

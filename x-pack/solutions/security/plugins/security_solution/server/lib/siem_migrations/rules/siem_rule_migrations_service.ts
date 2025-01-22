@@ -14,6 +14,7 @@ import type {
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
+import type { PackageService } from '@kbn/fleet-plugin/server';
 import { RuleMigrationsDataService } from './data/rule_migrations_data_service';
 import type { RuleMigrationsDataClient } from './data/rule_migrations_data_client';
 import type { RuleMigrationsTaskClient } from './task/rule_migrations_task_client';
@@ -29,6 +30,7 @@ export interface SiemRuleMigrationsCreateClientParams {
   request: KibanaRequest;
   currentUser: AuthenticatedUser | null;
   spaceId: string;
+  packageService?: PackageService;
 }
 
 export interface SiemRuleMigrationsClient {
@@ -60,13 +62,19 @@ export class SiemRuleMigrationsService {
   createClient({
     spaceId,
     currentUser,
+    packageService,
     request,
   }: SiemRuleMigrationsCreateClientParams): SiemRuleMigrationsClient {
     assert(currentUser, 'Current user must be authenticated');
     assert(this.esClusterClient, 'ES client not available, please call setup first');
 
-    const esClient = this.esClusterClient.asInternalUser;
-    const dataClient = this.dataService.createClient({ spaceId, currentUser, esClient });
+    const esScopedClient = this.esClusterClient.asScoped(request);
+    const dataClient = this.dataService.createClient({
+      spaceId,
+      currentUser,
+      esScopedClient,
+      packageService,
+    });
     const taskClient = this.taskService.createClient({ currentUser, dataClient });
 
     return { data: dataClient, task: taskClient };

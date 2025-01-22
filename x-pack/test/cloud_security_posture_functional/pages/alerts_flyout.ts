@@ -14,9 +14,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const logger = getService('log');
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const pageObjects = getPageObjects(['common', 'header', 'alerts', 'expandedFlyout']);
+  const pageObjects = getPageObjects([
+    'common',
+    'header',
+    'alerts',
+    'expandedFlyoutGraph',
+    'timeline',
+  ]);
   const alertsPage = pageObjects.alerts;
-  const expandedFlyout = pageObjects.expandedFlyout;
+  const expandedFlyoutGraph = pageObjects.expandedFlyoutGraph;
+  const timelinePage = pageObjects.timeline;
 
   describe('Security Alerts Page - Graph visualization', function () {
     this.tags(['cloud_security_posture_graph_viz']);
@@ -59,61 +66,73 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await alertsPage.flyout.assertGraphPreviewVisible();
       await alertsPage.flyout.assertGraphNodesNumber(3);
 
-      await expandedFlyout.expandGraph();
-      await expandedFlyout.waitGraphIsLoaded();
-      await expandedFlyout.assertGraphNodesNumber(3);
+      await expandedFlyoutGraph.expandGraph();
+      await expandedFlyoutGraph.waitGraphIsLoaded();
+      await expandedFlyoutGraph.assertGraphNodesNumber(3);
 
       // Show actions by entity
-      await expandedFlyout.showActionsByEntity('admin@example.com');
-      await expandedFlyout.expectFilterTextEquals(0, 'actor.entity.id: admin@example.com');
-      await expandedFlyout.expectFilterPreviewEquals(0, 'actor.entity.id: admin@example.com');
+      await expandedFlyoutGraph.showActionsByEntity('admin@example.com');
+      await expandedFlyoutGraph.expectFilterTextEquals(0, 'actor.entity.id: admin@example.com');
+      await expandedFlyoutGraph.expectFilterPreviewEquals(0, 'actor.entity.id: admin@example.com');
 
       // Show actions on entity
-      await expandedFlyout.showActionsOnEntity('admin@example.com');
-      await expandedFlyout.expectFilterTextEquals(
+      await expandedFlyoutGraph.showActionsOnEntity('admin@example.com');
+      await expandedFlyoutGraph.expectFilterTextEquals(
         0,
         'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com'
       );
-      await expandedFlyout.expectFilterPreviewEquals(
+      await expandedFlyoutGraph.expectFilterPreviewEquals(
         0,
         'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com'
       );
 
       // Explore related entities
-      await expandedFlyout.exploreRelatedEntities('admin@example.com');
-      await expandedFlyout.expectFilterTextEquals(
+      await expandedFlyoutGraph.exploreRelatedEntities('admin@example.com');
+      await expandedFlyoutGraph.expectFilterTextEquals(
         0,
         'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com'
       );
-      await expandedFlyout.expectFilterPreviewEquals(
+      await expandedFlyoutGraph.expectFilterPreviewEquals(
         0,
         'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com'
       );
 
       // Show events with the same action
-      await expandedFlyout.showEventsOfSameAction(
+      await expandedFlyoutGraph.showEventsOfSameAction(
         'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success)'
       );
-      await expandedFlyout.expectFilterTextEquals(
+      await expandedFlyoutGraph.expectFilterTextEquals(
         0,
         'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com OR event.action: google.iam.admin.v1.CreateRole'
       );
-      await expandedFlyout.expectFilterPreviewEquals(
+      await expandedFlyoutGraph.expectFilterPreviewEquals(
         0,
         'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com OR event.action: google.iam.admin.v1.CreateRole'
       );
 
       // Clear filters
-      await expandedFlyout.clearAllFilters();
+      await expandedFlyoutGraph.clearAllFilters();
 
       // Add custom filter
-      await expandedFlyout.addFilter({
+      await expandedFlyoutGraph.addFilter({
         field: 'actor.entity.id',
         operation: 'is',
         value: 'admin2@example.com',
       });
       await pageObjects.header.waitUntilLoadingHasFinished();
-      await expandedFlyout.assertGraphNodesNumber(5);
+      await expandedFlyoutGraph.assertGraphNodesNumber(5);
+
+      // Open timeline
+      await expandedFlyoutGraph.clickOnInvestigateInTimelineButton();
+      await timelinePage.ensureTimelineIsOpen();
+      await timelinePage.waitForEvents();
+      await timelinePage.closeTimeline();
+
+      // Test query bar
+      await expandedFlyoutGraph.setKqlQuery('cannotFindThis');
+      await expandedFlyoutGraph.clickOnInvestigateInTimelineButton();
+      await timelinePage.ensureTimelineIsOpen();
+      await timelinePage.waitForEvents();
     });
   });
 }

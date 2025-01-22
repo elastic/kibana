@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import {
   Criteria,
@@ -22,9 +23,13 @@ import {
   EuiIcon,
   EuiPopover,
   EuiScreenReaderOnly,
+  EuiSpacer,
 } from '@elastic/eui';
-import moment from 'moment';
+import { WelcomeMessageKnowledgeBase } from '@kbn/ai-assistant/src/chat/welcome_message_knowledge_base';
+import { css } from '@emotion/css';
 import { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/public';
+import { useGenAIConnectors, useKnowledgeBase } from '@kbn/ai-assistant/src/hooks';
+import { AssistantBeacon } from '@kbn/ai-assistant-icon';
 import { useGetKnowledgeBaseEntries } from '../../hooks/use_get_knowledge_base_entries';
 import { categorizeEntries, KnowledgeBaseEntryCategory } from '../../helpers/categorize_entries';
 import { KnowledgeBaseEditManualEntryFlyout } from './knowledge_base_edit_manual_entry_flyout';
@@ -33,9 +38,21 @@ import { KnowledgeBaseBulkImportFlyout } from './knowledge_base_bulk_import_flyo
 import { useKibana } from '../../hooks/use_kibana';
 import { KnowledgeBaseEditUserInstructionFlyout } from './knowledge_base_edit_user_instruction_flyout';
 
+const fullHeightClassName = css`
+  height: 100%;
+`;
+
+const centerMaxWidthClassName = css`
+  text-align: center;
+`;
+
 export function KnowledgeBaseTab() {
   const { uiSettings } = useKibana().services;
   const dateFormat = uiSettings.get('dateFormat');
+
+  const connectors = useGenAIConnectors();
+
+  const knowledgeBase = useKnowledgeBase();
 
   const columns: Array<EuiBasicTableColumn<KnowledgeBaseEntryCategory>> = [
     {
@@ -207,7 +224,7 @@ export function KnowledgeBaseTab() {
     setQuery(e?.currentTarget.value || '');
   };
 
-  return (
+  return knowledgeBase.status.value?.ready ? (
     <>
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
@@ -369,5 +386,21 @@ export function KnowledgeBaseTab() {
         )
       ) : null}
     </>
+  ) : (
+    <EuiFlexGroup
+      alignItems="center"
+      direction="column"
+      gutterSize="none"
+      className={fullHeightClassName}
+    >
+      <EuiFlexItem grow={false}>
+        <AssistantBeacon backgroundColor="emptyShade" size="xl" />
+      </EuiFlexItem>
+      <EuiSpacer size="l" />
+
+      <EuiFlexItem grow className={centerMaxWidthClassName}>
+        <WelcomeMessageKnowledgeBase connectors={connectors} knowledgeBase={knowledgeBase} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

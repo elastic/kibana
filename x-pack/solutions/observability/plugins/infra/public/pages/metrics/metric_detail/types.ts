@@ -6,11 +6,11 @@
  */
 
 import rt from 'io-ts';
-import { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
 import type { WithEuiThemeProps } from '@elastic/eui';
 import { InventoryFormatterTypeRT } from '@kbn/metrics-data-access-plugin/common';
-import { MetricsTimeInput } from './hooks/use_metrics_time';
-import { NodeDetailsMetricData } from '../../../../common/http_api/node_details_api';
+import type { MetricsTimeInput } from './hooks/use_metrics_time';
+import type { NodeDetailsMetricData } from '../../../../common/http_api/node_details_api';
 
 export interface LayoutProps {
   metrics?: NodeDetailsMetricData[];

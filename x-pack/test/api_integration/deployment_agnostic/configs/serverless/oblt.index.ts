@@ -21,5 +21,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('../../apis/saved_objects_management'));
     loadTestFile(require.resolve('../../apis/observability/slo'));
     loadTestFile(require.resolve('../../apis/observability/synthetics'));
+    loadTestFile(require.resolve('../../apis/observability/ai_assistant'));
   });
 }

@@ -49,7 +49,7 @@ import { chunksIntoMessage, eventSourceStreamIntoObservable } from './helpers';
 export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   // Not using Axios
   protected getResponseErrorMessage(error: AxiosError): string {
-    throw new Error('Method not implemented.');
+    throw new Error(error.message || 'Method not implemented.');
   }
 
   private inferenceId;
@@ -128,11 +128,13 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     const obs$ = from(eventSourceStreamIntoObservable(res as unknown as Readable)).pipe(
       filter((line) => !!line && line !== '[DONE]'),
       map((line) => {
-        return JSON.parse(line) as OpenAI.ChatCompletionChunk | { error: { message: string } };
+        return JSON.parse(line) as
+          | OpenAI.ChatCompletionChunk
+          | { error: { message?: string; reason?: string } };
       }),
       tap((line) => {
         if ('error' in line) {
-          throw new Error(line.error.message);
+          throw new Error(line.error.message || line.error.reason || 'Unknown error');
         }
         if (
           'choices' in line &&

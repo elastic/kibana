@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
 import Boom from '@hapi/boom';
-import { ApmPluginRequestHandlerContext } from '../typings';
+import type { ApmPluginRequestHandlerContext } from '../typings';
 import { ClusterPrivilegeType } from '../../../common/privilege_type';
 
 const resource = '*';

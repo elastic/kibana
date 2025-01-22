@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RetrieverContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { RetrieverContainer } from '@elastic/elasticsearch/lib/api/types';
 import { IndicesQuerySourceFields, QuerySourceFields } from '../types';
 
 export type IndexFields = Record<string, string[]>;

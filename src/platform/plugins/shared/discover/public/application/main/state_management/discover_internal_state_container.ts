@@ -26,6 +26,11 @@ interface InternalStateDataRequestParams {
   timeRangeRelative?: TimeRange;
 }
 
+interface InternalStateDataRequestParams {
+  timeRangeAbsolute?: TimeRange;
+  timeRangeRelative?: TimeRange;
+}
+
 export interface InternalState {
   appState: DiscoverAppState | undefined;
   dataView: DataView | undefined;

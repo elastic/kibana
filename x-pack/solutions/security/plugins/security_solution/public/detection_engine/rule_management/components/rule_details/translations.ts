@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const RULE_DETAILS_FLYOUT_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.label',
+  {
+    defaultMessage: 'Rule details',
+  }
+);
+
 export const OVERVIEW_TAB_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.overviewTabLabel',
   {
@@ -270,6 +277,21 @@ export const MACHINE_LEARNING_JOB_ID_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.machineLearningJobIdFieldLabel',
   {
     defaultMessage: 'Machine Learning job',
+  }
+);
+
+export const MACHINE_LEARNING_JOB_NOT_AVAILABLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.machineLearning.mlJobNotAvailable',
+  {
+    defaultMessage:
+      'This job is currently unavailable. Please ensure that all related ML integrations are installed and configured.',
+  }
+);
+
+export const OPEN_HELP_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.machineLearning.mlJobNotAvailable.openHelpPopoverAriaLabel',
+  {
+    defaultMessage: 'Open help popover',
   }
 );
 

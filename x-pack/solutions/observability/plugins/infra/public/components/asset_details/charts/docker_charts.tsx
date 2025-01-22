@@ -17,7 +17,7 @@ import { Chart } from './chart';
 import { TitleWithTooltip } from '../components/section_title';
 import { CONTAINER_METRIC_GROUP_TITLES } from '../translations';
 import { CONTAINER_METRICS_DOC_HREF } from '../../../common/visualizations/constants';
-import { MetricsChartsFields, ContainerMetricTypes } from './types';
+import type { MetricsChartsFields, ContainerMetricTypes } from './types';
 
 interface Props extends MetricsChartsFields {
   metric: ContainerMetricTypes;

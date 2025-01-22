@@ -20,13 +20,14 @@ import { useAssetDetailsRenderPropsContext } from '../hooks/use_asset_details_re
 import { useMetadataStateContext } from '../hooks/use_metadata_state';
 import { usePageHeader } from '../hooks/use_page_header';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
-import { ContentTemplateProps } from '../types';
+import type { ContentTemplateProps } from '../types';
 import { getIntegrationsAvailable } from '../utils';
 import { InfraPageTemplate } from '../../shared/templates/infra_page_template';
 import { OnboardingFlow } from '../../shared/templates/no_data_config';
 import { PageTitleWithPopover } from '../header/page_title_with_popover';
 import { useEntitySummary } from '../hooks/use_entity_summary';
 import { isLogsSignal, isMetricsSignal } from '../utils/get_data_stream_types';
+import { useDatePickerContext } from '../hooks/use_date_picker';
 
 const DATA_AVAILABILITY_PER_TYPE: Partial<Record<InventoryItemType, string[]>> = {
   host: [SYSTEM_INTEGRATION],
@@ -37,10 +38,13 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   const { metadata, loading: metadataLoading } = useMetadataStateContext();
   const { rightSideItems, tabEntries, breadcrumbs: headerBreadcrumbs } = usePageHeader(tabs, links);
   const { asset } = useAssetDetailsRenderPropsContext();
+  const { getDateRangeInTimestamp } = useDatePickerContext();
   const trackOnlyOnce = React.useRef(false);
   const { dataStreams, status: entitySummaryStatus } = useEntitySummary({
     entityType: asset.type,
     entityId: asset.id,
+    from: new Date(getDateRangeInTimestamp().from).toISOString(),
+    to: new Date(getDateRangeInTimestamp().to).toISOString(),
   });
   const { isEntityCentricExperienceEnabled } = useEntityCentricExperienceSetting();
   const { activeTabId } = useTabSwitcherContext();

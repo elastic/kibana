@@ -90,6 +90,12 @@ export const registerAutocompleteEntitiesRoute = (deps: RouteDependencies) => {
       options: {
         tags: ['access:console'],
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: autoCompleteEntitiesValidationConfig,
     },
     async (context, request, response) => {

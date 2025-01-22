@@ -6,7 +6,7 @@
  */
 
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { TimePickerTimeDefaults } from '../components/shared/date_picker/typings';
+import type { TimePickerTimeDefaults } from '../components/shared/date_picker/typings';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 
 export function useDefaultTimeRange() {

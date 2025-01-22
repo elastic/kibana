@@ -7,15 +7,16 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { i18n } from '@kbn/i18n';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import { KibanaFeatureConfig, KibanaFeatureScope } from '@kbn/features-plugin/common';
 import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from './constants/saved_objects';
 
-export const CONNECTORS_ADVANCED_EXECUTE_PRIVILEGE_API_TAG = 'actions:execute-advanced-connectors';
-export const CONNECTORS_BASIC_EXECUTE_PRIVILEGE_API_TAG = 'actions:execute-basic-connectors';
+const ENDPOINT_SECURITY_EXECUTE_PRIVILEGE_API_TAG = 'actions:execute-endpoint-security-connectors';
+export const ENDPOINT_SECURITY_EXECUTE_PRIVILEGE = `api:${ENDPOINT_SECURITY_EXECUTE_PRIVILEGE_API_TAG}`;
+export const ENDPOINT_SECURITY_SUB_ACTIONS_EXECUTE_PRIVILEGE = `api:actions:execute-endpoint-security-sub-actions`;
 
 /**
  * The order of appearance in the feature privilege page
@@ -23,7 +24,7 @@ export const CONNECTORS_BASIC_EXECUTE_PRIVILEGE_API_TAG = 'actions:execute-basic
  */
 const FEATURE_ORDER = 3000;
 
-export const ACTIONS_FEATURE = {
+export const ACTIONS_FEATURE: KibanaFeatureConfig = {
   id: 'actions',
   name: i18n.translate('xpack.actions.featureRegistry.actionsFeatureName', {
     defaultMessage: 'Actions and Connectors',
@@ -38,10 +39,7 @@ export const ACTIONS_FEATURE = {
   privileges: {
     all: {
       app: [],
-      api: [
-        CONNECTORS_ADVANCED_EXECUTE_PRIVILEGE_API_TAG,
-        CONNECTORS_BASIC_EXECUTE_PRIVILEGE_API_TAG,
-      ],
+      api: [],
       catalogue: [],
       management: {
         insightsAndAlerting: ['triggersActions', 'triggersActionsConnectors'],
@@ -58,7 +56,7 @@ export const ACTIONS_FEATURE = {
     },
     read: {
       app: [],
-      api: [CONNECTORS_BASIC_EXECUTE_PRIVILEGE_API_TAG],
+      api: [],
       catalogue: [],
       management: {
         insightsAndAlerting: ['triggersActions', 'triggersActionsConnectors'],
@@ -71,4 +69,37 @@ export const ACTIONS_FEATURE = {
       ui: ['show', 'execute'],
     },
   },
+  subFeatures: [
+    {
+      name: i18n.translate('xpack.actions.featureRegistry.endpointSecuritySubFeatureName', {
+        defaultMessage: 'Endpoint Security',
+      }),
+      description: i18n.translate(
+        'xpack.actions.featureRegistry.endpointSecuritySubFeatureDescription',
+        {
+          defaultMessage: 'Includes: Sentinel One, Crowdstrike',
+        }
+      ),
+      privilegeGroups: [
+        {
+          groupType: 'independent',
+          privileges: [
+            {
+              api: [ENDPOINT_SECURITY_EXECUTE_PRIVILEGE_API_TAG],
+              id: 'endpoint_security_execute',
+              name: i18n.translate(
+                'xpack.actions.featureRegistry.endpointSecuritySubFeaturePrivilege',
+                {
+                  defaultMessage: 'Execute',
+                }
+              ),
+              includeIn: 'all',
+              savedObject: { all: [], read: [] },
+              ui: ['endpointSecurityExecute'],
+            },
+          ],
+        },
+      ],
+    },
+  ],
 };

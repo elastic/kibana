@@ -14,12 +14,11 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import {
-  getSpanMetricColumns,
-  SpanMetricGroup,
-} from '../../../shared/dependencies_table/get_span_metric_columns';
+import type { SpanMetricGroup } from '../../../shared/dependencies_table/get_span_metric_columns';
+import { getSpanMetricColumns } from '../../../shared/dependencies_table/get_span_metric_columns';
 import { EmptyMessage } from '../../../shared/empty_message';
-import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
+import type { ITableColumn } from '../../../shared/managed_table';
+import { ManagedTable } from '../../../shared/managed_table';
 import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { DependencyOperationDetailLink } from '../../dependency_operation_detail_view/dependency_operation_detail_link';

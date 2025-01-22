@@ -13,13 +13,11 @@ import { getPathParts } from '../../archive';
 
 import { saveKibanaAssetsRefs } from '../../packages/install';
 
-import { makeManagedIndexPatternsGlobal } from '../index_pattern/install';
-
 import type { ArchiveAsset } from './install';
 import {
   KibanaSavedObjectTypeMapping,
-  createDefaultIndexPatterns,
   createSavedObjectKibanaAsset,
+  installManagedIndexPattern,
   isKibanaAssetType,
   toAssetReference,
 } from './install';
@@ -45,8 +43,10 @@ export async function installKibanaAssetsWithStreaming({
   const { savedObjectClientWithSpace, savedObjectsImporter } =
     getSpaceAwareSaveobjectsClients(spaceId);
 
-  await createDefaultIndexPatterns(savedObjectsImporter);
-  await makeManagedIndexPatternsGlobal(savedObjectsClient);
+  await installManagedIndexPattern({
+    savedObjectsImporter,
+    savedObjectsClient,
+  });
 
   const assetRefs: KibanaAssetReference[] = [];
   let batch: ArchiveAsset[] = [];

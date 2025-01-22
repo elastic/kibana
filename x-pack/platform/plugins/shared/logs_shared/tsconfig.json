@@ -53,6 +53,7 @@
     "@kbn/field-formats-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/saved-search-plugin",
+    "@kbn/discover-plugin",
     "@kbn/spaces-plugin",
     "@kbn/analytics",
     "@kbn/usage-collection-plugin",

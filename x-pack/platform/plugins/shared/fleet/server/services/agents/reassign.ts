@@ -143,7 +143,7 @@ export async function reassignAgents(
           newAgentPolicyId,
         },
         { pitId: await openPointInTime(esClient) }
-      ).runActionAsyncWithRetry();
+      ).runActionAsyncTask();
     }
   }
 

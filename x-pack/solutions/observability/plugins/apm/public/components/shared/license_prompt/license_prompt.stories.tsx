@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { ComponentProps, ComponentType } from 'react';
+import type { ComponentProps, ComponentType } from 'react';
+import React from 'react';
 import { LicensePrompt } from '.';
-import {
-  ApmPluginContext,
-  ApmPluginContextValue,
-} from '../../../context/apm_plugin/apm_plugin_context';
+import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
+import { ApmPluginContext } from '../../../context/apm_plugin/apm_plugin_context';
 
 const contextMock = {
   core: { http: { basePath: { prepend: () => {} } } },

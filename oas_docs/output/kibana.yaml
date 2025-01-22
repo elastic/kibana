@@ -5190,6 +5190,7 @@ paths:
       operationId: DeleteAssetCriticalityRecord
       parameters:
         - description: The ID value of the asset.
+          example: my_host
           in: query
           name: id_value
           required: true
@@ -5236,6 +5237,7 @@ paths:
       operationId: GetAssetCriticalityRecord
       parameters:
         - description: The ID value of the asset.
+          example: my_host
           in: query
           name: id_value
           required: true
@@ -5281,6 +5283,10 @@ paths:
                       enum:
                         - wait_for
                       type: string
+              example:
+                criticality_level: high_impact
+                id_field: host.name
+                id_value: my_host
         required: true
       responses:
         '200':
@@ -5404,6 +5410,31 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
+                example:
+                  page: 1
+                  per_page: 10
+                  records:
+                    - '@timestamp': '2024-08-02T14:40:35.705Z'
+                      asset:
+                        criticality: medium_impact
+                      criticality_level: medium_impact
+                      host:
+                        asset:
+                          criticality: medium_impact
+                        name: my_other_host
+                      id_field: host.name
+                      id_value: my_other_host
+                    - '@timestamp': '2024-08-02T11:15:34.290Z'
+                      asset:
+                        criticality: high_impact
+                      criticality_level: high_impact
+                      host:
+                        asset:
+                          criticality: high_impact
+                        name: my_host
+                      id_field: host.name
+                      id_value: my_host
+                  total: 2
                 type: object
                 properties:
                   page:
@@ -5425,7 +5456,7 @@ paths:
                   - page
                   - per_page
                   - total
-          description: Bulk upload successful
+          description: Successfully retrieved asset criticality records
       summary: List asset criticality records
       tags:
         - Security Entity Analytics API
@@ -11549,6 +11580,26 @@ paths:
       summary: Get running processes
       tags:
         - Security Endpoint Management API
+  /api/endpoint/action/runscript:
+    post:
+      description: Run a shell command on an endpoint.
+      operationId: RunScriptAction
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_RunScriptRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Security_Endpoint_Management_API_SuccessResponse'
+          description: OK
+      summary: Run a script
+      tags:
+        - Security Endpoint Management API
   /api/endpoint/action/scan:
     post:
       description: Scan a specific file or directory on an endpoint for malware.
@@ -12021,7 +12072,7 @@ paths:
           schema:
             type: string
         - in: query
-          name: entities_types
+          name: entity_types
           required: true
           schema:
             items:
@@ -13346,6 +13397,7 @@ paths:
         - Security Exceptions API
   /api/fleet/agent_download_sources:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [fleet-agent-policies-read OR fleet-settings-read].'
       operationId: get-fleet-agent-download-sources
       parameters: []
       responses:
@@ -13411,6 +13463,7 @@ paths:
       tags:
         - Elastic Agent binary download sources
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: post-fleet-agent-download-sources
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -13497,7 +13550,7 @@ paths:
         - Elastic Agent binary download sources
   /api/fleet/agent_download_sources/{sourceId}:
     delete:
-      description: Delete an agent binary download source by ID.
+      description: 'Delete an agent binary download source by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: delete-fleet-agent-download-sources-sourceid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -13544,7 +13597,7 @@ paths:
       tags:
         - Elastic Agent binary download sources
     get:
-      description: Get an agent binary download source by ID.
+      description: 'Get an agent binary download source by ID.<br/><br/>[Required authorization] Route required privileges: ANY of [fleet-agent-policies-read OR fleet-settings-read].'
       operationId: get-fleet-agent-download-sources-sourceid
       parameters:
         - in: path
@@ -13604,7 +13657,7 @@ paths:
       tags:
         - Elastic Agent binary download sources
     put:
-      description: Update an agent binary download source by ID.
+      description: 'Update an agent binary download source by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: put-fleet-agent-download-sources-sourceid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -13696,6 +13749,7 @@ paths:
         - Elastic Agent binary download sources
   /api/fleet/agent_policies:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [fleet-agent-policies-read OR fleet-agents-read OR fleet-setup].'
       operationId: get-fleet-agent-policies
       parameters:
         - in: query
@@ -14203,6 +14257,24 @@ paths:
                                   - created_at
                                   - created_by
                               type: array
+                        required_versions:
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              percentage:
+                                description: Target percentage of agents to auto upgrade
+                                maximum: 100
+                                minimum: 0
+                                type: number
+                              version:
+                                description: Target version for automatic agent upgrade
+                                type: string
+                            required:
+                              - version
+                              - percentage
+                          nullable: true
+                          type: array
                         revision:
                           type: number
                         schema_version:
@@ -14274,6 +14346,7 @@ paths:
       tags:
         - Elastic Agent policies
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agent-policies-all].'
       operationId: post-fleet-agent-policies
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -14445,6 +14518,24 @@ paths:
                   description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
                   nullable: true
                   type: object
+                required_versions:
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      percentage:
+                        description: Target percentage of agents to auto upgrade
+                        maximum: 100
+                        minimum: 0
+                        type: number
+                      version:
+                        description: Target version for automatic agent upgrade
+                        type: string
+                    required:
+                      - version
+                      - percentage
+                  nullable: true
+                  type: array
                 space_ids:
                   items:
                     type: string
@@ -14904,6 +14995,24 @@ paths:
                                 - created_at
                                 - created_by
                             type: array
+                      required_versions:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            percentage:
+                              description: Target percentage of agents to auto upgrade
+                              maximum: 100
+                              minimum: 0
+                              type: number
+                            version:
+                              description: Target version for automatic agent upgrade
+                              type: string
+                          required:
+                            - version
+                            - percentage
+                        nullable: true
+                        type: array
                       revision:
                         type: number
                       schema_version:
@@ -14966,6 +15075,7 @@ paths:
         - Elastic Agent policies
   /api/fleet/agent_policies/_bulk_get:
     post:
+      description: '[Required authorization] Route required privileges: ANY of [fleet-agent-policies-read OR fleet-agents-read OR fleet-setup].'
       operationId: post-fleet-agent-policies-bulk-get
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -15447,6 +15557,24 @@ paths:
                                   - created_at
                                   - created_by
                               type: array
+                        required_versions:
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              percentage:
+                                description: Target percentage of agents to auto upgrade
+                                maximum: 100
+                                minimum: 0
+                                type: number
+                              version:
+                                description: Target version for automatic agent upgrade
+                                type: string
+                            required:
+                              - version
+                              - percentage
+                          nullable: true
+                          type: array
                         revision:
                           type: number
                         schema_version:
@@ -15510,7 +15638,7 @@ paths:
         - Elastic Agent policies
   /api/fleet/agent_policies/{agentPolicyId}:
     get:
-      description: Get an agent policy by ID.
+      description: 'Get an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: ANY of [fleet-agent-policies-read OR fleet-agents-read OR fleet-setup].'
       operationId: get-fleet-agent-policies-agentpolicyid
       parameters:
         - in: path
@@ -15970,6 +16098,24 @@ paths:
                                 - created_at
                                 - created_by
                             type: array
+                      required_versions:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            percentage:
+                              description: Target percentage of agents to auto upgrade
+                              maximum: 100
+                              minimum: 0
+                              type: number
+                            version:
+                              description: Target version for automatic agent upgrade
+                              type: string
+                          required:
+                            - version
+                            - percentage
+                        nullable: true
+                        type: array
                       revision:
                         type: number
                       schema_version:
@@ -16031,7 +16177,7 @@ paths:
       tags:
         - Elastic Agent policies
     put:
-      description: Update an agent policy by ID.
+      description: 'Update an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-all].'
       operationId: put-fleet-agent-policies-agentpolicyid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -16211,6 +16357,24 @@ paths:
                   description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
                   nullable: true
                   type: object
+                required_versions:
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      percentage:
+                        description: Target percentage of agents to auto upgrade
+                        maximum: 100
+                        minimum: 0
+                        type: number
+                      version:
+                        description: Target version for automatic agent upgrade
+                        type: string
+                    required:
+                      - version
+                      - percentage
+                  nullable: true
+                  type: array
                 space_ids:
                   items:
                     type: string
@@ -16670,6 +16834,24 @@ paths:
                                 - created_at
                                 - created_by
                             type: array
+                      required_versions:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            percentage:
+                              description: Target percentage of agents to auto upgrade
+                              maximum: 100
+                              minimum: 0
+                              type: number
+                            version:
+                              description: Target version for automatic agent upgrade
+                              type: string
+                          required:
+                            - version
+                            - percentage
+                        nullable: true
+                        type: array
                       revision:
                         type: number
                       schema_version:
@@ -16732,7 +16914,7 @@ paths:
         - Elastic Agent policies
   /api/fleet/agent_policies/{agentPolicyId}/copy:
     post:
-      description: Copy an agent policy by ID.
+      description: 'Copy an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-all].'
       operationId: post-fleet-agent-policies-agentpolicyid-copy
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -17213,6 +17395,24 @@ paths:
                                 - created_at
                                 - created_by
                             type: array
+                      required_versions:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            percentage:
+                              description: Target percentage of agents to auto upgrade
+                              maximum: 100
+                              minimum: 0
+                              type: number
+                            version:
+                              description: Target version for automatic agent upgrade
+                              type: string
+                          required:
+                            - version
+                            - percentage
+                        nullable: true
+                        type: array
                       revision:
                         type: number
                       schema_version:
@@ -17275,7 +17475,7 @@ paths:
         - Elastic Agent policies
   /api/fleet/agent_policies/{agentPolicyId}/download:
     get:
-      description: Download an agent policy by ID.
+      description: 'Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read, fleet-setup].'
       operationId: get-fleet-agent-policies-agentpolicyid-download
       parameters:
         - in: path
@@ -17341,7 +17541,7 @@ paths:
         - Elastic Agent policies
   /api/fleet/agent_policies/{agentPolicyId}/full:
     get:
-      description: Get a full agent policy by ID.
+      description: 'Get a full agent policy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read].'
       operationId: get-fleet-agent-policies-agentpolicyid-full
       parameters:
         - in: path
@@ -17689,7 +17889,7 @@ paths:
         - Elastic Agent policies
   /api/fleet/agent_policies/{agentPolicyId}/outputs:
     get:
-      description: Get a list of outputs associated with agent policy by policy id.
+      description: 'Get a list of outputs associated with agent policy by policy id.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read, fleet-settings-read].'
       operationId: get-fleet-agent-policies-agentpolicyid-outputs
       parameters:
         - in: path
@@ -17785,7 +17985,7 @@ paths:
         - Elastic Agent policies
   /api/fleet/agent_policies/delete:
     post:
-      description: Delete an agent policy by ID.
+      description: 'Delete an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-all].'
       operationId: post-fleet-agent-policies-delete
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -17845,7 +18045,7 @@ paths:
         - Elastic Agent policies
   /api/fleet/agent_policies/outputs:
     post:
-      description: Get a list of outputs associated with agent policies.
+      description: 'Get a list of outputs associated with agent policies.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read, fleet-settings-read].'
       operationId: post-fleet-agent-policies-outputs
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -18006,9 +18206,13 @@ paths:
                         type: number
                       online:
                         type: number
+                      orphaned:
+                        type: number
                       other:
                         type: number
                       unenrolled:
+                        type: number
+                      uninstalled:
                         type: number
                       updating:
                         type: number
@@ -18046,6 +18250,7 @@ paths:
         - Elastic Agent status
   /api/fleet/agent_status/data:
     get:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
       operationId: get-fleet-agent-status-data
       parameters:
         - in: query
@@ -18120,6 +18325,7 @@ paths:
         - Elastic Agents
   /api/fleet/agents:
     get:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
       operationId: get-fleet-agents
       parameters:
         - in: query
@@ -18206,6 +18412,8 @@ paths:
                           required:
                             - id
                             - version
+                        audit_unenrolled_reason:
+                          type: string
                         components:
                           items:
                             additionalProperties: false
@@ -18369,6 +18577,8 @@ paths:
                             - unenrolled
                             - updating
                             - degraded
+                            - uninstalled
+                            - orphaned
                           type: string
                         tags:
                           items:
@@ -18498,6 +18708,7 @@ paths:
       tags:
         - Elastic Agents
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
       operationId: post-fleet-agents
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -18555,7 +18766,7 @@ paths:
         - Elastic Agents
   /api/fleet/agents/{agentId}:
     delete:
-      description: Delete an agent by ID.
+      description: 'Delete an agent by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: delete-fleet-agents-agentid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -18604,7 +18815,7 @@ paths:
       tags:
         - Elastic Agents
     get:
-      description: Get an agent by ID.
+      description: 'Get an agent by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
       operationId: get-fleet-agents-agentid
       parameters:
         - in: path
@@ -18647,6 +18858,8 @@ paths:
                         required:
                           - id
                           - version
+                      audit_unenrolled_reason:
+                        type: string
                       components:
                         items:
                           additionalProperties: false
@@ -18810,6 +19023,8 @@ paths:
                           - unenrolled
                           - updating
                           - degraded
+                          - uninstalled
+                          - orphaned
                         type: string
                       tags:
                         items:
@@ -18925,7 +19140,7 @@ paths:
       tags:
         - Elastic Agents
     put:
-      description: Update an agent by ID.
+      description: 'Update an agent by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: put-fleet-agents-agentid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -18983,6 +19198,8 @@ paths:
                         required:
                           - id
                           - version
+                      audit_unenrolled_reason:
+                        type: string
                       components:
                         items:
                           additionalProperties: false
@@ -19146,6 +19363,8 @@ paths:
                           - unenrolled
                           - updating
                           - degraded
+                          - uninstalled
+                          - orphaned
                         type: string
                       tags:
                         items:
@@ -19262,6 +19481,7 @@ paths:
         - Elastic Agents
   /api/fleet/agents/{agentId}/actions:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: post-fleet-agents-agentid-actions
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -19374,7 +19594,6 @@ paths:
                       - data
                       - created_at
                       - ack_data
-                      - agents
                 required:
                   - item
         '400':
@@ -19398,6 +19617,7 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/{agentId}/reassign:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: post-fleet-agents-agentid-reassign
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -19452,6 +19672,7 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/{agentId}/request_diagnostics:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
       operationId: post-fleet-agents-agentid-request-diagnostics
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -19513,6 +19734,7 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/{agentId}/unenroll:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: post-fleet-agents-agentid-unenroll
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -19545,6 +19767,7 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/{agentId}/upgrade:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: post-fleet-agents-agentid-upgrade
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -19605,6 +19828,7 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/{agentId}/uploads:
     get:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
       operationId: get-fleet-agents-agentid-uploads
       parameters:
         - in: path
@@ -19677,6 +19901,7 @@ paths:
         - Elastic Agents
   /api/fleet/agents/action_status:
     get:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
       operationId: get-fleet-agents-action-status
       parameters:
         - in: query
@@ -19834,6 +20059,7 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/actions/{actionId}/cancel:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: post-fleet-agents-actions-actionid-cancel
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -19896,7 +20122,6 @@ paths:
                       - data
                       - created_at
                       - ack_data
-                      - agents
                 required:
                   - item
         '400':
@@ -19920,6 +20145,7 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/available_versions:
     get:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
       operationId: get-fleet-agents-available-versions
       parameters: []
       responses:
@@ -19957,6 +20183,7 @@ paths:
         - Elastic Agents
   /api/fleet/agents/bulk_reassign:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: post-fleet-agents-bulk-reassign
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -20022,6 +20249,7 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/bulk_request_diagnostics:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
       operationId: post-fleet-agents-bulk-request-diagnostics
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -20087,6 +20315,7 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/bulk_unenroll:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: post-fleet-agents-bulk-unenroll
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -20157,6 +20386,7 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/bulk_update_agent_tags:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: post-fleet-agents-bulk-update-agent-tags
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -20227,6 +20457,7 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/bulk_upgrade:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: post-fleet-agents-bulk-upgrade
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -20303,7 +20534,7 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/files/{fileId}:
     delete:
-      description: Delete a file uploaded by an agent.
+      description: 'Delete a file uploaded by an agent.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: delete-fleet-agents-files-fileid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -20354,7 +20585,7 @@ paths:
         - Elastic Agents
   /api/fleet/agents/files/{fileId}/{fileName}:
     get:
-      description: Get a file uploaded by an agent.
+      description: 'Get a file uploaded by an agent.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
       operationId: get-fleet-agents-files-fileid-filename
       parameters:
         - in: path
@@ -20394,6 +20625,7 @@ paths:
         - Elastic Agents
   /api/fleet/agents/setup:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [fleet-agents-read OR fleet-agent-policies-read OR fleet-settings-read OR fleet-setup].'
       operationId: get-fleet-agents-setup
       parameters: []
       responses:
@@ -20453,6 +20685,7 @@ paths:
       tags:
         - Elastic Agents
     post:
+      description: '[Required authorization] Route required privileges: ANY of [fleet-agents-read OR fleet-agent-policies-read OR fleet-settings-read OR fleet-setup].'
       operationId: post-fleet-agents-setup
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -20510,6 +20743,7 @@ paths:
         - Elastic Agents
   /api/fleet/agents/tags:
     get:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
       operationId: get-fleet-agents-tags
       parameters:
         - in: query
@@ -20604,6 +20838,7 @@ paths:
         - Fleet internals
   /api/fleet/data_streams:
     get:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all, fleet-agent-policies-all, fleet-settings-all].'
       operationId: get-fleet-data-streams
       parameters: []
       responses:
@@ -20700,6 +20935,7 @@ paths:
         - Data streams
   /api/fleet/enrollment_api_keys:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [fleet-agents-all OR fleet-setup].'
       operationId: get-fleet-enrollment-api-keys
       parameters:
         - in: query
@@ -20822,6 +21058,7 @@ paths:
       tags:
         - Fleet enrollment API keys
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: post-fleet-enrollment-api-keys
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -20911,7 +21148,7 @@ paths:
         - Fleet enrollment API keys
   /api/fleet/enrollment_api_keys/{keyId}:
     delete:
-      description: Revoke an enrollment API key by ID by marking it as inactive.
+      description: 'Revoke an enrollment API key by ID by marking it as inactive.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: delete-fleet-enrollment-api-keys-keyid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -20960,7 +21197,7 @@ paths:
       tags:
         - Fleet enrollment API keys
     get:
-      description: Get an enrollment API key by ID.
+      description: 'Get an enrollment API key by ID.<br/><br/>[Required authorization] Route required privileges: ANY of [fleet-agents-all OR fleet-setup].'
       operationId: get-fleet-enrollment-api-keys-keyid
       parameters:
         - in: path
@@ -21028,6 +21265,7 @@ paths:
         - Fleet enrollment API keys
   /api/fleet/epm/bulk_assets:
     post:
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: post-fleet-epm-bulk-assets
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -21118,6 +21356,7 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/categories:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: get-fleet-epm-categories
       parameters:
         - in: query
@@ -21181,6 +21420,7 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/custom_integrations:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].'
       operationId: post-fleet-epm-custom-integrations
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -21315,6 +21555,7 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/data_streams:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: get-fleet-epm-data-streams
       parameters:
         - in: query
@@ -21389,6 +21630,7 @@ paths:
         - Data streams
   /api/fleet/epm/packages:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: get-fleet-epm-packages
       parameters:
         - in: query
@@ -21780,6 +22022,7 @@ paths:
       tags:
         - Elastic Package Manager (EPM)
     post:
+      description: '[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].'
       operationId: post-fleet-epm-packages
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -21899,6 +22142,7 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/_bulk:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].'
       operationId: post-fleet-epm-packages-bulk
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -22073,6 +22317,7 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/{pkgName}/{pkgVersion}:
     delete:
+      description: '[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].'
       operationId: delete-fleet-epm-packages-pkgname-pkgversion
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -22650,6 +22895,7 @@ paths:
       tags:
         - Elastic Package Manager (EPM)
     post:
+      description: '[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].'
       operationId: post-fleet-epm-packages-pkgname-pkgversion
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -22791,6 +23037,7 @@ paths:
       tags:
         - Elastic Package Manager (EPM)
     put:
+      description: '[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].'
       operationId: put-fleet-epm-packages-pkgname-pkgversion
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -23252,6 +23499,7 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath}:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: get-fleet-epm-packages-pkgname-pkgversion-filepath
       parameters:
         - in: path
@@ -23379,6 +23627,7 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/{pkgName}/stats:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: get-fleet-epm-packages-pkgname-stats
       parameters:
         - in: path
@@ -23425,6 +23674,7 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/installed:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: get-fleet-epm-packages-installed
       parameters:
         - in: query
@@ -23570,6 +23820,7 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/limited:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: get-fleet-epm-packages-limited
       parameters: []
       responses:
@@ -23607,6 +23858,7 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/templates/{pkgName}/{pkgVersion}/inputs:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: get-fleet-epm-templates-pkgname-pkgversion-inputs
       parameters:
         - in: path
@@ -23706,6 +23958,7 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/verification_key_id:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: get-fleet-epm-verification-key-id
       parameters: []
       responses:
@@ -23742,6 +23995,7 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/fleet_server_hosts:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [fleet-agents-all OR fleet-settings-read].'
       operationId: get-fleet-fleet-server-hosts
       parameters: []
       responses:
@@ -23813,6 +24067,7 @@ paths:
       tags:
         - Fleet Server hosts
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: post-fleet-fleet-server-hosts
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -23911,7 +24166,7 @@ paths:
         - Fleet Server hosts
   /api/fleet/fleet_server_hosts/{itemId}:
     delete:
-      description: Delete a Fleet Server host by ID.
+      description: 'Delete a Fleet Server host by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: delete-fleet-fleet-server-hosts-itemid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -23958,7 +24213,7 @@ paths:
       tags:
         - Fleet Server hosts
     get:
-      description: Get a Fleet Server host by ID.
+      description: 'Get a Fleet Server host by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-read].'
       operationId: get-fleet-fleet-server-hosts-itemid
       parameters:
         - in: path
@@ -24024,7 +24279,7 @@ paths:
       tags:
         - Fleet Server hosts
     put:
-      description: Update a Fleet Server host by ID.
+      description: 'Update a Fleet Server host by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: put-fleet-fleet-server-hosts-itemid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -24121,6 +24376,7 @@ paths:
         - Fleet Server hosts
   /api/fleet/health_check:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: post-fleet-health-check
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -24194,6 +24450,7 @@ paths:
         - Fleet internals
   /api/fleet/kubernetes:
     get:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read, fleet-setup].'
       operationId: get-fleet-kubernetes
       parameters:
         - in: query
@@ -24244,6 +24501,7 @@ paths:
         - Elastic Agent policies
   /api/fleet/kubernetes/download:
     get:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read, fleet-setup].'
       operationId: get-fleet-kubernetes-download
       parameters:
         - in: query
@@ -24304,6 +24562,7 @@ paths:
         - Elastic Agent policies
   /api/fleet/logstash_api_keys:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: post-fleet-logstash-api-keys
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -24346,6 +24605,7 @@ paths:
         - Fleet outputs
   /api/fleet/message_signing_service/rotate_key_pair:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all, fleet-agent-policies-all, fleet-settings-all].'
       operationId: post-fleet-message-signing-service-rotate-key-pair
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -24410,6 +24670,7 @@ paths:
         - Message Signing Service
   /api/fleet/outputs:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [fleet-settings-read OR fleet-agent-policies-read].'
       operationId: get-fleet-outputs
       parameters: []
       responses:
@@ -25134,6 +25395,7 @@ paths:
       tags:
         - Fleet outputs
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: post-fleet-outputs
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -26539,7 +26801,7 @@ paths:
         - Fleet outputs
   /api/fleet/outputs/{outputId}:
     delete:
-      description: Delete output by ID.
+      description: 'Delete output by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: delete-fleet-outputs-outputid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -26602,7 +26864,7 @@ paths:
       tags:
         - Fleet outputs
     get:
-      description: Get output by ID.
+      description: 'Get output by ID.<br/><br/>[Required authorization] Route required privileges: ANY of [fleet-settings-read OR fleet-agent-policies-read].'
       operationId: get-fleet-outputs-outputid
       parameters:
         - in: path
@@ -27321,7 +27583,7 @@ paths:
       tags:
         - Fleet outputs
     put:
-      description: Update output by ID.
+      description: 'Update output by ID.<br/><br/>[Required authorization] Route required privileges: ANY of [fleet-settings-all OR fleet-agent-policies-all].'
       operationId: put-fleet-outputs-outputid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -28711,6 +28973,7 @@ paths:
         - Fleet outputs
   /api/fleet/outputs/{outputId}/health:
     get:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-settings-read].'
       operationId: get-fleet-outputs-outputid-health
       parameters:
         - in: path
@@ -30518,7 +30781,7 @@ paths:
         - Fleet package policies
   /api/fleet/package_policies/{packagePolicyId}:
     delete:
-      description: Delete a package policy by ID.
+      description: 'Delete a package policy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-all, integrations-all].'
       operationId: delete-fleet-package-policies-packagepolicyid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -31843,6 +32106,7 @@ paths:
         - Fleet package policies
   /api/fleet/package_policies/delete:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agent-policies-all, integrations-all].'
       operationId: post-fleet-package-policies-delete
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -31971,7 +32235,7 @@ paths:
         - Fleet package policies
   /api/fleet/package_policies/upgrade:
     post:
-      description: Upgrade a package policy to a newer package version.
+      description: 'Upgrade a package policy to a newer package version.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-all, integrations-all].'
       operationId: post-fleet-package-policies-upgrade
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -32044,6 +32308,7 @@ paths:
         - Fleet package policies
   /api/fleet/package_policies/upgrade/dryrun:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read, integrations-read].'
       operationId: post-fleet-package-policies-upgrade-dryrun
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -32836,6 +33101,7 @@ paths:
         - Fleet package policies
   /api/fleet/proxies:
     get:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-settings-read].'
       operationId: get-fleet-proxies
       parameters: []
       responses:
@@ -32913,6 +33179,7 @@ paths:
       tags:
         - Fleet proxies
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: post-fleet-proxies
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -33023,7 +33290,7 @@ paths:
         - Fleet proxies
   /api/fleet/proxies/{itemId}:
     delete:
-      description: Delete a proxy by ID
+      description: 'Delete a proxy by ID<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: delete-fleet-proxies-itemid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -33070,7 +33337,7 @@ paths:
       tags:
         - Fleet proxies
     get:
-      description: Get a proxy by ID.
+      description: 'Get a proxy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-read].'
       operationId: get-fleet-proxies-itemid
       parameters:
         - in: path
@@ -33142,7 +33409,7 @@ paths:
       tags:
         - Fleet proxies
     put:
-      description: Update a proxy by ID.
+      description: 'Update a proxy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: put-fleet-proxies-itemid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -33255,6 +33522,7 @@ paths:
         - Fleet proxies
   /api/fleet/service_tokens:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: post-fleet-service-tokens
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -33311,6 +33579,7 @@ paths:
         - Fleet service tokens
   /api/fleet/settings:
     get:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-settings-read].'
       operationId: get-fleet-settings
       parameters: []
       responses:
@@ -33398,6 +33667,7 @@ paths:
       tags:
         - Fleet internals
     put:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: put-fleet-settings
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -33524,6 +33794,7 @@ paths:
         - Fleet internals
   /api/fleet/setup:
     post:
+      description: '[Required authorization] Route required privileges: ANY of [fleet-agents-read OR fleet-agent-policies-read OR fleet-settings-read OR fleet-setup].'
       operationId: post-fleet-setup
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -33593,7 +33864,7 @@ paths:
         - Fleet internals
   /api/fleet/uninstall_tokens:
     get:
-      description: List the metadata for the latest uninstall tokens per agent policy.
+      description: 'List the metadata for the latest uninstall tokens per agent policy.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: get-fleet-uninstall-tokens
       parameters:
         - description: Partial match filtering for policy IDs
@@ -33685,7 +33956,7 @@ paths:
         - Fleet uninstall tokens
   /api/fleet/uninstall_tokens/{uninstallTokenId}:
     get:
-      description: Get one decrypted uninstall token by its ID.
+      description: 'Get one decrypted uninstall token by its ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: get-fleet-uninstall-tokens-uninstalltokenid
       parameters:
         - in: path
@@ -53368,10 +53639,12 @@ components:
         - minLength: 1
           type: string
     Security_Endpoint_Management_API_AgentTypes:
+      description: The host agent type (optional). Defaults to endpoint.
       enum:
         - endpoint
         - sentinel_one
         - crowdstrike
+        - microsoft_defender_endpoint
       type: string
     Security_Endpoint_Management_API_AlertIds:
       description: A list of alerts ids.
@@ -53386,6 +53659,23 @@ components:
         type: string
       minItems: 1
       type: array
+    Security_Endpoint_Management_API_CloudFileScriptParameters:
+      type: object
+      properties:
+        cloudFile:
+          description: Script name in cloud storage.
+          minLength: 1
+          type: string
+        commandLine:
+          description: Command line arguments.
+          minLength: 1
+          type: string
+        timeout:
+          description: Timeout in seconds.
+          minimum: 1
+          type: integer
+      required:
+        - cloudFile
     Security_Endpoint_Management_API_Command:
       description: The command to be executed (cannot be an empty string)
       enum:
@@ -53512,6 +53802,23 @@ components:
             - parameters
     Security_Endpoint_Management_API_GetProcessesRouteRequestBody:
       $ref: '#/components/schemas/Security_Endpoint_Management_API_NoParametersRequestSchema'
+    Security_Endpoint_Management_API_HostPathScriptParameters:
+      type: object
+      properties:
+        commandLine:
+          description: Command line arguments.
+          minLength: 1
+          type: string
+        hostPath:
+          description: Absolute or relative path of script on host machine.
+          minLength: 1
+          type: string
+        timeout:
+          description: Timeout in seconds.
+          minimum: 1
+          type: integer
+      required:
+        - hostPath
     Security_Endpoint_Management_API_IsolateRouteRequestBody:
       $ref: '#/components/schemas/Security_Endpoint_Management_API_NoParametersRequestSchema'
     Security_Endpoint_Management_API_KillProcessRouteRequestBody:
@@ -53665,6 +53972,34 @@ components:
       properties:
         note:
           type: string
+    Security_Endpoint_Management_API_RawScriptParameters:
+      type: object
+      properties:
+        commandLine:
+          description: Command line arguments.
+          minLength: 1
+          type: string
+        raw:
+          description: Raw script content.
+          minLength: 1
+          type: string
+        timeout:
+          description: Timeout in seconds.
+          minimum: 1
+          type: integer
+      required:
+        - raw
+    Security_Endpoint_Management_API_RunScriptRouteRequestBody:
+      type: object
+      properties:
+        parameters:
+          description: Exactly one of 'Raw', 'HostPath', or 'CloudFile' must be provided. CommandLine and Timeout are optional for all.
+          oneOf:
+            - $ref: '#/components/schemas/Security_Endpoint_Management_API_RawScriptParameters'
+            - $ref: '#/components/schemas/Security_Endpoint_Management_API_HostPathScriptParameters'
+            - $ref: '#/components/schemas/Security_Endpoint_Management_API_CloudFileScriptParameters'
+      required:
+        - parameters
     Security_Endpoint_Management_API_ScanRouteRequestBody:
       allOf:
         - type: object
@@ -53841,6 +54176,17 @@ components:
               type: string
           required:
             - '@timestamp'
+      example:
+        '@timestamp': '2024-08-02T11:15:34.290Z'
+        asset:
+          criticality: high_impact
+        criticality_level: high_impact
+        host:
+          asset:
+            criticality: high_impact
+          name: my_host
+        id_field: host.name
+        id_value: my_host
     Security_Entity_Analytics_API_AssetCriticalityRecordEcsParts:
       type: object
       properties:
@@ -53852,6 +54198,20 @@ components:
           required:
             - asset
         host:
+          type: object
+          properties:
+            asset:
+              type: object
+              properties:
+                criticality:
+                  $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
+              required:
+                - criticality
+            name:
+              type: string
+          required:
+            - name
+        service:
           type: object
           properties:
             asset:
@@ -54032,6 +54392,7 @@ components:
       oneOf:
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_UserEntity'
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_HostEntity'
+        - $ref: '#/components/schemas/Security_Entity_Analytics_API_ServiceEntity'
     Security_Entity_Analytics_API_EntityRiskLevels:
       enum:
         - Unknown
@@ -54114,6 +54475,7 @@ components:
         - user
         - host
         - service
+        - universal
       type: string
     Security_Entity_Analytics_API_HostEntity:
       type: object
@@ -54183,6 +54545,8 @@ components:
       enum:
         - host.name
         - user.name
+        - service.name
+        - related.entity
       type: string
     Security_Entity_Analytics_API_IndexPattern:
       type: string
@@ -54253,6 +54617,42 @@ components:
         - index
         - description
         - category
+    Security_Entity_Analytics_API_ServiceEntity:
+      type: object
+      properties:
+        '@timestamp':
+          format: date-time
+          type: string
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
+          required:
+            - criticality
+        entity:
+          type: object
+          properties:
+            name:
+              type: string
+            source:
+              type: string
+          required:
+            - name
+            - source
+        service:
+          type: object
+          properties:
+            name:
+              type: string
+            risk:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityRiskScoreRecord'
+          required:
+            - name
+      required:
+        - '@timestamp'
+        - service
+        - entity
     Security_Entity_Analytics_API_StoreStatus:
       enum:
         - not_installed

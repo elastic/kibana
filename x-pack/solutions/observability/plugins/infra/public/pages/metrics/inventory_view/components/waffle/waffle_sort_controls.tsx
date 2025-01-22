@@ -5,17 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState, ReactNode } from 'react';
-import {
-  EuiSwitch,
-  EuiContextMenuPanelDescriptor,
-  EuiPopover,
-  EuiContextMenu,
-  withEuiTheme,
-  WithEuiThemeProps,
-} from '@elastic/eui';
+import type { ReactNode } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { EuiContextMenuPanelDescriptor, WithEuiThemeProps } from '@elastic/eui';
+import { EuiSwitch, EuiPopover, EuiContextMenu, withEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { WaffleSortOption } from '../../hooks/use_waffle_options';
+import type { WaffleSortOption } from '../../hooks/use_waffle_options';
 import { DropdownButton } from '../dropdown_button';
 
 interface Props {

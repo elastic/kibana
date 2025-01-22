@@ -19,7 +19,7 @@ import { Chart } from './chart';
 import { useIntegrationCheck } from '../hooks/use_integration_check';
 import { useK8sContainerPageViewMetricsCharts } from '../hooks/use_container_metrics_charts';
 import { CONTAINER_METRICS_DOC_HREF } from '../../../common/visualizations/constants';
-import { KubernetesContainerMetrics, MetricsChartsFields } from './types';
+import type { KubernetesContainerMetrics, MetricsChartsFields } from './types';
 
 const FRAGMENT_BASE = 'key-metrics';
 

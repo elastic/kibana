@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { EuiProvider } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { GetStateReturn } from './services/context_state';
@@ -73,7 +74,9 @@ describe('ContextAppContent test', () => {
 
     const component = mountWithIntl(
       <KibanaContextProvider services={discoverServiceMock}>
-        <ContextAppContent {...props} />
+        <EuiProvider>
+          <ContextAppContent {...props} />
+        </EuiProvider>
       </KibanaContextProvider>
     );
     await act(async () => {

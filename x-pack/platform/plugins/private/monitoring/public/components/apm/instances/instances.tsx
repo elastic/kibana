@@ -65,14 +65,12 @@ function getColumns(setupMode: SetupMode, cgroup: unknown) {
           };
 
           setupModeStatus = (
-            <div className="monTableCell__setupModeStatus">
-              <SetupModeBadge
-                setupMode={setupMode}
-                status={status}
-                instance={instance}
-                productName={APM_SYSTEM_ID}
-              />
-            </div>
+            <SetupModeBadge
+              setupMode={setupMode}
+              status={status}
+              instance={instance}
+              productName={APM_SYSTEM_ID}
+            />
           );
         }
 
@@ -187,7 +185,7 @@ export function ApmServerInstances({ apms, setupMode, alerts }: Props) {
         <EuiPanel>
           {setupModeCallout}
           <EuiMonitoringTable
-            className="apmInstancesTable"
+            data-test-subj="apmInstancesTable"
             rows={data.apms}
             columns={getColumns(setupMode, data.cgroup)}
             sorting={sorting}

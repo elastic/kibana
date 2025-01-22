@@ -23,6 +23,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     description: i18n.translate('savedObjectsFinder.advancedSettings.perPageText', {
       defaultMessage: 'Number of objects to show per page in the load dialog',
     }),
+    requiresPageReload: true,
     schema: schema.number(),
   },
   [LISTING_LIMIT_SETTING]: {

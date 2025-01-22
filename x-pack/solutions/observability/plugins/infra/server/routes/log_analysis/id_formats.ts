@@ -12,7 +12,7 @@ import {
   getLogAnalysisIdFormatsRequestPayloadRT,
   getLogAnalysisIdFormatsSuccessResponsePayloadRT,
 } from '../../../common/http_api/latest';
-import { InfraBackendLibs } from '../../lib/infra_types';
+import type { InfraBackendLibs } from '../../lib/infra_types';
 import { isMlPrivilegesError } from '../../lib/log_analysis';
 import { resolveIdFormats } from '../../lib/log_analysis/resolve_id_formats';
 import { assertHasInfraMlPlugins } from '../../utils/request_context';

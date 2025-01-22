@@ -3621,13 +3621,7 @@
             "label": "uiSettings",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -3667,7 +3661,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<Context>; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -3675,7 +3669,23 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<any>) => void; readonly getAction: (id: string) => ",
+              "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<any>>) => void; readonly getAction: (id: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -3683,7 +3693,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>; readonly getTriggerActions: (triggerId: string) => ",
+              "<object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -3691,7 +3701,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+              "<object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -3699,7 +3709,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => ",
+              "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -3707,7 +3717,7 @@
                 "section": "def-public.FrequentCompatibilityChangeAction",
                 "text": "FrequentCompatibilityChangeAction"
               },
-              "<object>[]; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -3750,13 +3760,7 @@
             "label": "theme",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.ThemeServiceSetup",
-                "text": "ThemeServiceSetup"
-              }
+              "ThemeServiceSetup"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -3790,13 +3794,7 @@
             "label": "toastNotifications",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.IToasts",
-                "text": "IToasts"
-              }
+              "IToasts"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -5264,13 +5262,7 @@
           " | undefined; runtime?: ",
           "MappingRuntimeFields",
           " | undefined; }) | undefined; client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           "; logger: ",
           {
             "pluginId": "@kbn/logging",
@@ -6646,13 +6638,7 @@
           "({\n  indexTemplate,\n  client,\n  logger,\n}: { indexTemplate: ",
           "IndicesPutIndexTemplateRequest",
           "; client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           "; logger: ",
           {
             "pluginId": "@kbn/logging",
@@ -8044,13 +8030,7 @@
             "text": "RequestStatus"
           },
           "; esResponse: any; kibanaRequest: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.KibanaRequest",
-            "text": "KibanaRequest"
-          },
+          "KibanaRequest",
           "<unknown, unknown, unknown, any>; operationName: string; startTime: number; }) => ",
           {
             "pluginId": "inspector",
@@ -8146,13 +8126,7 @@
                 "label": "kibanaRequest",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/common/utils/get_inspect_response.ts",
@@ -8579,10 +8553,10 @@
           },
           {
             "parentPluginId": "observability",
-            "id": "def-server.CustomThresholdLocators.logsExplorerLocator",
+            "id": "def-server.CustomThresholdLocators.logsLocator",
             "type": "Object",
             "tags": [],
-            "label": "logsExplorerLocator",
+            "label": "logsLocator",
             "description": [],
             "signature": [
               {
@@ -8594,11 +8568,11 @@
               },
               "<",
               {
-                "pluginId": "@kbn/deeplinks-observability",
+                "pluginId": "discover",
                 "scope": "common",
-                "docId": "kibKbnDeeplinksObservabilityPluginApi",
-                "section": "def-common.LogsExplorerLocatorParams",
-                "text": "LogsExplorerLocatorParams"
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-common.DiscoverAppLocatorParams",
+                "text": "DiscoverAppLocatorParams"
               },
               "> | undefined"
             ],
@@ -8670,13 +8644,7 @@
             "label": "context",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               " & { licensing: Promise<",
               {
                 "pluginId": "licensing",
@@ -8694,13 +8662,7 @@
                 "text": "AlertingApiRequestHandlerContext"
               },
               ">; core: Promise<",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.CoreRequestHandlerContext",
-                "text": "CoreRequestHandlerContext"
-              },
+              "CoreRequestHandlerContext",
               ">; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/server/routes/types.ts",
@@ -8749,13 +8711,7 @@
             "label": "request",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/server/routes/types.ts",
@@ -8961,23 +8917,11 @@
             "text": "ServerRoute"
           },
           "<any, any, any, infer TReturnType extends ServerRouteHandlerReturnType, any> ? TReturnType extends ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IKibanaResponse",
-            "text": "IKibanaResponse"
-          },
+          "IKibanaResponse",
           "<infer TWrappedResponseType extends string | Record<string, any> | Error | Buffer | ",
           "Stream",
           " | { message: string | Error; attributes?: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.ResponseErrorAttributes",
-            "text": "ResponseErrorAttributes"
-          },
+          "ResponseErrorAttributes",
           " | undefined; } | undefined> ? TWrappedResponseType : TReturnType : never"
         ],
         "path": "x-pack/solutions/observability/plugins/observability/server/routes/types.ts",
@@ -12820,13 +12764,7 @@
       "description": [],
       "signature": [
         "{ getAlertDetailsConfig(): Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; getScopedAnnotationsClient: (requestContext: { core: Promise<{ elasticsearch: { client: ",
-        {
-          "pluginId": "@kbn/core-elasticsearch-server",
-          "scope": "server",
-          "docId": "kibKbnCoreElasticsearchServerPluginApi",
-          "section": "def-server.IScopedClusterClient",
-          "text": "IScopedClusterClient"
-        },
+        "IScopedClusterClient",
         "; }; }>; licensing: Promise<",
         {
           "pluginId": "licensing",
@@ -12836,13 +12774,7 @@
           "text": "LicensingApiRequestHandlerContext"
         },
         ">; }, request: ",
-        {
-          "pluginId": "@kbn/core-http-server",
-          "scope": "server",
-          "docId": "kibKbnCoreHttpServerPluginApi",
-          "section": "def-server.KibanaRequest",
-          "text": "KibanaRequest"
-        },
+        "KibanaRequest",
         "<unknown, unknown, unknown, any>) => Promise<{ index: string; create: (createParams: { annotation: { title?: string | undefined; type?: string | undefined; style?: { icon?: string | undefined; color?: string | undefined; line?: { width?: number | undefined; style?: \"dashed\" | \"solid\" | \"dotted\" | undefined; iconPosition?: \"top\" | \"bottom\" | undefined; textDecoration?: \"none\" | \"name\" | undefined; } | undefined; rect?: { fill?: \"inside\" | \"outside\" | undefined; } | undefined; } | undefined; }; '@timestamp': string; message: string; } & { event?: ({ start: string; } & { end?: string | undefined; }) | undefined; tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; monitor?: { id?: string | undefined; } | undefined; slo?: ({ id: string; } & { instanceId?: string | undefined; }) | undefined; host?: { name?: string | undefined; } | undefined; }) => Promise<{ _id: string; _index: string; _source: { id: string; } & { annotation: { title?: string | undefined; type?: string | undefined; style?: { icon?: string | undefined; color?: string | undefined; line?: { width?: number | undefined; style?: \"dashed\" | \"solid\" | \"dotted\" | undefined; iconPosition?: \"top\" | \"bottom\" | undefined; textDecoration?: \"none\" | \"name\" | undefined; } | undefined; rect?: { fill?: \"inside\" | \"outside\" | undefined; } | undefined; } | undefined; }; '@timestamp': string; message: string; } & { event?: ({ start: string; } & { end?: string | undefined; }) | undefined; tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; monitor?: { id?: string | undefined; } | undefined; slo?: ({ id: string; } & { instanceId?: string | undefined; }) | undefined; host?: { name?: string | undefined; } | undefined; }; }>; update: (updateParams: { id: string; } & { annotation: { title?: string | undefined; type?: string | undefined; style?: { icon?: string | undefined; color?: string | undefined; line?: { width?: number | undefined; style?: \"dashed\" | \"solid\" | \"dotted\" | undefined; iconPosition?: \"top\" | \"bottom\" | undefined; textDecoration?: \"none\" | \"name\" | undefined; } | undefined; rect?: { fill?: \"inside\" | \"outside\" | undefined; } | undefined; } | undefined; }; '@timestamp': string; message: string; } & { event?: ({ start: string; } & { end?: string | undefined; }) | undefined; tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; monitor?: { id?: string | undefined; } | undefined; slo?: ({ id: string; } & { instanceId?: string | undefined; }) | undefined; host?: { name?: string | undefined; } | undefined; }) => Promise<{ _id: string; _index: string; _source: { id: string; } & { annotation: { title?: string | undefined; type?: string | undefined; style?: { icon?: string | undefined; color?: string | undefined; line?: { width?: number | undefined; style?: \"dashed\" | \"solid\" | \"dotted\" | undefined; iconPosition?: \"top\" | \"bottom\" | undefined; textDecoration?: \"none\" | \"name\" | undefined; } | undefined; rect?: { fill?: \"inside\" | \"outside\" | undefined; } | undefined; } | undefined; }; '@timestamp': string; message: string; } & { event?: ({ start: string; } & { end?: string | undefined; }) | undefined; tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; monitor?: { id?: string | undefined; } | undefined; slo?: ({ id: string; } & { instanceId?: string | undefined; }) | undefined; host?: { name?: string | undefined; } | undefined; }; }>; getById: (getByIdParams: { id: string; }) => Promise<{ _source: { annotation: { title: string; type?: string | undefined; style?: { icon?: string | undefined; color?: string | undefined; line?: { width?: number | undefined; style?: \"dashed\" | \"solid\" | \"dotted\" | undefined; iconPosition?: \"top\" | \"bottom\" | undefined; textDecoration?: \"none\" | \"name\" | undefined; } | undefined; rect?: { fill?: \"inside\" | \"outside\" | undefined; } | undefined; } | undefined; }; id: string; '@timestamp': string; message: string; event?: ({ start: string; } & { end?: string | undefined; }) | undefined; tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; monitor?: { id?: string | undefined; } | undefined; slo?: ({ id: string; } & { instanceId?: string | undefined; }) | undefined; host?: { name?: string | undefined; } | undefined; }; _index: string; _id?: string | undefined; _score?: number | null | undefined; _explanation?: ",
         "ExplainExplanation",
         " | undefined; fields?: Record<string, any> | undefined; highlight?: Record<string, string[]> | undefined; inner_hits?: Record<string, ",
@@ -13333,13 +13265,7 @@
         "description": [],
         "signature": [
           "(basePath: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IBasePath",
-            "text": "IBasePath"
-          },
+          "IBasePath",
           ", spaceId: string, alertUuid: string | null) => string"
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/utils/alerting/alert_url.ts",
@@ -13354,13 +13280,7 @@
             "label": "basePath",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IBasePath",
-                "text": "IBasePath"
-              }
+              "IBasePath"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/common/utils/alerting/alert_url.ts",
             "deprecated": false,
@@ -13582,13 +13502,7 @@
             "text": "RequestStatus"
           },
           "; esResponse: any; kibanaRequest: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.KibanaRequest",
-            "text": "KibanaRequest"
-          },
+          "KibanaRequest",
           "<unknown, unknown, unknown, any>; operationName: string; startTime: number; }) => ",
           {
             "pluginId": "inspector",
@@ -13684,13 +13598,7 @@
                 "label": "kibanaRequest",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/common/utils/get_inspect_response.ts",

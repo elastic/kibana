@@ -94,13 +94,7 @@
         "description": [],
         "signature": [
           "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ", indexName: string, query?: string | undefined, from?: number, size?: number, trackTotalHits?: boolean) => Promise<",
           {
             "pluginId": "@kbn/search-index-documents",
@@ -125,13 +119,7 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
             "path": "x-pack/solutions/search/packages/kbn-search-index-documents/lib/fetch_search_results.ts",
             "deprecated": false,

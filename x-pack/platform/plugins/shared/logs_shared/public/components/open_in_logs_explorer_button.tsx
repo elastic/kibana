@@ -15,13 +15,13 @@ type OpenInLogsExplorerButtonProps = Pick<EuiButtonEmptyProps, 'href' | 'flush' 
 const OpenInLogsExplorerButton = ({ testSubject, ...rest }: OpenInLogsExplorerButtonProps) => {
   return (
     <EuiButtonEmpty
-      iconType="popout"
+      iconType="discoverApp"
       data-test-subj={testSubject ?? 'logsSharedOpenInLogsExplorerButton'}
       {...rest}
     >
       <FormattedMessage
         id="xpack.logsShared.openInLogsExplorerButtonText"
-        defaultMessage="Open in Logs Explorer"
+        defaultMessage="Open in Discover"
       />
     </EuiButtonEmpty>
   );

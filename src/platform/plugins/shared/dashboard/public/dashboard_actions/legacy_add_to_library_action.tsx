@@ -18,12 +18,10 @@ import {
   HasLegacyLibraryTransforms,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { DASHBOARD_ACTION_GROUP } from '.';
 
 import { dashboardAddToLibraryActionStrings } from './_dashboard_actions_strings';
 import { coreServices } from '../services/kibana_services';
-
-export const ACTION_LEGACY_ADD_TO_LIBRARY = 'legacySaveToLibrary';
+import { ACTION_LEGACY_ADD_TO_LIBRARY, DASHBOARD_ACTION_GROUP } from './constants';
 
 export type LegacyAddPanelToLibraryActionApi = CanAccessViewMode &
   HasLegacyLibraryTransforms &

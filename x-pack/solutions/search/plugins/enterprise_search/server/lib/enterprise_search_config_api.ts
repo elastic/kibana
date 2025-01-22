@@ -45,10 +45,6 @@ export const callEnterpriseSearchConfigAPI = async ({
   if (!config.host)
     // Return Access and Features for when running without `ent-search`
     return {
-      access: {
-        hasAppSearchAccess: false,
-        hasWorkplaceSearchAccess: false,
-      },
       features: {
         hasConnectors: config.hasConnectors,
         hasDefaultIngestPipeline: config.hasDefaultIngestPipeline,
@@ -100,10 +96,6 @@ export const callEnterpriseSearchConfigAPI = async ({
     return {
       enterpriseSearchVersion: data?.version?.number,
       kibanaVersion: kibanaPackageJson.version,
-      access: {
-        hasAppSearchAccess: !!data?.current_user?.access?.app_search,
-        hasWorkplaceSearchAccess: !!data?.current_user?.access?.workplace_search,
-      },
       features: {
         hasConnectors: config.hasConnectors,
         hasDefaultIngestPipeline: config.hasDefaultIngestPipeline,

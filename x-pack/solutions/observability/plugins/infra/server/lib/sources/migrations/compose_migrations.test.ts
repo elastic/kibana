@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { migrationMocks } from '@kbn/core/server/mocks';
 import { composeMigrations } from './compose_migrations';
 

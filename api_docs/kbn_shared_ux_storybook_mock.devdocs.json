@@ -37,7 +37,7 @@
           },
           "<Props, Services, PropArguments, ServiceArguments>"
         ],
-        "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+        "path": "src/platform/packages/shared/shared-ux/storybook/mock/src/mocks.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -55,7 +55,7 @@
               "InputType",
               "; }"
             ],
-            "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+            "path": "src/platform/packages/shared/shared-ux/storybook/mock/src/mocks.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -73,7 +73,7 @@
               "InputType",
               "; }"
             ],
-            "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+            "path": "src/platform/packages/shared/shared-ux/storybook/mock/src/mocks.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -98,7 +98,7 @@
               "Args",
               ", Partial<Services>, {}, {}>[]"
             ],
-            "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+            "path": "src/platform/packages/shared/shared-ux/storybook/mock/src/mocks.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -116,7 +116,7 @@
               "ArgTypes",
               "<PropArguments>"
             ],
-            "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+            "path": "src/platform/packages/shared/shared-ux/storybook/mock/src/mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -140,7 +140,7 @@
               "Args",
               ">>"
             ],
-            "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+            "path": "src/platform/packages/shared/shared-ux/storybook/mock/src/mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -166,7 +166,7 @@
               "Args",
               ">>"
             ],
-            "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+            "path": "src/platform/packages/shared/shared-ux/storybook/mock/src/mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -192,7 +192,7 @@
               },
               "<PropArguments, ServiceArguments> | undefined) => any"
             ],
-            "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+            "path": "src/platform/packages/shared/shared-ux/storybook/mock/src/mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -206,7 +206,7 @@
                 "signature": [
                   "keyof PropArguments | keyof ServiceArguments"
                 ],
-                "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+                "path": "src/platform/packages/shared/shared-ux/storybook/mock/src/mocks.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -228,7 +228,7 @@
                   },
                   "<PropArguments, ServiceArguments> | undefined"
                 ],
-                "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+                "path": "src/platform/packages/shared/shared-ux/storybook/mock/src/mocks.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -256,7 +256,7 @@
               },
               "<PropArguments, {}> | undefined) => Props"
             ],
-            "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+            "path": "src/platform/packages/shared/shared-ux/storybook/mock/src/mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -277,7 +277,7 @@
                   },
                   "<PropArguments, {}> | undefined"
                 ],
-                "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+                "path": "src/platform/packages/shared/shared-ux/storybook/mock/src/mocks.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -305,7 +305,7 @@
               },
               "<PropArguments, ServiceArguments> | undefined) => Services"
             ],
-            "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+            "path": "src/platform/packages/shared/shared-ux/storybook/mock/src/mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -326,7 +326,7 @@
                   },
                   "<PropArguments, ServiceArguments> | undefined"
                 ],
-                "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+                "path": "src/platform/packages/shared/shared-ux/storybook/mock/src/mocks.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -354,7 +354,7 @@
         "signature": [
           "{ [P in keyof PropArguments | keyof ServiceArguments]: any; }"
         ],
-        "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+        "path": "src/platform/packages/shared/shared-ux/storybook/mock/src/mocks.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

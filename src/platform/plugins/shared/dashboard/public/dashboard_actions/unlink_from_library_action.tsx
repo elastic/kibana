@@ -30,9 +30,7 @@ import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { coreServices } from '../services/kibana_services';
 import { dashboardUnlinkFromLibraryActionStrings } from './_dashboard_actions_strings';
-import { DASHBOARD_ACTION_GROUP } from '.';
-
-export const ACTION_UNLINK_FROM_LIBRARY = 'unlinkFromLibrary';
+import { ACTION_UNLINK_FROM_LIBRARY, DASHBOARD_ACTION_GROUP } from './constants';
 
 export type UnlinkPanelFromLibraryActionApi = CanAccessViewMode &
   (HasLibraryTransforms | HasInPlaceLibraryTransforms) &

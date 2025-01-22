@@ -152,6 +152,7 @@ import type { PackagePolicyClientFetchAllItemIdsOptions } from './package_policy
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { isSpaceAwarenessEnabled, isSpaceAwarenessMigrationPending } from './spaces/helpers';
 import { updatePackagePolicySpaces } from './spaces/package_policy';
+import { runWithCache } from './epm/packages/cache';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -517,7 +518,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const agentPolicyIds = new Set(packagePolicies.flatMap((pkgPolicy) => pkgPolicy.policy_ids));
 
-    const agentPolicies = await agentPolicyService.getByIDs(soClient, [...agentPolicyIds]);
+    const agentPolicies = await agentPolicyService.getByIds(soClient, [...agentPolicyIds]);
     const agentPoliciesIndexById = indexBy('id', agentPolicies);
     for (const agentPolicy of agentPolicies) {
       validateIsNotHostedPolicy(agentPolicy, options?.force);
@@ -1116,24 +1117,25 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // Bump revision of all associated agent policies (old and new)
     const associatedPolicyIds = new Set([...oldPackagePolicy.policy_ids, ...newPolicy.policy_ids]);
     logger.debug(`Bumping revision of associated agent policies ${associatedPolicyIds}`);
-    const bumpPromises = [];
-    for (const policyId of associatedPolicyIds) {
-      // Check if the agent policy is in both old and updated package policies
-      const assignedInOldPolicy = oldPackagePolicy.policy_ids.includes(policyId);
-      const assignedInNewPolicy = newPolicy.policy_ids.includes(policyId);
+    const bumpPromise = pMap(
+      associatedPolicyIds,
+      (policyId) => {
+        // Check if the agent policy is in both old and updated package policies
+        const assignedInOldPolicy = oldPackagePolicy.policy_ids.includes(policyId);
+        const assignedInNewPolicy = newPolicy.policy_ids.includes(policyId);
 
-      // Remove protection if policy is unassigned (in old but not in updated) or policy is assigned (in updated but not in old)
-      const removeProtection =
-        (assignedInOldPolicy && !assignedInNewPolicy) ||
-        (!assignedInOldPolicy && assignedInNewPolicy);
+        // Remove protection if policy is unassigned (in old but not in updated) or policy is assigned (in updated but not in old)
+        const removeProtection =
+          (assignedInOldPolicy && !assignedInNewPolicy) ||
+          (!assignedInOldPolicy && assignedInNewPolicy);
 
-      bumpPromises.push(
-        agentPolicyService.bumpRevision(soClient, esClient, policyId, {
+        return agentPolicyService.bumpRevision(soClient, esClient, policyId, {
           user: options?.user,
           removeProtection,
-        })
-      );
-    }
+        });
+      },
+      { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS }
+    );
 
     const assetRemovePromise = removeOldAssets({
       soClient,
@@ -1144,7 +1146,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       ? deleteSecrets({ esClient, soClient, ids: secretsToDelete.map((s) => s.id) })
       : Promise.resolve();
 
-    await Promise.all([...bumpPromises, assetRemovePromise, deleteSecretsPromise]);
+    await Promise.all([bumpPromise, assetRemovePromise, deleteSecretsPromise]);
 
     sendUpdatePackagePolicyTelemetryEvent(soClient, [packagePolicyUpdate], [oldPackagePolicy]);
 
@@ -1550,7 +1552,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         return acc;
       }, new Set());
 
-      const agentPolicies = await agentPolicyService.getByIDs(soClient, uniquePolicyIdsR);
+      const agentPolicies = await agentPolicyService.getByIds(soClient, uniquePolicyIdsR);
 
       for (const policyId of uniquePolicyIdsR) {
         const agentPolicy = agentPolicies.find((p) => p.id === policyId);
@@ -1694,40 +1696,42 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     packagePolicy?: PackagePolicy,
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyResponse> {
-    const result: UpgradePackagePolicyResponse = [];
+    return runWithCache(async () => {
+      const result: UpgradePackagePolicyResponse = [];
 
-    for (const id of ids) {
-      try {
-        const {
-          packagePolicy: currentPackagePolicy,
-          packageInfo,
-          experimentalDataStreamFeatures,
-        } = await this.getUpgradePackagePolicyInfo(soClient, id, packagePolicy, pkgVersion);
+      for (const id of ids) {
+        try {
+          const {
+            packagePolicy: currentPackagePolicy,
+            packageInfo,
+            experimentalDataStreamFeatures,
+          } = await this.getUpgradePackagePolicyInfo(soClient, id, packagePolicy, pkgVersion);
 
-        if (currentPackagePolicy.is_managed && !options?.force) {
-          throw new PackagePolicyRestrictionRelatedError(`Cannot upgrade package policy ${id}`);
+          if (currentPackagePolicy.is_managed && !options?.force) {
+            throw new PackagePolicyRestrictionRelatedError(`Cannot upgrade package policy ${id}`);
+          }
+
+          await this.doUpgrade(
+            soClient,
+            esClient,
+            id,
+            currentPackagePolicy,
+            result,
+            packageInfo,
+            experimentalDataStreamFeatures,
+            options
+          );
+        } catch (error) {
+          result.push({
+            id,
+            success: false,
+            ...fleetErrorToResponseOptions(error),
+          });
         }
-
-        await this.doUpgrade(
-          soClient,
-          esClient,
-          id,
-          currentPackagePolicy,
-          result,
-          packageInfo,
-          experimentalDataStreamFeatures,
-          options
-        );
-      } catch (error) {
-        result.push({
-          id,
-          success: false,
-          ...fleetErrorToResponseOptions(error),
-        });
       }
-    }
 
-    return result;
+      return result;
+    });
   }
 
   private async doUpgrade(
