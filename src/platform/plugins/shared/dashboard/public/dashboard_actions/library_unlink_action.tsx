@@ -11,14 +11,12 @@ import { PresentationContainer } from '@kbn/presentation-containers';
 import {
   CanAccessViewMode,
   EmbeddableApiContext,
-  HasInPlaceLibraryTransforms,
   HasLibraryTransforms,
   HasParentApi,
   HasType,
   HasUniqueId,
   PublishesPanelTitle,
   apiCanAccessViewMode,
-  apiHasInPlaceLibraryTransforms,
   apiHasLibraryTransforms,
   apiHasParentApi,
   apiHasType,
@@ -33,7 +31,7 @@ import { dashboardUnlinkFromLibraryActionStrings } from './_dashboard_actions_st
 import { ACTION_UNLINK_FROM_LIBRARY, DASHBOARD_ACTION_GROUP } from './constants';
 
 export type UnlinkPanelFromLibraryActionApi = CanAccessViewMode &
-  (HasLibraryTransforms | HasInPlaceLibraryTransforms) &
+  HasLibraryTransforms &
   HasType &
   HasUniqueId &
   HasParentApi<Pick<PresentationContainer, 'replacePanel'>> &
@@ -42,7 +40,7 @@ export type UnlinkPanelFromLibraryActionApi = CanAccessViewMode &
 export const isApiCompatible = (api: unknown | null): api is UnlinkPanelFromLibraryActionApi =>
   Boolean(
     apiCanAccessViewMode(api) &&
-      (apiHasLibraryTransforms(api) || apiHasInPlaceLibraryTransforms(api)) &&
+      apiHasLibraryTransforms(api) &&
       apiHasUniqueId(api) &&
       apiHasType(api) &&
       apiHasParentApi(api) &&
@@ -65,40 +63,23 @@ export class UnlinkFromLibraryAction implements Action<EmbeddableApiContext> {
     return 'folderExclamation';
   }
 
-  public async canUnlinkFromLibrary(api: UnlinkPanelFromLibraryActionApi) {
-    if (apiHasLibraryTransforms(api)) {
-      return api.canUnlinkFromLibrary();
-    } else if (apiHasInPlaceLibraryTransforms(api)) {
-      const canUnLink = api.canUnlinkFromLibrary ? await api.canUnlinkFromLibrary() : true;
-      return canUnLink && Boolean(api.libraryId$.value);
-    }
-    throw new IncompatibleActionError();
-  }
-
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) {
       // either a an `unlinkFromLibrary` method or a `getByValueState` method is required
       return false;
     }
-    return (
-      getInheritedViewMode(embeddable) === 'edit' && (await this.canUnlinkFromLibrary(embeddable))
-    );
+    return getInheritedViewMode(embeddable) === 'edit' && (await embeddable.canUnlinkFromLibrary());
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     const title = getPanelTitle(embeddable);
     try {
-      if (apiHasLibraryTransforms(embeddable)) {
-        await embeddable.parentApi.replacePanel(embeddable.uuid, {
-          panelType: embeddable.type,
-          initialState: { ...embeddable.getByValueState(), title },
-        });
-      } else if (apiHasInPlaceLibraryTransforms(embeddable)) {
-        embeddable.unlinkFromLibrary();
-      } else {
-        throw new IncompatibleActionError();
-      }
+      const { references, rawState } = embeddable.getSerializedStateByValue();
+      await embeddable.parentApi.replacePanel(embeddable.uuid, {
+        panelType: embeddable.type,
+        serializedState: { rawState: { ...rawState, title }, references },
+      });
       coreServices.notifications.toasts.addSuccess({
         title: dashboardUnlinkFromLibraryActionStrings.getSuccessMessage(title ? `'${title}'` : ''),
         'data-test-subj': 'unlinkPanelSuccess',
