@@ -410,6 +410,15 @@ export const PresentationPanelHoverActions = ({
     // memoize the drag handle to avoid calling `setDragHandle` unnecessarily
     () => (
       <button
+        className={`embPanel--dragHandle`}
+        css={css`
+          cursor: move;
+          visibility: hidden; // default for every mode **except** edit mode
+
+          .embPanel__hoverActionsAnchor--editMode & {
+            visibility: visible; // overwrite visibility in edit mode
+          }
+        `}
         ref={(ref) => {
           dragHandleRef.current = ref;
           setDragHandle('hoverActions', ref);
@@ -418,15 +427,13 @@ export const PresentationPanelHoverActions = ({
         <EuiIcon
           type="move"
           color="text"
-          className={`embPanel--dragHandle`}
+          css={css`
+            margin: ${euiTheme.size.xs};
+          `}
+          data-test-subj="embeddablePanelDragHandle"
           aria-label={i18n.translate('presentationPanel.dragHandle', {
             defaultMessage: 'Move panel',
           })}
-          data-test-subj="embeddablePanelDragHandle"
-          css={css`
-            margin: ${euiTheme.size.xs};
-            cursor: move;
-          `}
         />
       </button>
     ),
@@ -440,6 +447,7 @@ export const PresentationPanelHoverActions = ({
     <div
       className={classNames('embPanel__hoverActionsAnchor', {
         'embPanel__hoverActionsAnchor--lockHoverActions': hasLockedHoverActions,
+        'embPanel__hoverActionsAnchor--editMode': viewMode === 'edit',
       })}
       data-test-embeddable-id={api?.uuid}
       data-test-subj={`embeddablePanelHoverActions-${(title || defaultTitle || '').replace(
@@ -472,16 +480,7 @@ export const PresentationPanelHoverActions = ({
       {children}
       {api && hasHoverActions && (
         <div className={classNames('embPanel__hoverActions', className)} css={hoverActionStyles}>
-          {viewMode === 'edit' ? (
-            dragHandle
-          ) : (
-            // this is necessary so that the CSS grid responds properly
-            <div
-              css={css`
-                visibility: hidden;
-              `}
-            />
-          )}
+          {dragHandle}
           <div className="breakpoint" />
           {showNotifications && notificationElements}
           {showDescription && (

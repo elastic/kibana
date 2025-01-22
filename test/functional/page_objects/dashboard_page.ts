@@ -287,7 +287,7 @@ export class DashboardPageObject extends FtrService {
     }
     // wait until the count of dashboard panels equals the count of drag handles
     await this.retry.waitFor('in edit mode', async () => {
-      const panels = await this.find.allByCssSelector('.embPanel__hoverActionsWrapper');
+      const panels = await this.find.allByCssSelector('[data-test-subj="embeddablePanel"]');
       const dragHandles = await this.find.allByCssSelector(
         '[data-test-subj="embeddablePanelDragHandle"]'
       );
