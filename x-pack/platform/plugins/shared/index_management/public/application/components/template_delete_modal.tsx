@@ -117,7 +117,7 @@ export const TemplateDeleteModal = ({
           <>
             <DeleteManagedAssetsCallout
               assetName={i18n.translate('xpack.idxMgmt.deleteTemplatesModal.assetName', {
-                defaultMessage: 'Index Template',
+                defaultMessage: 'index templates',
               })}
             />
 

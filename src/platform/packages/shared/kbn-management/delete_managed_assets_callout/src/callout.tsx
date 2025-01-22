@@ -34,7 +34,7 @@ export const DeleteManagedAssetsCallout = ({
       <p>
         {overrideBody ??
           i18n.translate('management.deleteManagedAssetsCallout.body', {
-            defaultMessage: `Elasticsearch automatically re-creates any missing managed {assetName}. If you delete a managed {assetName}, the deletion appears as successful but the {assetName} is immediately re-created and reappears.`,
+            defaultMessage: `Elasticsearch automatically re-creates any missing managed {assetName}. If you delete managed {assetName}, the deletion appears as successful, but the {assetName} are immediately re-created and reappear.`,
             values: { assetName },
           })}
       </p>
