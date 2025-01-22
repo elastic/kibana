@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EntityDetailViewWithoutParams, EntityViewTab } from '../entity_detail_view';
-import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
-import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
+import { isWiredStreamGetResponse } from '@kbn/streams-schema';
+import React from 'react';
 import { useKibana } from '../../hooks/use_kibana';
-import { StreamDetailOverview } from '../stream_detail_overview';
+import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
+import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
+import { EntityDetailViewWithoutParams, EntityViewTab } from '../entity_detail_view';
 import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
 import { StreamDetailManagement } from '../stream_detail_management';
+import { StreamDetailOverview } from '../stream_detail_overview';
 
 export function StreamDetailView() {
   const params1 = useStreamsAppParams('/{key}/{tab}', true);
@@ -36,14 +37,42 @@ export function StreamDetailView() {
     loading,
   } = useStreamsAppFetch(
     ({ signal }) => {
-      return streamsRepositoryClient.fetch('GET /api/streams/{id}', {
-        signal,
-        params: {
-          path: {
-            id: key,
+      return streamsRepositoryClient
+        .fetch('GET /api/streams/{id}', {
+          signal,
+          params: {
+            path: {
+              id: key,
+            },
           },
-        },
-      });
+        })
+        .then((response) => {
+          if (isWiredStreamGetResponse(response)) {
+            return {
+              dashboards: response.dashboards,
+              inherited_fields: response.inherited_fields,
+              elasticsearch_assets: [],
+              lifecycle: response.lifecycle,
+              name: key,
+              stream: {
+                name: key,
+                ...response.stream,
+              },
+            };
+          }
+
+          return {
+            dashboards: response.dashboards,
+            elasticsearch_assets: response.elasticsearch_assets,
+            inherited_fields: {},
+            lifecycle: response.lifecycle,
+            name: key,
+            stream: {
+              name: key,
+              ...response.stream,
+            },
+          };
+        });
     },
     [streamsRepositoryClient, key]
   );
