@@ -8,30 +8,30 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { getPanelDescription } from './publishes_panel_description';
+import { getDescription } from './publishes_description';
 
-describe('getPanelDescription', () => {
+describe('getDescription', () => {
   test('should return default description when description is undefined', () => {
     const api = {
-      panelDescription: new BehaviorSubject<string | undefined>(undefined),
-      defaultPanelDescription: new BehaviorSubject<string | undefined>('default description'),
+      description$: new BehaviorSubject<string | undefined>(undefined),
+      defaultDescription$: new BehaviorSubject<string | undefined>('default description'),
     };
-    expect(getPanelDescription(api)).toBe('default description');
+    expect(getDescription(api)).toBe('default description');
   });
 
   test('should return empty description when description is empty string', () => {
     const api = {
-      panelDescription: new BehaviorSubject<string | undefined>(''),
-      defaultPanelDescription: new BehaviorSubject<string | undefined>('default description'),
+      description$: new BehaviorSubject<string | undefined>(''),
+      defaultDescription$: new BehaviorSubject<string | undefined>('default description'),
     };
-    expect(getPanelDescription(api)).toBe('');
+    expect(getDescription(api)).toBe('');
   });
 
   test('should return description when description is provided', () => {
     const api = {
-      panelDescription: new BehaviorSubject<string | undefined>('custom description'),
-      defaultPanelDescription: new BehaviorSubject<string | undefined>('default description'),
+      description$: new BehaviorSubject<string | undefined>('custom description'),
+      defaultDescription$: new BehaviorSubject<string | undefined>('default description'),
     };
-    expect(getPanelDescription(api)).toBe('custom description');
+    expect(getDescription(api)).toBe('custom description');
   });
 });
