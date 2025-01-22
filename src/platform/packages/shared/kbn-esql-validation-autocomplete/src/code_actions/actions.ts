@@ -9,7 +9,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { distance } from 'fastest-levenshtein';
-import type { AstProviderFn, ESQLAst, EditorError, ESQLMessage } from '@kbn/esql-ast';
+import {
+  type AstProviderFn,
+  type ESQLAst,
+  type EditorError,
+  type ESQLMessage,
+  isIdentifier,
+} from '@kbn/esql-ast';
 import { uniqBy } from 'lodash';
 import {
   getFieldsByTypeHelper,
@@ -20,7 +26,6 @@ import {
   getAllFunctions,
   getCommandDefinition,
   isColumnItem,
-  isIdentifier,
   isSourceItem,
   shouldBeQuotedText,
 } from '../shared/helpers';

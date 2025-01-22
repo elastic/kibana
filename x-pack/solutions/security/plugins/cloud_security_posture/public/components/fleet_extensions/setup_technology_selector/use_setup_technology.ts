@@ -14,11 +14,13 @@ export const useSetupTechnology = ({
   input,
   isAgentlessEnabled,
   handleSetupTechnologyChange,
+  defaultSetupTechnology,
   isEditPage,
 }: {
   input: NewPackagePolicyInput;
   isAgentlessEnabled?: boolean;
-  handleSetupTechnologyChange?: (value: SetupTechnology, policyTemplateName?: string) => void;
+  handleSetupTechnologyChange?: (value: SetupTechnology) => void;
+  defaultSetupTechnology?: SetupTechnology;
   isEditPage?: boolean;
 }) => {
   const isCspmAws = input.type === CLOUDBEAT_AWS;
@@ -26,15 +28,17 @@ export const useSetupTechnology = ({
   const isCspmAzure = input.type === CLOUDBEAT_AZURE;
   const isAgentlessSupportedForCloudProvider = isCspmAws || isCspmGcp || isCspmAzure;
   const isAgentlessAvailable = isAgentlessSupportedForCloudProvider && isAgentlessEnabled;
-  const defaultSetupTechnology =
+  const defaultEditSetupTechnology =
     isEditPage && isAgentlessAvailable ? SetupTechnology.AGENTLESS : SetupTechnology.AGENT_BASED;
 
-  const [setupTechnology, setSetupTechnology] = useState<SetupTechnology>(defaultSetupTechnology);
+  const [setupTechnology, setSetupTechnology] = useState<SetupTechnology>(
+    defaultSetupTechnology || defaultEditSetupTechnology
+  );
 
   const updateSetupTechnology = (value: SetupTechnology) => {
     setSetupTechnology(value);
     if (handleSetupTechnologyChange) {
-      handleSetupTechnologyChange(value, input.policy_template);
+      handleSetupTechnologyChange(value);
     }
   };
 

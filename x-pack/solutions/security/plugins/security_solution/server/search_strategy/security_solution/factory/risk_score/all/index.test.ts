@@ -10,15 +10,17 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { riskScore } from '.';
 import type { IEsSearchResponse } from '@kbn/search-types';
-import type { HostRiskScore } from '../../../../../../common/search_strategy';
-import { RiskScoreEntity, RiskSeverity } from '../../../../../../common/search_strategy';
+import { RiskSeverity, type HostRiskScore } from '../../../../../../common/search_strategy';
+import { EntityType } from '../../../../../../common/entity_analytics/types';
 import * as buildQuery from './query.risk_score.dsl';
 import { get } from 'lodash/fp';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { createMockEndpointAppContext } from '../../../../../endpoint/mocks';
-import type { RiskScoreRequestOptions } from '../../../../../../common/api/search_strategy';
-import { RiskQueries } from '../../../../../../common/api/search_strategy';
+import {
+  EntityRiskQueries,
+  type RiskScoreRequestOptions,
+} from '../../../../../../common/api/search_strategy';
 
 export const mockSearchStrategyResponse: IEsSearchResponse<HostRiskScore> = {
   rawResponse: {
@@ -88,9 +90,9 @@ const mockDeps = {
 
 export const mockOptions: RiskScoreRequestOptions = {
   defaultIndex: ['logs-*'],
-  riskScoreEntity: RiskScoreEntity.host,
+  riskScoreEntity: EntityType.host,
   includeAlertsCount: true,
-  factoryQueryType: RiskQueries.hostsRiskScore,
+  factoryQueryType: EntityRiskQueries.list,
 };
 
 describe('buildRiskScoreQuery search strategy', () => {

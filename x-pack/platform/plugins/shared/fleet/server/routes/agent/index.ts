@@ -8,7 +8,6 @@ import { schema } from '@kbn/config-schema';
 
 import type { FleetAuthz } from '../../../common';
 import { API_VERSIONS } from '../../../common/constants';
-import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 import { getRouteRequiredAuthz, type FleetAuthzRouter } from '../../services/security';
 
 import { AGENT_API_ROUTES } from '../../constants';
@@ -854,36 +853,32 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       getAvailableVersionsHandler
     );
 
-  const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
-
   // route used by export CSV feature on the UI to generate report
-  if (experimentalFeatures.enableExportCSV) {
-    router.versioned
-      .get({
-        path: '/internal/fleet/agents/status_runtime_field',
-        access: 'internal',
-        security: {
-          authz: {
-            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.READ],
-          },
+  router.versioned
+    .get({
+      path: '/internal/fleet/agents/status_runtime_field',
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.READ],
         },
-      })
-      .addVersion(
-        {
-          version: API_VERSIONS.internal.v1,
-          validate: {
-            request: {},
-            response: {
-              200: {
-                body: () => schema.string(),
-              },
-              400: {
-                body: genericErrorResponse,
-              },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: {},
+          response: {
+            200: {
+              body: () => schema.string(),
+            },
+            400: {
+              body: genericErrorResponse,
             },
           },
         },
-        getAgentStatusRuntimeFieldHandler
-      );
-  }
+      },
+      getAgentStatusRuntimeFieldHandler
+    );
 };

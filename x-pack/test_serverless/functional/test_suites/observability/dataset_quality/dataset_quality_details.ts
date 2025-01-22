@@ -59,6 +59,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const degradedDataStreamName = `logs-${degradedDatasetName}-${defaultNamespace}`;
 
   describe('Dataset quality details', function () {
+    // see details: https://github.com/elastic/kibana/issues/206734
+    this.tags(['failsOnMKI']);
     before(async () => {
       // Install Apache Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(apachePkg);

@@ -13,17 +13,16 @@ import { SuggestionRawDefinition } from './types';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { aggregationFunctionDefinitions } from '../definitions/generated/aggregation_functions';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
-import { getFunctionSignatures, getCommandSignature } from '../definitions/helpers';
+import { getFunctionSignatures } from '../definitions/helpers';
 import { timeUnitsToSuggest } from '../definitions/literals';
 import {
   FunctionDefinition,
-  CommandDefinition,
   CommandOptionsDefinition,
   CommandModeDefinition,
   FunctionParameterType,
 } from '../definitions/types';
-import { shouldBeQuotedSource, getCommandDefinition, shouldBeQuotedText } from '../shared/helpers';
-import { buildDocumentation, buildFunctionDocumentation } from './documentation_util';
+import { shouldBeQuotedSource, shouldBeQuotedText } from '../shared/helpers';
+import { buildFunctionDocumentation } from './documentation_util';
 import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 import { ESQLRealField } from '../validation/types';
 import { isNumericType } from '../shared/esql_types';
@@ -192,27 +191,6 @@ export const getSuggestionsAfterNot = (): SuggestionRawDefinition[] => {
     .filter(({ name }) => name === 'like' || name === 'rlike' || name === 'in')
     .map(getOperatorSuggestion);
 };
-
-export function getSuggestionCommandDefinition(
-  command: CommandDefinition<string>
-): SuggestionRawDefinition {
-  const commandDefinition = getCommandDefinition(command.name);
-  const commandSignature = getCommandSignature(commandDefinition);
-  return {
-    label: commandDefinition.name.toUpperCase(),
-    text: commandDefinition.signature.params.length
-      ? `${commandDefinition.name.toUpperCase()} $0`
-      : commandDefinition.name.toUpperCase(),
-    asSnippet: true,
-    kind: 'Method',
-    detail: commandDefinition.description,
-    documentation: {
-      value: buildDocumentation(commandSignature.declaration, commandSignature.examples),
-    },
-    sortText: 'A',
-    command: TRIGGER_SUGGESTION_COMMAND,
-  };
-}
 
 export const buildFieldsDefinitionsWithMetadata = (
   fields: ESQLRealField[],

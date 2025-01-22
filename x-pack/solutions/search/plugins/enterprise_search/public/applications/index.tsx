@@ -25,7 +25,7 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { Router } from '@kbn/shared-ux-router';
 
 import { DEFAULT_PRODUCT_FEATURES } from '../../common/constants';
-import { ClientConfigType, InitialAppData, ProductAccess } from '../../common/types';
+import { ClientConfigType, InitialAppData } from '../../common/types';
 import { PluginsStart, ClientData, ESConfig, UpdateSideNavDefinitionFn } from '../plugin';
 
 import { externalUrl } from './shared/enterprise_search_url';
@@ -59,7 +59,6 @@ export const renderApp = (
   { config, data, esConfig }: { config: ClientConfigType; data: ClientData; esConfig: ESConfig }
 ) => {
   const {
-    access,
     appSearch,
     configuredLimits,
     enterpriseSearchVersion,
@@ -89,12 +88,6 @@ export const renderApp = (
   const entCloudHost = getCloudEnterpriseSearchHost(plugins.cloud);
   externalUrl.enterpriseSearchUrl = publicUrl || entCloudHost || config.host || '';
 
-  const noProductAccess: ProductAccess = {
-    hasAppSearchAccess: false,
-    hasWorkplaceSearchAccess: false,
-  };
-
-  const productAccess = access || noProductAccess;
   const productFeatures = features ?? { ...DEFAULT_PRODUCT_FEATURES };
 
   const EmptyContext: FC<PropsWithChildren<unknown>> = ({ children }) => <>{children}</>;
@@ -128,7 +121,6 @@ export const renderApp = (
     lens,
     ml,
     navigateToUrl,
-    productAccess,
     productFeatures,
     renderHeaderActions: (HeaderActions) =>
       params.setHeaderActionMenu(
@@ -170,7 +162,6 @@ export const renderApp = (
                 <Provider store={store}>
                   <Router history={params.history}>
                     <App
-                      access={productAccess}
                       appSearch={appSearch}
                       configuredLimits={configuredLimits}
                       enterpriseSearchVersion={enterpriseSearchVersion}

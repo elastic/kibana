@@ -41,7 +41,6 @@
     "@kbn/core-http-browser",
     "@kbn/core-notifications-browser",
     "@kbn/core-doc-links-browser",
-    "@kbn/ui-theme",
     "@kbn/datemath",
     "@kbn/core-capabilities-common",
     "@kbn/shared-ux-router",

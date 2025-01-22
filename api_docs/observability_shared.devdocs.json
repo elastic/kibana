@@ -705,7 +705,7 @@
                     "section": "def-public.Action",
                     "text": "Action"
                   },
-                  "<Context>; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+                  "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -713,7 +713,23 @@
                     "section": "def-public.ActionDefinition",
                     "text": "ActionDefinition"
                   },
-                  "<any>) => void; readonly getAction: (id: string) => ",
+                  "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.ActionDefinition",
+                    "text": "ActionDefinition"
+                  },
+                  "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.ActionDefinition",
+                    "text": "ActionDefinition"
+                  },
+                  "<any>>) => void; readonly getAction: (id: string) => Promise<",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -721,7 +737,7 @@
                     "section": "def-public.Action",
                     "text": "Action"
                   },
-                  "<object>; readonly getTriggerActions: (triggerId: string) => ",
+                  "<object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -729,7 +745,7 @@
                     "section": "def-public.Action",
                     "text": "Action"
                   },
-                  "<object>[]; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+                  "<object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -737,7 +753,7 @@
                     "section": "def-public.Action",
                     "text": "Action"
                   },
-                  "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => ",
+                  "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -745,7 +761,7 @@
                     "section": "def-public.FrequentCompatibilityChangeAction",
                     "text": "FrequentCompatibilityChangeAction"
                   },
-                  "<object>[]; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+                  "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -1238,7 +1254,7 @@
         "signature": [
           "({ children, ...props }: { children?: React.ReactNode; } & ",
           "CommonProps",
-          " & Omit<React.HTMLAttributes<HTMLUListElement>, \"color\"> & { bordered?: boolean | undefined; flush?: boolean | undefined; gutterSize?: \"m\" | \"none\" | \"s\" | undefined; listItems?: ",
+          " & Omit<React.HTMLAttributes<HTMLUListElement>, \"color\"> & { bordered?: boolean | undefined; flush?: boolean | undefined; gutterSize?: \"none\" | \"m\" | \"s\" | undefined; listItems?: ",
           "EuiListGroupItemProps",
           "[] | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; maxWidth?: boolean | ",
           "Property",
@@ -1258,7 +1274,7 @@
             "signature": [
               "{ children?: React.ReactNode; } & ",
               "CommonProps",
-              " & Omit<React.HTMLAttributes<HTMLUListElement>, \"color\"> & { bordered?: boolean | undefined; flush?: boolean | undefined; gutterSize?: \"m\" | \"none\" | \"s\" | undefined; listItems?: ",
+              " & Omit<React.HTMLAttributes<HTMLUListElement>, \"color\"> & { bordered?: boolean | undefined; flush?: boolean | undefined; gutterSize?: \"none\" | \"m\" | \"s\" | undefined; listItems?: ",
               "EuiListGroupItemProps",
               "[] | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; maxWidth?: boolean | ",
               "Property",
