@@ -19,10 +19,12 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import { APIReturnType, StreamsAPIClientRequestParamsOf } from '@kbn/streams-plugin/public/api';
+import { isEqual } from 'lodash';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
 import { ProcessingDefinition } from '../types';
 import { DetectedField } from '../types';
+import { EMPTY_EQUALS_CONDITION } from '../../../util/condition';
 
 type Simulation = APIReturnType<'POST /api/streams/{id}/processing/_simulate'>;
 type SimulationRequestBody =
@@ -71,12 +73,16 @@ export const useProcessingSimulator = ({
         return { documents: [] };
       }
 
+      const conditionForApi = isEqual(condition, EMPTY_EQUALS_CONDITION)
+        ? { always: {} }
+        : condition;
+
       return streamsRepositoryClient.fetch('POST /api/streams/{id}/_sample', {
         signal,
         params: {
           path: { id: definition.name },
           body: {
-            if: condition,
+            if: conditionForApi,
             start: start?.valueOf(),
             end: end?.valueOf(),
             size: 100,

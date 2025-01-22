@@ -7,12 +7,7 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import {
-  Condition,
-  ProcessorType,
-  conditionSchema,
-  createIsNarrowSchema,
-} from '@kbn/streams-schema';
+import { ProcessorType, conditionSchema, createIsNarrowSchema } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import { z } from '@kbn/zod';
 import {
@@ -26,8 +21,7 @@ import {
   isDissectProcessor,
   isGrokProcessor,
 } from './types';
-
-const defaultCondition: Condition = { always: {} };
+import { EMPTY_EQUALS_CONDITION } from '../../util/condition';
 
 const defaultGrokProcessorFormState: GrokFormState = {
   type: 'grok',
@@ -36,7 +30,7 @@ const defaultGrokProcessorFormState: GrokFormState = {
   pattern_definitions: {},
   ignore_failure: true,
   ignore_missing: true,
-  condition: defaultCondition,
+  condition: EMPTY_EQUALS_CONDITION,
 };
 
 const defaultDissectProcessorFormState: DissectFormState = {
@@ -45,7 +39,7 @@ const defaultDissectProcessorFormState: DissectFormState = {
   pattern: '',
   ignore_failure: true,
   ignore_missing: true,
-  condition: defaultCondition,
+  condition: EMPTY_EQUALS_CONDITION,
 };
 
 const defaultProcessorFormStateByType: Record<ProcessorType, ProcessorFormState> = {
@@ -87,7 +81,7 @@ export const convertFormStateToProcessing = (
       formState;
 
     return {
-      condition: isCompleteCondition(condition) ? condition : { never: {} },
+      condition,
       config: {
         grok: {
           patterns: patterns
@@ -107,7 +101,7 @@ export const convertFormStateToProcessing = (
       formState;
 
     return {
-      condition: isCompleteCondition(condition) ? condition : { never: {} },
+      condition,
       config: {
         dissect: {
           field,

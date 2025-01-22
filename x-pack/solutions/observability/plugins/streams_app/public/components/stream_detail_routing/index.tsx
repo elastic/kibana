@@ -47,6 +47,7 @@ import { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_
 import { DraggableProvided } from '@hello-pangea/dnd';
 import { IToasts, Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { isEqual } from 'lodash';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
@@ -57,6 +58,7 @@ import { NestedView } from '../nested_view';
 import { PreviewTable } from '../preview_table';
 import { StreamDeleteModal } from '../stream_delete_modal';
 import { AssetImage } from '../asset_image';
+import { EMPTY_EQUALS_CONDITION } from '../../util/condition';
 
 interface ChildUnderEdit {
   isNew: boolean;
@@ -314,6 +316,12 @@ function ControlBar({
     if (!routingAppState.childUnderEdit) {
       return;
     }
+    const condition = isEqual(routingAppState.childUnderEdit.child.if, EMPTY_EQUALS_CONDITION)
+      ? {
+          always: {},
+        }
+      : routingAppState.childUnderEdit.child.if;
+
     return streamsRepositoryClient.fetch('POST /api/streams/{id}/_fork', {
       signal,
       params: {
@@ -321,7 +329,7 @@ function ControlBar({
           id: definition.name,
         },
         body: {
-          if: routingAppState.childUnderEdit.child.if,
+          if: condition,
           stream: {
             name: routingAppState.childUnderEdit.child.destination,
           },
@@ -494,13 +502,16 @@ function PreviewPanel({
 
   const previewSampleFetch = useStreamsAppFetch(
     ({ signal }) => {
-      if (
-        !definition ||
-        !routingAppState.debouncedChildUnderEdit ||
-        !routingAppState.debouncedChildUnderEdit.isNew
-      ) {
+      const { debouncedChildUnderEdit } = routingAppState;
+
+      if (!definition || !debouncedChildUnderEdit || !debouncedChildUnderEdit.isNew) {
         return Promise.resolve({ documents: [] });
       }
+
+      const condition = isEqual(debouncedChildUnderEdit.child.if, EMPTY_EQUALS_CONDITION)
+        ? { always: {} }
+        : debouncedChildUnderEdit.child.if;
+
       return streamsRepositoryClient.fetch('POST /api/streams/{id}/_sample', {
         signal,
         params: {
@@ -508,7 +519,7 @@ function PreviewPanel({
             id: definition.name,
           },
           body: {
-            if: routingAppState.debouncedChildUnderEdit.child.if,
+            if: condition,
             start: start?.valueOf(),
             end: end?.valueOf(),
             size: 100,
@@ -794,7 +805,9 @@ function ChildStreamList({
                     child: {
                       destination: `${definition.name}.child`,
                       if: {
-                        never: {},
+                        field: '',
+                        operator: 'eq',
+                        value: '',
                       },
                     },
                   });

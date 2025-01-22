@@ -22,6 +22,7 @@ import { htmlIdGenerator } from '@elastic/eui';
 import { isEqual, omit } from 'lodash';
 import { DetectedField, EnrichmentUIProcessorDefinition, ProcessingDefinition } from '../types';
 import { useKibana } from '../../../hooks/use_kibana';
+import { EMPTY_EQUALS_CONDITION } from '../../../util/condition';
 
 export const useDefinition = (definition: ReadStreamDefinition, refreshDefinition: () => void) => {
   const { core, dependencies } = useKibana();
@@ -154,18 +155,21 @@ const convertUiDefinitionIntoApiDefinition = (
   processor: EnrichmentUIProcessorDefinition
 ): ProcessorDefinition => {
   const { id: _id, config, condition } = processor;
+
+  const validCondition = isEqual(EMPTY_EQUALS_CONDITION, condition) ? { always: {} } : condition;
+
   if ('grok' in config) {
     return {
       grok: {
         ...config.grok,
-        if: condition,
+        if: validCondition,
       },
     };
   }
   return {
     dissect: {
       ...config.dissect,
-      if: condition,
+      if: validCondition,
     },
   };
 };
