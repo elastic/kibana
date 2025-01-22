@@ -57,7 +57,6 @@ interface StartPlugins {
   security?: SecurityPluginStart;
   share: SharePluginStart;
   spaces?: SpacesPluginStart;
-  spacesApi?: SpacesPluginStart;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;

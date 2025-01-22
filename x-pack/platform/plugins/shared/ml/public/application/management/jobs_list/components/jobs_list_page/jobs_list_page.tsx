@@ -50,7 +50,7 @@ interface Props {
   coreStart: CoreStart;
   share: SharePluginStart;
   history: ManagementAppMountParams['history'];
-  spacesApi?: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
   data: DataPublicPluginStart;
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsStart;
@@ -62,7 +62,7 @@ export const JobsListPage: FC<Props> = ({
   coreStart,
   share,
   history,
-  spacesApi,
+  spaces,
   data,
   usageCollection,
   fieldFormats,
@@ -105,8 +105,8 @@ export const JobsListPage: FC<Props> = ({
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const ContextWrapper = useCallback(
-    spacesApi ? spacesApi.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
-    [spacesApi]
+    spaces ? spaces.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
+    [spaces]
   );
 
   if (initialized === false) {
@@ -131,7 +131,7 @@ export const JobsListPage: FC<Props> = ({
               data,
               usageCollection,
               fieldFormats,
-              spacesApi,
+              spaces,
               mlServices,
             }}
           >
@@ -177,7 +177,7 @@ export const JobsListPage: FC<Props> = ({
               data,
               usageCollection,
               fieldFormats,
-              spacesApi,
+              spaces,
               mlServices,
             }}
           >
@@ -237,7 +237,7 @@ export const JobsListPage: FC<Props> = ({
                       </EuiFlexItem>
                     </EuiFlexGroup>
                     <SpaceManagement
-                      spacesApi={spacesApi}
+                      spacesApi={spaces}
                       onTabChange={setCurrentTabId}
                       onReload={setRefreshJobs}
                     />
