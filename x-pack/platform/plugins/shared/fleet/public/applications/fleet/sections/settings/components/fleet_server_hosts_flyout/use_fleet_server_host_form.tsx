@@ -146,14 +146,62 @@ export function useFleetServerHostsForm(
   );
   const proxyIdInput = useInput(fleetServerHost?.proxy_id ?? '', () => undefined, isEditDisabled);
 
+  const certificateAuthoritiesInput = useInput(
+    fleetServerHost?.certificate_authorities ?? '',
+    () => undefined,
+    isEditDisabled
+  );
+  const certificateInput = useInput(
+    fleetServerHost?.certificate ?? '',
+    () => undefined,
+    isEditDisabled
+  );
+  const certificateKeyInput = useInput(
+    fleetServerHost?.certificate_key ?? '',
+    () => undefined,
+    isEditDisabled
+  );
+  const esCertificateAuthoritiesInput = useInput(
+    fleetServerHost?.es_certificate_authorities ?? '',
+    () => undefined,
+    isEditDisabled
+  );
+  const esCertificateInput = useInput(
+    fleetServerHost?.es_certificate ?? '',
+    () => undefined,
+    isEditDisabled
+  );
+  const esCertificateKeyInput = useInput(
+    fleetServerHost?.es_certificate_key ?? '',
+    () => undefined,
+    isEditDisabled
+  );
+
   const inputs = useMemo(
     () => ({
       nameInput,
       isDefaultInput,
       hostUrlsInput,
       proxyIdInput,
+      certificateAuthoritiesInput,
+      certificateInput,
+      certificateKeyInput,
+      esCertificateAuthoritiesInput,
+      esCertificateInput,
+      esCertificateKeyInput,
     }),
-    [nameInput, isDefaultInput, hostUrlsInput, proxyIdInput]
+    [
+      nameInput,
+      isDefaultInput,
+      hostUrlsInput,
+      proxyIdInput,
+      certificateAuthoritiesInput,
+      certificateInput,
+      certificateKeyInput,
+      esCertificateAuthoritiesInput,
+      esCertificateInput,
+      esCertificateKeyInput,
+    ]
   );
 
   const validate = useCallback(() => validateInputs(inputs), [inputs]);
@@ -172,6 +220,12 @@ export function useFleetServerHostsForm(
         host_urls: hostUrlsInput.value,
         is_default: isDefaultInput.value,
         proxy_id: proxyIdInput.value !== '' ? proxyIdInput.value : null,
+        certificate_authorities: certificateAuthoritiesInput.value,
+        certificate: certificateInput.value,
+        certificate_key: certificateKeyInput.value,
+        es_certificate_authorities: esCertificateAuthoritiesInput.value,
+        es_certificate: esCertificateInput.value,
+        es_certificate_key: esCertificateKeyInput.value,
       };
       if (fleetServerHost) {
         const res = await sendPutFleetServerHost(fleetServerHost.id, data);
@@ -200,14 +254,20 @@ export function useFleetServerHostsForm(
       });
     }
   }, [
-    fleetServerHost,
+    validate,
+    confirm,
     nameInput.value,
     hostUrlsInput.value,
     isDefaultInput.value,
     proxyIdInput.value,
-    validate,
-    notifications,
-    confirm,
+    certificateAuthoritiesInput.value,
+    certificateInput.value,
+    certificateKeyInput.value,
+    esCertificateAuthoritiesInput.value,
+    esCertificateInput.value,
+    esCertificateKeyInput.value,
+    fleetServerHost,
+    notifications.toasts,
     onSuccess,
   ]);
 

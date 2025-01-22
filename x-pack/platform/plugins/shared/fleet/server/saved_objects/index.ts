@@ -1088,6 +1088,12 @@ export const getSavedObjectTypes = (
           host_urls: { type: 'keyword', index: false },
           is_preconfigured: { type: 'boolean' },
           proxy_id: { type: 'keyword' },
+          certificate_authorities: { type: 'keyword', index: false },
+          certificate: { type: 'keyword', index: false },
+          certificate_key: { type: 'keyword', index: false },
+          es_certificate_authorities: { type: 'keyword', index: false },
+          es_certificate: { type: 'keyword', index: false },
+          es_certificate_key: { type: 'keyword', index: false },
         },
       },
       modelVersions: {
@@ -1097,6 +1103,21 @@ export const getSavedObjectTypes = (
               type: 'mappings_addition',
               addedMappings: {
                 is_internal: { type: 'boolean', index: false },
+              },
+            },
+          ],
+        },
+        '2': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                certificate_authorities: { type: 'keyword', index: false },
+                certificate: { type: 'keyword', index: false },
+                certificate_key: { type: 'keyword', index: false },
+                es_certificate_authorities: { type: 'keyword', index: false },
+                es_certificate: { type: 'keyword', index: false },
+                es_certificate_key: { type: 'keyword', index: false },
               },
             },
           ],
