@@ -1143,6 +1143,9 @@ describe('get()', () => {
       isDeprecated: false,
       isSystemAction: false,
       name: 'test',
+      config: {
+        foo: 'bar',
+      },
     });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
   });
@@ -1217,6 +1220,7 @@ describe('get()', () => {
       isPreconfigured: false,
       isSystemAction: true,
       name: 'System action: .cases',
+      config: {},
     });
   });
 });

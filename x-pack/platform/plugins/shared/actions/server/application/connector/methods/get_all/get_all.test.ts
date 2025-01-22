@@ -330,6 +330,7 @@ describe('getAll()', () => {
           id: 'testPreconfigured',
           actionTypeId: '.slack',
           name: 'test',
+          config: { foo: 'bar' },
           isPreconfigured: true,
           isSystemAction: false,
           isDeprecated: false,
@@ -421,6 +422,7 @@ describe('getAll()', () => {
           isSystemAction: true,
           name: 'System action: .cases',
           referencedByCount: 2,
+          config: {},
         },
         {
           id: '1',
@@ -440,6 +442,9 @@ describe('getAll()', () => {
           isSystemAction: false,
           isDeprecated: false,
           referencedByCount: 2,
+          config: {
+            foo: 'bar',
+          },
         },
       ]);
     });
@@ -525,6 +530,9 @@ describe('getAll()', () => {
           isSystemAction: false,
           name: 'test',
           referencedByCount: 2,
+          config: {
+            foo: 'bar',
+          },
         },
       ]);
 
@@ -829,6 +837,9 @@ describe('getAllUnsecured()', () => {
         isSystemAction: false,
         isDeprecated: false,
         referencedByCount: 2,
+        config: {
+          foo: 'bar',
+        },
       },
     ]);
 
@@ -1006,6 +1017,9 @@ describe('getAllUnsecured()', () => {
         isSystemAction: false,
         isDeprecated: false,
         referencedByCount: 2,
+        config: {
+          foo: 'bar',
+        },
       },
     ]);
 
@@ -1168,6 +1182,9 @@ describe('getAllUnsecured()', () => {
         isSystemAction: false,
         name: 'test',
         referencedByCount: 2,
+        config: {
+          foo: 'bar',
+        },
       },
     ]);
 
