@@ -12,9 +12,9 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 import { performBulkActionRoute } from './rules/bulk_actions/route';
 import { bulkCreateRulesRoute } from './rules/bulk_create_rules/route';
-import { bulkDeleteRulesRoute } from './rules/bulk_delete_rules/route';
-import { bulkPatchRulesRoute } from './rules/bulk_patch_rules/route';
 import { bulkUpdateRulesRoute } from './rules/bulk_update_rules/route';
+import { bulkPatchRulesRoute } from './rules/bulk_patch_rules/route';
+import { bulkDeleteRulesRoute } from './rules/bulk_delete_rules/route';
 import { createRuleRoute } from './rules/create_rule/route';
 import { deleteRuleRoute } from './rules/delete_rule/route';
 import { exportRulesRoute } from './rules/export_rules/route';
@@ -26,10 +26,6 @@ import { readRuleRoute } from './rules/read_rule/route';
 import { updateRuleRoute } from './rules/update_rule/route';
 import { readTagsRoute } from './tags/read_tags/route';
 import { getCoverageOverviewRoute } from './rules/coverage_overview/route';
-import { bulkCreateRulesRoute } from './rules/bulk_create_rules/route';
-import { bulkUpdateRulesRoute } from './rules/bulk_update_rules/route';
-import { bulkPatchRulesRoute } from './rules/bulk_patch_rules/route';
-import { bulkDeleteRulesRoute } from './rules/bulk_delete_rules/route';
 
 export const registerRuleManagementRoutes = (
   router: SecuritySolutionPluginRouter,
