@@ -10,6 +10,7 @@ import { FILTER_CLOSED } from '@kbn/securitysolution-data-table/common/types';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsByStatus } from '../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import type { ParsedAlertsData } from '../../overview/components/detection_response/alerts_by_status/types';
+import type { CloudPostureEntityIdentifier } from '../components/entity_insight';
 
 export const useNonClosedAlerts = ({
   field,
@@ -18,7 +19,7 @@ export const useNonClosedAlerts = ({
   from,
   queryId,
 }: {
-  field: 'host.name' | 'user.name';
+  field: CloudPostureEntityIdentifier;
   value: string;
   to: string;
   from: string;
