@@ -31,7 +31,9 @@ interface DeleteStreamParams extends BaseParams {
   logger: Logger;
 }
 
-export function getDataStreamLifecycle(dataStream: IndicesDataStream): IngestStreamLifecycle | undefined {
+export function getDataStreamLifecycle(
+  dataStream: IndicesDataStream
+): IngestStreamLifecycle | undefined {
   if (
     dataStream.ilm_policy &&
     (!dataStream.lifecycle || typeof dataStream.prefer_ilm === 'undefined' || dataStream.prefer_ilm)
