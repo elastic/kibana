@@ -7,6 +7,12 @@
 
 import type { AnalyzedFile, FileWrapper } from './file_wrapper';
 
+export enum CLASH_TYPE {
+  MAPPING,
+  FORMAT,
+  UNSUPPORTED,
+}
+
 export interface MappingClash {
   fieldName: string;
   existingType: string;
@@ -16,6 +22,7 @@ export interface MappingClash {
 export interface FileClash {
   fileName: string;
   clash: boolean;
+  clashType?: CLASH_TYPE;
 }
 
 export function createMergedMappings(files: FileWrapper[]) {
@@ -208,6 +215,75 @@ export function getMappingClashInfo(
         allClash ||
         (medianAboveZero === false && c.count > 0) ||
         (medianAboveZero && c.count === 0),
+      clashType: CLASH_TYPE.MAPPING,
+    };
+  });
+}
+
+export function getFormatClashes(files: FileWrapper[]): FileClash[] {
+  const formatMap = files
+    .map((file) => file.getFormat())
+    .reduce((acc, format, i) => {
+      if (format === undefined) {
+        acc.set('unknown', (acc.get('unknown') ?? 0) + 1);
+      } else {
+        acc.set(format, (acc.get(format) ?? 0) + 1);
+      }
+      return acc;
+    }, new Map<string, number>());
+
+  // return early if there is only one format and it is supported
+  if (formatMap.size === 1 && formatMap.has('unknown') === false) {
+    return files.map((f) => ({
+      fileName: f.getFileName(),
+      clash: false,
+    }));
+  }
+
+  const formatArray = Array.from(formatMap.entries()).sort((a, b) => b[1] - a[1]);
+
+  const fileClashes = files.map((f) => {
+    return {
+      fileName: f.getFileName(),
+      clash: f.getStatus().supportedFormat === false,
+      clashType: CLASH_TYPE.UNSUPPORTED,
+    };
+  });
+
+  const topCount = formatArray[0];
+
+  // if the top count is for an unsupported format,
+  // return the fileClashes containing unsupported formats
+  if (topCount[0] === 'unknown') {
+    return fileClashes;
+  }
+
+  // Check if all counts are the same,
+  // mark all files as clashing
+  const counts = Array.from(formatMap.values());
+  const allCountsSame = counts.every((count) => count === counts[0]);
+  if (allCountsSame) {
+    return files.map((f) => {
+      return {
+        fileName: f.getFileName(),
+        clash: true,
+        clashType: f.getStatus().supportedFormat ? CLASH_TYPE.FORMAT : CLASH_TYPE.UNSUPPORTED,
+      };
+    });
+  }
+
+  return files.map((f) => {
+    let clashType: CLASH_TYPE | undefined;
+    if (f.getStatus().supportedFormat === false) {
+      clashType = CLASH_TYPE.UNSUPPORTED;
+    } else if (f.getFormat() !== topCount[0]) {
+      clashType = CLASH_TYPE.FORMAT;
+    }
+
+    return {
+      fileName: f.getFileName(),
+      clash: clashType !== undefined,
+      clashType,
     };
   });
 }

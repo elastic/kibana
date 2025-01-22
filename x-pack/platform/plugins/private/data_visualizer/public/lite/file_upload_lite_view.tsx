@@ -37,7 +37,7 @@ import { FileManager } from './file_manager';
 import { STATUS } from './file_manager/file_manager';
 import { FileStatus } from './file_status';
 import { OverallUploadStatus } from './overall_upload_status';
-import { MappingClashWarning } from './mapping_clash_warning';
+import { FileClashWarning } from './mapping_clash_warning';
 import { IndexInput } from './index_input';
 // import { OverallUploadProgress } from './overall_upload_progress';
 
@@ -185,7 +185,7 @@ export const FileUploadLiteView: FC<Props> = ({
                 ))}
 
                 {fileClashes ? (
-                  <MappingClashWarning uploadStatus={uploadStatus} filesStatus={filesStatus} />
+                  <FileClashWarning uploadStatus={uploadStatus} filesStatus={filesStatus} />
                 ) : null}
                 <EuiSpacer />
               </>

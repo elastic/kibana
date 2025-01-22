@@ -25,7 +25,12 @@ import {
 import { AutoDeploy } from '../../application/file_data_visualizer/components/import_view/auto_deploy';
 import type { FileUploadResults } from '../flyout/create_flyout';
 import type { FileClash } from './merge_tools';
-import { createMergedMappings, createMergedPipeline, getMappingClashInfo } from './merge_tools';
+import {
+  createMergedMappings,
+  createMergedPipeline,
+  getFormatClashes,
+  getMappingClashInfo,
+} from './merge_tools';
 
 export enum STATUS {
   NA,
@@ -45,6 +50,7 @@ export interface UploadStatus {
   filesStatus: AnalyzedFile[];
   // mappingClashes: MappingClash[];
   fileClashes: FileClash[];
+  formatMix: boolean;
 }
 
 export class FileManager {
@@ -77,6 +83,7 @@ export class FileManager {
     filesStatus: [],
     // mappingClashes: [],
     fileClashes: [],
+    formatMix: false,
   });
 
   constructor(
@@ -99,14 +106,25 @@ export class FileManager {
       const allFilesAnalyzed = statuses.every((status) => status.loaded);
       if (allFilesAnalyzed) {
         this.analysisValid$.next(true);
-        if (this.uploadStatus$.getValue().fileImport === STATUS.STARTED) {
+        const uploadStatus = this.uploadStatus$.getValue();
+        if (uploadStatus.fileImport === STATUS.STARTED) {
+          return;
+        }
+        if (this.getFiles().length === 0) {
+          this.setStatus({
+            fileClashes: [],
+          });
           return;
         }
 
-        const formatOk = this.checkFormat();
+        const { formatsOk, fileClashes } = this.getFormatClashes();
         const { mappingClashes, mergedMappings } = this.createMergedMappings();
         const mappingsOk = mappingClashes.length === 0;
-        if (mappingsOk) {
+        if (formatsOk === false) {
+          this.setStatus({
+            fileClashes,
+          });
+        } else if (mappingsOk) {
           this.mappings = mergedMappings;
           this.pipeline = this.createMergedPipeline();
           this.addSemanticTextField();
@@ -120,7 +138,7 @@ export class FileManager {
             fileClashes: getMappingClashInfo(mappingClashes, statuses),
           });
         }
-        this.analysisOk$.next(mappingsOk && formatOk);
+        this.analysisOk$.next(mappingsOk && formatsOk);
       }
     });
   }
@@ -166,20 +184,22 @@ export class FileManager {
     return this.files$.getValue();
   }
 
-  private checkFormat() {
+  private getFormatClashes(): {
+    formatsOk: boolean;
+    fileClashes: FileClash[];
+  } {
     // console.log('checkFormat');
     const files = this.getFiles();
-    const formats = new Set<string>(files.map((file) => file.getStatus().results!.format));
+    const fileClashes = getFormatClashes(files);
+    const formatsOk = fileClashes.every((file) => file.clash === false);
 
-    if (formats.size > 1) {
-      return false;
+    if (formatsOk) {
+      this.commonFileFormat = formatsOk ? files[0].getStatus().results!.format : null;
     }
-
-    this.commonFileFormat = formats.values().next().value;
-    // eslint-disable-next-line no-console
-    console.log(this.commonFileFormat);
-
-    return true;
+    return {
+      formatsOk,
+      fileClashes,
+    };
   }
 
   private createMergedMappings() {

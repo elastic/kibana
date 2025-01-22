@@ -15,10 +15,10 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiProgress,
-  EuiIcon,
 } from '@elastic/eui';
 import type { AnalyzedFile } from './file_manager/file_wrapper';
 import { STATUS, type UploadStatus } from './file_manager/file_manager';
+import { CLASH_TYPE } from './file_manager/merge_tools';
 
 interface Props {
   uploadStatus: UploadStatus;
@@ -28,52 +28,51 @@ interface Props {
 }
 
 export const FileStatus: FC<Props> = ({ fileStatus, uploadStatus, deleteFile, index }) => {
-  const clash = uploadStatus.fileClashes[index]?.clash;
+  const fileClash = uploadStatus.fileClashes[index] ?? {
+    clash: false,
+  };
+
+  const importStarted =
+    uploadStatus.overallImportStatus === STATUS.STARTED ||
+    uploadStatus.overallImportStatus === STATUS.COMPLETED;
   return (
-    <React.Fragment>
+    <>
       <EuiPanel
         hasShadow={false}
         hasBorder
         paddingSize="s"
-        color={clash ? 'danger' : 'transparent'}
+        color={fileClash.clash ? 'danger' : 'transparent'}
       >
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={8}>
-            <EuiText size="xs">
-              <span css={{ fontWeight: 'bold' }}>{fileStatus.fileName}</span>{' '}
-              <span>{fileStatus.fileSize}</span>
-            </EuiText>
-          </EuiFlexItem>
-          {/* <EuiFlexItem grow={false}>
+        {importStarted ? (
+          <>
+            <EuiProgress
+              value={Math.floor(fileStatus.importProgress)}
+              max={100}
+              size="s"
+              label={fileStatus.fileName}
+              valueText={true}
+              color={fileStatus.importProgress === 100 ? 'success' : 'primary'}
+            />
+          </>
+        ) : (
+          <>
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={8}>
+                <EuiText size="xs">
+                  <span css={{ fontWeight: 'bold' }}>{fileStatus.fileName}</span>{' '}
+                  <span>{fileStatus.fileSize}</span>
+                </EuiText>
+              </EuiFlexItem>
+              {/* <EuiFlexItem grow={false}>
             <EuiText size="xs">
               <span>{fileStatus.fileSize}</span>
             </EuiText>
           </EuiFlexItem> */}
-          <EuiFlexItem grow={2}>
-            {uploadStatus.overallImportStatus === STATUS.STARTED ||
-            uploadStatus.overallImportStatus === STATUS.COMPLETED ? (
-              <>
-                {fileStatus.importStatus === STATUS.STARTED ? (
-                  <EuiFlexItem grow={true}>
-                    <EuiProgress value={fileStatus.importProgress} max={100} size="s" />
-                  </EuiFlexItem>
-                ) : null}
-                {fileStatus.importStatus === STATUS.COMPLETED ? (
-                  <EuiFlexGroup gutterSize="none">
-                    <EuiFlexItem grow={true} />
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type="checkInCircleFilled" color="success" />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                ) : null}
-              </>
-            ) : (
-              <>
+              <EuiFlexItem grow={2}>
                 <EuiFlexGroup gutterSize="none">
                   <EuiFlexItem grow={true} />
                   <EuiFlexItem grow={false}>
                     <EuiButtonIcon
-                      disabled={uploadStatus.overallImportStatus !== STATUS.NOT_STARTED}
                       onClick={deleteFile}
                       iconType="trash"
                       size="xs"
@@ -82,10 +81,41 @@ export const FileStatus: FC<Props> = ({ fileStatus, uploadStatus, deleteFile, in
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            {fileClash.clash ? (
+              <>
+                {fileClash.clashType === CLASH_TYPE.FORMAT ? (
+                  <>
+                    <EuiSpacer size="s" />
+                    <EuiText size="xs" color="danger">
+                      format clash
+                    </EuiText>
+                  </>
+                ) : null}
+
+                {fileClash.clashType === CLASH_TYPE.MAPPING ? (
+                  <>
+                    <EuiSpacer size="s" />
+                    <EuiText size="xs" color="danger">
+                      mapping clash
+                    </EuiText>
+                  </>
+                ) : null}
+
+                {fileClash.clashType === CLASH_TYPE.UNSUPPORTED ? (
+                  <>
+                    <EuiSpacer size="s" />
+                    <EuiText size="xs" color="danger">
+                      unsupported format
+                    </EuiText>
+                  </>
+                ) : null}
               </>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            ) : null}
+          </>
+        )}
 
         {/* <EuiFlexItem grow={true} />
           <EuiFlexItem grow={false}>
@@ -119,6 +149,6 @@ export const FileStatus: FC<Props> = ({ fileStatus, uploadStatus, deleteFile, in
         ) : null} */}
       </EuiPanel>
       <EuiSpacer size="s" />
-    </React.Fragment>
+    </>
   );
 };

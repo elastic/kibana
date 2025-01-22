@@ -39,6 +39,7 @@ export type AnalyzedFile = AnalysisResults & {
   mappingClash: boolean;
   importProgress: number;
   docCount: number;
+  supportedFormat: boolean;
 };
 
 export class FileWrapper {
@@ -60,6 +61,7 @@ export class FileWrapper {
     mappingClash: false,
     importProgress: 0,
     docCount: 0,
+    supportedFormat: true,
   });
 
   public readonly fileStatus$ = this.analyzedFile$.asObservable();
@@ -93,12 +95,15 @@ export class FileWrapper {
       } else {
         analysisResults = await this.analyzeStandardFile(fileContents, {});
       }
+      const supportedFormat = isSupportedFormat(analysisResults);
+
       this.setStatus({
         ...analysisResults,
         loaded: true,
         fileName: this.file.name,
         fileContents,
         data,
+        supportedFormat,
       });
     });
   }
@@ -164,6 +169,9 @@ export class FileWrapper {
   public getPipeline() {
     return this.analyzedFile$.getValue().results?.ingest_pipeline;
   }
+  public getFormat() {
+    return this.analyzedFile$.getValue().results?.format;
+  }
 
   public async import(id: string, index: string, pipelineId: string, mappings: any, pipeline: any) {
     this.setStatus({ importStatus: STATUS.STARTED });
@@ -180,4 +188,14 @@ export class FileWrapper {
     this.setStatus({ docCount: resp.docCount, importStatus: STATUS.COMPLETED });
     return resp;
   }
+}
+
+function isSupportedFormat(analysisResults: AnalysisResults) {
+  const format = analysisResults.results?.format;
+  return (
+    format === 'ndjson' ||
+    format === 'delimited' ||
+    format === 'tika' ||
+    format === 'semi_structured_text'
+  );
 }
