@@ -129,5 +129,9 @@ handlebars.registerHelper('encodeURIQuery', (component: unknown) => {
   const str = String(component);
   return url.encodeUriQuery(str);
 });
+handlebars.registerHelper('equal', (a: unknown, b: unknown) => {
+  console.log('isEqual', a, b);
+  return a === b;
+});
 
 export { handlebars };

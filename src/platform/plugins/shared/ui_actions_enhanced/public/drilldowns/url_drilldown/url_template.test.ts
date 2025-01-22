@@ -333,4 +333,91 @@ describe('basic string formatting helpers', () => {
       `"[split] \\"splitter\\" expected to be a string"`
     );
   });
+
+  test('extract a filter by field using "equals"', async () => {
+    const scope = {
+      event: {
+        key: 'bytes',
+        value: 5080,
+        negate: false,
+        points: [
+          {
+            value: 5080,
+            key: 'bytes',
+          },
+        ],
+      },
+      context: {
+        panel: {
+          id: '45f2193b-6cfa-426d-90ec-6254ae35cfac',
+          title: '[Logs] Bytes distribution',
+          savedObjectId: '16b1d7d0-ea71-11eb-8b4b-f7b600de0f7d',
+          query: {
+            query: '',
+            language: 'kuery',
+          },
+          timeRange: {
+            from: 'now-15m',
+            to: 'now',
+          },
+          filters: [
+            {
+              meta: {
+                index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                params: {
+                  gte: '1000',
+                },
+                field: 'bytes',
+                type: 'range',
+                key: 'bytes',
+                disabled: false,
+                negate: false,
+                alias: null,
+              },
+              query: {
+                range: {
+                  bytes: {
+                    gte: '1000',
+                  },
+                },
+              },
+              $state: {
+                store: 'appState',
+              },
+            },
+            {
+              meta: {
+                disabled: false,
+                negate: false,
+                alias: null,
+                index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                key: 'extension',
+                field: 'extension',
+                type: 'exists',
+              },
+              query: {
+                exists: {
+                  field: 'extension',
+                },
+              },
+              $state: {
+                store: 'appState',
+              },
+            },
+          ],
+          indexPatternId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        },
+      },
+      kibanaUrl: 'http://localhost:5601/hcw',
+    };
+
+    expect(
+      await compile(
+        `https://elastic.co/{{#each context.panel.filters}}{{#if (equal meta.field 'bytes')}}{{rison this}}{{/if}}{{/each}}`,
+        scope
+      )
+    ).toMatchInlineSnapshot(
+      `"https://elastic.co/('$state':(store:appState),meta:(alias:!n,disabled:!f,field:bytes,index:'90943e30-9a47-11e8-b64d-95841ca0b247',key:bytes,negate:!f,params:(gte:'1000'),type:range),query:(range:(bytes:(gte:'1000'))))"`
+    );
+  });
 });
