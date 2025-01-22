@@ -61,11 +61,13 @@ export function getAllowedOutputTypesForPackagePolicy(
   return Object.values(outputType);
 }
 
-export function getAllowedOutputTypesForIntegration(packageName: string): string[] {
-  const isRestrictedToSameClusterES = sameClusterRestrictedPackages.includes(packageName);
+export function getAllowedOutputTypesForIntegration(packageName?: string): string[] {
+  if (packageName) {
+    const isRestrictedToSameClusterES = sameClusterRestrictedPackages.includes(packageName);
 
-  if (isRestrictedToSameClusterES) {
-    return [outputType.Elasticsearch];
+    if (isRestrictedToSameClusterES) {
+      return [outputType.Elasticsearch];
+    }
   }
 
   return Object.values(outputType);

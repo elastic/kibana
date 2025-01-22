@@ -12,7 +12,10 @@ import {
   LICENCE_FOR_OUTPUT_PER_INTEGRATION,
   LICENCE_FOR_MULTIPLE_AGENT_POLICIES,
 } from '../../../common/constants';
-import { getAllowedOutputTypesForPackagePolicy } from '../../../common/services/output_helpers';
+import {
+  getAllowedOutputTypesForPackagePolicy,
+  getAllowedOutputTypesForIntegration,
+} from '../../../common/services/output_helpers';
 import type {
   PackagePolicy,
   NewPackagePolicy,
@@ -95,7 +98,11 @@ export async function canUseOutputForIntegration(
       };
     }
 
-    const allowedOutputTypes = getAllowedOutputTypesForPackagePolicy(packagePolicy);
+    const allowedOutputTypesForIntegration = getAllowedOutputTypesForIntegration(packageName);
+    const allowedOutputTypesForPackagePolicy = getAllowedOutputTypesForPackagePolicy(packagePolicy);
+    const allowedOutputTypes = allowedOutputTypesForIntegration.filter((type) =>
+      allowedOutputTypesForPackagePolicy.includes(type)
+    );
 
     const output = await outputService.get(soClient, outputId);
 
