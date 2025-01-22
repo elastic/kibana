@@ -31,7 +31,8 @@ export const useHoverActionStyles = () => {
 
         // delay hiding hover actions to make grabbing the drag handle easier
         transition: ${euiTheme.animation.extraFast} opacity ease-in,
-          ${euiTheme.animation.extraFast} z-index linear;
+          ${euiTheme.animation.extraFast} z-index linear,
+          ${euiTheme.animation.extraFast} visibility linear;
         transition-delay: ${euiTheme.animation.normal};
       }
 
@@ -45,7 +46,7 @@ export const useHoverActionStyles = () => {
         z-index: ${euiTheme.levels.toast};
         opacity: 1;
         visibility: visible;
-        transition: 0s opacity; // apply transition on hover out only
+        transition: none; // apply transition delay on hover out only
       }
     `;
   }, [euiTheme]);
@@ -119,7 +120,7 @@ export const useHoverActionStyles = () => {
       }
 
       @container hoverActionsAnchor (width < 250px) {
-        // shrink down to single wrapped element with no breakpoint when panel gets smaller
+        // shrink down to single wrapped element with no breakpoint when panel gets small
         ${singleWrapperStyles}
       }
 

@@ -193,7 +193,7 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
     }, [panelId, renderPanelContents, dragHandleApi]);
 
     return (
-      <div ref={panelRef} css={initialStyles} className={`kbnGridPanel`}>
+      <div ref={panelRef} css={initialStyles} className="kbnGridPanel">
         <DragHandle
           ref={setDragHandleApi}
           gridLayoutStateManager={gridLayoutStateManager}
