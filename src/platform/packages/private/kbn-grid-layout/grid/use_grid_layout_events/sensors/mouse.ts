@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { UserInteractionEvent } from '../../types';
 import { handleAutoscroll, stopAutoScroll } from './autoscroll';
 
 export type UserMouseEvent = MouseEvent | React.MouseEvent<HTMLButtonElement, MouseEvent>;
@@ -25,25 +26,25 @@ export const startMouseInteraction = ({
 }: {
   e: UserMouseEvent;
   onStart: () => void;
-  onMove: (e: Event) => void;
+  onMove: (e: UserInteractionEvent) => void;
   onEnd: () => void;
 }) => {
   if (e.button !== MOUSE_BUTTON_LEFT) return;
 
-  const handleMove = (ev: Event) => {
+  const handleMouseMove = (ev: UserMouseEvent) => {
     handleAutoscroll(ev);
     onMove(ev);
   };
 
   const handleEnd = () => {
-    document.removeEventListener('scroll', handleMove);
-    document.removeEventListener('mousemove', handleMove);
+    document.removeEventListener('scroll', onMove);
+    document.removeEventListener('mousemove', handleMouseMove);
     stopAutoScroll();
     onEnd();
   };
 
-  document.addEventListener('scroll', handleMove);
-  document.addEventListener('mousemove', handleMove);
-  document.addEventListener('mouseup', handleEnd, { once: true });
+  document.addEventListener('scroll', onMove, { passive: true });
+  document.addEventListener('mousemove', handleMouseMove, { passive: true });
+  document.addEventListener('mouseup', handleEnd, { once: true, passive: true });
   onStart();
 };

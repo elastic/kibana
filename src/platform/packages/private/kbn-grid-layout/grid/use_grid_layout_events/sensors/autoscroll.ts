@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isMouseEvent } from '.';
+import { UserMouseEvent } from './mouse';
 
 const MIN_SPEED = 50;
 const MAX_SPEED = 150;
@@ -57,8 +57,7 @@ export const stopAutoScroll = () => {
   }
 };
 
-export const handleAutoscroll = (e: Event) => {
-  if (!isMouseEvent(e)) return;
+export const handleAutoscroll = (e: UserMouseEvent) => {
   // auto scroll when an event is happening close to the top or bottom of the screen
   const heightPercentage = 100 - ((window.innerHeight - e.clientY) / window.innerHeight) * 100;
   const atTheTop = window.scrollY <= 0;

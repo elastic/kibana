@@ -44,7 +44,7 @@ export const useGridLayoutEvents = ({
       const onStart = () =>
         startAction(e, gridLayoutStateManager, interactionType, rowIndex, panelId);
 
-      const onMove = (ev: Event) => {
+      const onMove = (ev: UserInteractionEvent) => {
         if (isMouseEvent(ev) || isTouchEvent(ev)) {
           pointerPixel.current = getPointerPosition(ev);
         }
