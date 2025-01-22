@@ -56,6 +56,7 @@
     "@kbn/object-utils",
     "@kbn/deeplinks-analytics",
     "@kbn/dashboard-plugin",
-    "@kbn/react-kibana-mount"
+    "@kbn/react-kibana-mount",
+    "@kbn/zod"
   ]
 }

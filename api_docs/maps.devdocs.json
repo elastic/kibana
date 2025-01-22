@@ -3039,6 +3039,14 @@
             "section": "def-public.MapSerializedState",
             "text": "MapSerializedState"
           },
+          ", ",
+          {
+            "pluginId": "maps",
+            "scope": "public",
+            "docId": "kibMapsPluginApi",
+            "section": "def-public.MapSerializedState",
+            "text": "MapSerializedState"
+          },
           "> & { getLayerList: () => ",
           "ILayer",
           "[]; reload: () => void; setEventHandlers: (eventHandlers: ",
