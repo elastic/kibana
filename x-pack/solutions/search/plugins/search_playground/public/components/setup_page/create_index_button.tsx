@@ -15,27 +15,35 @@ export const CreateIndexButton: React.FC = () => {
   const {
     services: { application, share },
   } = useKibana();
+
   const createIndexLocator = useMemo(
-    () =>
-      share.url.locators.get('CREATE_INDEX_LOCATOR_ID') ??
-      share.url.locators.get('SEARCH_CREATE_INDEX'),
+    () => share.url.locators.get('SEARCH_CREATE_INDEX'),
     [share.url.locators]
   );
-  const handleNavigateToIndex = useCallback(async () => {
-    const createIndexUrl = await createIndexLocator?.getUrl({});
 
-    if (createIndexUrl) {
-      application?.navigateToUrl(createIndexUrl);
-    }
-  }, [application, createIndexLocator]);
+  const handleCreateIndexClick = useCallback(
+    async (event: React.MouseEvent<HTMLAnchorElement>) => {
+      event.preventDefault();
+
+      if (!createIndexLocator) {
+        return;
+      }
+
+      const url = await createIndexLocator.getUrl({});
+      application?.navigateToUrl(url);
+    },
+    [application, createIndexLocator]
+  );
 
   return createIndexLocator ? (
+    // eslint-disable-next-line @elastic/eui/href-or-on-click
     <EuiButton
       color="primary"
       iconType="plusInCircle"
       fill
-      onClick={handleNavigateToIndex}
       data-test-subj="createIndexButton"
+      href={createIndexLocator.getRedirectUrl({})}
+      onClick={handleCreateIndexClick}
     >
       <FormattedMessage
         id="xpack.searchPlayground.createIndexButton"

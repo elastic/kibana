@@ -17,7 +17,17 @@ export const DissectPatternDefinition = () => {
   const { core } = useKibana();
   const esDocUrl = core.docLinks.links.ingest.dissectKeyModifiers;
 
-  const { field, fieldState } = useController({ name: 'pattern' });
+  const { field, fieldState } = useController({
+    name: 'pattern',
+    rules: {
+      required: i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.dissectPatternRequiredError',
+        { defaultMessage: 'A pattern is required.' }
+      ),
+    },
+  });
+
+  const { invalid, error } = fieldState;
 
   return (
     <EuiFormRow
@@ -41,7 +51,8 @@ export const DissectPatternDefinition = () => {
           }}
         />
       }
-      isInvalid={fieldState.invalid}
+      isInvalid={invalid}
+      error={error?.message}
       fullWidth
     >
       <CodeEditor

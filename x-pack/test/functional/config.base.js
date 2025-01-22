@@ -192,6 +192,12 @@ export default async function ({ readConfigFile }) {
       enterpriseSearch: {
         pathname: '/app/elasticsearch/overview',
       },
+      elasticsearchStart: {
+        pathname: '/app/elasticsearch/start',
+      },
+      elasticsearchIndices: {
+        pathname: '/app/elasticsearch/indices',
+      },
     },
 
     suiteTags: {

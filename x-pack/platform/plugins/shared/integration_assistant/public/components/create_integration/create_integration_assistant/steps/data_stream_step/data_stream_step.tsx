@@ -21,15 +21,18 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { NAME_REGEX_PATTERN } from '../../../../../../common/constants';
 import type { InputType } from '../../../../../../common';
+import {
+  DATASTREAM_NAME_REGEX_PATTERN,
+  NAME_REGEX_PATTERN,
+} from '../../../../../../common/constants';
 import { useActions, type State } from '../../state';
 import type { IntegrationSettings } from '../../types';
 import { StepContentWrapper } from '../step_content_wrapper';
-import type { OnComplete } from './use_generation';
 import { GenerationModal } from './generation_modal';
 import { SampleLogsInput } from './sample_logs_input';
 import * as i18n from './translations';
+import type { OnComplete } from './use_generation';
 import { useLoadPackageNames } from './use_load_package_names';
 
 export const InputTypeOptions: Array<EuiComboBoxOptionOption<InputType>> = [
@@ -50,6 +53,7 @@ export const InputTypeOptions: Array<EuiComboBoxOptionOption<InputType>> = [
 ];
 
 const isValidName = (name: string) => NAME_REGEX_PATTERN.test(name);
+const isValidDatastreamName = (name: string) => DATASTREAM_NAME_REGEX_PATTERN.test(name);
 const getNameFromTitle = (title: string) => title.toLowerCase().replaceAll(/[^a-z0-9]/g, '_');
 
 interface DataStreamStepProps {
@@ -99,7 +103,7 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
         dataStreamName: (e: React.ChangeEvent<HTMLInputElement>) => {
           const nextDataStreamName = e.target.value;
           setDataStreamName(nextDataStreamName);
-          if (!isValidName(nextDataStreamName)) {
+          if (!isValidDatastreamName(nextDataStreamName)) {
             setInvalidFields((current) => ({ ...current, dataStreamName: true }));
             setIntegrationValues({ dataStreamName: undefined });
           } else {

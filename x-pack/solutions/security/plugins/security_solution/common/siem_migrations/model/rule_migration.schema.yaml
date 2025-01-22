@@ -313,12 +313,16 @@ components:
         elastic_rule:
           description: The migrated elastic rule attributes to update.
           $ref: '#/components/schemas/ElasticRulePartial'
-        translation_result:
-          description: The rule translation result.
-          $ref: '#/components/schemas/RuleMigrationTranslationResult'
         comments:
           description: The comments for the migration including a summary from the LLM in markdown.
           $ref: '#/components/schemas/RuleMigrationComments'
+
+    RuleMigrationRetryFilter:
+      type: string
+      description: Indicates the filter to retry the migrations rules translation
+      enum: # should match SiemMigrationRetryFilter enum at ../constants.ts
+        - failed
+        - not_fully_translated
 
     ## Rule migration resources
 

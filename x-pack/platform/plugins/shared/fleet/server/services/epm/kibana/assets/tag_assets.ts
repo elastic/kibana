@@ -7,11 +7,13 @@
 
 import { v5 as uuidv5 } from 'uuid';
 import { uniqBy } from 'lodash';
+import pMap from 'p-map';
 import type { SavedObjectsImportSuccess } from '@kbn/core-saved-objects-common';
 import { taggableTypes } from '@kbn/saved-objects-tagging-plugin/common/constants';
 import type { IAssignmentService } from '@kbn/saved-objects-tagging-plugin/server';
 import type { ITagsClient } from '@kbn/saved-objects-tagging-plugin/common/types';
 
+import { MAX_CONCURRENT_PACKAGE_ASSETS } from '../../../../constants';
 import type { KibanaAssetType } from '../../../../../common';
 import type { PackageSpecTags } from '../../../../types';
 
@@ -124,8 +126,9 @@ export async function tagKibanaAssets(opts: TagAssetsParams) {
     const groupedAssets = groupByAssetId(packageSpecAssets);
 
     if (Object.entries(groupedAssets).length > 0) {
-      await Promise.all(
-        Object.entries(groupedAssets).map(async ([assetId, asset]) => {
+      await pMap(
+        Object.entries(groupedAssets),
+        async ([assetId, asset]) => {
           try {
             await savedObjectTagAssignmentService.updateTagAssignments({
               tags: asset.tags,
@@ -140,7 +143,8 @@ export async function tagKibanaAssets(opts: TagAssetsParams) {
             }
             throw error;
           }
-        })
+        },
+        { concurrency: MAX_CONCURRENT_PACKAGE_ASSETS }
       );
     }
   }

@@ -7,9 +7,9 @@
 
 import { badRequest, internal } from '@hapi/boom';
 import { z } from '@kbn/zod';
+import { DisableStreamsResponse } from '../../lib/streams/client';
 import { SecurityException } from '../../lib/streams/errors';
 import { createServerRoute } from '../create_server_route';
-import { deleteStream } from './delete';
 
 export const disableStreamsRoute = createServerRoute({
   endpoint: 'POST /api/streams/_disable',
@@ -22,13 +22,11 @@ export const disableStreamsRoute = createServerRoute({
       requiredPrivileges: ['streams_write'],
     },
   },
-  handler: async ({ request, logger, getScopedClients }): Promise<{ acknowledged: true }> => {
+  handler: async ({ request, getScopedClients }): Promise<DisableStreamsResponse> => {
     try {
-      const { scopedClusterClient, assetClient } = await getScopedClients({ request });
+      const { streamsClient } = await getScopedClients({ request });
 
-      await deleteStream(scopedClusterClient, assetClient, 'logs', logger);
-
-      return { acknowledged: true };
+      return await streamsClient.disableStreams();
     } catch (e) {
       if (e instanceof SecurityException) {
         throw badRequest(e);

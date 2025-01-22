@@ -22,7 +22,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const DOC_LINK_VERSION = meta.version;
   const ECS_VERSION = meta.ecs_version;
   const ELASTIC_WEBSITE_URL = meta.elasticWebsiteUrl;
-  const DOCS_WEBSITE_URL = meta.docsWebsiteUrl;
   const ELASTIC_GITHUB = meta.elasticGithubUrl;
   const SEARCH_LABS_URL = meta.searchLabsUrl;
 
@@ -34,11 +33,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const OBSERVABILITY_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/`;
   const APM_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/apm/`;
   const SECURITY_SOLUTION_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/`;
-  const APP_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}/`;
   const ENTERPRISE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}/`;
   const ESRE_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/esre/${DOC_LINK_VERSION}/`;
-  const WORKPLACE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/`;
-  const SEARCH_UI_DOCS = `${DOCS_WEBSITE_URL}search-ui/`;
+  const SEARCH_UI_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/search-ui/current/`;
   const MACHINE_LEARNING_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/`;
   const SERVERLESS_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/serverless/current/`;
   const SEARCH_LABS_REPO = `${ELASTIC_GITHUB}elasticsearch-labs/`;
@@ -121,33 +118,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       auditdModule: `${ELASTIC_WEBSITE_URL}guide/en/beats/auditbeat/${DOC_LINK_VERSION}/auditbeat-module-auditd.html`,
       systemModule: `${ELASTIC_WEBSITE_URL}guide/en/beats/auditbeat/${DOC_LINK_VERSION}/auditbeat-module-system.html`,
     },
-    appSearch: {
-      adaptiveRelevance: `${APP_SEARCH_DOCS}curations-guide.html#curations-reference-adaptive-relevance`,
-      apiRef: `${APP_SEARCH_DOCS}api-reference.html`,
-      apiClients: `${APP_SEARCH_DOCS}api-clients.html`,
-      apiKeys: `${APP_SEARCH_DOCS}authentication.html#authentication-api-keys`,
-      authentication: `${APP_SEARCH_DOCS}authentication.html`,
-      crawlRules: `${APP_SEARCH_DOCS}crawl-web-content.html#crawl-web-content-manage-crawl-rules`,
-      curations: `${APP_SEARCH_DOCS}curations-guide.html`,
-      duplicateDocuments: `${APP_SEARCH_DOCS}web-crawler-reference.html#web-crawler-reference-content-deduplication`,
-      elasticsearchIndexedEngines: `${APP_SEARCH_DOCS}elasticsearch-engines.html`,
-      entryPoints: `${APP_SEARCH_DOCS}crawl-web-content.html#crawl-web-content-manage-entry-points`,
-      gettingStarted: `${APP_SEARCH_DOCS}getting-started.html`,
-      guide: `${APP_SEARCH_DOCS}index.html`,
-      indexingDocuments: `${APP_SEARCH_DOCS}indexing-documents-guide.html`,
-      indexingDocumentsSchema: `${APP_SEARCH_DOCS}indexing-documents-guide.html#indexing-documents-guide-schema`,
-      logSettings: `${APP_SEARCH_DOCS}logs.html`,
-      metaEngines: `${APP_SEARCH_DOCS}meta-engines-guide.html`,
-      precisionTuning: `${APP_SEARCH_DOCS}precision-tuning.html`,
-      relevanceTuning: `${APP_SEARCH_DOCS}relevance-tuning-guide.html`,
-      resultSettings: `${APP_SEARCH_DOCS}result-settings-guide.html`,
-      searchUI: `${APP_SEARCH_DOCS}reference-ui-guide.html`,
-      security: `${APP_SEARCH_DOCS}security-and-users.html`,
-      synonyms: `${APP_SEARCH_DOCS}synonyms-guide.html`,
-      webCrawler: `${APP_SEARCH_DOCS}web-crawler.html`,
-      webCrawlerEventLogs: `${APP_SEARCH_DOCS}view-web-crawler-events-logs.html`,
-      webCrawlerReference: `${APP_SEARCH_DOCS}web-crawler-reference.html`,
-    },
     enterpriseSearch: {
       aiSearchDoc: `${ESRE_DOCS}`,
       aiSearchHelp: `${ESRE_DOCS}help.html`,
@@ -228,41 +198,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       textEmbedding: `${MACHINE_LEARNING_DOCS}ml-nlp-model-ref.html#ml-nlp-model-ref-text-embedding`,
       troubleshootSetup: `${ENTERPRISE_SEARCH_DOCS}troubleshoot-setup.html`,
       usersAccess: `${ENTERPRISE_SEARCH_DOCS}users-access.html`,
-    },
-    workplaceSearch: {
-      apiKeys: `${WORKPLACE_SEARCH_DOCS}workplace-search-api-authentication.html`,
-      box: `${WORKPLACE_SEARCH_DOCS}workplace-search-box-connector.html`,
-      confluenceCloud: `${WORKPLACE_SEARCH_DOCS}workplace-search-confluence-cloud-connector.html`,
-      confluenceCloudConnectorPackage: `${WORKPLACE_SEARCH_DOCS}confluence-cloud.html`,
-      confluenceServer: `${WORKPLACE_SEARCH_DOCS}workplace-search-confluence-server-connector.html`,
-      contentSources: `${WORKPLACE_SEARCH_DOCS}workplace-search-content-sources.html`,
-      customConnectorPackage: `${WORKPLACE_SEARCH_DOCS}custom-connector-package.html`,
-      customSources: `${WORKPLACE_SEARCH_DOCS}workplace-search-custom-api-sources.html`,
-      customSourcePermissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-custom-api-sources.html#custom-api-source-document-level-access-control`,
-      documentPermissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-sources-document-permissions.html`,
-      dropbox: `${WORKPLACE_SEARCH_DOCS}workplace-search-dropbox-connector.html`,
-      externalSharePointOnline: `${WORKPLACE_SEARCH_DOCS}sharepoint-online-external.html`,
-      externalIdentities: `${WORKPLACE_SEARCH_DOCS}workplace-search-external-identities-api.html`,
-      gatedFormBlog: `${ELASTIC_WEBSITE_URL}blog/evolution-workplace-search-private-data-elasticsearch`,
-      gettingStarted: `${WORKPLACE_SEARCH_DOCS}workplace-search-getting-started.html`,
-      gitHub: `${WORKPLACE_SEARCH_DOCS}workplace-search-github-connector.html`,
-      gmail: `${WORKPLACE_SEARCH_DOCS}workplace-search-gmail-connector.html`,
-      googleDrive: `${WORKPLACE_SEARCH_DOCS}workplace-search-google-drive-connector.html`,
-      indexingSchedule: `${WORKPLACE_SEARCH_DOCS}workplace-search-customizing-indexing-rules.html#_indexing_schedule`,
-      jiraCloud: `${WORKPLACE_SEARCH_DOCS}workplace-search-jira-cloud-connector.html`,
-      jiraServer: `${WORKPLACE_SEARCH_DOCS}workplace-search-jira-server-connector.html`,
-      networkDrive: `${WORKPLACE_SEARCH_DOCS}network-drives.html`,
-      oneDrive: `${WORKPLACE_SEARCH_DOCS}workplace-search-onedrive-connector.html`,
-      permissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-permissions.html`,
-      privateSourcePermissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-permissions.html#organizational-sources-private-sources`,
-      salesforce: `${WORKPLACE_SEARCH_DOCS}workplace-search-salesforce-connector.html`,
-      security: `${WORKPLACE_SEARCH_DOCS}workplace-search-security.html`,
-      serviceNow: `${WORKPLACE_SEARCH_DOCS}workplace-search-servicenow-connector.html`,
-      sharePoint: `${WORKPLACE_SEARCH_DOCS}workplace-search-sharepoint-online-connector.html`,
-      sharePointServer: `${WORKPLACE_SEARCH_DOCS}sharepoint-server.html`,
-      slack: `${WORKPLACE_SEARCH_DOCS}workplace-search-slack-connector.html`,
-      synch: `${WORKPLACE_SEARCH_DOCS}workplace-search-customizing-indexing-rules.html`,
-      zendesk: `${WORKPLACE_SEARCH_DOCS}workplace-search-zendesk-connector.html`,
     },
     metricbeat: {
       base: `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}`,

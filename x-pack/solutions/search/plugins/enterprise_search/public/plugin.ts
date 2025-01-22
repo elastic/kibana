@@ -23,6 +23,7 @@ import {
   AppStatus,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { FleetStart } from '@kbn/fleet-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -56,11 +57,7 @@ import { ClientConfigType, InitialAppData } from '../common/types';
 import { hasEnterpriseLicense } from '../common/utils/licensing';
 
 import { SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';
-import {
-  CONNECTORS_PATH,
-  SEARCH_INDICES_PATH,
-  CRAWLERS_PATH,
-} from './applications/enterprise_search_content/routes';
+import { CONNECTORS_PATH, CRAWLERS_PATH } from './applications/enterprise_search_content/routes';
 
 import { docLinks } from './applications/shared/doc_links';
 import type { DynamicSideNavItems } from './navigation_tree';
@@ -87,6 +84,7 @@ export interface PluginsStart {
   cloud?: CloudSetup & CloudStart;
   console?: ConsolePluginStart;
   data?: DataPublicPluginStart;
+  fleet?: FleetStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
   indexManagement?: IndexManagementPluginStart;
   lens?: LensPublicStart;
@@ -113,13 +111,6 @@ const contentLinks: AppDeepLink[] = [
     path: `/${CONNECTORS_PATH}`,
     title: i18n.translate('xpack.enterpriseSearch.navigation.contentConnectorsLinkLabel', {
       defaultMessage: 'Connectors',
-    }),
-  },
-  {
-    id: 'searchIndices',
-    path: `/${SEARCH_INDICES_PATH}`,
-    title: i18n.translate('xpack.enterpriseSearch.navigation.contentIndicesLinkLabel', {
-      defaultMessage: 'Indices',
     }),
   },
   {

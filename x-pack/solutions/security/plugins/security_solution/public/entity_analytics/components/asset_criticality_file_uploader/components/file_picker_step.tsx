@@ -17,9 +17,11 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, useI18n } from '@kbn/i18n-react';
 
 import { euiThemeVars } from '@kbn/ui-theme';
+import { useAssetCriticalityEntityTypes } from '../../../hooks/use_enabled_entity_types';
+import { EntityTypeToIdentifierField } from '../../../../../common/entity_analytics/types';
 import {
   CRITICALITY_CSV_MAX_SIZE_BYTES,
   ValidCriticalityLevels,
@@ -44,8 +46,18 @@ const listStyle = css`
 
 export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePickerStepProps> =
   React.memo(({ onFileChange, errorMessage, isLoading }) => {
+    const i18n = useI18n();
+
     const formatBytes = useFormatBytes();
     const { euiTheme } = useEuiTheme();
+    const entityTypes = useAssetCriticalityEntityTypes();
+    const i18nOrList = (items: string[]) =>
+      i18n
+        .formatListToParts(items, {
+          type: 'disjunction',
+        })
+        .map(({ type, value }) => (type === 'element' ? <b>{value}</b> : value)); // bolded list items
+
     return (
       <>
         <EuiSpacer size="m" />
@@ -94,22 +106,22 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
           <ul className={listStyle}>
             <li>
               <FormattedMessage
-                defaultMessage="Entity type: Indicate whether the entity is a {host} or a {user}."
+                defaultMessage="Entity type: Indicate whether the entity is a {entityTypes}"
                 id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetTypeDescription"
                 values={{
-                  host: <b>{'host'}</b>,
-                  user: <b>{'user'}</b>,
+                  entityTypes: i18nOrList(entityTypes),
                 }}
               />
             </li>
             <li>
               {
                 <FormattedMessage
-                  defaultMessage="Identifier: Specify the entity's {hostName} or {userName}."
+                  defaultMessage="Identifier: Specify the entity's {fieldsName}"
                   id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetIdentifierDescription"
                   values={{
-                    hostName: <b>{'host.name'}</b>,
-                    userName: <b>{'user.name'}</b>,
+                    fieldsName: i18nOrList(
+                      entityTypes.map((type) => EntityTypeToIdentifierField[type])
+                    ),
                   }}
                 />
               }

@@ -8,8 +8,8 @@
 import expect from '@kbn/expect';
 import { WiredStreamConfigDefinition, WiredStreamDefinition } from '@kbn/streams-schema';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { cleanUpRootStream } from './helpers/cleanup';
-import { enableStreams, putStream } from './helpers/requests';
+import { disableStreams, enableStreams, putStream } from './helpers/requests';
+import { createStreamsRepositorySupertestClient } from './helpers/repository_client';
 
 const rootStreamDefinition: WiredStreamDefinition = {
   name: 'logs',
@@ -39,15 +39,15 @@ const rootStreamDefinition: WiredStreamDefinition = {
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esClient = getService('es');
+  const apiClient = createStreamsRepositorySupertestClient(supertest);
 
   describe('Root stream', () => {
     before(async () => {
-      await enableStreams(supertest);
+      await enableStreams(apiClient);
     });
 
     after(async () => {
-      await cleanUpRootStream(esClient);
+      await disableStreams(apiClient);
     });
 
     it('Should not allow processing changes', async () => {
@@ -68,7 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
           ],
         },
       };
-      const response = await putStream(supertest, 'logs', body, 400);
+      const response = await putStream(apiClient, 'logs', body, 400);
       expect(response).to.have.property(
         'message',
         'Root stream processing rules cannot be changed'
@@ -89,7 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         },
       };
-      const response = await putStream(supertest, 'logs', body, 400);
+      const response = await putStream(apiClient, 'logs', body, 400);
       expect(response).to.have.property('message', 'Root stream fields cannot be changed');
     });
 
@@ -109,7 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
           ],
         },
       };
-      const response = await putStream(supertest, 'logs', body);
+      const response = await putStream(apiClient, 'logs', body);
       expect(response).to.have.property('acknowledged', true);
     });
   });

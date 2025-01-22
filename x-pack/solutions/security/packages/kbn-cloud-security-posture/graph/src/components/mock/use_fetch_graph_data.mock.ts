@@ -7,9 +7,13 @@
 
 import { useMemo } from 'react';
 import { action } from '@storybook/addon-actions';
+import type { UseFetchGraphDataParams } from '../../hooks/use_fetch_graph_data';
+import { USE_FETCH_GRAPH_DATA_ACTION, USE_FETCH_GRAPH_DATA_REFRESH_ACTION } from './constants';
 
-export const useFetchGraphData = () =>
-  useMemo(
+export const useFetchGraphData = (params: UseFetchGraphDataParams) => {
+  action(USE_FETCH_GRAPH_DATA_ACTION)(JSON.stringify(params));
+
+  return useMemo(
     () => ({
       isLoading: false,
       isFetching: false,
@@ -60,7 +64,8 @@ export const useFetchGraphData = () =>
           },
         ],
       },
-      refresh: action('refresh'),
+      refresh: action(USE_FETCH_GRAPH_DATA_REFRESH_ACTION),
     }),
     []
   );
+};

@@ -144,5 +144,24 @@ describe('inferenceAdapter', () => {
         }),
       });
     });
+
+    it('propagates the temperature parameter', () => {
+      inferenceAdapter.chatComplete({
+        logger,
+        executor: executorMock,
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        temperature: 0.4,
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(executorMock.invoke).toHaveBeenCalledWith({
+        subAction: 'unified_completion_stream',
+        subActionParams: expect.objectContaining({
+          body: expect.objectContaining({
+            temperature: 0.4,
+          }),
+        }),
+      });
+    });
   });
 });
