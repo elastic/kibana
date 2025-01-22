@@ -379,6 +379,7 @@ export class Walker {
   }
 
   public walkSingleAstItem(node: ESQLAstExpression): void {
+    if (!node) return;
     const { options } = this;
     options.visitSingleAstItem?.(node);
     switch (node.type) {
