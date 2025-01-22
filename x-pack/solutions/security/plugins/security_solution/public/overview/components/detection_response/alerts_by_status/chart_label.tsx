@@ -6,7 +6,7 @@
  */
 import { EuiLink } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 
 interface ChartLabelProps {
@@ -15,7 +15,7 @@ interface ChartLabelProps {
 }
 
 const PlaceHolder = styled.div`
-  padding: ${(props) => props.theme.eui.euiSizeS};
+  padding: ${(props) => props.theme.euiTheme.size.s};
 `;
 
 const ChartLabelComponent: React.FC<ChartLabelProps> = ({ count, onClick }) => {
