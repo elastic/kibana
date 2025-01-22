@@ -27,7 +27,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback, useMemo, lazy, Suspense } from 'react';
 
-// import { InferenceFlyoutWrapper } from '@kbn/inference-endpoint-ui-common';
 import { useAddEndpoint } from '../../../../../hooks/use_add_endpoint';
 import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
