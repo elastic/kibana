@@ -383,11 +383,13 @@ export class EntityStoreDataClient {
       });
       this.log(`debug`, entityType, `Created entity definition`);
 
-      logger.debug('creating keyword builder pipeline');
-      await createKeywordBuilderPipeline({
-        logger,
-        esClient: this.esClient,
-      });
+      if (entityType === EntityType.universal) {
+        logger.debug('creating keyword builder pipeline');
+        await createKeywordBuilderPipeline({
+          logger,
+          esClient: this.esClient,
+        });
+      }
 
       // the index must be in place with the correct mapping before the enrich policy is created
       // this is because the enrich policy will fail if the index does not exist with the correct fields
