@@ -31,7 +31,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      es.cluster.putSettings({
+      await es.cluster.putSettings({
         persistent: {
           cluster: {
             remote: {
