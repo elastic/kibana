@@ -28,6 +28,7 @@ import {
   AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
   AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
   AGENTLESS_GLOBAL_TAG_NAME_TEAM,
+  INTERNAL_AGENTLESS_FLEET_SERVER_HOST_ID,
 } from '../../constants';
 
 import { appContextService } from '../app_context';
@@ -265,19 +266,21 @@ class AgentlessAgentService {
     });
 
     const { items: fleetHosts } = await listFleetServerHosts(soClient);
-    // Tech Debt: change this when we add the internal fleet server config to use the internal fleet server host
-    // https://github.com/elastic/security-team/issues/9695
-    const defaultFleetHost =
-      fleetHosts.length === 1 ? fleetHosts[0] : fleetHosts.find((host) => host.is_default);
 
-    if (!defaultFleetHost) {
-      throw new AgentlessAgentConfigError('missing default Fleet server host');
+    const agentlessFleetHost = fleetHosts.find(
+      (host) => host.id === INTERNAL_AGENTLESS_FLEET_SERVER_HOST_ID
+    );
+
+    if (!agentlessFleetHost) {
+      throw new AgentlessAgentConfigError('missing internal agentless Fleet server host');
     }
     if (!enrollmentApiKeys.length) {
       throw new AgentlessAgentConfigError('missing Fleet enrollment token');
     }
     const fleetToken = enrollmentApiKeys[0].api_key;
-    const fleetUrl = defaultFleetHost?.host_urls[0];
+
+    const fleetUrl = agentlessFleetHost?.host_urls[0];
+
     return { fleetUrl, fleetToken };
   }
 

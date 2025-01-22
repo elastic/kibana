@@ -12,3 +12,4 @@ export const AGENTLESS_AGENT_POLICY_MONITORING: MonitoringType = ['logs', 'metri
 export const AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION = 'organization';
 export const AGENTLESS_GLOBAL_TAG_NAME_DIVISION = 'division';
 export const AGENTLESS_GLOBAL_TAG_NAME_TEAM = 'team';
+export const INTERNAL_AGENTLESS_FLEET_SERVER_HOST_ID = 'fleet-internal-agentless-server-host';
