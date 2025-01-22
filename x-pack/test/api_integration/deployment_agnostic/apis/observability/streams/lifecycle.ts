@@ -221,7 +221,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
-      it('update backing indices settings when transitioning from ilm to dlm', async () => {
+      it('updates when transitioning from ilm to dlm', async () => {
         const name = 'logs.ilm-with-backing-indices';
         await putStream(apiClient, name, {
           dashboards: [],
@@ -255,7 +255,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
-      it('update backing indices settings when transitioning from ilm to dlm', async () => {
+      it('updates when transitioning from dlm to ilm', async () => {
         const name = 'logs.dlm-with-backing-indices';
         await putStream(apiClient, name, {
           dashboards: [],
