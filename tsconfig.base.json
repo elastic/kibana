@@ -698,6 +698,8 @@
       "@kbn/dashboard-plugin/*": ["src/platform/plugins/shared/dashboard/*"],
       "@kbn/data-forge": ["x-pack/platform/packages/shared/kbn-data-forge"],
       "@kbn/data-forge/*": ["x-pack/platform/packages/shared/kbn-data-forge/*"],
+      "@kbn/data-grid-in-table-search": ["src/platform/packages/shared/kbn-data-grid-in-table-search"],
+      "@kbn/data-grid-in-table-search/*": ["src/platform/packages/shared/kbn-data-grid-in-table-search/*"],
       "@kbn/data-plugin": ["src/platform/plugins/shared/data"],
       "@kbn/data-plugin/*": ["src/platform/plugins/shared/data/*"],
       "@kbn/data-quality-plugin": ["x-pack/platform/plugins/shared/data_quality"],

@@ -19,15 +19,15 @@ import {
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/types';
 import { formatFieldValue } from '@kbn/discover-utils';
+import {
+  InTableSearchHighlightsWrapper,
+  InTableSearchHighlightsWrapperProps,
+} from '@kbn/data-grid-in-table-search';
 import { UnifiedDataTableContext } from '../table_context';
 import type { CustomCellRenderer } from '../types';
 import { SourceDocument } from '../components/source_document';
 import SourcePopoverContent from '../components/source_popover_content';
 import { DataTablePopoverCellValue } from '../components/data_table_cell_value';
-import {
-  InTableSearchHighlightsWrapper,
-  InTableSearchHighlightsWrapperProps,
-} from '../components/in_table_search';
 
 export const CELL_CLASS = 'unifiedDataTable__cellValue';
 

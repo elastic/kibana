@@ -419,6 +419,7 @@
     "@kbn/dashboard-enhanced-plugin": "link:x-pack/platform/plugins/shared/dashboard_enhanced",
     "@kbn/dashboard-plugin": "link:src/platform/plugins/shared/dashboard",
     "@kbn/data-forge": "link:x-pack/platform/packages/shared/kbn-data-forge",
+    "@kbn/data-grid-in-table-search": "link:src/platform/packages/shared/kbn-data-grid-in-table-search",
     "@kbn/data-plugin": "link:src/platform/plugins/shared/data",
     "@kbn/data-quality-plugin": "link:x-pack/platform/plugins/shared/data_quality",
     "@kbn/data-search-plugin": "link:test/plugin_functional/plugins/data_search",

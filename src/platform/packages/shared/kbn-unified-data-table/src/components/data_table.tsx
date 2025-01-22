@@ -51,6 +51,7 @@ import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { AdditionalFieldGroups } from '@kbn/unified-field-list';
+import { useDataGridInTableSearch } from '@kbn/data-grid-in-table-search';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
 import {
   UnifiedDataTableSettings,
@@ -94,7 +95,6 @@ import {
   getAdditionalRowControlColumns,
 } from './custom_control_columns';
 import { useSorting } from '../hooks/use_sorting';
-import { useDataGridInTableSearch } from './in_table_search';
 
 const CONTROL_COLUMN_IDS_DEFAULT = [SELECT_ROW, OPEN_DETAILS];
 const THEME_DEFAULT = { darkMode: false };

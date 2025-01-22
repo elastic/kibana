@@ -9,7 +9,6 @@
 
 import React, { useCallback, useEffect, useState, ReactNode, useRef, useMemo } from 'react';
 import { createPortal, unmountComponentAtNode } from 'react-dom';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { InTableSearchHighlightsWrapperProps } from './in_table_search_highlights_wrapper';
 
@@ -28,7 +27,7 @@ interface ActiveMatch {
 export interface UseInTableSearchMatchesProps {
   inTableSearchTerm: string;
   visibleColumns: string[];
-  rows: DataTableRecord[] | unknown[];
+  rows: unknown[];
   renderCellValue: (
     props: EuiDataGridCellValueElementProps &
       Pick<InTableSearchHighlightsWrapperProps, 'inTableSearchTerm' | 'onHighlightsCountFound'>

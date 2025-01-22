@@ -88,7 +88,7 @@ function modifyDOMAndAddSearchHighlights(
             const mark = document.createElement('mark');
             mark.textContent = part;
             mark.style.backgroundColor = '#e5ffc0'; // TODO: Use a named color token
-            mark.setAttribute('class', 'unifiedDataTable__inTableSearchMatch');
+            mark.setAttribute('class', 'dataGridInTableSearch__match');
             mark.setAttribute('data-match-index', `${matchIndex++}`);
             nodeWithHighlights.appendChild(mark);
           } else {

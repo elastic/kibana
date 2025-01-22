@@ -5250,6 +5250,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-grid-in-table-search@link:src/platform/packages/shared/kbn-data-grid-in-table-search":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-plugin@link:src/platform/plugins/shared/data":
   version "0.0.0"
   uid ""

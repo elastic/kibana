@@ -65,7 +65,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
             border: 2px solid #ffc30e !important;
             border-radius: 3px;
           }
-          .unifiedDataTable__inTableSearchMatch[data-match-index='${matchIndexWithinCell}'] {
+          .dataGridInTableSearch__match[data-match-index='${matchIndexWithinCell}'] {
             background-color: #ffc30e !important;
           }
         }
@@ -146,16 +146,16 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
 
   const innerCss = useMemo(
     () => css`
-      .unifiedDataTable__inTableSearchMatchesCounter {
+      .dataGridInTableSearch__matchesCounter {
         font-variant-numeric: tabular-nums;
       }
 
-      .unifiedDataTable__inTableSearchButton {
+      .dataGridInTableSearch__button {
         /* to make the transition between the button and input more seamless for cases where a custom toolbar is not used */
         min-height: 2 * ${euiTheme.size.base}; // input height
       }
 
-      .unifiedDataTable__inTableSearchInput {
+      .dataGridInTableSearch__input {
         /* to prevent the width from changing when entering the search term */
         min-width: 210px;
       }
@@ -167,7 +167,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
 
       /* override borders style only if it's under the custom grid toolbar */
       .unifiedDataTableToolbarControlIconButton & .euiFormControlLayout,
-      .unifiedDataTableToolbarControlIconButton & .unifiedDataTable__inTableSearchInput {
+      .unifiedDataTableToolbarControlIconButton & .dataGridInTableSearch__input {
         border-top-right-radius: 0;
         border-bottom-right-radius: 0;
         border-right: 0;
@@ -193,7 +193,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
         </>
       ) : (
         <EuiToolTip
-          content={i18n.translate('unifiedDataTable.inTableSearch.inputPlaceholder', {
+          content={i18n.translate('dataGridInTableSearch.inputPlaceholder', {
             defaultMessage: 'Search in the table',
           })}
           delay="long"
@@ -203,8 +203,8 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
             iconType="search"
             size="xs"
             color="text"
-            className="unifiedDataTable__inTableSearchButton"
-            aria-label={i18n.translate('unifiedDataTable.inTableSearch.inputPlaceholder', {
+            className="dataGridInTableSearch__button"
+            aria-label={i18n.translate('dataGridInTableSearch.buttonSearch', {
               defaultMessage: 'Search in the table',
             })}
             onClick={showInput}

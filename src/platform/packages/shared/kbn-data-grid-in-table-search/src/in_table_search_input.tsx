@@ -89,13 +89,13 @@ export const InTableSearchInput: React.FC<InTableSearchInputProps> = React.memo(
       <EuiFieldSearch
         autoFocus
         compressed
-        className="unifiedDataTable__inTableSearchInput"
+        className="dataGridInTableSearch__input"
         data-test-subj={INPUT_TEST_SUBJ}
         isClearable={!isProcessing}
         isLoading={isProcessing}
         append={
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
-            <EuiFlexItem grow={false} className="unifiedDataTable__inTableSearchMatchesCounter">
+            <EuiFlexItem grow={false} className="dataGridInTableSearch__matchesCounter">
               <EuiText color="subdued" size="s">
                 {matchesCount && activeMatchPosition
                   ? `${activeMatchPosition}/${matchesCount}`
@@ -108,7 +108,7 @@ export const InTableSearchInput: React.FC<InTableSearchInputProps> = React.memo(
                 iconType="arrowUp"
                 color="text"
                 disabled={areArrowsDisabled}
-                aria-label={i18n.translate('unifiedDataTable.inTableSearch.buttonPreviousMatch', {
+                aria-label={i18n.translate('dataGridInTableSearch.buttonPreviousMatch', {
                   defaultMessage: 'Previous',
                 })}
                 onClick={goToPrevMatch}
@@ -119,7 +119,7 @@ export const InTableSearchInput: React.FC<InTableSearchInputProps> = React.memo(
                 iconType="arrowDown"
                 color="text"
                 disabled={areArrowsDisabled}
-                aria-label={i18n.translate('unifiedDataTable.inTableSearch.buttonNextMatch', {
+                aria-label={i18n.translate('dataGridInTableSearch.buttonNextMatch', {
                   defaultMessage: 'Next',
                 })}
                 onClick={goToNextMatch}
@@ -127,7 +127,7 @@ export const InTableSearchInput: React.FC<InTableSearchInputProps> = React.memo(
             </EuiFlexItem>
           </EuiFlexGroup>
         }
-        placeholder={i18n.translate('unifiedDataTable.inTableSearch.inputPlaceholder', {
+        placeholder={i18n.translate('dataGridInTableSearch.inputPlaceholder', {
           defaultMessage: 'Search in the table',
         })}
         value={inputValue}
