@@ -480,7 +480,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           // Check value in Table
           const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
-          const countColumn = table[PageObjects.datasetQuality.texts.docsCountColumn];
+          const countColumn = table[PageObjects.datasetQuality.texts.datasetDocsCountColumn];
           expect(await countColumn.getCellTexts()).to.eql(['5', '5', '5']);
 
           // Check value in Flyout
@@ -500,7 +500,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           // Check value in Table
           const newTable = await PageObjects.datasetQuality.parseDegradedFieldTable();
-          const newCountColumn = newTable[PageObjects.datasetQuality.texts.docsCountColumn];
+          const newCountColumn = newTable[PageObjects.datasetQuality.texts.datasetDocsCountColumn];
           expect(await newCountColumn.getCellTexts()).to.eql(['15', '15', '5', '5']);
 
           // Check value in Flyout
