@@ -9,13 +9,13 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const persistedLogViewReferenceSchema = schema.object({
+const persistedLogViewReferenceSchema = schema.object({
   logViewId: schema.string(),
   type: schema.literal('log-view-reference'),
 });
 
 // Comparators //
-export enum Comparator {
+enum Comparator {
   GT = 'more than',
   GT_OR_EQ = 'more than or equals',
   LT = 'less than',
@@ -28,7 +28,7 @@ export enum Comparator {
   NOT_MATCH_PHRASE = 'does not match phrase',
 }
 
-export const ComparatorSchema = schema.oneOf([
+const ComparatorSchema = schema.oneOf([
   schema.literal(Comparator.GT),
   schema.literal(Comparator.GT_OR_EQ),
   schema.literal(Comparator.LT),
@@ -41,31 +41,31 @@ export const ComparatorSchema = schema.oneOf([
   schema.literal(Comparator.NOT_MATCH_PHRASE),
 ]);
 
-export const ThresholdSchema = schema.object({
+const ThresholdSchema = schema.object({
   comparator: ComparatorSchema,
   value: schema.number(),
 });
 
-export const criterionSchema = schema.object({
+const criterionSchema = schema.object({
   field: schema.string(),
   comparator: ComparatorSchema,
   value: schema.oneOf([schema.string(), schema.number()]),
 });
 
-export const countCriteriaSchema = schema.arrayOf(criterionSchema);
-export const ratioCriteriaSchema = schema.arrayOf(countCriteriaSchema);
+const countCriteriaSchema = schema.arrayOf(criterionSchema);
+const ratioCriteriaSchema = schema.arrayOf(countCriteriaSchema);
 
-export const timeUnitSchema = schema.oneOf([
+const timeUnitSchema = schema.oneOf([
   schema.literal('s'),
   schema.literal('m'),
   schema.literal('h'),
   schema.literal('d'),
 ]);
 
-export const timeSizeSchema = schema.number();
-export const groupBySchema = schema.arrayOf(schema.string());
+const timeSizeSchema = schema.number();
+const groupBySchema = schema.arrayOf(schema.string());
 
-export const RequiredRuleParamsSchema = schema.object({
+const RequiredRuleParamsSchema = schema.object({
   // NOTE: "count" would be better named as "threshold", but this would require a
   // migration of encrypted saved objects, so we'll keep "count" until it's problematic.
   count: ThresholdSchema,
@@ -74,7 +74,7 @@ export const RequiredRuleParamsSchema = schema.object({
   logView: persistedLogViewReferenceSchema, // Alerts are only compatible with persisted Log Views
 });
 
-export const OptionalRuleParamsSchema = schema.object({
+const OptionalRuleParamsSchema = schema.object({
   groupBy: schema.maybe(groupBySchema),
 });
 
@@ -100,8 +100,4 @@ export const logThresholdParamsSchema = schema.oneOf([
 ]);
 
 // Export types for TypeScript
-export type TimeUnit = ReturnType<typeof timeUnitSchema.validate>;
-export type Threshold = ReturnType<typeof ThresholdSchema.validate>;
-export type CountRuleParams = ReturnType<typeof countRuleParamsSchema.validate>;
-export type RatioRuleParams = ReturnType<typeof ratioRuleParamsSchema.validate>;
 export type LogThresholdParams = ReturnType<typeof logThresholdParamsSchema.validate>;
