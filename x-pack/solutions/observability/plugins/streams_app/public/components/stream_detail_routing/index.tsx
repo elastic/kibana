@@ -507,7 +507,7 @@ function PreviewPanel({
             condition: routingAppState.debouncedChildUnderEdit.child.condition,
             start: start?.valueOf(),
             end: end?.valueOf(),
-            number: 100,
+            size: 100,
           },
         },
       });

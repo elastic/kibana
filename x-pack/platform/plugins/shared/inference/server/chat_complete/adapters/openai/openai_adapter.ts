@@ -69,6 +69,13 @@ export const openAIAdapter: InferenceConnectorAdapter = {
       })
     ).pipe(
       switchMap((response) => {
+        if (response.status === 'error') {
+          return throwError(() =>
+            createInferenceInternalError(`Error calling connector: ${response.serviceMessage}`, {
+              rootError: response.serviceMessage,
+            })
+          );
+        }
         if (isReadable(response.data as any)) {
           return eventSourceStreamIntoObservable(response.data as Readable);
         }

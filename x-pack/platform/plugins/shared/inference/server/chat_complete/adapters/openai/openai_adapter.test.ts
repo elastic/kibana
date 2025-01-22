@@ -395,6 +395,30 @@ describe('openAIAdapter', () => {
       });
     });
 
+    it('throws an error if the connector response is in error', async () => {
+      executorMock.invoke.mockImplementation(async () => {
+        return {
+          actionId: 'actionId',
+          status: 'error',
+          serviceMessage: 'something went wrong',
+          data: undefined,
+        };
+      });
+
+      await expect(
+        lastValueFrom(
+          openAIAdapter
+            .chatComplete({
+              ...defaultArgs,
+              messages: [{ role: MessageRole.User, content: 'Hello' }],
+            })
+            .pipe(toArray())
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Error calling connector: something went wrong"`
+      );
+    });
+
     it('emits chunk events', async () => {
       const response$ = openAIAdapter.chatComplete({
         ...defaultArgs,
