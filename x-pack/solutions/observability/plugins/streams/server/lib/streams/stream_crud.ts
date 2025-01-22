@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { IndicesDataStream, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import {
+  IndicesDataStream,
+  IndicesDataStreamLifecycleWithRollover,
+  IngestPipeline,
+} from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import { StreamLifecycle } from '@kbn/streams-schema';
@@ -38,12 +42,15 @@ export function getDataStreamLifecycle(dataStream: IndicesDataStream): StreamLif
     };
   }
 
-  if (dataStream.lifecycle && dataStream.lifecycle.enabled) {
+  const lifecycle = dataStream.lifecycle as
+    | (IndicesDataStreamLifecycleWithRollover & {
+        enabled: boolean;
+      })
+    | undefined;
+  if (lifecycle && lifecycle.enabled) {
     return {
       type: 'dlm',
-      data_retention: dataStream.lifecycle.data_retention
-        ? String(dataStream.lifecycle.data_retention)
-        : undefined,
+      data_retention: lifecycle.data_retention ? String(lifecycle.data_retention) : undefined,
     };
   }
 
