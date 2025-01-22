@@ -52,11 +52,6 @@ import {
 
 import { AGENTLESS_DISABLED_INPUTS } from '../../../../../../../../common/constants';
 
-import type {
-  PackagePolicyConfigRecord,
-  RegistryRequiredVars,
-} from '../../../../../../../../common/types';
-
 import { useAgentless, useSetupTechnology } from './setup_technology';
 
 export async function createAgentPolicy({
