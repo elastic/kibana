@@ -22,7 +22,7 @@ const BUTTON_TEST_SUBJ = 'startInTableSearchButton';
 export interface InTableSearchControlProps
   extends Omit<UseInTableSearchMatchesProps, 'onScrollToActiveMatch'> {
   pageSize: number | null; // null when the pagination is disabled
-  scrollToCell: (params: { rowIndex: number; columnIndex: number; align: 'smart' }) => void;
+  scrollToCell: (params: { rowIndex: number; columnIndex: number; align: 'auto' }) => void;
   shouldOverrideCmdF: (element: HTMLElement) => boolean;
   onChange: (searchTerm: string | undefined) => void;
   onChangeCss: (styles: SerializedStyles) => void;
@@ -71,7 +71,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
       scrollToCell({
         rowIndex: visibleRowIndex,
         columnIndex: Number(columnIndex),
-        align: 'smart',
+        align: 'auto',
       });
     },
     [scrollToCell, onChangeCss, onChangeToExpectedPage, pageSize]
