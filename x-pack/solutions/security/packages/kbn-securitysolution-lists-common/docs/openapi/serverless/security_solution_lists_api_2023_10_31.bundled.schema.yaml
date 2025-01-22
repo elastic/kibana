@@ -409,7 +409,9 @@ paths:
                 type:
                   $ref: '#/components/schemas/ListType'
                 version:
-                  $ref: '#/components/schemas/ListVersion'
+                  default: 1
+                  minimum: 1
+                  type: integer
               required:
                 - name
                 - description
@@ -2676,7 +2678,6 @@ components:
         - text
       type: string
     ListVersion:
-      default: 1
       description: The document version number.
       example: 1
       minimum: 1

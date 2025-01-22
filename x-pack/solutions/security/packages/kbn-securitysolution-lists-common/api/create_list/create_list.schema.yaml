@@ -33,7 +33,9 @@ paths:
                 meta:
                   $ref: '../model/list_common.schema.yaml#/components/schemas/ListMetadata'
                 version:
-                  $ref: '../model/list_common.schema.yaml#/components/schemas/ListVersion'
+                  type: integer
+                  minimum: 1
+                  default: 1
               required:
                 - name
                 - description

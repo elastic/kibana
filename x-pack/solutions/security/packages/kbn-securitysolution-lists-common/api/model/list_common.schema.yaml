@@ -85,7 +85,6 @@ components:
     ListVersion:
       type: integer
       minimum: 1
-      default: 1
       description: The document version number.
       example: 1
 

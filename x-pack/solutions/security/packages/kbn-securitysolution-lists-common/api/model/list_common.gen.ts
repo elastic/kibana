@@ -103,7 +103,7 @@ export const ListDeserializer = z.string();
  * The document version number.
  */
 export type ListVersion = z.infer<typeof ListVersion>;
-export const ListVersion = z.number().int().min(1).default(1);
+export const ListVersion = z.number().int().min(1);
 
 /**
   * The version id, normally returned by the API when the document is retrieved. Use it ensure updates are done against the latest version.
