@@ -667,12 +667,14 @@ export class EntityStoreDataClient {
       });
       this.log('debug', entityType, `Deleted field retention enrich policy`);
 
-      logger.debug(`Deleting asset inventory keyword builder pipeline`);
+      if (entityType === EntityType.universal) {
+        logger.debug(`Deleting asset inventory keyword builder pipeline`);
 
-      await deleteKeywordBuilderPipeline({
-        logger,
-        esClient: this.esClient,
-      });
+        await deleteKeywordBuilderPipeline({
+          logger,
+          esClient: this.esClient,
+        });
+      }
 
       if (deleteData) {
         await deleteEntityIndex({
