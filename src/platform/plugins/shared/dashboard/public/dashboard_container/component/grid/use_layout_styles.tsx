@@ -30,6 +30,9 @@ export const useLayoutStyles = () => {
      * is resolved, we should swap these out for the drag-specific colour tokens
      */
     return css`
+      --dashboardActivePanelBorderStyle: ${euiTheme.border.width.thick} solid
+        ${euiTheme.colors.vis.euiColorVis0};
+
       &.kbnGrid {
         // remove margin top + bottom on grid in favour of padding in row
         padding-bottom: 0px;
@@ -80,11 +83,7 @@ export const useLayoutStyles = () => {
 
       .kbnGridPanel--active {
         .embPanel {
-          outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.vis.euiColorVis0} !important;
-        }
-        .embPanel__hoverActions {
-          border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.vis.euiColorVis0} !important;
-          border-bottom: 0px solid !important;
+          outline: var(--dashboardActivePanelBorderStyle) !important;
         }
       }
     `;

@@ -105,7 +105,6 @@ export const PresentationPanelInternal = <
     [setDragHandles]
   );
 
-  console.log('styles', styles);
   return (
     <PresentationPanelHoverActions
       {...{

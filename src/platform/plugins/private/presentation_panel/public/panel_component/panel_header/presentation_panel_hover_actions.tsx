@@ -449,6 +449,10 @@ export const PresentationPanelHoverActions = ({
       css={css`
         --borderStyle: ${viewMode === 'edit' ? EDIT_MODE_OUTLINE : VIEW_MODE_OUTLINE};
 
+        .kbnGridPanel--active & {
+          --borderStyle: var(--dashboardActivePanelBorderStyle);
+        }
+
         ${showBorder
           ? css`
               .embPanel {
