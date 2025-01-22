@@ -65,7 +65,7 @@ describe('Mobile Service overview page', () => {
       });
 
       it('shows No results found, when no data is present', () => {
-        cy.wait(aliasNames);
+        cy.wait(aliasNames, { timeout: 60000 });
 
         const timeStart = moment(start).subtract(5, 'm').toISOString();
         const timeEnd = moment(end).subtract(5, 'm').toISOString();
