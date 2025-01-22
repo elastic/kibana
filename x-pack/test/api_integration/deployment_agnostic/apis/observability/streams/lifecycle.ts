@@ -37,23 +37,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     const dataStreams = await esClient.indices.getDataStream({ name: streams });
     for (const dataStream of dataStreams.data_streams) {
-      console.log(JSON.stringify(dataStream.indices, null, 2));
       if (expectedLifecycle.type === 'dlm') {
         expect(dataStream.lifecycle?.data_retention).to.eql(expectedLifecycle.data_retention);
-        expect(dataStream.indices.every((index) => !index.prefer_ilm && !index.ilm_policy)).to.eql(
-          true
+        expect(dataStream.indices.every((index) => !index.ilm_policy)).to.eql(
+          true,
+          'backing indices should not specify an ilm_policy'
         );
         if (!isServerless) {
-          expect(dataStream.prefer_ilm).to.eql(false);
+          expect(dataStream.prefer_ilm).to.eql(false, 'data stream should not specify prefer_ilm');
+          expect(dataStream.indices.every((index) => !index.prefer_ilm)).to.eql(
+            true,
+            'backing indices should not specify prefer_ilm'
+          );
         }
       } else if (expectedLifecycle.type === 'ilm') {
-        expect(dataStream.prefer_ilm).to.eql(true);
+        expect(dataStream.prefer_ilm).to.eql(true, 'data stream should specify prefer_ilm');
         expect(dataStream.ilm_policy).to.eql(expectedLifecycle.policy);
         expect(
           dataStream.indices.every(
             (index) => index.prefer_ilm && index.ilm_policy === expectedLifecycle.policy
           )
-        ).to.eql(true);
+        ).to.eql(true, 'backing indices should specify prefer_ilm and ilm_policy');
       }
     }
   }
