@@ -116,7 +116,12 @@ export const MigrationRuleQuery: React.FC<MigrationRuleQueryProps> = React.memo(
             <h3>{ruleName}</h3>
           </EuiTitle>
           <EuiSpacer size="m" />
-          <EuiCodeBlock language={codeBlockLanguage} fontSize="s" paddingSize="s">
+          <EuiCodeBlock
+            language={codeBlockLanguage}
+            fontSize="s"
+            paddingSize="s"
+            className="eui-textBreakWord"
+          >
             {query}
           </EuiCodeBlock>
         </>
