@@ -41,7 +41,7 @@ export const PopoverReference: React.FC<React.PropsWithChildren<Props>> = ({
       onMouseLeave={closePopover}
       anchorPosition="upCenter"
       style={{
-        verticalAlign: "baseline",
+        verticalAlign: 'baseline',
       }}
       {...rest}
     >

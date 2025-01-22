@@ -112,7 +112,7 @@ interface GetPluginDependencies {
 const getPluginDependencies = ({
   contentReferences,
   contentReferencesVisible,
-  loading
+  loading,
 }: GetPluginDependencies) => {
   const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
 
@@ -125,7 +125,7 @@ const getPluginDependencies = ({
     contentReference: contentReferenceComponentFactory({
       contentReferences,
       contentReferencesVisible,
-      loading
+      loading,
     }),
     cursor: Cursor,
     customCodeBlock: (props) => {
@@ -183,7 +183,7 @@ export function MessageText({
   const { parsingPluginList, processingPluginList } = getPluginDependencies({
     contentReferences,
     contentReferencesVisible,
-    loading
+    loading,
   });
 
   return (
