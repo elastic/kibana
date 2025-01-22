@@ -39,7 +39,6 @@ connector:
     webhook-service:
       actionTypeId: .webhook
       name: 'Email service'
-      exposeConfig: true
       config:                   <4>
         url: 'https://email-alert-service.elastic.co'
         method: post
@@ -49,6 +48,7 @@ connector:
       secrets:                  <5>
         user: elastic
         password: changeme
+      exposeConfig: true        <6>
 ```
 
 <1>  The key is the connector identifier, `my-slack1` in this example.
