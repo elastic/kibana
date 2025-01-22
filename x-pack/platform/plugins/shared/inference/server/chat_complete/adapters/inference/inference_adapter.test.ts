@@ -182,5 +182,29 @@ describe('inferenceAdapter', () => {
         }),
       });
     });
+
+    it('throws an error if the connector response is in error', async () => {
+      executorMock.invoke.mockImplementation(async () => {
+        return {
+          actionId: 'actionId',
+          status: 'error',
+          serviceMessage: 'something went wrong',
+          data: undefined,
+        };
+      });
+
+      await expect(
+        lastValueFrom(
+          inferenceAdapter
+            .chatComplete({
+              ...defaultArgs,
+              messages: [{ role: MessageRole.User, content: 'Hello' }],
+            })
+            .pipe(toArray())
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Error calling connector: something went wrong"`
+      );
+    });
   });
 });

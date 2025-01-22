@@ -35,6 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
 
   describe('Kibana API Deprecations', function () {
+    this.onlyEsVersion('8');
     // bail on first error in this suite since cases sequentially depend on each other
     this.bail(true);
 
