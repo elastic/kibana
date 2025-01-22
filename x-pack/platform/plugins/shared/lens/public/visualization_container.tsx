@@ -7,22 +7,21 @@
 
 import './visualization_container.scss';
 
-import React, { forwardRef } from 'react';
+import React from 'react';
 import classNames from 'classnames';
 
-type VisualizationContainerProps = React.HTMLAttributes<HTMLDivElement>;
-
-export const VisualizationContainer = forwardRef<HTMLDivElement, VisualizationContainerProps>(
-  function VisualizationContainer({ children, className, ...rest }, ref) {
-    return (
-      <div
-        data-test-subj="lnsVisualizationContainer"
-        className={classNames(className, 'lnsVisualizationContainer')}
-        {...rest}
-        ref={ref}
-      >
-        {children}
-      </div>
-    );
-  }
-);
+export function VisualizationContainer({
+  children,
+  className,
+  ...rest
+}: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      data-test-subj="lnsVisualizationContainer"
+      className={classNames(className, 'lnsVisualizationContainer')}
+      {...rest}
+    >
+      {children}
+    </div>
+  );
+}

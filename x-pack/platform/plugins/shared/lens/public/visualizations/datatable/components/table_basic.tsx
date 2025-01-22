@@ -26,9 +26,7 @@ import {
   EuiDataGridColumn,
   EuiDataGridSorting,
   EuiDataGridStyle,
-  EuiDataGridProps,
 } from '@elastic/eui';
-import { useDataGridInTableSearch } from '@kbn/data-grid-in-table-search';
 import { CustomPaletteState, EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
@@ -83,7 +81,6 @@ const PAGE_SIZE_OPTIONS = [DEFAULT_PAGE_SIZE, 20, 30, 50, 100];
 
 export const DatatableComponent = (props: DatatableRenderProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
-  const [dataGridWrapper, setDataGridWrapper] = useState<HTMLElement | null>(null);
 
   const isInteractive = props.interactive;
   const theme = useObservable<CoreTheme>(props.theme.theme$, {
@@ -512,42 +509,6 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     }
   }, [columnConfig.columns, alignments, props.data, columns]);
 
-  const paginationObj: EuiDataGridProps['pagination'] = useMemo(
-    () =>
-      pagination
-        ? {
-            ...pagination,
-            pageSizeOptions: PAGE_SIZE_OPTIONS,
-            onChangeItemsPerPage,
-            onChangePage,
-          }
-        : undefined,
-    [pagination, onChangePage, onChangeItemsPerPage]
-  );
-
-  const { inTableSearchTermCss, inTableSearchControl, extendedCellContext } =
-    useDataGridInTableSearch({
-      dataGridWrapper,
-      dataGridRef,
-      visibleColumns,
-      rows: firstLocalTable.rows,
-      cellContext: undefined,
-      renderCellValue,
-      pagination: paginationObj,
-    });
-
-  const toolbarVisibility: EuiDataGridProps['toolbarVisibility'] = useMemo(
-    () => ({
-      additionalControls: inTableSearchControl ? { right: inTableSearchControl } : false,
-      showColumnSelector: false,
-      showKeyboardShortcuts: false,
-      showFullScreenSelector: false,
-      showDisplaySelector: false,
-      showSortSelector: false,
-    }),
-    [inTableSearchControl]
-  );
-
   if (isEmpty) {
     return (
       <VisualizationContainer className="lnsDataTableContainer">
@@ -563,11 +524,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     });
 
   return (
-    <VisualizationContainer
-      className="lnsDataTableContainer"
-      ref={(node) => setDataGridWrapper(node)}
-      css={inTableSearchTermCss}
-    >
+    <VisualizationContainer className="lnsDataTableContainer">
       <DataContext.Provider
         value={{
           table: firstLocalTable,
@@ -598,10 +555,16 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           gridStyle={gridStyle}
           schemaDetectors={schemaDetectors}
           sorting={sorting}
-          pagination={paginationObj}
+          pagination={
+            pagination && {
+              ...pagination,
+              pageSizeOptions: PAGE_SIZE_OPTIONS,
+              onChangeItemsPerPage,
+              onChangePage,
+            }
+          }
           onColumnResize={onColumnResize}
-          toolbarVisibility={toolbarVisibility}
-          cellContext={extendedCellContext}
+          toolbarVisibility={false}
           renderFooterCellValue={renderSummaryRow}
           ref={dataGridRef}
         />
