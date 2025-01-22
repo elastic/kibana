@@ -178,6 +178,10 @@ describe('StorageIndexAdapter', () => {
       });
     });
 
+    it('deletes the document', async () => {
+      await verifyClean();
+    });
+
     // FLAKY: https://github.com/elastic/kibana/issues/206482
     // FLAKY: https://github.com/elastic/kibana/issues/206483
     describe.skip('after rolling over the index manually and indexing the same document', () => {
@@ -316,6 +320,10 @@ describe('StorageIndexAdapter', () => {
       it('deletes the document from the rolled over index', async () => {
         await verifyDocumentDeletedInRolledOverIndex();
       });
+
+      it('deletes the documents', async () => {
+        await verifyClean();
+      });
     });
   });
 
@@ -348,6 +356,10 @@ describe('StorageIndexAdapter', () => {
       expect(indices).toEqual([writeIndexName]);
 
       expect(getIndicesResponse[writeIndexName].mappings?._meta?.version).toEqual('next_version');
+    });
+
+    it('deletes the documents', async () => {
+      await verifyClean();
     });
   });
 
@@ -386,6 +398,10 @@ describe('StorageIndexAdapter', () => {
         	Root causes:
         		illegal_argument_exception: mapper [foo] cannot be changed from type [keyword] to [text]"
       `);
+    });
+
+    it('deletes the documents', async () => {
+      await verifyClean();
     });
   });
 
@@ -566,5 +582,29 @@ describe('StorageIndexAdapter', () => {
         },
       },
     });
+  }
+
+  async function verifyClean() {
+    await client.clean();
+
+    // verify that the index template is removed
+    const templates = await esClient.indices
+      .getIndexTemplate({
+        name: TEST_INDEX_NAME,
+      })
+      .catch((error) => {
+        if (isResponseError(error) && error.statusCode === 404) {
+          return { index_templates: [] };
+        }
+        throw error;
+      });
+
+    expect(templates.index_templates).toEqual([]);
+
+    // verify that the backing indices are removed
+    const indices = await esClient.indices.get({
+      index: `${TEST_INDEX_NAME}*`,
+    });
+    expect(Object.keys(indices)).toEqual([]);
   }
 });
