@@ -13,8 +13,9 @@ import { lastValueFrom } from 'rxjs';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
 
-interface Props {
+interface TransactionLinkProps {
   traceId: string;
+  serviceName: string;
   transactionName?: string;
   indexPattern?: string;
 }
@@ -54,13 +55,22 @@ async function getTransactionData(
   );
 }
 
-export const TraceLink: React.FC<Props> = ({ traceId, transactionName, indexPattern }: Props) => {
+export const TransactionLink: React.FC<TransactionLinkProps> = ({
+  traceId,
+  transactionName,
+  serviceName,
+  indexPattern,
+}: TransactionLinkProps) => {
   const { share, data } = useDiscoverServices();
-  const transactionLocator = share?.url.locators.get<{ traceId: string }>(
-    'TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR'
-  );
 
-  const [fetchedTransactionName, setFetchedTransactionName] = useState<string | null>(null);
+  const transactionByNameLocator = share?.url.locators.get<{
+    transactionName: string;
+    serviceName: string;
+  }>('TransactionDetailsByNameLocator');
+
+  const [fetchedTransactionName, setFetchedTransactionName] = useState<string>(
+    transactionName ?? ''
+  );
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -93,7 +103,13 @@ export const TraceLink: React.FC<Props> = ({ traceId, transactionName, indexPatt
   }
 
   return (
-    <EuiLink href={transactionLocator?.getRedirectUrl({ traceId })} target="_blank">
+    <EuiLink
+      href={transactionByNameLocator?.getRedirectUrl({
+        transactionName: transactionName ?? fetchedTransactionName,
+        serviceName,
+      })}
+      target="_blank"
+    >
       {transactionName ?? fetchedTransactionName}
     </EuiLink>
   );
