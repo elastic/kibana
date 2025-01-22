@@ -16,7 +16,7 @@ import {
 
 test.describe('Maps full screen mode', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsAdmin(); // add layer button not there when logged in as viewer
+    await browserAuth.loginAsPrivilegedUser(); // add layer button not there when logged in as viewer
     await pageObjects.maps.goto();
     await pageObjects.maps.waitForRender();
   });
