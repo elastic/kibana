@@ -20,7 +20,6 @@ import {
   UserMouseEvent,
   UserTouchEvent,
 } from '../types';
-import { isMouseEvent, isTouchEvent } from '../utils/sensors';
 
 export interface DragHandleApi {
   setDragHandles: (refs: Array<HTMLElement | null>) => void;
@@ -48,26 +47,13 @@ export const DragHandle = React.forwardRef<
    */
   const onDragStart = useCallback(
     (e: UserMouseEvent | UserTouchEvent) => {
-      // ignore when not in edit mode
-      if (gridLayoutStateManager.accessMode$.getValue() !== 'EDIT') return;
-
-      // ignore anything but left clicks for mouse events
-      if (isMouseEvent(e) && e.button !== 0) {
-        return;
-      }
-      // ignore multi-touch events for touch events
-      if (isTouchEvent(e) && e.touches.length > 1) {
-        return;
-      }
-      e.stopPropagation();
       interactionStart('drag', e);
     },
-    [interactionStart, gridLayoutStateManager.accessMode$]
+    [interactionStart]
   );
 
   const onDragEnd = useCallback(
     (e: UserTouchEvent | UserMouseEvent) => {
-      e.stopPropagation();
       interactionStart('drop', e);
     },
     [interactionStart]
@@ -119,7 +105,7 @@ export const DragHandle = React.forwardRef<
       aria-label={i18n.translate('kbnGridLayout.dragHandle.ariaLabel', {
         defaultMessage: 'Drag to move',
       })}
-      className="kbnGridPanel__dragHandle"
+      className="kbnGridPanel--dragHandle"
       css={css`
         opacity: 0;
         display: flex;
