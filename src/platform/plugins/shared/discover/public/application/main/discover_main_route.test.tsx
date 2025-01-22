@@ -22,6 +22,7 @@ import {
 } from '../../customizations/customization_service';
 import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
 import { mockCustomizationContext } from '../../customizations/__mocks__/customization_context';
+import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 
 let mockCustomizationService: DiscoverCustomizationService | undefined;
 
@@ -43,6 +44,7 @@ jest.mock('./discover_main_app', () => {
 });
 
 let mockRootProfileLoading = false;
+let mockDefaultAdHocDataViews: DataViewSpec[] = [];
 
 jest.mock('../../context_awareness', () => {
   const originalModule = jest.requireActual('../../context_awareness');
@@ -51,7 +53,7 @@ jest.mock('../../context_awareness', () => {
     useRootProfile: () => ({
       rootProfileLoading: mockRootProfileLoading,
       AppWrapper: ({ children }: { children: ReactNode }) => <>{children}</>,
-      getDefaultAdHocDataViews: () => [],
+      getDefaultAdHocDataViews: () => mockDefaultAdHocDataViews,
     }),
   };
 });
@@ -60,10 +62,21 @@ describe('DiscoverMainRoute', () => {
   beforeEach(() => {
     mockCustomizationService = createCustomizationService();
     mockRootProfileLoading = false;
+    mockDefaultAdHocDataViews = [];
   });
 
   test('renders the main app when hasESData=true & hasUserDataView=true ', async () => {
     const component = mountComponent(true, true);
+
+    await waitFor(() => {
+      component.update();
+      expect(component.find(DiscoverMainApp).exists()).toBe(true);
+    });
+  });
+
+  test('renders the main app when ad hoc data views exist', async () => {
+    mockDefaultAdHocDataViews = [{ id: 'test', title: 'test' }];
+    const component = mountComponent(false, false);
 
     await waitFor(() => {
       component.update();
@@ -159,6 +172,7 @@ function getServicesMock(hasESData = true, hasUserDataView = true) {
     hasUserDataView: jest.fn(() => Promise.resolve(hasUserDataView)),
     hasDataView: jest.fn(() => Promise.resolve(true)),
   };
+  dataViewsMock.create = jest.fn((spec) => Promise.resolve(spec as unknown as DataView));
   discoverServiceMock.core.http.get = jest.fn().mockResolvedValue({});
   return discoverServiceMock;
 }
