@@ -8,10 +8,11 @@
  */
 
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-server-internal';
-import type { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
+import { ensureRawRequest, type CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { PostValidationMetadata } from '@kbn/core-http-server';
 import { Logger } from '@kbn/logging';
+import { getEcsResponseLog } from '@kbn/core-http-server-internal/src/logging';
 import { buildApiDeprecationId } from '../deprecations';
 import { getIsRouteApiDeprecation, getIsAccessApiDeprecation } from '../deprecations';
 
@@ -54,7 +55,9 @@ export function createRouteDeprecationsHandler({
       const client = coreUsageData.getClient();
       // no await we just fire it off.
       void client.incrementDeprecatedApi(counterName, { resolved: false });
-      logger.warn(`LOOK FOR THIS ${req.route.routePath} ${counterName} ${hasAccessDeprecation}`);
+
+      const { message, meta } = getEcsResponseLog(ensureRawRequest(req), logger);
+      logger.debug(message, meta);
     }
   };
 }
