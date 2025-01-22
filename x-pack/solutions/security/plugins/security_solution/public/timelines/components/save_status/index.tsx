@@ -43,17 +43,23 @@ export const TimelineSaveStatus = React.memo<TimelineSaveStatusProps>(({ timelin
     changed = false,
     status,
     updated,
+    show,
   } = useDeepEqualSelector((state) =>
-    pick(['changed', 'status', 'updated'], getTimeline(state, timelineId) ?? timelineDefaults)
+    pick(
+      ['changed', 'status', 'updated', 'show'],
+      getTimeline(state, timelineId) ?? timelineDefaults
+    )
   );
 
   const isDraft = status === TimelineStatusEnum.draft;
 
+  const badgeColor = useMemo(() => (show ? 'warning' : 'default'), [show]);
+
   let statusContent: React.ReactNode;
   if (isDraft || !updated) {
-    statusContent = <EuiBadge color="warning">{UNSAVED}</EuiBadge>;
+    statusContent = <EuiBadge color={badgeColor}>{UNSAVED}</EuiBadge>;
   } else if (changed) {
-    statusContent = <EuiBadge color="warning">{UNSAVED_CHANGES}</EuiBadge>;
+    statusContent = <EuiBadge color={badgeColor}>{UNSAVED_CHANGES}</EuiBadge>;
   }
 
   if (!statusContent) return null;
