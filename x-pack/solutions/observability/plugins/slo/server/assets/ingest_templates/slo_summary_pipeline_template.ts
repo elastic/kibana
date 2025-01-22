@@ -234,6 +234,21 @@ export const getSLOSummaryPipelineTemplate = (
           source: getBurnRateSource('oneDayBurnRate'),
         },
       },
+      // >= 8.18: add updatedBy, createdBy
+      {
+        set: {
+          field: 'slo.updatedBy',
+          value: slo.updatedBy,
+          ignore_failure: true,
+        },
+      },
+      {
+        set: {
+          field: 'slo.createdBy',
+          value: slo.createdBy,
+          ignore_failure: true,
+        },
+      },
     ],
     _meta: {
       description: `Ingest pipeline for SLO summary data [id: ${slo.id}, revision: ${slo.revision}]`,
