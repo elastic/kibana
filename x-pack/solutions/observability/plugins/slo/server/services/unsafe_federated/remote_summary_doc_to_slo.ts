@@ -42,6 +42,8 @@ export function fromRemoteSummaryDocumentToSloDefinition(
     updatedAt: summaryDoc.slo.updatedAt ?? '2024-01-01T00:00:00.000Z', // fallback prior 8.14
     groupBy: summaryDoc.slo.groupBy,
     version: 1,
+    createdBy: summaryDoc.slo.createdBy,
+    updatedBy: summaryDoc.slo.updatedBy,
   });
 
   if (isLeft(res)) {
