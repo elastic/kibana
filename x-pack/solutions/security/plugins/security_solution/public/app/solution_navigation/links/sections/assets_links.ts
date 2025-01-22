@@ -7,7 +7,7 @@
 
 import { SecurityPageName, ExternalPageName } from '@kbn/security-solution-navigation';
 import { ASSETS_PATH, CLOUD_DEFEND_PATH } from '../../../../../common/constants';
-import { SERVER_APP_ID } from '../../../../../common';
+import { SECURITY_FEATURE_ID } from '../../../../../common';
 import type { LinkItem } from '../../../../common/links/types';
 import type { SolutionNavLink } from '../../../../common/links';
 import { IconEcctlLazy, IconFleetLazy } from './lazy_icons';
@@ -18,7 +18,7 @@ const assetsAppLink: LinkItem = {
   id: SecurityPageName.assets,
   title: i18n.ASSETS_TITLE,
   path: ASSETS_PATH,
-  capabilities: [`${SERVER_APP_ID}.show`],
+  capabilities: [`${SECURITY_FEATURE_ID}.show`],
   hideTimeline: true,
   skipUrlState: true,
   links: [], // endpoints and cloudDefend links are added in createAssetsLinkFromManage
@@ -30,7 +30,7 @@ const assetsCloudDefendAppLink: LinkItem = {
   title: i18n.CLOUD_DEFEND_TITLE,
   description: i18n.CLOUD_DEFEND_DESCRIPTION,
   path: CLOUD_DEFEND_PATH,
-  capabilities: [`${SERVER_APP_ID}.show`],
+  capabilities: [`${SECURITY_FEATURE_ID}.show`],
   landingIcon: IconEcctlLazy,
   isBeta: true,
   hideTimeline: true,

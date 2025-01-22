@@ -246,6 +246,10 @@ export const getSavedObjectTypes = (
           advanced_settings: { type: 'flattened', index: false },
           supports_agentless: { type: 'boolean' },
           global_data_tags: { type: 'flattened', index: false },
+          agentless: {
+            dynamic: false,
+            properties: {},
+          },
           monitoring_pprof_enabled: { type: 'boolean', index: false },
           monitoring_http: { type: 'flattened', index: false },
           monitoring_diagnostics: { type: 'flattened', index: false },
@@ -313,6 +317,19 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '6': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                agentless: {
+                  dynamic: false,
+                  properties: {},
+                },
+              },
+            },
+          ],
+        },
       },
     },
     [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
@@ -357,6 +374,10 @@ export const getSavedObjectTypes = (
           advanced_settings: { type: 'flattened', index: false },
           supports_agentless: { type: 'boolean' },
           global_data_tags: { type: 'flattened', index: false },
+          agentless: {
+            dynamic: false,
+            properties: {},
+          },
         },
       },
       modelVersions: {

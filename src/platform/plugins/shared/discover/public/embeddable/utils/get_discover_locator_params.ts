@@ -18,7 +18,7 @@ export const getDiscoverLocatorParams = (
   const savedSearch = api.savedSearch$.getValue();
 
   const dataView = savedSearch?.searchSource.getField('index');
-  const savedObjectId = api.savedObjectId?.getValue();
+  const savedObjectId = api.savedObjectId$?.getValue();
   const locatorParams: DiscoverAppLocatorParams = savedObjectId
     ? { savedSearchId: savedObjectId }
     : {

@@ -151,7 +151,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('unfreeze', () => {
+    describe('unfreeze', function () {
+      this.onlyEsVersion('8');
       it('should unfreeze an index', async () => {
         const index = await createIndex();
 

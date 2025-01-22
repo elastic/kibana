@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { initializeTitleManager } from '@kbn/presentation-publishing';
 import type { LensRuntimeState } from '../types';
 import { getLensRuntimeStateMock, getLensInternalApiMock, makeEmbeddableServices } from '../mocks';
 import { initializeStateManagement } from './initialize_state_management';
@@ -17,12 +18,14 @@ function setupDashboardServicesApi(runtimeOverrides?: Partial<LensRuntimeState>)
   const internalApiMock = getLensInternalApiMock();
   const runtimeState = getLensRuntimeStateMock(runtimeOverrides);
   const stateManagementConfig = initializeStateManagement(runtimeState, internalApiMock);
+  const titleManager = initializeTitleManager(runtimeState);
   const { api } = initializeDashboardServices(
     runtimeState,
     () => runtimeState,
     internalApiMock,
     stateManagementConfig,
     {},
+    titleManager,
     services
   );
   return api;
