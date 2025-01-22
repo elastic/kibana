@@ -31,7 +31,7 @@ export const startTouchInteraction = ({
     onEnd();
   };
 
-  e.target!.addEventListener('touchmove', onMove, { passive: false });
+  e.target!.addEventListener('touchmove', onMove);
   e.target!.addEventListener('touchend', handleEnd, { once: true });
   onStart();
 };
