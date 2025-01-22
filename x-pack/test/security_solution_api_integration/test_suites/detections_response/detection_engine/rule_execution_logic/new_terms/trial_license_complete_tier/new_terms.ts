@@ -1413,14 +1413,22 @@ export default ({ getService }: FtrProviderContext) => {
         const { logs } = await previewRule({
           supertest,
           rule: { ...rule, query: `id: "${testId}"`, new_terms_fields: ['host.name'] },
+          enableLoggedRequests: true,
         });
 
-        expect(logs[0].requests).toEqual(3);
+        expect(logs[0].requests?.length).toEqual(4);
         const requests = logs[0].requests ?? [];
 
-        expect(requests[0].description).toBe('Find historical values');
-        expect(requests[1].description).toBe('Find new terms');
-        expect(requests[2].description).toBe('Find events associated with new events');
+        expect(requests[0].description).toBe('Find all values');
+        expect(requests[0].request_type).toBe('findAllTerms');
+
+        expect(requests[1].description).toBe('Find new values');
+        expect(requests[1].request_type).toBe('findNewTerms');
+
+        expect(requests[2].description).toBe('Find documents associated with new values');
+        expect(requests[2].request_type).toBe('findDocuments');
+
+        expect(requests[3].description).toBe('Find all values after host.name: host-2');
       });
 
       it('should return requests property when enable_logged_requests set to true for multiple fields', async () => {
@@ -1452,14 +1460,20 @@ export default ({ getService }: FtrProviderContext) => {
         const { logs } = await previewRule({
           supertest,
           rule: { ...rule, query: `id: "${testId}"` },
+          enableLoggedRequests: true,
         });
 
-        expect(logs[0].requests).toEqual(3);
+        expect(logs[0].requests?.length).toEqual(4);
         const requests = logs[0].requests ?? [];
 
-        expect(requests[0].description).toBe('Find historical values');
-        expect(requests[1].description).toBe('Find new terms');
-        expect(requests[2].description).toBe('Find events associated with new events');
+        expect(requests[0].description).toBe('Find all values');
+        expect(requests[0].request_type).toBe('findAllTerms');
+
+        expect(requests[1].description).toBe('Find new values');
+        expect(requests[1].request_type).toBe('findNewTerms');
+
+        expect(requests[2].description).toBe('Find documents associated with new values');
+        expect(requests[2].request_type).toBe('findDocuments');
       });
     });
   });
