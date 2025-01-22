@@ -19,22 +19,29 @@ import { HelpMenu } from '../components/help_menu';
 import { useMlKibana } from '../contexts/kibana';
 import { MlPageHeader } from '../components/page_header';
 import { PageTitle } from '../components/page_title';
-import { getAnnotationStyles, getTimeseriesExplorerStyles } from './styles';
+import { useAnnotationStyles, useTimeseriesExplorerStyles } from './styles';
 
 interface TimeSeriesExplorerPageProps {
   dateFormatTz?: string;
   resizeRef?: any;
   noSingleMetricJobsFound?: boolean;
+  handleJobSelectionChange: ({
+    jobIds,
+    time,
+  }: {
+    jobIds: string[];
+    time?: { from: string; to: string };
+  }) => void;
+  selectedJobId?: string[];
 }
-
-const timeseriesExplorerStyles = getTimeseriesExplorerStyles();
-const annotationStyles = getAnnotationStyles();
 
 export const TimeSeriesExplorerPage: FC<PropsWithChildren<TimeSeriesExplorerPageProps>> = ({
   children,
   dateFormatTz,
   resizeRef,
   noSingleMetricJobsFound,
+  handleJobSelectionChange,
+  selectedJobId = [],
 }) => {
   const {
     services: { cases, docLinks },
@@ -42,6 +49,9 @@ export const TimeSeriesExplorerPage: FC<PropsWithChildren<TimeSeriesExplorerPage
   const CasesContext = cases?.ui.getCasesContext() ?? React.Fragment;
   const casesPermissions = cases?.helpers.canUseCases();
   const helpLink = docLinks.links.ml.anomalyDetection;
+
+  const timeseriesExplorerStyles = useTimeseriesExplorerStyles();
+  const annotationStyles = useAnnotationStyles();
 
   return (
     <>
@@ -66,7 +76,13 @@ export const TimeSeriesExplorerPage: FC<PropsWithChildren<TimeSeriesExplorerPage
         </MlPageHeader>
 
         {noSingleMetricJobsFound ? null : (
-          <JobSelector dateFormatTz={dateFormatTz!} singleSelection={true} timeseriesOnly={true} />
+          <JobSelector
+            dateFormatTz={dateFormatTz!}
+            singleSelection={true}
+            timeseriesOnly={true}
+            onSelectionChange={handleJobSelectionChange}
+            selectedJobIds={selectedJobId}
+          />
         )}
         <CasesContext owner={[]} permissions={casesPermissions!}>
           {children}

@@ -9,6 +9,7 @@ import type { FC } from 'react';
 import React from 'react';
 
 import {
+  useEuiTheme,
   EuiIcon,
   EuiText,
   EuiTitle,
@@ -18,7 +19,6 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import { useCurrentEuiTheme } from '../../hooks/use_current_eui_theme';
 
 export interface LinkCardProps {
   icon: EuiIconType | string;
@@ -43,7 +43,7 @@ export const LinkCard: FC<LinkCardProps> = ({
   isDisabled,
   'data-test-subj': dataTestSubj,
 }) => {
-  const euiTheme = useCurrentEuiTheme();
+  const { euiTheme } = useEuiTheme();
 
   const linkHrefAndOnClickProps = {
     ...(href ? { href } : {}),
@@ -67,7 +67,7 @@ export const LinkCard: FC<LinkCardProps> = ({
         {...linkHrefAndOnClickProps}
       >
         <EuiFlexGroup gutterSize="s" responsive={true}>
-          <EuiFlexItem grow={false} css={{ paddingTop: euiTheme.euiSizeXS }}>
+          <EuiFlexItem grow={false} css={{ paddingTop: euiTheme.size.xs }}>
             <EuiIcon size="m" type={icon} aria-label={iconAreaLabel} />
           </EuiFlexItem>
           <EuiFlexItem>

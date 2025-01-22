@@ -82,7 +82,7 @@ export class RepoSourceClassifier {
     const segs = path.getSegs();
     if (
       segs.includes('scripts') &&
-      !path.getRepoRel().startsWith('src/plugins/data/server/scripts/')
+      !path.getRepoRel().startsWith('src/platform/plugins/shared/data/server/scripts/')
     ) {
       return true;
     }

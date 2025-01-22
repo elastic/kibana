@@ -17,7 +17,7 @@ import { parseInterval } from '@kbn/ml-parse-interval';
 
 import { initCardinalityFieldsCache } from './fields_aggs_cache';
 import { isValidAggregationField } from '../../../common/util/validation_utils';
-import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
+import { getDatafeedAggregations, getIndicesOptions } from '../../../common/util/datafeed_utils';
 import type { Datafeed, IndicesOptions } from '../../../common/types/anomaly_detection_jobs';
 
 /**
@@ -190,7 +190,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       {
         index,
         body,
-        ...(datafeedConfig?.indices_options ?? {}),
+        ...getIndicesOptions(datafeedConfig),
       },
       { maxRetries: 0 }
     );
@@ -418,7 +418,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       {
         index,
         body,
-        ...(datafeedConfig?.indices_options ?? {}),
+        ...getIndicesOptions(datafeedConfig),
       },
       { maxRetries: 0 }
     );

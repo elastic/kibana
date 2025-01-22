@@ -30,7 +30,7 @@
           " | undefined) => ",
           "PassThrough"
         ],
-        "path": "packages/kbn-utils/src/streams/concat_stream_providers.ts",
+        "path": "src/platform/packages/shared/kbn-utils/src/streams/concat_stream_providers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,7 +46,7 @@
               "Readable",
               ")[]"
             ],
-            "path": "packages/kbn-utils/src/streams/concat_stream_providers.ts",
+            "path": "src/platform/packages/shared/kbn-utils/src/streams/concat_stream_providers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -64,7 +64,7 @@
               "TransformOptions",
               " | undefined"
             ],
-            "path": "packages/kbn-utils/src/streams/concat_stream_providers.ts",
+            "path": "src/platform/packages/shared/kbn-utils/src/streams/concat_stream_providers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -90,7 +90,7 @@
           "(initial: T | undefined) => ",
           "Transform"
         ],
-        "path": "packages/kbn-utils/src/streams/concat_stream.ts",
+        "path": "src/platform/packages/shared/kbn-utils/src/streams/concat_stream.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -106,7 +106,7 @@
             "signature": [
               "T | undefined"
             ],
-            "path": "packages/kbn-utils/src/streams/concat_stream.ts",
+            "path": "src/platform/packages/shared/kbn-utils/src/streams/concat_stream.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -126,7 +126,7 @@
           "(fn: (obj: T) => boolean) => ",
           "Transform"
         ],
-        "path": "packages/kbn-utils/src/streams/filter_stream.ts",
+        "path": "src/platform/packages/shared/kbn-utils/src/streams/filter_stream.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -140,7 +140,7 @@
             "signature": [
               "(obj: T) => boolean"
             ],
-            "path": "packages/kbn-utils/src/streams/filter_stream.ts",
+            "path": "src/platform/packages/shared/kbn-utils/src/streams/filter_stream.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -164,7 +164,7 @@
           "(intersperseChunk: string | Buffer) => ",
           "Transform"
         ],
-        "path": "packages/kbn-utils/src/streams/intersperse_stream.ts",
+        "path": "src/platform/packages/shared/kbn-utils/src/streams/intersperse_stream.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -178,7 +178,7 @@
             "signature": [
               "string | Buffer"
             ],
-            "path": "packages/kbn-utils/src/streams/intersperse_stream.ts",
+            "path": "src/platform/packages/shared/kbn-utils/src/streams/intersperse_stream.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -202,7 +202,7 @@
           "(items: T | T[]) => ",
           "Readable"
         ],
-        "path": "packages/kbn-utils/src/streams/list_stream.ts",
+        "path": "src/platform/packages/shared/kbn-utils/src/streams/list_stream.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -218,7 +218,7 @@
             "signature": [
               "T | T[]"
             ],
-            "path": "packages/kbn-utils/src/streams/list_stream.ts",
+            "path": "src/platform/packages/shared/kbn-utils/src/streams/list_stream.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -238,7 +238,7 @@
           "(fn: (value: T, i: number) => void) => ",
           "Transform"
         ],
-        "path": "packages/kbn-utils/src/streams/map_stream.ts",
+        "path": "src/platform/packages/shared/kbn-utils/src/streams/map_stream.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -252,7 +252,7 @@
             "signature": [
               "(value: T, i: number) => void"
             ],
-            "path": "packages/kbn-utils/src/streams/map_stream.ts",
+            "path": "src/platform/packages/shared/kbn-utils/src/streams/map_stream.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -275,7 +275,7 @@
           "Writable",
           "[]]) => Promise<T>"
         ],
-        "path": "packages/kbn-utils/src/streams/promise_from_streams.ts",
+        "path": "src/platform/packages/shared/kbn-utils/src/streams/promise_from_streams.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -293,7 +293,7 @@
               "Writable",
               "[]]"
             ],
-            "path": "packages/kbn-utils/src/streams/promise_from_streams.ts",
+            "path": "src/platform/packages/shared/kbn-utils/src/streams/promise_from_streams.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -317,7 +317,7 @@
           "(reducer: (value: any, chunk: T, enc: string) => T, initial: T | undefined) => ",
           "Transform"
         ],
-        "path": "packages/kbn-utils/src/streams/reduce_stream.ts",
+        "path": "src/platform/packages/shared/kbn-utils/src/streams/reduce_stream.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -331,7 +331,7 @@
             "signature": [
               "(value: any, chunk: T, enc: string) => T"
             ],
-            "path": "packages/kbn-utils/src/streams/reduce_stream.ts",
+            "path": "src/platform/packages/shared/kbn-utils/src/streams/reduce_stream.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -348,7 +348,7 @@
             "signature": [
               "T | undefined"
             ],
-            "path": "packages/kbn-utils/src/streams/reduce_stream.ts",
+            "path": "src/platform/packages/shared/kbn-utils/src/streams/reduce_stream.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -368,7 +368,7 @@
           "(toReplace: string, replacement: string | Buffer) => ",
           "Transform"
         ],
-        "path": "packages/kbn-utils/src/streams/replace_stream.ts",
+        "path": "src/platform/packages/shared/kbn-utils/src/streams/replace_stream.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -382,7 +382,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-utils/src/streams/replace_stream.ts",
+            "path": "src/platform/packages/shared/kbn-utils/src/streams/replace_stream.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -397,7 +397,7 @@
             "signature": [
               "string | Buffer"
             ],
-            "path": "packages/kbn-utils/src/streams/replace_stream.ts",
+            "path": "src/platform/packages/shared/kbn-utils/src/streams/replace_stream.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -421,7 +421,7 @@
           "(splitChunk: string | Uint8Array) => ",
           "Transform"
         ],
-        "path": "packages/kbn-utils/src/streams/split_stream.ts",
+        "path": "src/platform/packages/shared/kbn-utils/src/streams/split_stream.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -435,7 +435,7 @@
             "signature": [
               "string | Uint8Array"
             ],
-            "path": "packages/kbn-utils/src/streams/split_stream.ts",
+            "path": "src/platform/packages/shared/kbn-utils/src/streams/split_stream.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -456,7 +456,7 @@
         "signature": [
           "(object: object) => string"
         ],
-        "path": "packages/kbn-utils/src/json/index.ts",
+        "path": "src/platform/packages/shared/kbn-utils/src/json/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -470,7 +470,7 @@
             "signature": [
               "object"
             ],
-            "path": "packages/kbn-utils/src/json/index.ts",
+            "path": "src/platform/packages/shared/kbn-utils/src/json/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -493,7 +493,7 @@
         "signature": [
           "{ readonly data: string; }"
         ],
-        "path": "packages/kbn-utils/src/path/index.ts",
+        "path": "src/platform/packages/shared/kbn-utils/src/path/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

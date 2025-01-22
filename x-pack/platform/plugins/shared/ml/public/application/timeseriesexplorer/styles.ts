@@ -5,328 +5,353 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { transparentize } from '@elastic/eui';
-import { mlColors } from '../styles';
+
+import { useEuiFontSize, useEuiTheme, transparentize } from '@elastic/eui';
+
+import { ML_SEVERITY_COLORS } from '@kbn/ml-anomaly-utils';
 
 // Annotations constants
 const mlAnnotationBorderWidth = '2px';
 const mlAnnotationRectDefaultStrokeOpacity = 0.2;
 const mlAnnotationRectDefaultFillOpacity = 0.05;
 
-export const getTimeseriesExplorerStyles = () =>
-  css({
-    color: euiThemeVars.euiColorDarkShade,
+export const useTimeseriesExplorerStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  const { fontSize: euiFontSizeXS } = useEuiFontSize('xs', { unit: 'px' });
+  const { fontSize: euiFontSizeS } = useEuiFontSize('s', { unit: 'px' });
 
-    '.ml-timeseries-chart': {
-      svg: {
-        fontSize: euiThemeVars.euiFontSizeXS,
-        fontFamily: euiThemeVars.euiFontFamily,
-      },
+  // Amsterdam: euiTheme.colors.vis.euiColorVis5
+  // Borealis:  euiTheme.colors.vis.euiColorVis9
+  const forecastColor = euiTheme.flags.hasVisColorAdjustment
+    ? euiTheme.colors.vis.euiColorVis5
+    : euiTheme.colors.vis.euiColorVis9;
 
-      '.axis': {
-        'path, line': {
-          fill: 'none',
-          stroke: euiThemeVars.euiBorderColor,
-          shapeRendering: 'crispEdges',
-          pointerEvents: 'none',
-        },
+  return useMemo(
+    () =>
+      css({
+        color: euiTheme.colors.darkShade,
 
-        text: {
-          fill: euiThemeVars.euiTextColor,
-        },
-
-        '.tick line': {
-          stroke: euiThemeVars.euiColorLightShade,
-        },
-      },
-
-      '.chart-border': {
-        stroke: euiThemeVars.euiBorderColor,
-        fill: 'none',
-        strokeWidth: 1,
-        shapeRendering: 'crispEdges',
-      },
-
-      '.chart-border-highlight': {
-        stroke: euiThemeVars.euiColorDarkShade,
-        strokeWidth: 2,
-
-        '&:hover': {
-          opacity: 1,
-        },
-      },
-
-      '.area': {
-        strokeWidth: 1,
-
-        '&.bounds': {
-          fill: transparentize(euiThemeVars.euiColorPrimary, 0.2),
-          pointerEvents: 'none',
-        },
-
-        '&.forecast': {
-          fill: transparentize(euiThemeVars.euiColorVis5, 0.3),
-          pointerEvents: 'none',
-        },
-      },
-
-      '.values-line': {
-        fill: 'none',
-        stroke: euiThemeVars.euiColorPrimary,
-        strokeWidth: 2,
-        pointerEvents: 'none',
-
-        '&.forecast': {
-          stroke: euiThemeVars.euiColorVis5,
-          pointerEvents: 'none',
-        },
-      },
-
-      '.hidden': {
-        visibility: 'hidden',
-      },
-
-      '.values-dots circle': {
-        fill: euiThemeVars.euiColorPrimary,
-        strokeWidth: 0,
-      },
-
-      '.metric-value': {
-        opacity: 1,
-        fill: 'transparent',
-        stroke: euiThemeVars.euiColorPrimary,
-        strokeWidth: 0,
-      },
-
-      '.anomaly-marker': {
-        strokeWidth: 1,
-        stroke: euiThemeVars.euiColorMediumShade,
-
-        '&.critical': {
-          fill: mlColors.critical,
-        },
-
-        '&.major': {
-          fill: mlColors.major,
-        },
-
-        '&.minor': {
-          fill: mlColors.minor,
-        },
-
-        '&.warning': {
-          fill: mlColors.warning,
-        },
-
-        '&.low': {
-          fill: mlColors.lowWarning,
-        },
-      },
-
-      '.metric-value:hover, .anomaly-marker:hover, .anomaly-marker.highlighted': {
-        strokeWidth: 6,
-        strokeOpacity: 0.65,
-        stroke: euiThemeVars.euiColorPrimary,
-      },
-
-      'rect.scheduled-event-marker': {
-        strokeWidth: 1,
-        stroke: euiThemeVars.euiColorDarkShade,
-        fill: euiThemeVars.euiColorLightShade,
-      },
-
-      '.forecast': {
-        '.metric-value, .metric-value:hover': {
-          stroke: euiThemeVars.euiColorVis5,
-        },
-      },
-
-      '.focus-chart': {
-        '.x-axis-background': {
-          line: {
-            fill: 'none',
-            shapeRendering: 'crispEdges',
-            stroke: euiThemeVars.euiColorLightestShade,
+        '.ml-timeseries-chart': {
+          svg: {
+            fontSize: euiFontSizeXS,
+            fontFamily: euiTheme.font.family,
           },
-          rect: {
-            fill: euiThemeVars.euiColorLightestShade,
-          },
-        },
-        '.focus-zoom': {
-          fill: euiThemeVars.euiColorDarkShade,
-          a: {
+
+          '.axis': {
+            'path, line': {
+              fill: 'none',
+              stroke: euiTheme.colors.borderBasePlain,
+              shapeRendering: 'crispEdges',
+              pointerEvents: 'none',
+            },
+
             text: {
-              fill: euiThemeVars.euiColorPrimary,
-              cursor: 'pointer',
+              fill: euiTheme.colors.textParagraph,
             },
-            '&:hover, &:active, &:focus': {
-              textDecoration: 'underline',
-              fill: euiThemeVars.euiColorPrimary,
-            },
-          },
-        },
-      },
 
-      '.context-chart': {
-        '.x.axis path': {
-          display: 'none',
-        },
-        '.axis text': {
-          fontSize: '10px',
-          fill: euiThemeVars.euiTextColor,
-        },
-        '.values-line': {
-          strokeWidth: 1,
-        },
-        '.mask': {
-          polygon: {
-            fillOpacity: 0.1,
+            '.tick line': {
+              stroke: euiTheme.colors.lightShade,
+            },
           },
-          '.area.bounds': {
-            fill: euiThemeVars.euiColorLightShade,
-          },
-          '.values-line': {
+
+          '.chart-border': {
+            stroke: euiTheme.colors.borderBasePlain,
+            fill: 'none',
             strokeWidth: 1,
-            stroke: euiThemeVars.euiColorMediumShade,
+            shapeRendering: 'crispEdges',
+          },
+
+          '.chart-border-highlight': {
+            stroke: euiTheme.colors.darkShade,
+            strokeWidth: 2,
+
+            '&:hover': {
+              opacity: 1,
+            },
+          },
+
+          '.area': {
+            strokeWidth: 1,
+
+            '&.bounds': {
+              fill: transparentize(euiTheme.colors.primary, 0.2),
+              pointerEvents: 'none',
+            },
+
+            '&.forecast': {
+              fill: transparentize(forecastColor, 0.3),
+              pointerEvents: 'none',
+            },
+          },
+
+          '.values-line': {
+            fill: 'none',
+            stroke: euiTheme.colors.primary,
+            strokeWidth: 2,
+            pointerEvents: 'none',
+
+            '&.forecast': {
+              stroke: forecastColor,
+              pointerEvents: 'none',
+            },
+          },
+
+          '.hidden': {
+            visibility: 'hidden',
+          },
+
+          '.values-dots circle': {
+            fill: euiTheme.colors.primary,
+            strokeWidth: 0,
+          },
+
+          '.metric-value': {
+            opacity: 1,
+            fill: 'transparent',
+            stroke: euiTheme.colors.primary,
+            strokeWidth: 0,
+          },
+
+          '.anomaly-marker': {
+            strokeWidth: 1,
+            stroke: euiTheme.colors.mediumShade,
+
+            '&.critical': {
+              fill: ML_SEVERITY_COLORS.CRITICAL,
+            },
+
+            '&.major': {
+              fill: ML_SEVERITY_COLORS.MAJOR,
+            },
+
+            '&.minor': {
+              fill: ML_SEVERITY_COLORS.MINOR,
+            },
+
+            '&.warning': {
+              fill: ML_SEVERITY_COLORS.WARNING,
+            },
+
+            '&.low': {
+              fill: ML_SEVERITY_COLORS.LOW,
+            },
+          },
+
+          '.metric-value:hover, .anomaly-marker:hover, .anomaly-marker.highlighted': {
+            strokeWidth: 6,
+            strokeOpacity: 0.65,
+            stroke: euiTheme.colors.primary,
+          },
+
+          'rect.scheduled-event-marker': {
+            strokeWidth: 1,
+            stroke: euiTheme.colors.darkShade,
+            fill: euiTheme.colors.lightShade,
+          },
+
+          '.forecast': {
+            '.metric-value, .metric-value:hover': {
+              stroke: forecastColor,
+            },
+          },
+
+          '.focus-chart': {
+            '.x-axis-background': {
+              line: {
+                fill: 'none',
+                shapeRendering: 'crispEdges',
+                stroke: euiTheme.colors.lightestShade,
+              },
+              rect: {
+                fill: euiTheme.colors.lightestShade,
+              },
+            },
+            '.focus-zoom': {
+              fill: euiTheme.colors.darkShade,
+              a: {
+                text: {
+                  fill: euiTheme.colors.primary,
+                  cursor: 'pointer',
+                },
+                '&:hover, &:active, &:focus': {
+                  textDecoration: 'underline',
+                  fill: euiTheme.colors.primary,
+                },
+              },
+            },
+          },
+
+          '.context-chart': {
+            '.x.axis path': {
+              display: 'none',
+            },
+            '.axis text': {
+              fontSize: '10px',
+              fill: euiTheme.colors.textParagraph,
+            },
+            '.values-line': {
+              strokeWidth: 1,
+            },
+            '.mask': {
+              polygon: {
+                fillOpacity: 0.1,
+              },
+              '.area.bounds': {
+                fill: euiTheme.colors.lightShade,
+              },
+              '.values-line': {
+                strokeWidth: 1,
+                stroke: euiTheme.colors.mediumShade,
+              },
+            },
+          },
+
+          '.swimlane .axis text': {
+            display: 'none',
+          },
+
+          '.swimlane rect.swimlane-cell-hidden': {
+            display: 'none',
+          },
+
+          '.brush .extent': {
+            fillOpacity: 0,
+            shapeRendering: 'crispEdges',
+            stroke: euiTheme.colors.darkShade,
+            strokeWidth: 2,
+            cursor: 'move',
+            '&:hover': {
+              opacity: 1,
+            },
+          },
+
+          '.top-border': {
+            fill: euiTheme.colors.emptyShade,
+          },
+
+          'foreignObject.brush-handle': {
+            pointerEvents: 'none',
+            paddingTop: '1px',
+          },
+
+          'div.brush-handle-inner': {
+            border: `1px solid ${euiTheme.colors.darkShade}`,
+            backgroundColor: euiTheme.colors.lightShade,
+            height: '70px',
+            width: '10px',
+            textAlign: 'center',
+            cursor: 'ew-resize',
+            marginTop: '9px',
+            fontSize: euiFontSizeS,
+            fill: euiTheme.colors.darkShade,
+          },
+
+          'div.brush-handle-inner-left': {
+            borderRadius: `${euiTheme.border.radius.small} 0 0 ${euiTheme.border.radius.small}`,
+          },
+
+          'div.brush-handle-inner-right': {
+            borderRadius: `0 ${euiTheme.border.radius.small} ${euiTheme.border.radius.small} 0`,
+          },
+
+          'rect.brush-handle': {
+            strokeWidth: 1,
+            stroke: euiTheme.colors.darkShade,
+            fill: euiTheme.colors.lightShade,
+            pointerEvents: 'none',
+            '&:hover': {
+              opacity: 1,
+            },
           },
         },
-      },
+      }),
+    [euiTheme, euiFontSizeS, euiFontSizeXS, forecastColor]
+  );
+};
 
-      '.swimlane .axis text': {
-        display: 'none',
-      },
+export const useAnnotationStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  const euiFontSizeXS = useEuiFontSize('xs', { unit: 'px' }).fontSize as string;
 
-      '.swimlane rect.swimlane-cell-hidden': {
-        display: 'none',
-      },
+  return useMemo(
+    () =>
+      css({
+        '.ml-annotation': {
+          '&__brush': {
+            '.extent': {
+              stroke: euiTheme.colors.lightShade,
+              strokeWidth: mlAnnotationBorderWidth,
+              strokeDasharray: '2 2',
+              fill: euiTheme.colors.lightestShade,
+              shapeRendering: 'geometricPrecision',
+            },
+          },
 
-      '.brush .extent': {
-        fillOpacity: 0,
-        shapeRendering: 'crispEdges',
-        stroke: euiThemeVars.euiColorDarkShade,
-        strokeWidth: 2,
-        cursor: 'move',
-        '&:hover': {
-          opacity: 1,
+          '&__rect': {
+            stroke: euiTheme.colors.fullShade,
+            strokeWidth: mlAnnotationBorderWidth,
+            strokeOpacity: mlAnnotationRectDefaultStrokeOpacity,
+            fill: euiTheme.colors.fullShade,
+            fillOpacity: mlAnnotationRectDefaultFillOpacity,
+            shapeRendering: 'geometricPrecision',
+            transition: `stroke-opacity ${euiTheme.animation.fast}, fill-opacity ${euiTheme.animation.fast}`,
+
+            '&--highlight': {
+              strokeOpacity: mlAnnotationRectDefaultStrokeOpacity * 2,
+              fillOpacity: mlAnnotationRectDefaultFillOpacity * 2,
+            },
+
+            '&--blur': {
+              strokeOpacity: mlAnnotationRectDefaultStrokeOpacity / 2,
+              fillOpacity: mlAnnotationRectDefaultFillOpacity / 2,
+            },
+          },
+
+          '&__text': {
+            textAnchor: 'middle',
+            fontSize: euiFontSizeXS,
+            fontFamily: euiTheme.font.family,
+            fontWeight: euiTheme.font.weight.medium,
+            fill: euiTheme.colors.fullShade,
+            transition: `fill ${euiTheme.animation.fast}`,
+            userSelect: 'none',
+
+            '&--blur': {
+              fill: euiTheme.colors.mediumShade,
+            },
+          },
+
+          '&__text-rect': {
+            fill: euiTheme.colors.lightShade,
+            transition: `fill ${euiTheme.animation.fast}`,
+
+            '&--blur': {
+              fill: euiTheme.colors.lightestShade,
+            },
+          },
+
+          '&--hidden': {
+            display: 'none',
+          },
+
+          '&__context-rect': {
+            stroke: euiTheme.colors.fullShade,
+            strokeWidth: mlAnnotationBorderWidth,
+            strokeOpacity: mlAnnotationRectDefaultStrokeOpacity,
+            fill: euiTheme.colors.fullShade,
+            fillOpacity: mlAnnotationRectDefaultFillOpacity,
+            transition: `stroke-opacity ${euiTheme.animation.fast}, fill-opacity ${euiTheme.animation.fast}`,
+            shapeRendering: 'geometricPrecision',
+
+            '&--blur': {
+              strokeOpacity: mlAnnotationRectDefaultStrokeOpacity / 2,
+              fillOpacity: mlAnnotationRectDefaultFillOpacity / 2,
+            },
+          },
         },
-      },
-
-      '.top-border': {
-        fill: euiThemeVars.euiColorEmptyShade,
-      },
-
-      'foreignObject.brush-handle': {
-        pointerEvents: 'none',
-        paddingTop: '1px',
-      },
-
-      'div.brush-handle-inner': {
-        border: `1px solid ${euiThemeVars.euiColorDarkShade}`,
-        backgroundColor: euiThemeVars.euiColorLightShade,
-        height: '70px',
-        width: '10px',
-        textAlign: 'center',
-        cursor: 'ew-resize',
-        marginTop: '9px',
-        fontSize: euiThemeVars.euiFontSizeS,
-        fill: euiThemeVars.euiColorDarkShade,
-      },
-
-      'div.brush-handle-inner-left': {
-        borderRadius: `${euiThemeVars.euiBorderRadius} 0 0 ${euiThemeVars.euiBorderRadius}`,
-      },
-
-      'div.brush-handle-inner-right': {
-        borderRadius: `0 ${euiThemeVars.euiBorderRadius} ${euiThemeVars.euiBorderRadius} 0`,
-      },
-
-      'rect.brush-handle': {
-        strokeWidth: 1,
-        stroke: euiThemeVars.euiColorDarkShade,
-        fill: euiThemeVars.euiColorLightShade,
-        pointerEvents: 'none',
-        '&:hover': {
-          opacity: 1,
-        },
-      },
-    },
-  });
-
-export const getAnnotationStyles = () =>
-  css({
-    '.ml-annotation': {
-      '&__brush': {
-        '.extent': {
-          stroke: euiThemeVars.euiColorLightShade,
-          strokeWidth: mlAnnotationBorderWidth,
-          strokeDasharray: '2 2',
-          fill: euiThemeVars.euiColorLightestShade,
-          shapeRendering: 'geometricPrecision',
-        },
-      },
-
-      '&__rect': {
-        stroke: euiThemeVars.euiColorFullShade,
-        strokeWidth: mlAnnotationBorderWidth,
-        strokeOpacity: mlAnnotationRectDefaultStrokeOpacity,
-        fill: euiThemeVars.euiColorFullShade,
-        fillOpacity: mlAnnotationRectDefaultFillOpacity,
-        shapeRendering: 'geometricPrecision',
-        transition: `stroke-opacity ${euiThemeVars.euiAnimSpeedFast}, fill-opacity ${euiThemeVars.euiAnimSpeedFast}`,
-
-        '&--highlight': {
-          strokeOpacity: mlAnnotationRectDefaultStrokeOpacity * 2,
-          fillOpacity: mlAnnotationRectDefaultFillOpacity * 2,
-        },
-
-        '&--blur': {
-          strokeOpacity: mlAnnotationRectDefaultStrokeOpacity / 2,
-          fillOpacity: mlAnnotationRectDefaultFillOpacity / 2,
-        },
-      },
-
-      '&__text': {
-        textAnchor: 'middle',
-        fontSize: euiThemeVars.euiFontSizeXS,
-        fontFamily: euiThemeVars.euiFontFamily,
-        fontWeight: euiThemeVars.euiFontWeightMedium,
-        fill: euiThemeVars.euiColorFullShade,
-        transition: `fill ${euiThemeVars.euiAnimSpeedFast}`,
-        userSelect: 'none',
-
-        '&--blur': {
-          fill: euiThemeVars.euiColorMediumShade,
-        },
-      },
-
-      '&__text-rect': {
-        fill: euiThemeVars.euiColorLightShade,
-        transition: `fill ${euiThemeVars.euiAnimSpeedFast}`,
-
-        '&--blur': {
-          fill: euiThemeVars.euiColorLightestShade,
-        },
-      },
-
-      '&--hidden': {
-        display: 'none',
-      },
-
-      '&__context-rect': {
-        stroke: euiThemeVars.euiColorFullShade,
-        strokeWidth: mlAnnotationBorderWidth,
-        strokeOpacity: mlAnnotationRectDefaultStrokeOpacity,
-        fill: euiThemeVars.euiColorFullShade,
-        fillOpacity: mlAnnotationRectDefaultFillOpacity,
-        transition: `stroke-opacity ${euiThemeVars.euiAnimSpeedFast}, fill-opacity ${euiThemeVars.euiAnimSpeedFast}`,
-        shapeRendering: 'geometricPrecision',
-
-        '&--blur': {
-          strokeOpacity: mlAnnotationRectDefaultStrokeOpacity / 2,
-          fillOpacity: mlAnnotationRectDefaultFillOpacity / 2,
-        },
-      },
-    },
-  });
+      }),
+    [euiTheme, euiFontSizeXS]
+  );
+};

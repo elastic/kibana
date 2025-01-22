@@ -7,12 +7,18 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import type { FieldDataRowProps } from '../../types/field_data_row';
+
 import { TopValues } from '../../../top_values';
+
+import type { FieldDataRowProps } from '../../types/field_data_row';
+
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
+import { useBarColor } from './use_bar_color';
 
 export const IpContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) => {
+  const barColor = useBarColor();
+
   const { stats } = config;
   if (stats === undefined) return null;
   const { count, sampleCount, cardinality } = stats;
@@ -26,7 +32,7 @@ export const IpContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) => {
         <TopValues
           stats={stats}
           fieldFormat={fieldFormat}
-          barColor="accentSecondary"
+          barColor={barColor}
           onAddFilter={onAddFilter}
         />
       )}

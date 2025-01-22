@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiText } from '@elastic/eui';
+import {
+  useEuiTheme,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { type FC } from 'react';
 import { FieldIcon } from '@kbn/react-field';
 import { type Field } from '@kbn/ml-anomaly-utils';
-import { useCurrentEuiThemeVars } from '@kbn/ml-kibana-theme';
-import { useFieldStatsFlyoutThemeVars } from './use_field_stats_flyout_context';
 
 import { getKbnFieldIconType } from './get_kbn_field_icon_types';
 
@@ -71,8 +76,7 @@ export interface FieldStatsInfoButtonProps {
  */
 export const FieldStatsInfoButton: FC<FieldStatsInfoButtonProps> = (props) => {
   const { field, label, onButtonClick, disabled, isEmpty, hideTrigger } = props;
-  const theme = useFieldStatsFlyoutThemeVars();
-  const themeVars = useCurrentEuiThemeVars(theme);
+  const { euiTheme } = useEuiTheme();
 
   const emptyFieldMessage = isEmpty
     ? ' ' +
@@ -100,7 +104,7 @@ export const FieldStatsInfoButton: FC<FieldStatsInfoButtonProps> = (props) => {
               disabled={disabled === true}
               size="xs"
               iconType="fieldStatistics"
-              css={{ color: isEmpty ? themeVars.euiTheme.euiColorDisabled : undefined }}
+              css={{ color: isEmpty ? euiTheme.colors.textDisabled : undefined }}
               onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
                 if (ev.type === 'click') {
                   ev.currentTarget.focus();
@@ -127,12 +131,12 @@ export const FieldStatsInfoButton: FC<FieldStatsInfoButtonProps> = (props) => {
       <EuiFlexItem
         grow={false}
         css={{
-          paddingRight: themeVars.euiTheme.euiSizeXS,
+          paddingRight: euiTheme.size.xs,
         }}
       >
         {!hideTrigger ? (
           <FieldIcon
-            color={isEmpty ? themeVars.euiTheme.euiColorDisabled : undefined}
+            color={isEmpty ? euiTheme.colors.textDisabled : undefined}
             type={getKbnFieldIconType(field.type)}
             fill="none"
           />

@@ -8,7 +8,7 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import { ScoutServerConfig } from '../../types';
+import { ScoutTestConfig } from '../../types';
 import { serviceLoadedMsg } from '../../playwright/utils';
 
 export interface PathOptions {
@@ -64,7 +64,7 @@ export class KibanaUrl {
   }
 }
 
-export function createKbnUrl(scoutConfig: ScoutServerConfig, log: ToolingLog) {
+export function createKbnUrl(scoutConfig: ScoutTestConfig, log: ToolingLog) {
   const kbnUrl = new KibanaUrl(new URL(scoutConfig.hosts.kibana));
 
   log.debug(serviceLoadedMsg('kbnUrl'));

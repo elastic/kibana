@@ -19,7 +19,7 @@
         "tags": [],
         "label": "ClusterDetails",
         "description": [],
-        "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+        "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,7 +30,7 @@
             "tags": [],
             "label": "clusterUuid",
             "description": [],
-            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -44,7 +44,7 @@
         "tags": [],
         "label": "StatsCollectionConfig",
         "description": [],
-        "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+        "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -66,7 +66,7 @@
               " & ",
               "UsageCountersServiceSetup"
             ],
-            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1334,7 +1334,7 @@
               "default",
               "; }"
             ],
-            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1346,15 +1346,9 @@
             "label": "soClient",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
-              }
+              "SavedObjectsClientContract"
             ],
-            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1365,7 +1359,7 @@
             "tags": [],
             "label": "refreshCache",
             "description": [],
-            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1379,7 +1373,7 @@
         "tags": [],
         "label": "StatsCollectionContext",
         "description": [],
-        "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+        "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1400,7 +1394,7 @@
               },
               " | Console"
             ],
-            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1411,7 +1405,7 @@
             "tags": [],
             "label": "version",
             "description": [],
-            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1436,7 +1430,7 @@
           " extends ",
           "BasicStatsPayload"
         ],
-        "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+        "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1450,7 +1444,7 @@
             "signature": [
               "CacheDetails"
             ],
-            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1461,7 +1455,7 @@
             "tags": [],
             "label": "collectionSource",
             "description": [],
-            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1505,7 +1499,7 @@
           },
           "[]>"
         ],
-        "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+        "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1526,7 +1520,7 @@
                 "text": "StatsCollectionConfig"
               }
             ],
-            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1546,7 +1540,7 @@
                 "text": "StatsCollectionContext"
               }
             ],
-            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1587,7 +1581,7 @@
           },
           ") => Promise<T[]>"
         ],
-        "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+        "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1609,7 +1603,7 @@
               },
               "[]"
             ],
-            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1629,7 +1623,7 @@
                 "text": "StatsCollectionConfig"
               }
             ],
-            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1649,7 +1643,7 @@
                 "text": "StatsCollectionContext"
               }
             ],
-            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1668,7 +1662,7 @@
           " | ",
           "EncryptedStatsGetterConfig"
         ],
-        "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+        "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1701,7 +1695,7 @@
           "text": "TelemetryCollectionManagerPluginStart"
         }
       ],
-      "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+      "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1719,7 +1713,7 @@
             "CollectionStrategyConfig",
             "<T>) => void"
           ],
-          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+          "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1734,7 +1728,7 @@
                 "CollectionStrategyConfig",
                 "<T>"
               ],
-              "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+              "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1755,7 +1749,7 @@
       "description": [
         "\nPublic contract coming from the start method."
       ],
-      "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+      "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1777,7 +1771,7 @@
             "EncryptedStatsGetterConfig",
             "): Promise<{ clusterUuid: string; stats: string; }[]>; }"
           ],
-          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+          "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1805,7 +1799,7 @@
             "EncryptedStatsGetterConfig",
             "): Promise<{ clusterUuid: string; stats: string; }[]>; }"
           ],
-          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+          "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1821,7 +1815,7 @@
           "signature": [
             "() => Promise<boolean>"
           ],
-          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+          "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1845,7 +1839,7 @@
         "tags": [],
         "label": "CACHE_DURATION_MS",
         "description": [],
-        "path": "src/plugins/telemetry_collection_manager/common/index.ts",
+        "path": "src/platform/plugins/shared/telemetry_collection_manager/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1860,7 +1854,7 @@
         "signature": [
           "\"telemetryCollectionManager\""
         ],
-        "path": "src/plugins/telemetry_collection_manager/common/index.ts",
+        "path": "src/platform/plugins/shared/telemetry_collection_manager/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1875,7 +1869,7 @@
         "signature": [
           "\"telemetry_collection_manager\""
         ],
-        "path": "src/plugins/telemetry_collection_manager/common/index.ts",
+        "path": "src/platform/plugins/shared/telemetry_collection_manager/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

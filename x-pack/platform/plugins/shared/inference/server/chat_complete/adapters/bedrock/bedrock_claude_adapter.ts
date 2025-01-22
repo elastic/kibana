@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { filter, from, map, switchMap, tap } from 'rxjs';
-import { Readable } from 'stream';
+import { filter, from, map, switchMap, tap, throwError } from 'rxjs';
+import { isReadable, Readable } from 'stream';
 import {
   Message,
   MessageRole,
@@ -17,7 +17,7 @@ import {
 } from '@kbn/inference-common';
 import { parseSerdeChunkMessage } from './serde_utils';
 import { InferenceConnectorAdapter } from '../../types';
-import type { BedRockMessage, BedrockToolChoice } from './types';
+import type { BedRockImagePart, BedRockMessage, BedRockTextPart, BedrockToolChoice } from './types';
 import {
   BedrockChunkMember,
   serdeEventstreamIntoObservable,
@@ -26,7 +26,16 @@ import { processCompletionChunks } from './process_completion_chunks';
 import { addNoToolUsageDirective } from './prompts';
 
 export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
-  chatComplete: ({ executor, system, messages, toolChoice, tools }) => {
+  chatComplete: ({
+    executor,
+    system,
+    messages,
+    toolChoice,
+    tools,
+    temperature = 0,
+    modelName,
+    abortSignal,
+  }) => {
     const noToolUsage = toolChoice === ToolChoiceType.none;
 
     const subActionParams = {
@@ -34,8 +43,10 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
       messages: messagesToBedrock(messages),
       tools: noToolUsage ? [] : toolsToBedrock(tools, messages),
       toolChoice: toolChoiceToBedrock(toolChoice),
-      temperature: 0,
+      temperature,
+      model: modelName,
       stopSequences: ['\n\nHuman:'],
+      signal: abortSignal,
     };
 
     return from(
@@ -45,8 +56,19 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
       })
     ).pipe(
       switchMap((response) => {
-        const readable = response.data as Readable;
-        return serdeEventstreamIntoObservable(readable);
+        if (response.status === 'error') {
+          return throwError(() =>
+            createInferenceInternalError(`Error calling connector: ${response.serviceMessage}`, {
+              rootError: response.serviceMessage,
+            })
+          );
+        }
+        if (isReadable(response.data as any)) {
+          return serdeEventstreamIntoObservable(response.data as Readable);
+        }
+        return throwError(() =>
+          createInferenceInternalError('Unexpected error', response.data as Record<string, any>)
+        );
       }),
       tap((eventData) => {
         if ('modelStreamErrorException' in eventData) {
@@ -152,7 +174,24 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
       case MessageRole.User:
         return {
           role: 'user' as const,
-          rawContent: [{ type: 'text' as const, text: message.content }],
+          rawContent: (typeof message.content === 'string'
+            ? [message.content]
+            : message.content
+          ).map((contentPart) => {
+            if (typeof contentPart === 'string') {
+              return { text: contentPart, type: 'text' } satisfies BedRockTextPart;
+            } else if (contentPart.type === 'text') {
+              return { text: contentPart.text, type: 'text' } satisfies BedRockTextPart;
+            }
+            return {
+              type: 'image',
+              source: {
+                data: contentPart.source.data,
+                mediaType: contentPart.source.mimeType,
+                type: 'base64',
+              },
+            } satisfies BedRockImagePart;
+          }),
         };
       case MessageRole.Assistant:
         return {

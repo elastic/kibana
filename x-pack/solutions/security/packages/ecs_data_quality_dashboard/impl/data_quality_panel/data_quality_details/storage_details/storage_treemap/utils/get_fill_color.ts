@@ -4,15 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { euiThemeVars } from '@kbn/ui-theme';
-import { DEFAULT_INDEX_COLOR } from '../constants';
 
-export const getFillColor = (incompatible: number | undefined): string => {
+export const getFillColor = (
+  incompatible: number | undefined,
+  successColor: string,
+  dangerColor: string,
+  primaryColor: string
+): string => {
   if (incompatible === 0) {
-    return euiThemeVars.euiColorSuccess;
+    return successColor;
   } else if (incompatible != null && incompatible > 0) {
-    return euiThemeVars.euiColorDanger;
+    return dangerColor;
   } else {
-    return DEFAULT_INDEX_COLOR;
+    return primaryColor;
   }
 };

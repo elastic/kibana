@@ -14,7 +14,7 @@
       "tags": [],
       "label": "LicenseManagementUIPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/license_management/public/plugin.ts",
+      "path": "x-pack/platform/plugins/shared/license_management/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -25,7 +25,7 @@
           "tags": [],
           "label": "enabled",
           "description": [],
-          "path": "x-pack/plugins/license_management/public/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/license_management/public/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -40,7 +40,7 @@
             "LicenseManagementLocator",
             " | undefined"
           ],
-          "path": "x-pack/plugins/license_management/public/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/license_management/public/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -58,7 +58,7 @@
       "signature": [
         "void"
       ],
-      "path": "x-pack/plugins/license_management/public/plugin.ts",
+      "path": "x-pack/platform/plugins/shared/license_management/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",

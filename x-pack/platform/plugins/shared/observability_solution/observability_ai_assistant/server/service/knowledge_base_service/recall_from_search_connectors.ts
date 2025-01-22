@@ -10,10 +10,10 @@ import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import { isEmpty, orderBy, compact } from 'lodash';
 import type { Logger } from '@kbn/logging';
 import { CoreSetup } from '@kbn/core-lifecycle-server';
-import { firstValueFrom } from 'rxjs';
 import { RecalledEntry } from '.';
 import { aiAssistantSearchConnectorIndexPattern } from '../../../common';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
+import { getElserModelId } from './get_elser_model_id';
 
 export async function recallFromSearchConnectors({
   queries,
@@ -85,9 +85,6 @@ async function recallFromSemanticTextConnectors({
   const params = {
     index: connectorIndices,
     size: 20,
-    _source: {
-      excludes: semanticTextFields.map((field) => `${field}.inference`),
-    },
     query: {
       bool: {
         should: semanticTextFields.flatMap((field) => {
@@ -128,7 +125,7 @@ async function recallFromLegacyConnectors({
 }): Promise<RecalledEntry[]> {
   const ML_INFERENCE_PREFIX = 'ml.inference.';
 
-  const modelIdPromise = getElserModelId(core, logger); // pre-fetch modelId in parallel with fieldCaps
+  const modelIdPromise = getElserModelId({ core, logger }); // pre-fetch modelId in parallel with fieldCaps
   const fieldCaps = await esClient.asCurrentUser.fieldCaps({
     index: connectorIndices,
     fields: `${ML_INFERENCE_PREFIX}*`,
@@ -155,12 +152,11 @@ async function recallFromLegacyConnectors({
         bool: {
           should: [
             {
-              text_expansion: {
-                [vectorField]: {
-                  model_text: text,
-                  model_id: modelId,
-                  boost,
-                },
+              sparse_vector: {
+                field: vectorField,
+                query: text,
+                inference_id: modelId,
+                boost,
               },
             },
           ],
@@ -230,43 +226,4 @@ async function getConnectorIndices(
   }
 
   return connectorIndices;
-}
-
-async function getElserModelId(
-  core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>,
-  logger: Logger
-) {
-  const defaultModelId = '.elser_model_2';
-  const [_, pluginsStart] = await core.getStartServices();
-
-  // Wait for the license to be available so the ML plugin's guards pass once we ask for ELSER stats
-  const license = await firstValueFrom(pluginsStart.licensing.license$);
-  if (!license.hasAtLeast('enterprise')) {
-    return defaultModelId;
-  }
-
-  try {
-    // Wait for the ML plugin's dependency on the internal saved objects client to be ready
-    const { ml } = await core.plugins.onSetup('ml');
-
-    if (!ml.found) {
-      throw new Error('Could not find ML plugin');
-    }
-
-    const elserModelDefinition = await (
-      ml.contract as {
-        trainedModelsProvider: (
-          request: {},
-          soClient: {}
-        ) => { getELSER: () => Promise<{ model_id: string }> };
-      }
-    )
-      .trainedModelsProvider({} as any, {} as any) // request, savedObjectsClient (but we fake it to use the internal user)
-      .getELSER();
-
-    return elserModelDefinition.model_id;
-  } catch (error) {
-    logger.error(`Failed to resolve ELSER model definition: ${error}`);
-    return defaultModelId;
-  }
 }

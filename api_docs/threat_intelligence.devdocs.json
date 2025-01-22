@@ -15,7 +15,7 @@
         "signature": [
           "<TId extends string = \"threat_intelligence\">(threatIntelligencePage: \"indicators\") => TILinkItem<TId>"
         ],
-        "path": "x-pack/plugins/threat_intelligence/public/utils/security_solution_links.ts",
+        "path": "x-pack/solutions/security/plugins/threat_intelligence/public/utils/security_solution_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -31,7 +31,7 @@
             "signature": [
               "\"indicators\""
             ],
-            "path": "x-pack/plugins/threat_intelligence/public/utils/security_solution_links.ts",
+            "path": "x-pack/solutions/security/plugins/threat_intelligence/public/utils/security_solution_links.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -53,7 +53,7 @@
         "description": [
           "\nMethods exposed from the security solution to the threat intelligence application."
         ],
-        "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+        "path": "x-pack/solutions/security/plugins/threat_intelligence/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -69,7 +69,7 @@
             "signature": [
               "() => React.ComponentType<{ children: React.ReactNode; }>"
             ],
-            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "path": "x-pack/solutions/security/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -87,7 +87,7 @@
             "signature": [
               "() => React.ComponentType<{ children: React.ReactNode; }>"
             ],
-            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "path": "x-pack/solutions/security/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -105,7 +105,7 @@
             "signature": [
               "LicenseAware"
             ],
-            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "path": "x-pack/solutions/security/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -121,7 +121,7 @@
             "signature": [
               "SelectedDataView"
             ],
-            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "path": "x-pack/solutions/security/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -140,7 +140,7 @@
               "AnyAction",
               ">"
             ],
-            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "path": "x-pack/solutions/security/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -158,7 +158,7 @@
               "UseInvestigateInTimelineProps",
               ") => () => Promise<void>"
             ],
-            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "path": "x-pack/solutions/security/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -172,13 +172,26 @@
                 "signature": [
                   "UseInvestigateInTimelineProps"
                 ],
-                "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+                "path": "x-pack/solutions/security/plugins/threat_intelligence/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.SecuritySolutionPluginContext.hasAccessToTimeline",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasAccessToTimeline",
+            "description": [
+              "\nWhether the current user has access to timeline"
+            ],
+            "path": "x-pack/solutions/security/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "threatIntelligence",
@@ -197,7 +210,7 @@
                 "text": "Query"
               }
             ],
-            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "path": "x-pack/solutions/security/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -221,7 +234,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "path": "x-pack/solutions/security/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -244,7 +257,7 @@
                 "text": "TimeRange"
               }
             ],
-            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "path": "x-pack/solutions/security/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -260,7 +273,7 @@
             "signature": [
               "React.VoidFunctionComponent<any>"
             ],
-            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "path": "x-pack/solutions/security/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -307,7 +320,7 @@
             "signature": [
               "(query: { id: string; loading: boolean; refetch: VoidFunction; }) => void"
             ],
-            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "path": "x-pack/solutions/security/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -318,7 +331,7 @@
                 "tags": [],
                 "label": "query",
                 "description": [],
-                "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+                "path": "x-pack/solutions/security/plugins/threat_intelligence/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -329,7 +342,7 @@
                     "tags": [],
                     "label": "id",
                     "description": [],
-                    "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+                    "path": "x-pack/solutions/security/plugins/threat_intelligence/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -340,7 +353,7 @@
                     "tags": [],
                     "label": "loading",
                     "description": [],
-                    "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+                    "path": "x-pack/solutions/security/plugins/threat_intelligence/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -354,7 +367,7 @@
                     "signature": [
                       "VoidFunction"
                     ],
-                    "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+                    "path": "x-pack/solutions/security/plugins/threat_intelligence/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "returnComment": [],
@@ -377,7 +390,7 @@
             "signature": [
               "(query: { id: string; }) => void"
             ],
-            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "path": "x-pack/solutions/security/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -388,7 +401,7 @@
                 "tags": [],
                 "label": "query",
                 "description": [],
-                "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+                "path": "x-pack/solutions/security/plugins/threat_intelligence/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -399,7 +412,7 @@
                     "tags": [],
                     "label": "id",
                     "description": [],
-                    "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+                    "path": "x-pack/solutions/security/plugins/threat_intelligence/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -420,7 +433,7 @@
             "signature": [
               "Blocking"
             ],
-            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "path": "x-pack/solutions/security/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -434,7 +447,7 @@
         "tags": [],
         "label": "ThreatIntelligencePluginSetup",
         "description": [],
-        "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+        "path": "x-pack/solutions/security/plugins/threat_intelligence/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -447,7 +460,7 @@
         "tags": [],
         "label": "ThreatIntelligencePluginStart",
         "description": [],
-        "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+        "path": "x-pack/solutions/security/plugins/threat_intelligence/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -469,7 +482,7 @@
               },
               "; }) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
-            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "path": "x-pack/solutions/security/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -493,7 +506,7 @@
         "signature": [
           "\"/threat_intelligence\""
         ],
-        "path": "x-pack/plugins/threat_intelligence/public/constants/navigation.ts",
+        "path": "x-pack/solutions/security/plugins/threat_intelligence/public/constants/navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -505,12 +518,12 @@
         "tags": [],
         "label": "TIPageId",
         "description": [
-          "\nAll the IDs for the threat intelligence pages.\nThis needs to match the threat intelligence page entries in SecurityPageName` (x-pack/plugins/security_solution/common/constants.ts).\n\nExample to add more IDs:\n  export type TIPageId = 'threat_intelligence' | 'threat_intelligence-feed';"
+          "\nAll the IDs for the threat intelligence pages.\nThis needs to match the threat intelligence page entries in SecurityPageName` (x-pack/solutions/security/plugins/security_solution/common/constants.ts).\n\nExample to add more IDs:\n  export type TIPageId = 'threat_intelligence' | 'threat_intelligence-feed';"
         ],
         "signature": [
           "\"threat_intelligence\""
         ],
-        "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+        "path": "x-pack/solutions/security/plugins/threat_intelligence/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

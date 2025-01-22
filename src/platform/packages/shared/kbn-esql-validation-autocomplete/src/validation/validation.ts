@@ -21,8 +21,15 @@ import {
   ESQLMessage,
   ESQLSource,
   walk,
+  isBinaryExpression,
+  isIdentifier,
 } from '@kbn/esql-ast';
-import type { ESQLAstField, ESQLIdentifier } from '@kbn/esql-ast/src/types';
+import type {
+  ESQLAstField,
+  ESQLAstJoinCommand,
+  ESQLIdentifier,
+  ESQLProperNode,
+} from '@kbn/esql-ast/src/types';
 import {
   CommandModeDefinition,
   CommandOptionsDefinition,
@@ -55,7 +62,6 @@ import {
   getQuotedColumnName,
   isInlineCastItem,
   getSignaturesWithMatchingArity,
-  isIdentifier,
   isFunctionOperatorParam,
   isMaybeAggFunction,
   isParametrized,
@@ -1104,6 +1110,72 @@ const validateMetricsCommand = (
   return messages;
 };
 
+/**
+ * Validates the JOIN command:
+ *
+ *     <LEFT | RIGHT | LOOKUP> JOIN <target> ON <conditions>
+ *     <LEFT | RIGHT | LOOKUP> JOIN index [ = alias ] ON <condition> [, <condition> [, ...]]
+ */
+const validateJoinCommand = (
+  command: ESQLAstJoinCommand,
+  references: ReferenceMaps
+): ESQLMessage[] => {
+  const messages: ESQLMessage[] = [];
+  const { commandType, args } = command;
+  const { joinIndices } = references;
+
+  if (!['left', 'right', 'lookup'].includes(commandType)) {
+    return [errors.unexpected(command.location, 'JOIN command type')];
+  }
+
+  const target = args[0] as ESQLProperNode;
+  let index: ESQLIdentifier;
+  let alias: ESQLIdentifier | undefined;
+
+  if (isBinaryExpression(target)) {
+    if (target.name === 'as') {
+      alias = target.args[1] as ESQLIdentifier;
+      index = target.args[0] as ESQLIdentifier;
+
+      if (!isIdentifier(index) || !isIdentifier(alias)) {
+        return [errors.unexpected(target.location)];
+      }
+    } else {
+      return [errors.unexpected(target.location)];
+    }
+  } else if (isIdentifier(target)) {
+    index = target as ESQLIdentifier;
+  } else {
+    return [errors.unexpected(target.location)];
+  }
+
+  let isIndexFound = false;
+  for (const { name, aliases } of joinIndices) {
+    if (index.name === name) {
+      isIndexFound = true;
+      break;
+    }
+
+    if (aliases) {
+      for (const aliasName of aliases) {
+        if (index.name === aliasName) {
+          isIndexFound = true;
+          break;
+        }
+      }
+    }
+  }
+
+  if (!isIndexFound) {
+    const error = errors.invalidJoinIndex(index);
+    messages.push(error);
+
+    return messages;
+  }
+
+  return messages;
+};
+
 function validateCommand(
   command: ESQLCommand,
   references: ReferenceMaps,
@@ -1131,6 +1203,12 @@ function validateCommand(
       messages.push(...validateMetricsCommand(metrics, references));
       break;
     }
+    case 'join': {
+      const join = command as ESQLAstJoinCommand;
+      const joinCommandErrors = validateJoinCommand(join, references);
+      messages.push(...joinCommandErrors);
+      break;
+    }
     default: {
       // Now validate arguments
       for (const commandArg of command.args) {
@@ -1147,13 +1225,9 @@ function validateCommand(
                 currentCommandIndex,
               })
             );
-          }
-
-          if (isSettingItem(arg)) {
+          } else if (isSettingItem(arg)) {
             messages.push(...validateSetting(arg, commandDef.modes[0], command, references));
-          }
-
-          if (isOptionItem(arg)) {
+          } else if (isOptionItem(arg)) {
             messages.push(
               ...validateOption(
                 arg,
@@ -1162,15 +1236,13 @@ function validateCommand(
                 references
               )
             );
-          }
-          if (isColumnItem(arg) || isIdentifier(arg)) {
+          } else if (isColumnItem(arg) || isIdentifier(arg)) {
             if (command.name === 'stats' || command.name === 'inlinestats') {
               messages.push(errors.unknownAggFunction(arg));
             } else {
               messages.push(...validateColumnForCommand(arg, command.name, references));
             }
-          }
-          if (isTimeIntervalItem(arg)) {
+          } else if (isTimeIntervalItem(arg)) {
             messages.push(
               getMessageFromId({
                 messageId: 'unsupportedTypeForCommand',
@@ -1182,8 +1254,7 @@ function validateCommand(
                 locations: arg.location,
               })
             );
-          }
-          if (isSourceItem(arg)) {
+          } else if (isSourceItem(arg)) {
             messages.push(...validateSource(arg, command.name, references));
           }
         }
@@ -1256,6 +1327,7 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getPolicies: ['unknownPolicy'],
   getPreferences: [],
   getFieldsMetadata: [],
+  getJoinIndices: [],
 };
 
 /**
@@ -1325,13 +1397,15 @@ async function validateAst(
 
   const { ast } = parsingResult;
 
-  const [sources, availableFields, availablePolicies] = await Promise.all([
+  const [sources, availableFields, availablePolicies, joinIndices] = await Promise.all([
     // retrieve the list of available sources
     retrieveSources(ast, callbacks),
     // retrieve available fields (if a source command has been defined)
     retrieveFields(queryString, ast, callbacks),
     // retrieve available policies (if an enrich command has been defined)
     retrievePolicies(ast, callbacks),
+    // retrieve indices for join command
+    callbacks?.getJoinIndices?.(),
   ]);
 
   if (availablePolicies.size) {
@@ -1366,6 +1440,7 @@ async function validateAst(
       policies: availablePolicies,
       variables,
       query: queryString,
+      joinIndices: joinIndices?.indices || [],
     };
     const commandMessages = validateCommand(command, references, ast, index);
     messages.push(...commandMessages);

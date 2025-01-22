@@ -1410,7 +1410,13 @@
         "<",
         "PartitionFieldsDefinition",
         ">; anomalySearch(query: ",
-        "SearchRequest",
+        {
+          "pluginId": "@kbn/es-types",
+          "scope": "common",
+          "docId": "kibKbnEsTypesPluginApi",
+          "section": "def-common.ESSearchRequest",
+          "text": "ESSearchRequest"
+        },
         ", jobIds: string[]): Promise<",
         {
           "pluginId": "@kbn/es-types",
@@ -1428,9 +1434,21 @@
           "text": "MlAnomalyRecordDoc"
         },
         ", ",
-        "SearchRequest",
+        {
+          "pluginId": "@kbn/es-types",
+          "scope": "common",
+          "docId": "kibKbnEsTypesPluginApi",
+          "section": "def-common.ESSearchRequest",
+          "text": "ESSearchRequest"
+        },
         ", { restTotalHitsAsInt: false; }>>; anomalySearch$(query: ",
-        "SearchRequest",
+        {
+          "pluginId": "@kbn/es-types",
+          "scope": "common",
+          "docId": "kibKbnEsTypesPluginApi",
+          "section": "def-common.ESSearchRequest",
+          "text": "ESSearchRequest"
+        },
         ", jobIds: string[]): ",
         "Observable",
         "<",
@@ -1450,7 +1468,13 @@
           "text": "MlAnomalyRecordDoc"
         },
         ", ",
-        "SearchRequest",
+        {
+          "pluginId": "@kbn/es-types",
+          "scope": "common",
+          "docId": "kibKbnEsTypesPluginApi",
+          "section": "def-common.ESSearchRequest",
+          "text": "ESSearchRequest"
+        },
         ", { restTotalHitsAsInt: false; }>>; getCategoryStoppedPartitions(jobIds: string[], fieldToBucket?: \"job_id\" | \"partition_field_value\" | undefined): Promise<",
         "GetStoppedPartitionResult",
         ">; getDatafeedResultChartData(jobId: string, start: number, end: number): Promise<",
@@ -1581,7 +1605,7 @@
         "MlSavedObjectType",
         ", ids: string[]): Promise<",
         "SavedObjectResult",
-        ">; syncSavedObjects(simulate?: boolean): Promise<",
+        ">; syncSavedObjects(simulate?: boolean, addToAllSpaces?: boolean | undefined): Promise<",
         "SyncSavedObjectResponse",
         ">; initSavedObjects(simulate?: boolean): Promise<",
         "InitializeSavedObjectResponse",
@@ -1593,6 +1617,10 @@
         "MlSavedObjectType",
         ", ids: string[]): Promise<",
         "CanDeleteMLSpaceAwareItemsResponse",
+        ">; canSyncToAllSpaces(mlSavedObjectType?: ",
+        "MlSavedObjectType",
+        " | undefined): Promise<",
+        "CanSyncToAllSpacesResponse",
         ">; trainedModelsSpaces(): Promise<",
         "TrainedModelsSpacesResponse",
         ">; updateModelsSpaces(modelIds: string[], spacesToAdd: string[], spacesToRemove: string[]): Promise<",
@@ -2621,21 +2649,9 @@
         " & ",
         "ResultsServiceProvider",
         " & { alertingServiceProvider(savedObjectsClient: ",
-        {
-          "pluginId": "@kbn/core-saved-objects-api-server",
-          "scope": "server",
-          "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-          "section": "def-server.SavedObjectsClientContract",
-          "text": "SavedObjectsClientContract"
-        },
+        "SavedObjectsClientContract",
         ", request: ",
-        {
-          "pluginId": "@kbn/core-http-server",
-          "scope": "server",
-          "docId": "kibKbnCoreHttpServerPluginApi",
-          "section": "def-server.KibanaRequest",
-          "text": "KibanaRequest"
-        },
+        "KibanaRequest",
         "<unknown, unknown, unknown, any>): { preview: (args_0: Readonly<{} & { timeRange: string; sampleSize: number; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>, spaceId: string, state?: ",
         "AnomalyDetectionRuleState",
         " | undefined) => Promise<{ payload: ",

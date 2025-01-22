@@ -49,13 +49,12 @@ import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../..';
 import type { SwimlaneType } from './explorer_constants';
 import { OVERALL_LABEL, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
 import { useMlKibana } from '../contexts/kibana';
-import type { ExplorerState } from './reducers/explorer_reducer';
 import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers_found';
 import { SwimlaneContainer } from './swimlane_container';
-import type {
-  AppStateSelectedCells,
-  OverallSwimlaneData,
-  ViewBySwimLaneData,
+import {
+  type AppStateSelectedCells,
+  type OverallSwimlaneData,
+  type ViewBySwimLaneData,
 } from './explorer_utils';
 import { NoOverallData } from './components/no_overall_data';
 import { SeverityControl } from '../components/severity_control';
@@ -67,6 +66,9 @@ import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { getTimeBoundsFromSelection } from './hooks/use_selected_cells';
 import { SwimLaneWrapper } from './alerts';
 import { Y_AXIS_LABEL_WIDTH } from './constants';
+import { CASES_TOAST_MESSAGES_TITLES } from '../../cases/constants';
+import type { ExplorerState } from './explorer_data';
+import { useJobSelection } from './hooks/use_job_selection';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
   return options.map((option) => ({
@@ -120,16 +122,13 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
     const { overallAnnotations } = explorerState;
 
     const { filterActive, queryString } = useObservable(
-      anomalyExplorerCommonStateService.getFilterSettings$(),
-      anomalyExplorerCommonStateService.getFilterSettings()
+      anomalyExplorerCommonStateService.filterSettings$,
+      anomalyExplorerCommonStateService.filterSettings
     );
 
     const swimlaneLimit = useObservable(anomalyTimelineStateService.getSwimLaneCardinality$());
 
-    const selectedJobs = useObservable(
-      anomalyExplorerCommonStateService.getSelectedJobs$(),
-      anomalyExplorerCommonStateService.getSelectedJobs()
-    );
+    const { selectedJobs, mergedGroupsAndJobsIds } = useJobSelection();
 
     const loading = useObservable(anomalyTimelineStateService.isOverallSwimLaneLoading$(), true);
 
@@ -189,13 +188,17 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       [severityUpdate, swimLaneSeverity]
     );
 
-    const openCasesModalCallback = useCasesModal(ANOMALY_SWIMLANE_EMBEDDABLE_TYPE);
+    const openCasesModalCallback = useCasesModal(
+      ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+      CASES_TOAST_MESSAGES_TITLES.ANOMALY_TIMELINE
+    );
 
     const openCasesModal = useCallback(
       (swimLaneType: SwimlaneType) => {
         openCasesModalCallback({
           swimlaneType: swimLaneType,
           ...(swimLaneType === SWIMLANE_TYPE.VIEW_BY ? { viewBy: viewBySwimlaneFieldName } : {}),
+          // For cases attachment, pass just the job IDs to maintain stale data
           jobIds: selectedJobs?.map((v) => v.id),
           timeRange: globalTimeRange,
           ...(isDefined(queryString) && queryString !== ''
@@ -236,6 +239,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             />
           ),
           panel: 'addToDashboardPanel',
+          icon: 'dashboardApp',
           'data-test-subj': 'mlAnomalyTimelinePanelAddToDashboardButton',
         });
 
@@ -281,6 +285,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               defaultMessage="Add to case"
             />
           ),
+          icon: 'casesApp',
           'data-test-subj': 'mlAnomalyTimelinePanelAttachToCaseButton',
         });
 
@@ -359,15 +364,13 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
         const stateTransfer = embeddable!.getStateTransfer();
 
-        const jobIds = selectedJobs.map((j) => j.id);
-
-        const config = getDefaultEmbeddablePanelConfig(jobIds, queryString);
+        const config = getDefaultEmbeddablePanelConfig(mergedGroupsAndJobsIds, queryString);
 
         const embeddableInput: Partial<AnomalySwimLaneEmbeddableState> = {
           id: config.id,
           title: newTitle,
           description: newDescription,
-          jobIds,
+          jobIds: mergedGroupsAndJobsIds,
           swimlaneType: selectedSwimlane,
           ...(selectedSwimlane === SWIMLANE_TYPE.VIEW_BY
             ? { viewBy: viewBySwimlaneFieldName }
@@ -389,7 +392,14 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
           path,
         });
       },
-      [embeddable, queryString, selectedJobs, selectedSwimlane, viewBySwimlaneFieldName]
+      [
+        embeddable,
+        mergedGroupsAndJobsIds,
+        queryString,
+        selectedJobs,
+        selectedSwimlane,
+        viewBySwimlaneFieldName,
+      ]
     );
 
     return (
@@ -424,6 +434,8 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                         defaultMessage: 'Actions',
                       })}
                       color="text"
+                      display="base"
+                      isSelected={isMenuOpen}
                       iconType="boxesHorizontal"
                       onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
                       data-test-subj="mlAnomalyTimelinePanelMenu"
@@ -621,7 +633,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               defaultMessage: 'Anomaly swim lane',
             })}
             documentInfo={{
-              title: getDefaultSwimlanePanelTitle(selectedJobs.map(({ id }) => id)),
+              title: getDefaultSwimlanePanelTitle(mergedGroupsAndJobsIds),
             }}
             onClose={() => {
               setSelectedSwimlane(undefined);

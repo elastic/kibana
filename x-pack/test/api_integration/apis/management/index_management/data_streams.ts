@@ -182,17 +182,38 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Update', () => {
-      const testDataStreamName = 'test-data-stream';
+      const testDataStreamName1 = 'test-data-stream1';
+      const testDataStreamName2 = 'test-data-stream2';
 
-      before(async () => await createDataStream(testDataStreamName));
-      after(async () => await deleteDataStream(testDataStreamName));
+      before(async () => {
+        await createDataStream(testDataStreamName1);
+        await createDataStream(testDataStreamName2);
+      });
+      after(async () => {
+        await deleteDataStream(testDataStreamName1);
+        await deleteDataStream(testDataStreamName2);
+      });
 
       it('updates the data retention of a DS', async () => {
         const { body } = await supertest
-          .put(`${API_BASE_PATH}/data_streams/${testDataStreamName}/data_retention`)
+          .put(`${API_BASE_PATH}/data_streams/data_retention`)
           .set('kbn-xsrf', 'xxx')
           .send({
             dataRetention: '7d',
+            dataStreams: [testDataStreamName1],
+          })
+          .expect(200);
+
+        expect(body).to.eql({ success: true });
+      });
+
+      it('updates the data retention of multiple DS', async () => {
+        const { body } = await supertest
+          .put(`${API_BASE_PATH}/data_streams/data_retention`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            dataRetention: '7d',
+            dataStreams: [testDataStreamName1, testDataStreamName2],
           })
           .expect(200);
 
@@ -201,9 +222,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('sets data retention to infinite', async () => {
         const { body } = await supertest
-          .put(`${API_BASE_PATH}/data_streams/${testDataStreamName}/data_retention`)
+          .put(`${API_BASE_PATH}/data_streams/data_retention`)
           .set('kbn-xsrf', 'xxx')
-          .send({})
+          .send({
+            dataStreams: [testDataStreamName1],
+          })
           .expect(200);
 
         expect(body).to.eql({ success: true });
@@ -211,14 +234,14 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('can disable lifecycle for a given policy', async () => {
         const { body } = await supertest
-          .put(`${API_BASE_PATH}/data_streams/${testDataStreamName}/data_retention`)
+          .put(`${API_BASE_PATH}/data_streams/data_retention`)
           .set('kbn-xsrf', 'xxx')
-          .send({ enabled: false })
+          .send({ enabled: false, dataStreams: [testDataStreamName1] })
           .expect(200);
 
         expect(body).to.eql({ success: true });
 
-        const datastream = await getDatastream(testDataStreamName);
+        const datastream = await getDatastream(testDataStreamName1);
         expect(datastream.lifecycle).to.be(undefined);
       });
     });

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { EuiComboBoxProps } from '@elastic/eui';
+import type { EuiComboBoxOptionsListProps, EuiComboBoxProps } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import type { FC } from 'react';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { isDefined } from '@kbn/ml-is-defined';
+import { i18n } from '@kbn/i18n';
 import { ALL_TRANSFORMS_SELECTION } from '../../../common/constants';
 
 export interface TransformSelectorControlProps {
@@ -33,6 +34,8 @@ export const TransformSelectorControl: FC<TransformSelectorControlProps> = ({
   options,
   allowSelectAll = false,
 }) => {
+  const [allowCustomOptions, setAllowCustomOptions] = useState(false);
+
   const onSelectionChange: EuiComboBoxProps<string>['onChange'] = ((selectionUpdate) => {
     if (!selectionUpdate?.length) {
       onChange([]);
@@ -50,6 +53,12 @@ export const TransformSelectorControl: FC<TransformSelectorControlProps> = ({
     );
   }) as Exclude<EuiComboBoxProps<string>['onChange'], undefined>;
 
+  const onCreateOption = allowCustomOptions
+    ? (((searchValue) => {
+        onChange([...selectedOptions, searchValue]);
+      }) as EuiComboBoxOptionsListProps<string>['onCreateOption'])
+    : undefined;
+
   const selectedOptionsEui = useMemo(() => convertToEuiOptions(selectedOptions), [selectedOptions]);
   const optionsEui = useMemo(() => {
     return convertToEuiOptions(allowSelectAll ? [ALL_TRANSFORMS_SELECTION, ...options] : options);
@@ -58,6 +67,17 @@ export const TransformSelectorControl: FC<TransformSelectorControlProps> = ({
   return (
     <EuiFormRow fullWidth label={label} isInvalid={!!errors?.length} error={errors}>
       <EuiComboBox<string>
+        onSearchChange={(searchValue, hasMatchingOption) => {
+          setAllowCustomOptions(!hasMatchingOption && searchValue.includes('*'));
+        }}
+        onCreateOption={onCreateOption}
+        customOptionText={i18n.translate(
+          'xpack.transform.alertTypes.transformHealth.customOptionText',
+          {
+            defaultMessage: 'Include {searchValuePlaceholder} wildcard',
+            values: { searchValuePlaceholder: '{searchValue}' },
+          }
+        )}
         singleSelection={false}
         selectedOptions={selectedOptionsEui}
         options={optionsEui}

@@ -1,0 +1,98 @@
+{
+  "id": "searchSynonyms",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "searchSynonyms",
+      "id": "def-server.SearchSynonymsPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "SearchSynonymsPluginSetup",
+      "description": [],
+      "path": "x-pack/solutions/search/plugins/search_synonyms/common/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "searchSynonyms",
+      "id": "def-server.SearchSynonymsPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "SearchSynonymsPluginStart",
+      "description": [],
+      "path": "x-pack/solutions/search/plugins/search_synonyms/common/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "searchSynonyms",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"searchSynonyms\""
+        ],
+        "path": "x-pack/solutions/search/plugins/search_synonyms/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchSynonyms",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"Synonyms\""
+        ],
+        "path": "x-pack/solutions/search/plugins/search_synonyms/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchSynonyms",
+        "id": "def-common.PLUGIN_TITLE",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_TITLE",
+        "description": [],
+        "path": "x-pack/solutions/search/plugins/search_synonyms/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -128,11 +128,15 @@ export async function suggest(
       // SORT fie<suggest>
       return [
         ...pushItUpInTheList(
-          fieldSuggestions.map((suggestion) => ({
-            ...suggestion,
-            command: TRIGGER_SUGGESTION_COMMAND,
-            rangeToReplace,
-          })),
+          fieldSuggestions.map((suggestion) => {
+            // if there is already a command, we don't want to override it
+            if (suggestion.command) return suggestion;
+            return {
+              ...suggestion,
+              command: TRIGGER_SUGGESTION_COMMAND,
+              rangeToReplace,
+            };
+          }),
           true
         ),
         ...functionSuggestions,

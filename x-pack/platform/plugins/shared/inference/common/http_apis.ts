@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import type { FunctionCallingMode, Message, ToolOptions } from '@kbn/inference-common';
-import { InferenceConnector } from './connectors';
+import type {
+  FunctionCallingMode,
+  Message,
+  ToolOptions,
+  InferenceConnector,
+} from '@kbn/inference-common';
 
 export type ChatCompleteRequestBody = {
   connectorId: string;
   stream?: boolean;
   system?: string;
+  temperature?: number;
+  modelName?: string;
   messages: Message[];
   functionCalling?: FunctionCallingMode;
 } & ToolOptions;

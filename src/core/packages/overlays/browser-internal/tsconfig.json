@@ -1,0 +1,38 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@emotion/react/types/css-prop"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "../../../../../typings/emotion.d.ts"
+  ],
+  "kbn_references": [
+    "@kbn/i18n-react",
+    "@kbn/core-theme-browser",
+    "@kbn/core-mount-utils-browser-internal",
+    "@kbn/core-i18n-browser",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/core-overlays-browser",
+    "@kbn/core-i18n-browser-mocks",
+    "@kbn/core-ui-settings-browser-mocks",
+    "@kbn/core-mount-utils-browser",
+    "@kbn/core-theme-browser-mocks",
+    "@kbn/i18n",
+    "@kbn/react-kibana-context-render",
+    "@kbn/core-analytics-browser-mocks",
+    "@kbn/core-analytics-browser",
+    "@kbn/core-user-profile-browser-mocks",
+    "@kbn/core-user-profile-browser"
+  ],
+  "exclude": [
+    "target/**/*"
+  ]
+}

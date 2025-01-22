@@ -1,0 +1,8 @@
+{
+  "name": "@kbn/securitysolution-list-hooks",
+  "version": "1.0.0",
+  "description": "Security solution list ReactJS hooks",
+  "license": "Elastic License 2.0",
+  "private": true,
+  "sideEffects": false
+}

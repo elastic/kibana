@@ -32,7 +32,6 @@ export type {
 };
 
 export { aiAssistantCapabilities } from '../common/capabilities';
-export { AssistantAvatar } from './components/assistant_avatar';
 export { ConnectorSelectorBase } from './components/connector_selector/connector_selector_base';
 export { useAbortableAsync, type AbortableAsyncState } from './hooks/use_abortable_async';
 export { useGenAIConnectorsWithoutContext } from './hooks/use_genai_connectors';
@@ -62,7 +61,6 @@ export {
 } from '../common/functions/visualize_esql';
 
 export {
-  isSupportedConnectorType,
   FunctionVisibility,
   MessageRole,
   KnowledgeBaseEntryRole,

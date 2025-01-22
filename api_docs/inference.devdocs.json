@@ -117,7 +117,7 @@
                   "section": "def-common.Message",
                   "text": "Message"
                 },
-                "[]; functionCalling?: ",
+                "[]; temperature?: number | undefined; modelName?: string | undefined; functionCalling?: ",
                 {
                   "pluginId": "@kbn/inference-common",
                   "scope": "common",
@@ -125,7 +125,7 @@
                   "section": "def-common.FunctionCallingMode",
                   "text": "FunctionCallingMode"
                 },
-                " | undefined; } & TToolOptions"
+                " | undefined; abortSignal?: AbortSignal | undefined; } & TToolOptions"
               ],
               "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
               "deprecated": false,
@@ -200,7 +200,13 @@
           "description": [],
           "signature": [
             "() => Promise<",
-            "InferenceConnector",
+            {
+              "pluginId": "@kbn/inference-common",
+              "scope": "common",
+              "docId": "kibKbnInferenceCommonPluginApi",
+              "section": "def-common.InferenceConnector",
+              "text": "InferenceConnector"
+            },
             "[]>"
           ],
           "path": "x-pack/platform/plugins/shared/inference/public/types.ts",
@@ -329,7 +335,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ [P in \"system\" | \"stream\" | \"messages\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
+                  "{ [P in \"abortSignal\" | \"temperature\" | \"system\" | \"stream\" | \"messages\" | \"modelName\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
                   {
                     "pluginId": "@kbn/inference-common",
                     "scope": "common",
@@ -390,7 +396,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ id: TId; input: string; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; system?: string | undefined; stream?: TStream | undefined; previousMessages?: ",
+                  "{ id: TId; abortSignal?: AbortSignal | undefined; input: string; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; system?: string | undefined; stream?: TStream | undefined; modelName?: string | undefined; previousMessages?: ",
                   {
                     "pluginId": "@kbn/inference-common",
                     "scope": "common",
@@ -417,7 +423,13 @@
             ],
             "signature": [
               "(id: string) => Promise<",
-              "InferenceConnector",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.InferenceConnector",
+                "text": "InferenceConnector"
+              },
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/inference/server/inference_client/types.ts",
@@ -523,7 +535,7 @@
                     "section": "def-common.Message",
                     "text": "Message"
                   },
-                  "[]; functionCalling?: ",
+                  "[]; temperature?: number | undefined; modelName?: string | undefined; functionCalling?: ",
                   {
                     "pluginId": "@kbn/inference-common",
                     "scope": "common",
@@ -531,7 +543,7 @@
                     "section": "def-common.FunctionCallingMode",
                     "text": "FunctionCallingMode"
                   },
-                  " | undefined; } & TToolOptions"
+                  " | undefined; abortSignal?: AbortSignal | undefined; } & TToolOptions"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
                 "deprecated": false,
@@ -610,7 +622,13 @@
             ],
             "signature": [
               "(id: string) => Promise<",
-              "InferenceConnector",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.InferenceConnector",
+                "text": "InferenceConnector"
+              },
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/inference/server/inference_client/types.ts",
@@ -837,7 +855,7 @@
             "section": "def-common.ChatCompleteAPI",
             "text": "ChatCompleteAPI"
           },
-          ") => ({ id, connectorId, input, schema, system, previousMessages, functionCalling, stream, retry, }: DefaultOutputOptions) => Promise<",
+          ") => ({ id, connectorId, input, schema, system, previousMessages, modelName, functionCalling, stream, abortSignal, retry, }: DefaultOutputOptions) => Promise<",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -961,7 +979,13 @@
             "label": "connectors",
             "description": [],
             "signature": [
-              "InferenceConnector",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.InferenceConnector",
+                "text": "InferenceConnector"
+              },
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/inference/common/http_apis.ts",
@@ -982,7 +1006,7 @@
         "label": "ChatCompleteRequestBody",
         "description": [],
         "signature": [
-          "{ connectorId: string; stream?: boolean | undefined; system?: string | undefined; messages: ",
+          "{ connectorId: string; stream?: boolean | undefined; system?: string | undefined; temperature?: number | undefined; modelName?: string | undefined; messages: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",

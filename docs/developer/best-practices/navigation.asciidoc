@@ -25,7 +25,7 @@ Assuming you want to link from your app to *Discover*. When building such URL th
 
 ==== Prepending a proper `basePath`
 
-To prepend {kib}'s `basePath` use {kib-repo}tree/{branch}/packages/core/http/core-http-browser-internal/src/base_path.ts[core.http.basePath.prepend] helper: 
+To prepend {kib}'s `basePath` use {kib-repo}tree/{branch}/src/core/packages/http/browser-internal/src/base_path.ts[core.http.basePath.prepend] helper: 
 
 [source,typescript jsx]
 ----
@@ -47,7 +47,7 @@ console.log(discoverUrl); // http://localhost:5601/bpr/s/space/app/discover
 const discoverUrlWithSomeState = core.http.basePath.prepend(`/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'2020-09-10T11:39:50.203Z',to:'2020-09-10T11:40:20.249Z'))&_a=(columns:!(_source),filters:!(),index:'90943e30-9a47-11e8-b64d-95841ca0b247',interval:auto,query:(language:kuery,query:''),sort:!())`);
 ----
 
-Instead, each app should expose {kib-repo}tree/{branch}/src/plugins/share/common/url_service/locators/README.md[a locator].
+Instead, each app should expose {kib-repo}tree/{branch}/src/platform/plugins/shared/share/common/url_service/locators/README.md[a locator].
 Other apps should use those locators for navigation or URL creation. 
 
 [source,typescript jsx]
@@ -58,7 +58,7 @@ const discoverUrl = await plugins.discover.locator.getUrl({filters, timeRange});
 await plugins.discover.locator.navigate({filters, timeRange});
 ----
 
-To get a better idea, take a look at *Discover* locator {kib-repo}tree/{branch}/src/plugins/discover/public/application/doc/locator.ts[implementation].
+To get a better idea, take a look at *Discover* locator {kib-repo}tree/{branch}/src/platform/plugins/shared/discover/public/application/doc/locator.ts[implementation].
 It allows specifying various **Discover** app state pieces like: index pattern, filters, query, time range and more.
 
 There are two ways to access locators of other apps:
@@ -87,13 +87,13 @@ window.location.href = urlToADashboard;
 
 To navigate between different {kib} apps without a page reload (by default) there are APIs in `core`:
 
-* {kib-repo}tree/{branch}/packages/core/application/core-application-browser/src/contracts.ts[core.application.navigateToApp]
-* {kib-repo}tree/{branch}/packages/core/application/core-application-browser/src/contracts.ts[core.application.navigateToUrl]
+* {kib-repo}tree/{branch}/src/core/packages/application/browser/src/contracts.ts[core.application.navigateToApp]
+* {kib-repo}tree/{branch}/src/core/packages/application/browser/src/contracts.ts[core.application.navigateToUrl]
 
 Both methods offer customization such as opening the target in a new page, with an `options` parameter. All the options are optional be default.
 
-* {kib-repo}tree/{branch}/packages/core/application/core-application-browser/src/contracts.ts[core.application.navigateToApp options]
-* {kib-repo}tree/{branch}/packages/core/application/core-application-browser/src/contracts.ts[core.application.navigateToUrl options]
+* {kib-repo}tree/{branch}/src/core/packages/application/browser/src/contracts.ts[core.application.navigateToApp options]
+* {kib-repo}tree/{branch}/src/core/packages/application/browser/src/contracts.ts[core.application.navigateToUrl options]
 
 *Rendering a link to a different {kib} app on its own would also cause a full page reload:*
 
@@ -120,7 +120,7 @@ const MySPALink = () =>
 ----
 
 As it would be too much boilerplate to do this for each {kib} link in your app, there is a handy wrapper that helps with it: 
-{kib-repo}tree/{branch}/packages/shared-ux/link/redirect_app/impl/src/redirect_app_links.tsx[RedirectAppLinks].
+{kib-repo}tree/{branch}/src/platform/packages/shared/shared-ux/link/redirect_app/impl/src/redirect_app_links.tsx[RedirectAppLinks].
 
 [source,typescript jsx]
 ----
@@ -163,8 +163,8 @@ Common rules to follow in this scenario:
 
 This is required to make sure `core` is aware of navigations triggered inside your app, so it could act accordingly when needed.
 
-* `Core`'s {kib-repo}tree/{branch}/packages/core/application/core-application-browser/src/scoped_history.ts[ScopedHistory] instance.
-* {kib-repo}tree/{branch}/packages/core/application/core-application-browser/src/app_mount.ts[Example usage]
+* `Core`'s {kib-repo}tree/{branch}/src/core/packages/application/browser/src/scoped_history.ts[ScopedHistory] instance.
+* {kib-repo}tree/{branch}/src/core/packages/application/browser/src/app_mount.ts[Example usage]
 * {kib-repo}tree/{branch}/test/plugin_functional/plugins/core_plugin_a/public/application.tsx#L120[Example plugin]
 
 Relative links will be resolved relative to your app's route (e.g.: `http://localhost5601/app/{your-app-id}`)
@@ -181,14 +181,14 @@ const MyInternalLink = () => <Link to="/my-other-page"></Link>
 === Using history and browser location
 
 Try to avoid using `window.location` and `window.history` directly. +  
-Instead, consider using {kib-repo}tree/{branch}/packages/core/application/core-application-browser/src/scoped_history.ts[ScopedHistory]
+Instead, consider using {kib-repo}tree/{branch}/src/core/packages/application/browser/src/scoped_history.ts[ScopedHistory]
 instance provided by `core`.
 
 * This way `core` will know about location changes triggered within your app, and it would act accordingly.
 * Some plugins are listening to location changes. Triggering location change manually could lead to unpredictable and hard-to-catch bugs.
 
 Common use-case for using 
-`core`'s {kib-repo}tree/{branch}/packages/core/application/core-application-browser/src/scoped_history.ts[ScopedHistory] directly: 
+`core`'s {kib-repo}tree/{branch}/src/core/packages/application/browser/src/scoped_history.ts[ScopedHistory] directly: 
 
 * Reading/writing query params or hash.
 * Imperatively triggering internal navigations within your app.
@@ -222,7 +222,7 @@ There are utils to help you to implement such kind of state syncing.
 
 * Adding a query param flag or simple key/value to the URL. 
 
-Follow {kib-repo}tree/{branch}/src/plugins/kibana_utils/docs/state_sync#state-syncing-utilities[these] docs to learn more.
+Follow {kib-repo}tree/{branch}/src/platform/plugins/shared/kibana_utils/docs/state_sync#state-syncing-utilities[these] docs to learn more.
 
 
 [[preserve-state]]
@@ -246,7 +246,7 @@ you'd notice that state is stored inside that link, and it also gets updated whe
 image:images/state_inside_the_link.png[State is stored inside the navigation link]
 
 This is where <<query-params, separation>> into `_a` and `_g` query params comes into play. What is considered a *global* state gets constantly updated in those navigation links. In the example above it was a time filter.
-This is backed by {kib-repo}tree/{branch}/src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts#L57[KbnUrlTracker] util. You can use it to achieve similar behavior.
+This is backed by {kib-repo}tree/{branch}/src/platform/plugins/shared/kibana_utils/public/state_management/url/kbn_url_tracker.ts#L57[KbnUrlTracker] util. You can use it to achieve similar behavior.
 
 NOTE: After migrating to KP navigation works without page reloads and all plugins are loaded simultaneously.
 Hence, likely there are simpler ways to preserve state of your application, unless you want to do it through URL.

@@ -7,13 +7,17 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
 import {
+  useEuiFontSize,
+  useEuiTheme,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingChart,
   EuiResizeObserver,
   EuiText,
 } from '@elastic/eui';
+
 import { throttle } from 'lodash';
 import type {
   BrushEndListener,
@@ -47,7 +51,6 @@ import {
   ML_SEVERITY_COLORS,
 } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
-import { useIsDarkTheme } from '@kbn/ml-kibana-theme';
 import type { TimeBuckets as TimeBucketsClass } from '@kbn/ml-time-buckets';
 import { SwimLanePagination } from './swimlane_pagination';
 import type {
@@ -62,7 +65,6 @@ import { FormattedTooltip } from '../components/chart_tooltip/chart_tooltip';
 import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 import { SWIM_LANE_LABEL_WIDTH, Y_AXIS_LABEL_PADDING } from './constants';
-import { useCurrentThemeVars, useMlKibana } from '../contexts/kibana';
 
 declare global {
   interface Window {
@@ -200,12 +202,8 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
 
-  const {
-    services: { theme: themeService },
-  } = useMlKibana();
-
-  const isDarkTheme = useIsDarkTheme(themeService);
-  const { euiTheme } = useCurrentThemeVars();
+  const { colorMode, euiTheme } = useEuiTheme();
+  const isDarkTheme = colorMode === 'DARK';
 
   // Holds the container height for previously fetched data
   const containerHeightRef = useRef<number>();
@@ -297,18 +295,20 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
 
   const showBrush = !!onCellsSelection;
 
+  const euiFontSizeXS = useEuiFontSize('xs', { unit: 'px' }).fontSize as string;
+
   const themeOverrides = useMemo<PartialTheme>(() => {
     if (!showSwimlane) return {};
 
     const theme: PartialTheme = {
       background: {
-        color: euiTheme.euiPanelBackgroundColorModifiers.plain,
+        color: euiTheme.colors.backgroundBasePlain,
       },
       heatmap: {
         grid: {
           stroke: {
             width: BORDER_WIDTH,
-            color: euiTheme.euiBorderColor,
+            color: euiTheme.border.color,
           },
         },
         cell: {
@@ -318,21 +318,21 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
             visible: false,
           },
           border: {
-            stroke: euiTheme.euiBorderColor,
+            stroke: euiTheme.colors.borderBasePlain,
             strokeWidth: 0,
           },
         },
         yAxisLabel: {
           visible: showYAxis,
           width: yAxisWidth,
-          textColor: euiTheme.euiTextSubduedColor,
+          textColor: euiTheme.colors.textSubdued,
           padding: Y_AXIS_LABEL_PADDING,
-          fontSize: parseInt(euiTheme.euiFontSizeXS, 10),
+          fontSize: parseInt(euiFontSizeXS, 10),
         },
         xAxisLabel: {
           visible: showTimeline,
-          textColor: euiTheme.euiTextSubduedColor,
-          fontSize: parseInt(euiTheme.euiFontSizeXS, 10),
+          textColor: euiTheme.colors.textSubdued,
+          fontSize: parseInt(euiFontSizeXS, 10),
         },
         brushMask: {
           visible: showBrush,

@@ -13,6 +13,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 
 import {
+  useEuiTheme,
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -80,6 +81,7 @@ interface LinksMenuProps {
 }
 
 export const LinksMenuUI = (props: LinksMenuProps) => {
+  const { euiTheme } = useEuiTheme();
   const isMounted = useMountedState();
 
   const [dataViewId, setDataViewId] = useState<string | null>(null);
@@ -195,7 +197,8 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   ) => {
     // Create a layer for each of the geoFields
     const initialLayers = getInitialSourceIndexFieldLayers(
-      sourceIndicesWithGeoFields[anomaly.jobId]
+      sourceIndicesWithGeoFields[anomaly.jobId],
+      euiTheme
     );
     // Widen the timerange by one bucket span on start/end to increase chances of always having data on the map
     const anomalyBucketStartMoment = moment(anomaly.source.timestamp).tz(

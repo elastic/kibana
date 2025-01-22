@@ -66,6 +66,23 @@ export interface ESQLEditorProps {
 
   /** adds a documentation icon in the footer which opens the inline docs as a flyout **/
   displayDocumentationAsFlyout?: boolean;
+
+  /** The component by default focuses on the editor when it is mounted, this flag disables it**/
+  disableAutoFocus?: boolean;
+}
+
+export interface JoinIndicesAutocompleteResult {
+  indices: JoinIndexAutocompleteItem[];
+}
+
+export interface JoinIndexAutocompleteItem {
+  name: string;
+  mode: 'lookup' | string;
+  aliases: string[];
+}
+
+export interface EsqlPluginStartBase {
+  getJoinIndicesAutocomplete: () => Promise<JoinIndicesAutocompleteResult>;
 }
 
 export interface ESQLEditorDeps {
@@ -76,4 +93,5 @@ export interface ESQLEditorDeps {
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
+  esql?: EsqlPluginStartBase;
 }

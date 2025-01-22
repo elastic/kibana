@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { euiThemeVars } from '@kbn/ui-theme';
-
 import { getFlattenedBuckets } from '../../utils/get_flattened_buckets';
 import { alertIndexWithAllResults } from '../../../../mock/pattern_rollup/mock_alerts_pattern_rollup';
 import { auditbeatWithAllResults } from '../../../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
@@ -21,6 +19,10 @@ const patternRollups: Record<string, PatternRollup> = {
   'auditbeat-*': auditbeatWithAllResults,
   'packetbeat-*': packetbeatNoResults,
 };
+
+const successColor = 'test-success-color';
+const dangerColor = 'test-danger-color';
+const primaryColor = 'test-primary-color';
 
 describe('getPatternLegendItem', () => {
   test('it returns the expected legend item', () => {
@@ -46,9 +48,17 @@ describe('getLegendItemsForPattern', () => {
       patternRollups,
     });
 
-    expect(getLegendItemsForPattern({ pattern, flattenedBuckets })).toEqual([
+    expect(
+      getLegendItemsForPattern({
+        pattern,
+        flattenedBuckets,
+        successColor,
+        dangerColor,
+        primaryColor,
+      })
+    ).toEqual([
       {
-        color: euiThemeVars.euiColorSuccess,
+        color: successColor,
         ilmPhase: 'hot',
         index: '.ds-auditbeat-8.6.1-2023.02.07-000001',
         pattern: 'auditbeat-*',
@@ -56,7 +66,7 @@ describe('getLegendItemsForPattern', () => {
         docsCount: 19123,
       },
       {
-        color: euiThemeVars.euiColorDanger,
+        color: dangerColor,
         ilmPhase: 'unmanaged',
         index: 'auditbeat-custom-index-1',
         pattern: 'auditbeat-*',
@@ -64,7 +74,7 @@ describe('getLegendItemsForPattern', () => {
         docsCount: 4,
       },
       {
-        color: euiThemeVars.euiColorDanger,
+        color: dangerColor,
         ilmPhase: 'unmanaged',
         index: 'auditbeat-custom-empty-index-1',
         pattern: 'auditbeat-*',
@@ -81,9 +91,17 @@ describe('getLegendItemsForPattern', () => {
       isILMAvailable: false,
       patternRollups,
     });
-    expect(getLegendItemsForPattern({ pattern, flattenedBuckets })).toEqual([
+    expect(
+      getLegendItemsForPattern({
+        pattern,
+        flattenedBuckets,
+        successColor,
+        dangerColor,
+        primaryColor,
+      })
+    ).toEqual([
       {
-        color: euiThemeVars.euiColorSuccess,
+        color: successColor,
         ilmPhase: null,
         index: '.ds-auditbeat-8.6.1-2023.02.07-000001',
         pattern: 'auditbeat-*',
@@ -91,7 +109,7 @@ describe('getLegendItemsForPattern', () => {
         docsCount: 19123,
       },
       {
-        color: euiThemeVars.euiColorDanger,
+        color: dangerColor,
         ilmPhase: null,
         index: 'auditbeat-custom-index-1',
         pattern: 'auditbeat-*',
@@ -99,7 +117,7 @@ describe('getLegendItemsForPattern', () => {
         docsCount: 4,
       },
       {
-        color: euiThemeVars.euiColorDanger,
+        color: dangerColor,
         ilmPhase: null,
         index: 'auditbeat-custom-empty-index-1',
         pattern: 'auditbeat-*',
@@ -118,7 +136,16 @@ describe('getLegendItems', () => {
       patternRollups,
     });
 
-    expect(getLegendItems({ flattenedBuckets, patterns, patternRollups })).toEqual([
+    expect(
+      getLegendItems({
+        flattenedBuckets,
+        patterns,
+        patternRollups,
+        successColor,
+        dangerColor,
+        primaryColor,
+      })
+    ).toEqual([
       {
         color: null,
         ilmPhase: null,
@@ -128,7 +155,7 @@ describe('getLegendItems', () => {
         docsCount: 26093,
       },
       {
-        color: euiThemeVars.euiColorSuccess,
+        color: successColor,
         ilmPhase: 'hot',
         index: '.internal.alerts-security.alerts-default-000001',
         pattern: '.alerts-security.alerts-default',
@@ -144,7 +171,7 @@ describe('getLegendItems', () => {
         docsCount: 19127,
       },
       {
-        color: euiThemeVars.euiColorSuccess,
+        color: successColor,
         ilmPhase: 'hot',
         index: '.ds-auditbeat-8.6.1-2023.02.07-000001',
         pattern: 'auditbeat-*',
@@ -152,7 +179,7 @@ describe('getLegendItems', () => {
         docsCount: 19123,
       },
       {
-        color: euiThemeVars.euiColorDanger,
+        color: dangerColor,
         ilmPhase: 'unmanaged',
         index: 'auditbeat-custom-index-1',
         pattern: 'auditbeat-*',
@@ -160,7 +187,7 @@ describe('getLegendItems', () => {
         docsCount: 4,
       },
       {
-        color: euiThemeVars.euiColorDanger,
+        color: dangerColor,
         ilmPhase: 'unmanaged',
         index: 'auditbeat-custom-empty-index-1',
         pattern: 'auditbeat-*',
@@ -176,7 +203,7 @@ describe('getLegendItems', () => {
         docsCount: 3258632,
       },
       {
-        color: euiThemeVars.euiColorPrimary,
+        color: primaryColor,
         ilmPhase: 'hot',
         index: '.ds-packetbeat-8.5.3-2023.02.04-000001',
         pattern: 'packetbeat-*',
@@ -184,7 +211,7 @@ describe('getLegendItems', () => {
         docsCount: 1630289,
       },
       {
-        color: euiThemeVars.euiColorPrimary,
+        color: primaryColor,
         ilmPhase: 'hot',
         index: '.ds-packetbeat-8.6.1-2023.02.04-000001',
         pattern: 'packetbeat-*',

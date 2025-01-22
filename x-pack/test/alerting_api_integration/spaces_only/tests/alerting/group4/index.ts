@@ -18,6 +18,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     loadTestFile(require.resolve('./builtin_alert_types'));
     loadTestFile(require.resolve('./mustache_templates.ts'));
     loadTestFile(require.resolve('./notify_when'));
+    loadTestFile(require.resolve('./muted_alerts'));
     loadTestFile(require.resolve('./event_log_alerts'));
     loadTestFile(require.resolve('./snooze'));
     loadTestFile(require.resolve('./unsnooze'));

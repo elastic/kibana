@@ -1,0 +1,47 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "__jest__/**/*",
+    "integration_tests/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "../../../../../typings/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    // required plugins
+    "@kbn/licensing-plugin",
+    "@kbn/management-plugin",
+    "@kbn/features-plugin",
+    "@kbn/share-plugin",
+    // optional plugins
+    "@kbn/cloud-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/index-management-plugin",
+    "@kbn/home-plugin",
+    // required bundles
+    "@kbn/kibana-react-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/i18n",
+    "@kbn/analytics",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/i18n-react",
+    "@kbn/core-http-browser",
+    "@kbn/config-schema",
+    "@kbn/shared-ux-router",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/index-management-shared-types",
+    "@kbn/react-kibana-context-render",
+    "@kbn/unsaved-changes-prompt",
+    "@kbn/shared-ux-table-persist",
+    "@kbn/index-lifecycle-management-common-shared",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

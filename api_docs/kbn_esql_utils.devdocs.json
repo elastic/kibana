@@ -421,7 +421,7 @@
                     "signature": [
                       "SearchStrategyRequest"
                     ],
-                    "path": "packages/kbn-search-types/src/types.ts",
+                    "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -442,7 +442,7 @@
                       },
                       " | undefined"
                     ],
-                    "path": "packages/kbn-search-types/src/types.ts",
+                    "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -624,7 +624,7 @@
                     "signature": [
                       "SearchStrategyRequest"
                     ],
-                    "path": "packages/kbn-search-types/src/types.ts",
+                    "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -645,7 +645,7 @@
                       },
                       " | undefined"
                     ],
-                    "path": "packages/kbn-search-types/src/types.ts",
+                    "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -835,7 +835,7 @@
                     "signature": [
                       "SearchStrategyRequest"
                     ],
-                    "path": "packages/kbn-search-types/src/types.ts",
+                    "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -856,7 +856,7 @@
                       },
                       " | undefined"
                     ],
-                    "path": "packages/kbn-search-types/src/types.ts",
+                    "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -1093,7 +1093,15 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ") => string"
+          ", query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | undefined) => string"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_initial_esql_query.ts",
         "deprecated": false,
@@ -1119,6 +1127,28 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getInitialESQLQuery.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_initial_esql_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1716,6 +1746,39 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.sanitazeESQLInput",
+        "type": "Function",
+        "tags": [],
+        "label": "sanitazeESQLInput",
+        "description": [],
+        "signature": [
+          "(input: string) => string | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/sanitaze_input.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.sanitazeESQLInput.$1",
+            "type": "string",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/sanitaze_input.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

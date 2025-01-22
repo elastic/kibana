@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { useEuiTheme, type EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import type { Validation } from '../job_validator';
 import { tabColor } from '../../../../../../common/util/group_color_utils';
@@ -23,14 +23,16 @@ export interface JobGroupsInputProps {
 
 export const JobGroupsInput: FC<JobGroupsInputProps> = memo(
   ({ existingGroups, selectedGroups, onChange, validation }) => {
+    const { euiTheme } = useEuiTheme();
+
     const options = existingGroups.map<EuiComboBoxOptionOption>((g) => ({
       label: g,
-      color: tabColor(g),
+      color: tabColor(g, euiTheme),
     }));
 
     const selectedOptions = selectedGroups.map<EuiComboBoxOptionOption>((g) => ({
       label: g,
-      color: tabColor(g),
+      color: tabColor(g, euiTheme),
     }));
 
     function onChangeCallback(optionsIn: EuiComboBoxOptionOption[]) {
@@ -46,7 +48,7 @@ export const JobGroupsInput: FC<JobGroupsInputProps> = memo(
 
       const newGroup: EuiComboBoxOptionOption = {
         label: input,
-        color: tabColor(input),
+        color: tabColor(input, euiTheme),
       };
 
       if (

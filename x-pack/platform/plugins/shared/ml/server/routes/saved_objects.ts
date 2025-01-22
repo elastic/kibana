@@ -92,9 +92,9 @@ export function savedObjectsRoutes(
       routeGuard.fullLicenseAPIGuard(
         async ({ client, request, response, mlSavedObjectService }) => {
           try {
-            const { simulate } = request.query;
+            const { simulate, addToAllSpaces } = request.query;
             const { syncSavedObjects } = syncSavedObjectsFactory(client, mlSavedObjectService);
-            const savedObjects = await syncSavedObjects(simulate);
+            const savedObjects = await syncSavedObjects(simulate, addToAllSpaces ?? true);
 
             return response.ok({
               body: savedObjects,
@@ -449,5 +449,47 @@ export function savedObjectsRoutes(
           }
         }
       )
+    );
+
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/saved_objects/can_sync_to_all_spaces/{mlSavedObjectType?}`,
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: [
+            'ml:canGetJobs',
+            'ml:canGetDataFrameAnalytics',
+            'ml:canGetTrainedModels',
+          ],
+        },
+      },
+      summary: 'Check whether user can sync a job or trained model to the * space',
+      description: `Check the user's ability to sync jobs or trained models to the * space. Returns whether they are able to sync the job or trained model to the * space.`,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: syncCheckSchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ request, response, mlSavedObjectService }) => {
+        try {
+          const { mlSavedObjectType } = request.params;
+          const canSync = await mlSavedObjectService.canCreateGlobalMlSavedObjects(
+            request,
+            mlSavedObjectType as MlSavedObjectType
+          );
+
+          return response.ok({
+            body: { canSync },
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
     );
 }

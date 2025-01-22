@@ -22,13 +22,7 @@
           "(router: ",
           "IRouter",
           "<",
-          {
-            "pluginId": "@kbn/core-http-request-handler-context-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-            "section": "def-server.RequestHandlerContext",
-            "text": "RequestHandlerContext"
-          },
+          "RequestHandlerContext",
           ">, logger: ",
           {
             "pluginId": "@kbn/logging",
@@ -39,7 +33,7 @@
           },
           ") => void"
         ],
-        "path": "packages/kbn-search-api-keys-server/src/routes/routes.ts",
+        "path": "x-pack/solutions/search/packages/kbn-search-api-keys-server/src/routes/routes.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -53,16 +47,10 @@
             "signature": [
               "IRouter",
               "<",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ">"
             ],
-            "path": "packages/kbn-search-api-keys-server/src/routes/routes.ts",
+            "path": "x-pack/solutions/search/packages/kbn-search-api-keys-server/src/routes/routes.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -83,7 +71,7 @@
                 "text": "Logger"
               }
             ],
-            "path": "packages/kbn-search-api-keys-server/src/routes/routes.ts",
+            "path": "x-pack/solutions/search/packages/kbn-search-api-keys-server/src/routes/routes.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

@@ -6,11 +6,11 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ReadStreamDefinition } from '@kbn/streams-plugin/common';
+import { WiredReadStreamDefinition } from '@kbn/streams-schema';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { RedirectTo } from '../redirect_to';
 import { StreamDetailRouting } from '../stream_detail_routing';
-import { StreamDetailEnriching } from '../stream_detail_enriching';
+import { StreamDetailEnrichment } from '../stream_detail_enrichment';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 import { Wrapper } from './wrapper';
 
@@ -23,9 +23,11 @@ function isValidManagementSubTab(value: string): value is ManagementSubTabs {
 export function WiredStreamDetailManagement({
   definition,
   refreshDefinition,
+  isLoadingDefinition,
 }: {
-  definition?: ReadStreamDefinition;
+  definition?: WiredReadStreamDefinition;
   refreshDefinition: () => void;
+  isLoadingDefinition: boolean;
 }) {
   const {
     path: { key, subtab },
@@ -42,15 +44,19 @@ export function WiredStreamDetailManagement({
     },
     enrich: {
       content: (
-        <StreamDetailEnriching definition={definition} refreshDefinition={refreshDefinition} />
+        <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
       ),
-      label: i18n.translate('xpack.streams.streamDetailView.enrichingTab', {
+      label: i18n.translate('xpack.streams.streamDetailView.enrichmentTab', {
         defaultMessage: 'Extract field',
       }),
     },
     schemaEditor: {
       content: (
-        <StreamDetailSchemaEditor definition={definition} refreshDefinition={refreshDefinition} />
+        <StreamDetailSchemaEditor
+          definition={definition}
+          refreshDefinition={refreshDefinition}
+          isLoadingDefinition={isLoadingDefinition}
+        />
       ),
       label: i18n.translate('xpack.streams.streamDetailView.schemaEditorTab', {
         defaultMessage: 'Schema editor',

@@ -6,9 +6,10 @@
  */
 
 import * as Gemini from '@google/generative-ai';
-import { from, map, switchMap } from 'rxjs';
-import { Readable } from 'stream';
+import { from, map, switchMap, throwError } from 'rxjs';
+import { isReadable, Readable } from 'stream';
 import {
+  createInferenceInternalError,
   Message,
   MessageRole,
   ToolChoiceType,
@@ -22,7 +23,16 @@ import { processVertexStream } from './process_vertex_stream';
 import type { GenerateContentResponseChunk, GeminiMessage, GeminiToolConfig } from './types';
 
 export const geminiAdapter: InferenceConnectorAdapter = {
-  chatComplete: ({ executor, system, messages, toolChoice, tools }) => {
+  chatComplete: ({
+    executor,
+    system,
+    messages,
+    toolChoice,
+    tools,
+    temperature = 0,
+    modelName,
+    abortSignal,
+  }) => {
     return from(
       executor.invoke({
         subAction: 'invokeStream',
@@ -31,14 +41,27 @@ export const geminiAdapter: InferenceConnectorAdapter = {
           systemInstruction: system,
           tools: toolsToGemini(tools),
           toolConfig: toolChoiceToConfig(toolChoice),
-          temperature: 0,
+          temperature,
+          model: modelName,
+          signal: abortSignal,
           stopSequences: ['\n\nHuman:'],
         },
       })
     ).pipe(
       switchMap((response) => {
-        const readable = response.data as Readable;
-        return eventSourceStreamIntoObservable(readable);
+        if (response.status === 'error') {
+          return throwError(() =>
+            createInferenceInternalError(`Error calling connector: ${response.serviceMessage}`, {
+              rootError: response.serviceMessage,
+            })
+          );
+        }
+        if (isReadable(response.data as any)) {
+          return eventSourceStreamIntoObservable(response.data as Readable);
+        }
+        return throwError(() =>
+          createInferenceInternalError('Unexpected error', response.data as Record<string, any>)
+        );
       }),
       map((line) => {
         return JSON.parse(line) as GenerateContentResponseChunk;
@@ -195,11 +218,21 @@ function messageToGeminiMapper() {
       case MessageRole.User:
         const userMessage: GeminiMessage = {
           role: 'user',
-          parts: [
-            {
-              text: message.content,
-            },
-          ],
+          parts: (typeof message.content === 'string' ? [message.content] : message.content).map(
+            (contentPart) => {
+              if (typeof contentPart === 'string') {
+                return { text: contentPart } satisfies Gemini.TextPart;
+              } else if (contentPart.type === 'text') {
+                return { text: contentPart.text } satisfies Gemini.TextPart;
+              }
+              return {
+                inlineData: {
+                  data: contentPart.source.data,
+                  mimeType: contentPart.source.mimeType,
+                },
+              } satisfies Gemini.InlineDataPart;
+            }
+          ),
         };
         return userMessage;
 

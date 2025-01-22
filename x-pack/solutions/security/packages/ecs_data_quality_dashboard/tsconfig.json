@@ -5,20 +5,16 @@
     "types": [
       "jest",
       "node",
-      "react"
+      "react",
+      "@emotion/react/types/css-prop",
+      "../../../../../typings/emotion.d.ts"
     ]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/i18n-react",
-    "@kbn/ui-theme",
     "@kbn/core-http-browser",
     "@kbn/core-http-browser-mocks",
     "@kbn/elastic-assistant",
@@ -26,5 +22,8 @@
     "@kbn/core",
     "@kbn/core-notifications-browser",
     "@kbn/core-notifications-browser-mocks",
+    "@kbn/core-chrome-browser-mocks",
+    "@kbn/ai-assistant-icon",
+    "@kbn/react-kibana-context-render"
   ]
 }

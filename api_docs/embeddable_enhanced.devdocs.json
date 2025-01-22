@@ -45,7 +45,7 @@
           },
           "; } | undefined>; }>>"
         ],
-        "path": "x-pack/plugins/embeddable_enhanced/public/embeddables/interfaces/has_dynamic_actions.ts",
+        "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/embeddables/interfaces/has_dynamic_actions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -59,7 +59,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "x-pack/plugins/embeddable_enhanced/public/embeddables/interfaces/has_dynamic_actions.ts",
+            "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/embeddables/interfaces/has_dynamic_actions.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -72,98 +72,12 @@
     "interfaces": [
       {
         "parentPluginId": "embeddableEnhanced",
-        "id": "def-public.EnhancedEmbeddableContext",
-        "type": "Interface",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "EnhancedEmbeddableContext",
-        "description": [],
-        "path": "x-pack/plugins/embeddable_enhanced/public/types.ts",
-        "deprecated": true,
-        "trackAdoption": false,
-        "references": [],
-        "children": [
-          {
-            "parentPluginId": "embeddableEnhanced",
-            "id": "def-public.EnhancedEmbeddableContext.embeddable",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "embeddable",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "embeddable",
-                "scope": "public",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.IEmbeddable",
-                "text": "IEmbeddable"
-              },
-              "<",
-              {
-                "pluginId": "embeddable",
-                "scope": "common",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-common.EmbeddableInput",
-                "text": "EmbeddableInput"
-              },
-              ", ",
-              {
-                "pluginId": "embeddable",
-                "scope": "public",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.EmbeddableOutput",
-                "text": "EmbeddableOutput"
-              },
-              ", any> & Partial<{ enhancements: { dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "public",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-public.DynamicActionManager",
-                "text": "DynamicActionManager"
-              },
-              "; }; setDynamicActions: (newState: { dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "common",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-common.DynamicActionsState",
-                "text": "DynamicActionsState"
-              },
-              "; } | undefined) => void; dynamicActionsState$: ",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.PublishingSubject",
-                "text": "PublishingSubject"
-              },
-              "<{ dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "common",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-common.DynamicActionsState",
-                "text": "DynamicActionsState"
-              },
-              "; } | undefined>; }>"
-            ],
-            "path": "x-pack/plugins/embeddable_enhanced/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddableEnhanced",
         "id": "def-public.SetupDependencies",
         "type": "Interface",
         "tags": [],
         "label": "SetupDependencies",
         "description": [],
-        "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+        "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -183,7 +97,7 @@
                 "text": "EmbeddableSetup"
               }
             ],
-            "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+            "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -203,7 +117,7 @@
                 "text": "SetupContract"
               }
             ],
-            "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+            "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -217,7 +131,7 @@
         "tags": [],
         "label": "StartDependencies",
         "description": [],
-        "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+        "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -237,7 +151,7 @@
                 "text": "EmbeddableStart"
               }
             ],
-            "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+            "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -257,7 +171,7 @@
                 "text": "StartContract"
               }
             ],
-            "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+            "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -267,75 +181,6 @@
     ],
     "enums": [],
     "misc": [
-      {
-        "parentPluginId": "embeddableEnhanced",
-        "id": "def-public.drilldownGrouping",
-        "type": "Array",
-        "tags": [],
-        "label": "drilldownGrouping",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/ui-actions-browser",
-            "scope": "common",
-            "docId": "kibKbnUiActionsBrowserPluginApi",
-            "section": "def-common.PresentableGroup",
-            "text": "PresentableGroup"
-          },
-          "<unknown>[]"
-        ],
-        "path": "x-pack/plugins/embeddable_enhanced/public/actions/drilldown_grouping.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddableEnhanced",
-        "id": "def-public.EnhancedEmbeddable",
-        "type": "Type",
-        "tags": [],
-        "label": "EnhancedEmbeddable",
-        "description": [],
-        "signature": [
-          "E & Partial<{ enhancements: { dynamicActions: ",
-          {
-            "pluginId": "uiActionsEnhanced",
-            "scope": "public",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-public.DynamicActionManager",
-            "text": "DynamicActionManager"
-          },
-          "; }; setDynamicActions: (newState: { dynamicActions: ",
-          {
-            "pluginId": "uiActionsEnhanced",
-            "scope": "common",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-common.DynamicActionsState",
-            "text": "DynamicActionsState"
-          },
-          "; } | undefined) => void; dynamicActionsState$: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
-            "text": "PublishingSubject"
-          },
-          "<{ dynamicActions: ",
-          {
-            "pluginId": "uiActionsEnhanced",
-            "scope": "common",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-common.DynamicActionsState",
-            "text": "DynamicActionsState"
-          },
-          "; } | undefined>; }>"
-        ],
-        "path": "x-pack/plugins/embeddable_enhanced/public/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "embeddableEnhanced",
         "id": "def-public.HasDynamicActions",
@@ -378,7 +223,7 @@
           },
           "; } | undefined> | undefined; }"
         ],
-        "path": "x-pack/plugins/embeddable_enhanced/public/embeddables/interfaces/has_dynamic_actions.ts",
+        "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/embeddables/interfaces/has_dynamic_actions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -392,7 +237,7 @@
       "tags": [],
       "label": "SetupContract",
       "description": [],
-      "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+      "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -406,7 +251,7 @@
       "tags": [],
       "label": "StartContract",
       "description": [],
-      "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+      "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -423,7 +268,7 @@
             ") => ",
             "ReactEmbeddableDynamicActionsApi"
           ],
-          "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -437,7 +282,7 @@
               "signature": [
                 "string"
               ],
-              "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+              "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -452,7 +297,7 @@
               "signature": [
                 "() => string | undefined"
               ],
-              "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+              "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -467,7 +312,7 @@
               "signature": [
                 "DynamicActionsSerializedState"
               ],
-              "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+              "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true

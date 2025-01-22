@@ -114,7 +114,7 @@ EXPOSE 5601
 RUN for iter in {1..10}; do \
       microdnf update --setopt=tsflags=nodocs -y && \
       microdnf install --setopt=tsflags=nodocs -y \
-        fontconfig freetype shadow-utils nss findutils && \
+      fontconfig liberation-fonts-common freetype shadow-utils nss findutils && \
       microdnf clean all && exit_code=0 && break || exit_code=$? && echo "microdnf error: retry $iter in 10s" && \
       sleep 10; \
     done; \
@@ -126,7 +126,7 @@ RUN for iter in {1..10}; do \
       apt-get update  && \
       apt-get upgrade -y  && \
       apt-get install -y --no-install-recommends \
-       fontconfig libnss3 curl ca-certificates && \
+      fontconfig fonts-liberation libnss3 curl ca-certificates && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* && exit_code=0 && break || exit_code=$? && echo "apt-get error: retry $iter in 10s" && \
       sleep 10; \
@@ -134,7 +134,7 @@ RUN for iter in {1..10}; do \
     (exit $exit_code)
 {{/ubuntu}}
 {{#wolfi}}
-RUN apk --no-cache add bash curl fontconfig libstdc++ libnss findutils shadow ca-certificates
+RUN apk --no-cache add bash curl fontconfig font-liberation libstdc++ libnss findutils shadow ca-certificates
 {{/wolfi}}
 
 # Bring in Kibana from the initial stage.

@@ -1,0 +1,74 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`OpenSearchPanel render 1`] = `
+<EuiFlyout
+  data-test-subj="loadSearchForm"
+  onClose={[MockFunction]}
+  ownFocus={true}
+>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <EuiTitle
+      size="m"
+    >
+      <h2>
+        <MemoizedFormattedMessage
+          defaultMessage="Open Discover session"
+          id="discover.topNav.openSearchPanel.openSearchTitle"
+        />
+      </h2>
+    </EuiTitle>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <SavedObjectFinder
+      id="discoverOpenSearch"
+      noItemsMessage={
+        <Memo(MemoizedFormattedMessage)
+          defaultMessage="No matching Discover sessions found."
+          id="discover.topNav.openSearchPanel.noSearchesFoundDescription"
+        />
+      }
+      onChoose={[Function]}
+      savedObjectMetaData={
+        Array [
+          Object {
+            "getIconForSavedObject": [Function],
+            "name": "Discover session",
+            "type": "search",
+          },
+        ]
+      }
+      services={
+        Object {
+          "contentClient": undefined,
+          "savedObjectsTagging": undefined,
+          "uiSettings": undefined,
+        }
+      }
+      showFilter={true}
+    />
+  </EuiFlyoutBody>
+  <EuiFlyoutFooter>
+    <EuiFlexGroup
+      justifyContent="flexEnd"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          data-test-subj="manageSearchesBtn"
+          fill={true}
+          href="/app/management/kibana/objects?initialQuery=type:(\\"discover session\\")"
+          onClick={[MockFunction]}
+        >
+          <MemoizedFormattedMessage
+            defaultMessage="Manage Discover sessions"
+            id="discover.topNav.openSearchPanel.manageSearchesButtonLabel"
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutFooter>
+</EuiFlyout>
+`;

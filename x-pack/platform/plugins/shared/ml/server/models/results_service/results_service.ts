@@ -19,6 +19,7 @@ import {
   ML_JOB_ID,
   ML_PARTITION_FIELD_VALUE,
 } from '@kbn/ml-anomaly-utils';
+import { getIndicesOptions } from '../../../common/util/datafeed_utils';
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
@@ -727,7 +728,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
         },
         size: 0,
       },
-      ...(datafeedConfig?.indices_options ?? {}),
+      ...getIndicesOptions(datafeedConfig),
     };
 
     if (client) {

@@ -277,7 +277,7 @@ export default function (providerContext: FtrProviderContext) {
       await new Promise((resolve, reject) => {
         let attempts = 0;
         const intervalId = setInterval(async () => {
-          if (attempts > 3) {
+          if (attempts > 10) {
             clearInterval(intervalId);
             reject(new Error('action timed out'));
           }
@@ -285,7 +285,6 @@ export default function (providerContext: FtrProviderContext) {
           const {
             body: { items: actionStatuses },
           } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
-
           const action = actionStatuses?.find((a: any) => a.actionId === actionId);
           if (action && action.nbAgentsActioned === action.nbAgentsActionCreated) {
             clearInterval(intervalId);
