@@ -7,7 +7,7 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { AggregationsTermsAggregateBase } from '@elastic/elasticsearch/lib/api/types';
+import { AggregationsTermsAggregateBase } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   AvgActionRunOutcomeByConnectorTypeBucket,
   parseActionRunOutcomeByConnectorTypesBucket,
