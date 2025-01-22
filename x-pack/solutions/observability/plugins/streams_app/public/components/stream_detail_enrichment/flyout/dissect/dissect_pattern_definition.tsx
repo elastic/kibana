@@ -12,12 +12,13 @@ import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { ProcessorFormState } from '../../types';
 
 export const DissectPatternDefinition = () => {
   const { core } = useKibana();
   const esDocUrl = core.docLinks.links.ingest.dissectKeyModifiers;
 
-  const { field, fieldState } = useController({
+  const { field, fieldState } = useController<ProcessorFormState, 'pattern'>({
     name: 'pattern',
     rules: {
       required: i18n.translate(
