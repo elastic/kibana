@@ -111,12 +111,12 @@ export function SearchStartProvider({ getService }: FtrProviderContext) {
       await testSubjects.missingOrFail('apiKeyHasBeenGenerated');
     },
     async expectAnalyzeLogsIntegrationLink() {
-      await testSubjects.existOrFail('analyzeLogsBtn');
-      expect(await testSubjects.getAttribute('analyzeLogsBtn', 'href')).match(
+      await testSubjects.existOrFail('analyzeLogsBrowseIntegrations');
+      expect(await testSubjects.getAttribute('analyzeLogsBrowseIntegrations', 'href')).match(
         /^https?\:\/\/.*\/app\/integrations\/browse\/observability/
       );
 
-      expect(await testSubjects.getAttribute('analyzeLogsBtn', 'target')).equal('_blank');
+      expect(await testSubjects.getAttribute('analyzeLogsBrowseIntegrations', 'target')).equal('_blank');
     },
     async expectCreateO11ySpaceBtn() {
       await testSubjects.existOrFail('createO11ySpaceBtn');
