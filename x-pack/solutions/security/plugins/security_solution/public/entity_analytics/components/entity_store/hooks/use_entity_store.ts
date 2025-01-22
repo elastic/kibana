@@ -21,7 +21,7 @@ import {
   type InitEntityEngineResponse,
   type StopEntityEngineResponse,
 } from '../../../../../common/api/entity_analytics';
-import { useEntityStoreRoutes } from '../../../api/entity_store';
+import { DEFAULT_FIELD_HISTORY_LENGTH, useEntityStoreRoutes } from '../../../api/entity_store';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
 
 const ENTITY_STORE_STATUS = ['GET', 'ENTITY_STORE_STATUS'];
@@ -67,7 +67,10 @@ export const useEnableEntityStoreMutation = (
         timestamp: new Date().toISOString(),
         action: 'start',
       });
-      return enableEntityStore({ ...otherParams, fieldHistoryLength: fieldHistoryLength ?? 10 });
+      return enableEntityStore({
+        ...otherParams,
+        fieldHistoryLength: fieldHistoryLength ?? DEFAULT_FIELD_HISTORY_LENGTH,
+      });
     },
     {
       mutationKey: ENABLE_STORE_STATUS_KEY,

@@ -179,7 +179,7 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.entityStore.enablement.moreEntityTypes"
               defaultMessage={
-                'Enable the service entity type in the entity store to capture even more entities observed in events'
+                'Enable missing types in the entity store to capture even more entities observed in events'
               }
             />
           </p>
