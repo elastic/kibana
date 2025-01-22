@@ -45,13 +45,19 @@ export const getColor = (euiTheme: EuiThemeComputed, isEnabled: boolean, status?
 
   switch (status) {
     case 'down':
-      return isAmsterdam ? euiTheme.colors.vis.euiColorVisBehindText9 : euiTheme.colors.backgroundBaseDanger;
+      return isAmsterdam
+        ? euiTheme.colors.vis.euiColorVisBehindText9
+        : euiTheme.colors.backgroundBaseDanger;
     case 'up':
-      return isAmsterdam ? euiTheme.colors.vis.euiColorVisBehindText0 : euiTheme.colors.backgroundBaseSuccess;
+      return isAmsterdam
+        ? euiTheme.colors.vis.euiColorVisBehindText0
+        : euiTheme.colors.backgroundBaseSuccess;
     case 'unknown':
       return euiTheme.colors.backgroundBasePlain;
     default:
-      return isAmsterdam ? euiTheme.colors.vis.euiColorVisBehindText0 : euiTheme.colors.backgroundBaseSuccess;
+      return isAmsterdam
+        ? euiTheme.colors.vis.euiColorVisBehindText0
+        : euiTheme.colors.backgroundBaseSuccess;
   }
 };
 
