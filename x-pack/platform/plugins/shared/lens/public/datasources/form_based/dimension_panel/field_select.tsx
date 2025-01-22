@@ -69,6 +69,7 @@ export function FieldSelect({
       return fieldContainsData(fieldName, currentIndexPattern, hasFieldData);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-shadow
     interface FieldOption {
       label: string;
       value: { type: 'field'; field: string; dataType: string | undefined; operationType: string };

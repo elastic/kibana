@@ -156,6 +156,7 @@ function setupUrlStateSync(
     },
     stateStorage: {
       ...urlStateStorage,
+      // eslint-disable-next-line @typescript-eslint/no-shadow
       set: <AlertSearchBarStateContainer,>(key: string, state: AlertSearchBarStateContainer) =>
         urlStateStorage.set(key, state, { replace }),
     },

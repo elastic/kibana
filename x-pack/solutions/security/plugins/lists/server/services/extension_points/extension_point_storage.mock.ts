@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { MockedLogger } from '@kbn/logging-mocks';
-import { loggerMock } from '@kbn/logging-mocks';
+import { type MockedLogger, loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 
 import type { ExceptionListClient } from '../exception_lists/exception_list_client';

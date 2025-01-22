@@ -21,6 +21,7 @@ import { stripUnsafeHeaders } from './strip_unsafe_headers';
 import { getFooterTemplate, getHeaderTemplate } from './templates';
 
 declare module 'puppeteer' {
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   interface Page {
     _client(): CDPSession;
   }

@@ -7,8 +7,7 @@
 
 import moment from 'moment';
 
-import type { ConfigType } from './config';
-import { ConfigSchema } from './config';
+import { ConfigSchema, type ConfigType } from './config';
 import { getConfigMock, getConfigMockDecoded } from './config.mock';
 
 describe('config_schema', () => {

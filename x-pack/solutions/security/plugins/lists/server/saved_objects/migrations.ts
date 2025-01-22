@@ -7,12 +7,13 @@
 
 import * as t from 'io-ts';
 import type { SavedObjectSanitizedDoc, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
-import type {
-  EntriesArray,
-  NonEmptyNestedEntriesArray,
-  OsTypeArray,
+import {
+  type EntriesArray,
+  type NonEmptyNestedEntriesArray,
+  type OsTypeArray,
+  entriesNested,
+  entry,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { entriesNested, entry } from '@kbn/securitysolution-io-ts-list-types';
 import {
   ENDPOINT_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,

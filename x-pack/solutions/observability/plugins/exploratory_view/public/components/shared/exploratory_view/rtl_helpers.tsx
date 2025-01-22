@@ -11,6 +11,7 @@ import React from 'react';
 import { stringify } from 'query-string';
 
 import type { RenderOptions, MatcherFunction } from '@testing-library/react';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { render as reactTestLibRender } from '@testing-library/react';
 import { Router, Route } from '@kbn/shared-ux-router';
 import type { History } from 'history';

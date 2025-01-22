@@ -5,29 +5,25 @@
  * 2.0.
  */
 
-import type {
-  EntryExists,
-  EntryList,
-  EntryMatch,
-  EntryMatchAny,
-  EntryNested,
-} from '@kbn/securitysolution-io-ts-list-types';
 import {
+  type EntryExists,
+  type EntryList,
+  type EntryMatch,
+  type EntryMatchAny,
+  type EntryNested,
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
-import type {
-  BuilderEntry,
-  EmptyEntry,
-  ExceptionsBuilderExceptionItem,
-  ExceptionsBuilderReturnExceptionItem,
-  FormattedBuilderEntry,
-  OperatorOption,
-} from '@kbn/securitysolution-list-utils';
 import {
   ALL_OPERATORS,
+  type BuilderEntry,
   DETECTION_ENGINE_EXCEPTION_OPERATORS,
   EXCEPTION_OPERATORS_SANS_LISTS,
+  type EmptyEntry,
+  type ExceptionsBuilderExceptionItem,
+  type ExceptionsBuilderReturnExceptionItem,
+  type FormattedBuilderEntry,
+  type OperatorOption,
   doesNotExistOperator,
   doesNotMatchOperator,
   existsOperator,

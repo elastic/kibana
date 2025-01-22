@@ -11,8 +11,7 @@ import type {
   UseExceptionListsProps,
 } from '@kbn/securitysolution-io-ts-list-types';
 import * as api from '@kbn/securitysolution-list-api';
-import type { ReturnExceptionLists } from '@kbn/securitysolution-list-hooks';
-import { useExceptionLists } from '@kbn/securitysolution-list-hooks';
+import { type ReturnExceptionLists, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { coreMock } from '@kbn/core/public/mocks';
 
 import { getFoundExceptionListSchemaMock } from '../../../common/schemas/response/found_exception_list_schema.mock';

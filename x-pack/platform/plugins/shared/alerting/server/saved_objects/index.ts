@@ -123,13 +123,10 @@ export function setupSavedObjects(
           warnings: getImportWarnings(ruleSavedObjects),
         };
       },
-      onExport<RawRule>(
-        context: SavedObjectsExportTransformContext,
-        objects: Array<SavedObject<RawRule>>
-      ) {
+      onExport<T>(context: SavedObjectsExportTransformContext, objects: Array<SavedObject<T>>) {
         return transformRulesForExport(objects);
       },
-      isExportable<RawRule>(ruleSavedObject: SavedObject<RawRule>) {
+      isExportable<T>(ruleSavedObject: SavedObject<T>) {
         return isRuleExportable(ruleSavedObject, ruleTypeRegistry, logger);
       },
     },

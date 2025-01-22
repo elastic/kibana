@@ -231,6 +231,7 @@ interface SolutionSideNavItemProps {
  * and it adds a button to open the item secondary panel if needed.
  */
 const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   function SolutionSideNavItem({ item, isSelected, isActive, isMobileSize, onOpenPanelNav }) {
     const { euiTheme } = useEuiTheme();
     const { tracker } = useTelemetryContext();

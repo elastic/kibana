@@ -6,20 +6,18 @@
  */
 
 import { chunk } from 'lodash/fp';
-import type {
-  CreateExceptionListItemSchema,
-  Entry,
-  EntryExists,
-  EntryList,
-  EntryMatch,
-  EntryMatchAny,
-  EntryMatchWildcard,
-  EntryNested,
-  ExceptionListItemSchema,
-  OsTypeArray,
-  Type,
-} from '@kbn/securitysolution-io-ts-list-types';
 import {
+  type CreateExceptionListItemSchema,
+  type Entry,
+  type EntryExists,
+  type EntryList,
+  type EntryMatch,
+  type EntryMatchAny,
+  type EntryMatchWildcard,
+  type EntryNested,
+  type ExceptionListItemSchema,
+  type OsTypeArray,
+  type Type,
   entriesExists,
   entriesList,
   entriesMatch,

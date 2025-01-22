@@ -11,16 +11,14 @@ import type * as t from 'io-ts';
 import { has } from 'lodash/fp';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
-import type {
-  CreateCommentsArray,
-  ExportExceptionDetails,
-  ImportCommentsArray,
-  ImportExceptionListItemSchema,
-  ImportExceptionListItemSchemaDecoded,
-  ImportExceptionListSchemaDecoded,
-  ImportExceptionsListSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
 import {
+  type CreateCommentsArray,
+  type ExportExceptionDetails,
+  type ImportCommentsArray,
+  type ImportExceptionListItemSchema,
+  type ImportExceptionListItemSchemaDecoded,
+  type ImportExceptionListSchemaDecoded,
+  type ImportExceptionsListSchema,
   importExceptionListItemSchema,
   importExceptionsListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';

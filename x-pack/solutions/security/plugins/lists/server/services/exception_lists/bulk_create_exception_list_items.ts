@@ -11,8 +11,7 @@ import type {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import type { SavedObjectType } from '@kbn/securitysolution-list-utils';
-import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
+import { type SavedObjectType, getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
 import type { ExceptionListSoSchema } from '../../schemas/saved_objects';
 

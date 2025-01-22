@@ -21,6 +21,7 @@ import { useQuery } from '@tanstack/react-query';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
+  PromptContextTemplate,
   RegisterPromptContext,
   UnRegisterPromptContext,
 } from '../assistant/prompt_context/types';
@@ -32,7 +33,6 @@ import type {
 } from './types';
 import { DEFAULT_ASSISTANT_TITLE } from '../assistant/translations';
 import type { CodeBlockDetails } from '../assistant/use_conversation/helpers';
-import type { PromptContextTemplate } from '../assistant/prompt_context/types';
 import type { KnowledgeBaseConfig, TraceOptions } from '../assistant/types';
 import {
   DEFAULT_ASSISTANT_NAMESPACE,

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { type TypeOf, schema } from '@kbn/config-schema';
 
 export const ConfigSchema = schema.object({
   importBufferSize: schema.number({ defaultValue: 1000, min: 1 }),

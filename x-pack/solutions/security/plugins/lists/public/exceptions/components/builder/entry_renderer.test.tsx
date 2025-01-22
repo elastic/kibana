@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiComboBox, type EuiComboBoxOptionOption } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   doesNotExistOperator,
@@ -27,8 +26,7 @@ import type { FieldSpec } from '@kbn/data-plugin/common';
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { waitFor } from '@testing-library/react';
-import type { ReactWrapper } from 'enzyme';
-import { mount } from 'enzyme';
+import { type ReactWrapper, mount } from 'enzyme';
 
 import { MockedShowValueListModal } from '../__mock__/show_value_list_modal.mock';
 import { getFoundListsBySizeSchemaMock } from '../../../../common/schemas/response/found_lists_by_size_schema.mock';

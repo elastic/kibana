@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import type { ElementType } from 'react';
-import React, { useCallback, useMemo } from 'react';
+import React, { type ElementType, useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
 import type { HttpStart } from '@kbn/core/public';
 import type { ExceptionListType, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
-import type {
-  BuilderEntry,
-  DataViewField,
-  ExceptionsBuilderExceptionItem,
-  FormattedBuilderEntry,
-  OperatorOption,
-} from '@kbn/securitysolution-list-utils';
 import {
+  type BuilderEntry,
+  type DataViewField,
+  type ExceptionsBuilderExceptionItem,
+  type FormattedBuilderEntry,
+  type OperatorOption,
   getFormattedBuilderEntries,
   getUpdatedEntriesOnDelete,
 } from '@kbn/securitysolution-list-utils';

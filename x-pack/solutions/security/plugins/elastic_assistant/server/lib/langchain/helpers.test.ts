@@ -6,10 +6,9 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { Message } from '@kbn/elastic-assistant-common';
+import type { Message, ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 import type { BaseMessage } from '@langchain/core/messages';
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
-import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 
 import {
   getLangChainMessage,

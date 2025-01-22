@@ -11,19 +11,20 @@ import type {
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import type {
-  CommentsArray,
-  CreateComment,
-  CreateCommentsArray,
-  CreateExceptionListItemSchema,
-  ExceptionListItemSchema,
-  ExceptionListSchema,
-  FoundExceptionListItemSchema,
-  FoundExceptionListSchema,
-  UpdateCommentsArrayOrUndefined,
-  UpdateExceptionListItemSchema,
+import {
+  type CommentsArray,
+  type CreateComment,
+  type CreateCommentsArray,
+  type CreateExceptionListItemSchema,
+  type ExceptionListItemSchema,
+  type ExceptionListSchema,
+  type FoundExceptionListItemSchema,
+  type FoundExceptionListSchema,
+  type UpdateCommentsArrayOrUndefined,
+  type UpdateExceptionListItemSchema,
+  exceptionListItemType,
+  exceptionListType,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { exceptionListItemType, exceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import { getExceptionListType } from '@kbn/securitysolution-list-utils';
 
 import type { ExceptionListSoSchema } from '../../../schemas/saved_objects';

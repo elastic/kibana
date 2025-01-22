@@ -6,12 +6,13 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { DefendInsightsPostRequestBody, Message } from '@kbn/elastic-assistant-common';
 import type { BaseMessage } from '@langchain/core/messages';
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 import type {
   AttackDiscoveryPostRequestBody,
+  DefendInsightsPostRequestBody,
   ExecuteConnectorRequestBody,
+  Message,
 } from '@kbn/elastic-assistant-common';
 
 export const getLangChainMessage = (

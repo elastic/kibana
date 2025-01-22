@@ -5,32 +5,34 @@
  * 2.0.
  */
 
-import type { ElementType } from 'react';
-import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import React, {
+  type ElementType,
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useState,
+} from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import type { HttpStart } from '@kbn/core/public';
 import { addIdToItem } from '@kbn/securitysolution-utils';
-import type {
-  ExceptionListItemSchema,
-  ExceptionListType,
-  NamespaceType,
-  OsTypeArray,
-} from '@kbn/securitysolution-io-ts-list-types';
 import {
+  type ExceptionListItemSchema,
+  type ExceptionListType,
+  type NamespaceType,
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
+  type OsTypeArray,
   entriesNested,
   exceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import type {
-  CreateExceptionListItemBuilderSchema,
-  DataViewField,
-  ExceptionsBuilderExceptionItem,
-  ExceptionsBuilderReturnExceptionItem,
-  OperatorOption,
-} from '@kbn/securitysolution-list-utils';
 import {
+  type CreateExceptionListItemBuilderSchema,
+  type DataViewField,
+  type ExceptionsBuilderExceptionItem,
+  type ExceptionsBuilderReturnExceptionItem,
+  type OperatorOption,
   containsValueListEntry,
   filterExceptionItems,
   getDefaultEmptyEntry,
@@ -46,8 +48,7 @@ import { AndOrBadge } from '../and_or_badge';
 import { BuilderExceptionListItemComponent } from './exception_item_renderer';
 import { BuilderLogicButtons } from './logic_buttons';
 import { getTotalErrorExist } from './selectors';
-import type { EntryFieldError, State } from './reducer';
-import { exceptionsBuilderReducer } from './reducer';
+import { type EntryFieldError, type State, exceptionsBuilderReducer } from './reducer';
 const MyInvisibleAndBadge = styled(EuiFlexItem)`
   visibility: hidden;
 `;

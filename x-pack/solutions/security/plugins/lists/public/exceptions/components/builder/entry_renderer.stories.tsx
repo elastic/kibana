@@ -17,8 +17,7 @@ import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
 import { fields } from '@kbn/data-plugin/common/mocks';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
-import type { EntryItemProps } from './entry_renderer';
-import { BuilderEntryItem } from './entry_renderer';
+import { BuilderEntryItem, type EntryItemProps } from './entry_renderer';
 
 const mockAutocompleteService = {
   getValueSuggestions: () =>

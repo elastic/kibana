@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { of } from 'rxjs';
 
 import type { MatcherFunction, RenderOptions } from '@testing-library/react';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { render as reactTestLibRender, configure } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
 import { Route } from '@kbn/shared-ux-router';

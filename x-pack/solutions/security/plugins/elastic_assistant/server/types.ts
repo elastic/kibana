@@ -15,6 +15,7 @@ import type {
   CoreSetup,
   AnalyticsServiceSetup,
   CustomRequestHandlerContext,
+  ElasticsearchClient,
   IRouter,
   KibanaRequest,
   Logger,
@@ -25,7 +26,6 @@ import { type MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { DynamicStructuredTool, Tool } from '@langchain/core/tools';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   AttackDiscoveryPostRequestBody,
   DefendInsightsPostRequestBody,
@@ -48,12 +48,14 @@ import type {
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
 import type { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
-import type { GetAIAssistantKnowledgeBaseDataClientParams } from './ai_assistant_data_clients/knowledge_base';
+import type {
+  AIAssistantKnowledgeBaseDataClient,
+  GetAIAssistantKnowledgeBaseDataClientParams,
+} from './ai_assistant_data_clients/knowledge_base';
 import type { AttackDiscoveryDataClient } from './lib/attack_discovery/persistence';
 import type { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
 import type { AIAssistantDataClient } from './ai_assistant_data_clients';
-import type { AIAssistantKnowledgeBaseDataClient } from './ai_assistant_data_clients/knowledge_base';
 import type { DefendInsightsDataClient } from './ai_assistant_data_clients/defend_insights';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
