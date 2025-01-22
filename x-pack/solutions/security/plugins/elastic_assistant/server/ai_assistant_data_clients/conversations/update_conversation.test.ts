@@ -145,6 +145,16 @@ describe('transformToUpdateScheme', () => {
             traceId: 'something',
             transactionId: 'something',
           },
+          metadata: {
+            contentReferences: {
+              zm3i5: {
+                knowledgeBaseEntryName: "Favorite_Food",
+                knowledgeBaseEntryId: "1c53565d-c6f1-45ab-9f4b-80b604dba8f3",
+                id: "zm3i5",
+                type: "KnowledgeBaseEntry"
+              }
+            }
+          }    
         },
         {
           content: 'Message 4',
@@ -177,6 +187,16 @@ describe('transformToUpdateScheme', () => {
             trace_id: 'something',
             transaction_id: 'something',
           },
+          metadata: {
+            content_references: {
+              zm3i5: {
+                knowledgeBaseEntryName: "Favorite_Food",
+                knowledgeBaseEntryId: "1c53565d-c6f1-45ab-9f4b-80b604dba8f3",
+                id: "zm3i5",
+                type: "KnowledgeBaseEntry"
+              }
+            }
+          }    
         },
         {
           '@timestamp': '2011-10-06T14:48:00.000Z',
