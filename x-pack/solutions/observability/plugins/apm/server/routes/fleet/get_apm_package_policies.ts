@@ -16,11 +16,11 @@ export async function getApmPackagePolicies({
   coreStart: CoreStart;
   fleetPluginStart: NonNullable<APMPluginStartDependencies['fleet']>;
 }) {
-  // @ts-ignore
   const savedObjectsClient: SavedObjectsClientContract = await getInternalSavedObjectsClient(
     coreStart
   );
   return await fleetPluginStart.packagePolicyService.list(savedObjectsClient, {
     kuery: 'ingest-package-policies.package.name:apm',
+    spaceId: '*',
   });
 }
