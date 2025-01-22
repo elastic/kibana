@@ -15,7 +15,7 @@ import {
   ImportRulesRequestQuery,
   ImportRulesResponse,
 } from '../../../../../../../common/api/detection_engine/rule_management';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
+import { DETECTION_ENGINE_RULES_IMPORT_URL } from '../../../../../../../common/constants';
 import type { ConfigType } from '../../../../../../config';
 import type { HapiReadableStream, SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { ImportRuleResponse } from '../../../../routes/utils';
@@ -46,7 +46,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
   router.versioned
     .post({
       access: 'public',
-      path: `${DETECTION_ENGINE_RULES_URL}/_import`,
+      path: DETECTION_ENGINE_RULES_IMPORT_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution'],
