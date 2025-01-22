@@ -172,10 +172,10 @@ export const dateHistogramOperation: OperationDefinition<
       interval =
         calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }, interval, false)
           ?.description || 'hour';
-      return i18n.translate('xpack.lens.dateHistogram.interval', {
-        defaultMessage: `{{field}} per ({interval})`,
+      return i18n.translate('xpack.lens.indexPattern.dateHistogram.interval', {
+        defaultMessage: `{field} per {interval}`,
         values: {
-          field,
+          field: field || '',
           interval,
         },
       });
