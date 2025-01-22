@@ -9,7 +9,7 @@ import type {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
-import type {
+import {
   AuthenticatedUser,
   CoreRequestHandlerContext,
   CoreSetup,
@@ -19,6 +19,7 @@ import type {
   KibanaRequest,
   Logger,
   AuditLogger,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
@@ -140,6 +141,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;
   llmTasks: LlmTasksPluginStart;
   inference: InferenceServerStart;
+  savedObjectsClient: SavedObjectsClientContract;
   telemetry: AnalyticsServiceSetup;
 }
 /**

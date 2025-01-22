@@ -14,6 +14,7 @@ import {
 } from 'langchain/agents';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
+import { getPrompt, promptDictionary } from '../../../prompt/get_prompt';
 import { getLlmClass } from '../../../../routes/utils';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { AssistantToolParams } from '../../../../types';
@@ -44,6 +45,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   onNewReplacements,
   replacements,
   request,
+  savedObjectsClient,
   size,
   systemPrompt,
   telemetry,
@@ -130,22 +132,29 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     }
   }
 
+  const defaultSystemPrompt = await getPrompt({
+    savedObjectsClient,
+    llm: llmType,
+    // use oss as model when using openai and oss
+    model: llmType === 'openai' && isOssModel ? 'oss' : request.body.model,
+    promptId: promptDictionary.systemPrompt,
+    actionsClient,
+    connectorId,
+  });
+
   const agentRunnable =
     isOpenAI || llmType === 'inference'
       ? await createOpenAIToolsAgent({
           llm: createLlmInstance(),
           tools,
-          prompt: formatPrompt(systemPrompts.openai, systemPrompt),
+          prompt: formatPrompt(defaultSystemPrompt, systemPrompt),
           streamRunnable: isStream,
         })
       : llmType && ['bedrock', 'gemini'].includes(llmType)
       ? await createToolCallingAgent({
           llm: createLlmInstance(),
           tools,
-          prompt:
-            llmType === 'bedrock'
-              ? formatPrompt(systemPrompts.bedrock, systemPrompt)
-              : formatPrompt(systemPrompts.gemini, systemPrompt),
+          prompt: formatPrompt(defaultSystemPrompt, systemPrompt),
           streamRunnable: isStream,
         })
       : // used with OSS models
