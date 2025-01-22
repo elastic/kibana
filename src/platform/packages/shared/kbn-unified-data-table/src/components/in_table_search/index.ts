@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { InTableSearchControl, type InTableSearchControlProps } from './in_table_search_control';
 export {
   InTableSearchHighlightsWrapper,
   type InTableSearchHighlightsWrapperProps,
 } from './in_table_search_highlights_wrapper';
 export {
-  useInTableSearchMatches,
-  type UseInTableSearchMatchesProps,
-  type UseInTableSearchMatchesReturn,
-} from './use_in_table_search_matches';
+  useDataGridInTableSearch,
+  type UseDataGridInTableSearchProps,
+  type UseDataGridInTableSearchReturn,
+} from './use_data_grid_in_table_search';

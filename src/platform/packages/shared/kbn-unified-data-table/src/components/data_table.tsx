@@ -36,7 +36,6 @@ import {
   useDataGridColumnsCellActions,
   type UseDataGridColumnsCellActionsProps,
 } from '@kbn/cell-actions';
-import type { SerializedStyles } from '@emotion/react';
 import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import type { Serializable } from '@kbn/utility-types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
@@ -95,7 +94,7 @@ import {
   getAdditionalRowControlColumns,
 } from './custom_control_columns';
 import { useSorting } from '../hooks/use_sorting';
-import { InTableSearchControl } from './in_table_search';
+import { useDataGridInTableSearch } from './in_table_search';
 
 const CONTROL_COLUMN_IDS_DEFAULT = [SELECT_ROW, OPEN_DETAILS];
 const THEME_DEFAULT = { darkMode: false };
@@ -750,66 +749,28 @@ export const UnifiedDataTable = ({
   );
 
   const { dataGridId, dataGridWrapper, setDataGridWrapper } = useFullScreenWatcher();
-  const [{ inTableSearchTerm, inTableSearchTermCss }, setInTableSearchState] = useState<{
-    inTableSearchTerm: string;
-    inTableSearchTermCss?: SerializedStyles;
-  }>(() => ({ inTableSearchTerm: '' }));
 
-  const inTableSearchControl = useMemo(() => {
-    if (!enableInTableSearch) {
-      return undefined;
-    }
-    const controlsCount =
-      dataGridWrapper?.querySelectorAll('.euiDataGridHeaderCell--controlColumn').length ?? 0;
-    return (
-      <InTableSearchControl
-        inTableSearchTerm={inTableSearchTerm}
-        visibleColumns={visibleColumns}
-        rows={displayedRows}
-        renderCellValue={renderCellValue}
-        pageSize={isPaginationEnabled ? currentPageSize : null}
-        getColumnIndexFromId={(columnId) => visibleColumns.indexOf(columnId) + controlsCount}
-        scrollToCell={(params) => {
-          dataGridRef.current?.scrollToItem?.(params);
-        }}
-        shouldOverrideCmdF={(element) => {
-          return dataGridWrapper?.contains?.(element) ?? false;
-        }}
-        onChange={(searchTerm) => setInTableSearchState({ inTableSearchTerm: searchTerm || '' })}
-        onChangeCss={(styles) =>
-          setInTableSearchState((prevState) => ({ ...prevState, inTableSearchTermCss: styles }))
-        }
-        onChangeToExpectedPage={(expectedPageIndex) => {
-          if (isPaginationEnabled && currentPageIndexRef.current !== expectedPageIndex) {
-            changeCurrentPageIndex(expectedPageIndex);
-          }
-        }}
-      />
-    );
-  }, [
-    enableInTableSearch,
-    setInTableSearchState,
-    displayedRows,
-    renderCellValue,
-    visibleColumns,
-    dataGridRef,
-    dataGridWrapper,
-    currentPageSize,
-    changeCurrentPageIndex,
-    isPaginationEnabled,
-    inTableSearchTerm,
-  ]);
+  const onChangeToExpectedPage = useCallback(
+    (expectedPageIndex: number) => {
+      if (isPaginationEnabled && currentPageIndexRef.current !== expectedPageIndex) {
+        changeCurrentPageIndex(expectedPageIndex);
+      }
+    },
+    [isPaginationEnabled, changeCurrentPageIndex]
+  );
 
-  const extendedCellContext: EuiDataGridProps['cellContext'] = useMemo(() => {
-    if (!inTableSearchTerm && !cellContext) {
-      return undefined;
-    }
-
-    return {
-      ...cellContext,
-      inTableSearchTerm,
-    };
-  }, [cellContext, inTableSearchTerm]);
+  const { inTableSearchTermCss, inTableSearchControl, extendedCellContext } =
+    useDataGridInTableSearch({
+      enableInTableSearch,
+      dataGridWrapper,
+      dataGridRef,
+      visibleColumns,
+      rows: displayedRows,
+      renderCellValue,
+      pageSize: isPaginationEnabled ? currentPageSize : null,
+      cellContext,
+      onChangeToExpectedPage,
+    });
 
   const renderCustomPopover = useMemo(
     () => renderCellPopover ?? getCustomCellPopoverRenderer(),

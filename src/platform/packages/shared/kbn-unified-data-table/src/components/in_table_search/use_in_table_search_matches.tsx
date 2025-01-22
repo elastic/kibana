@@ -28,7 +28,7 @@ interface ActiveMatch {
 export interface UseInTableSearchMatchesProps {
   inTableSearchTerm: string;
   visibleColumns: string[];
-  rows: DataTableRecord[];
+  rows: DataTableRecord[] | unknown[];
   renderCellValue: (
     props: EuiDataGridCellValueElementProps &
       Pick<InTableSearchHighlightsWrapperProps, 'inTableSearchTerm' | 'onHighlightsCountFound'>
