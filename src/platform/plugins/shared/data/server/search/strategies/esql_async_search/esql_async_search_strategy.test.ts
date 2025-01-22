@@ -86,7 +86,6 @@ describe('ES|QL async search strategy', () => {
         expect(mockApiCaller).toBeCalled();
         const request = mockApiCaller.mock.calls[0][0].body;
         expect(request.query).toEqual(params.query);
-        expect(request).toHaveProperty('keep_alive', '60000ms');
       });
 
       it('makes a GET request to async search with ID', async () => {
@@ -141,7 +140,6 @@ describe('ES|QL async search strategy', () => {
             method: 'POST',
             path: '/_query/async',
             body: {
-              keep_alive: '60000ms',
               wait_for_completion_timeout: '100ms',
               keep_on_completion: false,
               query: 'from logs',
@@ -188,7 +186,6 @@ describe('ES|QL async search strategy', () => {
         expect(mockApiCaller).toBeCalled();
         const request = mockApiCaller.mock.calls[0][0].body;
         expect(request).toHaveProperty('wait_for_completion_timeout');
-        expect(request).toHaveProperty('keep_alive');
       });
 
       it('should delete when aborted', async () => {

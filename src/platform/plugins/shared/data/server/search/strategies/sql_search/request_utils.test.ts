@@ -13,57 +13,6 @@ import { getMockSearchConfig } from '../../../../config.mock';
 
 describe('request utils', () => {
   describe('getDefaultAsyncSubmitParams', () => {
-    test('Uses `keep_alive` from default params if no `sessionId` is provided', async () => {
-      const mockConfig = getMockSearchConfig({
-        sessions: {
-          defaultExpiration: moment.duration(3, 'd'),
-        },
-      });
-      const params = getDefaultAsyncSubmitParams(mockConfig, {});
-      expect(params).toHaveProperty('keep_alive', '60000ms');
-    });
-
-    // unskip when SQL has full session support https://github.com/elastic/kibana/issues/127880
-    test.skip('Uses `keep_alive` from config if enabled and session is stored', async () => {
-      const mockConfig = getMockSearchConfig({
-        sessions: {
-          defaultExpiration: moment.duration(3, 'd'),
-        },
-      });
-      const params = getDefaultAsyncSubmitParams(mockConfig, {
-        sessionId: 'foo',
-        isStored: true,
-      });
-      expect(params).toHaveProperty('keep_alive', '259200000ms');
-    });
-
-    // remove when SQL has full session support https://github.com/elastic/kibana/issues/127880
-    test('Uses `keep_alive` from asyncSearch config if sessions enabled and session is stored', async () => {
-      const mockConfig = getMockSearchConfig({
-        sessions: {
-          defaultExpiration: moment.duration(3, 'd'),
-        },
-      });
-      const params = getDefaultAsyncSubmitParams(mockConfig, {
-        sessionId: 'foo',
-        isStored: true,
-      });
-      expect(params).toHaveProperty('keep_alive', '60000ms');
-    });
-
-    test('Uses `keepAlive` of `1m` if disabled', async () => {
-      const mockConfig = getMockSearchConfig({
-        sessions: {
-          defaultExpiration: moment.duration(3, 'd'),
-          enabled: false,
-        },
-      });
-      const params = getDefaultAsyncSubmitParams(mockConfig, {
-        sessionId: 'foo',
-      });
-      expect(params).toHaveProperty('keep_alive', '60000ms');
-    });
-
     // unskip when SQL has full session support https://github.com/elastic/kibana/issues/127880
     test.skip('Uses `keep_on_completion` if sessions enabled', async () => {
       const mockConfig = getMockSearchConfig({});
