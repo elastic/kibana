@@ -332,6 +332,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
                     iconType="expand"
                     onClick={onExpandEvent}
                     size="s"
+                    color="text"
                   />
                 </EuiToolTip>
               </EventsTdContent>
@@ -396,6 +397,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
                   iconType="analyzeEvent"
                   onClick={handleClick}
                   size="s"
+                  color="text"
                 />
               </EuiToolTip>
             </EventsTdContent>
@@ -411,6 +413,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
                   iconType="sessionViewer"
                   onClick={openSessionView}
                   size="s"
+                  color="text"
                 />
               </EuiToolTip>
             </EventsTdContent>
