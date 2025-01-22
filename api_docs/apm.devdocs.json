@@ -1119,7 +1119,7 @@
           "IngestGetPipelineResponse",
           " | undefined; }; diagnosticsPrivileges: { index: Record<string, ",
           "SecurityHasPrivilegesPrivileges",
-          ">; cluster: Record<string, boolean>; hasAllClusterPrivileges: boolean; hasAllIndexPrivileges: boolean; hasAllPrivileges: boolean; }; apmIndices: Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>; apmIndexTemplates: { name: string; isNonStandard: boolean; exists: boolean; }[]; fleetPackageInfo: { isInstalled: boolean; version?: string | undefined; }; kibanaVersion: string; elasticsearchVersion: string; apmEvents: ",
+          ">; cluster: Record<string, boolean>; hasAllClusterPrivileges: boolean; hasAllIndexPrivileges: boolean; hasAllPrivileges: boolean; }; apmIndices: Readonly<{} & { error: string; span: string; transaction: string; metric: string; onboarding: string; sourcemap: string; }>; apmIndexTemplates: { name: string; isNonStandard: boolean; exists: boolean; }[]; fleetPackageInfo: { isInstalled: boolean; version?: string | undefined; }; kibanaVersion: string; elasticsearchVersion: string; apmEvents: ",
           "ApmEvent",
           "[]; invalidIndices?: ",
           "IndiciesItem",
@@ -4419,7 +4419,7 @@
           },
           "<\"GET /internal/apm/settings/apm-indices\", undefined, ",
           "APMRouteHandlerResources",
-          ", Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>, ",
+          ", Readonly<{} & { error: string; span: string; transaction: string; metric: string; onboarding: string; sourcemap: string; }>, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/settings/apm-index-settings\": ",
           {

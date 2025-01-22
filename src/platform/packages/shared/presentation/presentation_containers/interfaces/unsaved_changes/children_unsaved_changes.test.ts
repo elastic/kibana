@@ -13,11 +13,11 @@ import { waitFor } from '@testing-library/react';
 
 describe('childrenUnsavedChanges$', () => {
   const child1Api = {
-    unsavedChanges: new BehaviorSubject<object | undefined>(undefined),
+    unsavedChanges$: new BehaviorSubject<object | undefined>(undefined),
     resetUnsavedChanges: () => true,
   };
   const child2Api = {
-    unsavedChanges: new BehaviorSubject<object | undefined>(undefined),
+    unsavedChanges$: new BehaviorSubject<object | undefined>(undefined),
     resetUnsavedChanges: () => true,
   };
   const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
@@ -25,8 +25,8 @@ describe('childrenUnsavedChanges$', () => {
 
   beforeEach(() => {
     onFireMock.mockReset();
-    child1Api.unsavedChanges.next(undefined);
-    child2Api.unsavedChanges.next(undefined);
+    child1Api.unsavedChanges$.next(undefined);
+    child2Api.unsavedChanges$.next(undefined);
     children$.next({
       child1: child1Api,
       child2: child2Api,
@@ -61,7 +61,7 @@ describe('childrenUnsavedChanges$', () => {
       }
     );
 
-    child1Api.unsavedChanges.next({
+    child1Api.unsavedChanges$.next({
       key1: 'modified value',
     });
 
@@ -98,7 +98,7 @@ describe('childrenUnsavedChanges$', () => {
     children$.next({
       ...children$.value,
       child3: {
-        unsavedChanges: new BehaviorSubject<object | undefined>({ key1: 'modified value' }),
+        unsavedChanges$: new BehaviorSubject<object | undefined>({ key1: 'modified value' }),
         resetUnsavedChanges: () => true,
       },
     });
