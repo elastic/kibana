@@ -76,7 +76,7 @@ describe('DiscoverMainRoute', () => {
 
   test('renders the main app when ad hoc data views exist', async () => {
     mockDefaultAdHocDataViews = [{ id: 'test', title: 'test' }];
-    const component = mountComponent(false, false);
+    const component = mountComponent(true, false);
 
     await waitFor(() => {
       component.update();

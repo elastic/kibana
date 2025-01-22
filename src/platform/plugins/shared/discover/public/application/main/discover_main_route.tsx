@@ -136,14 +136,19 @@ export function DiscoverMainRoute({
 
         const hasAdHocDataViews = stateContainer.internalState.getState().adHocDataViews.length > 0;
 
-        if ((!hasUserDataViewValue || !defaultDataViewExists) && !hasAdHocDataViews) {
+        if (
+          (!hasUserDataViewValue || !defaultDataViewExists) &&
+          (!hasAdHocDataViews || !hasESDataValue)
+        ) {
           setNoDataState({
             showNoDataPage: true,
             hasESData: hasESDataValue,
             hasUserDataView: hasUserDataViewValue,
           });
+
           return false;
         }
+
         return true;
       } catch (e) {
         setError(e);

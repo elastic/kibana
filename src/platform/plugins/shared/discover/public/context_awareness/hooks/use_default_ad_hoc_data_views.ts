@@ -51,6 +51,8 @@ export const useDefaultAdHocDataViews = ({
     for (const prevId of internalState.get().defaultProfileAdHocDataViewIds) {
       dataViews.clearInstanceCache(prevId);
     }
+
+    internalState.transitions.setDefaultProfileAdHocDataViews([]);
   });
 
   return { initializeProfileDataViews };
