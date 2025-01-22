@@ -89,12 +89,9 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
     (type) => !(installedTypes || []).includes(type)
   );
 
-  const enableUninstalledEntityStore = useCallback(
-    () => () => {
-      storeEnablement.mutate({ entityTypes: uninstalledTypes });
-    },
-    [storeEnablement, uninstalledTypes]
-  );
+  const enableUninstalledEntityStore = () => {
+    storeEnablement.mutate({ entityTypes: uninstalledTypes });
+  };
 
   if (storeEnablement.error) {
     return (
