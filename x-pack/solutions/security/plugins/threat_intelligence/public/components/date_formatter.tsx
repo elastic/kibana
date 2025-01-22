@@ -6,7 +6,8 @@
  */
 
 import moment from 'moment';
-import React, { VFC } from 'react';
+import type { VFC } from 'react';
+import React from 'react';
 import { EMPTY_VALUE } from '../constants/common';
 import { dateFormatter } from '../utils/dates';
 import { useDateFormat, useTimeZone } from '../hooks/use_kibana_ui_settings';

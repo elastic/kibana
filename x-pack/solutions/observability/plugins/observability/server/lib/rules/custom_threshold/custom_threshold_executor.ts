@@ -12,27 +12,30 @@ import {
   ALERT_REASON,
   ALERT_GROUP,
 } from '@kbn/rule-data-utils';
-import { LocatorPublic } from '@kbn/share-plugin/common';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
-import { IBasePath, Logger } from '@kbn/core/server';
-import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import type { IBasePath, Logger } from '@kbn/core/server';
+import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { getEcsGroups } from '@kbn/observability-alerting-rule-utils';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { getEsQueryConfig } from '../../../utils/get_es_query_config';
-import { AlertsLocatorParams, getAlertDetailsUrl } from '../../../../common';
+import type { AlertsLocatorParams} from '../../../../common';
+import { getAlertDetailsUrl } from '../../../../common';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
-import { ObservabilityConfig } from '../../..';
+import type { ObservabilityConfig } from '../../..';
 import { getEvaluationValues, getThreshold } from './lib/get_values';
 import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, UNGROUPED_FACTORY_KEY } from './constants';
-import {
-  AlertStates,
+import type {
   CustomThresholdRuleTypeParams,
   CustomThresholdRuleTypeState,
   CustomThresholdAlertState,
   CustomThresholdAlertContext,
   CustomThresholdSpecificActionGroups,
   CustomThresholdActionGroup,
-  CustomThresholdAlert,
+  CustomThresholdAlert} from './types';
+import {
+  AlertStates
 } from './types';
 import { buildFiredAlertReason, buildNoDataAlertReason } from './messages';
 import {
@@ -45,8 +48,9 @@ import {
 } from './utils';
 
 import { formatAlertResult, getLabel } from './lib/format_alert_result';
-import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
-import { MissingGroupsRecord } from './lib/check_missing_group';
+import type { EvaluatedRuleParams} from './lib/evaluate_rule';
+import { evaluateRule } from './lib/evaluate_rule';
+import type { MissingGroupsRecord } from './lib/check_missing_group';
 
 export interface CustomThresholdLocators {
   alertsLocator?: LocatorPublic<AlertsLocatorParams>;

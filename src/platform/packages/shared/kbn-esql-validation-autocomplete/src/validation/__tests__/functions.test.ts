@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FunctionDefinition } from '../../definitions/types';
+import type { FunctionDefinition } from '../../definitions/types';
 import { setTestFunctions } from '../../shared/test_functions';
 import { setup } from './helpers';
 

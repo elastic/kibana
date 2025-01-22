@@ -6,13 +6,14 @@
  */
 
 import React, { Component, Fragment } from 'react';
+import type {
+  EuiSwitchEvent} from '@elastic/eui';
 import {
   EuiFormRow,
   EuiModalHeader,
   EuiModalBody,
   EuiModalHeaderTitle,
-  EuiSwitch,
-  EuiSwitchEvent,
+  EuiSwitch
 } from '@elastic/eui';
 import { createReactOverlays } from '@kbn/kibana-react-plugin/public';
 import { mapEmbeddablesSingleton } from '../../react_embeddable/map_embeddables_singleton';

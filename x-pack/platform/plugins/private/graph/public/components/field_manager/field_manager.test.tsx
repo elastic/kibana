@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import React, { ReactElement, MouseEvent } from 'react';
+import type { ReactElement, MouseEvent } from 'react';
+import React from 'react';
 import { EuiColorPicker, EuiSelectable, EuiContextMenu, EuiButton } from '@elastic/eui';
 import { FieldPicker } from './field_picker';
 import { FieldEditor } from './field_editor';
-import { GraphStore, loadFields } from '../../state_management';
+import type { GraphStore} from '../../state_management';
+import { loadFields } from '../../state_management';
 import { getSuitableIcon } from '../../helpers/style_choices';
-import { shallow, ShallowWrapper } from 'enzyme';
+import type { ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { FieldManager } from './field_manager';
 import { Provider } from 'react-redux';

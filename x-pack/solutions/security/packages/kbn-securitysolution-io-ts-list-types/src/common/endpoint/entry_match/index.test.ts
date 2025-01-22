@@ -8,7 +8,8 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import { getEndpointEntryMatchMock } from './index.mock';
-import { EndpointEntryMatch, endpointEntryMatch } from '.';
+import type { EndpointEntryMatch} from '.';
+import { endpointEntryMatch } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { getEntryMatchMock } from '../../entry_match/index.mock';
 

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { findOrCreateDataView } from '../../utils/find_or_create_data_view';
 
+import type {
+  FetchAnalyticsCollectionActions} from './fetch_analytics_collection_logic';
 import {
-  FetchAnalyticsCollectionActions,
   FetchAnalyticsCollectionLogic,
 } from './fetch_analytics_collection_logic';
 

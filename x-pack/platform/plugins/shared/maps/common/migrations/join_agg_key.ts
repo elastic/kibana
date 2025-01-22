@@ -6,16 +6,17 @@
  */
 
 import _ from 'lodash';
+import type {
+  VECTOR_STYLES} from '../constants';
 import {
   AGG_DELIMITER,
   AGG_TYPE,
   FIELD_ORIGIN,
   JOIN_FIELD_NAME_PREFIX,
-  LAYER_TYPE,
-  VECTOR_STYLES,
+  LAYER_TYPE
 } from '../constants';
 import { getJoinAggKey } from '../get_agg_key';
-import {
+import type {
   AggDescriptor,
   JoinDescriptor,
   LayerDescriptor,

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
-import {
-  API_VERSIONS,
-  ELASTIC_AI_ASSISTANT_EVALUATE_URL,
+import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
+import type {
   GetEvaluateResponse,
   PostEvaluateRequestBodyInput,
-  PostEvaluateResponse,
+  PostEvaluateResponse} from '@kbn/elastic-assistant-common';
+import {
+  API_VERSIONS,
+  ELASTIC_AI_ASSISTANT_EVALUATE_URL
 } from '@kbn/elastic-assistant-common';
 
 export interface PostEvaluationParams {

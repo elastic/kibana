@@ -6,7 +6,8 @@
  */
 
 import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { FullSizeCenteredPage } from '../full_size_page';
 
 // Keep this component lean as it is part of the main app bundle

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
+import React from 'react';
 
 export const CircleIcon = ({ style }: { style: CSSProperties }) => (
   <svg

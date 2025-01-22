@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useEffect, useCallback, RefCallback } from 'react';
+import type { RefCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useResizeObserver } from '@elastic/eui';
-import {
+import type {
   ShapeRef,
   ShapeAttributes,
   ShapeContentAttributes,
-  SvgConfig,
+  SvgConfig} from '../reusable';
+import {
   getDefaultShapeData,
 } from '../reusable';
-import { Dimensions, ShapeComponentProps } from './types';
+import type { Dimensions, ShapeComponentProps } from './types';
 import { getViewBox } from '../../../common/lib';
 import { ShapeDrawerComponent } from '../..';
 

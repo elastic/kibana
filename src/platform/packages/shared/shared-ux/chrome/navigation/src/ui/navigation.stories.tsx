@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ComponentMeta } from '@storybook/react';
-import React, { EventHandler, FC, MouseEvent, useState, useEffect } from 'react';
+import type { ComponentMeta } from '@storybook/react';
+import type { EventHandler, FC, MouseEvent} from 'react';
+import React, { useState, useEffect } from 'react';
 import { of } from 'rxjs';
 
+import type {
+  EuiCollapsibleNavBetaProps} from '@elastic/eui';
 import {
   EuiButton,
   EuiCollapsibleNavBeta,
-  EuiCollapsibleNavBetaProps,
   EuiHeader,
   EuiHeaderSection,
   EuiPageTemplate,
@@ -27,7 +29,7 @@ import mdx from '../../README.mdx';
 import type { NavigationServices } from '../types';
 import { NavigationProvider } from '../services';
 import { Navigation } from './navigation';
-import { ContentProvider } from './components/panel';
+import type { ContentProvider } from './components/panel';
 
 const storybookMock = new NavigationStorybookMock();
 

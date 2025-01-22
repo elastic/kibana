@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, distinctUntilChanged, map, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
 import { isEqual } from 'lodash';
 import {
   removeDropCommandsFromESQLQuery,
@@ -34,15 +35,16 @@ import {
   mapVisToChartType,
 } from '@kbn/visualization-utils';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
-import { XYConfiguration } from '@kbn/visualizations-plugin/common';
+import type { XYConfiguration } from '@kbn/visualizations-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { fieldSupportsBreakdown } from '@kbn/field-utils';
+import type {
+  UnifiedHistogramSuggestionContext,
+  UnifiedHistogramVisContext} from '../types';
 import {
   UnifiedHistogramExternalVisContextStatus,
-  UnifiedHistogramSuggestionContext,
-  UnifiedHistogramSuggestionType,
-  UnifiedHistogramVisContext,
+  UnifiedHistogramSuggestionType
 } from '../types';
 import {
   isSuggestionShapeAndVisContextCompatible,

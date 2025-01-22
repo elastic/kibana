@@ -14,13 +14,13 @@ import type {
   ThemeServiceStart,
   UserProfileService,
 } from '@kbn/core/public';
-import { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
-import { DevToolsSetup } from '@kbn/dev-tools-plugin/public';
-import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { SharePluginSetup, SharePluginStart, LocatorPublic } from '@kbn/share-plugin/public';
+import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
+import type { DevToolsSetup } from '@kbn/dev-tools-plugin/public';
+import type { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { SharePluginSetup, SharePluginStart, LocatorPublic } from '@kbn/share-plugin/public';
 
-import { ConsoleUILocatorParams } from './locator';
-import { EmbeddedConsoleView } from './embeddable_console';
+import type { ConsoleUILocatorParams } from './locator';
+import type { EmbeddedConsoleView } from './embeddable_console';
 
 export interface ConsoleStartServices {
   analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;

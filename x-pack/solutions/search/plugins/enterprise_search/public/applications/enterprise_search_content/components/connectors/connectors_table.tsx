@@ -9,11 +9,12 @@ import React, { useMemo } from 'react';
 
 import { useValues } from 'kea';
 
-import {
+import type {
   CriteriaWithPagination,
+  EuiBasicTableColumn} from '@elastic/eui';
+import {
   EuiBadge,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
@@ -21,7 +22,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { Meta } from '../../../../../common/types/pagination';
+import type { Meta } from '../../../../../common/types/pagination';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
@@ -35,7 +36,7 @@ import {
 import { ConnectorViewIndexLink } from '../shared/connector_view_search_indices_details/connector_view_search_indices_details';
 
 import { ConnectorType } from './connector_type';
-import { ConnectorViewItem } from './connectors_logic';
+import type { ConnectorViewItem } from './connectors_logic';
 
 interface ConnectorsTableProps {
   isCrawler: boolean;

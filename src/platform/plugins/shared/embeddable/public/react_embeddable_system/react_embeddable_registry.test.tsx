@@ -11,7 +11,7 @@ import {
   registerReactEmbeddableFactory,
   getReactEmbeddableFactory,
 } from './react_embeddable_registry';
-import { ReactEmbeddableFactory } from './types';
+import type { ReactEmbeddableFactory } from './types';
 
 describe('react embeddable registry', () => {
   const getTestEmbeddableFactory = () =>

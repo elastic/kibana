@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
-import { SyntheticsRestApiRouteFactory } from '../types';
+import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitors, isMonitorsQueryFiltered, QuerySchema } from '../common';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';

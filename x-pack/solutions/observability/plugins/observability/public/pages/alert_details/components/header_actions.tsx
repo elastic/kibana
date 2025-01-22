@@ -8,7 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
-import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public/types';
+import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public/types';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import {
   EuiButton,
@@ -20,8 +20,9 @@ import {
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
+import type {
+  AlertStatus} from '@kbn/rule-data-utils';
 import {
-  AlertStatus,
   ALERT_RULE_UUID,
   ALERT_STATUS_ACTIVE,
   ALERT_UUID,
@@ -35,9 +36,9 @@ import {
 
 import { v4 as uuidv4 } from 'uuid';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
-import { CreateInvestigationResponse } from '@kbn/investigation-shared';
-import { RuleTypeParams } from '@kbn/alerting-plugin/common';
-import { Group } from '@kbn/observability-alerting-rule-utils';
+import type { CreateInvestigationResponse } from '@kbn/investigation-shared';
+import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import type { Group } from '@kbn/observability-alerting-rule-utils';
 import { useKibana } from '../../../utils/kibana_react';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import type { TopAlert } from '../../../typings/alerts';
@@ -46,7 +47,7 @@ import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
 import { useCreateInvestigation } from '../hooks/use_create_investigation';
 import { useFetchInvestigationsByAlert } from '../hooks/use_fetch_investigations_by_alert';
 import { useAddInvestigationItem } from '../hooks/use_add_investigation_item';
-import { AlertParams } from '../../../components/custom_threshold/types';
+import type { AlertParams } from '../../../components/custom_threshold/types';
 import { generateInvestigationItem } from '../../../utils/investigation_item_helper';
 
 export interface HeaderActionsProps {

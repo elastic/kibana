@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 // -------------------------------
 // >= 8.6 UA is always enabled to guide stack upgrades

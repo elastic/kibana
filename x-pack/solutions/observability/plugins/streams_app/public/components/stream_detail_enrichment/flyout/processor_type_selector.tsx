@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { EuiLink, EuiFormRow, EuiSuperSelect, EuiSuperSelectProps } from '@elastic/eui';
+import type { EuiSuperSelectProps } from '@elastic/eui';
+import { EuiLink, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useController, useFormContext, useWatch } from 'react-hook-form';
-import { ProcessorType } from '@kbn/streams-schema';
+import type { ProcessorType } from '@kbn/streams-schema';
 import { useKibana } from '../../../hooks/use_kibana';
 import { getDefaultFormState } from '../utils';
 

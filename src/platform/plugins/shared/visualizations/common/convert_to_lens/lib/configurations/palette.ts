@@ -8,10 +8,11 @@
  */
 
 import color from 'color';
-import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { getStopsWithColorsFromRanges, PaletteConfig } from '../../../utils';
-import { PaletteParams } from './types';
-import { PercentageModeConfig, PercentageModeConfigWithMinMax } from '../../types';
+import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import type { PaletteConfig } from '../../../utils';
+import { getStopsWithColorsFromRanges } from '../../../utils';
+import type { PaletteParams } from './types';
+import type { PercentageModeConfig, PercentageModeConfigWithMinMax } from '../../types';
 
 type ColorStopsWithMinMax = Pick<
   CustomPaletteParams,

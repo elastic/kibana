@@ -7,12 +7,12 @@
 import { unzip } from 'zlib';
 import { promisify } from 'util';
 import expect from '@kbn/expect';
-import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
-import { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services';
-import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext } from '../../configs/ftr_provider_context';
+import type { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services';
+import type { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { FtrProviderContext } from '../../configs/ftr_provider_context';
 import { targetTags } from '../../target_tags';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {

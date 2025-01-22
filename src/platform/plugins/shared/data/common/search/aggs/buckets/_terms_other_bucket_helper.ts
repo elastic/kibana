@@ -10,17 +10,18 @@
 import { isNumber, keys, values, find, each, cloneDeep, flatten } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  Filter} from '@kbn/es-query';
 import {
   buildExistsFilter,
   buildPhrasesFilter,
-  buildQueryFromFilters,
-  Filter,
+  buildQueryFromFilters
 } from '@kbn/es-query';
 import { lastValueFrom } from 'rxjs';
 import { AggGroupNames } from '../agg_groups';
-import { IAggConfigs } from '../agg_configs';
-import { IAggType } from '../agg_type';
-import { IAggConfig } from '../agg_config';
+import type { IAggConfigs } from '../agg_configs';
+import type { IAggType } from '../agg_type';
+import type { IAggConfig } from '../agg_config';
 import { createSamplerAgg } from '../utils/sampler';
 
 const MISSING_KEY_STRING = '__missing__';

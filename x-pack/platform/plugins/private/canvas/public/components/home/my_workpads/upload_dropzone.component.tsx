@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 // @ts-expect-error untyped library
 import Dropzone from 'react-dropzone';
 

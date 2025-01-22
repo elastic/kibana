@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
-import { Meta } from '../../../../../../../common/types';
+import type { Meta } from '../../../../../../../common/types';
 import { flashAPIErrors } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
-import { DomainConfig, DomainConfigFromServer } from '../../../../api/crawler/types';
+import type { DomainConfig, DomainConfigFromServer } from '../../../../api/crawler/types';
 import { domainConfigServerToClient } from '../../../../api/crawler/utils';
 import { IndexNameLogic } from '../../index_name_logic';
 

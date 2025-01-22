@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import React, { MouseEvent, useState } from 'react';
+import type { MouseEvent} from 'react';
+import React, { useState } from 'react';
 
 import { css } from '@emotion/react';
 
+import type {
+  EuiThemeComputed} from '@elastic/eui';
 import {
   EuiBadge,
   EuiButtonIcon,
@@ -22,7 +25,6 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiText,
-  EuiThemeComputed,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';

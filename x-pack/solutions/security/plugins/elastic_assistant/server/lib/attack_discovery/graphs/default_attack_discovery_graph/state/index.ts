@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import type { Document } from '@langchain/core/documents';
 import type { StateGraphArgs } from '@langchain/langgraph';
 

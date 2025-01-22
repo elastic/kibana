@@ -9,10 +9,11 @@
 
 import React from 'react';
 import { sortBy } from 'lodash';
+import type {
+  EuiContextMenuPanelDescriptor} from '@elastic/eui';
 import {
   EuiButton,
   EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
   EuiIcon,
   EuiPopover,
 } from '@elastic/eui';

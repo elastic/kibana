@@ -10,11 +10,12 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { createHashHistory } from 'history';
 import { TodoAppPage } from './todo';
-import { StateContainersExamplesPage, ExampleLink } from '../common/example_page';
+import type { ExampleLink } from '../common/example_page';
+import { StateContainersExamplesPage } from '../common/example_page';
 
 export interface AppOptions {
   appTitle: string;

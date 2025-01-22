@@ -7,7 +7,7 @@
 
 import { KSPM_POLICY_TEMPLATE, CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 
-import { AwsCredentialsTypeFieldMap, GcpCredentialsTypeFieldMap, PostureTypes } from './types_old';
+import type { AwsCredentialsTypeFieldMap, GcpCredentialsTypeFieldMap, PostureTypes } from './types_old';
 
 export const CLOUD_SECURITY_INTERTAL_PREFIX_ROUTE_PATH = '/internal/cloud_security_posture/';
 

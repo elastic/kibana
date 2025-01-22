@@ -9,10 +9,11 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import {
+import type {
   Criteria,
+  EuiBasicTableColumn} from '@elastic/eui';
+import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiHorizontalRule,
@@ -23,11 +24,11 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import {
+import type {
   EuiTableFieldDataColumnType,
   EuiTableSortingType,
 } from '@elastic/eui/src/components/basic_table/table_types';
-import { UseEuiTheme } from '@elastic/eui/src/services/theme/hooks';
+import type { UseEuiTheme } from '@elastic/eui/src/services/theme/hooks';
 
 import { i18n } from '@kbn/i18n';
 
@@ -35,15 +36,16 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { getFlag } from '../../../utils/get_flag';
 import { AnalyticsCollectionExploreTableLogic } from '../analytics_collection_explore_table_logic';
-import {
-  ExploreTableColumns,
+import type {
   ExploreTableItem,
-  ExploreTables,
   SearchTermsTable,
   ClickedTable,
   ReferrersTable,
   WorsePerformersTable,
-  LocationsTable,
+  LocationsTable} from '../analytics_collection_explore_table_types';
+import {
+  ExploreTableColumns,
+  ExploreTables
 } from '../analytics_collection_explore_table_types';
 
 import { AnalyticsCollectionExplorerCallout } from './analytics_collection_explorer_callout';

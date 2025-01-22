@@ -9,8 +9,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { CoreSetup, Plugin } from '@kbn/core/server';
-import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
+import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { LEGACY_TIME_AXIS, palette, systemPalette } from '../common';
 
 interface SetupDependencies {

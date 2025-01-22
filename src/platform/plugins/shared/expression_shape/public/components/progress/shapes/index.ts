@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ShapeType } from '../../reusable';
+import type { ShapeType } from '../../reusable';
 import { Gauge as gauge } from './gauge';
 import { HorizontalBar as horizontalBar } from './horizontal_bar';
 import { HorizontalPill as horizontalPill } from './horizontal_pill';

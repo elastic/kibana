@@ -10,13 +10,16 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import type {
+  GeometryValue,
+  SeriesNameFn,
+  XYChartSeriesIdentifier} from '@elastic/charts';
 import {
   AreaSeries,
   Axis,
   BarSeries,
   ColorVariant,
   Fit,
-  GeometryValue,
   GroupBy,
   HorizontalAlignment,
   LayoutDirection,
@@ -25,20 +28,18 @@ import {
   Position,
   RectAnnotation,
   ScaleType,
-  SeriesNameFn,
   Settings,
   SmallMultiples,
   VerticalAlignment,
-  XYChartSeriesIdentifier,
   Tooltip,
   LegendValue,
 } from '@elastic/charts';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
-import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
-import { DataLayerConfig } from '../../common';
+import type { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
+import type { DataLayerConfig } from '../../common';
 import { LayerTypes } from '../../common/constants';
 import { XyEndzones } from './x_domain';
 import {
@@ -56,8 +57,9 @@ import {
   createSampleDatatableWithRows,
   sampleLayer,
 } from '../../common/__mocks__';
-import { XYChart, XYChartRenderProps } from './xy_chart';
-import { ExtendedDataLayerConfig, XYProps, AnnotationLayerConfigResult } from '../../common/types';
+import type { XYChartRenderProps } from './xy_chart';
+import { XYChart } from './xy_chart';
+import type { ExtendedDataLayerConfig, XYProps, AnnotationLayerConfigResult } from '../../common/types';
 import { DataLayers } from './data_layers';
 import { SplitChart } from './split_chart';
 import { LegendSize } from '@kbn/visualizations-plugin/common';

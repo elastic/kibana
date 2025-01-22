@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import {
-  test as base,
+import type {
   PageObjects,
-  createLazyPageObject,
   ScoutTestFixtures,
   ScoutWorkerFixtures,
   KibanaUrl,
-  KbnClient,
+  KbnClient} from '@kbn/scout';
+import {
+  test as base,
+  createLazyPageObject
 } from '@kbn/scout';
 import { OnboardingHomePage } from './page_objects';
 import { CustomLogsPage } from './page_objects/custom_logs';

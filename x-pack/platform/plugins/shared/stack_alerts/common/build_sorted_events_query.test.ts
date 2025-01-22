@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { buildSortedEventsQuery, BuildSortedEventsQuery } from './build_sorted_events_query';
+import type { BuildSortedEventsQuery } from './build_sorted_events_query';
+import { buildSortedEventsQuery } from './build_sorted_events_query';
 import type { Writable } from '@kbn/utility-types';
 
 const DefaultQuery: Writable<Partial<BuildSortedEventsQuery>> = {

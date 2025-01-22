@@ -18,7 +18,7 @@ import {
   getDefaultEuiMarkdownProcessingPlugins,
 } from '@elastic/eui';
 
-import { CrawlerDomainValidationStep } from '../../../../../api/crawler/types';
+import type { CrawlerDomainValidationStep } from '../../../../../api/crawler/types';
 
 import { domainValidationStateToPanelColor } from './utils';
 import { ValidationStateIcon } from './validation_state_icon';

@@ -9,6 +9,9 @@ import React, { useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
+import type {
+  EuiStepsHorizontalProps,
+  EuiStepStatus} from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -20,10 +23,8 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiStepsHorizontal,
-  EuiStepsHorizontalProps,
   EuiLoadingSpinner,
   EuiSpacer,
-  EuiStepStatus,
   EuiTitle,
 } from '@elastic/eui';
 

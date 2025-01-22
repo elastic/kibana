@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
-import { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
+import type { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
 import { i18n } from '@kbn/i18n';
 
 export function AddProcessorButton(props: EuiButtonPropsForButton) {

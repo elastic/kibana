@@ -8,15 +8,16 @@
 import React, { useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { orderBy } from 'lodash';
+import type {
+  EuiBasicTableColumn} from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiButtonIcon,
   EuiHealth,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
-import { SnapshotRestore } from '../../../../../../common/types';
+import type { SnapshotRestore } from '../../../../../../common/types';
 import { UIM_RESTORE_LIST_EXPAND_INDEX } from '../../../../constants';
 import { useServices } from '../../../../app_context';
 import { FormattedDateTime } from '../../../../components';

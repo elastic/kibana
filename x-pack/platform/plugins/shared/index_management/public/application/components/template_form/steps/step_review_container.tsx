@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import { TemplateDeserialized } from '../../../../../common';
+import type { TemplateDeserialized } from '../../../../../common';
 import { Forms } from '../../../../shared_imports';
-import { WizardContent, WizardSection } from '../template_form';
+import type { WizardContent, WizardSection } from '../template_form';
 import { StepReview } from './step_review';
 
 interface Props {

@@ -7,7 +7,7 @@
 
 import { NOTIFICATION_DEFAULT_FREQUENCY } from '@kbn/security-solution-plugin/common/constants';
 import { getSimpleRuleOutput } from './get_simple_rule_output';
-import { RuleWithoutServerGeneratedProperties } from './remove_server_generated_properties';
+import type { RuleWithoutServerGeneratedProperties } from './remove_server_generated_properties';
 
 export const getSimpleRuleOutputWithWebHookAction = (
   actionId: string,

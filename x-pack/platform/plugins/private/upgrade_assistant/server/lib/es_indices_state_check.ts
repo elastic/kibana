@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { getIndexState } from '../../common/get_index_state';
-import { ResolveIndexResponseFromES } from '../../common/types';
+import type { ResolveIndexResponseFromES } from '../../common/types';
 
 type StatusCheckResult = Record<string, 'open' | 'closed'>;
 

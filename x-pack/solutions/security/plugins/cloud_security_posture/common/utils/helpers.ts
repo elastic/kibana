@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { Truthy } from 'lodash';
+import type { Truthy } from 'lodash';
 import type { BaseCspSetupStatus, BenchmarksCisId } from '@kbn/cloud-security-posture-common';
-import {
+import type {
   NewPackagePolicy,
   NewPackagePolicyInput,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PackagePolicy,
   PackagePolicyInput,
-  UpdatePackagePolicy,
+  UpdatePackagePolicy} from '@kbn/fleet-plugin/common';
+import {
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE
 } from '@kbn/fleet-plugin/common';
 import type { BenchmarkRuleSelectParams } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import type { BenchmarkRuleSelectParams as BenchmarkRuleSelectParamsV4 } from '@kbn/cloud-security-posture-common/schema/rules/v4';

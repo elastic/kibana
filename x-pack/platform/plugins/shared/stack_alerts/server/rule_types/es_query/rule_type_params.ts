@@ -6,15 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import {
   validateTimeWindowUnits,
   validateAggType,
   validateGroupBy,
   MAX_GROUPS,
 } from '@kbn/triggers-actions-ui-plugin/server';
-import { RuleTypeState } from '@kbn/alerting-plugin/server';
-import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { RuleTypeState } from '@kbn/alerting-plugin/server';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import {
   MAX_SELECTABLE_SOURCE_FIELDS,
   MAX_SELECTABLE_GROUP_BY_TERMS,

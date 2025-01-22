@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import moment, { Moment } from 'moment';
+import type { Moment } from 'moment';
+import moment from 'moment';
 
 import type {
   AnalyticsServiceSetup,
@@ -21,25 +22,25 @@ import type {
   DefendInsightsPostRequestBody,
   DefendInsightsResponse,
   Replacements,
-} from '@kbn/elastic-assistant-common';
+
+  DefendInsightType,
+  DefendInsightsGetRequestQuery} from '@kbn/elastic-assistant-common';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   DEFEND_INSIGHTS_TOOL_ID,
-  DefendInsightStatus,
-  DefendInsightType,
-  DefendInsightsGetRequestQuery,
+  DefendInsightStatus
 } from '@kbn/elastic-assistant-common';
 
 import type { GetRegisteredTools } from '../../services/app_context';
 import type { AssistantTool, ElasticAssistantApiRequestHandlerContext } from '../../types';
 
-import { DefendInsightsDataClient } from '../../ai_assistant_data_clients/defend_insights';
+import type { DefendInsightsDataClient } from '../../ai_assistant_data_clients/defend_insights';
 import {
   DEFEND_INSIGHT_ERROR_EVENT,
   DEFEND_INSIGHT_SUCCESS_EVENT,

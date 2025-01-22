@@ -8,7 +8,7 @@
 import { EuiButtonIcon } from '@elastic/eui';
 import React, { useState, memo, useCallback } from 'react';
 
-import { EsQuerySnapshot } from '@kbn/alerts-ui-shared';
+import type { EsQuerySnapshot } from '@kbn/alerts-ui-shared';
 import { HoverVisibilityContainer } from './hover_visibility_container';
 
 import { ModalInspectQuery } from './modal';

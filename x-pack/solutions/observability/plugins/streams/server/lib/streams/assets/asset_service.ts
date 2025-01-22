@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { StorageIndexAdapter } from '@kbn/observability-utils-server/es/storage';
-import { StreamsPluginStartDependencies } from '../../../types';
+import type { StreamsPluginStartDependencies } from '../../../types';
 import { AssetClient } from './asset_client';
 import { assetStorageSettings } from './storage_settings';
 

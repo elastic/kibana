@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
+import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -38,7 +39,7 @@ import { NewConnectorLogic } from '../../new_index/method_connector/new_connecto
 import { ChooseConnector } from './components/choose_connector';
 import { ConnectorDescriptionPopover } from './components/connector_description_popover';
 import { ManualConfiguration } from './components/manual_configuration';
-import { SelfManagePreference } from './create_connector';
+import type { SelfManagePreference } from './create_connector';
 
 interface StartStepProps {
   error?: string | React.ReactNode;

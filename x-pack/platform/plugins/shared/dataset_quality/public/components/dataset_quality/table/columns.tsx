@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type {
+  EuiBasicTableColumn} from '@elastic/eui';
 import {
   EuiBadge,
-  EuiBasicTableColumn,
   EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,12 +20,12 @@ import {
   EuiSkeletonRectangle,
   EuiTableHeader,
 } from '@elastic/eui';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { BrowserUrlService } from '@kbn/share-plugin/public';
+import type { BrowserUrlService } from '@kbn/share-plugin/public';
 import {
   DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
   POOR_QUALITY_MINIMUM_PERCENTAGE,
@@ -35,7 +36,7 @@ import { DatasetQualityIndicator, QualityIndicator } from '../../quality_indicat
 import { PrivilegesWarningIconWrapper, IntegrationIcon } from '../../common';
 import { useDatasetRedirectLinkTelemetry, useRedirectLink } from '../../../hooks';
 import { DegradedDocsPercentageLink } from './degraded_docs_percentage_link';
-import { TimeRangeConfig } from '../../../../common/types';
+import type { TimeRangeConfig } from '../../../../common/types';
 import { DatasetQualityDetailsLink } from './dataset_quality_details_link';
 
 const nameColumnName = i18n.translate('xpack.datasetQuality.nameColumnName', {

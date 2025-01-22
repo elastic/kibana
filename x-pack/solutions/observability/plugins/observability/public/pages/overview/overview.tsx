@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import { BoolQuery } from '@kbn/es-query';
+import type { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
@@ -36,9 +36,10 @@ import { EmptySections } from './components/sections/empty/empty_sections';
 import { SectionContainer } from './components/sections/section_container';
 import { calculateBucketSize } from './helpers/calculate_bucket_size';
 import { useKibana } from '../../utils/kibana_react';
-import {
+import type {
   DataContextApps,
-  HasDataMap,
+  HasDataMap} from '../../context/has_data_context/has_data_context';
+import {
   appLabels,
 } from '../../context/has_data_context/has_data_context';
 

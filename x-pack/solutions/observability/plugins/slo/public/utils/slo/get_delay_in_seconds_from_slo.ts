@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type {
+  SLODefinitionResponse} from '@kbn/slo-schema';
 import {
-  SLODefinitionResponse,
   timeslicesBudgetingMethodSchema,
   durationType,
 } from '@kbn/slo-schema';

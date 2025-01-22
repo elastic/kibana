@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type {
+  AlertingAuthorizationFilterOpts} from '../../authorization';
 import {
-  AlertingAuthorizationFilterType,
-  AlertingAuthorizationFilterOpts,
+  AlertingAuthorizationFilterType
 } from '../../authorization';
 
 export {

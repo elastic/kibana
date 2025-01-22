@@ -18,10 +18,11 @@ import { type Filter, buildEsQuery, extractTimeRange } from '@kbn/es-query';
 import { getTimeFieldFromESQLQuery, getStartEndParams } from '@kbn/esql-utils';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
+import type {
+  CancellationToken,
+  ReportingError} from '@kbn/reporting-common';
 import {
   AuthenticationExpiredError,
-  CancellationToken,
-  ReportingError,
   byteSizeValueToNumber,
 } from '@kbn/reporting-common';
 import type { TaskRunResult } from '@kbn/reporting-common/types';

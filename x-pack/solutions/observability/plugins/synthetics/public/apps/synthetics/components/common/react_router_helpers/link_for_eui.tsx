@@ -7,12 +7,13 @@
 
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import type {
+  EuiButtonProps,
+  EuiButtonEmptyProps,
+  EuiLinkAnchorProps} from '@elastic/eui';
 import {
   EuiLink,
   EuiButton,
-  EuiButtonProps,
-  EuiButtonEmptyProps,
-  EuiLinkAnchorProps,
   EuiButtonEmpty,
 } from '@elastic/eui';
 

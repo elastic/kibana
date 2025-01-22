@@ -6,13 +6,13 @@
  */
 
 import { EuiConfirmModal } from '@elastic/eui';
-import { KueryNode } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState, useMemo } from 'react';
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '../../common/lib/kibana';
 import { useBulkEditResponse } from '../hooks/use_bulk_edit_response';
-import { BulkEditResponse, RuleTableItem } from '../../types';
+import type { BulkEditResponse, RuleTableItem } from '../../types';
 
 export const UpdateApiKeyModalConfirmation = ({
   onCancel,

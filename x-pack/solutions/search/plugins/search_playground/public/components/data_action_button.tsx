@@ -9,7 +9,8 @@ import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton } from '@elastic/eui';
 import { useWatch } from 'react-hook-form';
-import { ChatForm, ChatFormFields } from '../types';
+import type { ChatForm} from '../types';
+import { ChatFormFields } from '../types';
 import { SelectIndicesFlyout } from './select_indices_flyout';
 
 export const DataActionButton: React.FC = () => {

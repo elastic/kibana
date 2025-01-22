@@ -9,8 +9,8 @@
 
 import { Client } from '@elastic/elasticsearch';
 import { ApmSynthtraceEsClient } from '../../..';
-import { Logger } from '../../lib/utils/create_logger';
-import { RunOptions } from './parse_run_cli_flags';
+import type { Logger } from '../../lib/utils/create_logger';
+import type { RunOptions } from './parse_run_cli_flags';
 import { getEsClientTlsSettings } from './ssl';
 
 export function getApmEsClient({

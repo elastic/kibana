@@ -28,7 +28,7 @@ import {
   mockRenderingPrebootDeps,
   mockRenderingSetupDeps,
 } from './test_helpers/params';
-import { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from './types';
+import type { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from './types';
 import { RenderingService } from './rendering_service';
 import { AuthStatus } from '@kbn/core-http-server';
 

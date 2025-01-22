@@ -9,8 +9,8 @@
 
 import React from 'react';
 import { action } from '@storybook/addon-actions';
-import { ComponentMeta } from '@storybook/react';
-import { FieldDefinition } from '@kbn/management-settings-types';
+import type { ComponentMeta } from '@storybook/react';
+import type { FieldDefinition } from '@kbn/management-settings-types';
 import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
 import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
 

@@ -27,12 +27,13 @@ import { useParams } from 'react-router-dom';
 import { getTestRunDetailLink } from '../../common/links/test_details_link';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { getErrorDetailsUrl } from '../monitor_errors/errors_list';
-import {
-  ConfigKey,
-  MonitorTypeEnum,
+import type {
   EncryptedSyntheticsSavedMonitor,
   Ping,
-  SyntheticsJourneyApiResponse,
+  SyntheticsJourneyApiResponse} from '../../../../../../common/runtime_types';
+import {
+  ConfigKey,
+  MonitorTypeEnum
 } from '../../../../../../common/runtime_types';
 
 import { useSyntheticsRefreshContext, useSyntheticsSettingsContext } from '../../../contexts';

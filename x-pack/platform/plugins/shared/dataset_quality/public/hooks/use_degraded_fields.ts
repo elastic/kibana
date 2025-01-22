@@ -7,8 +7,8 @@
 import { useSelector } from '@xstate/react';
 import { useCallback, useMemo } from 'react';
 import { orderBy } from 'lodash';
-import { DegradedField } from '../../common/data_streams_stats';
-import { SortDirection } from '../../common/types';
+import type { DegradedField } from '../../common/data_streams_stats';
+import type { SortDirection } from '../../common/types';
 import {
   DEFAULT_DEGRADED_FIELD_SORT_DIRECTION,
   DEFAULT_DEGRADED_FIELD_SORT_FIELD,

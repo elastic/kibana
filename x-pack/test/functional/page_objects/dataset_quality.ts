@@ -8,8 +8,8 @@
 import expect from '@kbn/expect';
 import querystring from 'querystring';
 import rison from '@kbn/rison';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import {
   DATA_QUALITY_URL_STATE_KEY,
   datasetQualityUrlSchemaV1,
@@ -19,7 +19,7 @@ import {
   DEFAULT_DEGRADED_FIELD_SORT_DIRECTION,
   DEFAULT_DEGRADED_FIELD_SORT_FIELD,
 } from '@kbn/dataset-quality-plugin/common/constants';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const defaultPageState: datasetQualityUrlSchemaV1.UrlSchema = {
   v: 1,

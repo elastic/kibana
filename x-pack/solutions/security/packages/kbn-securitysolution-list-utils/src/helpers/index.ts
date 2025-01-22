@@ -12,7 +12,7 @@ import {
   validateHasWildcardWithWrongOperator,
 } from '@kbn/securitysolution-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import {
+import type {
   CreateExceptionListItemSchema,
   EntriesArray,
   Entry,
@@ -20,6 +20,8 @@ import {
   ExceptionListType,
   ListSchema,
   NamespaceType,
+  CreateRuleExceptionListItemSchema} from '@kbn/securitysolution-io-ts-list-types';
+import {
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
   createExceptionListItemSchema,
@@ -28,12 +30,12 @@ import {
   entry,
   exceptionListItemSchema,
   nestedEntryItem,
-  CreateRuleExceptionListItemSchema,
   createRuleExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import {
+import type {
   DataViewBase,
-  DataViewFieldBase,
+  DataViewFieldBase} from '@kbn/es-query';
+import {
   getDataViewFieldSubtypeNested,
   isDataViewFieldSubtypeNested,
 } from '@kbn/es-query';
@@ -55,7 +57,7 @@ import {
   doesNotMatchOperator,
 } from '../autocomplete_operators';
 
-import {
+import type {
   BuilderEntry,
   CreateExceptionListItemBuilderSchema,
   DataViewField,

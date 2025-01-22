@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type {
+  EuiStepStatus} from '@elastic/eui';
 import {
   EuiButtonGroup,
   EuiLink,
@@ -12,7 +14,6 @@ import {
   EuiSkeletonRectangle,
   EuiSkeletonText,
   EuiSpacer,
-  EuiStepStatus,
   EuiSteps,
   EuiText,
 } from '@elastic/eui';
@@ -20,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { OnboardingFlowEventContext } from '../../../../common/telemetry_events';
+import type { OnboardingFlowEventContext } from '../../../../common/telemetry_events';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { FeedbackButtons } from '../shared/feedback_buttons';
@@ -29,7 +30,7 @@ import { CreateStackInAWSConsole } from './create_stack_in_aws_console';
 import { CreateStackOption } from './types';
 import { useFirehoseFlow } from './use_firehose_flow';
 import { VisualizeData } from './visualize_data';
-import { ObservabilityOnboardingAppServices } from '../../..';
+import type { ObservabilityOnboardingAppServices } from '../../..';
 import { useWindowBlurDataMonitoringTrigger } from '../shared/use_window_blur_data_monitoring_trigger';
 import { ExistingDataCallout } from './existing_data_callout';
 import { usePopulatedAWSIndexList } from './use_populated_aws_index_list';

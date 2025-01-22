@@ -5,26 +5,28 @@
  * 2.0.
  */
 
-import {
+import type {
   Message,
   ToolDefinition,
   ToolChoice,
   ToolCallsOf,
+  ToolMessage,
+  MessageOf} from '@kbn/inference-common';
+import {
   withoutChunkEvents,
   withoutTokenCountEvents,
-  ToolMessage,
-  MessageOf,
   MessageRole,
 } from '@kbn/inference-common';
-import { InferenceClient } from '@kbn/inference-plugin/server';
-import { Logger } from '@kbn/logging';
+import type { InferenceClient } from '@kbn/inference-plugin/server';
+import type { Logger } from '@kbn/logging';
+import type {
+  Observable,
+  OperatorFunction} from 'rxjs';
 import {
   defer,
   last,
   merge,
-  Observable,
   of,
-  OperatorFunction,
   share,
   switchMap,
   toArray,

@@ -9,7 +9,7 @@ import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { isLensApi } from '../react_embeddable/type_guards';
 
 interface DiscoverAppLocatorParams extends SerializableRecord {

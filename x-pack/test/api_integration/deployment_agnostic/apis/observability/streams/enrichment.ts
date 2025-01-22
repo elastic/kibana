@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { WiredStreamConfigDefinition } from '@kbn/streams-schema';
+import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import type { WiredStreamConfigDefinition } from '@kbn/streams-schema';
 import {
   disableStreams,
   enableStreams,
@@ -16,9 +16,10 @@ import {
   indexDocument,
   putStream,
 } from './helpers/requests';
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type {
+  StreamsSupertestRepositoryClient} from './helpers/repository_client';
 import {
-  StreamsSupertestRepositoryClient,
   createStreamsRepositoryAdminClient,
 } from './helpers/repository_client';
 

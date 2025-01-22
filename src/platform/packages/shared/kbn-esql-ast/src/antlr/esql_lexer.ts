@@ -1,14 +1,15 @@
 // @ts-nocheck
 // Generated from src/antlr/esql_lexer.g4 by ANTLR 4.13.2
 // noinspection ES6UnusedImports,JSUnusedGlobalSymbols,JSUnusedLocalSymbols
-import {
+import type {
 	ATN,
-	ATNDeserializer,
 	CharStream,
-	DecisionState, DFA,
+	DecisionState,
+	RuleContext} from "antlr4";
+import {
+	ATNDeserializer, DFA,
 	Lexer,
 	LexerATNSimulator,
-	RuleContext,
 	PredictionContextCache,
 	Token
 } from "antlr4";

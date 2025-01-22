@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import {
+import type {
   CoreSetup,
   CoreStart,
-  DEFAULT_APP_CATEGORIES,
   KibanaRequest,
   Logger,
   Plugin,
-  PluginInitializerContext,
+  PluginInitializerContext} from '@kbn/core/server';
+import {
+  DEFAULT_APP_CATEGORIES,
   SavedObjectsClient,
 } from '@kbn/core/server';
 import { AlertsLocatorDefinition, sloFeatureId } from '@kbn/observability-plugin/common';
@@ -25,7 +26,7 @@ import { registerSloUsageCollector } from './lib/collectors/register';
 import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
 import { getSloServerRouteRepository } from './routes/get_slo_server_route_repository';
 import { registerServerRoutes } from './routes/register_routes';
-import { SLORoutesDependencies } from './routes/types';
+import type { SLORoutesDependencies } from './routes/types';
 import { SO_SLO_TYPE, slo } from './saved_objects';
 import { SO_SLO_SETTINGS_TYPE, sloSettings } from './saved_objects/slo_settings';
 import { DefaultResourceInstaller, DefaultSLOInstaller } from './services';

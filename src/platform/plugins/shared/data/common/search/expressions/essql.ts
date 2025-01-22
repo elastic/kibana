@@ -15,18 +15,20 @@ import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-p
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 
 import { zipObject } from 'lodash';
-import { Observable, defer, throwError } from 'rxjs';
+import type { Observable} from 'rxjs';
+import { defer, throwError } from 'rxjs';
 import { catchError, map, switchMap, tap } from 'rxjs';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { NowProviderPublicContract } from '../../../public';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
-import { UiSettingsCommon } from '../..';
-import {
+import type { UiSettingsCommon } from '../..';
+import type {
   KibanaContext,
   SqlRequestParams,
   SqlSearchStrategyRequest,
-  SqlSearchStrategyResponse,
+  SqlSearchStrategyResponse} from '..';
+import {
   SQL_SEARCH_STRATEGY,
 } from '..';
 

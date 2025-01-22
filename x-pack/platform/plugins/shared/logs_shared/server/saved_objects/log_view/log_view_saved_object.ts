@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsType } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsType } from '@kbn/core/server';
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { logViewSavedObjectRT } from './types';

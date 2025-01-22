@@ -6,7 +6,7 @@
  */
 
 import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { createAndUploadFile } from '../../../../cases_api_integration/common/lib/api';
 import { OBSERVABILITY_FILE_KIND } from '../../../../cases_api_integration/common/lib/constants';
 

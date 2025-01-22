@@ -6,8 +6,9 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type {
+  InternalCreateExceptionListSchemaDecoded} from '@kbn/securitysolution-io-ts-list-types';
 import {
-  InternalCreateExceptionListSchemaDecoded,
   internalCreateExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL } from '@kbn/securitysolution-list-constants';

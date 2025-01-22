@@ -16,9 +16,9 @@ import { i18n } from '@kbn/i18n';
 import { clearFlashMessages, flashSuccessToast } from '../../../../../shared/flash_messages';
 import { GenericEndpointInlineEditableTable } from '../../../../../shared/tables/generic_endpoint_inline_editable_table';
 
-import { InlineEditableTableColumn } from '../../../../../shared/tables/inline_editable_table/types';
-import { ItemWithAnID } from '../../../../../shared/tables/types';
-import { CrawlerDomain, Sitemap } from '../../../../api/crawler/types';
+import type { InlineEditableTableColumn } from '../../../../../shared/tables/inline_editable_table/types';
+import type { ItemWithAnID } from '../../../../../shared/tables/types';
+import type { CrawlerDomain, Sitemap } from '../../../../api/crawler/types';
 
 import { CrawlerDomainDetailLogic } from './crawler_domain_detail_logic';
 

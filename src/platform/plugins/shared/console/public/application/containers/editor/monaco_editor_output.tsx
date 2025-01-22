@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
+import type {
   CSSProperties,
-  FunctionComponent,
+  FunctionComponent} from 'react';
+import React, {
   useCallback,
   useEffect,
   useRef,
@@ -27,7 +28,8 @@ import {
   EuiButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
-import { CONSOLE_THEME_ID, CONSOLE_OUTPUT_LANG_ID, monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
+import { CONSOLE_THEME_ID, CONSOLE_OUTPUT_LANG_ID } from '@kbn/monaco';
 import {
   getStatusCodeDecorations,
   isJSONContentType,

@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { CASES_URL, MAX_COMMENTS_PER_PAGE } from '@kbn/cases-plugin/common/constants';
 import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getPostCaseRequest,
   persistableStateAttachment,

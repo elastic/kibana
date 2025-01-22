@@ -17,7 +17,8 @@ import {
   APP_LOGS_COUNT_CLUSTER_PRIVILEGES,
   APP_LOGS_COUNT_INDEX_PRIVILEGES,
 } from '../../../../../common/constants';
-import { WithPrivileges, MissingPrivileges } from '../../../../shared_imports';
+import type { MissingPrivileges } from '../../../../shared_imports';
+import { WithPrivileges } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
 import { loadLogsCheckpoint } from '../../../lib/logs_checkpoint';
 import type { OverviewStepProps } from '../../types';

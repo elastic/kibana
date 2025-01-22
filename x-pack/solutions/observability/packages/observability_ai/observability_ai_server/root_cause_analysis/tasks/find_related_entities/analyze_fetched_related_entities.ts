@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { InferenceClient } from '@kbn/inference-plugin/server';
-import { Logger } from '@kbn/logging';
+import type { InferenceClient } from '@kbn/inference-plugin/server';
+import type { Logger } from '@kbn/logging';
 import { getEntityKuery } from '@kbn/observability-utils-common/entities/get_entity_kuery';
-import {
+import type {
   DocumentAnalysis,
   TruncatedDocumentAnalysis,
 } from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
 import { sortAndTruncateAnalyzedFields } from '@kbn/observability-utils-common/llm/log_analysis/sort_and_truncate_analyzed_fields';
 import { analyzeDocuments } from '@kbn/observability-utils-server/entities/analyze_documents';
-import { FieldPatternResultWithChanges } from '@kbn/observability-utils-server/entities/get_log_patterns';
-import { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import type { FieldPatternResultWithChanges } from '@kbn/observability-utils-server/entities/get_log_patterns';
+import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { kqlQuery } from '@kbn/observability-utils-server/es/queries/kql_query';
 import { rangeQuery } from '@kbn/observability-utils-server/es/queries/range_query';
 import { chunk, isEmpty, isEqual } from 'lodash';
@@ -29,8 +29,8 @@ import { chunkOutputCalls } from '../../util/chunk_output_calls';
 import { formatEntity } from '../../util/format_entity';
 import { serializeKnowledgeBaseEntries } from '../../util/serialize_knowledge_base_entries';
 import { toBlockquote } from '../../util/to_blockquote';
-import { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
-import { RelatedEntityKeywordSearch } from './write_keyword_searches_for_related_entities';
+import type { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
+import type { RelatedEntityKeywordSearch } from './write_keyword_searches_for_related_entities';
 
 export interface RelatedEntityFromSearchResults {
   entity: { [x: string]: string };

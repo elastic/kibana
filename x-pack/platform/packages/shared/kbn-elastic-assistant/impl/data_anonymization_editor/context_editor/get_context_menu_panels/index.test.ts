@@ -6,7 +6,7 @@
  */
 import { getContextMenuPanels, PRIMARY_PANEL_ID } from '.';
 import * as i18n from '../translations';
-import { ContextEditorRow } from '../types';
+import type { ContextEditorRow } from '../types';
 
 describe('getContextMenuPanels', () => {
   const closePopover = jest.fn();

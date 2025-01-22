@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   AlertConsumers,
   ALERT_CASE_IDS,
   ALERT_STATUS,
   ALERT_MAINTENANCE_WINDOW_IDS,
 } from '@kbn/rule-data-utils';
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
-import { Dispatch, ReducerAction, ReducerState } from 'react';
-import { Alert, AlertsTableProps } from '../../../types';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import type { Dispatch, ReducerAction, ReducerState } from 'react';
+import type { Alert, AlertsTableProps } from '../../../types';
 import type { bulkActionsReducer } from './bulk_actions/reducer';
 
 export interface Consumer {

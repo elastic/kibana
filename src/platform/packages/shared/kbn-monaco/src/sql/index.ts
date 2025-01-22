@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LangModuleType } from '../types';
+import type { LangModuleType } from '../types';
 import { ID } from './constants';
 import { lexerRules } from './lexer_rules';
 

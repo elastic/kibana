@@ -9,10 +9,11 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs/promises';
 import path from 'path';
-import {
+import type {
   ActionsClientChatOpenAI,
-  type ActionsClientLlm,
-  ActionsClientSimpleChatModel,
+  ActionsClientSimpleChatModel} from '@kbn/langchain/server/language_models';
+import {
+  type ActionsClientLlm
 } from '@kbn/langchain/server/language_models';
 import type { Logger } from '@kbn/logging';
 import { ChatPromptTemplate } from '@langchain/core/prompts';

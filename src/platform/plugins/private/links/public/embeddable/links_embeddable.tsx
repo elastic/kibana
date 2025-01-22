@@ -13,24 +13,26 @@ import { BehaviorSubject } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { EuiListGroup, EuiPanel } from '@elastic/eui';
 
-import { PanelIncompatibleError, ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { PanelIncompatibleError } from '@kbn/embeddable-plugin/public';
 import {
   initializeTitles,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 
-import { SerializedPanelState } from '@kbn/presentation-containers';
+import type { SerializedPanelState } from '@kbn/presentation-containers';
 
+import type {
+  LinksLayoutType} from '../../common/content_management';
 import {
   CONTENT_ID,
   DASHBOARD_LINK_TYPE,
-  LinksLayoutType,
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
 } from '../../common/content_management';
 import { DashboardLinkComponent } from '../components/dashboard_link/dashboard_link_component';
 import { ExternalLinkComponent } from '../components/external_link/external_link_component';
-import {
+import type {
   LinksApi,
   LinksByReferenceSerializedState,
   LinksByValueSerializedState,

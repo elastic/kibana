@@ -5,20 +5,23 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
-import { ConnectorScheduling } from '@kbn/search-connectors';
+import type { ConnectorScheduling } from '@kbn/search-connectors';
 
-import { CrawlerIndex } from '../../../../../../../common/types/indices';
-import { Actions } from '../../../../../shared/api_logic/create_api_logic';
+import type { CrawlerIndex } from '../../../../../../../common/types/indices';
+import type { Actions } from '../../../../../shared/api_logic/create_api_logic';
 
 import { flashAPIErrors } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
+import type {
+  UpdateConnectorSchedulingArgs} from '../../../../api/connector/update_connector_scheduling_api_logic';
 import {
-  UpdateConnectorSchedulingApiLogic,
-  UpdateConnectorSchedulingArgs,
+  UpdateConnectorSchedulingApiLogic
 } from '../../../../api/connector/update_connector_scheduling_api_logic';
-import { CrawlSchedule, CrawlScheduleFromServer, CrawlUnits } from '../../../../api/crawler/types';
+import type { CrawlSchedule, CrawlScheduleFromServer} from '../../../../api/crawler/types';
+import { CrawlUnits } from '../../../../api/crawler/types';
 import { crawlScheduleServerToClient } from '../../../../api/crawler/utils';
 import { IndexNameLogic } from '../../index_name_logic';
 import { IndexViewLogic } from '../../index_view_logic';

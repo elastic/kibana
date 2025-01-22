@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { Status } from '@kbn/investigation-shared';
 import { investigationSchema } from '@kbn/investigation-shared';
-import { Investigation, StoredInvestigation } from '../models/investigation';
-import { Paginated, Pagination } from '../models/pagination';
+import type { Investigation, StoredInvestigation } from '../models/investigation';
+import type { Paginated, Pagination } from '../models/pagination';
 import { SO_INVESTIGATION_TYPE } from '../saved_objects/investigation';
 
 export interface Search {

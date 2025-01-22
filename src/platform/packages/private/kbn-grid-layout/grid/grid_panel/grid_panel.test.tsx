@@ -9,7 +9,8 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { GridPanel, GridPanelProps } from './grid_panel';
+import type { GridPanelProps } from './grid_panel';
+import { GridPanel } from './grid_panel';
 import { gridLayoutStateManagerMock } from '../test_utils/mocks';
 
 describe('GridPanel', () => {

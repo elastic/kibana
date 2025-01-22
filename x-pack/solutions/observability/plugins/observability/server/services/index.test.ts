@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import {
+import type {
   AlertDetailsContextualInsightsHandlerQuery,
-  AlertDetailsContextualInsightsRequestContext,
+  AlertDetailsContextualInsightsRequestContext} from '.';
+import {
   AlertDetailsContextualInsightsService,
 } from '.';
 

@@ -7,13 +7,14 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import type {
+  EuiContextMenuItemProps} from '@elastic/eui';
 import {
   EuiButton,
   EuiIcon,
   EuiPopover,
   EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiContextMenuItemProps,
+  EuiContextMenuItem
 } from '@elastic/eui';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';

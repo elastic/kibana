@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { OptionsListSearchTechnique } from '../../../../common/options_list/suggestions_searching';
+import type { OptionsListSearchTechnique } from '../../../../common/options_list/suggestions_searching';
 
 export const OptionsListStrings = {
   control: {

@@ -23,11 +23,12 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import {
+import type {
   GuideFilterValues,
+  GuideCardConstants} from '@kbn/guided-onboarding/guide';
+import {
   GuideCards,
   GuideFilters,
-  GuideCardConstants,
   guideCards,
 } from '@kbn/guided-onboarding/guide';
 import {
@@ -36,7 +37,7 @@ import {
   guideCardsClassic,
   type GuideFilterValuesClassic,
 } from '@kbn/guided-onboarding/classic';
-import { GuideId, GuideState } from '@kbn/guided-onboarding/src/types';
+import type { GuideId, GuideState } from '@kbn/guided-onboarding/src/types';
 import { getServices } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';
 

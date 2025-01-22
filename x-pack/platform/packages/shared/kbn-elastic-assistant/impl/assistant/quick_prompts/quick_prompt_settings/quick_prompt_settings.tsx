@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiTitle, EuiText, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
-import {
+import type {
   PromptResponse,
   PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';

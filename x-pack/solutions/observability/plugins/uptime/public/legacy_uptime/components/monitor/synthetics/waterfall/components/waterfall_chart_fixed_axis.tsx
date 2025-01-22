@@ -6,16 +6,17 @@
  */
 
 import React from 'react';
+import type {
+  BarStyleAccessor,
+  DomainRange,
+  TickFormatter} from '@elastic/charts';
 import {
   Axis,
   BarSeries,
-  BarStyleAccessor,
   Chart,
-  DomainRange,
   Position,
   ScaleType,
   Settings,
-  TickFormatter,
   TooltipType,
   Tooltip,
 } from '@elastic/charts';

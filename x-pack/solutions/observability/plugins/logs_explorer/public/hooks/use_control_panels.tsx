@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ControlGroupRuntimeState, ControlGroupRendererApi } from '@kbn/controls-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { TimeRange } from '@kbn/es-query';
+import type { ControlGroupRuntimeState, ControlGroupRendererApi } from '@kbn/controls-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
 import { useSelector } from '@xstate/react';
 import { useCallback } from 'react';
-import { LogsExplorerControllerStateService } from '../state_machines/logs_explorer_controller';
+import type { LogsExplorerControllerStateService } from '../state_machines/logs_explorer_controller';
 
 export const useControlPanels = (
   logsExplorerControllerStateService: LogsExplorerControllerStateService,

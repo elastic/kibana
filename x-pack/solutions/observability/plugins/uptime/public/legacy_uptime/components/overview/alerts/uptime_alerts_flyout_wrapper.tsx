@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 
 interface Props {
   alertFlyoutVisible: boolean;

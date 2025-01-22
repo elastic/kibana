@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { ProcessingDefinition, getProcessorType } from '@kbn/streams-schema';
+import type { ProcessingDefinition} from '@kbn/streams-schema';
+import { getProcessorType } from '@kbn/streams-schema';
 import { get } from 'lodash';
-import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import { conditionToPainless } from './condition_to_painless';
 
 export function formatToIngestProcessors(

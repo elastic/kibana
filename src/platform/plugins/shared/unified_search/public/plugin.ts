@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { Storage, IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { createQueryStringInput } from './query_string_input/get_query_string_input';

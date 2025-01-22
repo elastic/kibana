@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -29,7 +30,7 @@ import { SLO_OVERVIEW_EMBEDDABLE_ID } from './constants';
 import { GroupSloView } from './group_view/group_view';
 import { SloOverview } from './slo_overview';
 import { SloCardChartList } from './slo_overview_grid';
-import { GroupSloCustomInput, SloOverviewApi, SloOverviewEmbeddableState } from './types';
+import type { GroupSloCustomInput, SloOverviewApi, SloOverviewEmbeddableState } from './types';
 
 const getOverviewPanelTitle = () =>
   i18n.translate('xpack.slo.sloEmbeddable.displayName', {

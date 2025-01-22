@@ -7,17 +7,18 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import {
+import type {
   DissectProcessingDefinition,
   GrokProcessingDefinition,
   ProcessingDefinition,
-  ProcessorType,
+  ProcessorType} from '@kbn/streams-schema';
+import {
   isCompleteCondition,
   isDissectProcessor,
   isGrokProcessor,
 } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
-import { DissectFormState, GrokFormState, ProcessorDefinition, ProcessorFormState } from './types';
+import type { DissectFormState, GrokFormState, ProcessorDefinition, ProcessorFormState } from './types';
 
 const defaultCondition: ProcessingDefinition['condition'] = {
   field: '',

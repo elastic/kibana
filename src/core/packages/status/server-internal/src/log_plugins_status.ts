@@ -10,7 +10,7 @@
 import { uniq } from 'lodash';
 import { merge, type Observable, Subject, type Subscription } from 'rxjs';
 import { pairwise, takeUntil, map, startWith, bufferTime, filter, concatAll } from 'rxjs';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import type { PluginName } from '@kbn/core-base-common';
 import { ServiceStatusLevels } from '@kbn/core-status-common';
 import type { LoggablePluginStatus, PluginStatus } from './types';

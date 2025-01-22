@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
-import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import type { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import type { FieldBrowserProps } from './types';
 import { Search } from './components/search';
 

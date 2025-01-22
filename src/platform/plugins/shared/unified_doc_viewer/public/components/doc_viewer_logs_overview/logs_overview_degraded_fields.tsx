@@ -8,7 +8,9 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type {
+  EuiBasicTableColumn} from '@elastic/eui';
 import {
   EuiAccordion,
   EuiBadge,
@@ -19,17 +21,17 @@ import {
   EuiTitle,
   EuiBasicTable,
   useGeneratedHtmlId,
-  EuiBasicTableColumn,
   EuiHeaderLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import { getRouterLinkProps } from '@kbn/router-utils';
+import type {
+  DataQualityDetailsLocatorParams} from '@kbn/deeplinks-observability';
 import {
-  DATA_QUALITY_DETAILS_LOCATOR_ID,
-  DataQualityDetailsLocatorParams,
+  DATA_QUALITY_DETAILS_LOCATOR_ID
 } from '@kbn/deeplinks-observability';
-import { BrowserUrlService } from '@kbn/share-plugin/public';
+import type { BrowserUrlService } from '@kbn/share-plugin/public';
 import { getUnifiedDocViewerServices } from '../../plugin';
 
 type Direction = 'asc' | 'desc';

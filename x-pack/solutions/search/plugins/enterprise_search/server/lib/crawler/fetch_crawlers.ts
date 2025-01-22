@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient } from '@kbn/core/server';
-import { Connector, CONNECTORS_INDEX } from '@kbn/search-connectors';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { Connector} from '@kbn/search-connectors';
+import { CONNECTORS_INDEX } from '@kbn/search-connectors';
 
-import { Crawler, CrawlRequest } from '../../../common/types/crawler';
+import type { Crawler, CrawlRequest } from '../../../common/types/crawler';
 import { fetchAll } from '../fetch_all';
 
 const CRAWLER_CONFIGURATIONS_INDEX = '.ent-search-actastic-crawler2_configurations_v2';

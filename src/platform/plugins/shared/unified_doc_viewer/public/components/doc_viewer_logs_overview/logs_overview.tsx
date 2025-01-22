@@ -8,10 +8,10 @@
  */
 
 import React from 'react';
-import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { getLogDocumentOverview } from '@kbn/discover-utils';
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import { ObservabilityLogsAIAssistantFeatureRenderDeps } from '@kbn/discover-shared-plugin/public';
+import type { ObservabilityLogsAIAssistantFeatureRenderDeps } from '@kbn/discover-shared-plugin/public';
 import { LogsOverviewHeader } from './logs_overview_header';
 import { LogsOverviewHighlights } from './logs_overview_highlights';
 import { FieldActionsProvider } from '../../hooks/use_field_actions';

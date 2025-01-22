@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MaybePromise } from '@kbn/utility-types';
-import { DashboardPanelState } from '../../../common';
+import type { MaybePromise } from '@kbn/utility-types';
+import type { DashboardPanelState } from '../../../common';
 import type { GridData } from '../../../server/content_management';
-import { PanelPlacementStrategy } from '../../plugin_constants';
+import type { PanelPlacementStrategy } from '../../plugin_constants';
 
 export interface PanelPlacementSettings {
   strategy?: PanelPlacementStrategy;

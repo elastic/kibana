@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { BaseMessage } from '@langchain/core/messages';
-import { AgentAction, AgentFinish, AgentStep } from '@langchain/core/agents';
+import type { BaseMessage } from '@langchain/core/messages';
+import type { AgentAction, AgentFinish, AgentStep } from '@langchain/core/agents';
 import type { Logger } from '@kbn/logging';
-import { ConversationResponse } from '@kbn/elastic-assistant-common';
+import type { ConversationResponse } from '@kbn/elastic-assistant-common';
 
 export interface AgentStateBase {
   agentOutcome?: AgentAction | AgentFinish;

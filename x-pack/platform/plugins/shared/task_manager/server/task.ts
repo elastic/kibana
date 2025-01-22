@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { ObjectType, schema, TypeOf } from '@kbn/config-schema';
+import type { ObjectType, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
 import { isErr, tryAsResult } from './lib/result_type';
-import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
-import { DecoratedError } from './task_running';
+import type { Interval} from './lib/intervals';
+import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';
+import type { DecoratedError } from './task_running';
 
 export const DEFAULT_TIMEOUT = '5m';
 

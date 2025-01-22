@@ -9,11 +9,11 @@ import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
 
-import { EmbeddableInput } from '@kbn/embeddable-plugin/common';
-import { ViewMode } from '@kbn/presentation-publishing';
+import type { EmbeddableInput } from '@kbn/embeddable-plugin/common';
+import type { ViewMode } from '@kbn/presentation-publishing';
 
 import { embeddableInputToExpression } from '../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
-import { CanvasContainerApi } from '../../../types';
+import type { CanvasContainerApi } from '../../../types';
 import { METRIC_TYPE, trackCanvasUiMetric } from '../../lib/ui_metric';
 // @ts-expect-error unconverted file
 import { addElement } from '../../state/actions/elements';

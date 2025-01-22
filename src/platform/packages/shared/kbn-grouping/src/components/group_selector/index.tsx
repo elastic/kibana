@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
+  EuiContextMenuPanelItemDescriptor} from '@elastic/eui';
+import {
   useEuiTheme,
 } from '@elastic/eui';
 import { EuiPopover } from '@elastic/eui';

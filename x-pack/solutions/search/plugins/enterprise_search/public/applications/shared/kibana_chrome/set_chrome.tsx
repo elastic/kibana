@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import type React from 'react';
+import { useEffect } from 'react';
 
 import { useValues } from 'kea';
 
 import { SEARCH_APPS_BREADCRUMB } from '../../../../common/constants';
 import { KibanaLogic } from '../kibana';
 
+import type {
+  BreadcrumbTrail} from './generate_breadcrumbs';
 import {
   useGenerateBreadcrumbs,
   useSearchBreadcrumbs,
@@ -20,7 +23,6 @@ import {
   useEnterpriseSearchContentBreadcrumbs,
   useAiSearchBreadcrumbs,
   useElasticsearchBreadcrumbs,
-  BreadcrumbTrail,
   useSearchExperiencesBreadcrumbs,
   useVectorSearchBreadcrumbs,
   useSemanticSearchBreadcrumbs,

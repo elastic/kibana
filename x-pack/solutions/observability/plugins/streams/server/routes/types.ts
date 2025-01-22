@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core-http-server';
-import { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { StreamsServer } from '../types';
-import { AssetService } from '../lib/streams/assets/asset_service';
-import { AssetClient } from '../lib/streams/assets/asset_client';
-import { StreamsClient } from '../lib/streams/client';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { StreamsServer } from '../types';
+import type { AssetService } from '../lib/streams/assets/asset_service';
+import type { AssetClient } from '../lib/streams/assets/asset_client';
+import type { StreamsClient } from '../lib/streams/client';
 
 type GetScopedClients = ({
   request,

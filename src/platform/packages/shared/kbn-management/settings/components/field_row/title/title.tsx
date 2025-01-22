@@ -12,7 +12,7 @@ import type { Interpolation, Theme } from '@emotion/react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { FieldDefinition, UnsavedFieldChange, SettingType } from '@kbn/management-settings-types';
+import type { FieldDefinition, UnsavedFieldChange, SettingType } from '@kbn/management-settings-types';
 
 import { useFieldStyles } from '../field_row.styles';
 import { FieldTitleCustomIcon } from './icon_custom';

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { CustomRequestHandlerContext } from '@kbn/core/server';
+import type { CustomRequestHandlerContext } from '@kbn/core/server';
 import type { FleetSetupContract, FleetStartContract } from '@kbn/fleet-plugin/server';
-import {
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
-import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/server';
+import type { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/server';
 
 export interface DatasetQualityPluginSetupDependencies {
   fleet: FleetSetupContract;

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { RootCauseAnalysisEvent } from '@kbn/observability-ai-server/root_cause_analysis';
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
+import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import { isRequestAbortedError } from '@kbn/server-route-repository-client';
 import React, { useEffect, useRef, useState } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';

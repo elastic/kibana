@@ -31,8 +31,8 @@ import {
 } from '../../../common/constants';
 import { PercentWidget } from '../percent_widget';
 import { CountWidget } from '../count_widget';
-import { KubernetesSecurityDeps } from '../../types';
-import { AggregateResult } from '../../../common/types';
+import type { KubernetesSecurityDeps } from '../../types';
+import type { AggregateResult } from '../../../common/types';
 import { useLastUpdated } from '../../hooks';
 import { useStyles } from './styles';
 import { TreeViewContainer } from '../tree_view_container';

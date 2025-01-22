@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { EuiButtonGroup, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import { SortOrder } from '../../../../common/latest';
+import type { SortOrder } from '../../../../common/latest';
 import { DATA_SOURCE_SELECTOR_WIDTH, sortOptions, sortOrdersLabel } from '../constants';
-import { DataSourceSelectorSearchHandler, DataSourceSelectorSearchParams } from '../types';
+import type { DataSourceSelectorSearchHandler, DataSourceSelectorSearchParams } from '../types';
 
 interface SearchControlsProps {
   isLoading: boolean;

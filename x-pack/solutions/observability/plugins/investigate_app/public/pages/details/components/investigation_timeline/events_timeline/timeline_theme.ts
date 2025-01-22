@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PartialTheme } from '@elastic/charts';
+import type { PartialTheme } from '@elastic/charts';
 
 export const TIMELINE_THEME: PartialTheme = {
   highlighter: {

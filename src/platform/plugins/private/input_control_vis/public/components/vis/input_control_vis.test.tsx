@@ -14,8 +14,8 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 import { InputControlVis } from './input_control_vis';
-import { ListControl } from '../../control/list_control_factory';
-import { RangeControl } from '../../control/range_control_factory';
+import type { ListControl } from '../../control/list_control_factory';
+import type { RangeControl } from '../../control/range_control_factory';
 
 const mockListControl: ListControl = {
   id: 'mock-list-control',

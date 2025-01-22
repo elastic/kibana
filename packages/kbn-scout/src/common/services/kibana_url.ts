@@ -8,7 +8,7 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import { ScoutTestConfig } from '../../types';
+import type { ScoutTestConfig } from '../../types';
 import { serviceLoadedMsg } from '../../playwright/utils';
 
 export interface PathOptions {

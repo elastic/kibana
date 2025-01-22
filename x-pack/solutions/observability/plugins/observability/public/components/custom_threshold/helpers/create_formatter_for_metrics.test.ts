@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type {
+  CustomThresholdExpressionMetric} from '../../../../common/custom_threshold_rule/types';
 import {
-  Aggregators,
-  CustomThresholdExpressionMetric,
+  Aggregators
 } from '../../../../common/custom_threshold_rule/types';
 import { createFormatterForMetric } from './create_formatter_for_metric';
 

@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { Cookie } from 'tough-cookie';
-import { UserProfile } from '@kbn/security-plugin/common';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { Cookie } from 'tough-cookie';
+import type { UserProfile } from '@kbn/security-plugin/common';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { findCasesResp, getPostCaseRequest } from '../../../../common/lib/mock';
 import {

@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiSteps, EuiText } from '@elastic/eui';
-import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
+import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 

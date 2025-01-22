@@ -16,15 +16,17 @@ import {
   ALERT_RULE_CONSUMER,
   ALERT_RULE_PRODUCER,
 } from '@kbn/rule-data-utils';
-import {
-  FIELD_FORMAT_IDS,
+import type {
   FieldFormatParams,
-  FieldFormatsRegistry,
+  FieldFormatsRegistry} from '@kbn/field-formats-plugin/common';
+import {
+  FIELD_FORMAT_IDS
 } from '@kbn/field-formats-plugin/common';
-import { EuiBadge, EuiLink, RenderCellValue } from '@elastic/eui';
+import type { RenderCellValue } from '@elastic/eui';
+import { EuiBadge, EuiLink } from '@elastic/eui';
 import { alertProducersData, observabilityFeatureIds } from '../constants';
 import { useKibana } from '../../../../common/lib/kibana';
-import { AlertsTableSupportedConsumers } from '../types';
+import type { AlertsTableSupportedConsumers } from '../types';
 
 export const getMappedNonEcsValue = ({
   data,

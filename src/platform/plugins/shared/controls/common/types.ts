@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
-import { CONTROL_LABEL_POSITION_OPTIONS, CONTROL_WIDTH_OPTIONS } from './constants';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { CONTROL_LABEL_POSITION_OPTIONS, CONTROL_WIDTH_OPTIONS } from './constants';
 
 export type ControlWidth = (typeof CONTROL_WIDTH_OPTIONS)[keyof typeof CONTROL_WIDTH_OPTIONS];
 export type ControlLabelPosition =

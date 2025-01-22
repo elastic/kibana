@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { MouseEventHandler } from 'react';
+import type { MouseEventHandler } from 'react';
+import React from 'react';
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 
-import { ProjectType } from '@kbn/serverless-types';
+import type { ProjectType } from '@kbn/serverless-types';
 
 import { icons } from './constants';
 

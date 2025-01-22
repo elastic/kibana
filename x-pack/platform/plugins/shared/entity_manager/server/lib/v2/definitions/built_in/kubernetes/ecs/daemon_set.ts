@@ -7,7 +7,7 @@
 
 import { BUILT_IN_ID_PREFIX } from '../../constants';
 import { commonEcsIndexPatterns } from './ecs_index_patterns';
-import { BuiltInDefinition } from '../../../../types';
+import type { BuiltInDefinition } from '../../../../types';
 
 export const builtInKubernetesDaemonSetEcsEntityDefinition: BuiltInDefinition = {
   type: {

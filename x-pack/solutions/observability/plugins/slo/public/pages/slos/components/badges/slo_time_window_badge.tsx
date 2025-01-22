@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiBadgeProps, EuiFlexItem } from '@elastic/eui';
+import type { EuiBadgeProps} from '@elastic/eui';
+import { EuiBadge, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  rollingTimeWindowTypeSchema,
+import type {
   SLODefinitionResponse,
-  SLOWithSummaryResponse,
+  SLOWithSummaryResponse} from '@kbn/slo-schema';
+import {
+  rollingTimeWindowTypeSchema
 } from '@kbn/slo-schema';
 import { euiLightVars } from '@kbn/ui-theme';
 import moment from 'moment';
-import React, { MouseEvent, useCallback } from 'react';
+import type { MouseEvent} from 'react';
+import React, { useCallback } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { SLOS_PATH } from '../../../../../common/locators/paths';
 import { toCalendarAlignedMomentUnitOfTime } from '../../../../utils/slo/duration';

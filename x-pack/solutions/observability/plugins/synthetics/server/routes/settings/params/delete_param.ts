@@ -7,10 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { SyntheticsRestApiRouteFactory } from '../../types';
+import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { DeleteParamsResponse } from '../../../../common/runtime_types';
+import type { DeleteParamsResponse } from '../../../../common/runtime_types';
 
 export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
   DeleteParamsResponse[],

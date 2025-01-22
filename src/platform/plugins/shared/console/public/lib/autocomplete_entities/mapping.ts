@@ -10,7 +10,7 @@
 import _ from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import type { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
-import { HttpSetup } from '@kbn/core-http-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { type Settings } from '../../services';
 import { API_BASE_PATH } from '../../../common/constants';
 import type { ResultTerm, AutoCompleteContext } from '../autocomplete/types';

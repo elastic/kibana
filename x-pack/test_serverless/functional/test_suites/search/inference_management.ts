@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import { testHasEmbeddedConsole } from './embedded_console';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([

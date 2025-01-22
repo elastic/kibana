@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { createScenarios as createAPIScenarios } from '../../reporting_api_integration/services/scenarios';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const GENERATE_CSV_DATA_TEST_SUBJ = 'embeddablePanelAction-generateCsvReport';
 

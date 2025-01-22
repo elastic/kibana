@@ -8,8 +8,9 @@
  */
 
 import type { LogRecord, Layout } from '@kbn/logging';
+import type {
+  Conversion} from './conversions';
 import {
-  Conversion,
   LoggerConversion,
   LevelConversion,
   MetaConversion,

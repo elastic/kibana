@@ -8,11 +8,12 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTableColumn, EuiButtonIcon } from '@elastic/eui';
+import type { EuiBasicTableColumn} from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { formatNumber } from '@elastic/eui';
 
-import { DegradedField } from '../../../../../common/api_types';
+import type { DegradedField } from '../../../../../common/api_types';
 import { SparkPlot } from '../../../common/spark_plot';
 import { NUMBER_FORMAT } from '../../../../../common/constants';
 import {

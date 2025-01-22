@@ -9,13 +9,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
-import { SuggestionRawDefinition } from './types';
+import type { SuggestionRawDefinition } from './types';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { aggregationFunctionDefinitions } from '../definitions/generated/aggregation_functions';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { timeUnitsToSuggest } from '../definitions/literals';
-import {
+import type {
   FunctionDefinition,
   CommandOptionsDefinition,
   CommandModeDefinition,
@@ -24,7 +24,7 @@ import {
 import { shouldBeQuotedSource, shouldBeQuotedText } from '../shared/helpers';
 import { buildFunctionDocumentation } from './documentation_util';
 import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
-import { ESQLRealField } from '../validation/types';
+import type { ESQLRealField } from '../validation/types';
 import { isNumericType } from '../shared/esql_types';
 import { getTestFunctions } from '../shared/test_functions';
 import { builtinFunctions } from '../definitions/builtin';

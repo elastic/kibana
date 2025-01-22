@@ -11,7 +11,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import userEvent from '@testing-library/user-event';
 import { TestProvider } from '../../test/test_provider';
 import { ControlGeneralViewSelector } from '.';
-import { Selector } from '../../../common';
+import type { Selector } from '../../../common';
 import { getSelectorConditions } from '../../common/utils';
 import * as i18n from '../control_general_view/translations';
 

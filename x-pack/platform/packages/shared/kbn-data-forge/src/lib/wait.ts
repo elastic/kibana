@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 export async function wait(delay: number, logger: ToolingLog) {
   logger.info(`Waiting ${delay}ms`);
   await new Promise((resolve) => {

@@ -7,9 +7,10 @@
 
 import { useQuery } from '@tanstack/react-query';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
 import { useFormContext } from 'react-hook-form';
-import { APIRoutes, ChatForm, ChatFormFields } from '../types';
+import type { ChatForm} from '../types';
+import { APIRoutes, ChatFormFields } from '../types';
 import { useKibana } from './use_kibana';
 
 export interface FetchIndexMappingsArgs {

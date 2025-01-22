@@ -14,12 +14,12 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
+import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import React, { useCallback } from 'react';
-import { ObservabilityPublicPluginsStart } from '../../../plugin';
+import type { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { useObservabilityOnboarding } from '../../../hooks/use_observability_onboarding';
 
 export function ObservabilityOnboardingCallout() {

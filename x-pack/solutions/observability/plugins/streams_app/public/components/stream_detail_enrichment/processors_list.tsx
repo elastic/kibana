@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
+import type {
+  EuiPanelProps} from '@elastic/eui';
 import {
   EuiDraggable,
-  EuiPanelProps,
   EuiPanel,
   EuiFlexGroup,
   EuiIcon,
@@ -17,16 +18,18 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type {
+  ReadStreamDefinition} from '@kbn/streams-schema';
 import {
-  ReadStreamDefinition,
   getProcessorType,
   isDissectProcessor,
   isGrokProcessor,
 } from '@kbn/streams-schema';
 import { useBoolean } from '@kbn/react-hooks';
 import { css } from '@emotion/react';
-import { EditProcessorFlyout, EditProcessorFlyoutProps } from './flyout';
-import { ProcessorDefinition } from './types';
+import type { EditProcessorFlyoutProps } from './flyout';
+import { EditProcessorFlyout } from './flyout';
+import type { ProcessorDefinition } from './types';
 
 export const DraggableProcessorListItem = ({
   processor,

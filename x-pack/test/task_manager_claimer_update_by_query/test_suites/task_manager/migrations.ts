@@ -8,15 +8,16 @@
 import expect from '@kbn/expect';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
-import {
+import type {
   ConcreteTaskInstance,
   SerializedConcreteTaskInstance,
-  TaskInstanceWithDeprecatedFields,
+  TaskInstanceWithDeprecatedFields} from '@kbn/task-manager-plugin/server/task';
+import {
   TaskStatus,
 } from '@kbn/task-manager-plugin/server/task';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import type { RuleTaskState, WrappedLifecycleRuleState } from '@kbn/alerting-state-types';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function createGetTests({ getService }: FtrProviderContext) {
   const es = getService('es');

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { createContext, Dispatch, SetStateAction, useContext } from 'react';
-import { Indicator } from '../../../../common/types/indicator';
+import type { Dispatch, SetStateAction} from 'react';
+import { createContext, useContext } from 'react';
+import type { Indicator } from '../../../../common/types/indicator';
 
 export interface IndicatorsTableContextValue {
   expanded: Indicator | undefined;

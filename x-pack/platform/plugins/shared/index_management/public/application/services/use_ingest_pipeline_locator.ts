@@ -7,10 +7,11 @@
 
 import { useLocatorUrl } from '@kbn/share-plugin/public';
 import { useAppContext } from '../app_context';
-import {
-  INGEST_PIPELINES_LOCATOR_ID,
+import type {
   INGEST_PIPELINES_EDIT,
-  INGEST_PIPELINES_LIST,
+  INGEST_PIPELINES_LIST} from '../constants';
+import {
+  INGEST_PIPELINES_LOCATOR_ID
 } from '../constants';
 
 export const useIngestPipelinesLocator = (

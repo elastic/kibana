@@ -19,7 +19,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
+import type { CodeEditorProps } from '@kbn/code-editor';
+import { CodeEditor } from '@kbn/code-editor';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
@@ -30,8 +31,8 @@ import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
-import { ESQLRealField } from '@kbn/esql-validation-autocomplete';
-import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
+import type { ESQLRealField } from '@kbn/esql-validation-autocomplete';
+import type { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {

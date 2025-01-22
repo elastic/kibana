@@ -9,11 +9,13 @@ import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
 
 import { API_BASE_PATH } from '../../../common/constants';
-import { ReindexStatusResponse, REINDEX_OP_TYPE } from '../../../common/types';
+import type { ReindexStatusResponse} from '../../../common/types';
+import { REINDEX_OP_TYPE } from '../../../common/types';
 import { versionCheckHandlerWrapper } from '../../lib/es_version_precheck';
-import { reindexServiceFactory, ReindexWorker, generateNewIndexName } from '../../lib/reindexing';
+import type { ReindexWorker} from '../../lib/reindexing';
+import { reindexServiceFactory, generateNewIndexName } from '../../lib/reindexing';
 import { reindexActionsFactory } from '../../lib/reindexing/reindex_actions';
-import { RouteDependencies } from '../../types';
+import type { RouteDependencies } from '../../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
 import { reindexHandler } from './reindex_handler';
 

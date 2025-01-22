@@ -6,9 +6,10 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
-import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { elasticsearchServiceMock, ScopedClusterClientMock } from '@kbn/core/server/mocks';
+import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { DeleteSLO } from './delete_slo';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
 import {
@@ -16,8 +17,8 @@ import {
   createSummaryTransformManagerMock,
   createTransformManagerMock,
 } from './mocks';
-import { SLORepository } from './slo_repository';
-import { TransformManager } from './transform_manager';
+import type { SLORepository } from './slo_repository';
+import type { TransformManager } from './transform_manager';
 
 describe('DeleteSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;

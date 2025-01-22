@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IndicesDataStream, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { Logger } from '@kbn/logging';
-import { StreamLifecycle } from '@kbn/streams-schema';
+import type { IndicesDataStream, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/logging';
+import type { StreamLifecycle } from '@kbn/streams-schema';
 import { deleteComponent } from './component_templates/manage_component_templates';
 import { getComponentTemplateName } from './component_templates/name';
 import { deleteDataStream } from './data_streams/manage_data_streams';

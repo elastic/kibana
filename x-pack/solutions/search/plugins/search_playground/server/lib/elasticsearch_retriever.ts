@@ -7,8 +7,8 @@
 
 import { BaseRetriever, type BaseRetrieverInput } from '@langchain/core/retrievers';
 import { Document } from '@langchain/core/documents';
-import { Client } from '@elastic/elasticsearch';
-import {
+import type { Client } from '@elastic/elasticsearch';
+import type {
   AggregationsAggregate,
   SearchHit,
   SearchResponse,

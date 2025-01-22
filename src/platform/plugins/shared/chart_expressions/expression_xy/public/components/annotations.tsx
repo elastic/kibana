@@ -12,9 +12,10 @@ import './reference_lines/reference_lines.scss';
 
 import React, { Fragment } from 'react';
 import { snakeCase } from 'lodash';
+import type {
+  CustomAnnotationTooltip} from '@elastic/charts';
 import {
   AnnotationDomainType,
-  CustomAnnotationTooltip,
   LineAnnotation,
   Position,
   RectAnnotation,
@@ -36,8 +37,8 @@ import type {
 } from '@kbn/event-annotation-plugin/common';
 import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
 import { defaultAnnotationColor, defaultAnnotationRangeColor } from '@kbn/event-annotation-common';
-import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
-import { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common/manual_event_annotation/types';
+import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
+import type { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common/manual_event_annotation/types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MergedAnnotation } from '../../common';
 import { AnnotationIcon, hasIcon, Marker, MarkerBody } from '../helpers';

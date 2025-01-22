@@ -7,14 +7,15 @@
 
 import { useRef, useCallback, useState, useEffect } from 'react';
 
-import {
+import type {
   ReindexStatusResponse,
+  ReindexWarning} from '../../../../../../common/types';
+import {
   ReindexStatus,
-  ReindexStep,
-  ReindexWarning,
+  ReindexStep
 } from '../../../../../../common/types';
 import { CancelLoadingState, LoadingState } from '../../../types';
-import { ApiService } from '../../../../lib/api';
+import type { ApiService } from '../../../../lib/api';
 
 const POLL_INTERVAL = 1000;
 

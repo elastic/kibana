@@ -8,17 +8,18 @@
 import moment from 'moment';
 import * as Rx from 'rxjs';
 import { timeout } from 'rxjs';
-import { Writable } from 'stream';
+import type { Writable } from 'stream';
 import { finished } from 'stream/promises';
 import { setTimeout } from 'timers/promises';
 
-import { UpdateResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { UpdateResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
+import type {
+  ReportingError} from '@kbn/reporting-common';
 import {
   CancellationToken,
   KibanaShuttingDownError,
   QueueTimeoutError,
-  ReportingError,
   durationToNumber,
   numberToDuration,
 } from '@kbn/reporting-common';
@@ -37,11 +38,12 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import { throwRetryableError } from '@kbn/task-manager-plugin/server';
 
-import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
+import type { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
+import type {
+  ReportTaskParams,
+  ReportingTask} from '.';
 import {
   REPORTING_EXECUTE_TYPE,
-  ReportTaskParams,
-  ReportingTask,
   ReportingTaskStatus,
   TIME_BETWEEN_ATTEMPTS,
 } from '.';
@@ -51,7 +53,7 @@ import {
   isExecutionError,
   mapToReportingError,
 } from '../../../common/errors/map_to_reporting_error';
-import { EventTracker } from '../../usage';
+import type { EventTracker } from '../../usage';
 import type { ReportingStore } from '../store';
 import { Report, SavedReport } from '../store';
 import type { ReportFailedFields, ReportProcessingFields } from '../store/store';

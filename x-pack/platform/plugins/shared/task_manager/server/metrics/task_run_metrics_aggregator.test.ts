@@ -9,10 +9,11 @@ import * as uuid from 'uuid';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { asOk, asErr } from '../lib/result_type';
 import { TaskStatus } from '../task';
+import type {
+  TaskManagerStats} from '../task_events';
 import {
   asTaskManagerStatEvent,
   asTaskRunEvent,
-  TaskManagerStats,
   TaskPersistence,
 } from '../task_events';
 import { TaskRunResult } from '../task_running';

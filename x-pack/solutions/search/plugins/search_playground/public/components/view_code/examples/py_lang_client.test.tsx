@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import { PY_LANG_CLIENT } from './py_lang_client'; // Adjust the import path according to your project structure
 import { ES_CLIENT_DETAILS } from '../view_code_flyout';
-import { ChatForm } from '../../../types';
+import type { ChatForm } from '../../../types';
 
 describe('PY_LANG_CLIENT function', () => {
   test('renders with correct content', () => {

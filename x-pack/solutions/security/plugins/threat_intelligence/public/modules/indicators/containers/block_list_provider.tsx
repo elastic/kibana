@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, {
-  createContext,
+import type {
   Dispatch,
   FC,
   PropsWithChildren,
-  SetStateAction,
+  SetStateAction} from 'react';
+import React, {
+  createContext,
   useState,
 } from 'react';
 

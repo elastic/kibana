@@ -8,9 +8,9 @@
  */
 
 import color from 'color';
-import { MetricVisConfiguration } from '@kbn/visualizations-plugin/common';
-import { Panel } from '../../../../../common/types';
-import { Column, Layer } from '../../convert';
+import type { MetricVisConfiguration } from '@kbn/visualizations-plugin/common';
+import type { Panel } from '../../../../../common/types';
+import type { Column, Layer } from '../../convert';
 import { getPalette } from '../palette';
 import { findMetricColumn, getMetricWithCollapseFn } from '../../../utils';
 

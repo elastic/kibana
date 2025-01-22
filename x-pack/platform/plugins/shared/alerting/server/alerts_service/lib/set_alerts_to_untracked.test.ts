@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type {
+  ElasticsearchClientMock} from '@kbn/core/server/mocks';
 import {
-  ElasticsearchClientMock,
   elasticsearchServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';

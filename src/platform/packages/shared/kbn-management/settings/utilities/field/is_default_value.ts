@@ -9,7 +9,7 @@
 
 import isEqual from 'lodash/isEqual';
 
-import { FieldDefinition, SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
+import type { FieldDefinition, SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
 import { hasUnsavedChange } from './has_unsaved_change';
 
 type F<T extends SettingType> = Pick<FieldDefinition<T>, 'savedValue' | 'defaultValue'>;

@@ -22,8 +22,9 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { FAILED_TO_SCHEDULE } from '../manual_test_run_mode/browser_test_results';
 import { BrowserStepsList } from '../../common/monitor_test_result/browser_steps_list';
+import type {
+  CheckGroupResult} from '../hooks/use_browser_run_once_monitors';
 import {
-  CheckGroupResult,
   useBrowserRunOnceMonitors,
 } from '../hooks/use_browser_run_once_monitors';
 import { TestResultHeader } from '../test_result_header';

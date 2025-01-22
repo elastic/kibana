@@ -8,7 +8,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { EuiTableRowCell } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { EnrichedDeprecationInfo } from '../../../../../../common/types';
+import type { EnrichedDeprecationInfo } from '../../../../../../common/types';
 import { GlobalFlyout } from '../../../../../shared_imports';
 import { useAppContext } from '../../../../app_context';
 import {
@@ -16,10 +16,11 @@ import {
   UIM_REINDEX_CLOSE_FLYOUT_CLICK,
   UIM_REINDEX_OPEN_FLYOUT_CLICK,
 } from '../../../../lib/ui_metric';
-import { DeprecationTableColumns } from '../../../types';
+import type { DeprecationTableColumns } from '../../../types';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
 import { ReindexResolutionCell } from './resolution_table_cell';
-import { ReindexFlyout, ReindexFlyoutProps } from './flyout';
+import type { ReindexFlyoutProps } from './flyout';
+import { ReindexFlyout } from './flyout';
 import { ReindexStatusProvider, useReindexContext } from './context';
 
 const { useGlobalFlyout } = GlobalFlyout;

@@ -11,13 +11,14 @@ import {
 } from '../../../../../common/http_api/logstash';
 import { getNodeInfo } from '../../../../lib/logstash/get_node_info';
 import { handleError } from '../../../../lib/errors';
+import type {
+  NamedMetricDescriptor} from '../../../../lib/details/get_metrics';
 import {
   getMetrics,
-  isNamedMetricDescriptor,
-  NamedMetricDescriptor,
+  isNamedMetricDescriptor
 } from '../../../../lib/details/get_metrics';
 import { metricSets } from './metric_set_node';
-import { MonitoringCore } from '../../../../types';
+import type { MonitoringCore } from '../../../../types';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getLogstashDataset } from '../../../../../common/get_index_patterns';
 

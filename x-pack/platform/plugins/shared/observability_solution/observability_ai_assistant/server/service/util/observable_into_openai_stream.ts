@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
-import OpenAI from 'openai';
+import type { Logger } from '@kbn/logging';
+import type OpenAI from 'openai';
+import type {
+  Observable} from 'rxjs';
 import {
   catchError,
   concatMap,
@@ -15,16 +17,16 @@ import {
   from,
   ignoreElements,
   map,
-  Observable,
   of,
 } from 'rxjs';
 import { PassThrough } from 'stream';
-import {
+import type {
   BufferFlushEvent,
   ChatCompletionChunkEvent,
-  StreamingChatResponseEventType,
   StreamingChatResponseEventWithoutError,
-  TokenCountEvent,
+  TokenCountEvent} from '../../../common/conversation_complete';
+import {
+  StreamingChatResponseEventType
 } from '../../../common/conversation_complete';
 
 export function observableIntoOpenAIStream(

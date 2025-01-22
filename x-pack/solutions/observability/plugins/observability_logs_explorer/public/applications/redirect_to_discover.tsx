@@ -9,7 +9,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { useLocation } from 'react-router-dom';
 import { Router } from '@kbn/shared-ux-router';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
 
 export const renderDiscoverRedirect = (core: CoreStart, appParams: AppMountParameters) => {

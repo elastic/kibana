@@ -6,12 +6,13 @@
  */
 
 import React, { useRef } from 'react';
+import type {
+  EuiTabbedContentTab} from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiTabbedContent,
-  EuiTabbedContentTab,
+  EuiTabbedContent
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';

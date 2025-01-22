@@ -14,9 +14,9 @@ import {
   hasObjectErrors,
   isValidRule,
 } from './rule_errors';
-import { Rule, RuleTypeModel } from '../../../types';
+import type { Rule, RuleTypeModel } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ActionTypeModel } from '../../..';
+import type { ActionTypeModel } from '../../..';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const config = { isUsingSecurity: true, minimumScheduleInterval: { value: '1m', enforce: false } };

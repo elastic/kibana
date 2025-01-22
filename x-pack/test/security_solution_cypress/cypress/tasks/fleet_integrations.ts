@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type {
+  Integration} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   BOOTSTRAP_PREBUILT_RULES_URL,
-  GET_ALL_INTEGRATIONS_URL,
-  Integration,
+  GET_ALL_INTEGRATIONS_URL
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { login } from './login';
 import { visitGetStartedPage } from './navigation';

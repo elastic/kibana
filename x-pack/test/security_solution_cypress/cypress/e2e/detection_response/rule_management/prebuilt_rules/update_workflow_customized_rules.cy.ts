@@ -6,7 +6,7 @@
  */
 
 import { getPrebuiltRuleMockOfType } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
-import {
+import type {
   RuleResponse,
   RuleSignatureId,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
@@ -20,8 +20,9 @@ import {
 } from '../../../../screens/alerts_detection_rules';
 import { selectRulesByName } from '../../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import type {
+  SAMPLE_PREBUILT_RULE} from '../../../../tasks/api_calls/prebuilt_rules';
 import {
-  SAMPLE_PREBUILT_RULE,
   createAndInstallMockedPrebuiltRules,
   installPrebuiltRuleAssets,
 } from '../../../../tasks/api_calls/prebuilt_rules';

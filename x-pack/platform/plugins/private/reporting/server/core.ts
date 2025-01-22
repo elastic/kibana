@@ -33,8 +33,8 @@ import { CsvSearchSourceExportType, CsvV2ExportType } from '@kbn/reporting-expor
 import { PdfExportType, PdfV1ExportType } from '@kbn/reporting-export-types-pdf';
 import { PngExportType } from '@kbn/reporting-export-types-png';
 import type { ReportingConfigType } from '@kbn/reporting-server';
-import { ExportType } from '@kbn/reporting-server';
-import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
+import type { ExportType } from '@kbn/reporting-server';
+import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
@@ -50,7 +50,8 @@ import type { ReportingSetup } from '.';
 import { createConfig } from './config';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
-import { ExecuteReportTask, ReportTaskParams } from './lib/tasks';
+import type { ReportTaskParams } from './lib/tasks';
+import { ExecuteReportTask } from './lib/tasks';
 import type { ReportingPluginRouter } from './types';
 import { EventTracker } from './usage';
 

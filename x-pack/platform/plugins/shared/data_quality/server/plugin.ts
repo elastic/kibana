@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/server';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
 
-import { Dependencies } from './types';
+import type { Dependencies } from './types';
 import { ELASTICSEARCH_FEATURE, KIBANA_FEATURE } from './features';
 
 export class DataQualityPlugin implements Plugin<void, void, any, any> {

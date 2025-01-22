@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { useState, VFC } from 'react';
+import type { VFC } from 'react';
+import React, { useState } from 'react';
+import type {
+  EuiComboBoxOptionOption} from '@elastic/eui';
 import {
   EuiButtonIcon,
-  EuiComboBoxOptionOption,
   EuiContextMenuPanel,
   EuiPopover,
   EuiToolTip,

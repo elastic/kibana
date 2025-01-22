@@ -7,7 +7,7 @@
 
 import { DataStreamsResponseSchema, DataStreamsRequestSchema } from '../../../common/rest_types';
 import { DATA_USAGE_DATA_STREAMS_API_ROUTE } from '../../../common';
-import { DataUsageContext, DataUsageRouter } from '../../types';
+import type { DataUsageContext, DataUsageRouter } from '../../types';
 import { getDataStreamsHandler } from './data_streams_handler';
 
 export const registerDataStreamsRoute = (

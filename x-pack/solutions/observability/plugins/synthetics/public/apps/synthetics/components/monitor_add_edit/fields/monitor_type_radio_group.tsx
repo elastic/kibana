@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type {
+  EuiKeyPadMenuItemProps} from '@elastic/eui';
 import {
   EuiPanel,
   EuiText,
@@ -14,8 +16,7 @@ import {
   EuiSpacer,
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
-  EuiIcon,
-  EuiKeyPadMenuItemProps,
+  EuiIcon
 } from '@elastic/eui';
 
 export type MonitorTypeRadioGroupProps = EuiKeyPadMenuItemProps & {

@@ -9,7 +9,7 @@
 
 import React from 'react';
 
-import { DecoratorFn } from '@storybook/react';
+import type { DecoratorFn } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common/eui_styled_components';

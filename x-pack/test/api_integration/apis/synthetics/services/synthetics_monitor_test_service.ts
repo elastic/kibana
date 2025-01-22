@@ -7,15 +7,15 @@
 
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
-import { EncryptedSyntheticsSavedMonitor } from '@kbn/synthetics-plugin/common/runtime_types';
-import { MonitorInspectResponse } from '@kbn/synthetics-plugin/public/apps/synthetics/state/monitor_management/api';
+import type { EncryptedSyntheticsSavedMonitor } from '@kbn/synthetics-plugin/common/runtime_types';
+import type { MonitorInspectResponse } from '@kbn/synthetics-plugin/public/apps/synthetics/state/monitor_management/api';
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
-import { ProjectAPIKeyResponse } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/get_api_key';
+import type { ProjectAPIKeyResponse } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/get_api_key';
 import moment from 'moment/moment';
 import { omit } from 'lodash';
-import { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export class SyntheticsMonitorTestService {
   private supertest: ReturnType<typeof KibanaSupertestProvider>;

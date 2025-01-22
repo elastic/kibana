@@ -8,12 +8,12 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiImage, EuiSpacer, EuiText } from '@elastic/eui';
-import { RuleSystemAction } from '@kbn/alerting-types';
-import { ActionConnector } from '@kbn/alerts-ui-shared';
+import type { RuleSystemAction } from '@kbn/alerting-types';
+import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import React, { useCallback, useMemo, useState } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { v4 as uuidv4 } from 'uuid';
-import { RuleAction, RuleFormParamsErrors } from '../common/types';
+import type { RuleAction, RuleFormParamsErrors } from '../common/types';
 import { DEFAULT_FREQUENCY, MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
 import { useRuleFormDispatch, useRuleFormState } from '../hooks';
 import {

@@ -7,13 +7,14 @@
 
 import React, { useCallback } from 'react';
 
-import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiBadge, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
+import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
+import type { EuiBasicTableColumn} from '@elastic/eui';
+import { EuiBadge, EuiLink } from '@elastic/eui';
 
 import { FormattedDate } from '@kbn/i18n-react';
-import { PromptResponse } from '@kbn/elastic-assistant-common';
-import { Conversation } from '../../../assistant_context/types';
-import { AIConnector } from '../../../connectorland/connector_selector';
+import type { PromptResponse } from '@kbn/elastic-assistant-common';
+import type { Conversation } from '../../../assistant_context/types';
+import type { AIConnector } from '../../../connectorland/connector_selector';
 import { getConnectorTypeTitle } from '../../../connectorland/helpers';
 import { getConversationApiConfig } from '../../use_conversation/helpers';
 import * as i18n from './translations';

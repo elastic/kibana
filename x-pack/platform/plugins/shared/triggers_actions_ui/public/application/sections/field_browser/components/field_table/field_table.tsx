@@ -5,14 +5,15 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  EuiInMemoryTable,
+import type {
   Pagination,
   Direction,
-  useEuiTheme,
-  CriteriaWithPagination,
+  CriteriaWithPagination} from '@elastic/eui';
+import {
+  EuiInMemoryTable,
+  useEuiTheme
 } from '@elastic/eui';
-import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import type { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { getFieldColumns, getFieldItemsData } from '../field_items';
 import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from '../../helpers';
 import type { BrowserFieldItem, FieldBrowserProps, GetFieldTableColumns } from '../../types';

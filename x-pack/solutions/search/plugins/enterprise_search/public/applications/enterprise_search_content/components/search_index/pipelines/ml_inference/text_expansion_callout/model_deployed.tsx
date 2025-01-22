@@ -20,8 +20,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import type {
+  TextExpansionCallOutState} from './text_expansion_callout';
 import {
-  TextExpansionCallOutState,
   TextExpansionDismissButton,
   FineTuneModelsButton,
 } from './text_expansion_callout';

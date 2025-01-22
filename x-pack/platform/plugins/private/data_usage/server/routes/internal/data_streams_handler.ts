@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RequestHandler } from '@kbn/core/server';
-import { DataUsageContext, DataUsageRequestHandlerContext } from '../../types';
+import type { RequestHandler } from '@kbn/core/server';
+import type { DataUsageContext, DataUsageRequestHandlerContext } from '../../types';
 import { errorHandler } from '../error_handler';
 import { getMeteringStats } from '../../utils/get_metering_stats';
 import type {

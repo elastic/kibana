@@ -8,7 +8,7 @@
  */
 
 import { ApmSynthtraceKibanaClient } from '../../lib/apm/client/apm_synthtrace_kibana_client';
-import { Logger } from '../../lib/utils/create_logger';
+import type { Logger } from '../../lib/utils/create_logger';
 
 export function getKibanaClient({ target, logger }: { target: string; logger: Logger }) {
   const kibanaClient = new ApmSynthtraceKibanaClient({

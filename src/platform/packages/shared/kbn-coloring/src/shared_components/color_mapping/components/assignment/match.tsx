@@ -12,7 +12,7 @@ import { EuiComboBox, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { ColorMapping } from '../../config';
+import type { ColorMapping } from '../../config';
 
 export const Match: React.FC<{
   index: number;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { APMBaseDoc } from './apm_base_doc';
-import {
+import type { APMBaseDoc } from './apm_base_doc';
+import type {
   Container,
   Host,
   Http,

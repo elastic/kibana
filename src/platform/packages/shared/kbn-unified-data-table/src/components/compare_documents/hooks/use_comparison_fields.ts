@@ -9,7 +9,8 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { AdditionalFieldGroups, convertFieldsToFallbackFields } from '@kbn/unified-field-list';
+import type { AdditionalFieldGroups} from '@kbn/unified-field-list';
+import { convertFieldsToFallbackFields } from '@kbn/unified-field-list';
 import { isEqual } from 'lodash';
 import { useMemo } from 'react';
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   HasEditCapabilities,
   HasInPlaceLibraryTransforms,
   HasType,
@@ -17,15 +17,15 @@ import {
   PublishesUnifiedSearch,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
-import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
-import { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { DashboardLocatorParams, DASHBOARD_API_TYPE } from '@kbn/dashboard-plugin/public';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import type { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type { DashboardLocatorParams, DASHBOARD_API_TYPE } from '@kbn/dashboard-plugin/public';
 import type { DashboardAttributes } from '@kbn/dashboard-plugin/server';
 
-import { CONTENT_ID } from '../common';
-import { Link, LinksAttributes, LinksLayoutType } from '../common/content_management';
+import type { CONTENT_ID } from '../common';
+import type { Link, LinksAttributes, LinksLayoutType } from '../common/content_management';
 
 export type LinksParentApi = PresentationContainer &
   HasType<typeof DASHBOARD_API_TYPE> &

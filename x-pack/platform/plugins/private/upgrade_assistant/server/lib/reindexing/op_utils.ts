@@ -6,7 +6,7 @@
  */
 
 import { flow } from 'fp-ts/lib/function';
-import { ReindexSavedObject } from '../../../common/types';
+import type { ReindexSavedObject } from '../../../common/types';
 
 export interface SortedReindexSavedObjects {
   /**

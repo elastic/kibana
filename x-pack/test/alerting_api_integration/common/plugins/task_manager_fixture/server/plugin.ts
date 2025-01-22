@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   Plugin,
   CoreSetup,
   CoreStart,
@@ -16,7 +16,7 @@ import {
 } from '@kbn/core/server';
 import { firstValueFrom, Subject } from 'rxjs';
 import { schema } from '@kbn/config-schema';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 export interface SampleTaskManagerFixtureStartDeps {
   taskManager: TaskManagerStartContract;

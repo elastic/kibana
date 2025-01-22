@@ -8,9 +8,9 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { SearchRequest, MsearchRequestItem } from '@elastic/elasticsearch/lib/api/types';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchRequest, MsearchRequestItem } from '@elastic/elasticsearch/lib/api/types';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 interface ClientOptions {
   node: string;

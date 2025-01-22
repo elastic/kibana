@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import {
+import type {
   Condition,
-  FilterCondition,
+  FilterCondition} from '@kbn/streams-schema';
+import {
   isAndCondition,
   isFilterCondition,
   isOrCondition,

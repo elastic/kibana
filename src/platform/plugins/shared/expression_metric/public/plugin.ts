@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { ExpressionsStart, ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { ExpressionsStart, ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { metricFunction } from '../common/expression_functions';
 import { metricRendererFactory } from './expression_renderers';
 

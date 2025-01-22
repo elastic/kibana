@@ -16,15 +16,16 @@ jest.spyOn(lodash, 'debounce').mockImplementation((fn: any) => {
   fn.cancel = jest.fn();
   return fn;
 });
+import type {
+  EuiSearchBarProps} from '@elastic/eui';
 import {
   EuiInMemoryTable,
   EuiLink,
-  EuiSearchBarProps,
   EuiText,
   EuiButton,
   Query,
 } from '@elastic/eui';
-import { IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 import * as sinon from 'sinon';
@@ -34,7 +35,7 @@ import {
 } from './saved_object_finder';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { findTestSubject } from '@kbn/test-jest-helpers';
-import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 
 describe('SavedObjectsFinder', () => {

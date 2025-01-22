@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CoreSetup } from '@kbn/core/public';
+import type { CoreSetup } from '@kbn/core/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { SetupDependencies, StartDependencies } from '../../plugin';
+import type { SetupDependencies, StartDependencies } from '../../plugin';
 import { FlyoutCreateDrilldownAction, FlyoutEditDrilldownAction } from './actions';
 import { EmbeddableToDashboardDrilldown } from './embeddable_to_dashboard_drilldown';
 

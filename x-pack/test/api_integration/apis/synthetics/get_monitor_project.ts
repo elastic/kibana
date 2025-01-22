@@ -6,14 +6,14 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import type SuperTest from 'supertest';
-import {
+import type {
   LegacyProjectMonitorsRequest,
   ProjectMonitor,
   ProjectMonitorMetaData,
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 

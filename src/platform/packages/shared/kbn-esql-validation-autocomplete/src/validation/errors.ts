@@ -15,7 +15,7 @@ import type {
   ESQLLocation,
   ESQLMessage,
 } from '@kbn/esql-ast';
-import { ESQLIdentifier } from '@kbn/esql-ast/src/types';
+import type { ESQLIdentifier } from '@kbn/esql-ast/src/types';
 import type { ErrorTypes, ErrorValues } from './types';
 
 function getMessageAndTypeFromId<K extends ErrorTypes>({

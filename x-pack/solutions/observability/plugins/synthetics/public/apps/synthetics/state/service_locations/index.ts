@@ -6,12 +6,13 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import {
-  DEFAULT_THROTTLING,
+import type {
   ServiceLocations,
-  ThrottlingOptions,
+  ThrottlingOptions} from '../../../../../common/runtime_types';
+import {
+  DEFAULT_THROTTLING
 } from '../../../../../common/runtime_types';
-import { IHttpSerializedFetchError } from '../utils/http_error';
+import type { IHttpSerializedFetchError } from '../utils/http_error';
 
 import {
   getServiceLocations,

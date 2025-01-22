@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ScoutPage, KibanaUrl, KbnClient } from '@kbn/scout';
+import type { ScoutPage, KibanaUrl, KbnClient } from '@kbn/scout';
 
 export class CustomLogsPage {
   static readonly ASSERTION_MESSAGES = {

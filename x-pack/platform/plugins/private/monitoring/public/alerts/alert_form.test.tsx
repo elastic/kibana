@@ -11,12 +11,13 @@
 
 import React, { Fragment, lazy } from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { ReactWrapper, mount } from 'enzyme';
+import type { ReactWrapper} from 'enzyme';
+import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '@kbn/core/public/mocks';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { ruleTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/rule_type_registry.mock';
-import {
+import type {
   ValidationResult,
   Rule,
   GenericValidationResult,

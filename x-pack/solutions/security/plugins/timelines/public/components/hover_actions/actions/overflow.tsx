@@ -7,11 +7,12 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import type {
+  EuiButtonEmpty,
+  EuiContextMenuItem} from '@elastic/eui';
 import {
   EuiButtonIcon,
-  EuiButtonEmpty,
   EuiContextMenuPanel,
-  EuiContextMenuItem,
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
@@ -20,7 +21,7 @@ import styled from 'styled-components';
 import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
 import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
 import { getAdditionalScreenReaderOnlyContext } from '../utils';
-import { HoverActionComponentProps } from './types';
+import type { HoverActionComponentProps } from './types';
 
 export const MORE_ACTIONS = i18n.translate('xpack.timelines.hoverActions.moreActions', {
   defaultMessage: 'More actions',

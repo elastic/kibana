@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { DataSourceSelection, isDatasetSelection } from '../../common/data_source_selection';
+import type { DataSourceSelection} from '../../common/data_source_selection';
+import { isDatasetSelection } from '../../common/data_source_selection';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
 export interface DiscoverEsqlUrlProps {

@@ -8,8 +8,9 @@
 import { EuiCallOut, EuiCodeBlock, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useState } from 'react';
+import type {
+  IntegrationInstallationError} from '../../../hooks/use_install_integrations';
 import {
-  IntegrationInstallationError,
   useInstallIntegrations,
 } from '../../../hooks/use_install_integrations';
 

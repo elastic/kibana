@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TimeRange } from '@kbn/data-plugin/common';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/data-plugin/common';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 export function useDateRange({ data }: { data: DataPublicPluginStart }): {

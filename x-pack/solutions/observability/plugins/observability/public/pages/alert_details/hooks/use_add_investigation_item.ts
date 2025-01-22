@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import {
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import type {
   CreateInvestigationItemParams,
   CreateInvestigationItemResponse,
 } from '@kbn/investigation-shared';

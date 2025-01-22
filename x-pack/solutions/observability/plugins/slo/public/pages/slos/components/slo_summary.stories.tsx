@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ComponentStory } from '@storybook/react';
+import type { ComponentStory } from '@storybook/react';
 import React from 'react';
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import {
@@ -13,7 +13,8 @@ import {
   historicalSummaryData,
 } from '../../../data/slo/historical_summary_data';
 import { buildSlo } from '../../../data/slo/slo';
-import { Props, SloSummary as Component } from './slo_summary';
+import type { Props} from './slo_summary';
+import { SloSummary as Component } from './slo_summary';
 
 export default {
   component: Component,

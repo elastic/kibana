@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { AppDependencies } from '../app_context';
+import type { AppDependencies } from '../app_context';
 
 export declare function indexManagementStore(services: AppDependencies['services']): any;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiPageSectionProps } from '@elastic/eui';
+import type { EuiPageSectionProps } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 

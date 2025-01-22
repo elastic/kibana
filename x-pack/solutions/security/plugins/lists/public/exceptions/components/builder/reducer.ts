@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import type {
+  ExceptionListItemSchema} from '@kbn/securitysolution-io-ts-list-types';
 import {
-  ExceptionListItemSchema,
   ListOperatorTypeEnum as OperatorTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  ExceptionsBuilderExceptionItem} from '@kbn/securitysolution-list-utils';
 import {
-  ExceptionsBuilderExceptionItem,
   getDefaultEmptyEntry,
 } from '@kbn/securitysolution-list-utils';
 

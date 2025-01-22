@@ -31,7 +31,7 @@ import {
 } from '../../../../common/translations';
 import { useDegradedFields } from '../../../hooks';
 import { SparkPlot } from '../../common/spark_plot';
-import { DegradedField } from '../../../../common/api_types';
+import type { DegradedField } from '../../../../common/api_types';
 
 export const DegradedFieldInfo = ({ fieldList }: { fieldList?: DegradedField }) => {
   const { euiTheme } = useEuiTheme();

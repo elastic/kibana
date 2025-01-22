@@ -6,7 +6,7 @@
  */
 
 import { EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N } from '@kbn/security-solution-plugin/public/assistant/content/prompts/user/translations';
-import { PromptCreateProps } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import type { PromptCreateProps } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { QUICK_PROMPT_BADGE, USER_PROMPT } from '../../screens/ai_assistant';
 import { createRule } from '../../tasks/api_calls/rules';
 import {

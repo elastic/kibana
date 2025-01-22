@@ -9,57 +9,62 @@
 
 import { i18n } from '@kbn/i18n';
 import { capitalize, isEmpty, isEqual, sortBy } from 'lodash';
-import { KueryNode } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import { RuleTypeModal } from '@kbn/response-ops-rule-form';
+import type {
+  ReactNode} from 'react';
 import React, {
   lazy,
   useEffect,
   useState,
-  ReactNode,
   useCallback,
   useMemo,
   useRef,
   Suspense,
 } from 'react';
+import type {
+  EuiTableSortingType,
+  EuiSelectableOption} from '@elastic/eui';
 import {
   EuiSpacer,
   EuiPageTemplate,
-  EuiTableSortingType,
   EuiButtonIcon,
-  EuiSelectableOption,
   EuiDescriptionList,
 } from '@elastic/eui';
-import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
+import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { useHistory } from 'react-router-dom';
 
+import type {
+  RuleExecutionStatus} from '@kbn/alerting-plugin/common';
 import {
-  RuleExecutionStatus,
   ALERTING_FEATURE_ID,
   RuleExecutionStatusErrorReasons,
   RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
+import type {
+  RuleCreationValidConsumer} from '@kbn/rule-data-utils';
 import {
-  RuleCreationValidConsumer,
   ruleDetailsRoute as commonRuleDetailsRoute,
   STACK_ALERTS_FEATURE_ID,
   getCreateRuleRoute,
   getEditRuleRoute,
 } from '@kbn/rule-data-utils';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
-import {
+import type {
   Rule,
   RuleTableItem,
   RuleType,
   RuleStatus,
   Pagination,
-  Percentiles,
   SnoozeSchedule,
   UpdateFiltersProps,
   BulkEditActions,
-  UpdateRulesToBulkEditProps,
+  UpdateRulesToBulkEditProps} from '../../../../types';
+import {
+  Percentiles
 } from '../../../../types';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
 import { RuleQuickEditButtonsWithApi as RuleQuickEditButtons } from '../../common/components/rule_quick_edit_buttons';

@@ -7,7 +7,8 @@
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { BehaviorSubject } from 'rxjs';
-import { FunctionDefinition, MessageRole } from '../../common';
+import type { FunctionDefinition} from '../../common';
+import { MessageRole } from '../../common';
 import type { ObservabilityAIAssistantChatService } from '../types';
 
 type MockedChatService = DeeplyMockedKeys<ObservabilityAIAssistantChatService>;

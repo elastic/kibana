@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { InvokeCreator } from 'xstate';
-import { LogsExplorerControllerContext, LogsExplorerControllerEvent } from '../types';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { InvokeCreator } from 'xstate';
+import type { LogsExplorerControllerContext, LogsExplorerControllerEvent } from '../types';
 
 export const createAdHocDataView =
   (): InvokeCreator<LogsExplorerControllerContext, LogsExplorerControllerEvent> =>

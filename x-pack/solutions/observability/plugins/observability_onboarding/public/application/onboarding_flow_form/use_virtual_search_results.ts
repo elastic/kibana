@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
-import { CustomCard } from '../packages_list/types';
-import { ObservabilityOnboardingAppServices } from '../..';
+import type { CustomCard } from '../packages_list/types';
+import type { ObservabilityOnboardingAppServices } from '../..';
 
 export function useVirtualSearchResults(): CustomCard[] {
   const {

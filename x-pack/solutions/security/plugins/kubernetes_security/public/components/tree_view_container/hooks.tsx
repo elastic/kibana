@@ -10,7 +10,7 @@ import type { KubernetesCollectionMap } from '../../types';
 import { LOCAL_STORAGE_TREE_NAV_KEY } from '../../../common/constants';
 import { addTimerangeAndDefaultFilterToQuery } from '../../utils/add_timerange_and_default_filter_to_query';
 import { addTreeNavSelectionToFilterQuery } from './helpers';
-import { IndexPattern, GlobalFilter } from '../../types';
+import type { IndexPattern, GlobalFilter } from '../../types';
 
 export type UseTreeViewProps = {
   globalFilter: GlobalFilter;

@@ -6,7 +6,8 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import moment, { Moment } from 'moment';
+import type { Moment } from 'moment';
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { TIMEZONE_OPTIONS as UI_TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-common';
@@ -28,7 +29,7 @@ import {
   EuiLink,
   EuiSplitPanel,
 } from '@elastic/eui';
-import { RecurrenceSchedule, SnoozeSchedule } from '../../../../../types';
+import type { RecurrenceSchedule, SnoozeSchedule } from '../../../../../types';
 import { RecurrenceScheduler } from './recurrence_scheduler';
 
 import './scheduler.scss';

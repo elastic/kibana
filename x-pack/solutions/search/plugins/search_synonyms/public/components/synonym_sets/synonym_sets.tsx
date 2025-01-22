@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { SynonymsGetSynonymsSetsSynonymsSetItem } from '@elastic/elasticsearch/lib/api/types';
-import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import type { SynonymsGetSynonymsSetsSynonymsSetItem } from '@elastic/elasticsearch/lib/api/types';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { DEFAULT_PAGE_VALUE, paginationToPage } from '../../../common/pagination';

@@ -10,12 +10,14 @@ import '../../_mocks_/index_name_logic.mock';
 
 import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import type { ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 
 import { EuiBasicTable } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { CrawlEvent, CrawlerStatus, CrawlType } from '../../../../api/crawler/types';
+import type { CrawlEvent} from '../../../../api/crawler/types';
+import { CrawlerStatus, CrawlType } from '../../../../api/crawler/types';
 
 import { CrawlRequestsTable } from './crawl_requests_table';
 

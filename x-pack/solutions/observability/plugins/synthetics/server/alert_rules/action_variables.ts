@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SyntheticsPluginsSetupDependencies } from '../types';
+import type { SyntheticsPluginsSetupDependencies } from '../types';
 import { commonMonitorStateI18, commonStateTranslations } from './translations';
 
 export const MESSAGE = 'message';

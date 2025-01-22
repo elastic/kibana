@@ -6,7 +6,7 @@
  */
 
 import { HashedCache } from '../../../../common/hashed_cache';
-import { DefaultDatasetsContext } from './types';
+import type { DefaultDatasetsContext } from './types';
 
 export const createDefaultContext = (): DefaultDatasetsContext => ({
   cache: new HashedCache(),

@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 
+import type {
+  IconType} from '@elastic/eui';
 import {
   EuiAccordion,
   EuiFlexGroup,
@@ -14,7 +17,6 @@ import {
   EuiIcon,
   EuiTitle,
   EuiText,
-  IconType,
   EuiPanel,
 } from '@elastic/eui';
 

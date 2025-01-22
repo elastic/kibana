@@ -6,28 +6,31 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { JsonObject } from '@kbn/utility-types';
-import { LogColumn, LogEntry, LogEntryCursor } from '../../../../common/log_entry';
-import {
+import type { JsonObject } from '@kbn/utility-types';
+import type { LogColumn, LogEntry, LogEntryCursor } from '../../../../common/log_entry';
+import type {
   LogViewColumnConfiguration,
-  logViewFieldColumnConfigurationRT,
   LogViewReference,
-  ResolvedLogView,
+  ResolvedLogView} from '../../../../common/log_views';
+import {
+  logViewFieldColumnConfigurationRT
 } from '../../../../common/log_views';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import { getBuiltinRules } from '../../../services/log_entries/message/builtin_rules';
-import {
+import type {
   CompiledLogMessageFormattingRule,
-  compileFormattingRules,
   Fields,
-  Highlights,
+  Highlights} from '../../../services/log_entries/message/message';
+import {
+  compileFormattingRules
 } from '../../../services/log_entries/message/message';
 import type { LogsSharedPluginRequestHandlerContext } from '../../../types';
-import { LogsSharedBackendLibs } from '../../logs_shared_types';
-import {
+import type { LogsSharedBackendLibs } from '../../logs_shared_types';
+import type {
   CompositeDatasetKey,
+  LogEntryDatasetBucket} from './queries/log_entry_datasets';
+import {
   createLogEntryDatasetsQuery,
-  LogEntryDatasetBucket,
   logEntryDatasetsResponseRT,
 } from './queries/log_entry_datasets';
 

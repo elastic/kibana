@@ -9,10 +9,11 @@ import { act, waitFor, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { RuleStateAttributes } from '@kbn/cloud-security-posture-common/schema/rules/v4';
+import type {
+  RuleStateUpdateRequest} from './use_change_csp_rule_state';
 import {
   useChangeCspRuleState,
-  createRulesWithUpdatedState,
-  RuleStateUpdateRequest,
+  createRulesWithUpdatedState
 } from './use_change_csp_rule_state';
 import { CSP_RULES_STATES_QUERY_KEY } from './use_csp_rules_state';
 import { BENCHMARK_INTEGRATION_QUERY_KEY_V2 } from '../benchmarks/use_csp_benchmark_integrations';

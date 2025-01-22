@@ -9,11 +9,11 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiText, EuiLink, EuiEmptyPrompt, EuiSwitch, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { HelpCommands } from './help_commands';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 import { fetchProjectAPIKey } from '../../../state/monitor_management/api';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 import { ApiKeyBtn } from './api_key_btn';
 import { useEnablement } from '../../../hooks';
 

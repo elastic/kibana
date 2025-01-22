@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import { ALL_VALUE, DeleteSLOInstancesParams } from '@kbn/slo-schema';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { DeleteSLOInstancesParams } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import {
   SLO_DESTINATION_INDEX_PATTERN,
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,

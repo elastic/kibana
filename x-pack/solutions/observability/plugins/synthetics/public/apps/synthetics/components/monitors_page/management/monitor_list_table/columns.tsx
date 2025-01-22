@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiButtonIcon } from '@elastic/eui';
+import type { EuiBasicTableColumn} from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -26,12 +27,13 @@ import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enabl
 import * as labels from './labels';
 import { MonitorDetailsLink } from './monitor_details_link';
 
-import {
-  ConfigKey,
+import type {
   EncryptedSyntheticsSavedMonitor,
   OverviewStatusState,
   ServiceLocations,
-  SyntheticsMonitorSchedule,
+  SyntheticsMonitorSchedule} from '../../../../../../../common/runtime_types';
+import {
+  ConfigKey
 } from '../../../../../../../common/runtime_types';
 
 import { MonitorTypeBadge } from '../../../common/components/monitor_type_badge';

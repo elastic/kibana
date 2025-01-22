@@ -6,10 +6,10 @@
  */
 
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-browser/src';
-import { CoreSetup } from '@kbn/core-lifecycle-browser';
+import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import { createStatusOverviewPanelAction } from './create_stats_overview_panel_action';
 import { createMonitorsOverviewPanelAction } from './create_monitors_overview_panel_action';
-import { ClientPluginsSetup, ClientPluginsStart } from '../../../plugin';
+import type { ClientPluginsSetup, ClientPluginsStart } from '../../../plugin';
 
 export const registerSyntheticsUiActions = async (
   core: CoreSetup<ClientPluginsStart, unknown>,

@@ -13,7 +13,7 @@ import { EuiButton, EuiCode, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import { KibanaDeps } from '../../../../../../../common/types';
+import type { KibanaDeps } from '../../../../../../../common/types';
 import { DataPanel } from '../../../../../shared/data_panel/data_panel';
 import { CrawlerLogic } from '../crawler_logic';
 

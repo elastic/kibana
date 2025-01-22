@@ -31,10 +31,11 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
-import { ClientPluginsStart } from '../../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../../plugin';
 import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
-import { LocationsStatus, useStatusByLocation } from '../../../../hooks/use_status_by_location';
+import type { LocationsStatus} from '../../../../hooks/use_status_by_location';
+import { useStatusByLocation } from '../../../../hooks/use_status_by_location';
 import {
   getMonitorAction,
   selectMonitorUpsertStatus,
@@ -49,9 +50,10 @@ import { MonitorLocationSelect } from '../../../common/components/monitor_locati
 import { MonitorStatus } from '../../../common/components/monitor_status';
 import { useOverviewStatus } from '../../hooks/use_overview_status';
 import { MonitorEnabled } from '../../management/monitor_list_table/monitor_enabled';
-import { ConfigKey, EncryptedSyntheticsMonitor, OverviewStatusMetaData } from '../types';
+import type { EncryptedSyntheticsMonitor, OverviewStatusMetaData } from '../types';
+import { ConfigKey } from '../types';
 import { ActionsPopover } from './actions_popover';
-import { FlyoutParamProps } from './types';
+import type { FlyoutParamProps } from './types';
 
 interface Props {
   configId: string;

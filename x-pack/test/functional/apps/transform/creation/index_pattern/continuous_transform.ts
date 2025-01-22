@@ -9,12 +9,13 @@ import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import {
+import type {
   GroupByEntry,
-  isLatestTransformTestData,
-  isPivotTransformTestData,
   LatestTransformTestData,
-  PivotTransformTestData,
+  PivotTransformTestData} from '../../helpers';
+import {
+  isLatestTransformTestData,
+  isPivotTransformTestData
 } from '../../helpers';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {

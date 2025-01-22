@@ -9,13 +9,13 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { ESQLEditor } from './esql_editor';
 import type { ESQLEditorProps } from './types';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { coreMock } from '@kbn/core/server/mocks';
 
 describe('ESQLEditor', () => {

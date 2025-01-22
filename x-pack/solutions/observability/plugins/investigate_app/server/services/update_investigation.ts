@@ -6,10 +6,10 @@
  */
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
-import { UpdateInvestigationParams, UpdateInvestigationResponse } from '@kbn/investigation-shared';
+import type { UpdateInvestigationParams, UpdateInvestigationResponse } from '@kbn/investigation-shared';
 import { isEqual, omit } from 'lodash';
-import { InvestigationRepository } from './investigation_repository';
-import { Investigation } from '../models/investigation';
+import type { InvestigationRepository } from './investigation_repository';
+import type { Investigation } from '../models/investigation';
 
 export async function updateInvestigation(
   investigationId: string,

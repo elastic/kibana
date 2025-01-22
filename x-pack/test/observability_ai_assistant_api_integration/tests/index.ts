@@ -7,7 +7,7 @@
 import globby from 'globby';
 import path from 'path';
 import { createUsersAndRoles } from '../common/users/create_users_and_roles';
-import { FtrProviderContext } from '../common/ftr_provider_context';
+import type { FtrProviderContext } from '../common/ftr_provider_context';
 
 const cwd = path.join(__dirname);
 

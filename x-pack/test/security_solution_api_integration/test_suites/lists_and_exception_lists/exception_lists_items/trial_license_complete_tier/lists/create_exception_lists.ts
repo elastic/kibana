@@ -14,7 +14,7 @@ import {
   getCreateExceptionListMinimalSchemaMock,
   getCreateExceptionListMinimalSchemaMockWithoutId,
 } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 import { deleteAllExceptions, removeExceptionListServerGeneratedProperties } from '../../../utils';
 

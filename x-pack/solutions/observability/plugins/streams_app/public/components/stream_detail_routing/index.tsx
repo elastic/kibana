@@ -4,9 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type {
+  DropResult,
+  DragStart,
+  EuiBreadcrumb} from '@elastic/eui';
 import {
   EuiBadge,
-  DropResult,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -26,26 +29,25 @@ import {
   EuiText,
   useEuiTheme,
   euiDragDropReorder,
-  DragStart,
-  EuiBreadcrumbs,
-  EuiBreadcrumb,
+  EuiBreadcrumbs
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import React, { useCallback, useEffect } from 'react';
-import {
+import type {
   StreamChild,
   ReadStreamDefinition,
-  WiredStreamConfigDefinition,
+  WiredStreamConfigDefinition} from '@kbn/streams-schema';
+import {
   isRoot,
   isDescendantOf,
 } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
-import { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
-import { DraggableProvided } from '@hello-pangea/dnd';
-import { IToasts, Toast } from '@kbn/core/public';
+import type { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
+import type { DraggableProvided } from '@hello-pangea/dnd';
+import type { IToasts, Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';

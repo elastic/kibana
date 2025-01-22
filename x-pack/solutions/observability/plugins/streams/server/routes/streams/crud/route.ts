@@ -7,13 +7,14 @@
 
 import { z } from '@kbn/zod';
 import { badRequest, internal, notFound } from '@hapi/boom';
-import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import {
-  streamConfigDefinitionSchema,
+import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import type {
   ListStreamsResponse,
   FieldDefinitionConfig,
   ReadStreamDefinition,
-  WiredReadStreamDefinition,
+  WiredReadStreamDefinition} from '@kbn/streams-schema';
+import {
+  streamConfigDefinitionSchema,
   isWiredStream,
 } from '@kbn/streams-schema';
 import { isResponseError } from '@kbn/es-errors';

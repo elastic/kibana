@@ -11,13 +11,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { selectDynamicSettings } from '../state/selectors';
 import { getDynamicSettings, setDynamicSettings } from '../state/actions/dynamic_settings';
-import { DynamicSettings } from '../../../common/runtime_types';
+import type { DynamicSettings } from '../../../common/runtime_types';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { IndicesForm } from '../components/settings/indices_form';
-import {
-  CertificateExpirationForm,
+import type {
   OnFieldChangeType,
-  PartialSettings,
+  PartialSettings} from '../components/settings/certificate_form';
+import {
+  CertificateExpirationForm
 } from '../components/settings/certificate_form';
 import * as Translations from './translations';
 import {

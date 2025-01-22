@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { ALERT_START } from '@kbn/rule-data-utils';
-import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
+import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
   AlertsTableConfigurationRegistry,
   RenderCustomActionsRowArgs,
 } from '@kbn/triggers-actions-ui-plugin/public/types';

@@ -8,7 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionShapeFunction, Shape } from '../types';
+import type { ExpressionShapeFunction} from '../types';
+import { Shape } from '../types';
 import { SVG } from '../constants';
 import { getAvailableShapes } from '../lib';
 

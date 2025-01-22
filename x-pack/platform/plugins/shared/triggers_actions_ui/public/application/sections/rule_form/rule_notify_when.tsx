@@ -8,6 +8,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type {
+  EuiSuperSelectOption} from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,14 +19,13 @@ import {
   EuiSelect,
   EuiText,
   EuiSpacer,
-  EuiSuperSelect,
-  EuiSuperSelectOption,
+  EuiSuperSelect
 } from '@elastic/eui';
 import { some, filter, map } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { InitialRule } from './rule_reducer';
+import type { InitialRule } from './rule_reducer';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
-import { RuleNotifyWhenType } from '../../../types';
+import type { RuleNotifyWhenType } from '../../../types';
 
 const DEFAULT_NOTIFY_WHEN_VALUE: RuleNotifyWhenType = 'onActionGroupChange';
 

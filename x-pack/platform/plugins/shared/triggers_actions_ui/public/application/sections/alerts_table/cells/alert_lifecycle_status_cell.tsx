@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { AlertStatus, ALERT_FLAPPING, ALERT_STATUS } from '@kbn/rule-data-utils';
+import type { AlertStatus} from '@kbn/rule-data-utils';
+import { ALERT_FLAPPING, ALERT_STATUS } from '@kbn/rule-data-utils';
 import React, { memo } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { AlertLifecycleStatusBadge } from '../../../components/alert_lifecycle_status_badge';
-import { CellComponentProps } from '../types';
+import type { CellComponentProps } from '../types';
 import { DefaultCell } from './default_cell';
 import { useAlertMutedState } from '../hooks/alert_mute/use_alert_muted_state';
 

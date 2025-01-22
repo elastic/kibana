@@ -6,12 +6,12 @@
  */
 
 import { EuiFlexGroup, EuiSkeletonRectangle } from '@elastic/eui';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
 import { SloStateBadge, SloStatusBadge } from '../../../../components/slo/slo_badges';
 import { SloActiveAlertsBadge } from '../../../../components/slo/slo_badges/slo_active_alerts_badge';
-import { BurnRateRuleParams } from '../../../../typings';
+import type { BurnRateRuleParams } from '../../../../typings';
 import { SloTagsList } from '../common/slo_tags_list';
 import { SloIndicatorTypeBadge } from './slo_indicator_type_badge';
 import { SloRemoteBadge } from './slo_remote_badge';

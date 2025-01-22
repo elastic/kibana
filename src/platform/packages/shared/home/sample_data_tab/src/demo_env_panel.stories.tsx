@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { ComponentMeta } from '@storybook/react';
+import type { ComponentMeta } from '@storybook/react';
 
 import { DemoEnvironmentPanel } from './demo_env_panel';
 

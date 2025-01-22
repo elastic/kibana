@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 
 import {} from '../..';
 
+import type {
+  ConnectorSyncJobDocument} from '@kbn/search-connectors';
 import {
   CONNECTORS_JOBS_INDEX,
-  ConnectorSyncJobDocument,
   fetchConnectorByIndexName,
   SyncStatus,
 } from '@kbn/search-connectors';
 
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
-import { ElasticsearchIndexWithIngestion } from '../../../common/types/indices';
+import type { ElasticsearchIndexWithIngestion } from '../../../common/types/indices';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
 

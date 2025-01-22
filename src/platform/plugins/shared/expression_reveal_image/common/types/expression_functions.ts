@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   ExpressionFunctionDefinition,
   ExpressionValueRender,
 } from '@kbn/expressions-plugin/common';

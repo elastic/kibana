@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { CSSProperties, RefCallback, useCallback, useEffect, useRef, useState } from 'react';
+import type { CSSProperties, RefCallback} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useResizeObserver } from '@elastic/eui';
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
-import { NodeDimensions, ProgressRendererConfig } from '../../../common/types';
-import { ShapeRef, SvgConfig, SvgTextAttributes } from '../reusable/types';
+import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import type { NodeDimensions, ProgressRendererConfig } from '../../../common/types';
+import type { ShapeRef, SvgConfig, SvgTextAttributes } from '../reusable/types';
 import { getShapeContentElement } from '../reusable/shape_factory';
 import { getTextAttributes, getViewBox } from './utils';
 import { getId } from '../../../common/lib';

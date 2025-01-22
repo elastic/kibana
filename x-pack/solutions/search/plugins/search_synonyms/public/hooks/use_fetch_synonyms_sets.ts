@@ -7,7 +7,8 @@
 
 import { useQuery } from '@tanstack/react-query';
 import type { SynonymsGetSynonymsSetsSynonymsSetItem } from '@elastic/elasticsearch/lib/api/types';
-import { DEFAULT_PAGE_VALUE, Page, Paginate } from '../../common/pagination';
+import type { Page, Paginate } from '../../common/pagination';
+import { DEFAULT_PAGE_VALUE } from '../../common/pagination';
 import { APIRoutes } from '../../common/api_routes';
 import { useKibana } from './use_kibana';
 

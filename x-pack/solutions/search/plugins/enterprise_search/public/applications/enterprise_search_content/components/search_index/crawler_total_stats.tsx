@@ -9,8 +9,9 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
+import type {
+  EuiStatProps} from '@elastic/eui';
 import {
-  EuiStatProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,

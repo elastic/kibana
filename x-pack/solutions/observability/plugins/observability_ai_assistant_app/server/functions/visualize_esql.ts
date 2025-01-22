@@ -6,9 +6,10 @@
  */
 import { VisualizeESQLUserIntention } from '@kbn/observability-ai-assistant-plugin/common/functions/visualize_esql';
 import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
+import type {
+  VisualizeQueryResponsev2} from '../../common/functions/visualize_esql';
 import {
-  visualizeESQLFunction,
-  VisualizeQueryResponsev2,
+  visualizeESQLFunction
 } from '../../common/functions/visualize_esql';
 import type { FunctionRegistrationParameters } from '.';
 import { runAndValidateEsqlQuery } from './query/validate_esql_query';

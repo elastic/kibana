@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   PromptResponse,
   PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
-import { AIConnector } from '../../../../connectorland/connector_selector';
-import { Conversation } from '../../../../..';
-import { ConversationsBulkActions } from '../../../api';
+import type { AIConnector } from '../../../../connectorland/connector_selector';
+import type { Conversation } from '../../../../..';
+import type { ConversationsBulkActions } from '../../../api';
 
 export interface SystemPromptSettingsProps {
   connectors: AIConnector[] | undefined;

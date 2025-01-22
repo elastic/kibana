@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { LogsExplorerPluginStart } from '@kbn/logs-explorer-plugin/public';
-import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
-import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
-import { ServerlessPluginStart } from '@kbn/serverless/public';
-import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { LogsExplorerPluginStart } from '@kbn/logs-explorer-plugin/public';
+import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
+import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   AppMountParameters,
   ScopedHistory,
@@ -18,15 +18,15 @@ import type {
   I18nStart,
   ThemeServiceStart,
 } from '@kbn/core/public';
-import { LogsSharedClientStartExports } from '@kbn/logs-shared-plugin/public';
-import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
-import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import { LensPublicStart } from '@kbn/lens-plugin/public';
-import { SLOPublicStart } from '@kbn/slo-plugin/public';
-import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
+import type { LogsSharedClientStartExports } from '@kbn/logs-shared-plugin/public';
+import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { SLOPublicStart } from '@kbn/slo-plugin/public';
+import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { ObservabilityLogsExplorerLocationState } from '@kbn/deeplinks-observability/locators';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

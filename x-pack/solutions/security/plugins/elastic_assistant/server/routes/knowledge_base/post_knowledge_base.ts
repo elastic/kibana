@@ -5,17 +5,18 @@
  * 2.0.
  */
 
+import type {
+  CreateKnowledgeBaseResponse} from '@kbn/elastic-assistant-common';
 import {
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
   CreateKnowledgeBaseRequestParams,
-  CreateKnowledgeBaseResponse,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
   CreateKnowledgeBaseRequestQuery,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { IKibanaResponse } from '@kbn/core/server';
+import type { IKibanaResponse } from '@kbn/core/server';
 import { buildResponse } from '../../lib/build_response';
-import { ElasticAssistantPluginRouter } from '../../types';
+import type { ElasticAssistantPluginRouter } from '../../types';
 
 // Since we're awaiting on ELSER setup, this could take a bit (especially if ML needs to autoscale)
 // Consider just returning if attempt was successful, and switch to client polling

@@ -17,11 +17,12 @@ import {
   ensureDefaultElserDeployedMock,
 } from './package_installer.test.mocks';
 
+import type {
+  ProductName} from '@kbn/product-doc-common';
 import {
   getArtifactName,
   getProductDocIndexName,
-  DocumentationProduct,
-  ProductName,
+  DocumentationProduct
 } from '@kbn/product-doc-common';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';

@@ -7,29 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { SyntheticEvent } from 'react';
+import type { SyntheticEvent } from 'react';
+import React from 'react';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type {
+  HasParentApi,
+  HasType} from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
   apiHasParentApi,
   apiHasType,
   apiHasUniqueId,
   apiIsOfType,
-  HasParentApi,
   type EmbeddableApiContext,
-  type HasUniqueId,
-  HasType,
+  type HasUniqueId
 } from '@kbn/presentation-publishing';
+import type {
+  FrequentCompatibilityChangeAction} from '@kbn/ui-actions-plugin/public';
 import {
   IncompatibleActionError,
-  FrequentCompatibilityChangeAction,
   type Action,
 } from '@kbn/ui-actions-plugin/public';
-import { PresentationContainer, apiIsPresentationContainer } from '@kbn/presentation-containers';
+import type { PresentationContainer} from '@kbn/presentation-containers';
+import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { CONTROL_GROUP_TYPE } from '../../common';
-import { CanClearSelections, isClearableControl } from '../types';
+import type { CanClearSelections} from '../types';
+import { isClearableControl } from '../types';
 
 import { ACTION_CLEAR_CONTROL } from './constants';
 

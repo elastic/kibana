@@ -19,11 +19,12 @@ import type {
   DeprecationRegistryProvider,
   DeprecationsClient,
 } from '@kbn/core-deprecations-server';
-import { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { DeprecationsFactory } from './deprecations_factory';
 import { registerRoutes } from './routes';
-import { config as deprecationConfig, DeprecationConfigType } from './deprecation_config';
+import type { DeprecationConfigType } from './deprecation_config';
+import { config as deprecationConfig } from './deprecation_config';
 import { registerApiDeprecationsInfo, registerConfigDeprecationsInfo } from './deprecations';
 
 /**

@@ -8,7 +8,7 @@
 import Fs from 'fs';
 import Path from 'path';
 
-import { CanvasTemplate } from '../../types';
+import type { CanvasTemplate } from '../../types';
 
 const ext = (name: string) => Path.extname(name);
 const base64 = (name: string) => Fs.readFileSync(Path.resolve(__dirname, 'assets', name), 'base64');

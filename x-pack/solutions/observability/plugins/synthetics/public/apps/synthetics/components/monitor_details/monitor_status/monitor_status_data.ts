@@ -7,16 +7,17 @@
 
 import datemath from '@elastic/datemath';
 import moment from 'moment';
+import type {
+  EuiThemeComputed,
+  EuiThemeColorModeStandard} from '@elastic/eui';
 import {
   tint,
   transparentize,
   VISUALIZATION_COLORS,
-  EuiThemeComputed,
-  EuiThemeColorModeStandard,
   COLOR_MODES_STANDARD,
 } from '@elastic/eui';
 import type { BrushEvent } from '@elastic/charts';
-import { MonitorStatusHeatmapBucket } from '../../../../../../common/runtime_types';
+import type { MonitorStatusHeatmapBucket } from '../../../../../../common/runtime_types';
 
 export const SUCCESS_VIZ_COLOR = VISUALIZATION_COLORS[0];
 export const DANGER_VIZ_COLOR = VISUALIZATION_COLORS[VISUALIZATION_COLORS.length - 1];

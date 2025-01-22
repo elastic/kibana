@@ -13,7 +13,8 @@ import {
   getElasticOutline,
   isValidUrl,
 } from '@kbn/presentation-util-plugin/common';
-import { ExpressionRevealImageFunction, Origin, Position } from '../types';
+import type { ExpressionRevealImageFunction} from '../types';
+import { Origin, Position } from '../types';
 import { BASE64, URL } from '../constants';
 
 const strings = {

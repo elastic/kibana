@@ -6,15 +6,17 @@
  */
 
 import React, { useMemo } from 'react';
-import { FormProvider, SubmitHandler, useForm } from 'react-hook-form';
+import type { SubmitHandler} from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import { EuiCallOut, EuiForm, EuiButton, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ProcessingDefinition, ReadStreamDefinition, getProcessorType } from '@kbn/streams-schema';
+import type { ProcessingDefinition, ReadStreamDefinition} from '@kbn/streams-schema';
+import { getProcessorType } from '@kbn/streams-schema';
 import { isEqual } from 'lodash';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { ProcessorTypeSelector } from './processor_type_selector';
 import { ProcessorFlyoutTemplate } from './processor_flyout_template';
-import { DetectedField, ProcessorDefinition, ProcessorFormState } from '../types';
+import type { DetectedField, ProcessorDefinition, ProcessorFormState } from '../types';
 import { DangerZone } from './danger_zone';
 import { DissectProcessorForm } from './dissect';
 import { GrokProcessorForm } from './grok';

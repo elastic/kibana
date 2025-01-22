@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ConnectorType } from '../../../../../application/connector/types';
-import { ConnectorTypesResponseV1 } from '../../../../../../common/routes/connector/response';
+import type { ConnectorType } from '../../../../../application/connector/types';
+import type { ConnectorTypesResponseV1 } from '../../../../../../common/routes/connector/response';
 
 export const transformListTypesResponse = (
   results: ConnectorType[]

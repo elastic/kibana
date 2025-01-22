@@ -7,7 +7,7 @@
 
 import { jsonRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
-import { Integration } from '../models/integration';
+import type { Integration } from '../models/integration';
 import { integrationRT } from '../types';
 import { sortOrderRT } from './common';
 

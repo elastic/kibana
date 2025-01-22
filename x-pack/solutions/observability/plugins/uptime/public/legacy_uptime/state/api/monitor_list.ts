@@ -7,9 +7,10 @@
 
 import { API_URLS } from '../../../../common/constants';
 import { apiService } from './utils';
-import {
+import type {
   FetchMonitorStatesQueryArgs,
-  MonitorSummariesResult,
+  MonitorSummariesResult} from '../../../../common/runtime_types';
+import {
   MonitorSummariesResultType,
 } from '../../../../common/runtime_types';
 

@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
 import { createResourceInstallerMock } from './mocks';
 import { DefaultSLOInstaller } from './slo_installer';
 

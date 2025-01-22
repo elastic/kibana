@@ -8,7 +8,8 @@ import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { DomainConfig, CustomCrawlType } from '../../../../api/crawler/types';
+import type { DomainConfig} from '../../../../api/crawler/types';
+import { CustomCrawlType } from '../../../../api/crawler/types';
 import { IndexNameLogic } from '../../index_name_logic';
 import { IndexViewLogic } from '../../index_view_logic';
 import { CrawlerLogic } from '../crawler_logic';

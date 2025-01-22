@@ -8,7 +8,7 @@
  */
 
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
-import { WebElementWrapper } from './web_element_wrapper';
+import type { WebElementWrapper } from './web_element_wrapper';
 import type { TimeoutOpt } from '../types';
 import { FtrService } from './ftr_provider_context';
 

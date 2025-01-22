@@ -10,18 +10,20 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { PersistedState } from '@kbn/visualizations-plugin/public';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
-import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
+import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
+import type {
+  ChartSizeEvent} from '@kbn/chart-expressions-common';
 import {
-  ChartSizeEvent,
   extractContainerType,
   extractVisualizationType,
 } from '@kbn/chart-expressions-common';
-import { ExpressionGaugePluginStart } from '../plugin';
-import { EXPRESSION_GAUGE_NAME, GaugeExpressionProps, GaugeShapes } from '../../common';
+import type { ExpressionGaugePluginStart } from '../plugin';
+import type { GaugeExpressionProps} from '../../common';
+import { EXPRESSION_GAUGE_NAME, GaugeShapes } from '../../common';
 import { getFormatService, getPaletteService } from '../services';
 
 interface ExpressionGaugeRendererDependencies {

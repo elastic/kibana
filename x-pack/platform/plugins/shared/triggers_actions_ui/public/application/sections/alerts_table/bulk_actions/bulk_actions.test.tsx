@@ -7,18 +7,19 @@
 import React, { useMemo, useReducer } from 'react';
 import { identity } from 'lodash';
 import { render, screen, within, fireEvent, waitFor } from '@testing-library/react';
-import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { AlertsTable } from '../alerts_table';
-import {
+import type {
   Alerts,
-  AlertsField,
   AlertsTableProps,
   BulkActionsConfig,
   BulkActionsState,
   FetchAlertData,
   InspectQuery,
-  RowSelectionState,
+  RowSelectionState} from '../../../../types';
+import {
+  AlertsField
 } from '../../../../types';
 import { bulkActionsReducer } from './reducer';
 import { createAppMockRenderer } from '../../test_utils';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GridLayoutData, GridPanelData } from '../types';
+import type { GridLayoutData, GridPanelData } from '../types';
 
 export const isGridDataEqual = (a?: GridPanelData, b?: GridPanelData) => {
   return (

@@ -15,10 +15,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo, VFC } from 'react';
+import type { VFC } from 'react';
+import React, { useMemo } from 'react';
 import { useIndicatorsFlyoutContext } from '../../hooks/use_flyout_context';
 import { EMPTY_VALUE } from '../../../../constants/common';
-import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
+import type { Indicator} from '../../../../../common/types/indicator';
+import { RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { unwrapValue } from '../../utils/unwrap_value';
 import { IndicatorEmptyPrompt } from './empty_prompt';
 import { IndicatorBlock } from './block';

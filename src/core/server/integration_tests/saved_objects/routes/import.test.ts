@@ -11,15 +11,16 @@ jest.mock('uuid');
 
 import supertest from 'supertest';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import type { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
 import {
   coreUsageStatsClientMock,
   coreUsageDataServiceMock,
 } from '@kbn/core-usage-data-server-mocks';
+import type {
+  SavedObjectConfig} from '@kbn/core-saved-objects-base-server-internal';
 import {
-  LEGACY_URL_ALIAS_TYPE,
-  SavedObjectConfig,
+  LEGACY_URL_ALIAS_TYPE
 } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsImporter } from '@kbn/core-saved-objects-import-export-server-internal';
 import {

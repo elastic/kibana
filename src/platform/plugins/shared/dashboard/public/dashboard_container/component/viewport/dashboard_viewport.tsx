@@ -14,7 +14,7 @@ import { EuiPortal } from '@elastic/eui';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 
-import {
+import type {
   ControlGroupApi,
   ControlGroupRuntimeState,
   ControlGroupSerializedState,

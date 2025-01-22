@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { Header } from './header';
-import { IVectorLayer } from '../../../../classes/layers/vector_layer';
+import type { IVectorLayer } from '../../../../classes/layers/vector_layer';
 
 const layerMock = {
   getDisplayName: async () => {

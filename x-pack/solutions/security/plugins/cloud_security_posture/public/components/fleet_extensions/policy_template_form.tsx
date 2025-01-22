@@ -27,13 +27,14 @@ import type {
   NewPackagePolicyInput,
   PackagePolicyReplaceDefineStepExtensionComponentProps,
 } from '@kbn/fleet-plugin/public/types';
-import { PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
 import { SubscriptionNotAllowed } from '../subscription_not_allowed';
-import { CspRadioGroupProps, RadioGroup } from './csp_boxed_radio_group';
+import type { CspRadioGroupProps} from './csp_boxed_radio_group';
+import { RadioGroup } from './csp_boxed_radio_group';
 import { assert } from '../../../common/utils/helpers';
 import type { CloudSecurityPolicyTemplate, PostureInput } from '../../../common/types_old';
 import {

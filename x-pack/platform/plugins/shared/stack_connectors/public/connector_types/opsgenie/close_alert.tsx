@@ -6,25 +6,27 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import type {
+  ActionParamsProps} from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  ActionParamsProps,
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import type {
+  RecursivePartial} from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
-  EuiText,
-  RecursivePartial,
+  EuiText
 } from '@elastic/eui';
 import type {
   OpsgenieActionParams,
   OpsgenieCloseAlertParams,
 } from '../../../server/connector_types';
 import * as i18n from './translations';
-import { EditActionCallback } from './types';
+import type { EditActionCallback } from './types';
 import { DisplayMoreOptions } from './display_more_options';
 
 type AdditionalOptionsProps = Pick<

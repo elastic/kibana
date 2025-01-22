@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
+import type { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
 
 export const mockIlmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> = {
   '.ds-packetbeat-8.6.1-2023.02.04-000001': {

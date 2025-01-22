@@ -6,16 +6,17 @@
  */
 
 import { isEmpty, isNil, omitBy } from 'lodash';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { replaceStringWithParams } from '../formatting_utils';
 import { PARAMS_KEYS_TO_SKIP } from '../common';
-import {
+import type {
   BrowserFields,
-  ConfigKey,
   HeartbeatConfig,
   MonitorFields,
   SyntheticsMonitor,
-  TLSFields,
+  TLSFields} from '../../../../common/runtime_types';
+import {
+  ConfigKey
 } from '../../../../common/runtime_types';
 import { publicFormatters } from '.';
 

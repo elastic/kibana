@@ -15,8 +15,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DataViewFilterHandler } from '../types';
-import { DataViewsFilterParams } from '../../../state_machines/data_views';
+import type { DataViewFilterHandler } from '../types';
+import type { DataViewsFilterParams } from '../../../state_machines/data_views';
 import {
   allDataViewTypesLabel,
   logsDataViewTypeLabel,

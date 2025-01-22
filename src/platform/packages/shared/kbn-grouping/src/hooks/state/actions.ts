@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ActionType, GroupOption, UpdateActiveGroups, UpdateGroupOptions } from '../types';
+import type { GroupOption, UpdateActiveGroups, UpdateGroupOptions } from '../types';
+import { ActionType } from '../types';
 
 const updateActiveGroups = ({
   activeGroups,

@@ -50,7 +50,7 @@ import {
   setupFindingsStatsTask,
 } from './tasks/findings_stats_task';
 import { registerCspmUsageCollector } from './lib/telemetry/collectors/register';
-import { CloudSecurityPostureConfig } from './config';
+import type { CloudSecurityPostureConfig } from './config';
 
 export class CspPlugin
   implements

@@ -8,13 +8,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin } from '@kbn/core/public';
+import type { CoreSetup, Plugin } from '@kbn/core/public';
 import { SectionRegistry } from '@kbn/management-settings-section-registry';
 import ReactDOM from 'react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
-import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
+import type { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
 
 const { setup: sectionRegistrySetup, start: sectionRegistryStart } = new SectionRegistry();
 

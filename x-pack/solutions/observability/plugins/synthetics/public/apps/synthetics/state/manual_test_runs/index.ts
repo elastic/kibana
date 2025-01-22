@@ -5,26 +5,29 @@
  * 2.0.
  */
 
-import { createReducer, PayloadAction } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
+import { createReducer } from '@reduxjs/toolkit';
 
-import { WritableDraft } from 'immer/dist/types/types-external';
-import { IHttpFetchError } from '@kbn/core-http-browser';
+import type { WritableDraft } from 'immer/dist/types/types-external';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 
-import { ActionPayload } from '../utils/actions';
-import { TestNowResponse } from '../../../../../common/types';
+import type { ActionPayload } from '../utils/actions';
+import type { TestNowResponse } from '../../../../../common/types';
+import type {
+  TestNowPayload} from './actions';
 import {
   clearTestNowMonitorAction,
   hideTestNowFlyoutAction,
   manualTestMonitorAction,
   manualTestRunUpdateAction,
-  TestNowPayload,
   toggleTestNowFlyoutAction,
 } from './actions';
-import {
+import type {
   MonitorFields,
-  ScheduleUnit,
   ServiceLocationErrors,
-  SyntheticsMonitorSchedule,
+  SyntheticsMonitorSchedule} from '../../../../../common/runtime_types';
+import {
+  ScheduleUnit
 } from '../../../../../common/runtime_types';
 
 export enum TestRunStatus {

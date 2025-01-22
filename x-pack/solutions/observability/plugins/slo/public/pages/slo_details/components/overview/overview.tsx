@@ -9,8 +9,9 @@ import { EuiFlexGrid, EuiPanel, EuiText, useIsWithinBreakpoints } from '@elastic
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
+import type {
+  SLOWithSummaryResponse} from '@kbn/slo-schema';
 import {
-  SLOWithSummaryResponse,
   occurrencesBudgetingMethodSchema,
   querySchema,
   rollingTimeWindowTypeSchema,

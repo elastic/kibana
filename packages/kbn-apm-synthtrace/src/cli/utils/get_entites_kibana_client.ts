@@ -8,7 +8,7 @@
  */
 
 import { EntitiesSynthtraceKibanaClient } from '../../lib/entities/entities_synthtrace_kibana_client';
-import { Logger } from '../../lib/utils/create_logger';
+import type { Logger } from '../../lib/utils/create_logger';
 
 export function getEntitiesKibanaClient({ target, logger }: { target: string; logger: Logger }) {
   const kibanaClient = new EntitiesSynthtraceKibanaClient({

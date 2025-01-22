@@ -6,11 +6,12 @@
  */
 
 import axios from 'axios';
-import {
-  DEFAULT_AAD_CONFIG,
+import type {
   RuleType,
   RuleTypeParams,
-  RuleTypeState,
+  RuleTypeState} from '@kbn/alerting-plugin/server';
+import {
+  DEFAULT_AAD_CONFIG,
   AlertsClientError,
 } from '@kbn/alerting-plugin/server';
 import { schema } from '@kbn/config-schema';

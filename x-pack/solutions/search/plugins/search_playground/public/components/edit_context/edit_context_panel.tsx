@@ -21,7 +21,8 @@ import React from 'react';
 import { useController } from 'react-hook-form';
 import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
-import { ChatForm, ChatFormFields } from '../../types';
+import type { ChatForm} from '../../types';
+import { ChatFormFields } from '../../types';
 import { AnalyticsEvents } from '../../analytics/constants';
 
 export const EditContextPanel: React.FC = () => {

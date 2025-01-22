@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   AIMessage,
   Message,
-  MessageRole,
   UseChatHelpers,
   AnnotationDoc,
-  AnnotationTokens,
+  AnnotationTokens} from '../types';
+import {
+  MessageRole
 } from '../types';
 import { transformAnnotationToDoc } from './transform_annotation_to_doc';
 

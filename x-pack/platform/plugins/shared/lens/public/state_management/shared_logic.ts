@@ -6,13 +6,14 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import { DataViewSpec, DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
-import { AggregateQuery, Query, Filter } from '@kbn/es-query';
-import { FilterManager } from '@kbn/data-plugin/public';
+import type { DataViewSpec} from '@kbn/data-views-plugin/common';
+import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
+import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
+import type { FilterManager } from '@kbn/data-plugin/public';
 import { DOC_TYPE, INDEX_PATTERN_TYPE } from '../../common/constants';
-import { VisualizationState, DatasourceStates } from '.';
-import { LensDocument } from '../persistence';
-import { DatasourceMap, VisualizationMap, Datasource } from '../types';
+import type { VisualizationState, DatasourceStates } from '.';
+import type { LensDocument } from '../persistence';
+import type { DatasourceMap, VisualizationMap, Datasource } from '../types';
 
 // This piece of logic is shared between the main editor code base and the inline editor one within the embeddable
 export function mergeToNewDoc(

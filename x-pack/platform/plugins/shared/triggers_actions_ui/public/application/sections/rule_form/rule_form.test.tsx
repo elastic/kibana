@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiFormLabel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ActionForm } from '../action_connector_form';
 import { AlertConsumers, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { RuleFormConsumerSelection } from './rule_form_consumer_selection';
-import {
+import type {
   ValidationResult,
   Rule,
   RuleType,

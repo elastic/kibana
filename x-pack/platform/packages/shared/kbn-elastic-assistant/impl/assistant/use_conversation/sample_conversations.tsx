@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Conversation } from '../../assistant_context/types';
+import type { Conversation } from '../../assistant_context/types';
 import { WELCOME_CONVERSATION_TITLE } from './translations';
 
 export const WELCOME_CONVERSATION: Conversation = {

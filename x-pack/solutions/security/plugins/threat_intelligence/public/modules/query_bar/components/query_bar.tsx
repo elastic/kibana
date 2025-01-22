@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, VFC } from 'react';
+import type { VFC } from 'react';
+import React, { useEffect } from 'react';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { useSecurityContext } from '../../../hooks/use_security_context';
 

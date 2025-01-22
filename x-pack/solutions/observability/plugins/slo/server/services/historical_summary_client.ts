@@ -5,31 +5,33 @@
  * 2.0.
  */
 
-import { MsearchMultisearchBody } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from '@kbn/core/server';
-import {
-  ALL_VALUE,
+import type { MsearchMultisearchBody } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type {
   BudgetingMethod,
-  calendarAlignedTimeWindowSchema,
   DurationUnit,
   FetchHistoricalSummaryParams,
-  fetchHistoricalSummaryResponseSchema,
+  fetchHistoricalSummaryResponseSchema} from '@kbn/slo-schema';
+import {
+  ALL_VALUE,
+  calendarAlignedTimeWindowSchema,
   occurrencesBudgetingMethodSchema,
   rollingTimeWindowSchema,
   timeslicesBudgetingMethodSchema,
   toMomentUnitOfTime,
 } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import moment from 'moment';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../common/constants';
-import {
+import type {
   DateRange,
   GroupBy,
   HistoricalSummary,
   Objective,
   SLOId,
-  TimeWindow,
+  TimeWindow} from '../domain/models';
+import {
   toCalendarAlignedTimeWindowMomentUnit,
 } from '../domain/models';
 import { computeSLI, computeSummaryStatus, toErrorBudget } from '../domain/services';

@@ -8,10 +8,10 @@
 import { z } from '@kbn/zod';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { errors } from '@elastic/elasticsearch';
-import { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { AuthenticatedUser } from '@kbn/core-security-common';
-import { IndexEntry } from '@kbn/elastic-assistant-common';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
+import type { IndexEntry } from '@kbn/elastic-assistant-common';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 export const isModelAlreadyExistsError = (error: Error) => {
   return (

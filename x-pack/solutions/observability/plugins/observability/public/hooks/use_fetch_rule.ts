@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import {
+import type {
   QueryObserverResult,
   RefetchOptions,
-  RefetchQueryFilters,
+  RefetchQueryFilters} from '@tanstack/react-query';
+import {
   useQuery,
 } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';

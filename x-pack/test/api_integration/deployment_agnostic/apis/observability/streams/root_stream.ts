@@ -6,11 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { WiredStreamConfigDefinition, WiredStreamDefinition } from '@kbn/streams-schema';
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { WiredStreamConfigDefinition, WiredStreamDefinition } from '@kbn/streams-schema';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { disableStreams, enableStreams, putStream } from './helpers/requests';
+import type {
+  StreamsSupertestRepositoryClient} from './helpers/repository_client';
 import {
-  StreamsSupertestRepositoryClient,
   createStreamsRepositoryAdminClient,
 } from './helpers/repository_client';
 

@@ -7,9 +7,10 @@
 
 import React from 'react';
 import { screen } from '@testing-library/react';
+import type {
+  AlertMonitorStatusProps} from './alert_monitor_status';
 import {
   AlertMonitorStatusComponent,
-  AlertMonitorStatusProps,
   hasFilters,
 } from './alert_monitor_status';
 import { render } from '../../../../lib/helper/rtl_helpers';

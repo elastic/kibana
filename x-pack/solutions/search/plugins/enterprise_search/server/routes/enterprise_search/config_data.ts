@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { callEnterpriseSearchConfigAPI } from '../../lib/enterprise_search_config_api';
-import { RouteDependencies } from '../../plugin';
+import type { RouteDependencies } from '../../plugin';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 
 const errorMessage = i18n.translate(

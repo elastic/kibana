@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { initializeTitles, SerializedTitles } from './titles_api';
+import type { SerializedTitles } from './titles_api';
+import { initializeTitles } from './titles_api';
 
 describe('titles api', () => {
   const rawState: SerializedTitles = {

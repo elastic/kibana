@@ -11,14 +11,16 @@ import '../../_mocks_/index_name_logic.mock';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
+import type {
+  CrawlRequestWithDetailsFromServer} from '../../../../api/crawler/types';
 import {
-  CrawlRequestWithDetailsFromServer,
   CrawlerStatus,
   CrawlType,
 } from '../../../../api/crawler/types';
 import { crawlRequestWithDetailsServerToClient } from '../../../../api/crawler/utils';
 
-import { CrawlDetailLogic, CrawlDetailValues } from './crawl_detail_logic';
+import type { CrawlDetailValues } from './crawl_detail_logic';
+import { CrawlDetailLogic } from './crawl_detail_logic';
 
 const DEFAULT_VALUES: CrawlDetailValues = {
   dataLoading: true,

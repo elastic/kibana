@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   Connector,
   ConnectorConfiguration,
   ConnectorDocument,
+  IngestPipelineParams} from '../types/connectors';
+import {
   ConnectorStatus,
-  FilteringValidationState,
-  IngestPipelineParams,
+  FilteringValidationState
 } from '../types/connectors';
 
 export function createConnectorDocument({

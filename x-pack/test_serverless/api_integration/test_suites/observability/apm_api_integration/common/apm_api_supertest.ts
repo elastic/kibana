@@ -6,16 +6,17 @@
  */
 import { format } from 'url';
 import supertest from 'supertest';
-import request from 'superagent';
+import type request from 'superagent';
 import type {
   APIReturnType,
   APIClientRequestParamsOf,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { Config, kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
+import type { Config} from '@kbn/test';
+import { kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
 import type { APIEndpoint } from '@kbn/apm-plugin/server';
 import { formatRequest } from '@kbn/server-route-repository';
 import type { InternalRequestHeader, RoleCredentials } from '../../../../../shared/services';
-import { InheritedFtrProviderContext } from '../../../../services';
+import type { InheritedFtrProviderContext } from '../../../../services';
 
 export function createApmApiClient(st: supertest.Agent) {
   return async <TEndpoint extends APIEndpoint>(

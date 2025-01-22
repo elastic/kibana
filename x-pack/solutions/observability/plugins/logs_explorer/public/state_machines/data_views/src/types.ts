@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DoneInvokeEvent } from 'xstate';
-import { DataViewDescriptor } from '../../../../common/data_views/models/data_view_descriptor';
+import type { DoneInvokeEvent } from 'xstate';
+import type { DataViewDescriptor } from '../../../../common/data_views/models/data_view_descriptor';
 import type { IHashedCache } from '../../../../common/hashed_cache';
-import { SortOrder } from '../../../../common/latest';
+import type { SortOrder } from '../../../../common/latest';
 
 export interface DataViewsSearchParams {
   name?: string;

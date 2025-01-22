@@ -7,26 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, FC, useMemo, useState, useCallback, useRef } from 'react';
+import type { FC} from 'react';
+import React, { memo, useMemo, useState, useCallback, useRef } from 'react';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
-import {
-  Chart,
+import type {
   ElementClickListener,
   BrushEndListener,
-  Heatmap,
   HeatmapBrushEvent,
   HeatmapElementEvent,
   HeatmapSpec,
-  ScaleType,
-  Settings,
-  TooltipType,
   ESFixedIntervalUnit,
   ESCalendarIntervalUnit,
   PartialTheme,
   SettingsProps,
-  Tooltip,
   SeriesIdentifier,
-  TooltipValue,
+  TooltipValue} from '@elastic/charts';
+import {
+  Chart,
+  Heatmap,
+  ScaleType,
+  Settings,
+  TooltipType,
+  Tooltip
 } from '@elastic/charts';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { search } from '@kbn/data-plugin/public';
@@ -40,7 +42,7 @@ import {
   LegendSizeToPixels,
 } from '@kbn/visualizations-plugin/common/constants';
 import { i18n } from '@kbn/i18n';
-import { DatatableColumn } from '@kbn/expressions-plugin/public';
+import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { IconChartHeatmap } from '@kbn/chart-icons';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';

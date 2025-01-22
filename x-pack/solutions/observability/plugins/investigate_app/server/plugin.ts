@@ -9,7 +9,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { Logger } from '@kbn/logging';
 import { mapValues } from 'lodash';
 import { registerServerRoutes } from './routes/register_routes';
-import { InvestigateAppRouteHandlerResources } from './routes/types';
+import type { InvestigateAppRouteHandlerResources } from './routes/types';
 import type {
   ConfigSchema,
   InvestigateAppServerSetup,
@@ -18,7 +18,7 @@ import type {
   InvestigateAppStartDependencies,
 } from './types';
 import { investigation } from './saved_objects/investigation';
-import { InvestigateAppConfig } from './config';
+import type { InvestigateAppConfig } from './config';
 import { registerUsageCollector } from './lib/collectors/register';
 
 export class InvestigateAppPlugin

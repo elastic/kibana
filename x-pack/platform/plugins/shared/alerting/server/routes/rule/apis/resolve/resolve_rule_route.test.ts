@@ -12,8 +12,8 @@ import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
-import { ResolvedRule } from '../../../../application/rule/methods/resolve/types';
-import { ResolvedSanitizedRule, RuleAction, RuleSystemAction } from '../../../../../common';
+import type { ResolvedRule } from '../../../../application/rule/methods/resolve/types';
+import type { ResolvedSanitizedRule, RuleAction, RuleSystemAction } from '../../../../../common';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 
 const rulesClient = rulesClientMock.create();

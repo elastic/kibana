@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { FeaturesPluginStart } from '@kbn/features-plugin/server';
-import { Space } from '@kbn/spaces-plugin/server';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
+import type { Space } from '@kbn/spaces-plugin/server';
 import { AlertingAuthorization } from './authorization/alerting_authorization';
-import { RuleTypeRegistry } from './types';
+import type { RuleTypeRegistry } from './types';
 
 export interface AlertingAuthorizationClientFactoryOpts {
   ruleTypeRegistry: RuleTypeRegistry;

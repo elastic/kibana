@@ -11,7 +11,8 @@ import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser'
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { useInspectorContext, FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
-import { AutoAbortedAPMClient, callApmApi } from '../services/rest/create_call_apm_api';
+import type { AutoAbortedAPMClient} from '../services/rest/create_call_apm_api';
+import { callApmApi } from '../services/rest/create_call_apm_api';
 
 export interface FetcherResult<Data> {
   data?: Data;

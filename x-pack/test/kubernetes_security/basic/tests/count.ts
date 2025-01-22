@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { COUNT_ROUTE, CURRENT_API_VERSION } from '@kbn/kubernetes-security-plugin/common/constants';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const MOCK_INDEX = 'kubernetes-test-index';
 const ORCHESTRATOR_NAMESPACE_PROPERTY = 'orchestrator.namespace';

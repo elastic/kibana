@@ -13,13 +13,14 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { css } from '@emotion/react';
 import { EuiFormRow, htmlIdGenerator, EuiButtonGroup, EuiIconTip, useEuiTheme } from '@elastic/eui';
 import { PalettePicker } from './palette_picker';
-import {
+import type {
   PaletteOutput,
   PaletteRegistry,
   DataBounds,
-  getFallbackDataBounds,
   CustomPaletteParams,
-  RequiredPaletteParamTypes,
+  RequiredPaletteParamTypes} from '../../palettes';
+import {
+  getFallbackDataBounds
 } from '../../palettes';
 
 import { toColorRanges } from './utils';

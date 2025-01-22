@@ -11,9 +11,10 @@ import { EuiCommentList } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { omit } from 'lodash';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
-import {
+import type {
   ChatActionClickPayload,
-  ChatState,
+  ChatState} from '@kbn/observability-ai-assistant-plugin/public';
+import {
   type Feedback,
   type ObservabilityAIAssistantChatService,
   type TelemetryEventTypeWithPayload,

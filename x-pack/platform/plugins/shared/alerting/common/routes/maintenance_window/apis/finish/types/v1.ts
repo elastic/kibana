@@ -6,8 +6,8 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { MaintenanceWindowResponseV1 } from '../../../response';
-import { finishParamsSchemaV1 } from '..';
+import type { MaintenanceWindowResponseV1 } from '../../../response';
+import type { finishParamsSchemaV1 } from '..';
 
 export type FinishMaintenanceWindowRequestParams = TypeOf<typeof finishParamsSchemaV1>;
 

@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { EuiPopover, EuiExpression } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
-import {
+import type {
   ESTermSourceDescriptor,
   JoinSourceDescriptor,
 } from '../../../../../../common/descriptor_types';

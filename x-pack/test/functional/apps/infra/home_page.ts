@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { KUBERNETES_TOUR_STORAGE_KEY } from '@kbn/infra-plugin/public/pages/metrics/inventory_view/components/kubernetes_tour';
-import { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import {
   INVENTORY_PATH,
   DATE_WITH_DOCKER_DATA_FROM,

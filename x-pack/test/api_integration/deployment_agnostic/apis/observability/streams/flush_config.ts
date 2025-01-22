@@ -6,12 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
+import type { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
-import { ReadStreamDefinition, WiredReadStreamDefinition } from '@kbn/streams-schema';
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { ReadStreamDefinition, WiredReadStreamDefinition } from '@kbn/streams-schema';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type {
+  StreamsSupertestRepositoryClient} from './helpers/repository_client';
 import {
-  StreamsSupertestRepositoryClient,
   createStreamsRepositoryAdminClient,
 } from './helpers/repository_client';
 import { disableStreams, enableStreams, indexDocument } from './helpers/requests';

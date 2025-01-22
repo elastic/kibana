@@ -29,9 +29,10 @@ import { KibanaLogic } from '../../../shared/kibana';
 import { mappingsWithPropsApiLogic } from '../../api/mappings/mappings_logic';
 import { searchDocumentsApiLogic } from '../../api/search_documents/search_documents_api_logic';
 
+import type {
+  AccessControlSelectorOption} from './components/access_control_index_selector/access_control_index_selector';
 import {
-  AccessControlIndexSelector,
-  AccessControlSelectorOption,
+  AccessControlIndexSelector
 } from './components/access_control_index_selector/access_control_index_selector';
 import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';

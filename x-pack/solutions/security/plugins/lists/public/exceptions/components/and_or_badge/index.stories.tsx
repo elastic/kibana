@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { Story } from '@storybook/react';
+import type { Story } from '@storybook/react';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
-import { AndOrBadge, AndOrBadgeProps } from '.';
+import type { AndOrBadgeProps } from '.';
+import { AndOrBadge } from '.';
 
 const sampleText =
   'Doggo ipsum i am bekom fat snoot wow such tempt waggy wags floofs, ruff heckin good boys and girls mlem.  Ruff heckin good boys and girls mlem stop it fren borkf borking doggo very hand that feed shibe, you are doing me the shock big ol heck smol borking doggo with a long snoot for pats heckin good boys. You are doing me the shock smol borking doggo with a long snoot for pats wow very biscit, length boy. Doggo ipsum i am bekom fat snoot wow such tempt waggy wags floofs, ruff heckin good boys and girls mlem.  Ruff heckin good boys and girls mlem stop it fren borkf borking doggo very hand that feed shibe, you are doing me the shock big ol heck smol borking doggo with a long snoot for pats heckin good boys.';

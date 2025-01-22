@@ -23,7 +23,7 @@ import {
 } from '@kbn/response-ops-rule-form';
 import { pick } from 'lodash';
 import React from 'react';
-import { RuleUpdates } from '../../../types';
+import type { RuleUpdates } from '../../../types';
 import { BASE_ALERTING_API_PATH } from '../../constants';
 import * as i18n from '../translations';
 

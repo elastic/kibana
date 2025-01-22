@@ -9,7 +9,7 @@
 
 import { isEmpty, xor } from 'lodash';
 import fastIsEqual from 'fast-deep-equal';
-import { DashboardPanelMap } from '../../common';
+import type { DashboardPanelMap } from '../../common';
 
 /**
  * Checks whether the panel maps have the same keys, and if they do, whether all of the other keys inside each panel

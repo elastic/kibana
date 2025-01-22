@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext, CoreSetup, Plugin, Logger } from '@kbn/core/server';
+import type { PluginInitializerContext, CoreSetup, Plugin, Logger } from '@kbn/core/server';
 
 import type { GuideId, GuideConfig } from '@kbn/guided-onboarding';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { GUIDED_ONBOARDING_FEATURE } from './feature';
-import { GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart } from './types';
+import type { GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart } from './types';
 import { defineRoutes } from './routes';
 import { guideStateSavedObjects, pluginStateSavedObjects } from './saved_objects';
 import type { GuidesConfig } from '../common';

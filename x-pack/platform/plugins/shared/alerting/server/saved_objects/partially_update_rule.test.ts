@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObjectsClientContract,
-  ISavedObjectsRepository,
+  ISavedObjectsRepository} from '@kbn/core/server';
+import {
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
+import type {
+  PartiallyUpdateableRuleAttributes} from './partially_update_rule';
 import {
-  PartiallyUpdateableRuleAttributes,
   partiallyUpdateRule,
   partiallyUpdateRuleWithEs,
 } from './partially_update_rule';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { RULE_SAVED_OBJECT_TYPE } from '.';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { estypes } from '@elastic/elasticsearch';
-import { RuleExecutionStatuses } from '@kbn/alerting-types';
+import type { estypes } from '@elastic/elasticsearch';
+import type { RuleExecutionStatuses } from '@kbn/alerting-types';
 
 const MockSavedObjectsClientContract = savedObjectsClientMock.create();
 const MockISavedObjectsRepository =

@@ -9,8 +9,8 @@ import React from 'react';
 import { Observable, Subject } from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import { App } from './app';
-import { LensAppProps, LensAppServices } from './types';
-import { LensDocument, SavedObjectIndexStore } from '../persistence';
+import type { LensAppProps, LensAppServices } from './types';
+import type { LensDocument, SavedObjectIndexStore } from '../persistence';
 import {
   visualizationMap,
   datasourceMap,
@@ -30,14 +30,15 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { serverlessMock } from '@kbn/serverless/public/mocks';
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
-import { setState, LensAppState } from '../state_management';
+import type { LensAppState } from '../state_management';
+import { setState } from '../state_management';
 import { coreMock } from '@kbn/core/public/mocks';
-import { LensSerializedState } from '..';
+import type { LensSerializedState } from '..';
 import { createMockedField, createMockedIndexPattern } from '../datasources/form_based/mocks';
 import { faker } from '@faker-js/faker';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { VisualizeEditorContext } from '../types';
+import type { VisualizeEditorContext } from '../types';
 import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
 
 jest.mock('../persistence/saved_objects_utils/check_for_duplicate_title', () => ({

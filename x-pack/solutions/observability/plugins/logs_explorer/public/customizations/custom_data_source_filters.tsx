@@ -6,10 +6,10 @@
  */
 import React from 'react';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
-import { Query } from '@kbn/es-query';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useControlPanels } from '../hooks/use_control_panels';
-import { LogsExplorerControllerStateService } from '../state_machines/logs_explorer_controller';
+import type { LogsExplorerControllerStateService } from '../state_machines/logs_explorer_controller';
 
 const DATA_SOURCE_FILTERS_CUSTOMIZATION_ID = 'dataSourceFiltersCustomization';
 

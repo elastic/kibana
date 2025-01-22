@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLAstNode, ESQLCommandOption } from '../types';
+import type { ESQLAstNode, ESQLCommandOption } from '../types';
 
 export const isOptionNode = (node: ESQLAstNode): node is ESQLCommandOption => {
   return !!node && typeof node === 'object' && !Array.isArray(node) && node.type === 'option';

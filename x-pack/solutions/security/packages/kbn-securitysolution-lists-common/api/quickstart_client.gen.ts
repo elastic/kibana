@@ -15,7 +15,7 @@
  */
 
 import type { KbnClient } from '@kbn/test';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { catchAxiosErrorFormatAndThrow } from '@kbn/securitysolution-utils';
 

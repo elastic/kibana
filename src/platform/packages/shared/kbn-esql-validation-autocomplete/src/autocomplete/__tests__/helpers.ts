@@ -19,13 +19,14 @@ import * as autocomplete from '../autocomplete';
 import type { ESQLCallbacks } from '../../shared/types';
 import type { EditorContext, SuggestionRawDefinition } from '../types';
 import { TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND, getSafeInsertText } from '../factories';
-import { ESQLRealField } from '../../validation/types';
-import {
+import type { ESQLRealField } from '../../validation/types';
+import type {
   FieldType,
-  fieldTypes,
   FunctionParameterType,
   FunctionReturnType,
-  SupportedDataType,
+  SupportedDataType} from '../../definitions/types';
+import {
+  fieldTypes
 } from '../../definitions/types';
 import { joinIndices } from '../../__tests__/helpers';
 

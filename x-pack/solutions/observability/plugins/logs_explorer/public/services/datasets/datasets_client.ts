@@ -5,25 +5,26 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 
 import { API_VERSIONS } from '@kbn/fleet-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { Dataset, Integration } from '../../../common/datasets';
-import {
-  DATASETS_URL,
+import type {
   FindDatasetsRequestQuery,
-  findDatasetsRequestQueryRT,
-  findDatasetsResponseRT,
   FindDatasetValue,
   FindIntegrationsRequestQuery,
+  FindIntegrationsValue} from '../../../common/latest';
+import {
+  DATASETS_URL,
+  findDatasetsRequestQueryRT,
+  findDatasetsResponseRT,
   findIntegrationsRequestQueryRT,
   findIntegrationsResponseRT,
-  FindIntegrationsValue,
   INTEGRATIONS_URL,
 } from '../../../common/latest';
 import { FindDatasetsError, FindIntegrationsError } from '../../../common/datasets/errors';
-import { IDatasetsClient } from './types';
+import type { IDatasetsClient } from './types';
 
 const defaultIntegrationsParams: Pick<FindIntegrationsRequestQuery, 'dataStreamType'> = {
   dataStreamType: 'logs',

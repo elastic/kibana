@@ -8,10 +8,11 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useEffect, useState } from 'react';
 import useEvent from 'react-use/lib/useEvent';
-import { ObservabilityOnboardingAppServices } from '../../..';
+import type { ObservabilityOnboardingAppServices } from '../../..';
+import type {
+  OnboardingFlowEventContext} from '../../../../common/telemetry_events';
 import {
-  OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT,
-  OnboardingFlowEventContext,
+  OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT
 } from '../../../../common/telemetry_events';
 
 interface Props {

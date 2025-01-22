@@ -8,7 +8,7 @@ import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { debounce } from 'lodash';
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 
-import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import type { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import type { FieldBrowserProps } from './types';
 import { FieldBrowserModal } from './field_browser_modal';
 import { filterBrowserFieldsByFieldName, filterSelectedBrowserFields } from './helpers';

@@ -7,9 +7,9 @@
 
 import { compact, partition, uniqBy } from 'lodash';
 import { v4 } from 'uuid';
-import { AdHocInstruction, Instruction } from '../../../common/types';
+import type { AdHocInstruction, Instruction } from '../../../common/types';
 import { withTokenBudget } from '../../../common/utils/with_token_budget';
-import { InstructionOrCallback } from '../types';
+import type { InstructionOrCallback } from '../types';
 
 export const USER_INSTRUCTIONS_HEADER = `## User instructions
           

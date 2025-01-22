@@ -6,7 +6,7 @@
  */
 
 import { resolve } from 'path';
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { generateConfig } from './config.base';
 import { services } from '../services';
 import { pageObjects } from '../page_objects';

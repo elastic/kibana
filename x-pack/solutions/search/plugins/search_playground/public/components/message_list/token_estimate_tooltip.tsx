@@ -22,7 +22,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useFormContext } from 'react-hook-form';
 import { docLinks } from '../../../common/doc_links';
 import { useLLMsModels } from '../../hooks/use_llms_models';
-import { ChatForm, ChatFormFields } from '../../types';
+import type { ChatForm} from '../../types';
+import { ChatFormFields } from '../../types';
 
 interface TokenEstimateTooltipProps {
   context: number;

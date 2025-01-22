@@ -14,11 +14,12 @@ import { MonitorStatusHeader } from './monitor_status_header';
 import { MonitorStatusCellTooltip } from './monitor_status_cell_tooltip';
 import { MonitorStatusLegend } from './monitor_status_legend';
 import { getMonitorStatusChartTheme } from './monitor_status_chart_theme';
+import type {
+  MonitorStatusPanelProps} from './monitor_status_data';
 import {
   getXAxisLabelFormatter,
   getColorBands,
-  getBrushData,
-  MonitorStatusPanelProps,
+  getBrushData
 } from './monitor_status_data';
 import { useMonitorStatusData } from './use_monitor_status_data';
 

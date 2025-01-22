@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Boom, badRequest, conflict, forbidden, notFound } from '@hapi/boom';
+import type { Boom} from '@hapi/boom';
+import { badRequest, conflict, forbidden, notFound } from '@hapi/boom';
 import { SLOError, SecurityException, SLOIdConflict, SLONotFound } from './errors';
 
 function handleSLOError(error: SLOError): Boom {

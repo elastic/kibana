@@ -9,10 +9,11 @@
 
 import { BehaviorSubject } from 'rxjs';
 
+import type {
+  RequestHandlerContext,
+  ServiceStatus} from '@kbn/core/server';
 import {
   type MetricsServiceSetup,
-  RequestHandlerContext,
-  ServiceStatus,
   ServiceStatusLevels,
 } from '@kbn/core/server';
 import {

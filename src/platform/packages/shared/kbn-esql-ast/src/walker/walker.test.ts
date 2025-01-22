@@ -8,7 +8,7 @@
  */
 
 import { parse } from '../parser';
-import {
+import type {
   ESQLColumn,
   ESQLCommand,
   ESQLCommandMode,

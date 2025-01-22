@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
-import {
+import type { Client } from '@elastic/elasticsearch';
+import type {
   CreateKnowledgeBaseResponse,
+  GetKnowledgeBaseIndicesResponse} from '@kbn/elastic-assistant-common';
+import {
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL,
-  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
-  GetKnowledgeBaseIndicesResponse,
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL
 } from '@kbn/elastic-assistant-common';
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
-import { MachineLearningProvider } from '../../../../../../functional/services/ml';
+import type { MachineLearningProvider } from '../../../../../../functional/services/ml';
 import { SUPPORTED_TRAINED_MODELS } from '../../../../../../functional/services/ml/api';
 
 import { routeWithNamespace } from '../../../../../../common/utils/security_solution';

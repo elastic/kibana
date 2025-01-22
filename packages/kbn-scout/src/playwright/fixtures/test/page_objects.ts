@@ -8,7 +8,7 @@
  */
 
 import { test as base } from '@playwright/test';
-import { ScoutTestFixtures, ScoutWorkerFixtures } from '../types';
+import type { ScoutTestFixtures, ScoutWorkerFixtures } from '../types';
 import { createCorePageObjects } from '../../page_objects';
 
 /**

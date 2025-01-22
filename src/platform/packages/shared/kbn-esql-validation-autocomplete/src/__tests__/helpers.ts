@@ -8,9 +8,9 @@
  */
 
 import { camelCase } from 'lodash';
-import { ESQLRealField, JoinIndexAutocompleteItem } from '../validation/types';
+import type { ESQLRealField, JoinIndexAutocompleteItem } from '../validation/types';
 import { fieldTypes } from '../definitions/types';
-import { ESQLCallbacks } from '../shared/types';
+import type { ESQLCallbacks } from '../shared/types';
 
 export const fields: ESQLRealField[] = [
   ...fieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),

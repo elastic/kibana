@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { investigationSchema, statusSchema } from '@kbn/investigation-shared';
+import type { z } from '@kbn/zod';
+import type { investigationSchema, statusSchema } from '@kbn/investigation-shared';
 
 export type Investigation = z.infer<typeof investigationSchema>;
 export type InvestigationStatus = z.infer<typeof statusSchema>;

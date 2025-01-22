@@ -9,7 +9,7 @@ import { badRequest, internal } from '@hapi/boom';
 import { z } from '@kbn/zod';
 import { SecurityException } from '../../../lib/streams/errors';
 import { createServerRoute } from '../../create_server_route';
-import { DisableStreamsResponse, EnableStreamsResponse } from '../../../lib/streams/client';
+import type { DisableStreamsResponse, EnableStreamsResponse } from '../../../lib/streams/client';
 
 export const enableStreamsRoute = createServerRoute({
   endpoint: 'POST /api/streams/_enable',

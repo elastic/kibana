@@ -9,12 +9,13 @@ import { LogicMounter } from '../../../__mocks__/kea_logic';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { Status } from '../../../../../common/types/api';
-import { EnterpriseSearchApplicationDetails } from '../../../../../common/types/search_applications';
+import type { EnterpriseSearchApplicationDetails } from '../../../../../common/types/search_applications';
 
 import { FetchSearchApplicationApiLogic } from '../../api/search_applications/fetch_search_application_api_logic';
 
+import type {
+  SearchApplicationIndicesFlyoutValues} from './search_application_indices_flyout_logic';
 import {
-  SearchApplicationIndicesFlyoutValues,
   SearchApplicationIndicesFlyoutLogic,
 } from './search_application_indices_flyout_logic';
 

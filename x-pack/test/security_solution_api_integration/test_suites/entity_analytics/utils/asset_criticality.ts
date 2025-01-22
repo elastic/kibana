@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import SuperTest from 'supertest';
+import type SuperTest from 'supertest';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -27,7 +27,7 @@ import type {
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import querystring from 'querystring';
-import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
+import type { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { routeWithNamespace, waitFor } from '../../../../common/utils/security_solution';
 
 export const getAssetCriticalityIndex = (namespace?: string) =>

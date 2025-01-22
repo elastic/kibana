@@ -15,7 +15,7 @@ import type { LensPluginStartDependencies } from '../../../plugin';
 import { createMockStartDependencies } from '../../../editor_frame_service/mocks';
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
 import type { EditConfigPanelProps } from './types';
-import { TypedLensSerializedState } from '../../../react_embeddable/types';
+import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 
 jest.mock('@kbn/esql-utils', () => {
   return {

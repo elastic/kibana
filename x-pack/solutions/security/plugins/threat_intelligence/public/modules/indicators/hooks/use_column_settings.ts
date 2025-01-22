@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiDataGridColumn, EuiDataGridSorting } from '@elastic/eui';
+import type { EuiDataGridColumn, EuiDataGridSorting } from '@elastic/eui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import negate from 'lodash/negate';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';

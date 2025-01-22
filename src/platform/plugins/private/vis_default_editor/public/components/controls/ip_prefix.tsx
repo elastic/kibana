@@ -7,21 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ChangeEvent, useCallback } from 'react';
+import type { ChangeEvent} from 'react';
+import React, { useCallback } from 'react';
 
+import type {
+  EuiFieldNumberProps,
+  EuiSwitchEvent,
+  EuiSwitchProps} from '@elastic/eui';
 import {
   EuiFormRow,
   EuiFieldNumber,
-  EuiFieldNumberProps,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSwitch,
-  EuiSwitchEvent,
-  EuiSwitchProps,
+  EuiSwitch
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AggParamEditorProps } from '../agg_param_props';
+import type { AggParamEditorProps } from '../agg_param_props';
 import { useValidation } from './utils';
 
 export interface IpPrefix {

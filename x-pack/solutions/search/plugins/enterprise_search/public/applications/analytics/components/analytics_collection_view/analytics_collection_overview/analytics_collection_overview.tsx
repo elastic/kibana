@@ -13,7 +13,7 @@ import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { AnalyticsCollection } from '../../../../../../common/types/analytics';
+import type { AnalyticsCollection } from '../../../../../../common/types/analytics';
 import { FilterBy, getFormulaByFilter } from '../../../utils/get_formula_by_filter';
 
 import { EnterpriseSearchAnalyticsPageTemplate } from '../../layout/page_template';

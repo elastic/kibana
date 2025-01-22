@@ -6,7 +6,7 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/public';
-import { DatasetQualityConfig } from '../common/plugin_config';
+import type { DatasetQualityConfig } from '../common/plugin_config';
 import { DatasetQualityPlugin } from './plugin';
 
 export type { DatasetQualityPluginSetup, DatasetQualityPluginStart } from './types';

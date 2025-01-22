@@ -17,7 +17,8 @@ import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 import { configServiceMock } from '@kbn/config-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { DeprecationsService, DeprecationsSetupDeps } from './deprecations_service';
+import type { DeprecationsSetupDeps } from './deprecations_service';
+import { DeprecationsService } from './deprecations_service';
 
 describe('DeprecationsService', () => {
   let coreContext: ReturnType<typeof mockCoreContext.create>;

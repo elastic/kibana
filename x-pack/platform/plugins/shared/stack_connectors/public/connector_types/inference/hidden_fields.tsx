@@ -8,7 +8,7 @@
 import React from 'react';
 import { HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { ConfigEntryView } from '../../../common/dynamic_config/types';
+import type { ConfigEntryView } from '../../../common/dynamic_config/types';
 import { getNonEmptyValidator } from './helpers';
 
 export const getProviderSecretsHiddenField = (

@@ -7,7 +7,8 @@
 
 import React, { useMemo } from 'react';
 import { niceTimeFormatter } from '@elastic/charts';
-import { Theme, LEGACY_LIGHT_THEME, LEGACY_DARK_THEME } from '@elastic/charts';
+import type { Theme} from '@elastic/charts';
+import { LEGACY_LIGHT_THEME, LEGACY_DARK_THEME } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingChart, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';

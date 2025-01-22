@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useKibana } from './use_kibana';
 import { investigationKeys } from './query_key_factory';

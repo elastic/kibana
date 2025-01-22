@@ -18,7 +18,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -26,14 +26,17 @@ import semverValid from 'semver/functions/valid';
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
 import { LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
+import type {
+  AzureOptions} from './get_azure_credentials_form_options';
 import {
-  AzureOptions,
   getAzureCredentialsFormManualOptions,
 } from './get_azure_credentials_form_options';
-import { AzureCredentialsType } from '../../../../common/types_old';
+import type { AzureCredentialsType } from '../../../../common/types_old';
 import { useAzureCredentialsForm } from './hooks';
-import { findVariableDef, getPosturePolicy, NewPackagePolicyPostureInput } from '../utils';
-import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
+import type { NewPackagePolicyPostureInput } from '../utils';
+import { findVariableDef, getPosturePolicy } from '../utils';
+import type { CspRadioOption} from '../csp_boxed_radio_group';
+import { RadioGroup } from '../csp_boxed_radio_group';
 import { CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS } from '../../test_subjects';
 import { AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ } from '../../test_subjects';
 

@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import { Message } from '@kbn/observability-ai-assistant-plugin/common';
+import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { useConversationKey } from '../hooks/use_conversation_key';

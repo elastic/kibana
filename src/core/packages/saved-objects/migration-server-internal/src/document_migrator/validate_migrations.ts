@@ -16,7 +16,7 @@ import type {
   SavedObjectsModelVersionMap,
 } from '@kbn/core-saved-objects-server';
 import { assertValidModelVersion } from '@kbn/core-saved-objects-base-server-internal';
-import {
+import type {
   SavedObjectsModelChange,
   SavedObjectsModelMappingsAdditionChange,
 } from '@kbn/core-saved-objects-server';

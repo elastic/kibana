@@ -10,13 +10,13 @@ import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { once } from 'lodash';
 import pRetry from 'p-retry';
-import { ObservabilityAIAssistantScreenContextRequest } from '../../common/types';
+import type { ObservabilityAIAssistantScreenContextRequest } from '../../common/types';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 import { ChatFunctionClient } from './chat_function_client';
 import { ObservabilityAIAssistantClient } from './client';
 import { KnowledgeBaseService } from './knowledge_base_service';
 import type { RegistrationCallback, RespondFunctionResources } from './types';
-import { ObservabilityAIAssistantConfig } from '../config';
+import type { ObservabilityAIAssistantConfig } from '../config';
 import { setupConversationAndKbIndexAssets } from './setup_conversation_and_kb_index_assets';
 
 function getResourceName(resource: string) {

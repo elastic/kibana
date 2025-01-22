@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MonitorOverviewState } from '../../state';
+import type { MonitorOverviewState } from '../../state';
 import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../common/constants/synthetics/client_defaults';
 import { CLIENT_DEFAULTS } from '../../../../../common/constants';
 import { parseAbsoluteDate } from './parse_absolute_date';

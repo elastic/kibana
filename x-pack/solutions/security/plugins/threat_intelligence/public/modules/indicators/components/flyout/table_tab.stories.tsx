@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
-import { CoreStart } from '@kbn/core/public';
+import type { Story } from '@storybook/react';
+import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { mockIndicatorsFiltersContext } from '../../../../mocks/mock_indicators_filters_context';
 import { mockUiSettingsService } from '../../../../mocks/mock_kibana_ui_settings_service';
 import { mockKibanaTimelinesService } from '../../../../mocks/mock_kibana_timelines_service';
-import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
+import type { Indicator } from '../../../../../common/types/indicator';
+import { generateMockIndicator } from '../../../../../common/types/indicator';
 import { IndicatorsFlyoutTable } from './table_tab';
 import { IndicatorsFiltersContext } from '../../hooks/use_filters_context';
 import { IndicatorsFlyoutContext } from '../../hooks/use_flyout_context';

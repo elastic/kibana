@@ -15,13 +15,13 @@ import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { emptyTitleText } from '@kbn/visualization-ui-components';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { ISearchStart } from '@kbn/data-plugin/public';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { ISearchStart } from '@kbn/data-plugin/public';
 import type { DraggingIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
-import { DateRange } from '../common/types';
+import type { DateRange } from '../common/types';
 import type { LensDocument } from './persistence/saved_object_store';
-import {
+import type {
   Datasource,
   DatasourceMap,
   Visualization,
@@ -29,9 +29,10 @@ import {
   IndexPatternRef,
   DraggedField,
   DragDropOperation,
-  isOperation,
   UserMessage,
-  TriggerEvent,
+  TriggerEvent} from './types';
+import {
+  isOperation,
   isLensBrushEvent,
   isLensMultiFilterEvent,
   isLensFilterEvent,

@@ -10,7 +10,7 @@
 import { get } from 'lodash';
 import { expectType } from 'tsd';
 import { offeringBasedSchema, schema } from '../..';
-import { TypeOf } from './object_type';
+import type { TypeOf } from './object_type';
 
 test('returns value by default', () => {
   const type = schema.object({

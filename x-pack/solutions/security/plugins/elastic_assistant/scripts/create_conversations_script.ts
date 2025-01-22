@@ -9,9 +9,10 @@ import { randomBytes } from 'node:crypto';
 import yargs from 'yargs/yargs';
 import { ToolingLog } from '@kbn/tooling-log';
 import axios from 'axios';
+import type {
+  ConversationCreateProps} from '@kbn/elastic-assistant-common';
 import {
   API_VERSIONS,
-  ConversationCreateProps,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
 } from '@kbn/elastic-assistant-common';
 import pLimit from 'p-limit';

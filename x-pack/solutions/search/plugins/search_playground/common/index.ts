@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Pagination } from './types';
+import type { Pagination } from './types';
 
 export const PLUGIN_ID = 'searchPlayground';
 export const PLUGIN_NAME = i18n.translate('xpack.searchPlayground.plugin.name', {

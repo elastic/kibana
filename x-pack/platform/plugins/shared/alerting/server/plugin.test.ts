@@ -5,24 +5,25 @@
  * 2.0.
  */
 
-import { AlertingPlugin, AlertingServerSetup } from './plugin';
+import type { AlertingServerSetup } from './plugin';
+import { AlertingPlugin } from './plugin';
 import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { coreMock, statusServiceMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { eventLogServiceMock } from '@kbn/event-log-plugin/server/event_log_service.mock';
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { KibanaFeature } from '@kbn/features-plugin/server';
-import { AlertingConfig } from './config';
-import { RuleType } from './types';
+import type { AlertingConfig } from './config';
+import type { RuleType } from './types';
 import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { dataPluginMock as autocompletePluginMock } from '@kbn/unified-search-plugin/server/mocks';
 import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
-import {
+import type {
   DataViewsServerPluginStart,
   PluginSetup as DataPluginSetup,
 } from '@kbn/data-plugin/server';
@@ -36,7 +37,7 @@ const mockAlertService = alertsServiceMock.create();
 jest.mock('./alerts_service/alerts_service', () => ({
   AlertsService: jest.fn().mockImplementation(() => mockAlertService),
 }));
-import { SharePluginStart } from '@kbn/share-plugin/server';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { generateAlertingConfig } from './test_utils';
 

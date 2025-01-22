@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { DEFINITIONS_ALIAS, TEMPLATE_VERSION } from '../constants';
-import {
+import type {
   EntitySourceDefinition,
   InternalClusterClient,
   StoredEntitySourceDefinition,
 } from '../types';
-import { SourceAs, runESQLQuery } from '../run_esql_query';
+import type { SourceAs} from '../run_esql_query';
+import { runESQLQuery } from '../run_esql_query';
 import { EntityDefinitionConflict } from '../errors/entity_definition_conflict';
 import { readTypeDefinitionById } from './type_definition';
 import { UnknownEntityType } from '../errors/unknown_entity_type';

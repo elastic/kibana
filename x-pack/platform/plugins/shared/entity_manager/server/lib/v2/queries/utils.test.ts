@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntitySourceDefinition } from '../types';
+import type { EntitySourceDefinition } from '../types';
 import { mergeEntitiesList } from './utils';
 
 describe('mergeEntitiesList', () => {

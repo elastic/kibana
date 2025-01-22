@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { NamedExoticComponent } from 'react';
-import { BlockListFlyoutProps, BlockListFormProps, SelectedDataView } from '../types';
-import { SecuritySolutionPluginContext } from '..';
+import type { NamedExoticComponent } from 'react';
+import React from 'react';
+import type { BlockListFlyoutProps, BlockListFormProps, SelectedDataView } from '../types';
+import type { SecuritySolutionPluginContext } from '..';
 
 export const getSecuritySolutionContextMock = (): SecuritySolutionPluginContext => ({
   getFiltersGlobalComponent:

@@ -11,7 +11,7 @@ import {
   DEFAULT_ROWS_PER_PAGE,
   LOG_LEVEL_FIELD,
 } from '../../../../common/constants';
-import { DefaultLogsExplorerControllerState } from './types';
+import type { DefaultLogsExplorerControllerState } from './types';
 import { DEFAULT_ALL_SELECTION } from './default_all_selection';
 
 export const DEFAULT_CONTEXT: DefaultLogsExplorerControllerState = {

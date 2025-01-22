@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const ENTERPRISE_SEARCH_USER = 'enterprise_search';
 const ENTERPRISE_SEARCH_PASSWORD = 'changeme';
+import type {
+  IEngine} from './app_search_client';
 import {
   createEngine,
   createMetaEngine,
   indexData,
   waitForIndexedDocs,
-  destroyEngine,
-  IEngine,
+  destroyEngine
 } from './app_search_client';
 
 export interface IUser {

@@ -13,7 +13,7 @@ import { KbnSearchError } from '../../report_search_error';
 import { errors } from '@elastic/elasticsearch';
 import indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
 import xContentParseException from '../../../../common/search/test_data/x_content_parse_exception.json';
-import { SearchStrategyDependencies } from '../../types';
+import type { SearchStrategyDependencies } from '../../types';
 import { esqlAsyncSearchStrategyProvider } from './esql_async_search_strategy';
 import { getMockSearchConfig } from '../../../../config.mock';
 

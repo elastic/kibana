@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataViewDescriptor } from '../../../../common/data_views/models/data_view_descriptor';
-import { ReloadDatasets } from '../../../hooks/use_datasets';
+import type { DataViewDescriptor } from '../../../../common/data_views/models/data_view_descriptor';
+import type { ReloadDatasets } from '../../../hooks/use_datasets';
 import { errorLabel, noDataRetryLabel } from '../constants';
 import type { Dataset, Integration } from '../../../../common/datasets';
 import { DatasetSkeleton } from './datasets_skeleton';

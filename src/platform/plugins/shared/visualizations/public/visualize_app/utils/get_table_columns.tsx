@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiBetaBadge, EuiButton, EuiEmptyPrompt, EuiIcon, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { VisualizationListItem } from '../..';
+import type { VisualizationListItem } from '../..';
 
 const getBadge = (item: VisualizationListItem) => {
   if (item.stage === 'beta') {

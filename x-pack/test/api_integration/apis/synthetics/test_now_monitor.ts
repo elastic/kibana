@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
+import type { MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 import { LOCAL_LOCATION } from './get_filters';

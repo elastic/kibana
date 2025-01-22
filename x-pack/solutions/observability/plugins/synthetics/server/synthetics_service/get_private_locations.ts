@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObject,
-  SavedObjectsClientContract,
+  SavedObjectsClientContract} from '@kbn/core/server';
+import {
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import { uniqBy } from 'lodash';
@@ -16,7 +17,7 @@ import {
   legacyPrivateLocationsSavedObjectName,
   privateLocationSavedObjectName,
 } from '../../common/saved_objects/private_locations';
-import {
+import type {
   PrivateLocationAttributes,
   SyntheticsPrivateLocationsAttributes,
 } from '../runtime_types/private_locations';

@@ -6,13 +6,14 @@
  */
 
 // eslint-disable-next-line max-classes-per-file
-import {
-  EMPTY,
+import type {
   MonoTypeOperatorFunction,
   Observable,
   Operator,
-  Subscriber,
-  TeardownLogic,
+  TeardownLogic} from 'rxjs';
+import {
+  EMPTY,
+  Subscriber
 } from 'rxjs';
 
 /**

@@ -11,7 +11,7 @@ import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { DataViewSpec, SavedQuery } from '@kbn/data-plugin/common';
-import { SavedObjectReference } from '@kbn/core-saved-objects-common';
+import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type { DateRange } from '../types';
 
 export const LENS_APP_LOCATOR = 'LENS_APP_LOCATOR';

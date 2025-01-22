@@ -6,19 +6,20 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import type {
+  EuiTabbedContentTab} from '@elastic/eui';
 import {
   type EuiDataGridColumn,
   EuiDescriptionList,
   EuiPanel,
-  EuiTabbedContentTab,
   EuiTitle,
 } from '@elastic/eui';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ScrollableFlyoutTabbedContent, AlertFieldsTable } from '@kbn/alerts-ui-shared';
-import { RegisterFormatter } from '../cells/render_cell_value';
-import { AlertsTableFlyoutBaseProps, AlertTableFlyoutComponent } from '../../../..';
+import type { RegisterFormatter } from '../cells/render_cell_value';
+import type { AlertsTableFlyoutBaseProps, AlertTableFlyoutComponent } from '../../../..';
 
 const FlyoutHeader: AlertTableFlyoutComponent = ({ alert }: AlertsTableFlyoutBaseProps) => {
   const name = alert[ALERT_RULE_NAME];

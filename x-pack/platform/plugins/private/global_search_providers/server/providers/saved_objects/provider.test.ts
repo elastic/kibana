@@ -8,14 +8,15 @@
 import { EMPTY } from 'rxjs';
 import { toArray } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
-import {
+import type {
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
-  SavedObjectsType,
+  SavedObjectsType} from '@kbn/core/server';
+import {
   SavedObjectTypeRegistry,
 } from '@kbn/core/server';
 import { globalSearchPluginMock } from '@kbn/global-search-plugin/server/mocks';
-import {
+import type {
   GlobalSearchResultProvider,
   GlobalSearchProviderFindOptions,
 } from '@kbn/global-search-plugin/server';

@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { WiredReadStreamDefinition } from '@kbn/streams-schema';
+import type { WiredReadStreamDefinition } from '@kbn/streams-schema';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { RedirectTo } from '../redirect_to';
 import { StreamDetailRouting } from '../stream_detail_routing';

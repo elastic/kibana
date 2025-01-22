@@ -9,12 +9,12 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { getAttackDiscovery } from '../get_attack_discovery/get_attack_discovery';
 import { updateAttackDiscovery } from './update_attack_discovery';
-import {
+import type {
   AttackDiscoveryResponse,
   AttackDiscoveryStatus,
   AttackDiscoveryUpdateProps,
 } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/core-security-common';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 jest.mock('../get_attack_discovery/get_attack_discovery');
 const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
 const mockLogger = loggerMock.create();

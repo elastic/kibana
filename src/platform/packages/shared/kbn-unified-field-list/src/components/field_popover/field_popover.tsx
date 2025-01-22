@@ -8,11 +8,12 @@
  */
 
 import React from 'react';
+import type {
+  EuiPopoverProps} from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
-  EuiPopoverProps,
   EuiPopoverTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';

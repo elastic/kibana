@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { resetSLOResponseSchema } from '@kbn/slo-schema';
 import {
   SLO_DESTINATION_INDEX_PATTERN,
@@ -20,9 +20,9 @@ import {
 import { getSLOPipelineTemplate } from '../assets/ingest_templates/slo_pipeline_template';
 import { getSLOSummaryPipelineTemplate } from '../assets/ingest_templates/slo_summary_pipeline_template';
 import { retryTransientEsErrors } from '../utils/retry';
-import { SLORepository } from './slo_repository';
+import type { SLORepository } from './slo_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
-import { TransformManager } from './transform_manager';
+import type { TransformManager } from './transform_manager';
 import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_expected_indicator_source_index_privileges';
 
 export class ResetSLO {

@@ -11,7 +11,7 @@ import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
 import { getDefaultAlertFlyout } from './default_alerts_flyout';
-import { AlertsTableFlyoutBaseProps } from '../../../..';
+import type { AlertsTableFlyoutBaseProps } from '../../../..';
 
 const columns = [
   {

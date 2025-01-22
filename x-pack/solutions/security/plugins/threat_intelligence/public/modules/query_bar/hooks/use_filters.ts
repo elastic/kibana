@@ -6,9 +6,10 @@
  */
 
 import { useContext } from 'react';
+import type {
+  IndicatorsFiltersContextValue} from '../../indicators/hooks/use_filters_context';
 import {
-  IndicatorsFiltersContext,
-  IndicatorsFiltersContextValue,
+  IndicatorsFiltersContext
 } from '../../indicators/hooks/use_filters_context';
 
 export type UseFiltersValue = IndicatorsFiltersContextValue;

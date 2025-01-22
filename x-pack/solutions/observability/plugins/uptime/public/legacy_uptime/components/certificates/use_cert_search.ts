@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux';
 import { useContext } from 'react';
 import { createEsParams, useEsSearch } from '@kbn/observability-shared-plugin/public';
 
-import { CertResult, GetCertsParams, Ping } from '../../../../common/runtime_types';
+import type { CertResult, GetCertsParams, Ping } from '../../../../common/runtime_types';
 
 import { selectDynamicSettings } from '../../state/selectors';
 import {

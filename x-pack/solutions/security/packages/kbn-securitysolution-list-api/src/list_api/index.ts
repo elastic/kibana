@@ -9,7 +9,7 @@ import { chain, fromEither, map, tryCatch } from 'fp-ts/lib/TaskEither';
 import { flow } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { validateEither } from '@kbn/securitysolution-io-ts-utils';
-import {
+import type {
   AcknowledgeSchema,
   DeleteListSchemaEncoded,
   ExportListItemQuerySchemaEncoded,
@@ -20,6 +20,8 @@ import {
   ListItemIndexExistSchema,
   ListSchema,
   ReadListSchema,
+  FoundListsBySizeSchema} from '@kbn/securitysolution-io-ts-list-types';
+import {
   acknowledgeSchema,
   deleteListSchema,
   readListSchema,
@@ -30,8 +32,7 @@ import {
   importListItemSchema,
   listItemIndexExistSchema,
   listSchema,
-  foundListsBySizeSchema,
-  FoundListsBySizeSchema,
+  foundListsBySizeSchema
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   LIST_INDEX,
@@ -42,7 +43,7 @@ import {
 } from '@kbn/securitysolution-list-constants';
 import { toError, toPromise } from '../fp_utils';
 
-import {
+import type {
   ApiParams,
   DeleteListParams,
   ExportListParams,

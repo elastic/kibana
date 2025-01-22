@@ -9,7 +9,7 @@
 
 import { useEffect } from 'react';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { DiscoverSavedSearchContainer } from '../state_management/discover_saved_search_container';
+import type { DiscoverSavedSearchContainer } from '../state_management/discover_saved_search_container';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 
 /**

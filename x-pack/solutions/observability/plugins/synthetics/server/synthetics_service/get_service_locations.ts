@@ -7,12 +7,13 @@
 
 import axios from 'axios';
 import { pick } from 'lodash';
-import { SyntheticsServerSetup } from '../types';
-import {
+import type { SyntheticsServerSetup } from '../types';
+import type {
   ManifestLocation,
   PublicLocation,
   PublicLocations,
-  ThrottlingOptions,
+  ThrottlingOptions} from '../../common/runtime_types';
+import {
   BandwidthLimitKey,
   LocationStatus,
 } from '../../common/runtime_types';

@@ -14,10 +14,11 @@ import { EuiButton, EuiFlexItem, EuiLink, EuiSpacer, EuiText } from '@elastic/eu
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type {
+  LanguageDefinition,
+  LanguageDefinitionSnippetArguments} from '@kbn/search-api-panels';
 import {
   SelectClientPanel,
-  LanguageDefinition,
-  LanguageDefinitionSnippetArguments,
   LanguageClientPanel,
   InstallClientPanel,
   OverviewPanel,
@@ -26,10 +27,10 @@ import {
   CloudDetailsPanel,
 } from '@kbn/search-api-panels';
 
-import { ApiKey } from '@kbn/security-plugin-types-common';
+import type { ApiKey } from '@kbn/security-plugin-types-common';
 
 import { PLUGIN_ID } from '../../../../common/constants';
-import { KibanaDeps } from '../../../../common/types';
+import type { KibanaDeps } from '../../../../common/types';
 
 import { icons } from '../../../assets/client_libraries';
 import { docLinks } from '../doc_links';

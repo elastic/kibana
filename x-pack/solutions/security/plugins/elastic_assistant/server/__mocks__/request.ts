@@ -14,11 +14,13 @@ import {
 import type {
   DefendInsightsGetRequestQuery,
   DefendInsightsPostRequestBody,
-} from '@kbn/elastic-assistant-common';
-import {
+
   AttackDiscoveryPostRequestBody,
   ConversationCreateProps,
   ConversationUpdateProps,
+  PerformKnowledgeBaseEntryBulkActionRequestBody,
+  PostEvaluateRequestBodyInput} from '@kbn/elastic-assistant-common';
+import {
   DEFEND_INSIGHTS,
   DEFEND_INSIGHTS_BY_ID,
   ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
@@ -35,9 +37,7 @@ import {
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
-  ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
-  PerformKnowledgeBaseEntryBulkActionRequestBody,
-  PostEvaluateRequestBodyInput,
+  ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND
 } from '@kbn/elastic-assistant-common';
 import {
   getAppendConversationMessagesSchemaMock,
@@ -45,11 +45,11 @@ import {
   getUpdateConversationSchemaMock,
 } from './conversations_schema.mock';
 import { getCreateKnowledgeBaseEntrySchemaMock } from './knowledge_base_entry_schema.mock';
-import {
+import type {
   PromptCreateProps,
   PromptUpdateProps,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
-import {
+import type {
   AnonymizationFieldCreateProps,
   AnonymizationFieldUpdateProps,
 } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';

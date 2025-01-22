@@ -26,12 +26,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useState } from 'react';
+import type {
+  Callbacks} from '@kbn/custom-integrations';
 import {
   ConnectedCustomIntegrationsButton,
   ConnectedCustomIntegrationsForm,
   useConsumerCustomIntegrations,
-  CustomIntegrationsProvider,
-  Callbacks,
+  CustomIntegrationsProvider
 } from '@kbn/custom-integrations';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useWizard } from '.';

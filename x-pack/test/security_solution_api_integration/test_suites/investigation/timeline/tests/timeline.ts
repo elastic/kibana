@@ -6,10 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { SavedTimeline, TimelineTypeEnum } from '@kbn/security-solution-plugin/common/api/timeline';
+import type { SavedTimeline} from '@kbn/security-solution-plugin/common/api/timeline';
+import { TimelineTypeEnum } from '@kbn/security-solution-plugin/common/api/timeline';
 import { TIMELINE_URL, TIMELINES_URL } from '@kbn/security-solution-plugin/common/constants';
-import TestAgent from 'supertest/lib/agent';
-import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
+import type TestAgent from 'supertest/lib/agent';
+import type { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 import { createBasicTimeline, createBasicTimelineTemplate } from '../../utils/timelines';
 
 export default function ({ getService }: FtrProviderContextWithSpaces) {

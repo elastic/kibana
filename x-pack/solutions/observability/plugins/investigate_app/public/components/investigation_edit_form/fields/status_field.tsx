@@ -7,10 +7,10 @@
 
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { InvestigationResponse } from '@kbn/investigation-shared';
+import type { InvestigationResponse } from '@kbn/investigation-shared';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { InvestigationForm } from '../investigation_edit_form';
+import type { InvestigationForm } from '../investigation_edit_form';
 
 const I18N_STATUS_LABEL = i18n.translate(
   'xpack.investigateApp.investigationEditForm.span.statusLabel',

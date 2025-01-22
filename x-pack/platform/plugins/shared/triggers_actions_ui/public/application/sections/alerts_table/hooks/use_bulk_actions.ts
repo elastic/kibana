@@ -5,24 +5,26 @@
  * 2.0.
  */
 import { useCallback, useContext, useEffect, useMemo } from 'react';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ALERT_CASE_IDS, isSiemRuleType } from '@kbn/rule-data-utils';
 import { AlertsTableContext } from '../contexts/alerts_table_context';
-import {
+import type {
   AlertsTableConfigurationRegistry,
   BulkActionsConfig,
   BulkActionsPanelConfig,
   BulkActionsState,
-  BulkActionsVerbs,
   BulkActionsReducerAction,
-  UseBulkActionsRegistry,
-} from '../../../../types';
+  UseBulkActionsRegistry} from '../../../../types';
 import {
-  getLeadingControlColumn as getBulkActionsLeadingControlColumn,
-  GetLeadingControlColumn,
+  BulkActionsVerbs
+} from '../../../../types';
+import type {
+  GetLeadingControlColumn} from '../bulk_actions/get_leading_control_column';
+import {
+  getLeadingControlColumn as getBulkActionsLeadingControlColumn
 } from '../bulk_actions/get_leading_control_column';
-import { CasesService } from '../types';
+import type { CasesService } from '../types';
 import {
   ADD_TO_EXISTING_CASE,
   ADD_TO_NEW_CASE,
@@ -30,7 +32,7 @@ import {
   MARK_AS_UNTRACKED,
   NO_ALERTS_ADDED_TO_CASE,
 } from './translations';
-import { TimelineItem } from '../bulk_actions/components/toolbar';
+import type { TimelineItem } from '../bulk_actions/components/toolbar';
 import { useBulkUntrackAlerts } from './use_bulk_untrack_alerts';
 import { useBulkUntrackAlertsByQuery } from './use_bulk_untrack_alerts_by_query';
 

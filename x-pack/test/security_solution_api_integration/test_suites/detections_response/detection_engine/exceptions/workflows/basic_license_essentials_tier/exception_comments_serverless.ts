@@ -17,9 +17,9 @@ import {
 import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { getUpdateMinimalExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/request/update_exception_list_item_schema.mock';
-import { UpdateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { UpdateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

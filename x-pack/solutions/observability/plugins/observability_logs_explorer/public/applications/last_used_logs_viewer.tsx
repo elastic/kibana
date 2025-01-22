@@ -15,7 +15,7 @@ import {
   OBS_LOGS_EXPLORER_LOGS_VIEWER_KEY,
 } from '@kbn/deeplinks-observability';
 import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 
 export const renderLastUsedLogsViewerRedirect = (
   core: CoreStart,

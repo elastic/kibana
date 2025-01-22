@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClientMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
+import type { ElasticsearchClientMock} from '@kbn/core/server/mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import type { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 import { fetcher } from './fetcher';
 
 let savedObjectClient: ReturnType<typeof savedObjectsRepositoryMock.create>;

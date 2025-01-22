@@ -12,7 +12,7 @@ import { render } from '@testing-library/react';
 import { buildMockDashboardApi } from '../mocks';
 import { InternalDashboardTopNav } from './internal_dashboard_top_nav';
 import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
-import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
+import type { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { DashboardContext } from '../dashboard_api/use_dashboard_api';
 import { dataService, navigationService } from '../services/kibana_services';
 

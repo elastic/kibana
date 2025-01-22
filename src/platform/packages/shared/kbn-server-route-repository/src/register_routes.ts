@@ -14,18 +14,20 @@ import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server
 import { isKibanaResponse } from '@kbn/core-http-server';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
-import {
+import type {
   DefaultRouteCreateOptions,
   RouteParamsRT,
   ServerRoute,
-  ZodParamsObject,
+  ZodParamsObject} from '@kbn/server-route-repository-utils';
+import {
   parseEndpoint,
 } from '@kbn/server-route-repository-utils';
-import { ServerSentEvent } from '@kbn/sse-utils';
+import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import { isZod } from '@kbn/zod';
 import { merge, omit } from 'lodash';
-import { Observable, isObservable } from 'rxjs';
+import type { Observable} from 'rxjs';
+import { isObservable } from 'rxjs';
 import { makeZodValidationObject } from './make_zod_validation_object';
 import { validateAndDecodeParams } from './validate_and_decode_params';
 import { noParamsValidationObject, passThroughValidationObject } from './validation_objects';

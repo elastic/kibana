@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { schema, Type, TypeOf } from '@kbn/config-schema';
+import type { Type, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import type {
   CoreSetup,
   IRouter,
@@ -13,16 +14,17 @@ import type {
   RequestHandlerContext,
   KibanaRequest,
 } from '@kbn/core/server';
+import type {
+  ToolCall} from '@kbn/inference-common';
 import {
   MessageRole,
-  ToolCall,
   ToolChoiceType,
   InferenceTaskEventType,
   isInferenceError,
 } from '@kbn/inference-common';
 import type { ChatCompleteRequestBody } from '../../common/http_apis';
 import { createClient as createInferenceClient } from '../inference_client';
-import { InferenceServerStart, InferenceStartDependencies } from '../types';
+import type { InferenceServerStart, InferenceStartDependencies } from '../types';
 import { observableIntoEventSourceStream } from '../util/observable_into_event_source_stream';
 
 const toolCallSchema: Type<ToolCall[]> = schema.arrayOf(

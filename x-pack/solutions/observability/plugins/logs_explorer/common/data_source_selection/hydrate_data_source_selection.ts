@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AllDatasetSelection } from './all_dataset_selection';
+import type { AllDatasetSelection } from './all_dataset_selection';
 import { DataViewSelection } from './data_view_selection';
 import { SingleDatasetSelection } from './single_dataset_selection';
-import { DataSourceSelectionPlain } from './types';
+import type { DataSourceSelectionPlain } from './types';
 import { UnresolvedDatasetSelection } from './unresolved_dataset_selection';
 
 export const hydrateDataSourceSelection = (

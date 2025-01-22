@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
+import type { Story } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { EuiContextMenu } from '@elastic/eui';
 

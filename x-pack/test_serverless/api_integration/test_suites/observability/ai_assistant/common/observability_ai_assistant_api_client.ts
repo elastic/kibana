@@ -12,11 +12,11 @@ import type {
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { formatRequest } from '@kbn/server-route-repository';
 import supertest from 'supertest';
-import { Subtract } from 'utility-types';
+import type { Subtract } from 'utility-types';
 import { format } from 'url';
-import { Config } from '@kbn/test';
-import { SupertestWithRoleScope } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
-import { InheritedFtrProviderContext } from '../../../../services';
+import type { Config } from '@kbn/test';
+import type { SupertestWithRoleScope } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
+import type { InheritedFtrProviderContext } from '../../../../services';
 import type { InternalRequestHeader, RoleCredentials } from '../../../../../shared/services';
 
 export function getObservabilityAIAssistantApiClient({

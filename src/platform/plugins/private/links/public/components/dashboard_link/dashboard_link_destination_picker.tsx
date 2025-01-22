@@ -13,16 +13,17 @@ import useMount from 'react-use/lib/useMount';
 import useUnmount from 'react-use/lib/useUnmount';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import type {
+  EuiComboBoxOptionOption} from '@elastic/eui';
 import {
   EuiBadge,
   EuiComboBox,
   EuiFlexItem,
   EuiHighlight,
-  EuiFlexGroup,
-  EuiComboBoxOptionOption,
+  EuiFlexGroup
 } from '@elastic/eui';
 
-import { DashboardItem } from '../../types';
+import type { DashboardItem } from '../../types';
 import { DashboardLinkStrings } from './dashboard_link_strings';
 import { fetchDashboard, fetchDashboards } from './dashboard_link_tools';
 

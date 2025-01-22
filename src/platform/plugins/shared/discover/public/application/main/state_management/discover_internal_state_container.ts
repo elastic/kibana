@@ -8,10 +8,11 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import type {
+  ReduxLikeStateContainer} from '@kbn/kibana-utils-plugin/common';
 import {
   createStateContainer,
-  createStateContainerReactHelpers,
-  ReduxLikeStateContainer,
+  createStateContainerReactHelpers
 } from '@kbn/kibana-utils-plugin/common';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { Filter, TimeRange } from '@kbn/es-query';

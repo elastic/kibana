@@ -16,13 +16,13 @@ import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
-import { TriggersAndActionsUiServices } from '../../../application/rules_app';
-import {
+import type { TriggersAndActionsUiServices } from '../../../application/rules_app';
+import type {
   RuleTypeRegistryContract,
   ActionTypeRegistryContract,
   AlertsTableConfigurationRegistryContract,
 } from '../../../types';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 
 export const createStartServicesMock = (): TriggersAndActionsUiServices => {

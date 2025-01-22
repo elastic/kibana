@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import type { ComponentStory } from '@storybook/react';
 
 import { EuiFlexGroup } from '@elastic/eui';
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
@@ -15,7 +15,8 @@ import {
   buildApmAvailabilityIndicator,
   buildApmLatencyIndicator,
 } from '../../../../data/slo/indicator';
-import { SloIndicatorTypeBadge as Component, Props } from './slo_indicator_type_badge';
+import type { Props } from './slo_indicator_type_badge';
+import { SloIndicatorTypeBadge as Component } from './slo_indicator_type_badge';
 import { buildSlo } from '../../../../data/slo/slo';
 
 export default {

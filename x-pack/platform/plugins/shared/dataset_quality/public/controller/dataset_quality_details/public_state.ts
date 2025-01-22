@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { DegradedFieldSortField } from '../../hooks';
+import type { DegradedFieldSortField } from '../../hooks';
+import type {
+  DatasetQualityDetailsControllerContext} from '../../state_machines/dataset_quality_details_controller';
 import {
-  DatasetQualityDetailsControllerContext,
   DEFAULT_CONTEXT,
 } from '../../state_machines/dataset_quality_details_controller';
-import { DatasetQualityDetailsPublicState, DatasetQualityDetailsPublicStateUpdate } from './types';
+import type { DatasetQualityDetailsPublicState, DatasetQualityDetailsPublicStateUpdate } from './types';
 
 export const getPublicStateFromContext = (
   context: DatasetQualityDetailsControllerContext

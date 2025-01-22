@@ -11,7 +11,7 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 
 import { LISTING_LIMIT_SETTING, PER_PAGE_SETTING } from '@kbn/saved-objects-settings';
-import { ProcedureName } from '../../../common';
+import type { ProcedureName } from '../../../common';
 import type { ContentRegistry } from '../../core';
 import { MSearchService } from '../../core/msearch';
 

@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { RequestHandlerContext } from '@kbn/core/server';
+import type { RequestHandlerContext } from '@kbn/core/server';
 import { prefixIndexPatternWithCcs } from '../../../../../../common/ccs_utils';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
@@ -19,7 +19,7 @@ import {
 } from '../../../../../../common/http_api/elasticsearch_settings';
 import { createValidationFunction } from '../../../../../lib/create_route_validation_function';
 import { handleError } from '../../../../../lib/errors';
-import { MonitoringCore, RouteDependencies } from '../../../../../types';
+import type { MonitoringCore, RouteDependencies } from '../../../../../types';
 
 const queryBody = {
   size: 0,

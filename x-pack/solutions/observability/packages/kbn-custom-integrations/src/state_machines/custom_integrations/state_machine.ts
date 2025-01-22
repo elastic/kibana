@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { ActorRefFrom, createMachine, EmittedFrom } from 'xstate';
-import { OmitDeprecatedState } from '@kbn/xstate-utils';
+import type { ActorRefFrom, EmittedFrom } from 'xstate';
+import { createMachine } from 'xstate';
+import type { OmitDeprecatedState } from '@kbn/xstate-utils';
 import { DEFAULT_CONTEXT } from './defaults';
 import { DEFAULT_CONTEXT as DEFAULT_CREATE_CONTEXT } from '../create/defaults';
-import {
+import type {
   CustomIntegrationsContext,
   CustomIntegrationsEvent,
   CustomIntegrationsTypestate,
@@ -17,10 +18,10 @@ import {
   InitialState,
 } from './types';
 import { createCreateCustomIntegrationStateMachine } from '../create/state_machine';
-import { IIntegrationsClient } from '../services/integrations_client';
-import { CustomIntegrationsNotificationChannel } from './notifications';
+import type { IIntegrationsClient } from '../services/integrations_client';
+import type { CustomIntegrationsNotificationChannel } from './notifications';
 import { executeFieldsPipeline, normalizeDatasetNames } from '../create/pipelines/fields';
-import { CreateInitialState } from '../create/types';
+import type { CreateInitialState } from '../create/types';
 
 export const createPureCustomIntegrationsStateMachine = (
   initialContext: DefaultCustomIntegrationsContext = DEFAULT_CONTEXT

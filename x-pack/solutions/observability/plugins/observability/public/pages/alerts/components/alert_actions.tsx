@@ -16,9 +16,9 @@ import {
 
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { AttachmentType } from '@kbn/cases-plugin/common';
-import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { AlertActionsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';

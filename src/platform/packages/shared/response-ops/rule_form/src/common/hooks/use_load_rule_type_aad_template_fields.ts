@@ -8,7 +8,7 @@
  */
 
 import { EcsFlat } from '@elastic/ecs';
-import { ActionVariable } from '@kbn/alerting-types';
+import type { ActionVariable } from '@kbn/alerting-types';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { useQuery } from '@tanstack/react-query';
 import {

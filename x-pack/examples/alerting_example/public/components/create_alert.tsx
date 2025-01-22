@@ -9,7 +9,7 @@ import React, { useState, useCallback } from 'react';
 
 import { EuiIcon, EuiFlexItem, EuiCard, EuiFlexGroup } from '@elastic/eui';
 
-import { AlertingExampleComponentParams } from '../application';
+import type { AlertingExampleComponentParams } from '../application';
 import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
 export const CreateAlert = ({

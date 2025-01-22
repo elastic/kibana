@@ -10,15 +10,15 @@
 import React from 'react';
 import { of } from 'rxjs';
 
-import { estypes } from '@elastic/elasticsearch';
-import { DataViewField } from '@kbn/data-views-plugin/common';
-import { SerializedPanelState } from '@kbn/presentation-containers';
+import type { estypes } from '@elastic/elasticsearch';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { SerializedPanelState } from '@kbn/presentation-containers';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 
 import { dataService, dataViewsService } from '../../../services/kibana_services';
 import { getMockedBuildApi, getMockedControlGroupApi } from '../../mocks/control_mocks';
 import { getRangesliderControlFactory } from './get_range_slider_control_factory';
-import { RangesliderControlState } from './types';
+import type { RangesliderControlState } from './types';
 
 const DEFAULT_TOTAL_RESULTS = 20;
 const DEFAULT_MIN = 0;

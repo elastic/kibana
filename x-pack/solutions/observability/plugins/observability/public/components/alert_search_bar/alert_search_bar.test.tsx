@@ -10,7 +10,7 @@ import { waitFor } from '@testing-library/react';
 import { timefilterServiceMock } from '@kbn/data-plugin/public/query/timefilter/timefilter_service.mock';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
-import { ObservabilityAlertSearchBarProps, Services } from './types';
+import type { ObservabilityAlertSearchBarProps, Services } from './types';
 import { ObservabilityAlertSearchBar } from './alert_search_bar';
 import { render } from '../../utils/test_helper';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../../../common/constants';

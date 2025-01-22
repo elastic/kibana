@@ -6,9 +6,9 @@
  */
 import expect from '@kbn/expect';
 import { INTERNAL_ROUTES, PUBLIC_ROUTES } from '@kbn/reporting-common';
-import { Response } from 'supertest';
+import type { Response } from 'supertest';
 import { indexTimestamp } from './index_timestamp';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function createUsageServices({ getService }: FtrProviderContext) {
   const log = getService('log');

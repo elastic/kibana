@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
+import type {
+  EuiBasicTableColumn,
+  EuiSearchBarProps} from '@elastic/eui';
 import {
   EuiInMemoryTable,
-  EuiBasicTableColumn,
-  EuiSearchBarProps,
   EuiButton,
   EuiLink,
 } from '@elastic/eui';

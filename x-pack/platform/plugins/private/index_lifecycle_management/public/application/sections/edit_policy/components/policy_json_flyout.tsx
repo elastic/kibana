@@ -22,12 +22,12 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 
-import { SerializedPolicy } from '../../../../../common/types';
+import type { SerializedPolicy } from '../../../../../common/types';
 
 import { useFormContext, useFormData } from '../../../../shared_imports';
 
 import { i18nTexts } from '../i18n_texts';
-import { FormInternal } from '../types';
+import type { FormInternal } from '../types';
 
 type PolicyJson = Omit<SerializedPolicy, 'name'>;
 interface Props {

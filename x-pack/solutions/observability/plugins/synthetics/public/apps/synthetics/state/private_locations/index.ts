@@ -6,9 +6,9 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import { SyntheticsPrivateLocations } from '../../../../../common/runtime_types';
-import { AgentPolicyInfo } from '../../../../../common/types';
-import { IHttpSerializedFetchError } from '..';
+import type { SyntheticsPrivateLocations } from '../../../../../common/runtime_types';
+import type { AgentPolicyInfo } from '../../../../../common/types';
+import type { IHttpSerializedFetchError } from '..';
 import {
   getAgentPoliciesAction,
   setAddingNewPrivateLocation,

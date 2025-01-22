@@ -6,7 +6,8 @@
  */
 
 import { findLastIndex, last } from 'lodash';
-import { Message, MessageAddEvent, MessageRole } from '../../../common';
+import type { Message, MessageAddEvent} from '../../../common';
+import { MessageRole } from '../../../common';
 import { createFunctionRequestMessage } from '../../../common/utils/create_function_request_message';
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 

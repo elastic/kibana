@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import {
+import type {
   SeriesIdentifier,
-  Tooltip,
   TooltipAction,
-  TooltipSpec,
+  TooltipSpec} from '@elastic/charts';
+import {
+  Tooltip,
   TooltipType,
 } from '@elastic/charts';
 import { EuiErrorBoundary } from '@elastic/eui';
@@ -17,9 +18,9 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useFormContext } from 'react-hook-form';
 import moment from 'moment';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { CreateAnnotationForm } from './create_annotation';
-import { Annotation } from '../../../../common/annotations';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { CreateAnnotationForm } from './create_annotation';
+import type { Annotation } from '../../../../common/annotations';
 import { DisplayAnnotation } from '../display_annotations';
 import { NewLineAnnotation } from './new_line_annotation';
 import { NewRectAnnotation } from './new_rect_annotation';

@@ -6,9 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { UserProfile } from '@kbn/security-plugin/common';
+import type { UserProfile } from '@kbn/security-plugin/common';
 import { useQuery } from '@tanstack/react-query';
-import { Dictionary, keyBy } from 'lodash';
+import type { Dictionary} from 'lodash';
+import { keyBy } from 'lodash';
 import { investigationKeys } from './query_key_factory';
 import { useKibana } from './use_kibana';
 

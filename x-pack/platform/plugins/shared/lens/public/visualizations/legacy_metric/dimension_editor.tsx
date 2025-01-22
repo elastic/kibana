@@ -5,8 +5,9 @@
  * 2.0.
  */
 import { EuiButtonGroup, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
+import type {
+  PaletteRegistry} from '@kbn/coloring';
 import {
-  PaletteRegistry,
   CustomizablePalette,
   CUSTOM_PALETTE,
   applyPaletteParams,

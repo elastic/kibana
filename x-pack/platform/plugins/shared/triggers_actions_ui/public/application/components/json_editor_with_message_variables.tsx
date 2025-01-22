@@ -9,12 +9,13 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EuiFormRow, EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { monaco, XJsonLang } from '@kbn/monaco';
+import type { monaco} from '@kbn/monaco';
+import { XJsonLang } from '@kbn/monaco';
 
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { CodeEditor } from '@kbn/code-editor';
 
-import { ActionVariable } from '@kbn/alerting-plugin/common';
+import type { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariables } from '@kbn/alerts-ui-shared';
 import { templateActionVariable } from '../lib';
 

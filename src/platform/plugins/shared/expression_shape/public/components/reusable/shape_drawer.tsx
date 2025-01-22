@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, Ref, useImperativeHandle } from 'react';
-import { ShapeDrawerProps, ShapeRef } from './types';
+import type { Ref} from 'react';
+import React, { forwardRef, useImperativeHandle } from 'react';
+import type { ShapeDrawerProps, ShapeRef } from './types';
 
 function ShapeDrawerComponent(props: ShapeDrawerProps, ref: Ref<ShapeRef>) {
   const { shapeType, getShape } = props;

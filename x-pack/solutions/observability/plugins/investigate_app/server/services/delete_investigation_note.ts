@@ -6,7 +6,7 @@
  */
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
-import { InvestigationRepository } from './investigation_repository';
+import type { InvestigationRepository } from './investigation_repository';
 
 export async function deleteInvestigationNote(
   investigationId: string,

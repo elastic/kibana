@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RulesClientContext } from '../../../../rules_client';
+import type { RulesClientContext } from '../../../../rules_client';
 import { unmuteAll } from './unmute_all';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 

@@ -8,10 +8,11 @@
  */
 
 import { AppMenuRegistry } from './app_menu_registry';
-import {
+import type {
   AppMenuActionSubmenuSecondary,
-  AppMenuActionType,
-  AppMenuSubmenuActionCustom,
+  AppMenuSubmenuActionCustom} from './types';
+import {
+  AppMenuActionType
 } from './types';
 
 describe('AppMenuRegistry', () => {

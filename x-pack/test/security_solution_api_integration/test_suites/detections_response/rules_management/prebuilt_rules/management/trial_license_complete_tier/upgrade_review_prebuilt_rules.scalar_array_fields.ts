@@ -10,7 +10,7 @@ import {
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllTimelines,
   deleteAllPrebuiltRuleAssets,

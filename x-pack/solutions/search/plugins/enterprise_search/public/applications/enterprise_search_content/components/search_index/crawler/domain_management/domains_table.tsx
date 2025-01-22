@@ -9,7 +9,8 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiBasicTableColumn, EuiBasicTable, EuiButtonIcon, EuiCopy } from '@elastic/eui';
+import type { EuiBasicTableColumn} from '@elastic/eui';
+import { EuiBasicTable, EuiButtonIcon, EuiCopy } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -22,7 +23,7 @@ import { generateEncodedPath } from '../../../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
 import { convertMetaToPagination, handlePageChange } from '../../../../../shared/table_pagination';
-import { CrawlerDomain } from '../../../../api/crawler/types';
+import type { CrawlerDomain } from '../../../../api/crawler/types';
 import { SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH } from '../../../../routes';
 import { IndexNameLogic } from '../../index_name_logic';
 

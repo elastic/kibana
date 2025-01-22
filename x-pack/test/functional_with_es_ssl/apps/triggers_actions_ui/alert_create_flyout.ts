@@ -9,9 +9,9 @@ import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import { omit } from 'lodash';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { getApmSynthtraceEsClient } from '../../../common/utils/synthtrace/apm_es_client';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { generateUniqueKey } from '../../lib/get_test_data';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {

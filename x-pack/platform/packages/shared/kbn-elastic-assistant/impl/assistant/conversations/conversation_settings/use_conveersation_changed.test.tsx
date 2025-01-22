@@ -11,7 +11,7 @@ import { customConvo } from '../../../mock/conversation';
 import { mockConnectors } from '../../../mock/connectors';
 import { mockSystemPrompts } from '../../../mock/system_prompt';
 import { getDefaultSystemPrompt } from '../../use_conversation/helpers';
-import { Conversation, ConversationsBulkActions } from '../../../..';
+import type { Conversation, ConversationsBulkActions } from '../../../..';
 
 jest.mock('../../use_conversation/helpers', () => ({
   getDefaultSystemPrompt: jest.fn(),

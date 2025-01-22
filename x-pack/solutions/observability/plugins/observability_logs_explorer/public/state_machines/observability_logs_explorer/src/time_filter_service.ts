@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TimefilterContract } from '@kbn/data-plugin/public';
-import { InvokeCreator } from 'xstate';
-import { ObservabilityLogsExplorerContext, ObservabilityLogsExplorerEvent } from './types';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { InvokeCreator } from 'xstate';
+import type { ObservabilityLogsExplorerContext, ObservabilityLogsExplorerEvent } from './types';
 
 export const initializeFromTimeFilterService =
   ({

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { ExecutorParams, ServiceNowPublicConfigurationType } from '../lib/servicenow/types';
-import {
+import type { ExecutorParams, ServiceNowPublicConfigurationType } from '../lib/servicenow/types';
+import type {
   ServiceNowConnectorType,
-  ServiceNowConnectorTypeExecutorOptions,
+  ServiceNowConnectorTypeExecutorOptions} from '.';
+import {
   getServiceNowITSMConnectorType,
 } from '.';
 import { api } from './api';

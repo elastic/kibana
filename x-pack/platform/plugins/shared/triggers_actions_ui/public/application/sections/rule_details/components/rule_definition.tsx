@@ -20,8 +20,8 @@ import { AlertConsumers, getEditRuleRoute, getRuleDetailsRoute } from '@kbn/rule
 import { i18n } from '@kbn/i18n';
 import { formatDuration } from '@kbn/alerting-plugin/common';
 import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query';
-import { RuleDefinitionProps } from '../../../../types';
-import { RuleType } from '../../../..';
+import type { RuleDefinitionProps } from '../../../../types';
+import type { RuleType } from '../../../..';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import {

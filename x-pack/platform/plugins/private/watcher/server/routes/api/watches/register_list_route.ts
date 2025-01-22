@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { Watch } from '../../../models/watch';
 
 export function registerListRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {

@@ -21,7 +21,8 @@ import {
   previousPreviewPanelAction,
 } from '../store/actions';
 import { useDispatch } from '../store/redux';
-import { FlyoutPanelProps, type ExpandableFlyoutApi } from '../types';
+import type { FlyoutPanelProps} from '../types';
+import { type ExpandableFlyoutApi } from '../types';
 
 export type { ExpandableFlyoutApi };
 

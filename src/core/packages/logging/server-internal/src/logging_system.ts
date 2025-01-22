@@ -8,16 +8,18 @@
  */
 
 import { getFlattenedObject, merge } from '@kbn/std';
-import { DisposableAppender, LogLevel, Logger, LoggerFactory, LogMeta } from '@kbn/logging';
+import type { DisposableAppender, Logger, LoggerFactory, LogMeta } from '@kbn/logging';
+import { LogLevel } from '@kbn/logging';
 import type { LoggerConfigType, LoggerContextConfigInput } from '@kbn/core-logging-server';
 import { Appenders } from './appenders/appenders';
 import { BufferAppender } from './appenders/buffer/buffer_appender';
 import { BaseLogger } from './logger';
 import { LoggerAdapter } from './logger_adapter';
-import {
+import type {
   LoggingConfigType,
+  LoggerContextConfigType} from './logging_config';
+import {
   LoggingConfig,
-  LoggerContextConfigType,
   loggerContextConfigSchema,
   config as loggingConfig,
 } from './logging_config';

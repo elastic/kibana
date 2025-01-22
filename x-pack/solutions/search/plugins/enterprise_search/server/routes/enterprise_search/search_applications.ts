@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AcknowledgedResponseBase, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { AcknowledgedResponseBase, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 
 import { ErrorCode } from '../../../common/types/error_codes';
-import {
+import type {
   EnterpriseSearchApplication,
   EnterpriseSearchApplicationsResponse,
   EnterpriseSearchApplicationUpsertResponse,
@@ -19,7 +19,7 @@ import { fetchAliasIndices } from '../../lib/search_applications/fetch_alias_ind
 import { fetchIndicesStats } from '../../lib/search_applications/fetch_indices_stats';
 
 import { fetchSearchApplicationFieldCapabilities } from '../../lib/search_applications/field_capabilities';
-import { RouteDependencies } from '../../plugin';
+import type { RouteDependencies } from '../../plugin';
 
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';

@@ -6,7 +6,7 @@
  */
 
 import { isBoolean } from 'lodash/fp';
-import { RegistryAlertTypeWithAuth } from '../../../../../../authorization';
+import type { RegistryAlertTypeWithAuth } from '../../../../../../authorization';
 import type { TypesRulesResponseBodyV1 } from '../../../../../../../common/routes/rule/apis/list_types';
 
 export const transformRuleTypesResponse = (

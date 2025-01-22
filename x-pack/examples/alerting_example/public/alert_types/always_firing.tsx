@@ -17,16 +17,18 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { omit, pick } from 'lodash';
-import {
+import type {
   ActionGroupWithCondition,
-  AlertConditions,
-  AlertConditionsGroup,
   RuleTypeModel,
-  RuleTypeParamsExpressionProps,
-} from '@kbn/triggers-actions-ui-plugin/public';
+  RuleTypeParamsExpressionProps} from '@kbn/triggers-actions-ui-plugin/public';
 import {
+  AlertConditions,
+  AlertConditionsGroup
+} from '@kbn/triggers-actions-ui-plugin/public';
+import type {
   AlwaysFiringParams,
-  AlwaysFiringActionGroupIds,
+  AlwaysFiringActionGroupIds} from '../../common/constants';
+import {
   DEFAULT_INSTANCES_TO_GENERATE,
 } from '../../common/constants';
 

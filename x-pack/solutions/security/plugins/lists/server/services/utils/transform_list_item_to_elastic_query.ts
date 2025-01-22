@@ -7,12 +7,13 @@
 
 import type { SerializerOrUndefined, Type } from '@kbn/securitysolution-io-ts-list-types';
 
-import {
+import type {
   EsDataTypeGeoPoint,
   EsDataTypeGeoShape,
   EsDataTypeRangeTerm,
   EsDataTypeSingle,
-  EsDataTypeUnion,
+  EsDataTypeUnion} from '../../schemas/common/schemas';
+import {
   esDataTypeGeoShape,
   esDataTypeRangeTerm,
   esDataTypeSingle,

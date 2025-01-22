@@ -21,7 +21,7 @@ import { FieldParent } from '../field_parent';
 import { FieldStatus } from '../field_status';
 import { FieldFormFormat, typeSupportsFormat } from './field_form_format';
 import { FieldFormType } from './field_form_type';
-import { SchemaEditorFlyoutProps } from '.';
+import type { SchemaEditorFlyoutProps } from '.';
 import { FieldType } from '../field_type';
 
 const EMPTY_CONTENT = '-----';

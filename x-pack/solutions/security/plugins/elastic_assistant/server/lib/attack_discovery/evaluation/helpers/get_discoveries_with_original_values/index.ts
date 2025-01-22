@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type {
+  Replacements} from '@kbn/elastic-assistant-common';
 import {
   type AttackDiscovery,
-  Replacements,
   replaceAnonymizedValuesWithOriginalValues,
 } from '@kbn/elastic-assistant-common';
 

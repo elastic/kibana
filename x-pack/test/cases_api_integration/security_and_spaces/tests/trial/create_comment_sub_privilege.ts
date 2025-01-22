@@ -7,11 +7,12 @@
 
 import expect from '@kbn/expect';
 
+import type {
+  ExternalReferenceSOAttachmentPayload} from '@kbn/cases-plugin/common/types/domain';
 import {
-  AttachmentType,
-  ExternalReferenceSOAttachmentPayload,
+  AttachmentType
 } from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   fileAttachmentMetadata,
   getFilesAttachmentReq,

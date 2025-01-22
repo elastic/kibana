@@ -13,7 +13,7 @@ import {
   getTimeDifferenceInSeconds,
 } from '@kbn/timerange';
 import { perfomanceMarkers } from '../../performance_markers';
-import { EventData } from '../performance_context';
+import type { EventData } from '../performance_context';
 
 interface PerformanceMeta {
   queryRangeSecs: number;

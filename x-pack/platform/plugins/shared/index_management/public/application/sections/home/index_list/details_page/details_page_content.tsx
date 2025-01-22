@@ -5,28 +5,31 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useCallback, useMemo } from 'react';
+import type { FunctionComponent} from 'react';
+import React, { useCallback, useMemo } from 'react';
+import type {
+  EuiPageHeaderProps} from '@elastic/eui';
 import {
   EuiButton,
   EuiPageHeader,
-  EuiPageHeaderProps,
   EuiPageSection,
   EuiSpacer,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 
 import { useIndexErrors } from '../../../../hooks/use_index_errors';
 import { resetIndexUrlParams } from './reset_index_url_params';
 import { renderBadges } from '../../../../lib/render_badges';
-import { Index } from '../../../../../../common';
+import type { Index } from '../../../../../../common';
+import type {
+  IndexDetailsTab,
+  IndexDetailsTabId} from '../../../../../../common/constants';
 import {
   INDEX_OPEN,
-  IndexDetailsSection,
-  IndexDetailsTab,
-  IndexDetailsTabId,
+  IndexDetailsSection
 } from '../../../../../../common/constants';
 import { getIndexDetailsLink } from '../../../../services/routing';
 import { useAppContext } from '../../../../app_context';

@@ -7,7 +7,7 @@
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { UrlTemplate } from '../../types';
+import type { UrlTemplate } from '../../types';
 import { IconRenderer } from '../icon_renderer';
 
 interface UrlTemplateButtonsProps {

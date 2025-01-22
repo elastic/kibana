@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLAstExpression } from '@kbn/esql-ast/src/types';
+import type { ESQLAstExpression } from '@kbn/esql-ast/src/types';
 
 /**
  * Position of the caret in the JOIN command, which can be easily matched with

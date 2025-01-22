@@ -9,7 +9,7 @@ import { load as loadYaml } from 'js-yaml';
 import { readFileSync } from 'fs';
 import * as path from 'path';
 import { cloneDeep, merge } from 'lodash';
-import { FeaturesPrivileges, Role, RoleIndexPrivilege } from '@kbn/security-plugin/common';
+import type { FeaturesPrivileges, Role, RoleIndexPrivilege } from '@kbn/security-plugin/common';
 import { ServerlessRoleName } from '../types';
 
 const ROLES_YAML_FILE_PATH = path.join(__dirname, 'project_controller_security_roles.yml');

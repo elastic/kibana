@@ -7,13 +7,13 @@
 
 import fetch from 'node-fetch';
 
-import { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { kibanaPackageJson } from '@kbn/repo-info';
 
-import { ConfigType } from '..';
+import type { ConfigType } from '..';
 import { isVersionMismatch } from '../../common/is_version_mismatch';
 import { stripTrailingSlash } from '../../common/strip_slashes';
-import { InitialAppData } from '../../common/types';
+import type { InitialAppData } from '../../common/types';
 
 import { entSearchHttpAgent } from './enterprise_search_http_agent';
 

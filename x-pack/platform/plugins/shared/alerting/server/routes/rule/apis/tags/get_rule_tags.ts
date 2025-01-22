@@ -4,15 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { transformRuleTagsBodyResponseV1 } from './transforms';
 import { transformRuleTagsQueryRequestV1 } from './transforms';
+import type {
+  RuleTagsRequestQueryV1} from '../../../../../common/routes/rule/apis/tags';
 import {
-  ruleTagsRequestQuerySchemaV1,
-  RuleTagsRequestQueryV1,
+  ruleTagsRequestQuerySchemaV1
 } from '../../../../../common/routes/rule/apis/tags';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
-import { ILicenseState } from '../../../../lib';
+import type { AlertingRequestHandlerContext} from '../../../../types';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 

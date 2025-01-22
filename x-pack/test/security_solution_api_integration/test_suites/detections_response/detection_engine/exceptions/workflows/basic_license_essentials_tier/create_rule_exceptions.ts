@@ -7,10 +7,11 @@
 
 import expect from '@kbn/expect';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import {
+import type {
   CreateExceptionListSchema,
   CreateRuleExceptionListItemSchema,
-  ExceptionListItemSchema,
+  ExceptionListItemSchema} from '@kbn/securitysolution-io-ts-list-types';
+import {
   ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
@@ -25,7 +26,7 @@ import {
   deleteAllExceptions,
   removeExceptionListItemServerGeneratedProperties,
 } from '../../../../../lists_and_exception_lists/utils';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 const getRuleExceptionItemMock = (): CreateRuleExceptionListItemSchema => ({
   description: 'Exception item for rule default exception list',

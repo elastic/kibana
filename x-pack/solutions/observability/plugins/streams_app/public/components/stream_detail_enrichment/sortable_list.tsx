@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import {
+import type {
   DragDropContextProps,
-  EuiDroppableProps,
+  EuiDroppableProps} from '@elastic/eui';
+import {
   EuiDragDropContext,
   EuiDroppable,
   useEuiTheme,

@@ -8,10 +8,12 @@
  */
 
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
+import type { TestBed } from '@kbn/test-jest-helpers';
+import { registerTestBed } from '@kbn/test-jest-helpers';
 import React, { useEffect } from 'react';
 import queryString from 'query-string';
-import moment, { Moment } from 'moment';
+import type { Moment } from 'moment';
+import moment from 'moment';
 import { act } from 'react-dom/test-utils';
 import type { ReactWrapper } from 'enzyme';
 import type { LocationDescriptor, History } from 'history';

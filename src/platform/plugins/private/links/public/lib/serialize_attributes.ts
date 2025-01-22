@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Link } from '../../common/content_management';
+import type { Link } from '../../common/content_management';
 import { extractReferences } from '../../common/persistable_state';
-import { LinksRuntimeState } from '../types';
+import type { LinksRuntimeState } from '../types';
 
 export const serializeLinksAttributes = (
   state: LinksRuntimeState,

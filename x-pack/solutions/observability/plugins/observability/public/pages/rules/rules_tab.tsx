@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 
 import { useHistory } from 'react-router-dom';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { RuleStatus } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleStatus } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../../../common/constants';
 import { observabilityAlertFeatureIds } from '../../../common';

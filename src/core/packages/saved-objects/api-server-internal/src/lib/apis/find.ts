@@ -8,15 +8,16 @@
  */
 
 import Boom from '@hapi/boom';
-import * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { isSupportedEsServer } from '@kbn/core-elasticsearch-server-internal';
-import {
-  SavedObjectsErrorHelpers,
-  type SavedObjectsRawDoc,
+import type {
   CheckAuthorizationResult,
   SavedObjectsRawDocSource,
   GetFindRedactTypeMapParams,
-  SavedObjectUnsanitizedDoc,
+  SavedObjectUnsanitizedDoc} from '@kbn/core-saved-objects-server';
+import {
+  SavedObjectsErrorHelpers,
+  type SavedObjectsRawDoc
 } from '@kbn/core-saved-objects-server';
 import {
   DEFAULT_NAMESPACE_STRING,
@@ -24,13 +25,13 @@ import {
   FIND_DEFAULT_PER_PAGE,
   SavedObjectsUtils,
 } from '@kbn/core-saved-objects-utils-server';
-import {
+import type {
   SavedObjectsFindOptions,
   SavedObjectsFindInternalOptions,
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { ApiExecutionContext } from './types';
+import type { ApiExecutionContext } from './types';
 import {
   validateConvertFilterToKueryNode,
   getSearchDsl,

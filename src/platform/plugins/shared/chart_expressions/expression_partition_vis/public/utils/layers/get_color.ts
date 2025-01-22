@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ArrayNode } from '@elastic/charts';
+import type { ArrayNode } from '@elastic/charts';
 import { isEqual } from 'lodash';
 import type { PaletteRegistry, SeriesLayer, PaletteOutput, PaletteDefinition } from '@kbn/coloring';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { lightenColor } from '@kbn/charts-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
-import { DistinctSeries } from '../get_distinct_series';
+import type { BucketColumns, PartitionVisParams } from '../../../common/types';
+import { ChartTypes } from '../../../common/types';
+import type { DistinctSeries } from '../get_distinct_series';
 import { getNodeLabel } from './get_node_labels';
 
 const isTreemapOrMosaicChart = (shape: ChartTypes) =>

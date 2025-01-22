@@ -10,17 +10,19 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { default as React, useCallback, useEffect, useState } from 'react';
 import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
-import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
+import type { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
 import { useWizard } from '.';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import type {
+  ElasticAgentPlatform} from '../shared/get_elastic_agent_setup_command';
 import {
-  ElasticAgentPlatform,
   getElasticAgentSetupCommand,
 } from '../shared/get_elastic_agent_setup_command';
-import {
-  InstallElasticAgentSteps,
+import type {
   ProgressStepId,
-  EuiStepStatus,
+  EuiStepStatus} from '../shared/install_elastic_agent_steps';
+import {
+  InstallElasticAgentSteps
 } from '../shared/install_elastic_agent_steps';
 import { StepModal } from '../shared/step_panel';
 import { ApiKeyBanner } from './api_key_banner';

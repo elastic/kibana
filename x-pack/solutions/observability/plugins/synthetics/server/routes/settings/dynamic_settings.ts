@@ -8,9 +8,9 @@ import { i18n } from '@kbn/i18n';
 
 import { schema } from '@kbn/config-schema';
 import { savedObjectsAdapter } from '../../saved_objects';
-import { SyntheticsRestApiRouteFactory } from '../types';
-import { DynamicSettings } from '../../../common/runtime_types';
-import { DynamicSettingsAttributes } from '../../runtime_types/settings';
+import type { SyntheticsRestApiRouteFactory } from '../types';
+import type { DynamicSettings } from '../../../common/runtime_types';
+import type { DynamicSettingsAttributes } from '../../runtime_types/settings';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const createGetDynamicSettingsRoute: SyntheticsRestApiRouteFactory<

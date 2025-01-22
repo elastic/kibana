@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { filter, OperatorFunction, scan, startWith } from 'rxjs';
-import {
+import type { OperatorFunction} from 'rxjs';
+import { filter, scan, startWith } from 'rxjs';
+import type {
   StreamingChatResponseEvent,
-  StreamingChatResponseEventType,
-  TokenCountEvent,
+  TokenCountEvent} from '../../../../common/conversation_complete';
+import {
+  StreamingChatResponseEventType
 } from '../../../../common/conversation_complete';
 
 export function extractTokenCount(): OperatorFunction<

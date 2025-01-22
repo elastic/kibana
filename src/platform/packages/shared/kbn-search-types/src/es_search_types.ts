@@ -9,7 +9,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { IKibanaSearchRequest, IKibanaSearchResponse } from './kibana_search_types';
+import type { IKibanaSearchRequest, IKibanaSearchResponse } from './kibana_search_types';
 
 export type ISearchRequestParams = {
   trackTotalHits?: boolean;

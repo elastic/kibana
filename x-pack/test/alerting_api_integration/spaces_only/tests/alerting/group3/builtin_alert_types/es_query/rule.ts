@@ -11,8 +11,10 @@ import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 
 import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import { Spaces } from '../../../../../scenarios';
-import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
+import type {
+  SourceField} from './common';
 import {
   createConnector,
   ES_GROUPS_TO_WRITE,
@@ -24,8 +26,7 @@ import {
   RULE_INTERVALS_TO_WRITE,
   RULE_INTERVAL_MILLIS,
   RULE_INTERVAL_SECONDS,
-  RULE_TYPE_ID,
-  SourceField,
+  RULE_TYPE_ID
 } from './common';
 import { createDataStream, deleteDataStream } from '../../../create_test_data';
 

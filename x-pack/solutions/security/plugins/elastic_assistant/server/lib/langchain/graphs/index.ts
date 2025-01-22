@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import {
-  getDefaultAssistantGraph,
+import type {
   GetDefaultAssistantGraphParams,
-  DefaultAssistantGraph,
-} from './default_assistant_graph/graph';
+  DefaultAssistantGraph} from './default_assistant_graph/graph';
 import {
+  getDefaultAssistantGraph
+} from './default_assistant_graph/graph';
+import type {
   DefaultAttackDiscoveryGraph,
-  GetDefaultAttackDiscoveryGraphParams,
+  GetDefaultAttackDiscoveryGraphParams} from '../../attack_discovery/graphs/default_attack_discovery_graph';
+import {
   getDefaultAttackDiscoveryGraph,
 } from '../../attack_discovery/graphs/default_attack_discovery_graph';
 

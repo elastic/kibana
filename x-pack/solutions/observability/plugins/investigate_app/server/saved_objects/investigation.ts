@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import { SavedObject } from '@kbn/core/server';
-import { StoredInvestigation } from '../models/investigation';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type { SavedObject } from '@kbn/core/server';
+import type { StoredInvestigation } from '../models/investigation';
 
 export const SO_INVESTIGATION_TYPE = 'investigation';
 

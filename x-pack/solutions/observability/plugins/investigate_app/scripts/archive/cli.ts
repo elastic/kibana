@@ -6,7 +6,7 @@
  */
 import * as inquirer from 'inquirer';
 import * as fs from 'fs';
-import { Argv } from 'yargs';
+import type { Argv } from 'yargs';
 import {
   elasticsearchOption,
   kibanaOption,

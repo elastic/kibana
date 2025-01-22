@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ClustersTable } from './clusters_table';
 

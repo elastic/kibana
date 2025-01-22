@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { AwaitedProperties } from '@kbn/utility-types';
+import type { AwaitedProperties } from '@kbn/utility-types';
 import { CUSTOM_ELEMENT_TYPE } from '../../../common/lib/constants';
 import { initializeGetCustomElementRoute } from './get';
+import type {
+  RequestHandlerContext,
+  RequestHandler} from '@kbn/core/server';
 import {
   kibanaResponseFactory,
-  RequestHandlerContext,
-  RequestHandler,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';

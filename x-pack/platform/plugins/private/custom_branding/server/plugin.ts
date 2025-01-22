@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import {
+import type {
   CoreSetup,
   CoreStart,
   IUiSettingsClient,
   KibanaRequest,
   Logger,
   Plugin,
-  PluginInitializerContext,
+  PluginInitializerContext} from '@kbn/core/server';
+import {
   SECURITY_EXTENSION_ID,
 } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { License } from '@kbn/license-api-guard-plugin/server';
-import { CustomBranding } from '@kbn/core-custom-branding-common';
-import { Subscription } from 'rxjs';
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { Subscription } from 'rxjs';
 import { PLUGIN } from '../common/constants';
 import type {
   CustomBrandingServerSetup,

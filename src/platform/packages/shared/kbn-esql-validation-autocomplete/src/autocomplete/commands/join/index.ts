@@ -8,13 +8,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type ESQLAstItem, ESQLAst } from '@kbn/esql-ast';
-import { ESQLCommand } from '@kbn/esql-ast/src/types';
+import type { ESQLAst } from '@kbn/esql-ast';
+import { type ESQLAstItem } from '@kbn/esql-ast';
+import type { ESQLCommand } from '@kbn/esql-ast/src/types';
 import type { ESQLCallbacks } from '../../../shared/types';
-import {
+import type {
   CommandBaseDefinition,
   CommandDefinition,
-  CommandTypeDefinition,
+  CommandTypeDefinition} from '../../../definitions/types';
+import {
   type SupportedDataType,
 } from '../../../definitions/types';
 import { getPosition, joinIndicesToSuggestions } from './util';

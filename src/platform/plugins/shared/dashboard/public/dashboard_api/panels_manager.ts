@@ -13,14 +13,17 @@ import { v4 } from 'uuid';
 import { asyncForEach } from '@kbn/std';
 import type { Reference } from '@kbn/content-management-utils';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { PanelPackage, apiHasSerializableState } from '@kbn/presentation-containers';
-import {
+import type { PanelPackage} from '@kbn/presentation-containers';
+import { apiHasSerializableState } from '@kbn/presentation-containers';
+import type {
   DefaultEmbeddableApi,
-  EmbeddablePackageState,
+  EmbeddablePackageState} from '@kbn/embeddable-plugin/public';
+import {
   PanelNotFoundError,
 } from '@kbn/embeddable-plugin/public';
+import type {
+  StateComparators} from '@kbn/presentation-publishing';
 import {
-  StateComparators,
   apiHasInPlaceLibraryTransforms,
   apiHasLibraryTransforms,
   apiPublishesPanelTitle,
@@ -31,15 +34,16 @@ import {
 import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 import { i18n } from '@kbn/i18n';
 import { coreServices, usageCollectionService } from '../services/kibana_services';
-import { DashboardPanelMap, DashboardPanelState, prefixReferencesFromPanel } from '../../common';
+import type { DashboardPanelMap, DashboardPanelState} from '../../common';
+import { prefixReferencesFromPanel } from '../../common';
 import type { initializeTrackPanel } from './track_panel';
 import { getPanelAddedSuccessString } from '../dashboard_app/_dashboard_app_strings';
 import { runPanelPlacementStrategy } from '../dashboard_container/panel_placement/place_new_panel_strategies';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../common/content_management';
 import { DASHBOARD_UI_METRIC_ID } from '../utils/telemetry_constants';
 import { getDashboardPanelPlacementSetting } from '../dashboard_container/panel_placement/panel_placement_registry';
-import { UnsavedPanelState } from '../dashboard_container/types';
-import { DashboardState } from './types';
+import type { UnsavedPanelState } from '../dashboard_container/types';
+import type { DashboardState } from './types';
 import { arePanelLayoutsEqual } from './are_panel_layouts_equal';
 import { dashboardClonePanelActionStrings } from '../dashboard_actions/_dashboard_actions_strings';
 import { placeClonePanel } from '../dashboard_container/panel_placement/place_clone_panel_strategy';

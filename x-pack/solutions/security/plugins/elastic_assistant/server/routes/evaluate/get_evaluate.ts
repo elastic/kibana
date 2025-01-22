@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { type IKibanaResponse, IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
+import { type IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import {
@@ -16,7 +17,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { buildResponse } from '../../lib/build_response';
-import { ElasticAssistantRequestHandlerContext } from '../../types';
+import type { ElasticAssistantRequestHandlerContext } from '../../types';
 import { performChecks } from '../helpers';
 import { ASSISTANT_GRAPH_MAP } from '../../lib/langchain/graphs';
 import { fetchLangSmithDatasets } from './utils';

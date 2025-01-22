@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { AlertHit } from '@kbn/alerting-plugin/server/types';
-import { ObservabilityAIAssistantRouteHandlerResources } from '@kbn/observability-ai-assistant-plugin/server/routes/types';
+import type { AlertHit } from '@kbn/alerting-plugin/server/types';
+import type { ObservabilityAIAssistantRouteHandlerResources } from '@kbn/observability-ai-assistant-plugin/server/routes/types';
 import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
 import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
+import type {
+  ObsAIAssistantConnectorTypeExecutorOptions} from '.';
 import {
   getObsAIAssistantConnectorAdapter,
-  getObsAIAssistantConnectorType,
-  ObsAIAssistantConnectorTypeExecutorOptions,
+  getObsAIAssistantConnectorType
 } from '.';
 import { Observable } from 'rxjs';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';

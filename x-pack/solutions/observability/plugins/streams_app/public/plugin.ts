@@ -7,14 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import { map } from 'rxjs';
-import {
+import type {
   AppMountParameters,
   AppUpdater,
   CoreSetup,
   CoreStart,
-  DEFAULT_APP_CATEGORIES,
   Plugin,
-  PluginInitializerContext,
+  PluginInitializerContext} from '@kbn/core/public';
+import {
+  DEFAULT_APP_CATEGORIES
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import { STREAMS_APP_ID } from '@kbn/deeplinks-observability/constants';
@@ -25,7 +26,7 @@ import type {
   StreamsAppSetupDependencies,
   StreamsAppStartDependencies,
 } from './types';
-import { StreamsAppServices } from './services/types';
+import type { StreamsAppServices } from './services/types';
 
 export class StreamsAppPlugin
   implements

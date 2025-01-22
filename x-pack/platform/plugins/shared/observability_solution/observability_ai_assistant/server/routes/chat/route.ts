@@ -9,8 +9,8 @@ import { toBooleanRt } from '@kbn/io-ts-utils';
 import { context as otelContext } from '@opentelemetry/api';
 import * as t from 'io-ts';
 import { from, map } from 'rxjs';
-import { Readable } from 'stream';
-import { AssistantScope } from '@kbn/ai-assistant-common';
+import type { Readable } from 'stream';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { aiAssistantSimulatedFunctionCalling } from '../..';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
 import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
@@ -22,7 +22,7 @@ import { withAssistantSpan } from '../../service/util/with_assistant_span';
 import { recallAndScore } from '../../utils/recall/recall_and_score';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { assistantScopeType, functionRt, messageRt, screenContextRt } from '../runtime_types';
-import { ObservabilityAIAssistantRouteHandlerResources } from '../types';
+import type { ObservabilityAIAssistantRouteHandlerResources } from '../types';
 
 const chatCompleteBaseRt = t.type({
   body: t.intersection([

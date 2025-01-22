@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { shallow } from 'enzyme';
 import { ShardsView } from './shards_view';
 

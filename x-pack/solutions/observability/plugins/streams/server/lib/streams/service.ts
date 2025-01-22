@@ -6,15 +6,16 @@
  */
 
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
-import {
+import type {
   IStorageClient,
+  StorageSettings} from '@kbn/observability-utils-server/es/storage';
+import {
   StorageIndexAdapter,
-  StorageSettings,
   types,
 } from '@kbn/observability-utils-server/es/storage';
 import type { StreamsPluginStartDependencies } from '../../types';
 import { StreamsClient } from './client';
-import { AssetClient } from './assets/asset_client';
+import type { AssetClient } from './assets/asset_client';
 
 export const streamsStorageSettings = {
   name: '.kibana_streams',

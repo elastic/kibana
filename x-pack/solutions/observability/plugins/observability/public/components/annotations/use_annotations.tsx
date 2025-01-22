@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useMemo, useState } from 'react';
-import { BrushEvent, TooltipSpec, LineAnnotationEvent, RectAnnotationEvent } from '@elastic/charts';
+import type { BrushEvent, TooltipSpec, LineAnnotationEvent, RectAnnotationEvent } from '@elastic/charts';
 import { FormProvider, useForm } from 'react-hook-form';
 import moment from 'moment';
 import useKey from 'react-use/lib/useKey';
@@ -14,7 +14,7 @@ import {
   defaultRangeAnnotationLabel,
   defaultAnnotationRangeColor,
 } from '@kbn/event-annotation-common';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { getDefaultAnnotation } from './default_annotation';
 import { useEditAnnotationHelper } from './hooks/use_edit_annotation_helper';
 import type { CreateAnnotationForm } from './components/create_annotation';

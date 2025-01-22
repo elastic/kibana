@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  UrlWithParsedQuery,
+  UrlWithStringQuery} from 'url';
 import {
   format as urlFormat,
-  parse as urlParse,
-  UrlWithParsedQuery,
-  UrlWithStringQuery,
+  parse as urlParse
 } from 'url';
 
 import type { ReportingServerInfo } from '@kbn/reporting-common/types';

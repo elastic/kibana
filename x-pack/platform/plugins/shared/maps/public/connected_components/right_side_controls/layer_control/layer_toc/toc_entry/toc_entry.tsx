@@ -8,7 +8,7 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiIcon, EuiButtonIcon, EuiConfirmModal, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -20,7 +20,7 @@ import {
   FIT_TO_DATA_LABEL,
 } from './action_labels';
 import { LegendDetails } from './legend_details';
-import { ILayer } from '../../../../../classes/layers/layer';
+import type { ILayer } from '../../../../../classes/layers/layer';
 import { isLayerGroup } from '../../../../../classes/layers/layer_group';
 
 function escapeLayerName(name: string) {

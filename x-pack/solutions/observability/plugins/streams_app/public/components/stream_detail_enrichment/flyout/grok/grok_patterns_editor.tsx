@@ -6,15 +6,17 @@
  */
 
 import React from 'react';
-import {
-  useFormContext,
-  useFieldArray,
+import type {
   UseFormRegisterReturn,
   FieldError,
-  FieldErrorsImpl,
-} from 'react-hook-form';
+  FieldErrorsImpl} from 'react-hook-form';
 import {
-  DragDropContextProps,
+  useFormContext,
+  useFieldArray
+} from 'react-hook-form';
+import type {
+  DragDropContextProps} from '@elastic/eui';
+import {
   EuiFormRow,
   EuiPanel,
   EuiSpacer,
@@ -27,7 +29,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SortableList } from '../../sortable_list';
-import { GrokFormState } from '../../types';
+import type { GrokFormState } from '../../types';
 
 export const GrokPatternsEditor = () => {
   const {

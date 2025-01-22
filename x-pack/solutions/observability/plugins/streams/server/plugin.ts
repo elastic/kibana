@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   CoreSetup,
   CoreStart,
   KibanaRequest,
@@ -15,15 +15,16 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
-import { StreamsConfig, configSchema, exposeToBrowserConfig } from '../common/config';
+import type { StreamsConfig} from '../common/config';
+import { configSchema, exposeToBrowserConfig } from '../common/config';
 import { streamsRouteRepository } from './routes';
-import {
+import type {
   StreamsPluginSetupDependencies,
   StreamsPluginStartDependencies,
   StreamsServer,
 } from './types';
 import { AssetService } from './lib/streams/assets/asset_service';
-import { RouteHandlerScopedClients } from './routes/types';
+import type { RouteHandlerScopedClients } from './routes/types';
 import { StreamsService } from './lib/streams/service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

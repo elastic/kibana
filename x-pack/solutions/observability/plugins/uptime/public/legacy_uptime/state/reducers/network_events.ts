@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { handleActions, Action } from 'redux-actions';
-import { NetworkEvent, SyntheticsNetworkEventsApiResponse } from '../../../../common/runtime_types';
-import {
+import type { Action } from 'redux-actions';
+import { handleActions } from 'redux-actions';
+import type { NetworkEvent, SyntheticsNetworkEventsApiResponse } from '../../../../common/runtime_types';
+import type {
   FetchNetworkEventsParams,
-  FetchNetworkEventsFailPayload,
+  FetchNetworkEventsFailPayload} from '../actions/network_events';
+import {
   getNetworkEvents,
   getNetworkEventsFail,
   getNetworkEventsSuccess,

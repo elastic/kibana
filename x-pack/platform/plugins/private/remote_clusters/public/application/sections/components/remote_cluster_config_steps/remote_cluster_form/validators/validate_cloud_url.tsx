@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Cluster } from '../../../../../../../common/lib';
+import type { Cluster } from '../../../../../../../common/lib';
 import { isAddressValid } from './validate_address';
 
 export const i18nTexts = {

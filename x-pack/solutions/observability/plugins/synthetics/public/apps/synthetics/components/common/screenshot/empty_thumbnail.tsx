@@ -9,9 +9,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme, EuiIcon, EuiText, EuiSkeletonRectangle } from '@elastic/eui';
 
+import type {
+  ScreenshotImageSize} from './screenshot_size';
 import {
   getConfinedScreenshotSize,
-  ScreenshotImageSize,
   THUMBNAIL_SCREENSHOT_SIZE,
 } from './screenshot_size';
 

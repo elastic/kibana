@@ -6,13 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type {
+  LoginAsInteractiveUserResponse} from './helpers';
 import {
   loginAsInteractiveUser,
   setupInteractiveUser,
   sampleDashboard,
-  cleanupInteractiveUser,
-  LoginAsInteractiveUserResponse,
+  cleanupInteractiveUser
 } from './helpers';
 
 export default function ({ getService }: FtrProviderContext) {

@@ -18,7 +18,7 @@ import {
   setDeprecationLogging,
 } from '../lib/es_deprecation_logging_apis';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
-import { RouteDependencies } from '../types';
+import type { RouteDependencies } from '../types';
 import { DEPRECATION_LOGS_INDEX } from '../../common/constants';
 
 export function registerDeprecationLoggingRoutes({

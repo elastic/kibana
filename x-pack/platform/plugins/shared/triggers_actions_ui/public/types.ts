@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -22,17 +22,18 @@ import type {
   EuiSuperSelectOption,
   RenderCellValue,
 } from '@elastic/eui';
-import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
+import type { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
+import type {
+  ActionType,
+  AsApiContract} from '@kbn/actions-plugin/common';
 import {
   ALERT_HISTORY_PREFIX,
-  ActionType,
   AlertHistoryDefaultIndexName,
   AlertHistoryDocumentTemplate,
-  AlertHistoryEsIndexConnectorId,
-  AsApiContract,
+  AlertHistoryEsIndexConnectorId
 } from '@kbn/actions-plugin/common';
-import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import {
+import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import type {
   ActionGroup,
   AlertStatus,
   SanitizedRule as AlertingSanitizedRule,
@@ -50,8 +51,8 @@ import {
   RuleTypeParams,
 } from '@kbn/alerting-plugin/common';
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
-import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
-import {
+import type { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
+import type {
   ActionConnector,
   ActionTypeRegistryContract,
   EsQuerySnapshot,
@@ -59,11 +60,11 @@ import {
 } from '@kbn/alerts-ui-shared/src/common/types';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DocLinksStart } from '@kbn/core/public';
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { KueryNode } from '@kbn/es-query';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { KueryNode } from '@kbn/es-query';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ValidationResult } from '@kbn/response-ops-rule-form';
 import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import type {
@@ -75,13 +76,13 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { Moment } from 'moment';
 import type { ComponentType, ReactNode, RefObject } from 'react';
-import React from 'react';
-import { AlertTableConfigRegistry } from './application/alert_table_config_registry';
+import type React from 'react';
+import type { AlertTableConfigRegistry } from './application/alert_table_config_registry';
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
 import type { AlertSummaryTimeRange } from './application/sections/alert_summary_widget/types';
-import { TimelineItem } from './application/sections/alerts_table/bulk_actions/components/toolbar';
-import { Case } from './application/sections/alerts_table/hooks/apis/bulk_get_cases';
+import type { TimelineItem } from './application/sections/alerts_table/bulk_actions/components/toolbar';
+import type { Case } from './application/sections/alerts_table/hooks/apis/bulk_get_cases';
 import type {
   BrowserFieldItem,
   CreateFieldComponent,
@@ -103,7 +104,7 @@ import type {
 } from './application/sections/rules_list/components/rule_tag_badge';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
 import type { RulesListProps } from './application/sections/rules_list/components/rules_list';
-import { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
+import type { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
 
 export type {
   ActionConnectorFieldsProps,

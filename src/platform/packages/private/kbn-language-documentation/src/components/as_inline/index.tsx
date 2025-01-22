@@ -6,7 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useCallback, useState, useRef, useMemo, useEffect, ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
+import React, { useCallback, useState, useRef, useMemo, useEffect } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme, euiScrollBarStyles, EuiSpacer } from '@elastic/eui';
 import { getFilteredGroups } from '../../utils/get_filtered_groups';

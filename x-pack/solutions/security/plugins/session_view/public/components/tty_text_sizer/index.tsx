@@ -5,9 +5,10 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useState } from 'react';
+import type {
+  EuiButtonIconProps} from '@elastic/eui';
 import {
   EuiButtonIcon,
-  EuiButtonIconProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,

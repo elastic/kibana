@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AuthenticatedUser } from '@kbn/core-security-common';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 import { getAttackDiscoveryStats } from './helpers';
-import { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
+import type { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
 import { transformESSearchToAttackDiscovery } from '../../../lib/attack_discovery/persistence/transforms/transforms';
 import { getAttackDiscoverySearchEsMock } from '../../../__mocks__/attack_discovery_schema.mock';
 

@@ -10,13 +10,14 @@
 import { act } from 'react-dom/test-utils';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { CoreTheme } from '@kbn/core/public';
+import type { CoreTheme } from '@kbn/core/public';
 
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { HttpSetup } from '@kbn/core/public';
-import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
+import type { TestBed } from '@kbn/test-jest-helpers';
+import { registerTestBed } from '@kbn/test-jest-helpers';
 import { testGuideConfig, testGuideId } from '@kbn/guided-onboarding';
 
 import type { PluginState } from '../../common';

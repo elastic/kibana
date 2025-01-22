@@ -18,11 +18,11 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Mappings } from '../../types';
+import type { Mappings } from '../../types';
 import { countVectorBasedTypesFromMappings } from './mappings_convertor';
 import { QuickStat } from './quick_stat';
 import { useKibana } from '../../hooks/use_kibana';
-import { IndexDocuments } from '../../hooks/api/use_document_search';
+import type { IndexDocuments } from '../../hooks/api/use_document_search';
 
 export interface QuickStatsProps {
   index: Index;

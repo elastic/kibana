@@ -6,9 +6,9 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import { JOB_STATUS } from '@kbn/reporting-common';
+import type { JOB_STATUS } from '@kbn/reporting-common';
 import type { JobId, ReportOutput, ReportSource, TaskRunResult } from '@kbn/reporting-common/types';
-import { ReportingPublicPluginStartDependencies } from './plugin';
+import type { ReportingPublicPluginStartDependencies } from './plugin';
 
 /*
  * Required services for mounting React components

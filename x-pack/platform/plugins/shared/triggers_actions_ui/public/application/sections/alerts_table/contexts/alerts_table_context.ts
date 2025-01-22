@@ -7,7 +7,7 @@
 
 import { createContext } from 'react';
 import { noop } from 'lodash';
-import { AlertsTableContextType } from '../types';
+import type { AlertsTableContextType } from '../types';
 
 export const AlertsTableContext = createContext<AlertsTableContextType>({
   mutedAlerts: {},

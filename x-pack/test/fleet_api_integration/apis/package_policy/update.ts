@@ -6,9 +6,9 @@
  */
 import expect from '@kbn/expect';
 import { policyFactory } from '@kbn/security-solution-plugin/common/endpoint/models/policy_config';
-import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { sortBy } from 'lodash';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import {
   skipIfNoDockerRegistry,
   isDockerRegistryEnabledOrSkipped,

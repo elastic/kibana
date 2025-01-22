@@ -11,7 +11,7 @@ import { TaskClaiming } from './task_claiming';
 import { taskStoreMock } from '../task_store.mock';
 import apm from 'elastic-apm-node';
 import { TaskPartitioner } from '../lib/task_partitioner';
-import { KibanaDiscoveryService } from '../kibana_discovery_service';
+import type { KibanaDiscoveryService } from '../kibana_discovery_service';
 import { DEFAULT_KIBANAS_PER_PARTITION } from '../config';
 
 jest.mock('../constants', () => ({

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { Observable, catchError, from, of, share, switchMap, toArray } from 'rxjs';
-import { ServerSentEventBase } from '@kbn/sse-utils';
+import type { Observable} from 'rxjs';
+import { catchError, from, of, share, switchMap, toArray } from 'rxjs';
+import type { ServerSentEventBase } from '@kbn/sse-utils';
+import type {
+  RootCauseAnalysisEvent} from '@kbn/observability-ai-server/root_cause_analysis';
 import {
-  RootCauseAnalysisEvent,
   runRootCauseAnalysis,
 } from '@kbn/observability-ai-server/root_cause_analysis';
 import { z } from '@kbn/zod';

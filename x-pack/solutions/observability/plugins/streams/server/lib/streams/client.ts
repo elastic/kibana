@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
-import {
+import type { errors } from '@elastic/elasticsearch';
+import type {
   IndicesDataStream,
   QueryDslQueryContainer,
   Result,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
-import {
+import type {
   Condition,
   IngestStreamDefinition,
   StreamDefinition,
-  WiredStreamDefinition,
+  WiredStreamDefinition} from '@kbn/streams-schema';
+import {
   assertsSchema,
   getAncestors,
   getParentId,
@@ -28,7 +29,7 @@ import {
   streamDefinitionSchema,
 } from '@kbn/streams-schema';
 import { cloneDeep, keyBy, omit, orderBy } from 'lodash';
-import { AssetClient } from './assets/asset_client';
+import type { AssetClient } from './assets/asset_client';
 import { DefinitionNotFound, SecurityException } from './errors';
 import { MalformedStreamId } from './errors/malformed_stream_id';
 import {
@@ -42,7 +43,7 @@ import {
   validateStreamTypeChanges,
 } from './helpers/validate_stream';
 import { rootStreamDefinition } from './root_stream_definition';
-import { StreamsStorageClient } from './service';
+import type { StreamsStorageClient } from './service';
 import {
   checkAccess,
   checkAccessBulk,

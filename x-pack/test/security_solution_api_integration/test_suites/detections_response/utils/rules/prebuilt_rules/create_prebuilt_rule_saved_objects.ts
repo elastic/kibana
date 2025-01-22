@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
-import { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
+import type { Client } from '@elastic/elasticsearch';
+import type { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
 import {
   getPrebuiltRuleMock,
   getPrebuiltRuleMockOfType,

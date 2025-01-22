@@ -10,7 +10,7 @@
 import React, { useEffect } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { useUrlTracking } from './hooks/use_url_tracking';
-import { DiscoverStateContainer } from './state_management/discover_state';
+import type { DiscoverStateContainer } from './state_management/discover_state';
 import { DiscoverLayout } from './components/layout';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';

@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { FormulaPublicApi, MetricState, OperationType } from '@kbn/lens-plugin/public';
+import type { FormulaPublicApi, MetricState, OperationType } from '@kbn/lens-plugin/public';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 
-import { Query } from '@kbn/es-query';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { Query } from '@kbn/es-query';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { getColorPalette } from '../synthetics/single_metric_config';
 import { FORMULA_COLUMN, RECORDS_FIELD } from '../constants';
-import { ColumnFilter, MetricOption } from '../../types';
-import { SeriesConfig } from '../../../../..';
+import type { ColumnFilter, MetricOption } from '../../types';
+import type { SeriesConfig } from '../../../../..';
+import type {
+  LayerConfig} from '../lens_attributes';
 import {
   buildNumberColumn,
-  LayerConfig,
   LensAttributes,
   parseCustomFieldName,
 } from '../lens_attributes';

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IngestDataCodeExamples } from '../types';
+import type { IngestDataCodeExamples } from '../types';
 
 import { JSIngestDataExample } from './javascript';
 import { PythonIngestDataExample } from './python';

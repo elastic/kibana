@@ -9,15 +9,16 @@ import { filter } from 'rxjs';
 import { get } from 'lodash';
 import dedent from 'dedent';
 import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { KibanaRequest, Logger } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
-import { ConnectorAdapter } from '@kbn/alerting-plugin/server';
+import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
 import {
   EmailParamsSchema,
   JiraParamsSchema,
@@ -25,17 +26,18 @@ import {
   SlackApiParamsSchema,
   WebhookParamsSchema,
 } from '@kbn/stack-connectors-plugin/server';
-import { ObservabilityAIAssistantRouteHandlerResources } from '@kbn/observability-ai-assistant-plugin/server/routes/types';
+import type { ObservabilityAIAssistantRouteHandlerResources } from '@kbn/observability-ai-assistant-plugin/server/routes/types';
+import type {
+  ChatCompletionChunkEvent} from '@kbn/observability-ai-assistant-plugin/common';
 import {
-  ChatCompletionChunkEvent,
   MessageRole,
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import { concatenateChatCompletionChunks } from '@kbn/observability-ai-assistant-plugin/common/utils/concatenate_chat_completion_chunks';
-import { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/common/functions/types';
-import { AlertDetailsContextualInsightsService } from '@kbn/observability-plugin/server/services';
+import type { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/common/functions/types';
+import type { AlertDetailsContextualInsightsService } from '@kbn/observability-plugin/server/services';
 import { getSystemMessageFromInstructions } from '@kbn/observability-ai-assistant-plugin/server/service/util/get_system_message_from_instructions';
-import { AdHocInstruction } from '@kbn/observability-ai-assistant-plugin/common/types';
+import type { AdHocInstruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { EXECUTE_CONNECTOR_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/execute_connector';
 import { convertSchemaToOpenApi } from './convert_schema_to_open_api';
 import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';

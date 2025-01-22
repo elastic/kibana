@@ -6,7 +6,7 @@
  */
 
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
-import { DEFAULT_ALERT_RESPONSE } from '../../../../../common/types/default_alerts';
+import type { DEFAULT_ALERT_RESPONSE } from '../../../../../common/types/default_alerts';
 import { apiService } from '../../../../utils/api_service';
 
 export async function getDefaultAlertingAPI(): Promise<DEFAULT_ALERT_RESPONSE> {

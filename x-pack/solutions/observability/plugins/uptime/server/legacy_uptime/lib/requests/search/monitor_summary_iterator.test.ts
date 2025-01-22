@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import type {
+  ChunkFetcher,
+  ChunkResult} from './monitor_summary_iterator';
 import {
   CHUNK_SIZE,
-  ChunkFetcher,
-  ChunkResult,
   MonitorSummaryIterator,
 } from './monitor_summary_iterator';
 import { simpleQueryContext } from './test_helpers';
-import { QueryContext } from './query_context';
-import { MonitorSummary } from '../../../../../common/runtime_types';
+import type { QueryContext } from './query_context';
+import type { MonitorSummary } from '../../../../../common/runtime_types';
 
 describe('iteration', () => {
   let iterator: MonitorSummaryIterator | null = null;

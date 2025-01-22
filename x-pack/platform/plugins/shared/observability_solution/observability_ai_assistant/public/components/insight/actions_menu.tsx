@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import { EuiButtonIcon, EuiContextMenu, EuiPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
+import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import { ConnectorSelectorBase } from '../connector_selector/connector_selector_base';
 
 export function ActionsMenu({

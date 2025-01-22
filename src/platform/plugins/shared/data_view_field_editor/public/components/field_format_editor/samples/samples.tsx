@@ -15,7 +15,7 @@ import { EuiBasicTable, EuiFormRow } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Sample } from '../types';
+import type { Sample } from '../types';
 
 interface FormatEditorSamplesProps {
   samples: Sample[];

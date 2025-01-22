@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
 import { toastAPIErrors } from '../../flash_messages';
 import { getErrorsFromHttpResponse } from '../../flash_messages/handle_api_errors';
 
 import { HttpLogic } from '../../http';
+import type {
+  InlineEditableTableProps as InlineEditableTableLogicProps} from '../inline_editable_table/inline_editable_table_logic';
 import {
-  InlineEditableTableLogic,
-  InlineEditableTableProps as InlineEditableTableLogicProps,
+  InlineEditableTableLogic
 } from '../inline_editable_table/inline_editable_table_logic';
 
-import { ItemWithAnID } from '../types';
+import type { ItemWithAnID } from '../types';
 
 import { stripIdAndCreatedAtFromItem } from './utils';
 

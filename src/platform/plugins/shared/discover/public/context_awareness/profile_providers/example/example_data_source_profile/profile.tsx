@@ -8,18 +8,20 @@
  */
 
 import { EuiBadge, EuiLink, EuiFlyout, EuiPanel } from '@elastic/eui';
+import type {
+  RowControlColumn} from '@kbn/discover-utils';
 import {
   AppMenuActionId,
   AppMenuActionType,
-  getFieldValue,
-  RowControlColumn,
+  getFieldValue
 } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { capitalize } from 'lodash';
 import React from 'react';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
-import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
+import type { DataSourceProfileProvider } from '../../../profiles';
+import { DataSourceCategory } from '../../../profiles';
 import { useExampleContext } from '../example_context';
 
 export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvider<{

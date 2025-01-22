@@ -6,16 +6,18 @@
  */
 
 import { EuiHeaderLink } from '@elastic/eui';
-import { LogsExplorerPublicState } from '@kbn/logs-explorer-plugin/public';
+import type { LogsExplorerPublicState } from '@kbn/logs-explorer-plugin/public';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import { LocatorPublic } from '@kbn/share-plugin/public';
-import { MatchedStateFromActor } from '@kbn/xstate-utils';
+import type { LocatorPublic } from '@kbn/share-plugin/public';
+import type { MatchedStateFromActor } from '@kbn/xstate-utils';
 import { useActor } from '@xstate/react';
 import React from 'react';
-import { DataQualityLocatorParams, DATA_QUALITY_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import type { DataQualityLocatorParams} from '@kbn/deeplinks-observability';
+import { DATA_QUALITY_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { datasetQualityLinkTitle } from '../../common/translations';
+import type {
+  ObservabilityLogsExplorerService} from '../state_machines/observability_logs_explorer/src';
 import {
-  ObservabilityLogsExplorerService,
   useObservabilityLogsExplorerPageStateContext,
 } from '../state_machines/observability_logs_explorer/src';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';

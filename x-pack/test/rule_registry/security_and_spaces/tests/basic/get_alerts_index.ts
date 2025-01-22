@@ -14,7 +14,7 @@ import {
   stackAlertsOnlyReadSpacesAll,
 } from '../../../common/lib/authentication/users';
 import type { User } from '../../../common/lib/authentication/types';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { getSpaceUrlPrefix } from '../../../common/lib/authentication/spaces';
 
 // eslint-disable-next-line import/no-default-export

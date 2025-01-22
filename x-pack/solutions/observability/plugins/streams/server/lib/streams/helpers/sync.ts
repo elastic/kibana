@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { IScopedClusterClient, Logger } from '@kbn/core/server';
-import {
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type {
   IngestStreamDefinition,
   StreamDefinition,
   WiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { isResponseError } from '@kbn/es-errors';
-import {
+import type {
   IndicesDataStream,
   IngestPipeline,
   IngestProcessorContainer,

@@ -7,12 +7,13 @@
 
 import { SPACES, ALL_SPACES_ID } from '../../common/lib/spaces';
 import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
-import { TestUser } from '../../common/lib/types';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { TestUser } from '../../common/lib/types';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
+import type {
+  BulkCreateTestDefinition} from '../../common/suites/bulk_create';
 import {
   bulkCreateTestSuiteFactory,
-  TEST_CASES as CASES,
-  BulkCreateTestDefinition,
+  TEST_CASES as CASES
 } from '../../common/suites/bulk_create';
 
 const {

@@ -13,7 +13,7 @@ import React, { useRef, Suspense, useEffect } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
 import { PackageList, fetchAvailablePackagesHook } from './lazy';
 import { useIntegrationCardList } from './use_integration_card_list';
-import { CustomCard } from './types';
+import type { CustomCard } from './types';
 
 interface Props {
   /**

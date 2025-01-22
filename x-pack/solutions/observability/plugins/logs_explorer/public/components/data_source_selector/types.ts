@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
+import type { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
 import type {
   DataSourceSelectionChangeHandler,
   DataSourceSelection,
   AllDatasetSelection,
 } from '../../../common/data_source_selection';
-import { SortOrder } from '../../../common/latest';
-import { Dataset, Integration, IntegrationId } from '../../../common/datasets';
-import { DataViewDescriptor } from '../../../common/data_views/models/data_view_descriptor';
-import { LoadDatasets, ReloadDatasets, SearchDatasets } from '../../hooks/use_datasets';
-import {
+import type { SortOrder } from '../../../common/latest';
+import type { Dataset, Integration, IntegrationId } from '../../../common/datasets';
+import type { DataViewDescriptor } from '../../../common/data_views/models/data_view_descriptor';
+import type { LoadDatasets, ReloadDatasets, SearchDatasets } from '../../hooks/use_datasets';
+import type {
   LoadMoreIntegrations,
   ReloadIntegrations,
   SearchIntegrations,
 } from '../../hooks/use_integrations';
-import {
+import type {
   DATA_VIEWS_TAB_ID,
   INTEGRATIONS_PANEL_ID,
   INTEGRATIONS_TAB_ID,
   UNCATEGORIZED_TAB_ID,
 } from './constants';
-import {
+import type {
   FilterDataViews,
   IsDataViewAllowed,
   IsDataViewAvailable,
@@ -34,8 +34,8 @@ import {
   ReloadDataViews,
   SearchDataViews,
 } from '../../hooks/use_data_views';
-import { DiscoverEsqlUrlProps } from '../../hooks/use_esql';
-import { DataViewsFilterParams } from '../../state_machines/data_views';
+import type { DiscoverEsqlUrlProps } from '../../hooks/use_esql';
+import type { DataViewsFilterParams } from '../../state_machines/data_views';
 
 export interface DataSourceSelectorProps {
   /* The generic data stream list */

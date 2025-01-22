@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { LogMessageColumn } from '../../../../common/log_entry';
+import type { LogMessageColumn } from '../../../../common/log_entry';
 import { LogEntryMessageColumn } from './log_entry_message_column';
 
 describe('LogEntryMessageColumn', () => {

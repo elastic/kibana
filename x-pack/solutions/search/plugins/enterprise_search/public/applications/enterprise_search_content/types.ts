@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ElasticsearchIndex, ElasticsearchViewIndexExtension } from '@kbn/search-connectors';
+import type { ElasticsearchIndex, ElasticsearchViewIndexExtension } from '@kbn/search-connectors';
 
-import { ConnectorIndex } from '@kbn/search-connectors/types/indices';
+import type { ConnectorIndex } from '@kbn/search-connectors/types/indices';
 
-import { CrawlerIndex } from '../../../common/types/indices';
+import type { CrawlerIndex } from '../../../common/types/indices';
 
 export type ConnectorViewIndex = ConnectorIndex & ElasticsearchViewIndexExtension;
 

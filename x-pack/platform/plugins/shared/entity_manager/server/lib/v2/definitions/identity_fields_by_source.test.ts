@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityV2 } from '@kbn/entities-schema';
+import type { EntityV2 } from '@kbn/entities-schema';
 import { readSourceDefinitions } from './source_definition';
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';

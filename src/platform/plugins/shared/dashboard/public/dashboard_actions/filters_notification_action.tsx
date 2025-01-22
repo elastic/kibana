@@ -12,18 +12,20 @@ import { merge } from 'rxjs';
 
 import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import {
-  apiPublishesPartialUnifiedSearch,
-  apiHasUniqueId,
+import type {
   EmbeddableApiContext,
   HasParentApi,
   HasUniqueId,
   PublishesDataViews,
   PublishesUnifiedSearch,
   CanLockHoverActions,
-  CanAccessViewMode,
+  CanAccessViewMode} from '@kbn/presentation-publishing';
+import {
+  apiPublishesPartialUnifiedSearch,
+  apiHasUniqueId
 } from '@kbn/presentation-publishing';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import type { Action} from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { coreServices } from '../services/kibana_services';
 import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';

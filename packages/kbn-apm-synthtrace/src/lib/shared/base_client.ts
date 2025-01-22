@@ -7,17 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Client } from '@elastic/elasticsearch';
-import {
+import type { Client } from '@elastic/elasticsearch';
+import type {
   ESDocumentWithOperation,
   Fields,
   SynthtraceESAction,
   SynthtraceGenerator,
 } from '@kbn/apm-synthtrace-client';
 import { castArray, isFunction } from 'lodash';
-import { Readable, Transform } from 'stream';
+import type { Transform } from 'stream';
+import { Readable } from 'stream';
 import { isGeneratorObject } from 'util/types';
-import { Logger } from '../utils/create_logger';
+import type { Logger } from '../utils/create_logger';
 import { sequential } from '../utils/stream_utils';
 
 export interface SynthtraceEsClientOptions {

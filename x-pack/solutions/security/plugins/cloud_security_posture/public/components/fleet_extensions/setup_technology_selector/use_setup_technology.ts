@@ -6,7 +6,7 @@
  */
 import { useState } from 'react';
 
-import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { CLOUDBEAT_AWS, CLOUDBEAT_GCP, CLOUDBEAT_AZURE } from '../../../../common/constants';
 

@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import supertest from 'supertest';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type supertest from 'supertest';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const createPdfV2Params = (testWidth: number | string, layoutId = 'preserve_layout') =>
   `(browserTimezone:UTC,layout:` +

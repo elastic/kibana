@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiSwitchEvent, EuiSwitch, EuiIcon } from '@elastic/eui';
+import type { EuiSwitchEvent} from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiIcon } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type {
+  PaletteRegistry} from '@kbn/coloring';
 import {
-  PaletteRegistry,
   CustomizablePalette,
   CUSTOM_PALETTE,
   applyPaletteParams,

@@ -17,12 +17,12 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ViewMode } from '@kbn/presentation-publishing';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { SAVED_BOOK_ID } from '../../react_embeddables/saved_book/constants';
-import {
+import type {
   BookApi,
   BookRuntimeState,
   BookSerializedState,

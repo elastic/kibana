@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CasesPermissions } from '@kbn/cases-plugin/common';
+import type { CasesPermissions } from '@kbn/cases-plugin/common';
 import { EMPTY_VALUE } from '../../../constants/common';
 import { useKibana } from '../../../hooks/use_kibana';
 

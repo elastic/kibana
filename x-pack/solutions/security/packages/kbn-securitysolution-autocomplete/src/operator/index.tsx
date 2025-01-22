@@ -6,14 +6,16 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import { OperatorOption } from '@kbn/securitysolution-list-utils';
-import { DataViewFieldBase } from '@kbn/es-query';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
+import type { OperatorOption } from '@kbn/securitysolution-list-utils';
+import type { DataViewFieldBase } from '@kbn/es-query';
 
 import { getOperators } from '../get_operators';
+import type {
+  GetGenericComboBoxPropsReturn} from '../get_generic_combo_box_props';
 import {
-  getGenericComboBoxProps,
-  GetGenericComboBoxPropsReturn,
+  getGenericComboBoxProps
 } from '../get_generic_combo_box_props';
 
 const AS_PLAIN_TEXT = { asPlainText: true };

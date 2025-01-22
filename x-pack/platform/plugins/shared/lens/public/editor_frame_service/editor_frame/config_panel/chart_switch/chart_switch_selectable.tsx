@@ -5,12 +5,13 @@
  * 2.0.
  */
 import React from 'react';
-import {
-  EuiSelectable,
-  EuiPopoverTitle,
+import type {
   EuiSelectableOption,
   EuiSelectableProps,
-  IconType,
+  IconType} from '@elastic/eui';
+import {
+  EuiSelectable,
+  EuiPopoverTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

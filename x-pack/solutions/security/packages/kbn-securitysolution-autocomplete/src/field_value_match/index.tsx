@@ -6,14 +6,15 @@
  */
 
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import type {
+  EuiComboBoxOptionOption} from '@elastic/eui';
 import {
   EuiSuperSelect,
   EuiFormRow,
   EuiFieldNumber,
-  EuiComboBoxOptionOption,
   EuiComboBox,
 } from '@elastic/eui';
-import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 
 import { uniq } from 'lodash';
 
@@ -26,9 +27,10 @@ type AutocompleteStart = any;
 
 import * as i18n from '../translations';
 import { useFieldValueAutocomplete } from '../hooks/use_field_value_autocomplete';
+import type {
+  GetGenericComboBoxPropsReturn} from '../get_generic_combo_box_props';
 import {
-  getGenericComboBoxProps,
-  GetGenericComboBoxPropsReturn,
+  getGenericComboBoxProps
 } from '../get_generic_combo_box_props';
 import { paramIsValid } from '../param_is_valid';
 import { paramContainsSpace } from '../param_contains_space';

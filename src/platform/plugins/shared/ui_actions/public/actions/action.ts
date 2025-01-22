@@ -9,7 +9,7 @@
 
 import type { Presentable } from '@kbn/ui-actions-browser/src/types';
 import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 
 /**
  * During action execution we can provide additional information,

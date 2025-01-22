@@ -7,13 +7,14 @@
 
 import React, { useCallback } from 'react';
 
-import { EuiBasicTable, EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { TaskTypes } from '../../../common/types';
+import type { EuiBasicTableColumn} from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import type { TaskTypes } from '../../../common/types';
 import * as i18n from '../../../common/translations';
 
 import { useTableData } from '../../hooks/use_table_data';
-import { FilterOptions, InferenceEndpointUI } from './types';
+import type { FilterOptions, InferenceEndpointUI } from './types';
 
 import { useAllInferenceEndpointsState } from '../../hooks/use_all_inference_endpoints_state';
 import { ServiceProviderFilter } from './filter/service_provider_filter';

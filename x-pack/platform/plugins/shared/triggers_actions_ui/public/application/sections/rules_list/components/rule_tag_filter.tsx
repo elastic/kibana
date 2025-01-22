@@ -8,13 +8,14 @@
 import React, { memo, useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type {
+  EuiSelectableProps,
+  EuiSelectableOption} from '@elastic/eui';
 import {
   EuiSelectable,
   EuiFilterButton,
   EuiFilterGroup,
   EuiPopover,
-  EuiSelectableProps,
-  EuiSelectableOption,
   EuiSpacer,
 } from '@elastic/eui';
 import { useLoadTagsQuery } from '../../../hooks/use_load_tags_query';

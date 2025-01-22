@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { PutTransformsRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/transforms';
+import type { PutTransformsRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/transforms';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import {
   ALERT_ACTION_GROUP,
@@ -20,7 +20,7 @@ import {
   EVENT_ACTION,
 } from '@kbn/rule-data-utils';
 import { TRANSFORM_HEALTH_RESULTS } from '@kbn/transform-plugin/common/constants';
-import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
 import { Spaces } from '../../../../../scenarios';
 

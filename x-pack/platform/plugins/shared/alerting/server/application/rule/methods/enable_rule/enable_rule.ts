@@ -7,12 +7,12 @@
 import Boom from '@hapi/boom';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { RawRule, IntervalSchedule } from '../../../../types';
+import type { RawRule, IntervalSchedule } from '../../../../types';
 import { resetMonitoringLastRun, getNextRun } from '../../../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { RulesClientContext } from '../../../../rules_client/types';
+import type { RulesClientContext } from '../../../../rules_client/types';
 import {
   updateMeta,
   createNewAPIKeySet,
@@ -22,7 +22,7 @@ import {
 import { validateScheduleLimit } from '../get_schedule_frequency';
 import { getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { EnableRuleParams } from './types';
+import type { EnableRuleParams } from './types';
 import { enableRuleParamsSchema } from './schemas';
 
 export async function enableRule(

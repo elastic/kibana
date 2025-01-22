@@ -6,17 +6,18 @@
  */
 
 import React from 'react';
+import type {
+  EuiFlexGroupProps} from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
-  EuiFlexGroupProps,
+  EuiPanel
 } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import { AllDatasetSelection } from '../../../../common';
-import { DiscoverEsqlUrlProps } from '../../../hooks/use_esql';
+import type { AllDatasetSelection } from '../../../../common';
+import type { DiscoverEsqlUrlProps } from '../../../hooks/use_esql';
 import { createAllLogsItem } from '../utils';
 import { showAllLogsLabel, tryEsql } from '../constants';
 

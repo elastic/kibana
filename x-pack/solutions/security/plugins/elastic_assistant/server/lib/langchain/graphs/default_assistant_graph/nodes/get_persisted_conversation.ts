@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AgentState, NodeParamsBase } from '../types';
-import { AIAssistantConversationsDataClient } from '../../../../../ai_assistant_data_clients/conversations';
+import type { AgentState, NodeParamsBase } from '../types';
+import type { AIAssistantConversationsDataClient } from '../../../../../ai_assistant_data_clients/conversations';
 import { getLangChainMessages } from '../../../helpers';
 import { NodeType } from '../constants';
 

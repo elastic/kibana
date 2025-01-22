@@ -7,7 +7,7 @@
 
 import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
-import { AlertEventResponse } from '@kbn/investigation-shared';
+import type { AlertEventResponse } from '@kbn/investigation-shared';
 import moment from 'moment';
 import React from 'react';
 

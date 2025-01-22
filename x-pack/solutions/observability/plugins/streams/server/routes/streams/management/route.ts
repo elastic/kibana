@@ -22,7 +22,7 @@ import { MalformedStreamId } from '../../../lib/streams/errors/malformed_stream_
 import { validateCondition } from '../../../lib/streams/helpers/condition_fields';
 import { conditionToQueryDsl } from '../../../lib/streams/helpers/condition_to_query_dsl';
 import { getFields } from '../../../lib/streams/helpers/condition_fields';
-import { ResyncStreamsResponse } from '../../../lib/streams/client';
+import type { ResyncStreamsResponse } from '../../../lib/streams/client';
 
 export const forkStreamsRoute = createServerRoute({
   endpoint: 'POST /api/streams/{id}/_fork',

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { AlertTableConfigRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/alert_table_config_registry';
+import type { AlertTableConfigRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/alert_table_config_registry';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
-import { HttpSetup } from '@kbn/core-http-browser';
-import { NotificationsStart } from '@kbn/core-notifications-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import { RELATED_ALERTS_TABLE_CONFIG_ID } from '../../constants';
 import type { ConfigSchema } from '../../plugin';
-import { ObservabilityRuleTypeRegistry } from '../..';
+import type { ObservabilityRuleTypeRegistry } from '../..';
 import { getAlertsPageTableConfiguration } from './alerts/get_alerts_page_table_configuration';
 import { getRuleDetailsTableConfiguration } from './rule_details/get_rule_details_table_configuration';
 import { getSloAlertsTableConfiguration } from './slo/get_slo_alerts_table_configuration';

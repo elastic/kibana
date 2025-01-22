@@ -9,7 +9,8 @@ import * as api from './apis/bulk_get_cases';
 import { waitFor, renderHook } from '@testing-library/react';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useBulkGetCases } from './use_bulk_get_cases';
-import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
+import type { AppMockRenderer} from '../../test_utils';
+import { createAppMockRenderer } from '../../test_utils';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 
 jest.mock('./apis/bulk_get_cases');

@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Either, isLeft, mapLeft } from 'fp-ts/lib/Either';
+import type { Either} from 'fp-ts/lib/Either';
+import { isLeft, mapLeft } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { fromEither, TaskEither } from 'fp-ts/lib/TaskEither';
+import type { TaskEither } from 'fp-ts/lib/TaskEither';
+import { fromEither } from 'fp-ts/lib/TaskEither';
 import * as t from 'io-ts';
 import { exactCheck } from '../exact_check';
 import { formatErrors } from '../format_errors';

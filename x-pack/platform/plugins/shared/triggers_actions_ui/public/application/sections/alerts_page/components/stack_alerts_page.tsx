@@ -24,10 +24,10 @@ import {
   isSiemRuleType,
 } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { BoolQuery, Filter } from '@kbn/es-query';
+import type { BoolQuery, Filter } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERTS_PAGE_ID } from '../../../../common/constants';
-import { QuickFiltersMenuItem } from '../../alerts_search_bar/quick_filters';
+import type { QuickFiltersMenuItem } from '../../alerts_search_bar/quick_filters';
 import { NoPermissionPrompt } from '../../../components/prompts/no_permission_prompt';
 import { ALERT_TABLE_GLOBAL_CONFIG_ID } from '../../../constants';
 import { useRuleStats } from '../hooks/use_rule_stats';
@@ -41,19 +41,21 @@ import {
   Provider,
 } from '../../alerts_search_bar/use_alert_search_bar_state_container';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
+import type {
+  AlertsFeatureIdsFilter} from '../../../lib/search_filters';
 import {
-  AlertsFeatureIdsFilter,
   createMatchPhraseFilter,
   createRuleTypesFilter,
 } from '../../../lib/search_filters';
 import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query';
 import { nonNullable } from '../../../../../common/utils';
+import type {
+  RuleTypeIdsByFeatureId} from '../hooks/use_rule_type_ids_by_feature_id';
 import {
-  RuleTypeIdsByFeatureId,
   useRuleTypeIdsByFeatureId,
 } from '../hooks/use_rule_type_ids_by_feature_id';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../../translations';
-import { AlertsTableSupportedConsumers } from '../../alerts_table/types';
+import type { AlertsTableSupportedConsumers } from '../../alerts_table/types';
 import { NON_SIEM_CONSUMERS } from '../../alerts_search_bar/constants';
 
 const AlertsTable = lazy(() => import('../../alerts_table/alerts_table_state'));

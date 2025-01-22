@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import {
-  buildEsQuery as kbnBuildEsQuery,
+import type {
   EsQueryConfig,
   Filter,
   Query,
-  TimeRange,
+  TimeRange} from '@kbn/es-query';
+import {
+  buildEsQuery as kbnBuildEsQuery
 } from '@kbn/es-query';
 import { ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
 import { getTime } from '@kbn/data-plugin/common';

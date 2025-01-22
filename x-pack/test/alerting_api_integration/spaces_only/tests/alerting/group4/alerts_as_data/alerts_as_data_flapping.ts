@@ -6,20 +6,21 @@
  */
 
 import expect from '@kbn/expect';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { ALERT_FLAPPING, ALERT_FLAPPING_HISTORY, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { Spaces } from '../../../../scenarios';
+import type {
+  TaskManagerDoc} from '../../../../../common/lib';
 import {
   getEventLog,
   getTestRuleData,
   getUrlPrefix,
   ObjectRemover,
-  resetRulesSettings,
-  TaskManagerDoc,
+  resetRulesSettings
 } from '../../../../../common/lib';
 import { TEST_CACHE_EXPIRATION_TIME } from '../../create_test_data';
 

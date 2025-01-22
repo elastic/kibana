@@ -21,8 +21,9 @@ import { KibanaLogic } from '../../../../../../shared/kibana';
 
 import { TRAINED_MODELS_PATH } from '../utils';
 
+import type {
+  TextExpansionCallOutState} from './text_expansion_callout';
 import {
-  TextExpansionCallOutState,
   TextExpansionDismissButton,
   FineTuneModelsButton,
 } from './text_expansion_callout';

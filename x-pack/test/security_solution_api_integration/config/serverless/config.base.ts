@@ -6,7 +6,7 @@
  */
 import path from 'path';
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
 

@@ -10,9 +10,9 @@ import { omit } from 'lodash';
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import moment from 'moment';
-import { PrivateLocation } from '@kbn/synthetics-plugin/common/runtime_types';
+import type { PrivateLocation } from '@kbn/synthetics-plugin/common/runtime_types';
 import { LOCATION_REQUIRED_ERROR } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/monitor_validation';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { addMonitorAPIHelper, omitMonitorKeys } from './add_monitor';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 

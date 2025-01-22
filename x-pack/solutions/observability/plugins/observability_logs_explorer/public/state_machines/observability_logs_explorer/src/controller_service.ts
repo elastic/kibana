@@ -6,7 +6,7 @@
  */
 
 import type { CreateLogsExplorerController } from '@kbn/logs-explorer-plugin/public';
-import { LogsExplorerPublicEvent } from '@kbn/logs-explorer-plugin/public/controller';
+import type { LogsExplorerPublicEvent } from '@kbn/logs-explorer-plugin/public/controller';
 import type { InvokeCreator } from 'xstate';
 import type { ObservabilityLogsExplorerContext, ObservabilityLogsExplorerEvent } from './types';
 

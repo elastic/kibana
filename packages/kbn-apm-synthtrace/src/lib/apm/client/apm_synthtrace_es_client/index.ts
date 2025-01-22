@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Client, estypes } from '@elastic/elasticsearch';
-import { ApmFields } from '@kbn/apm-synthtrace-client';
-import { ValuesType } from 'utility-types';
-import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../../../shared/base_client';
-import { Logger } from '../../../utils/create_logger';
+import type { Client, estypes } from '@elastic/elasticsearch';
+import type { ApmFields } from '@kbn/apm-synthtrace-client';
+import type { ValuesType } from 'utility-types';
+import type { SynthtraceEsClientOptions } from '../../../shared/base_client';
+import { SynthtraceEsClient } from '../../../shared/base_client';
+import type { Logger } from '../../../utils/create_logger';
 import { apmPipeline } from './apm_pipeline';
 
 export enum ComponentTemplateName {

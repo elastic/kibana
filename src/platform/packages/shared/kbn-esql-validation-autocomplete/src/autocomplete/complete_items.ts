@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { ItemKind, SuggestionRawDefinition } from './types';
 import { builtinFunctions } from '../definitions/builtin';
 import { getOperatorSuggestion, TRIGGER_SUGGESTION_COMMAND } from './factories';
-import { CommandDefinition, CommandTypeDefinition } from '../definitions/types';
+import type { CommandDefinition, CommandTypeDefinition } from '../definitions/types';
 import { getCommandDefinition } from '../shared/helpers';
 import { getCommandSignature } from '../definitions/helpers';
 import { buildDocumentation } from './documentation_util';

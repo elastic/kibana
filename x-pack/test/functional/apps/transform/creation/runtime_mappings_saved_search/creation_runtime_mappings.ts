@@ -7,16 +7,17 @@
 
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 import type { HistogramCharts } from '../../../../services/transform/wizard';
 
-import {
+import type {
   GroupByEntry,
-  isLatestTransformTestData,
-  isPivotTransformTestData,
   LatestTransformTestData,
-  PivotTransformTestData,
+  PivotTransformTestData} from '../../helpers';
+import {
+  isLatestTransformTestData,
+  isPivotTransformTestData
 } from '../../helpers';
 
 export default function ({ getService }: FtrProviderContext) {

@@ -6,7 +6,7 @@
  */
 import { notImplemented } from '@hapi/boom';
 import * as t from 'io-ts';
-import { Conversation } from '../../../common/types';
+import type { Conversation } from '../../../common/types';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { conversationCreateRt, conversationUpdateRt } from '../runtime_types';
 

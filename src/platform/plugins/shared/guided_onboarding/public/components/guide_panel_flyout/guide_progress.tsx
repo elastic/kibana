@@ -13,7 +13,7 @@ import type { GuideConfig, GuideStep as GuideStepType, StepConfig } from '@kbn/g
 import { i18n } from '@kbn/i18n';
 import { GuideStep } from '../guide_panel_step';
 import type { PluginState } from '../../../common';
-import { getGuidePanelStyles } from '../guide_panel.styles';
+import type { getGuidePanelStyles } from '../guide_panel.styles';
 
 export const GuideProgress = ({
   guideConfig,

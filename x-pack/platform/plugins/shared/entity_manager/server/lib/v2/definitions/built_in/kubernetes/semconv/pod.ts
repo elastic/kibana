@@ -7,7 +7,7 @@
 
 import { BUILT_IN_ID_PREFIX } from '../../constants';
 import { commonOtelIndexPatterns } from './otel_index_patterns';
-import { BuiltInDefinition } from '../../../../types';
+import type { BuiltInDefinition } from '../../../../types';
 
 export const builtInKubernetesPodSemConvEntityDefinition: BuiltInDefinition = {
   type: {

@@ -7,8 +7,8 @@
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiComboBox } from '@elastic/eui';
-import { FieldSpec } from '@kbn/data-views-plugin/common';
-import { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
 import { RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { useStyles } from './styles';
 import { DROPDOWN_TEST_ID } from './test_ids';

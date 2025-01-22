@@ -6,24 +6,25 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { merge } from 'lodash';
 
 import { coerce } from 'semver';
-import { Plugin } from './plugin';
-import { EsContext } from './es';
-import { EventLogService } from './event_log_service';
+import type { Plugin } from './plugin';
+import type { EsContext } from './es';
+import type { EventLogService } from './event_log_service';
 import { millisToNanos } from '../common';
-import {
+import type {
   IEvent,
   IValidatedEvent,
   IEventLogger,
-  IEventLogService,
+  IEventLogService} from './types';
+import {
   ECS_VERSION,
   EventSchema,
 } from './types';
 import { SAVED_OBJECT_REL_PRIMARY } from './types';
-import { Doc } from './es/cluster_client_adapter';
+import type { Doc } from './es/cluster_client_adapter';
 
 type SystemLogger = Plugin['systemLogger'];
 

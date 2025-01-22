@@ -9,7 +9,7 @@
 
 import { EuiMarkdownEditor, EuiMarkdownFormat, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   initializeTitles,
@@ -19,7 +19,7 @@ import {
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { EUI_MARKDOWN_ID } from './constants';
-import {
+import type {
   MarkdownEditorApi,
   MarkdownEditorRuntimeState,
   MarkdownEditorSerializedState,

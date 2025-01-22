@@ -6,8 +6,8 @@
  */
 import type { IKibanaSearchResponse, IEsSearchRequest } from '@kbn/search-types';
 import { isRunningResponse } from '@kbn/data-plugin/common';
-import { ISearchStart } from '@kbn/data-plugin/public';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { ISearchStart } from '@kbn/data-plugin/public';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME } from '../../common/constants';
 
 interface SearchOptions {

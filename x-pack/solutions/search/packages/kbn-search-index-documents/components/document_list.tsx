@@ -9,6 +9,8 @@ import React, { useState } from 'react';
 
 import type { IndicesGetMappingResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 
+import type {
+  Pagination} from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiCallOut,
@@ -20,8 +22,7 @@ import {
   EuiProgress,
   EuiPopover,
   EuiText,
-  EuiSpacer,
-  Pagination,
+  EuiSpacer
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

@@ -14,7 +14,8 @@ import {
   INTERVAL_AFTER_BLOCK_EXCEPTION,
 } from './create_managed_configuration';
 import { mockLogger } from '../test_utils';
-import { CLAIM_STRATEGY_UPDATE_BY_QUERY, CLAIM_STRATEGY_MGET, TaskManagerConfig } from '../config';
+import type { TaskManagerConfig } from '../config';
+import { CLAIM_STRATEGY_UPDATE_BY_QUERY, CLAIM_STRATEGY_MGET } from '../config';
 import { MsearchError } from './msearch_error';
 import { BulkUpdateError } from './bulk_update_error';
 

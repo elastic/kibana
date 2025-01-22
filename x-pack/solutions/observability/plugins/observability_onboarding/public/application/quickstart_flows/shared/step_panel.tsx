@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
+import type {
+  EuiPanelProps} from '@elastic/eui';
 import {
-  EuiPanelProps,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiModalBody,

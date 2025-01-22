@@ -6,9 +6,9 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
+import type { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { BoolQuery, Filter } from '@kbn/es-query';
+import type { BoolQuery, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
@@ -22,13 +22,13 @@ import { renderGroupPanel } from '../../components/alerts_table/grouping/render_
 import { getGroupStats } from '../../components/alerts_table/grouping/get_group_stats';
 import { getAggregationsByGroupingField } from '../../components/alerts_table/grouping/get_aggregations_by_grouping_field';
 import { DEFAULT_GROUPING_OPTIONS } from '../../components/alerts_table/grouping/constants';
-import { AlertsByGroupingAgg } from '../../components/alerts_table/types';
+import type { AlertsByGroupingAgg } from '../../components/alerts_table/types';
 import { ObservabilityAlertSearchBar } from '../../components/alert_search_bar/alert_search_bar';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
 import { useToasts } from '../../hooks/use_toast';
-import { RulesParams } from '../../locators/rules';
+import type { RulesParams } from '../../locators/rules';
 import { useKibana } from '../../utils/kibana_react';
 import {
   alertSearchBarStateContainer,
@@ -46,7 +46,8 @@ import { ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID } from '../../constants';
 import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { buildEsQuery } from '../../utils/build_es_query';
-import { renderRuleStats, RuleStatsState } from './components/rule_stats';
+import type { RuleStatsState } from './components/rule_stats';
+import { renderRuleStats } from './components/rule_stats';
 import { mergeBoolQueries } from './helpers/merge_bool_queries';
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';

@@ -12,8 +12,8 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiTextArea, EuiFormRow, EuiSpacer, EuiSelect } from '@elastic/eui';
 import type { RuleFormParamsErrors } from '@kbn/response-ops-rule-form';
-import { ActionVariable } from '@kbn/alerting-types';
-import {
+import type { ActionVariable } from '@kbn/alerting-types';
+import type {
   ChatCompleteParams,
   RerankParams,
   SparseEmbeddingParams,
@@ -23,7 +23,7 @@ import {
 import { DEFAULTS_BY_TASK_TYPE } from './constants';
 import * as i18n from './translations';
 import { SUB_ACTION } from '../../../common/inference/constants';
-import { InferenceActionConnector, InferenceActionParams } from './types';
+import type { InferenceActionConnector, InferenceActionParams } from './types';
 
 const InferenceServiceParamsFields: React.FunctionComponent<
   ActionParamsProps<InferenceActionParams>

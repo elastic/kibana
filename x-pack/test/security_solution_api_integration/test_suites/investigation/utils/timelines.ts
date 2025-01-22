@@ -7,10 +7,11 @@
 
 import type SuperTest from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
-import {
+import type {
   GetTimelinesResponse,
   SavedTimeline,
-  SavedTimelineWithSavedObjectId,
+  SavedTimelineWithSavedObjectId} from '@kbn/security-solution-plugin/common/api/timeline';
+import {
   TimelineTypeEnum,
 } from '@kbn/security-solution-plugin/common/api/timeline';
 import {

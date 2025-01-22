@@ -16,7 +16,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { GenericEndpointInlineEditableTable } from '../../../../../shared/tables/generic_endpoint_inline_editable_table';
 
-import { CrawlerDomain } from '../../../../api/crawler/types';
+import type { CrawlerDomain } from '../../../../api/crawler/types';
 
 import { SitemapsTable } from './sitemaps_table';
 

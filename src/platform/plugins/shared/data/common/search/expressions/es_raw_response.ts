@@ -8,7 +8,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ExpressionTypeDefinition } from '@kbn/expressions-plugin/common';
+import type { ExpressionTypeDefinition } from '@kbn/expressions-plugin/common';
 
 const name = 'es_raw_response';
 

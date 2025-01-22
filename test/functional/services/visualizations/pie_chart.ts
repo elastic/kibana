@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { DebugState } from '@elastic/charts';
+import type { DebugState } from '@elastic/charts';
 import { FtrService } from '../../ftr_provider_context';
 
 const partitionVisChartSelector = 'partitionVisChart';

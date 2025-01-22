@@ -10,7 +10,7 @@
 import React from 'react';
 
 import { useBatchedPublishingSubjects as mockUseBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { DashboardPanelMap } from '../../../../common';
+import type { DashboardPanelMap } from '../../../../common';
 import {
   DashboardContext,
   useDashboardApi as mockUseDashboardApi,
@@ -19,7 +19,8 @@ import { DashboardInternalContext } from '../../../dashboard_api/use_dashboard_i
 import { buildMockDashboardApi } from '../../../mocks';
 import { DashboardGrid } from './dashboard_grid';
 import type { Props as DashboardGridItemProps } from './dashboard_grid_item';
-import { RenderResult, act, render, waitFor } from '@testing-library/react';
+import type { RenderResult} from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 
 jest.mock('./dashboard_grid_item', () => {
   return {

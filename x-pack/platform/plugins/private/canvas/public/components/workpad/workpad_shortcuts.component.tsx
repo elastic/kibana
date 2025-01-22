@@ -8,7 +8,7 @@ import React from 'react';
 // @ts-expect-error
 import { Shortcuts } from 'react-shortcuts';
 import { isTextInput } from '../../lib/is_text_input';
-import { Props } from './workpad.component';
+import type { Props } from './workpad.component';
 
 type ShortcutProps = Pick<
   Props,

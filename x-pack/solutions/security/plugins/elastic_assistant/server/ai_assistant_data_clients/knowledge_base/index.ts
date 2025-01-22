@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   MlTrainedModelDeploymentNodesStats,
   MlTrainedModelStats,
   SearchTotalHits,
@@ -14,24 +14,26 @@ import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { Document } from 'langchain/document';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import {
-  DocumentEntryType,
+import type {
   DocumentEntry,
   IndexEntry,
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
-  Metadata,
+  Metadata} from '@kbn/elastic-assistant-common';
+import {
+  DocumentEntryType
 } from '@kbn/elastic-assistant-common';
 import pRetry from 'p-retry';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { StructuredTool } from '@langchain/core/tools';
-import { AnalyticsServiceSetup, AuditLogger, ElasticsearchClient } from '@kbn/core/server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { StructuredTool } from '@langchain/core/tools';
+import type { AnalyticsServiceSetup, AuditLogger, ElasticsearchClient } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { map } from 'lodash';
-import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
-import { GetElser } from '../../types';
+import type { AIAssistantDataClientParams } from '..';
+import { AIAssistantDataClient } from '..';
+import type { GetElser } from '../../types';
 import { createKnowledgeBaseEntry, transformToCreateSchema } from './create_knowledge_base_entry';
-import { EsDocumentEntry, EsIndexEntry, EsKnowledgeBaseEntrySchema } from './types';
+import type { EsDocumentEntry, EsIndexEntry, EsKnowledgeBaseEntrySchema } from './types';
 import { transformESSearchToKnowledgeBaseEntry } from './transforms';
 import { SECURITY_LABS_RESOURCE, USER_RESOURCE } from '../../routes/knowledge_base/constants';
 import {

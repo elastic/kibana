@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HistoricalSummaryResponse } from '@kbn/slo-schema';
-import { ComponentStory } from '@storybook/react';
+import type { HistoricalSummaryResponse } from '@kbn/slo-schema';
+import type { ComponentStory } from '@storybook/react';
 import React from 'react';
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import {
@@ -17,7 +17,8 @@ import {
   historicalSummaryData,
   NO_DATA_TO_HEALTHY_ROLLING_SLO,
 } from '../../../data/slo/historical_summary_data';
-import { Props, SloSparkline as Component } from './slo_sparkline';
+import type { Props} from './slo_sparkline';
+import { SloSparkline as Component } from './slo_sparkline';
 
 export default {
   component: Component,

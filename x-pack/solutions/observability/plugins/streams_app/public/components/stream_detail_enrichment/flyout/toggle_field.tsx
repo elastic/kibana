@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { useController } from 'react-hook-form';
-import { EuiFormRow, EuiFormRowProps, EuiSwitch, htmlIdGenerator } from '@elastic/eui';
+import type { EuiFormRowProps} from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, htmlIdGenerator } from '@elastic/eui';
 
 interface ToggleFieldProps {
   helpText?: EuiFormRowProps['helpText'];

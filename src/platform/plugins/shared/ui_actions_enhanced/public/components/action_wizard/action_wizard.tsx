@@ -25,7 +25,7 @@ import {
   EuiBetaBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Trigger } from '@kbn/ui-actions-plugin/public';
+import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import {
   txtBetaActionFactoryLabel,
   txtBetaActionFactoryTooltip,
@@ -35,7 +35,7 @@ import {
   txtTriggerPickerHelpTooltip,
 } from './i18n';
 import './action_wizard.scss';
-import { ActionFactory, BaseActionConfig, BaseActionFactoryContext } from '../../dynamic_actions';
+import type { ActionFactory, BaseActionConfig, BaseActionFactoryContext } from '../../dynamic_actions';
 
 export interface ActionWizardProps<
   ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext

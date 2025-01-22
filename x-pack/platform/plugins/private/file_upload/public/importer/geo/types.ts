@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Feature } from 'geojson';
-import { ReactNode } from 'react';
-import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { IImporter } from '../types';
+import type { Feature } from 'geojson';
+import type { ReactNode } from 'react';
+import type { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import type { IImporter } from '../types';
 import type { ImportFailure } from '../../../common/types';
 
 export interface GeoFilePreview {

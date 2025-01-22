@@ -8,6 +8,8 @@
  */
 
 import React from 'react';
+import type {
+  EuiThemeComputed} from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -15,7 +17,6 @@ import {
   EuiProgress,
   EuiText,
   EuiTextBlockTruncate,
-  EuiThemeComputed,
   EuiToolTip,
   makeHighContrastColor,
   useEuiTheme,

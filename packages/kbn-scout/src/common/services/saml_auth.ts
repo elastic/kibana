@@ -15,10 +15,11 @@ import {
   readRolesDescriptorsFromResource,
 } from '@kbn/es';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { HostOptions, SamlSessionManager } from '@kbn/test';
-import { ToolingLog } from '@kbn/tooling-log';
-import { ScoutTestConfig } from '../../types';
-import { Protocol } from '../../playwright/types';
+import type { HostOptions} from '@kbn/test';
+import { SamlSessionManager } from '@kbn/test';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { ScoutTestConfig } from '../../types';
+import type { Protocol } from '../../playwright/types';
 import { serviceLoadedMsg } from '../../playwright/utils';
 
 const getResourceDirPath = (config: ScoutTestConfig) => {

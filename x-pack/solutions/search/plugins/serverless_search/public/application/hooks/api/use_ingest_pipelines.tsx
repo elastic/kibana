@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types';
 import { useKibanaServices } from '../use_kibana';
 
 export const useIngestPipelines = () => {

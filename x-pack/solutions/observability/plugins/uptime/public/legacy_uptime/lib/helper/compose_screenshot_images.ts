@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import {
-  isScreenshotBlockDoc,
+import type {
   ScreenshotRefImageData,
-  ScreenshotBlockCache,
+  ScreenshotBlockCache} from '../../../../common/runtime_types';
+import {
+  isScreenshotBlockDoc
 } from '../../../../common/runtime_types';
 
 /**

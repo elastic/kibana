@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import type { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
 import { PLUGIN_ID } from '../common/constants';

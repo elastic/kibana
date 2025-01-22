@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Page, test as base } from '@playwright/test';
+import type { Page} from '@playwright/test';
+import { test as base } from '@playwright/test';
 import { subj } from '@kbn/test-subj-selector';
-import { ScoutPage, KibanaUrl, ScoutTestFixtures, ScoutWorkerFixtures } from '../types';
+import type { ScoutPage, KibanaUrl, ScoutTestFixtures, ScoutWorkerFixtures } from '../types';
 
 /**
  * Instead of defining each method individually, we use a list of method names and loop through them, creating methods dynamically.

@@ -7,7 +7,7 @@
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import expect from '@kbn/expect';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 
 const testSpaceId = 'fleet_test_space';

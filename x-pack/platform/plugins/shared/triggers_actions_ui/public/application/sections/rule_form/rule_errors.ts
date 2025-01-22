@@ -6,9 +6,10 @@
  */
 import { isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { RuleNotifyWhen, SanitizedRuleAction } from '@kbn/alerting-plugin/common';
+import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { formatDuration, parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
-import {
+import type {
   RuleTypeModel,
   Rule,
   IErrorObject,
@@ -17,7 +18,7 @@ import {
   TriggersActionsUiConfig,
   RuleUiAction,
 } from '../../../types';
-import { InitialRule } from './rule_reducer';
+import type { InitialRule } from './rule_reducer';
 
 export function validateBaseProperties(
   ruleObject: InitialRule,

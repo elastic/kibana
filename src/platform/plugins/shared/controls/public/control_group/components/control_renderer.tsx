@@ -11,7 +11,7 @@ import React, { useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { StateComparators } from '@kbn/presentation-publishing';
+import type { StateComparators } from '@kbn/presentation-publishing';
 
 import type { DefaultControlState } from '../../../common';
 import { getControlFactory } from '../../control_factory_registry';

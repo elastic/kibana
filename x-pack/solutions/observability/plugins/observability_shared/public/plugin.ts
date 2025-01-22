@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
+import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
@@ -14,7 +14,7 @@ import type {
   SharePluginSetup,
   SharePluginStart,
 } from '@kbn/share-plugin/public';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';

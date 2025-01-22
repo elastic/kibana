@@ -6,9 +6,10 @@
  */
 import type SuperTest from 'supertest';
 
-import {
+import type {
   CoverageOverviewFilter,
-  CoverageOverviewResponse,
+  CoverageOverviewResponse} from '@kbn/security-solution-plugin/common/api/detection_engine';
+import {
   RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 

@@ -6,9 +6,9 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { DEFINITIONS_ALIAS, TEMPLATE_VERSION } from '../constants';
-import { InternalClusterClient } from '../types';
+import type { InternalClusterClient } from '../types';
 
 const definitionsIndexTemplate = {
   name: `${DEFINITIONS_ALIAS}-template`,

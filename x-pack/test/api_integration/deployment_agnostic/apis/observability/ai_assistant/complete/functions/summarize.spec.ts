@@ -7,8 +7,9 @@
 
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import expect from '@kbn/expect';
+import type {
+  LlmProxy} from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import {
-  LlmProxy,
   createLlmProxy,
 } from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';

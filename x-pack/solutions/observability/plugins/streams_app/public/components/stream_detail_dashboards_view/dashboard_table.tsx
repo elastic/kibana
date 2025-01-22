@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type {
+  EuiBasicTableColumn} from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -15,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import { useKibana } from '../../hooks/use_kibana';
 import { tagListToReferenceList } from './to_reference_list';

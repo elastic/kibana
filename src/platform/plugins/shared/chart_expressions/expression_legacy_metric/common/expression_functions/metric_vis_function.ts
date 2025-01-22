@@ -9,14 +9,15 @@
 
 import { i18n } from '@kbn/i18n';
 
+import type {
+  Dimension} from '@kbn/visualizations-plugin/common/utils';
 import {
   prepareLogTable,
-  Dimension,
   validateAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
 import { ColorMode } from '@kbn/charts-plugin/common';
 import { visType } from '../types';
-import { MetricVisExpressionFunctionDefinition } from '../types';
+import type { MetricVisExpressionFunctionDefinition } from '../types';
 import { EXPRESSION_METRIC_NAME, LabelPosition } from '../constants';
 
 const errors = {

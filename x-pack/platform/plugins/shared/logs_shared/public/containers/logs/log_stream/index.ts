@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { buildEsQuery } from '@kbn/es-query';
+import type { buildEsQuery } from '@kbn/es-query';
 import createContainer from 'constate';
 import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import useSetState from 'react-use/lib/useSetState';
-import { LogEntry, LogEntryCursor } from '../../../../common/log_entry';
-import { LogViewColumnConfiguration, LogViewReference } from '../../../../common/log_views';
+import type { LogEntry, LogEntryCursor } from '../../../../common/log_entry';
+import type { LogViewColumnConfiguration, LogViewReference } from '../../../../common/log_views';
 import { useSubscription } from '../../../utils/use_observable';
 import { useFetchLogEntriesAfter } from './use_fetch_log_entries_after';
 import { useFetchLogEntriesAround } from './use_fetch_log_entries_around';

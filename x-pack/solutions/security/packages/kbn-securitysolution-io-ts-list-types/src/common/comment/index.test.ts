@@ -8,12 +8,13 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import { getCommentsArrayMock, getCommentsMock } from './index.mock';
-import {
+import type {
   Comment,
-  comment,
   CommentsArray,
+  CommentsArrayOrUndefined} from '.';
+import {
+  comment,
   commentsArray,
-  CommentsArrayOrUndefined,
   commentsArrayOrUndefined,
 } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';

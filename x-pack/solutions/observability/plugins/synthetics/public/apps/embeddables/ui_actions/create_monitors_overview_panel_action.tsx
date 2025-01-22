@@ -10,10 +10,10 @@ import {
   IncompatibleActionError,
   type UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import { COMMON_OBSERVABILITY_GROUPING } from '@kbn/observability-shared-plugin/common';
-import { ClientPluginsStart } from '../../../plugin';
+import type { ClientPluginsStart } from '../../../plugin';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../constants';
 
 export const ADD_SYNTHETICS_MONITORS_OVERVIEW_ACTION_ID =

@@ -8,9 +8,10 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type {
+  EuiContextMenuPanelDescriptor} from '@elastic/eui';
 import {
   EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
   EuiHeaderLink,
   EuiPopover,
 } from '@elastic/eui';
@@ -21,7 +22,7 @@ import {
   SYNTHETICS_TLS_RULE,
 } from '../../../../../common/constants/synthetics_alerts';
 import { ManageRulesLink } from '../common/links/manage_rules_link';
-import { ClientPluginsStart } from '../../../../plugin';
+import type { ClientPluginsStart } from '../../../../plugin';
 import { STATUS_RULE_NAME, TLS_RULE_NAME, ToggleFlyoutTranslations } from './hooks/translations';
 import { useSyntheticsRules } from './hooks/use_synthetics_rules';
 import {

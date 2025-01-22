@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type {
+  MigrateFunctionsObject} from '@kbn/kibana-utils-plugin/common';
 import {
-  mergeMigrationFunctionMaps,
-  MigrateFunctionsObject,
+  mergeMigrationFunctionMaps
 } from '@kbn/kibana-utils-plugin/common';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { extract, inject } from '../../common/embeddable';

@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
+import type { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { coreServices } from '../services/kibana_services';
+import type {
+  LegacyUnlinkPanelFromLibraryActionApi} from './legacy_unlink_from_library_action';
 import {
-  LegacyUnlinkFromLibraryAction,
-  LegacyUnlinkPanelFromLibraryActionApi,
+  LegacyUnlinkFromLibraryAction
 } from './legacy_unlink_from_library_action';
 
 describe('Unlink from library action', () => {

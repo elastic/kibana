@@ -29,7 +29,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
 import { findLast } from 'lodash';
-import { KbnPalettes } from '@kbn/palettes';
+import type { KbnPalettes } from '@kbn/palettes';
 import { Assignment } from '../assignment/assignment';
 import {
   addNewAssignment,
@@ -37,8 +37,8 @@ import {
   removeAllAssignments,
 } from '../../state/color_mapping';
 import { selectColorMode, selectComputedAssignments, selectPalette } from '../../state/selectors';
-import { ColorMappingInputData } from '../../categorical_color_mapping';
-import { ColorMapping } from '../../config';
+import type { ColorMappingInputData } from '../../categorical_color_mapping';
+import type { ColorMapping } from '../../config';
 import { ruleMatch } from '../../color/rule_matching';
 
 export function AssignmentsConfig({

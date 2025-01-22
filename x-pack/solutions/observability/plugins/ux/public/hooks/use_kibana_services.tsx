@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { HttpStart, DocLinksStart, IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
+import type { HttpStart, DocLinksStart, IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ApmPluginStartDeps } from '../plugin';
+import type { ApmPluginStartDeps } from '../plugin';
 
 interface UxKibanaServices extends ApmPluginStartDeps {
   http: HttpStart;

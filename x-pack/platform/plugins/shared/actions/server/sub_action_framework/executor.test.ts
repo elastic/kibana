@@ -6,20 +6,21 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { MockedLogger } from '@kbn/logging-mocks';
-import { ActionsConfigurationUtilities } from '../actions_config';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import type { ActionsConfigurationUtilities } from '../actions_config';
 import { actionsConfigMock } from '../actions_config.mock';
 import { actionsMock } from '../mocks';
 import { buildExecutor } from './executor';
+import type {
+  TestConfig,
+  TestSecrets} from './mocks';
 import {
   TestSecretsSchema,
   TestConfigSchema,
   TestNoSubActions,
-  TestConfig,
-  TestSecrets,
   TestExecutor,
 } from './mocks';
-import { IService, ServiceParams } from './types';
+import type { IService, ServiceParams } from './types';
 import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { ConnectorUsageCollector } from '../usage';
 

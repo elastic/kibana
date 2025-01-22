@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PackagePolicy } from '@kbn/fleet-plugin/common';
-import { AgentPolicyServiceInterface, PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { AgentPolicyServiceInterface, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { NATIVE_CONNECTOR_DEFINITIONS, fetchConnectors } from '@kbn/search-connectors';
 import { getPackageInfo } from '@kbn/fleet-plugin/server/services/epm/packages';

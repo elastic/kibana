@@ -6,15 +6,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { QueryClientProviderProps, useQuery } from '@tanstack/react-query';
-import { MaintenanceWindow } from '@kbn/alerting-plugin/common';
+import type { QueryClientProviderProps} from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+import type { MaintenanceWindow } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
-import { ServerError } from '../types';
+import type { ServerError } from '../types';
 import { useLicense } from '../../../hooks/use_license';
 import { triggersActionsUiQueriesKeys } from '../../../hooks/constants';
+import type {
+  BulkGetMaintenanceWindowsResult} from './apis/bulk_get_maintenance_windows';
 import {
-  bulkGetMaintenanceWindows,
-  BulkGetMaintenanceWindowsResult,
+  bulkGetMaintenanceWindows
 } from './apis/bulk_get_maintenance_windows';
 
 const ERROR_TITLE = i18n.translate(

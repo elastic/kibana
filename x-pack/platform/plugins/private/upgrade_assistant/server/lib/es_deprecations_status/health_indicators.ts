@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient } from '@kbn/core/server';
-import { EnrichedDeprecationInfo } from '../../../common/types';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { EnrichedDeprecationInfo } from '../../../common/types';
 
 export async function getHealthIndicators(
   dataClient: IScopedClusterClient

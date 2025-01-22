@@ -9,6 +9,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type {
+  EuiSwitchEvent} from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiCode,
@@ -16,14 +18,14 @@ import {
   EuiFormRow,
   EuiIconTip,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import {
+import type {
   AggFunctionsMapping,
   AggParamOption,
-  IndexPatternAggRestrictions,
+  IndexPatternAggRestrictions} from '@kbn/data-plugin/public';
+import {
   search,
   UI_SETTINGS,
 } from '@kbn/data-plugin/public';
@@ -31,10 +33,10 @@ import { extendedBoundsToAst, intervalOptions } from '@kbn/data-plugin/common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import { updateColumnParam } from '../layer_helpers';
-import { FieldBasedOperationErrorMessage, OperationDefinition, ParamEditorProps } from '.';
-import { FieldBasedIndexPatternColumn } from './column_types';
+import type { FieldBasedOperationErrorMessage, OperationDefinition, ParamEditorProps } from '.';
+import type { FieldBasedIndexPatternColumn } from './column_types';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
-import { FormBasedLayer } from '../../types';
+import type { FormBasedLayer } from '../../types';
 import { TIME_SHIFT_MULTIPLE_DATE_HISTOGRAMS } from '../../../../user_messages_ids';
 
 const { isValidInterval } = search.aggs;

@@ -9,9 +9,10 @@ import React from 'react';
 
 import { SEARCH_PRODUCT_NAME } from '../../../../../common/constants';
 import { SetVectorSearchChrome } from '../../../shared/kibana_chrome';
+import type {
+  PageTemplateProps} from '../../../shared/layout';
 import {
   EnterpriseSearchPageTemplateWrapper,
-  PageTemplateProps,
   useEnterpriseSearchNav,
 } from '../../../shared/layout';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';

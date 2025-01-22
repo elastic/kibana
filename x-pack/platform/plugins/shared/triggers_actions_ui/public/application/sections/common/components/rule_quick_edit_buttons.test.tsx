@@ -7,7 +7,7 @@
 
 import * as React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { RuleTableItem } from '../../../../types';
+import type { RuleTableItem } from '../../../../types';
 import { RuleQuickEditButtonsWithApi as RuleQuickEditButtons } from './rule_quick_edit_buttons';
 
 jest.mock('../../../../common/lib/kibana', () => ({

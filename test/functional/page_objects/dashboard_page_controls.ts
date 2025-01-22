@@ -7,18 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  ControlWidth} from '@kbn/controls-plugin/common';
 import {
-  ControlWidth,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
 } from '@kbn/controls-plugin/common';
-import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common';
-import { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/suggestions_searching';
-import { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
+import type { ControlGroupChainingSystem } from '@kbn/controls-plugin/common';
+import type { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/suggestions_searching';
+import type { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 interface OptionsListAdditionalSettings {

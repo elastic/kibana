@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
-import { Connector } from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
 
-import { Status } from '../../../../../../../common/types/api';
+import type { Status } from '../../../../../../../common/types/api';
 
+import type {
+  UpdateHtmlExtractionActions} from '../../../../api/crawler/update_html_extraction_api_logic';
 import {
-  UpdateHtmlExtractionActions,
   UpdateHtmlExtractionApiLogic,
 } from '../../../../api/crawler/update_html_extraction_api_logic';
-import { CachedFetchIndexApiLogicActions } from '../../../../api/index/cached_fetch_index_api_logic';
+import type { CachedFetchIndexApiLogicActions } from '../../../../api/index/cached_fetch_index_api_logic';
 import { isCrawlerIndex } from '../../../../utils/indices';
 import { IndexViewLogic } from '../../index_view_logic';
 

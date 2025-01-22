@@ -8,8 +8,9 @@
  */
 
 import { SOURCE_COLUMN } from '@kbn/unified-data-table';
+import type {
+  SummaryColumnGetterDeps} from '../../../../components/data_types/logs/summary_column';
 import {
-  SummaryColumnGetterDeps,
   getSummaryColumn,
 } from '../../../../components/data_types/logs/summary_column';
 

@@ -7,9 +7,10 @@
 
 import { mockHttpValues } from '../../../__mocks__/kea_logic';
 
+import type {
+  DetachMlInferencePipelineResponse} from './detach_ml_inference_pipeline';
 import {
-  detachMlInferencePipeline,
-  DetachMlInferencePipelineResponse,
+  detachMlInferencePipeline
 } from './detach_ml_inference_pipeline';
 
 describe('DetachMlInferencePipelineApiLogic', () => {

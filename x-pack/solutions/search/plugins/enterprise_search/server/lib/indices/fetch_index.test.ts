@@ -6,7 +6,7 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 
 import { fetchConnectorByIndexName } from '@kbn/search-connectors';
 

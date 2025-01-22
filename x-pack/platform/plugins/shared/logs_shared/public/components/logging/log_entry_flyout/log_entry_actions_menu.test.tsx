@@ -6,19 +6,21 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
+import type {
+  TransactionDetailsByTraceIdLocatorParams,
+  UptimeOverviewLocatorInfraParams,
+  UptimeOverviewLocatorParams} from '@kbn/deeplinks-observability';
 import {
   TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR,
-  TransactionDetailsByTraceIdLocatorParams,
-  uptimeOverviewLocatorID,
-  UptimeOverviewLocatorInfraParams,
-  UptimeOverviewLocatorParams,
+  uptimeOverviewLocatorID
 } from '@kbn/deeplinks-observability';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MockUrlService } from '@kbn/share-plugin/common/mocks';
 import { type UrlService } from '@kbn/share-plugin/common/url_service';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { subj as testSubject } from '@kbn/test-subj-selector';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { LogEntryActionsMenu } from './log_entry_actions_menu';
 

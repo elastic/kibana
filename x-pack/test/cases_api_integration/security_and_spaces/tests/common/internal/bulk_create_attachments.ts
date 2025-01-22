@@ -9,14 +9,16 @@ import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 import { ALERT_CASE_IDS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
-import { Case, AttachmentType } from '@kbn/cases-plugin/common';
-import { BulkCreateAttachmentsRequest } from '@kbn/cases-plugin/common/types/api';
+import type { Case} from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
+import type { BulkCreateAttachmentsRequest } from '@kbn/cases-plugin/common/types/api';
+import type {
+  ExternalReferenceSOAttachmentPayload} from '@kbn/cases-plugin/common/types/domain';
 import {
-  ExternalReferenceSOAttachmentPayload,
   CaseStatuses,
   ExternalReferenceStorageType,
 } from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
   postCaseReq,
@@ -68,7 +70,7 @@ import {
   createSecuritySolutionAlerts,
   getAlertById,
 } from '../../../../common/lib/alerts';
-import { User } from '../../../../common/lib/authentication/types';
+import type { User } from '../../../../common/lib/authentication/types';
 import { SECURITY_SOLUTION_FILE_KIND } from '../../../../common/lib/constants';
 import { arraysToEqual } from '../../../../common/lib/validation';
 

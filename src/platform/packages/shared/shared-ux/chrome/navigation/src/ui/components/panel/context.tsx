@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  ReactNode} from 'react';
 import React, {
   type FC,
   type PropsWithChildren,
@@ -14,13 +16,12 @@ import React, {
   useContext,
   useMemo,
   useState,
-  ReactNode,
   useEffect,
 } from 'react';
 import type { ChromeProjectNavigationNode, PanelSelectedNode } from '@kbn/core-chrome-browser';
 
 import { DefaultContent } from './default_content';
-import { ContentProvider } from './types';
+import type { ContentProvider } from './types';
 
 export interface PanelContext {
   isOpen: boolean;

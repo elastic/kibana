@@ -8,9 +8,10 @@
 import { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import * as t from 'io-ts';
 
+import type {
+  CreateExceptionListSchemaDecoded} from '../../create_exception_list_schema';
 import {
-  createExceptionListSchema,
-  CreateExceptionListSchemaDecoded,
+  createExceptionListSchema
 } from '../../create_exception_list_schema';
 
 export const internalCreateExceptionListSchema = t.intersection([

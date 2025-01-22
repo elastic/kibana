@@ -6,7 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import type { BrowserFields } from '@kbn/rule-registry-plugin/common';
 
 /**
  * An item rendered in the table

@@ -9,7 +9,7 @@
 
 import Path from 'path';
 
-import webpack from 'webpack';
+import type webpack from 'webpack';
 import { ToolingLog } from '@kbn/tooling-log';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { isNormalModule, isConcatenatedModule } from '@kbn/optimizer-webpack-helpers';

@@ -19,7 +19,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useWatch } from 'react-hook-form';
 import { docLinks } from '../../common/doc_links';
 import { EditContextPanel } from './edit_context/edit_context_panel';
-import { ChatForm, ChatFormFields } from '../types';
+import type { ChatForm} from '../types';
+import { ChatFormFields } from '../types';
 import { useManagementLink } from '../hooks/use_management_link';
 import { SummarizationPanel } from './summarization_panel/summarization_panel';
 

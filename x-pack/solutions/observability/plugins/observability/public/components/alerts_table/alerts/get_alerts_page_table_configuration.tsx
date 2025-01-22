@@ -6,15 +6,15 @@
  */
 
 import React from 'react';
-import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALERT_START } from '@kbn/rule-data-utils';
-import {
+import type {
   AlertsTableConfigurationRegistry,
   RenderCustomActionsRowArgs,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
-import { HttpSetup } from '@kbn/core-http-browser';
-import { NotificationsStart } from '@kbn/core-notifications-browser';
+import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
+import type { HttpSetup } from '@kbn/core-http-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../../../../common/constants';
 import { casesFeatureId, observabilityFeatureId } from '../../../../common';
 import { AlertActions } from '../../../pages/alerts/components/alert_actions';

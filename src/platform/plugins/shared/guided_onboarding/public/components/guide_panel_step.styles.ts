@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiThemeComputed } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { StepStatus } from '@kbn/guided-onboarding';
 

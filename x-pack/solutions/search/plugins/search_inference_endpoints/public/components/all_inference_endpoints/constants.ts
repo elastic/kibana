@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import {
-  SortFieldInferenceEndpoint,
+import type {
   QueryParams,
   AllInferenceEndpointsTableState,
-  SortOrder,
-  FilterOptions,
+  FilterOptions} from './types';
+import {
+  SortFieldInferenceEndpoint,
+  SortOrder
 } from './types';
 
 export const DEFAULT_TABLE_ACTIVE_PAGE = 1;

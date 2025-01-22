@@ -5,15 +5,16 @@
  * 2.0.
  */
 import expect from 'expect';
-import {
+import type {
   AllFieldsDiff,
-  RuleUpdateProps,
+  RuleUpdateProps} from '@kbn/security-solution-plugin/common/api/detection_engine';
+import {
   ThreeWayDiffConflict,
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getPrebuiltRuleMock } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllTimelines,
   deleteAllPrebuiltRuleAssets,

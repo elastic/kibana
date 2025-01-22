@@ -4,30 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Response } from 'supertest';
+import type { Response } from 'supertest';
 import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { omit, pick } from 'lodash';
 import { PassThrough } from 'stream';
 import expect from '@kbn/expect';
-import {
+import type {
   ChatCompletionChunkEvent,
   ConversationCreateEvent,
   ConversationUpdateEvent,
   MessageAddEvent,
-  StreamingChatResponseEvent,
+  StreamingChatResponseEvent} from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
+import {
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
-import { ObservabilityAIAssistantScreenContextRequest } from '@kbn/observability-ai-assistant-plugin/common/types';
+import type { ObservabilityAIAssistantScreenContextRequest } from '@kbn/observability-ai-assistant-plugin/common/types';
+import type {
+  LlmProxy,
+  LlmResponseSimulator} from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import {
   createLlmProxy,
-  isFunctionTitleRequest,
-  LlmProxy,
-  LlmResponseSimulator,
+  isFunctionTitleRequest
 } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import { createOpenAiChunk } from '../../../../../../observability_ai_assistant_api_integration/common/create_openai_chunk';
 import { decodeEvents, getConversationCreatedEvent, getConversationUpdatedEvent } from '../helpers';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
+import type { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');

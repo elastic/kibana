@@ -11,13 +11,13 @@ import {
   pinnedEventSavedObjectType,
   timelineSavedObjectType,
 } from '@kbn/security-solution-plugin/server/lib/timeline/saved_object_mappings';
-import {
+import type {
   BareNoteWithoutExternalRefs,
   BarePinnedEventWithoutExternalRefs,
   TimelineWithoutExternalRefs,
 } from '@kbn/security-solution-plugin/common/api/timeline';
 import { TIMELINE_URL } from '@kbn/security-solution-plugin/common/constants';
-import TestAgent from 'supertest/lib/agent';
+import type TestAgent from 'supertest/lib/agent';
 import type { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 import { getSavedObjectFromES } from '../../../utils';
 

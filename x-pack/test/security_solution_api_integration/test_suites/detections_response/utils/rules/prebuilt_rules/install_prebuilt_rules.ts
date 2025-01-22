@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import {
-  PERFORM_RULE_INSTALLATION_URL,
+import type {
   RuleVersionSpecifier,
-  PerformRuleInstallationResponseBody,
+  PerformRuleInstallationResponseBody} from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
+import {
+  PERFORM_RULE_INSTALLATION_URL
 } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
 import type { Client } from '@elastic/elasticsearch';
 import type SuperTest from 'supertest';

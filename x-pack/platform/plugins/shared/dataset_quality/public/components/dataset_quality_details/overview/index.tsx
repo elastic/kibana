@@ -7,7 +7,8 @@
 
 import React, { useCallback, useState } from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { EuiSpacer, OnRefreshProps } from '@elastic/eui';
+import type { OnRefreshProps } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { useDatasetQualityDetailsState } from '../../../hooks';
 import { AggregationNotSupported } from './aggregation_not_supported';
 import { DegradedFields } from './degraded_fields';

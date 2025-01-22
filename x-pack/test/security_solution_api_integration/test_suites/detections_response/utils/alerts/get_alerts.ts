@@ -8,8 +8,9 @@
 import type SuperTest from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type {
+  RuleExecutionStatus} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import {
-  RuleExecutionStatus,
   RuleExecutionStatusEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';

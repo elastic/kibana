@@ -10,9 +10,10 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { InspectorViewProps } from '@kbn/inspector-plugin/public';
 import { XJsonLang } from '@kbn/monaco';
+import type {
+  EuiComboBoxOptionOption} from '@elastic/eui';
 import {
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFormRow,
   EuiSpacer,
   EuiTabs,

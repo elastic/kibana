@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 
 import {
   EuiFlexGroup,
@@ -20,10 +21,10 @@ import {
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { Phase as PhaseType } from '../../../../../../../common/types';
+import type { Phase as PhaseType } from '../../../../../../../common/types';
 import { useFormData } from '../../../../../../shared_imports';
 import { i18nTexts } from '../../../i18n_texts';
-import { FormInternal } from '../../../types';
+import type { FormInternal } from '../../../types';
 import { PhaseIcon } from '../../phase_icon';
 import { PhaseFooter } from '../../phase_footer';
 

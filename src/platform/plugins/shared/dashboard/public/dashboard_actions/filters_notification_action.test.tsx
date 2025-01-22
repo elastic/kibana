@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter, FilterStateStore, type AggregateQuery, type Query } from '@kbn/es-query';
+import type { Filter} from '@kbn/es-query';
+import { FilterStateStore, type AggregateQuery, type Query } from '@kbn/es-query';
 
 import { BehaviorSubject } from 'rxjs';
+import type {
+  FiltersNotificationActionApi} from './filters_notification_action';
 import {
-  FiltersNotificationAction,
-  FiltersNotificationActionApi,
+  FiltersNotificationAction
 } from './filters_notification_action';
 
 const getMockPhraseFilter = (key: string, value: string): Filter => {

@@ -10,9 +10,10 @@
 import type { Logger } from '@kbn/logging';
 import type { ISavedObjectsRepository } from '@kbn/core/server';
 import { MAIN_APP_DEFAULT_VIEW_ID } from '@kbn/usage-collection-plugin/common/constants';
-import {
+import type {
   ApplicationUsageDaily,
-  ApplicationUsageTotal,
+  ApplicationUsageTotal} from '../saved_objects_types';
+import {
   SAVED_OBJECTS_DAILY_TYPE,
   SAVED_OBJECTS_TOTAL_TYPE,
 } from '../saved_objects_types';

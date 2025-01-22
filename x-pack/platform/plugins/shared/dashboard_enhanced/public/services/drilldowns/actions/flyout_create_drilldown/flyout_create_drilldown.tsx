@@ -12,7 +12,7 @@ import {
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import {
   tracksOverlays,
   type PresentationContainer,
@@ -31,9 +31,10 @@ import {
   type HasSupportedTriggers,
   type HasType,
 } from '@kbn/presentation-publishing';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import type { Action} from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import React from 'react';
-import { StartDependencies } from '../../../../plugin';
+import type { StartDependencies } from '../../../../plugin';
 import {
   createDrilldownTemplatesFromSiblings,
   DRILLDOWN_ACTION_GROUP,

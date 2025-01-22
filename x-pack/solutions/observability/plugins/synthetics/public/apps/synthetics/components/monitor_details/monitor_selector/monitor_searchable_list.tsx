@@ -6,12 +6,13 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import type {
+  EuiSelectableOption} from '@elastic/eui';
 import {
   EuiHighlight,
   EuiLink,
   EuiPopoverTitle,
   EuiSelectable,
-  EuiSelectableOption,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

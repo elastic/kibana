@@ -7,19 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MockedKeys } from '@kbn/utility-types-jest';
-import { mount, ReactWrapper } from 'enzyme';
-import { CoreSetup, CoreStart, DocLinksStart } from '@kbn/core/public';
+import type { MockedKeys } from '@kbn/utility-types-jest';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
+import type { CoreSetup, CoreStart, DocLinksStart } from '@kbn/core/public';
 import moment from 'moment';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '@kbn/core/public/mocks';
-import { SearchUsageCollector, SessionsClient } from '../../..';
+import type { SearchUsageCollector} from '../../..';
+import { SessionsClient } from '../../..';
 import { SearchSessionsMgmtAPI } from '../lib/api';
 import { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { LocaleWrapper } from '../__mocks__';
 import { SearchSessionsMgmtMain } from './main';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
 import { createSearchUsageCollectorMock } from '../../../collectors/mocks';

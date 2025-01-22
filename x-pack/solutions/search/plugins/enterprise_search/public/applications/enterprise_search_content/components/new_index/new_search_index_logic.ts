@@ -5,36 +5,41 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
-import { Actions } from '../../../shared/api_logic/create_api_logic';
-import {
-  AddConnectorApiLogic,
+import type { Actions } from '../../../shared/api_logic/create_api_logic';
+import type {
   AddConnectorApiLogicArgs,
-  AddConnectorApiLogicResponse,
+  AddConnectorApiLogicResponse} from '../../api/connector/add_connector_api_logic';
+import {
+  AddConnectorApiLogic
 } from '../../api/connector/add_connector_api_logic';
-import {
-  CreateCrawlerIndexApiLogic,
+import type {
   CreateCrawlerIndexArgs,
-  CreateCrawlerIndexResponse,
-} from '../../api/crawler/create_crawler_index_api_logic';
+  CreateCrawlerIndexResponse} from '../../api/crawler/create_crawler_index_api_logic';
 import {
-  CreateApiIndexApiLogic,
+  CreateCrawlerIndexApiLogic
+} from '../../api/crawler/create_crawler_index_api_logic';
+import type {
   CreateApiIndexApiLogicArgs,
-  CreateApiIndexApiLogicResponse,
+  CreateApiIndexApiLogicResponse} from '../../api/index/create_api_index_api_logic';
+import {
+  CreateApiIndexApiLogic
 } from '../../api/index/create_api_index_api_logic';
 
-import {
-  IndexExistsApiLogic,
+import type {
   IndexExistsApiParams,
-  IndexExistsApiResponse,
+  IndexExistsApiResponse} from '../../api/index/index_exists_api_logic';
+import {
+  IndexExistsApiLogic
 } from '../../api/index/index_exists_api_logic';
 
 import { isValidIndexName } from '../../utils/validate_index_name';
 
 import { UNIVERSAL_LANGUAGE_VALUE } from './constants';
 import { flashIndexCreatedToast } from './new_index_created_toast';
-import { LanguageForOptimization } from './types';
+import type { LanguageForOptimization } from './types';
 import { getLanguageForOptimization } from './utils';
 
 export interface NewSearchIndexValues {

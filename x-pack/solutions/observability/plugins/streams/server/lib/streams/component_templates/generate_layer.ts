@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   ClusterPutComponentTemplateRequest,
   MappingDateProperty,
   MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
-import { WiredStreamDefinition, isRoot } from '@kbn/streams-schema';
+import type { WiredStreamDefinition} from '@kbn/streams-schema';
+import { isRoot } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { logsSettings, logsLifecycle } from './logs_layer';
 import { getComponentTemplateName } from './name';

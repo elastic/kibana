@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { ServerlessRoleName } from '../../../../shared/lib';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['header', 'svlCommonPage', 'svlCommonNavigation']);

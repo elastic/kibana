@@ -7,6 +7,8 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
+import type {
+  EuiSuperSelectOption} from '@elastic/eui';
 import {
   EuiPanel,
   EuiTitle,
@@ -18,29 +20,30 @@ import {
   EuiLoadingLogo,
   EuiButton,
   EuiFormRow,
-  EuiSuperSelectOption,
   EuiSuperSelect,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
 import { FieldIcon } from '@kbn/react-field';
+import type {
+  ReadStreamDefinition} from '@kbn/streams-schema';
 import {
   FIELD_DEFINITION_TYPES,
-  ReadStreamDefinition,
   isWiredReadStream,
 } from '@kbn/streams-schema';
 import { useController, useFieldArray } from 'react-hook-form';
 import { css } from '@emotion/react';
 import { flattenObject } from '@kbn/object-utils';
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useKibana } from '../../../hooks/use_kibana';
-import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../../streams_app_search_bar';
+import type { StreamsAppSearchBarProps } from '../../streams_app_search_bar';
+import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { PreviewTable } from '../../preview_table';
 import { convertFormStateToProcessing } from '../utils';
-import { DetectedField, ProcessorFormState } from '../types';
-import { UseProcessingSimulatorReturnType } from '../hooks/use_processing_simulator';
+import type { DetectedField, ProcessorFormState } from '../types';
+import type { UseProcessingSimulatorReturnType } from '../hooks/use_processing_simulator';
 
 interface ProcessorOutcomePreviewProps {
   definition: ReadStreamDefinition;

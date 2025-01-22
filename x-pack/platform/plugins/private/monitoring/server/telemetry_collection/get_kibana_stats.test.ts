@@ -5,12 +5,13 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  KibanaUsageStats} from './get_kibana_stats';
 import {
   getUsageStats,
   combineStats,
   rollUpTotals,
-  ensureTimeSpan,
-  KibanaUsageStats,
+  ensureTimeSpan
 } from './get_kibana_stats';
 
 describe('Get Kibana Stats', () => {

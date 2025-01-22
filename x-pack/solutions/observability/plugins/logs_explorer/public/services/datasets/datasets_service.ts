@@ -6,7 +6,7 @@
  */
 
 import { DatasetsClient } from './datasets_client';
-import { DatasetsServiceSetup, DatasetsServiceStart, DatasetsServiceStartDeps } from './types';
+import type { DatasetsServiceSetup, DatasetsServiceStart, DatasetsServiceStartDeps } from './types';
 
 export class DatasetsService {
   constructor() {}

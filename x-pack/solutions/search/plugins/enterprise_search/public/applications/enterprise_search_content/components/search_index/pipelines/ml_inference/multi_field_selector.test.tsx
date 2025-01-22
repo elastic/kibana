@@ -11,9 +11,10 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import type {
+  EuiBasicTableColumn} from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiButton,
   EuiComboBox,
   EuiFieldText,

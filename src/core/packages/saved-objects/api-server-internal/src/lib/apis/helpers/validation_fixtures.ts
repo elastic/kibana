@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 
 export const typedef: Partial<SavedObjectsType> = {
   mappings: {

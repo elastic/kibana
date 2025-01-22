@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type {
+  EuiComboBoxOptionOption} from '@elastic/eui';
 import {
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFormControlLayout,
   EuiFormLabel,
   EuiToolTip,

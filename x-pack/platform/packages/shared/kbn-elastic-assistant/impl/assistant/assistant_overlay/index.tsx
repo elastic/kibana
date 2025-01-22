@@ -12,7 +12,8 @@ import useEvent from 'react-use/lib/useEvent';
 import { css } from '@emotion/react';
 
 import { createGlobalStyle } from 'styled-components';
-import { ShowAssistantOverlayProps, useAssistantContext } from '../../assistant_context';
+import type { ShowAssistantOverlayProps} from '../../assistant_context';
+import { useAssistantContext } from '../../assistant_context';
 import { Assistant, CONVERSATION_SIDE_PANEL_WIDTH } from '..';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;

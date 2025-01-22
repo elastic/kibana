@@ -8,6 +8,9 @@
  */
 
 import type { ErrorNode, ParserRuleContext, TerminalNode } from 'antlr4';
+import type {
+  InlinestatsCommandContext,
+  JoinCommandContext} from '../antlr/esql_parser';
 import {
   type ShowInfoContext,
   type SingleStatementContext,
@@ -28,11 +31,9 @@ import {
   type WhereCommandContext,
   default as esql_parser,
   type MetricsCommandContext,
-  IndexPatternContext,
-  InlinestatsCommandContext,
-  JoinCommandContext,
+  IndexPatternContext
 } from '../antlr/esql_parser';
-import { default as ESQLParserListener } from '../antlr/esql_parser_listener';
+import type { default as ESQLParserListener } from '../antlr/esql_parser_listener';
 import {
   createCommand,
   createFunction,

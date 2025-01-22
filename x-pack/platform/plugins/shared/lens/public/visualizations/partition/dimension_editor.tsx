@@ -8,11 +8,12 @@
 import './toolbar.scss';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type {
+  PaletteRegistry,
+  ColorMapping} from '@kbn/coloring';
 import {
   CategoricalColorMapping,
   DEFAULT_COLOR_MAPPING_CONFIG,
-  PaletteRegistry,
-  ColorMapping,
   SPECIAL_TOKENS_STRING_CONVERSION,
 } from '@kbn/coloring';
 import { ColorPicker } from '@kbn/visualization-ui-components';
@@ -20,9 +21,10 @@ import { useDebouncedValue } from '@kbn/visualization-utils';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiText, EuiBadge } from '@elastic/eui';
 import { useState, useCallback } from 'react';
 import { getColorCategories } from '@kbn/chart-expressions-common';
-import { KbnPalette, KbnPalettes } from '@kbn/palettes';
-import { PieVisualizationState } from '../../../common/types';
-import { VisualizationDimensionEditorProps } from '../../types';
+import type { KbnPalettes } from '@kbn/palettes';
+import { KbnPalette } from '@kbn/palettes';
+import type { PieVisualizationState } from '../../../common/types';
+import type { VisualizationDimensionEditorProps } from '../../types';
 import {
   PalettePanelContainer,
   PalettePicker,

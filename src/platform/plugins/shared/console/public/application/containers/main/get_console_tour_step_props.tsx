@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
+import type {
   EuiTourStepProps,
   EuiTourActions,
-  EuiTourState,
+  EuiTourState} from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ConsoleTourStepProps } from '../../components';
+import type { ConsoleTourStepProps } from '../../components';
 
 export const getConsoleTourStepProps = (
   stateTourStepProps: EuiTourStepProps[],

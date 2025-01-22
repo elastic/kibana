@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
-import { ControlGroupRuntimeState, ControlPanelState, SerializedControlState } from '../../common';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { ControlGroupRuntimeState, ControlPanelState, SerializedControlState } from '../../common';
 
 // using SerializableRecord to force type to be read as serializable
 export type SerializableControlGroupState = SerializableRecord &

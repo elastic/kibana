@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import rison from '@kbn/rison';
 import { KNOWN_TYPES } from '../../../common/constants';
-import {
+import type {
   DataStreamDegradedDocsResponse,
   DataStreamTotalDocsResponse,
+  IntegrationsResponse,
+  NonAggregatableDatasets} from '../../../common/api_types';
+import {
   getDataStreamDegradedDocsResponseRt,
   getDataStreamsStatsResponseRt,
   getDataStreamTotalDocsResponseRt,
   getIntegrationsResponseRt,
-  getNonAggregatableDatasetsRt,
-  IntegrationsResponse,
-  NonAggregatableDatasets,
+  getNonAggregatableDatasetsRt
 } from '../../../common/api_types';
-import {
+import type {
   DataStreamStatServiceResponse,
   GetDataStreamsDegradedDocsStatsQuery,
   GetDataStreamsStatsQuery,
@@ -29,7 +30,7 @@ import {
   GetNonAggregatableDataStreamsParams,
 } from '../../../common/data_streams_stats';
 import { Integration } from '../../../common/data_streams_stats/integration';
-import { IDataStreamsStatsClient } from './types';
+import type { IDataStreamsStatsClient } from './types';
 import { DatasetQualityError } from '../../../common/errors';
 
 export class DataStreamsStatsClient implements IDataStreamsStatsClient {

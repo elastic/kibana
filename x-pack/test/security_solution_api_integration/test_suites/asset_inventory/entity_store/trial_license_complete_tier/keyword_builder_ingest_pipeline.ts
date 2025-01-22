@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { buildIngestPipeline } from '@kbn/security-solution-plugin/server/lib/asset_inventory/ingest_pipelines';
 import { applyIngestProcessorToDoc } from '../utils/ingest';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');

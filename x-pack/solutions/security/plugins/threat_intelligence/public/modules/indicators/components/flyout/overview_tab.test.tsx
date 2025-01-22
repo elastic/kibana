@@ -8,7 +8,8 @@
 import { TestProvidersComponent } from '../../../../mocks/test_providers';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
+import type { Indicator } from '../../../../../common/types/indicator';
+import { generateMockIndicator } from '../../../../../common/types/indicator';
 import { IndicatorsFlyoutOverview } from './overview_tab';
 import { EMPTY_PROMPT_TEST_ID } from './empty_prompt';
 import { IndicatorsFlyoutContext } from '../../hooks/use_flyout_context';

@@ -19,7 +19,7 @@ import {
   OtelKubernetesPage,
   FirehosePage,
 } from './pages';
-import { ObservabilityOnboardingAppServices } from '..';
+import type { ObservabilityOnboardingAppServices } from '..';
 
 const queryClient = new QueryClient();
 

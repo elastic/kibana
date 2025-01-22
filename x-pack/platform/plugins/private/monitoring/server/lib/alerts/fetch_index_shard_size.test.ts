@@ -7,7 +7,7 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchIndexShardSize } from './fetch_index_shard_size';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 
 jest.mock('../../static_globals', () => ({
   Globals: {

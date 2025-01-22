@@ -5,24 +5,26 @@
  * 2.0.
  */
 
-import { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
-import {
+import type { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
+import type {
   FetchSLOHealthParams,
-  FetchSLOHealthResponse,
+  FetchSLOHealthResponse} from '@kbn/slo-schema';
+import {
   fetchSLOHealthResponseSchema,
 } from '@kbn/slo-schema';
-import { Dictionary, groupBy, keyBy } from 'lodash';
+import type { Dictionary} from 'lodash';
+import { groupBy, keyBy } from 'lodash';
 import moment from 'moment';
 import {
   getSLOSummaryTransformId,
   getSLOTransformId,
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../common/constants';
-import { SLODefinition } from '../domain/models';
-import { HealthStatus, State } from '../domain/models/health';
-import { SLORepository } from './slo_repository';
-import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
+import type { SLODefinition } from '../domain/models';
+import type { HealthStatus, State } from '../domain/models/health';
+import type { SLORepository } from './slo_repository';
+import type { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 
 const LAG_THRESHOLD_MINUTES = 10;
 const STALE_THRESHOLD_MINUTES = 2 * 24 * 60;

@@ -10,7 +10,7 @@ import { CaseSeverity } from '@kbn/cases-plugin/common/types/domain';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import type { RoleCredentials } from '../../../../shared/services';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');

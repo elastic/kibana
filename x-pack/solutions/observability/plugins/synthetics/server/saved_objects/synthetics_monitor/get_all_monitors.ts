@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsFindResult,
@@ -14,9 +14,10 @@ import { intersection } from 'lodash';
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils';
 import { periodToMs } from '../../routes/overview_status/utils';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
+import type {
+  EncryptedSyntheticsMonitorAttributes} from '../../../common/runtime_types';
 import {
   ConfigKey,
-  EncryptedSyntheticsMonitorAttributes,
   SourceType,
 } from '../../../common/runtime_types';
 

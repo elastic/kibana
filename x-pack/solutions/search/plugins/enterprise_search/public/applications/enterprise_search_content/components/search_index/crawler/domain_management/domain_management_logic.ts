@@ -11,15 +11,16 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
-import { Meta } from '../../../../../../../common/types';
+import type { Meta } from '../../../../../../../common/types';
 import { Status } from '../../../../../../../common/types/api';
 import { DEFAULT_META } from '../../../../../shared/constants';
 import { updateMetaPageIndex } from '../../../../../shared/table_pagination';
 import { DeleteCrawlerDomainApiLogic } from '../../../../api/crawler/delete_crawler_domain_api_logic';
 import { GetCrawlerDomainsApiLogic } from '../../../../api/crawler/get_crawler_domains_api_logic';
-import { CrawlerDomain, CrawlerDomainsWithMeta } from '../../../../api/crawler/types';
+import type { CrawlerDomain, CrawlerDomainsWithMeta } from '../../../../api/crawler/types';
 import { IndexNameLogic } from '../../index_name_logic';
 
 interface DomainManagementValues {

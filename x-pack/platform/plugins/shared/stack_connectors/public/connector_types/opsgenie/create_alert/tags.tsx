@@ -7,9 +7,10 @@
 
 import React, { useCallback, useMemo } from 'react';
 
+import type {
+  EuiComboBoxOptionOption} from '@elastic/eui';
 import {
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -17,11 +18,12 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 
-import { ActionConnectorMode, ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 import type { OpsgenieActionParams } from '../../../../server/connector_types';
 import { RULE_TAGS_TEMPLATE } from '../../../../common/opsgenie';
 import * as i18n from './translations';
-import { EditActionCallback } from '../types';
+import type { EditActionCallback } from '../types';
 
 interface TagsProps {
   onChange: EditActionCallback;

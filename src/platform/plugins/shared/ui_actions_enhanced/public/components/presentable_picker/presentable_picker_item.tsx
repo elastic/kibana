@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { EuiFlexItem, EuiIcon, EuiKeyPadMenuItem, EuiToolTip } from '@elastic/eui';
-import { UiActionsPresentable as Presentable } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsPresentable as Presentable } from '@kbn/ui-actions-plugin/public';
 import {
   txtBetaActionFactoryLabel,
   txtBetaActionFactoryTooltip,

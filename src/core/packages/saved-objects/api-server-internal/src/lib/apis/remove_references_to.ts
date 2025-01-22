@@ -9,7 +9,7 @@
 
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import {
+import type {
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsRemoveReferencesToResponse,
 } from '@kbn/core-saved-objects-api-server';

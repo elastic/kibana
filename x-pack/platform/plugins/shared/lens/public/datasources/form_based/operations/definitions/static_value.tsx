@@ -8,8 +8,8 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import { OperationDefinition } from '.';
-import {
+import type { OperationDefinition } from '.';
+import type {
   ReferenceBasedIndexPatternColumn,
   GenericIndexPatternColumn,
   ValueFormatConfig,

@@ -17,8 +17,9 @@ import {
   useGeneratedHtmlId,
   EuiTitle,
 } from '@elastic/eui';
+import type {
+  LogDocumentOverview} from '@kbn/discover-utils';
 import {
-  LogDocumentOverview,
   fieldConstants,
   getMessageFieldWithFallbacks,
 } from '@kbn/discover-utils';

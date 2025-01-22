@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ComponentType, mount } from 'enzyme';
+import type { ComponentType} from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -20,7 +21,8 @@ import {
 } from '../services/dashboard_backup_service';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { coreServices } from '../services/kibana_services';
-import { DashboardUnsavedListing, DashboardUnsavedListingProps } from './dashboard_unsaved_listing';
+import type { DashboardUnsavedListingProps } from './dashboard_unsaved_listing';
+import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 
 const makeDefaultProps = (): DashboardUnsavedListingProps => ({
   goToDashboard: jest.fn(),

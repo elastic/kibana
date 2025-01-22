@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import type { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
-import { AssistantFeatures } from '@kbn/elastic-assistant-common';
+import type { AssistantFeatures } from '@kbn/elastic-assistant-common';
 import { ReplaySubject, type Subject } from 'rxjs';
-import { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { events } from './lib/telemetry/event_based_telemetry';
-import {
+import type {
   AssistantTool,
   ElasticAssistantPluginCoreSetupDependencies,
   ElasticAssistantPluginSetup,

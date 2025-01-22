@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import React, { FC, ReactElement, useMemo, useState } from 'react';
+import type { FC, ReactElement} from 'react';
+import React, { useMemo, useState } from 'react';
+import type {
+  EuiButtonEmptyProps,
+  PanelPaddingSize,
+  PopoverAnchorPosition} from '@elastic/eui';
 import {
   EuiButtonEmpty,
-  EuiButtonEmptyProps,
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
-  EuiPopover,
-  PanelPaddingSize,
-  PopoverAnchorPosition,
+  EuiPopover
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';

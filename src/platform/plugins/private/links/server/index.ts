@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext } from '@kbn/core-plugins-server';
+import type { PluginInitializerContext } from '@kbn/core-plugins-server';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
   const { LinksServerPlugin } = await import('./plugin');

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EuiPopover, EuiSelectable, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { FieldIcon } from '@kbn/react-field';
-import { WorkspaceField } from '../../types';
+import type { WorkspaceField } from '../../types';
 
 export interface FieldPickerProps {
   fieldMap: Record<string, WorkspaceField>;

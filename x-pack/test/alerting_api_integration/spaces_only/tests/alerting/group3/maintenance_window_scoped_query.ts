@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
 import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   createRule,
   createAction,

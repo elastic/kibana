@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { EuiDataGridColumn, EuiDataGridOnColumnResizeData } from '@elastic/eui';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { BrowserField, BrowserFields } from '@kbn/alerting-types';
-import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { EuiDataGridColumn, EuiDataGridOnColumnResizeData } from '@elastic/eui';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { BrowserField, BrowserFields } from '@kbn/alerting-types';
+import type { MutableRefObject} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isEmpty } from 'lodash';
 import { useFetchAlertsFieldsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_alerts_fields_query';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
-import { AlertsTableStorage } from '../../alerts_table_state';
+import type { AlertsTableStorage } from '../../alerts_table_state';
 import { toggleColumn } from './toggle_column';
 import { useKibana } from '../../../../../common';
 

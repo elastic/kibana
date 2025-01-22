@@ -8,22 +8,23 @@
  */
 
 import { map } from 'rxjs';
-import { History } from 'history';
+import type { History } from 'history';
 
+import type {
+  IKbnUrlStateStorage} from '@kbn/kibana-utils-plugin/public';
 import {
   getQueryParams,
-  IKbnUrlStateStorage,
   createQueryParamObservable,
 } from '@kbn/kibana-utils-plugin/public';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 import type { Query } from '@kbn/es-query';
-import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
+import type { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { SEARCH_SESSION_ID } from '../../plugin_constants';
-import { DashboardLocatorParams } from '../../dashboard_container/types';
+import type { DashboardLocatorParams } from '../../dashboard_container/types';
 import { convertPanelMapToPanelsArray } from '../../../common';
 import { dataService } from '../../services/kibana_services';
-import { DashboardApi } from '../../dashboard_api/types';
+import type { DashboardApi } from '../../dashboard_api/types';
 
 export const removeSearchSessionIdFromURL = (kbnUrlStateStorage: IKbnUrlStateStorage) => {
   kbnUrlStateStorage.kbnUrlControls.updateAsync((nextUrl) => {

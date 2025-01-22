@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type {
+  EuiSearchBarProps} from '@elastic/eui';
 import {
   EuiButton,
   EuiConfirmModal,
@@ -14,22 +16,22 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
-  EuiSearchBarProps,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
+import type {
   DocumentEntry,
-  DocumentEntryType,
   IndexEntry,
-  IndexEntryType,
   KnowledgeBaseEntryCreateProps,
-  KnowledgeBaseEntryResponse,
+  KnowledgeBaseEntryResponse} from '@kbn/elastic-assistant-common';
+import {
+  DocumentEntryType,
+  IndexEntryType
 } from '@kbn/elastic-assistant-common';
 import { css } from '@emotion/react';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import useAsync from 'react-use/lib/useAsync';
 import { ProductDocumentationManagement } from '../../assistant/settings/product_documentation';
 import { KnowledgeBaseTour } from '../../tour/knowledge_base';
@@ -60,7 +62,7 @@ import {
 import { useCreateKnowledgeBaseEntry } from '../../assistant/api/knowledge_base/entries/use_create_knowledge_base_entry';
 import { useUpdateKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_update_knowledge_base_entries';
 import { DELETE, SETTINGS_UPDATED_TOAST_TITLE } from '../../assistant/settings/translations';
-import { KnowledgeBaseConfig } from '../../assistant/types';
+import type { KnowledgeBaseConfig } from '../../assistant/types';
 import {
   isKnowledgeBaseSetup,
   useKnowledgeBaseStatus,

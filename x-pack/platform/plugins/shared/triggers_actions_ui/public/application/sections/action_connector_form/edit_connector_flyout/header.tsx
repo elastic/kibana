@@ -7,6 +7,8 @@
 
 import React, { memo, useCallback } from 'react';
 import { css } from '@emotion/react';
+import type {
+  IconType} from '@elastic/eui';
 import {
   EuiTitle,
   EuiFlexGroup,
@@ -14,7 +16,6 @@ import {
   EuiIcon,
   EuiText,
   EuiFlyoutHeader,
-  IconType,
   EuiBetaBadge,
   EuiTab,
   EuiTabs,
@@ -22,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { SubFeature } from '@kbn/actions-plugin/common';
+import type { SubFeature } from '@kbn/actions-plugin/common';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../../translations';
 import { EditConnectorTabs } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';

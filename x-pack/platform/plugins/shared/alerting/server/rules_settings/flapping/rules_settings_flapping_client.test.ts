@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import type {
+  RulesSettingsFlappingClientConstructorOptions} from './rules_settings_flapping_client';
 import {
-  RulesSettingsFlappingClient,
-  RulesSettingsFlappingClientConstructorOptions,
+  RulesSettingsFlappingClient
 } from './rules_settings_flapping_client';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type {
+  RulesSettings} from '../../../common';
 import {
   RULES_SETTINGS_FEATURE_ID,
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
   RULES_SETTINGS_FLAPPING_SAVED_OBJECT_ID,
-  DEFAULT_FLAPPING_SETTINGS,
-  RulesSettings,
+  DEFAULT_FLAPPING_SETTINGS
 } from '../../../common';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 

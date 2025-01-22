@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { EuiDataGridCustomToolbarProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { EuiDataGridCustomToolbarProps} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import './render_custom_toolbar.scss';
 
 export interface UnifiedDataTableRenderCustomToolbarProps {

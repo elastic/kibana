@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import type { FunctionComponent} from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -24,7 +25,7 @@ import {
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
-import { DocLinksStart } from '@kbn/core/public';
+import type { DocLinksStart } from '@kbn/core/public';
 import type { SystemIndicesMigrationFeature } from '../../../../../common/types';
 import type { OverviewStepProps } from '../../types';
 import { useMigrateSystemIndices } from './use_migrate_system_indices';

@@ -14,14 +14,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
+import type {
+  SaveModalDashboardProps} from '@kbn/presentation-util-plugin/public';
 import {
   LazySavedObjectSaveModalDashboard,
-  SaveModalDashboardProps,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ClientPluginsStart } from '../../../../../plugin';
-import {
+import type { ClientPluginsStart } from '../../../../../plugin';
+import type {
   SYNTHETICS_MONITORS_EMBEDDABLE,
   SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
 } from '../../../../embeddables/constants';

@@ -6,13 +6,15 @@
  */
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { buildQueryFromFilters, Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { buildQueryFromFilters } from '@kbn/es-query';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import {
+import type {
   GetSLOResponse,
-  apmTransactionDurationIndicatorSchema,
   APMTransactionDurationIndicator,
-  APMTransactionErrorRateIndicator,
+  APMTransactionErrorRateIndicator} from '@kbn/slo-schema';
+import {
+  apmTransactionDurationIndicatorSchema
 } from '@kbn/slo-schema';
 import type { BurnRateAlert, BurnRateRule, TimeRange } from '../../../types';
 

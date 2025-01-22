@@ -11,10 +11,11 @@ import { flow, mapValues } from 'lodash';
 import type { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import {
-  mergeMigrationFunctionMaps,
+import type {
   MigrateFunctionsObject,
-  MigrateFunction,
+  MigrateFunction} from '@kbn/kibana-utils-plugin/common';
+import {
+  mergeMigrationFunctionMaps
 } from '@kbn/kibana-utils-plugin/common';
 import {
   commonAddSupportOfDualIndexSelectionModeInTSVB,
@@ -30,7 +31,7 @@ import {
   commonPreserveOldLegendSizeDefault,
   commonRemoveExclamationCircleIcon,
 } from '../migrations/visualization_common_migrations';
-import { SerializedVis } from '../../common';
+import type { SerializedVis } from '../../common';
 
 const byValueAddSupportOfDualIndexSelectionModeInTSVB = (state: SerializableRecord) => {
   return {

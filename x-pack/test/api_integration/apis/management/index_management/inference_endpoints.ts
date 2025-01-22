@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const API_BASE_PATH = '/api/index_management';
 

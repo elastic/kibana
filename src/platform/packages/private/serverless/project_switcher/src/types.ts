@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ProjectType } from '@kbn/serverless-types';
+import type { ProjectType } from '@kbn/serverless-types';
 
 /**
  * A list of services that are consumed by this component.

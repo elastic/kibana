@@ -4,18 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type {
+  EuiSelectableOption} from '@elastic/eui';
 import {
   EuiFilterButton,
   EuiFilterGroup,
   EuiPopover,
   EuiPopoverTitle,
-  EuiSelectable,
-  EuiSelectableOption,
+  EuiSelectable
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from '../../../../components/mappings_editor/mappings_state_context';
-import { State } from '../../../../components/mappings_editor/types';
+import type { State } from '../../../../components/mappings_editor/types';
 import {
   getFieldsFromState,
   getFieldsMatchingFilterFromState,

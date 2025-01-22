@@ -6,7 +6,7 @@
  */
 
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
-import { RuleAction } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { RuleAction } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import type SuperTest from 'supertest';
 
 import { getWebHookAction } from './get_web_hook_action';

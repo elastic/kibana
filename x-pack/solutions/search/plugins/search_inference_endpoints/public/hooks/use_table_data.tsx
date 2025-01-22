@@ -6,16 +6,17 @@
  */
 
 import type { EuiTableSortingType } from '@elastic/eui';
-import { Pagination } from '@elastic/eui';
-import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import type { Pagination } from '@elastic/eui';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { useMemo } from 'react';
 import { TaskTypes } from '../../common/types';
 import { DEFAULT_TABLE_LIMIT } from '../components/all_inference_endpoints/constants';
-import {
+import type {
   FilterOptions,
-  INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES,
   InferenceEndpointUI,
-  QueryParams,
+  QueryParams} from '../components/all_inference_endpoints/types';
+import {
+  INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES,
   SortOrder,
   ServiceProviderKeys,
 } from '../components/all_inference_endpoints/types';

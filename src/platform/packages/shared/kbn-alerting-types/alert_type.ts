@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TechnicalRuleDataFieldName } from '@kbn/rule-data-utils';
+import type { TechnicalRuleDataFieldName } from '@kbn/rule-data-utils';
 
 export interface BasicFields {
   _id: string;

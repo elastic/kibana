@@ -9,16 +9,17 @@
 
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { Filter, buildEsQuery, TimeRange, Query } from '@kbn/es-query';
+import type { Filter, TimeRange, Query } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 
 import { SearchAPI } from './data_model/search_api';
 import { TimeCache } from './data_model/time_cache';
 
-import { VegaVisualizationDependencies } from './plugin';
-import { VisParams } from './vega_fn';
+import type { VegaVisualizationDependencies } from './plugin';
+import type { VisParams } from './vega_fn';
 import { getData, getDataViews } from './services';
-import { VegaInspectorAdapters } from './vega_inspector';
+import type { VegaInspectorAdapters } from './vega_inspector';
 
 interface VegaRequestHandlerParams {
   query: Query;

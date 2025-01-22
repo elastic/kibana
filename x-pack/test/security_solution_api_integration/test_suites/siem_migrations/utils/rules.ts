@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import SuperTest from 'supertest';
+import type SuperTest from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 
-import { RuleMigration } from '@kbn/security-solution-plugin/common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigration } from '@kbn/security-solution-plugin/common/siem_migrations/model/rule_migration.gen';
 import { INDEX_PATTERN as SIEM_MIGRATIONS_INDEX_PATTERN } from '@kbn/security-solution-plugin/server/lib/siem_migrations/rules/data/rule_migrations_data_service';
 import { SIEM_RULE_MIGRATION_PATH } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
-import { GetRuleMigrationResponse } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+import type { GetRuleMigrationResponse } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 
 const SIEM_MIGRATIONS_RULES_INDEX_PATTERN = `${SIEM_MIGRATIONS_INDEX_PATTERN}-rules-default`;
 

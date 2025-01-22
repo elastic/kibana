@@ -8,10 +8,11 @@
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
-import {
-  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL,
+import type {
   KnowledgeBaseEntryCreateProps,
-  KnowledgeBaseEntryResponse,
+  KnowledgeBaseEntryResponse} from '@kbn/elastic-assistant-common';
+import {
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL
 } from '@kbn/elastic-assistant-common';
 import type { User } from './auth/types';
 

@@ -10,7 +10,7 @@
 import { first } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import { reportServerError } from '@kbn/kibana-utils-plugin/server';
-import { IncomingMessage } from 'http';
+import type { IncomingMessage } from 'http';
 import { reportSearchError } from '../report_search_error';
 import { getRequestAbortedSignal } from '../../lib';
 import type { DataPluginRouter } from '../types';

@@ -6,7 +6,7 @@
  */
 
 import { DataViewDescriptor } from '../data_views/models/data_view_descriptor';
-import { DataSourceSelectionStrategy, DataViewSelectionPayload } from './types';
+import type { DataSourceSelectionStrategy, DataViewSelectionPayload } from './types';
 
 export class DataViewSelection implements DataSourceSelectionStrategy {
   selectionType: 'dataView';

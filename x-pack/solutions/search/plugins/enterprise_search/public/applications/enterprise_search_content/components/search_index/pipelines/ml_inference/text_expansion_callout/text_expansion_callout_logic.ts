@@ -5,29 +5,34 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { HttpError, Status } from '../../../../../../../../common/types/api';
+import type { HttpError} from '../../../../../../../../common/types/api';
+import { Status } from '../../../../../../../../common/types/api';
 import { MlModelDeploymentState } from '../../../../../../../../common/types/ml';
 import { getErrorsFromHttpResponse } from '../../../../../../shared/flash_messages/handle_api_errors';
 
 import { KibanaLogic } from '../../../../../../shared/kibana';
 
-import {
-  CreateTextExpansionModelApiLogic,
+import type {
   CreateTextExpansionModelApiLogicActions,
-  CreateTextExpansionModelResponse,
+  CreateTextExpansionModelResponse} from '../../../../../api/ml_models/text_expansion/create_text_expansion_model_api_logic';
+import {
+  CreateTextExpansionModelApiLogic
 } from '../../../../../api/ml_models/text_expansion/create_text_expansion_model_api_logic';
-import {
-  FetchTextExpansionModelApiLogic,
+import type {
   FetchTextExpansionModelApiLogicActions,
-  FetchTextExpansionModelResponse,
-} from '../../../../../api/ml_models/text_expansion/fetch_text_expansion_model_api_logic';
+  FetchTextExpansionModelResponse} from '../../../../../api/ml_models/text_expansion/fetch_text_expansion_model_api_logic';
 import {
-  StartTextExpansionModelApiLogic,
-  StartTextExpansionModelApiLogicActions,
+  FetchTextExpansionModelApiLogic
+} from '../../../../../api/ml_models/text_expansion/fetch_text_expansion_model_api_logic';
+import type {
+  StartTextExpansionModelApiLogicActions} from '../../../../../api/ml_models/text_expansion/start_text_expansion_model_api_logic';
+import {
+  StartTextExpansionModelApiLogic
 } from '../../../../../api/ml_models/text_expansion/start_text_expansion_model_api_logic';
 
 const FETCH_TEXT_EXPANSION_MODEL_POLLING_DURATION = 5000; // 5 seconds

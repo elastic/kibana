@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { OBSERVABILITY_PROJECT_SETTINGS } from '@kbn/serverless-observability-settings';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { isEditorFieldSetting } from '../common/management/advanced_settings';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {

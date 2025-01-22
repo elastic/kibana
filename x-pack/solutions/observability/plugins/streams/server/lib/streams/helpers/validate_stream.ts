@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { StreamDefinition, WiredStreamDefinition, isWiredStream } from '@kbn/streams-schema';
+import type { StreamDefinition, WiredStreamDefinition} from '@kbn/streams-schema';
+import { isWiredStream } from '@kbn/streams-schema';
 import { difference, isEqual } from 'lodash';
 import { RootStreamImmutabilityException } from '../errors';
 import { MalformedStream } from '../errors/malformed_stream';

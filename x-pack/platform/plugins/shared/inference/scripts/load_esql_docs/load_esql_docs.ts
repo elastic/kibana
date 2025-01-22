@@ -6,11 +6,13 @@
  */
 
 import { run } from '@kbn/dev-cli-runner';
-import { ESQLMessage, EditorError, getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import type { ESQLMessage, EditorError} from '@kbn/esql-ast';
+import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
 import Fs from 'fs/promises';
 import Path from 'path';
-import yargs, { Argv } from 'yargs';
+import type { Argv } from 'yargs';
+import yargs from 'yargs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { INLINE_ESQL_QUERY_REGEX } from '../../common/tasks/nl_to_esql/constants';
 import { correctCommonEsqlMistakes } from '../../common/tasks/nl_to_esql';
@@ -20,7 +22,8 @@ import { KibanaClient } from '../util/kibana_client';
 import { selectConnector } from '../util/select_connector';
 import { syncBuiltDocs } from './sync_built_docs_repo';
 import { extractDocEntries } from './extract_doc_entries';
-import { generateDoc, FileToWrite } from './generate_doc';
+import type { FileToWrite } from './generate_doc';
+import { generateDoc } from './generate_doc';
 
 yargs(process.argv.slice(2))
   .command(

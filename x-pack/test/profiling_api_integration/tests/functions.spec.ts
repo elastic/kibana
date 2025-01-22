@@ -6,9 +6,9 @@
  */
 
 import { getRoutePaths } from '@kbn/profiling-plugin/common';
-import { TopNFunctions } from '@kbn/profiling-utils';
+import type { TopNFunctions } from '@kbn/profiling-utils';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../common/ftr_provider_context';
+import type { FtrProviderContext } from '../common/ftr_provider_context';
 import { loadProfilingData, setupProfiling } from '../utils/profiling_data';
 import { getBettertest } from '../common/bettertest';
 

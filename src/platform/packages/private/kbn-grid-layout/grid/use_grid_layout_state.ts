@@ -15,7 +15,7 @@ import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfi
 
 import { useEuiTheme } from '@elastic/eui';
 
-import {
+import type {
   ActivePanel,
   GridAccessMode,
   GridLayoutData,

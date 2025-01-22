@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren, useContext } from 'react';
+import type { FC, PropsWithChildren} from 'react';
+import React, { useContext } from 'react';
 
 import {
   FieldCategoryKibanaProvider,
   FieldCategoryProvider,
 } from '@kbn/management-settings-components-field-category';
-import { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import type { FormServices, FormKibanaDependencies, Services } from './types';
 import { reloadPageToast } from './reload_page_toast';
 

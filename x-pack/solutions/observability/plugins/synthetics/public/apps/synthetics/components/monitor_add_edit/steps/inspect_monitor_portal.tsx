@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { InPortal } from 'react-reverse-portal';
-import { SyntheticsMonitor } from '../../../../../../common/runtime_types';
+import type { SyntheticsMonitor } from '../../../../../../common/runtime_types';
 import { MonitorInspectWrapper } from '../../common/components/monitor_inspect';
 import { InspectMonitorPortalNode } from '../portals';
 

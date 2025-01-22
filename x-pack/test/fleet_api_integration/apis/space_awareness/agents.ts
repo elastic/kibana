@@ -6,12 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  AGENTS_INDEX,
+import type {
   CreateAgentPolicyResponse,
-  GetAgentsResponse,
+  GetAgentsResponse} from '@kbn/fleet-plugin/common';
+import {
+  AGENTS_INDEX
 } from '@kbn/fleet-plugin/common';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
 import {

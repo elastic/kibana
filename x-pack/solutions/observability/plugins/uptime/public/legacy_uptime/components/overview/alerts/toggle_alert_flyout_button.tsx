@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor} from '@elastic/eui';
 import {
   EuiHeaderLink,
   EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
   EuiLink,
   EuiPopover,
 } from '@elastic/eui';
@@ -18,10 +19,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CLIENT_ALERT_TYPES } from '../../../../../common/constants/uptime_alerts';
-import { ClientPluginsStart } from '../../../../plugin';
+import type { ClientPluginsStart } from '../../../../plugin';
 
 import { ToggleFlyoutTranslations } from './translations';
-import { ToggleAlertFlyoutButtonProps } from './alerts_containers';
+import type { ToggleAlertFlyoutButtonProps } from './alerts_containers';
 
 interface ComponentProps {
   setAlertFlyoutVisible: (value: boolean | string) => void;

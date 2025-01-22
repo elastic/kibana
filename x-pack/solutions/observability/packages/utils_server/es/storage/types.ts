@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MappingObjectProperty, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import { Required } from 'utility-types';
+import type { MappingObjectProperty, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import type { Required } from 'utility-types';
 
 type AllMappingPropertyType = Required<MappingProperty>['type'];
 

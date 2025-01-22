@@ -10,9 +10,10 @@ import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import type {
+  EuiComboBoxOptionOption} from '@elastic/eui';
 import {
   EuiCallOut,
-  EuiComboBoxOptionOption,
   EuiDescribedFormGroup,
   EuiLink,
   EuiSpacer,

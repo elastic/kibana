@@ -9,7 +9,7 @@ import { cleanup } from '@kbn/infra-forge';
 import { loadTestData } from '../../../../api_integration/apis/slos/helper/load_test_data';
 import { SloEsClient } from '../../../../api_integration/apis/slos/helper/es';
 import { sloData } from '../../../../api_integration/apis/slos/fixtures/create_slo';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard']);

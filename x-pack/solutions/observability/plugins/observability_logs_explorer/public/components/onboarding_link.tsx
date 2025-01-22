@@ -6,12 +6,13 @@
  */
 
 import { EuiButton } from '@elastic/eui';
+import type {
+  ObservabilityOnboardingLocatorParams} from '@kbn/deeplinks-observability/locators';
 import {
-  ObservabilityOnboardingLocatorParams,
   OBSERVABILITY_ONBOARDING_LOCATOR,
 } from '@kbn/deeplinks-observability/locators';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import { BrowserUrlService } from '@kbn/share-plugin/public';
+import type { BrowserUrlService } from '@kbn/share-plugin/public';
 import React from 'react';
 import { onboardingLinkTitle } from '../../common/translations';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';

@@ -8,7 +8,7 @@
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { KnowledgeBaseSettingsManagement } from '.';
 import { useCreateKnowledgeBaseEntry } from '../../assistant/api/knowledge_base/entries/use_create_knowledge_base_entry';
 import { useDeleteKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_delete_knowledge_base_entries';

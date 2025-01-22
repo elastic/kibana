@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useImperativeHandle, useRef, useState } 
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   GridLayoutStateManager,
   PanelInteractionEvent,
   UserInteractionEvent,

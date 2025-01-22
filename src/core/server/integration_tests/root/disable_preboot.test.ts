@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  TestElasticsearchUtils} from '@kbn/core-test-helpers-kbn-server';
 import {
   createRootWithCorePlugins,
-  createTestServers,
-  TestElasticsearchUtils,
+  createTestServers
 } from '@kbn/core-test-helpers-kbn-server';
 
 function createRootWithDisabledPreboot() {

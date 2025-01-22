@@ -7,11 +7,12 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import {
-  ALL_VALUE,
+import type {
   FiltersSchema,
   QuerySchema,
-  SyntheticsAvailabilityIndicator,
+  SyntheticsAvailabilityIndicator} from '@kbn/slo-schema';
+import {
+  ALL_VALUE
 } from '@kbn/slo-schema';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
@@ -19,7 +20,7 @@ import { useFormContext } from 'react-hook-form';
 import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
 import { useCreateDataView } from '../../../../../hooks/use_create_data_view';
 import { formatAllFilters } from '../../../helpers/format_filters';
-import { CreateSLOForm } from '../../../types';
+import type { CreateSLOForm } from '../../../types';
 import { DataPreviewChart } from '../../common/data_preview_chart';
 import { GroupByCardinality } from '../../common/group_by_cardinality';
 import { QueryBuilder } from '../../common/query_builder';

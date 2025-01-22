@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Condition, ProcessingDefinition } from '../models';
+import type { Condition, ProcessingDefinition } from '../models';
 import {
   isGrokProcessor,
   isDissectProcessor,

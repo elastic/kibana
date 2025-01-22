@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, VFC } from 'react';
+import type { VFC } from 'react';
+import React, { memo, useMemo } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { CasesPermissions } from '@kbn/cases-plugin/common';
+import type { CasesPermissions } from '@kbn/cases-plugin/common';
 import { IndicatorsPage } from '../modules/indicators/pages/indicators';
 import { IntegrationsGuard } from './integrations_guard';
 import { SecuritySolutionPluginTemplateWrapper } from './security_solution_plugin_template_wrapper';

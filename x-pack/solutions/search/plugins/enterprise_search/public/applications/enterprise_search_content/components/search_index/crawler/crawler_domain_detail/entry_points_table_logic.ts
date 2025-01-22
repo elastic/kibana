@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
 import { clearFlashMessages, flashSuccessToast } from '../../../../../shared/flash_messages';
 
-import { EntryPoint } from '../../../../api/crawler/types';
+import type { EntryPoint } from '../../../../api/crawler/types';
 
 import { CrawlerDomainDetailLogic } from './crawler_domain_detail_logic';
 

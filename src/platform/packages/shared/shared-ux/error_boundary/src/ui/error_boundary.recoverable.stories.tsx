@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Meta, Story } from '@storybook/react';
+import type { Meta, Story } from '@storybook/react';
 import React from 'react';
 
 import { EuiFormFieldset } from '@elastic/eui';

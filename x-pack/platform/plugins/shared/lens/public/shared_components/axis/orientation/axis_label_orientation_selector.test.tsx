@@ -7,9 +7,10 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import type {
+  AxisLabelOrientationSelectorProps} from './axis_label_orientation_selector';
 import {
-  AxisLabelOrientationSelector,
-  AxisLabelOrientationSelectorProps,
+  AxisLabelOrientationSelector
 } from './axis_label_orientation_selector';
 import userEvent from '@testing-library/user-event';
 

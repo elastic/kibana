@@ -6,7 +6,7 @@
  */
 
 import { chunk } from 'lodash/fp';
-import {
+import type {
   CreateExceptionListItemSchema,
   Entry,
   EntryExists,
@@ -17,7 +17,8 @@ import {
   EntryNested,
   ExceptionListItemSchema,
   OsTypeArray,
-  Type,
+  Type} from '@kbn/securitysolution-io-ts-list-types';
+import {
   entriesExists,
   entriesList,
   entriesMatch,

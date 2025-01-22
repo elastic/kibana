@@ -6,11 +6,11 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { PromptResponse } from '@kbn/elastic-assistant-common';
-import { Conversation } from '../../../..';
+import type { PromptResponse } from '@kbn/elastic-assistant-common';
+import type { Conversation } from '../../../..';
 import { getDefaultSystemPrompt } from '../../use_conversation/helpers';
-import { ConversationsBulkActions } from '../../api';
-import { AIConnector } from '../../../connectorland/connector_selector';
+import type { ConversationsBulkActions } from '../../api';
+import type { AIConnector } from '../../../connectorland/connector_selector';
 
 interface Props {
   allSystemPrompts: PromptResponse[];

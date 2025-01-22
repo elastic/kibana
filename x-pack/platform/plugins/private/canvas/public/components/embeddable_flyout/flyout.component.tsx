@@ -7,7 +7,8 @@
 
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FC, useCallback, useMemo } from 'react';
+import type { FC} from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { useAddFromLibraryTypes } from '@kbn/embeddable-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';

@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { SavedObjectsFindResponse } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
 import { escapeQuotes } from '@kbn/es-query';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { RouteContext } from './types';
+import type { RouteContext } from './types';
 import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
 import { getAllLocations } from '../synthetics_service/get_all_locations';
-import { EncryptedSyntheticsMonitorAttributes } from '../../common/runtime_types';
-import { PrivateLocation, ServiceLocation } from '../../common/runtime_types';
+import type { EncryptedSyntheticsMonitorAttributes } from '../../common/runtime_types';
+import type { PrivateLocation, ServiceLocation } from '../../common/runtime_types';
 import { monitorAttributes, syntheticsMonitorType } from '../../common/types/saved_objects';
 
 const StringOrArraySchema = schema.maybe(

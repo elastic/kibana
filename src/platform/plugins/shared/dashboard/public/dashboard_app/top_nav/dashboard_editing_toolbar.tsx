@@ -13,7 +13,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import React, { useCallback, useMemo } from 'react';
 
 import { AddFromLibraryButton, Toolbar, ToolbarButton } from '@kbn/shared-ux-button-toolbar';
-import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
+import type { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';

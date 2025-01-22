@@ -10,7 +10,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { ALERT_EVENTS_FIELDS } from '@kbn/alerts-as-data-utils';
 import { ruleRegistrySearchStrategyProvider } from './search_strategy';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
-import { SearchStrategyDependencies } from '@kbn/data-plugin/server';
+import type { SearchStrategyDependencies } from '@kbn/data-plugin/server';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';

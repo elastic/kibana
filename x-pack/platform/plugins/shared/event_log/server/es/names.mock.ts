@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EsNames } from './names';
+import type { EsNames } from './names';
 
 const createNamesMock = () => {
   const mock: jest.Mocked<EsNames> = {

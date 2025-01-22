@@ -10,7 +10,7 @@
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EmbedContent } from './embed_content';
 import React from 'react';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 
 describe('Share modal embed content tab', () => {
   describe('share url embedded', () => {

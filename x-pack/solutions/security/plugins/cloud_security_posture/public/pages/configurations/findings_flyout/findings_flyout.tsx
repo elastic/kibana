@@ -5,6 +5,9 @@
  * 2.0.
  */
 import React, { useState } from 'react';
+import type {
+  PropsOf,
+  EuiDescriptionListProps} from '@elastic/eui';
 import {
   useEuiTheme,
   EuiFlexItem,
@@ -17,14 +20,12 @@ import {
   EuiTabs,
   EuiTab,
   EuiFlexGroup,
-  PropsOf,
   EuiCodeBlock,
   EuiMarkdownFormat,
   EuiIcon,
   EuiPagination,
   EuiFlyoutFooter,
   EuiToolTip,
-  EuiDescriptionListProps,
   EuiCallOut,
   EuiLink,
 } from '@elastic/eui';
@@ -36,7 +37,7 @@ import { generatePath } from 'react-router-dom';
 import { css } from '@emotion/react';
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
-import { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding';
+import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding';
 import { isNativeCspFinding } from '../../../common/utils/is_native_csp_finding';
 import {
   CSP_MISCONFIGURATIONS_DATASET,
@@ -52,7 +53,7 @@ import { OverviewTab } from './overview_tab';
 import { RuleTab } from './rule_tab';
 import type { BenchmarkId } from '../../../../common/types_old';
 import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
-import { BenchmarkName } from '../../../../common/types_old';
+import type { BenchmarkName } from '../../../../common/types_old';
 import { FINDINGS_FLYOUT, FINDINGS_MISCONFIGS_FLYOUT_DESCRIPTION_LIST } from '../test_subjects';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { createDetectionRuleFromBenchmarkRule } from '../utils/create_detection_rule_from_benchmark';

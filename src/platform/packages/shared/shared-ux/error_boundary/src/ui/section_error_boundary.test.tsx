@@ -8,10 +8,11 @@
  */
 
 import { render } from '@testing-library/react';
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 
 import { BadComponent, ChunkLoadErrorComponent, getServicesMock } from '../../mocks';
-import { KibanaErrorBoundaryServices } from '../../types';
+import type { KibanaErrorBoundaryServices } from '../../types';
 import { KibanaErrorBoundaryDepsProvider } from '../services/error_boundary_services';
 import { KibanaErrorService } from '../services/error_service';
 import { KibanaSectionErrorBoundary } from './section_error_boundary';

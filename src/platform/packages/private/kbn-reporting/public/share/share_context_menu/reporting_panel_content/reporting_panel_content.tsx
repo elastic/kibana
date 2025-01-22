@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Component, ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React, { Component } from 'react';
 import * as Rx from 'rxjs';
 
 import { CSV_REPORT_TYPE, CSV_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
@@ -26,7 +27,8 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import type { InjectedIntl} from '@kbn/i18n-react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { BaseParams } from '@kbn/reporting-common/types';
 

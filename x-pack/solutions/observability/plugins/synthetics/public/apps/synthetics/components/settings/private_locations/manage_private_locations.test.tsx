@@ -12,7 +12,7 @@ import * as locationHooks from './hooks/use_locations_api';
 import * as settingsHooks from '../../../contexts/synthetics_settings_context';
 import type { SyntheticsSettingsContextValues } from '../../../contexts';
 import { ManagePrivateLocations } from './manage_private_locations';
-import { PrivateLocation } from '../../../../../../common/runtime_types';
+import type { PrivateLocation } from '../../../../../../common/runtime_types';
 import { fireEvent } from '@testing-library/react';
 
 jest.mock('../../../hooks');

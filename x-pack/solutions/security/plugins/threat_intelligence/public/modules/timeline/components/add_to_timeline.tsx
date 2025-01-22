@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import React, { useRef, VFC } from 'react';
-import { DataProvider } from '@kbn/timelines-plugin/common';
-import { AddToTimelineButtonProps } from '@kbn/timelines-plugin/public';
+import type { VFC } from 'react';
+import React, { useRef } from 'react';
+import type { DataProvider } from '@kbn/timelines-plugin/common';
+import type { AddToTimelineButtonProps } from '@kbn/timelines-plugin/public';
+import type {
+  EuiButtonIcon} from '@elastic/eui';
 import {
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiContextMenuItem,
   EuiFlexItem,
   EuiToolTip,
 } from '@elastic/eui';
 import { generateDataProvider } from '../utils/data_provider';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
-import { Indicator } from '../../../../common/types/indicator';
+import type { Indicator } from '../../../../common/types/indicator';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSecurityContext } from '../../../hooks/use_security_context';
 import { useStyles } from './styles';

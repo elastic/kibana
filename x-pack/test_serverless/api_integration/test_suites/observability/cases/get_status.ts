@@ -7,7 +7,7 @@
 
 import { CASE_STATUS_URL } from '@kbn/cases-plugin/common/constants';
 import type { RoleCredentials } from '../../../../shared/services';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const svlCases = getService('svlCases');

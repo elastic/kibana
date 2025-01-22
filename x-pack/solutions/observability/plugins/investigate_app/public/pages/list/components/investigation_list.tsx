@@ -4,18 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   Criteria,
+  EuiBasicTableColumn} from '@elastic/eui';
+import {
   EuiAvatar,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiLink,
   EuiLoadingSpinner,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { InvestigationResponse } from '@kbn/investigation-shared/src/rest_specs/investigation';
+import type { InvestigationResponse } from '@kbn/investigation-shared/src/rest_specs/investigation';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { paths } from '../../../../common/paths';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { TracksOverlays } from '@kbn/presentation-containers';
+import type { CoreStart } from '@kbn/core/public';
+import type { TracksOverlays } from '@kbn/presentation-containers';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
 import ReactDOM from 'react-dom';

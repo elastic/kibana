@@ -6,8 +6,9 @@
  */
 
 import { getColorMappingTelemetryEvents } from './color_telemetry_helpers';
+import type {
+  ColorMapping} from '@kbn/coloring';
 import {
-  ColorMapping,
   DEFAULT_COLOR_MAPPING_CONFIG,
   DEFAULT_OTHER_ASSIGNMENT_INDEX,
 } from '@kbn/coloring';

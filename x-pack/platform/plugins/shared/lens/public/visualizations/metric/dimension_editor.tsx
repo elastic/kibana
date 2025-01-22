@@ -16,11 +16,12 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import { LayoutDirection } from '@elastic/charts';
+import type { LayoutDirection } from '@elastic/charts';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import type {
+  PaletteRegistry} from '@kbn/coloring';
 import {
-  PaletteRegistry,
   CustomizablePalette,
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
@@ -37,7 +38,7 @@ import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor, showingBar } from './visualization';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
-import { MetricVisualizationState } from './types';
+import type { MetricVisualizationState } from './types';
 import { metricIconsSet } from '../../shared_components/icon_set';
 
 export type SupportingVisType = 'none' | 'bar' | 'trendline';

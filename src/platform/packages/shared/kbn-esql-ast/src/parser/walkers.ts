@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ParserRuleContext, TerminalNode } from 'antlr4';
+import type { TerminalNode } from 'antlr4';
+import { ParserRuleContext } from 'antlr4';
+import type {
+  InlinestatsCommandContext} from '../antlr/esql_parser';
 import {
   default as esql_parser,
   ArithmeticBinaryContext,
@@ -57,8 +60,7 @@ import {
   type ValueExpressionContext,
   ValueExpressionDefaultContext,
   InlineCastContext,
-  IndexPatternContext,
-  InlinestatsCommandContext,
+  IndexPatternContext
 } from '../antlr/esql_parser';
 import {
   createSource,
@@ -85,7 +87,7 @@ import {
   createLiteralString,
 } from './factories';
 
-import {
+import type {
   ESQLLiteral,
   ESQLColumn,
   ESQLFunction,

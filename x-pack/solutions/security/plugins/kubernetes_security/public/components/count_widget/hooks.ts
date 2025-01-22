@@ -6,7 +6,7 @@
  */
 
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   QUERY_KEY_COUNT_WIDGET,

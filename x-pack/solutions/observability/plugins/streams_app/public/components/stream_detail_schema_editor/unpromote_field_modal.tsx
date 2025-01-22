@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { SchemaEditorUnpromotingState } from './hooks/use_unpromoting_state';
+import type { SchemaEditorUnpromotingState } from './hooks/use_unpromoting_state';
 
 export const UnpromoteFieldModal = ({
   unpromotingState,

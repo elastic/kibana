@@ -10,17 +10,17 @@ import https from 'https';
 import { SslConfig, sslSchema } from '@kbn/server-http-tools';
 import apm from 'elastic-apm-node';
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import type { AxiosError, AxiosRequestConfig } from 'axios';
 import axios from 'axios';
-import { LogMeta } from '@kbn/core/server';
+import type { LogMeta } from '@kbn/core/server';
 import { momentDateParser } from '../../common/utils';
 import {
   UsageMetricsAutoOpsResponseSchema,
   type UsageMetricsAutoOpsResponseSchemaBody,
   type UsageMetricsRequestBody,
 } from '../../common/rest_types';
-import { AutoOpsConfig } from '../types';
+import type { AutoOpsConfig } from '../types';
 import { AutoOpsError } from '../errors';
 import { appContextService } from './app_context';
 

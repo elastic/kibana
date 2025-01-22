@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type {
+  InstallPrebuiltRulesAndTimelinesResponse} from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
 import {
-  InstallPrebuiltRulesAndTimelinesResponse,
   PREBUILT_RULES_URL,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
 import type { Client } from '@elastic/elasticsearch';

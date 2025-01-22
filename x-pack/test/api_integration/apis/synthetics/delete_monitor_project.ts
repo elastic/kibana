@@ -5,13 +5,14 @@
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
-import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
+import type { ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
+import { ConfigKey } from '@kbn/synthetics-plugin/common/runtime_types';
 import { REQUEST_TOO_LARGE_DELETE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/project_monitor/delete_monitor_project';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import expect from '@kbn/expect';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 

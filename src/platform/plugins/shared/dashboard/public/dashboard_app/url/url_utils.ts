@@ -7,23 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { History } from 'history';
+import type { History } from 'history';
 import _ from 'lodash';
 import { skip } from 'rxjs';
 import semverSatisfies from 'semver/functions/satisfies';
 
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
-import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
-import {
+import type {
   DashboardContainerInput,
   DashboardPanelMap,
-  SharedDashboardState,
+  SharedDashboardState} from '../../../common';
+import {
   convertPanelsArrayToPanelMap,
 } from '../../../common';
 import type { DashboardPanel } from '../../../server/content_management';
 import type { SavedDashboardPanel } from '../../../server/dashboard_saved_object';
-import { DashboardApi } from '../../dashboard_api/types';
+import type { DashboardApi } from '../../dashboard_api/types';
 import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../../utils/urls';
 import { migrateLegacyQuery } from '../../services/dashboard_content_management_service/lib/load_dashboard_state';
 import { coreServices } from '../../services/kibana_services';

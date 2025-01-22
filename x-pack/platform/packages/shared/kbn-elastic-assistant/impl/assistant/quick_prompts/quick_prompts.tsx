@@ -17,8 +17,9 @@ import {
 import useMeasure from 'react-use/lib/useMeasure';
 
 import { css } from '@emotion/react';
+import type {
+  PromptResponse} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import {
-  PromptResponse,
   PromptTypeEnum,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import * as i18n from './translations';

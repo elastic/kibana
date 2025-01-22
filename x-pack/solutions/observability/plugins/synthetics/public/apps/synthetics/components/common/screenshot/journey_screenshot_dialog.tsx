@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, {
+import type {
   MouseEvent,
+  KeyboardEvent} from 'react';
+import React, {
   useContext,
   useEffect,
   useState,
-  useCallback,
-  KeyboardEvent,
+  useCallback
 } from 'react';
 import { i18n } from '@kbn/i18n';
 import {

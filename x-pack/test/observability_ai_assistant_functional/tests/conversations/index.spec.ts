@@ -7,17 +7,18 @@
 
 import expect from '@kbn/expect';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
-import { ChatFeedback } from '@kbn/observability-ai-assistant-plugin/public/analytics/schemas/chat_feedback';
+import type { ChatFeedback } from '@kbn/observability-ai-assistant-plugin/public/analytics/schemas/chat_feedback';
 import { pick } from 'lodash';
 import { parse as parseCookie } from 'tough-cookie';
 import { kbnTestConfig } from '@kbn/test';
+import type {
+  LlmProxy} from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import {
   createLlmProxy,
-  isFunctionTitleRequest,
-  LlmProxy,
+  isFunctionTitleRequest
 } from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import { interceptRequest } from '../../common/intercept_request';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import { editor } from '../../../observability_ai_assistant_api_integration/common/users/users';
 

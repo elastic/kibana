@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import type {
+  RefResult,
+  FullScreenshot,
+  ScreenshotImageBlob,
+  ScreenshotRefImageData} from './synthetics';
 import {
   isRefResult,
   isFullScreenshot,
   isScreenshotRef,
-  isScreenshotImageBlob,
-  RefResult,
-  FullScreenshot,
-  ScreenshotImageBlob,
-  ScreenshotRefImageData,
+  isScreenshotImageBlob
 } from './synthetics';
 
 describe('synthetics runtime types', () => {

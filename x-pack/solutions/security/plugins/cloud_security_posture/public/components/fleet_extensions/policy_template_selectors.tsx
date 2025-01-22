@@ -9,7 +9,7 @@ import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
-import { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
+import type { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { VULN_MGMT_POLICY_TEMPLATE, CNVM_POLICY_TEMPLATE } from '../../../common/constants';
 import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types_old';

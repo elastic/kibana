@@ -48,27 +48,28 @@ import {
 } from '@elastic/eui';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { capitalize } from 'lodash';
-import { KibanaFeature } from '@kbn/features-plugin/public';
+import type { KibanaFeature } from '@kbn/features-plugin/public';
 import {
   formatDuration,
   getDurationNumberInItsUnit,
   getDurationUnitValue,
   parseDuration,
 } from '@kbn/alerting-plugin/common/parse_duration';
-import {
+import type {
   RuleActionParam,
-  ALERTING_FEATURE_ID,
-  RecoveredActionGroup,
-  isActionGroupDisabledForActionTypeId,
   RuleActionAlertsFilterProperty,
   RuleActionKey,
-  Flapping,
+  Flapping} from '@kbn/alerting-plugin/common';
+import {
+  ALERTING_FEATURE_ID,
+  RecoveredActionGroup,
+  isActionGroupDisabledForActionTypeId
 } from '@kbn/alerting-plugin/common';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '@kbn/alerts-ui-shared/src/common/constants/rule_flapping';
-import { RuleReducerAction, InitialRule } from './rule_reducer';
-import {
+import type { RuleReducerAction, InitialRule } from './rule_reducer';
+import type {
   RuleTypeModel,
   Rule,
   IErrorObject,
@@ -86,7 +87,7 @@ import { SolutionFilter } from './solution_filter';
 import './rule_form.scss';
 import { useKibana } from '../../../common/lib/kibana';
 import { recoveredActionGroupMessage, summaryMessage } from '../../constants';
-import { IsEnabledResult, IsDisabledResult } from '../../lib/check_rule_type_enabled';
+import type { IsEnabledResult, IsDisabledResult } from '../../lib/check_rule_type_enabled';
 import { checkRuleTypeEnabled } from '../../lib/check_rule_type_enabled';
 import {
   ruleTypeCompare,

@@ -9,8 +9,8 @@
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { ObservedSize } from 'use-resize-observer/polyfilled';
-import {
+import type { ObservedSize } from 'use-resize-observer/polyfilled';
+import type {
   ActivePanel,
   GridAccessMode,
   GridLayoutData,

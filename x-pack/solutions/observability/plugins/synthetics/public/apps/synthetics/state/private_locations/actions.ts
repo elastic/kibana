@@ -6,8 +6,8 @@
  */
 
 import { createAction } from '@reduxjs/toolkit';
-import { SyntheticsPrivateLocations } from '../../../../../common/runtime_types';
-import { AgentPolicyInfo } from '../../../../../common/types';
+import type { SyntheticsPrivateLocations } from '../../../../../common/runtime_types';
+import type { AgentPolicyInfo } from '../../../../../common/types';
 import { createAsyncAction } from '../utils/actions';
 
 export const getAgentPoliciesAction = createAsyncAction<void, AgentPolicyInfo[]>(

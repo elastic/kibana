@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { END, START, StateGraph, StateGraphArgs } from '@langchain/langgraph';
-import { AgentAction, AgentFinish, AgentStep } from '@langchain/core/agents';
-import { AgentRunnableSequence } from 'langchain/dist/agents/agent';
-import { StructuredTool } from '@langchain/core/tools';
+import type { StateGraphArgs } from '@langchain/langgraph';
+import { END, START, StateGraph } from '@langchain/langgraph';
+import type { AgentAction, AgentFinish, AgentStep } from '@langchain/core/agents';
+import type { AgentRunnableSequence } from 'langchain/dist/agents/agent';
+import type { StructuredTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/logging';
 
-import { BaseMessage } from '@langchain/core/messages';
-import { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import { ConversationResponse, Replacements } from '@kbn/elastic-assistant-common';
-import { AgentState, NodeParamsBase } from './types';
-import { AssistantDataClients } from '../../executors/types';
+import type { BaseMessage } from '@langchain/core/messages';
+import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
+import type { ConversationResponse, Replacements } from '@kbn/elastic-assistant-common';
+import type { AgentState, NodeParamsBase } from './types';
+import type { AssistantDataClients } from '../../executors/types';
 
 import { stepRouter } from './nodes/step_router';
 import { modelInput } from './nodes/model_input';

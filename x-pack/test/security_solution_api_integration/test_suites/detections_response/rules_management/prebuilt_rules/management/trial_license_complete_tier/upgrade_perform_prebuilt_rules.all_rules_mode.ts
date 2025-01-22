@@ -8,21 +8,22 @@
 import expect from 'expect';
 import type SuperTest from 'supertest';
 import { cloneDeep } from 'lodash';
-import {
+import type {
   QueryRuleCreateFields,
   EqlRuleCreateFields,
   EsqlRuleCreateFields,
   RuleResponse,
   ThreatMatchRuleCreateFields,
   ThreatMatchRule,
-  FIELDS_TO_UPGRADE_TO_CURRENT_VERSION,
-  ModeEnum,
   AllFieldsDiff,
   DataSourceIndexPatterns,
-  QueryRule,
+  QueryRule} from '@kbn/security-solution-plugin/common/api/detection_engine';
+import {
+  FIELDS_TO_UPGRADE_TO_CURRENT_VERSION,
+  ModeEnum
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllTimelines,
   deleteAllPrebuiltRuleAssets,

@@ -20,7 +20,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { InvestigationResponse } from '@kbn/investigation-shared/src/rest_specs/investigation';
+import type { InvestigationResponse } from '@kbn/investigation-shared/src/rest_specs/investigation';
 import { useDeleteInvestigation } from '../../../hooks/use_delete_investigation';
 import { InvestigationEditForm } from '../../../components/investigation_edit_form/investigation_edit_form';
 export function InvestigationListActions({

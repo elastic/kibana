@@ -11,8 +11,10 @@ import React from 'react';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { EuiLoadingSpinner, EuiNotificationBadge, EuiText } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { FieldsAccordion, FieldsAccordionProps } from './fields_accordion';
-import { FieldListItem, FieldsGroupNames } from '../../types';
+import type { FieldsAccordionProps } from './fields_accordion';
+import { FieldsAccordion } from './fields_accordion';
+import type { FieldListItem} from '../../types';
+import { FieldsGroupNames } from '../../types';
 
 describe('UnifiedFieldList <FieldsAccordion />', () => {
   let defaultProps: FieldsAccordionProps<FieldListItem>;

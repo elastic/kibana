@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import { renderHook, RenderHookResult } from '@testing-library/react';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
+import type {
+  UseInvestigateInTimelineValue} from './use_investigate_in_timeline';
 import {
-  useInvestigateInTimeline,
-  UseInvestigateInTimelineValue,
+  useInvestigateInTimeline
 } from './use_investigate_in_timeline';
+import type {
+  Indicator} from '../../../../common/types/indicator';
 import {
   generateMockIndicator,
-  generateMockUrlIndicator,
-  Indicator,
+  generateMockUrlIndicator
 } from '../../../../common/types/indicator';
 import { TestProvidersComponent } from '../../../mocks/test_providers';
 

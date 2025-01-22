@@ -9,11 +9,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../common/constants';
 import { UrlService } from '../common/url_service';
+import type {
+  ServerUrlService} from './url_service';
 import {
-  ServerUrlService,
   ServerShortUrlClientFactory,
   registerUrlServiceRoutes,
   registerUrlServiceSavedObjectType,

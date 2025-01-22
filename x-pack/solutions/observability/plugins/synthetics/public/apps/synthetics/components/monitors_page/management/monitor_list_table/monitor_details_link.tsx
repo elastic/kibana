@@ -9,9 +9,10 @@ import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { selectSelectedLocationId } from '../../../../state';
+import type {
+  EncryptedSyntheticsSavedMonitor} from '../../../../../../../common/runtime_types';
 import {
-  ConfigKey,
-  EncryptedSyntheticsSavedMonitor,
+  ConfigKey
 } from '../../../../../../../common/runtime_types';
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
 

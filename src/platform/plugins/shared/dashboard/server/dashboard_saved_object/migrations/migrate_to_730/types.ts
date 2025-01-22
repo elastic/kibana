@@ -8,7 +8,7 @@
  */
 
 import type { Serializable } from '@kbn/utility-types';
-import { SavedObjectReference } from '@kbn/core/server';
+import type { SavedObjectReference } from '@kbn/core/server';
 
 import type { GridData } from '../../../content_management';
 import type { DashboardSavedObjectAttributes } from '../../schema';

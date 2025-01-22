@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ReactNode, useState } from 'react';
+import type { ReactNode} from 'react';
+import React, { useState } from 'react';
 import {
   copyToClipboard,
   EuiButton,
@@ -17,7 +18,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ParsedAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
+import type { ParsedAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
 import { useTestQuery } from './use_test_query';
 import { TestQueryRowTable } from './test_query_row_table';
 

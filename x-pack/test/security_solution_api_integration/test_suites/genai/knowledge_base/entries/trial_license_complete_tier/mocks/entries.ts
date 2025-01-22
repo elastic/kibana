@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import {
+import type {
   DocumentEntryCreateFields,
+  IndexEntryCreateFields} from '@kbn/elastic-assistant-common';
+import {
   DocumentEntryType,
-  IndexEntryCreateFields,
   IndexEntryType,
 } from '@kbn/elastic-assistant-common';
 

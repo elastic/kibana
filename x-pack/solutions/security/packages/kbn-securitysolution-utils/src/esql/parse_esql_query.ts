@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { type ESQLAstQueryExpression, parse, ESQLCommandOption, EditorError } from '@kbn/esql-ast';
+import type { ESQLCommandOption, EditorError } from '@kbn/esql-ast';
+import { type ESQLAstQueryExpression, parse } from '@kbn/esql-ast';
 import { isColumnItem, isOptionItem } from '@kbn/esql-validation-autocomplete';
 import { isAggregatingQuery } from './compute_if_esql_query_aggregating';
 

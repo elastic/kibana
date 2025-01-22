@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { cleanFiltersForSerialize } from './clean_filters_for_serialize';
 
 describe('cleanFiltersForSerialize', () => {

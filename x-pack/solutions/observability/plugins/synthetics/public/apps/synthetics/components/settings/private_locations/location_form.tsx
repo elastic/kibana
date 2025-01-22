@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import React, { Ref } from 'react';
+import type { Ref } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type {
+  EuiFieldTextProps} from '@elastic/eui';
 import {
   EuiFieldText,
   EuiForm,
@@ -14,14 +17,13 @@ import {
   EuiSpacer,
   EuiCallOut,
   EuiCode,
-  EuiLink,
-  EuiFieldTextProps,
+  EuiLink
 } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { useFormContext, useFormState } from 'react-hook-form';
 import { TagsField } from '../components/tags_field';
-import { PrivateLocation } from '../../../../../../common/runtime_types';
+import type { PrivateLocation } from '../../../../../../common/runtime_types';
 import { AgentPolicyNeeded } from './agent_policy_needed';
 import { PolicyHostsField, AGENT_POLICY_FIELD_NAME } from './policy_hosts';
 import { selectAgentPolicies } from '../../../state/private_locations';

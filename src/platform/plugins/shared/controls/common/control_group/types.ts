@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewField } from '@kbn/data-views-plugin/common';
-import { ControlLabelPosition, DefaultControlState, ParentIgnoreSettings } from '../types';
-import { CONTROL_CHAINING_OPTIONS } from '../constants';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { ControlLabelPosition, DefaultControlState, ParentIgnoreSettings } from '../types';
+import type { CONTROL_CHAINING_OPTIONS } from '../constants';
 
 export const CONTROL_GROUP_TYPE = 'control_group';
 

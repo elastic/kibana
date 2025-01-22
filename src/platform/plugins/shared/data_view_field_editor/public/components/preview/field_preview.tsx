@@ -19,7 +19,7 @@ import { FieldPreviewError } from './field_preview_error';
 import { PreviewListItem } from './field_list/field_list_item';
 import { PreviewFieldList } from './field_list/field_list';
 import { useStateSelector } from '../../state_utils';
-import { PreviewState } from './types';
+import type { PreviewState } from './types';
 
 import './field_preview.scss';
 

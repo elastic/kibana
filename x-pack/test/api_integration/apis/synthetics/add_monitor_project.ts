@@ -6,20 +6,21 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
-import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
+import type { ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
+import { ConfigKey } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import {
   ELASTIC_MANAGED_LOCATIONS_DISABLED,
   REQUEST_TOO_LARGE,
 } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/project_monitor/add_monitor_project';
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   PROFILE_VALUES_ENUM,
   PROFILES_MAP,
 } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 import { comparePolicies } from './sample_data/test_policy';

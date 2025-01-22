@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 
 import { INGESTION_METHOD_IDS } from '../../../../../common/constants';
 
-import { ProductFeatures } from '../../../../../common/types';
+import type { ProductFeatures } from '../../../../../common/types';
 
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana/kibana_logic';

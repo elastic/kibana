@@ -8,7 +8,7 @@
 import { Subject } from 'rxjs';
 import { take, bufferCount } from 'rxjs';
 import { createConfigurationAggregator } from './configuration_statistics';
-import { TaskManagerConfig } from '../config';
+import type { TaskManagerConfig } from '../config';
 
 describe('Configuration Statistics Aggregator', () => {
   test('merges the static config with the merged configs', async () => {

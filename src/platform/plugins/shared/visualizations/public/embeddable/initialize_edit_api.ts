@@ -8,12 +8,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type {
+  PublishingSubject} from '@kbn/presentation-publishing';
 import {
-  PublishingSubject,
   apiHasAppContext,
   apiPublishesTimeRange,
 } from '@kbn/presentation-publishing';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import type { Vis } from '../vis';
 import { urlFor } from '../utils/saved_visualize_utils';
 import { getCapabilities, getEmbeddable } from '../services';

@@ -12,7 +12,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import { LOGS_ONBOARDING_FEEDBACK_LINK } from '@kbn/observability-shared-plugin/common';
-import { ObservabilityLogsExplorerStartServices } from '../../../types';
+import type { ObservabilityLogsExplorerStartServices } from '../../../types';
 import { FEEDBACK_TOAST_LIFETIME_MS } from './constants';
 
 export const createRequestFeedbackNotifier =

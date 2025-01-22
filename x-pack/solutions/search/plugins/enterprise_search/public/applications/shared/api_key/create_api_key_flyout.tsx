@@ -10,6 +10,8 @@ import { css } from '@emotion/react';
 
 import { useValues, useActions } from 'kea';
 
+import type {
+  EuiSwitchEvent} from '@elastic/eui';
 import {
   useEuiTheme,
   EuiAccordion,
@@ -29,7 +31,6 @@ import {
   EuiStep,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,

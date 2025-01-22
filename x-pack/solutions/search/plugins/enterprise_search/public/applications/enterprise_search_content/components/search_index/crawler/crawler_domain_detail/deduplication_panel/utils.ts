@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiSelectableLIOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import type { EuiSelectableLIOption } from '@elastic/eui/src/components/selectable/selectable_option';
 
-import { CrawlerDomain } from '../../../../../api/crawler/types';
+import type { CrawlerDomain } from '../../../../../api/crawler/types';
 
 export const getSelectableOptions = (
   domain: CrawlerDomain,

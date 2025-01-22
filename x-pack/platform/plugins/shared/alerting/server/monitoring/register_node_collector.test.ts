@@ -6,9 +6,9 @@
  */
 import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { Metric } from '@kbn/monitoring-collection-plugin/server';
+import type { Metric } from '@kbn/monitoring-collection-plugin/server';
 import { registerNodeCollector } from './register_node_collector';
-import { NodeRulesMetric } from './types';
+import type { NodeRulesMetric } from './types';
 import { InMemoryMetrics, IN_MEMORY_METRICS } from '.';
 
 jest.mock('./in_memory_metrics');

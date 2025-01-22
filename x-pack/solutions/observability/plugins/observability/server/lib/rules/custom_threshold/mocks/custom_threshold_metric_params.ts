@@ -6,9 +6,10 @@
  */
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import type {
+  CustomMetricExpressionParams} from '../../../../../common/custom_threshold_rule/types';
 import {
-  Aggregators,
-  CustomMetricExpressionParams,
+  Aggregators
 } from '../../../../../common/custom_threshold_rule/types';
 
 export const criteriaMultipleConditions: CustomMetricExpressionParams[] = [

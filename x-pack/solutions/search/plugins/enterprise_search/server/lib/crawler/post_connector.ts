@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 import { createConnectorDocument, CONNECTORS_INDEX, ConnectorStatus } from '@kbn/search-connectors';
 

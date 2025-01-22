@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiText } from '@elastic/eui';
 import { ShardsView } from './shards_view';

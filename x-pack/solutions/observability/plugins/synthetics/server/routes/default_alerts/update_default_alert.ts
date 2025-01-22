@@ -6,10 +6,10 @@
  */
 
 import { DefaultAlertService } from './default_alert_service';
-import { SyntheticsRestApiRouteFactory } from '../types';
+import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { savedObjectsAdapter } from '../../saved_objects';
-import { DEFAULT_ALERT_RESPONSE } from '../../../common/types/default_alerts';
+import type { DEFAULT_ALERT_RESPONSE } from '../../../common/types/default_alerts';
 
 export const updateDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',

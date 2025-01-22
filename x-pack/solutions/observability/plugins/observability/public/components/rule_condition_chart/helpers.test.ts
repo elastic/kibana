@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type {
+  CustomThresholdExpressionMetric} from '../../../common/custom_threshold_rule/types';
 import {
-  Aggregators,
-  CustomThresholdExpressionMetric,
+  Aggregators
 } from '../../../common/custom_threshold_rule/types';
 import { getBufferThreshold, getLensOperationFromRuleMetric, lensFieldFormatter } from './helpers';
 const useCases = [

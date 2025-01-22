@@ -8,9 +8,9 @@
  */
 
 import type { ValuesType, UnionToIntersection } from 'utility-types';
-import * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 // TODO: Remove when all usages have been migrated to non-body
-import { SearchRequest as SearchRequestWithBodyKey } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchRequest as SearchRequestWithBodyKey } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 interface AggregationsAggregationContainer extends Record<string, any> {
   aggs?: any;

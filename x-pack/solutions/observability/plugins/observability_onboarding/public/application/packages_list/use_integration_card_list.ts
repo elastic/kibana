@@ -6,9 +6,9 @@
  */
 
 import { useMemo } from 'react';
-import { IntegrationCardItem } from '@kbn/fleet-plugin/public';
+import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { CustomCard } from './types';
+import type { CustomCard } from './types';
 
 export function toOnboardingPath({
   basePath,

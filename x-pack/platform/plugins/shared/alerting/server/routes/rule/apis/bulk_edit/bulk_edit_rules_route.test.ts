@@ -13,7 +13,7 @@ import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
-import { RuleAction, RuleSystemAction, SanitizedRule } from '../../../../types';
+import type { RuleAction, RuleSystemAction, SanitizedRule } from '../../../../types';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { omit } from 'lodash';
 

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart, Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { CoreStart, Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { getServices } from './services';
 
 interface SetupDeps {

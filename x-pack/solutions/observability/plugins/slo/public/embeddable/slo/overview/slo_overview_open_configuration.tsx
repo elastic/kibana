@@ -11,9 +11,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { GroupSloCustomInput, SingleSloCustomInput } from './types';
-import { SLOPublicPluginsStart } from '../../..';
+import type { SLOPublicPluginsStart } from '../../..';
 import { SloConfiguration } from './slo_configuration';
-import { SLORepositoryClient } from '../../../types';
+import type { SLORepositoryClient } from '../../../types';
 import { PluginContext } from '../../../context/plugin_context';
 
 export async function openSloConfiguration(

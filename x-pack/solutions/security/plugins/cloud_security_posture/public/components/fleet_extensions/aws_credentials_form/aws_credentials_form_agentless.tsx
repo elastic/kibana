@@ -31,8 +31,9 @@ import {
 } from './get_aws_credentials_form_options';
 import { getAwsCredentialsType, getPosturePolicy } from '../utils';
 import { AwsInputVarFields } from './aws_input_var_fields';
+import type {
+  AwsFormProps} from './aws_credentials_form';
 import {
-  AwsFormProps,
   AWSSetupInfoContent,
   AwsCredentialTypeSelector,
   ReadDocumentation,

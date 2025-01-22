@@ -11,11 +11,11 @@ import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { SetMap } from '@kbn/set-map';
-import { RepoPath } from '@kbn/repo-path';
+import type { RepoPath } from '@kbn/repo-path';
 import { makeMatcher } from '@kbn/picomatcher';
-import { TsProject } from '@kbn/ts-projects';
+import type { TsProject } from '@kbn/ts-projects';
 
-import { PackageFileMap } from './package_file_map';
+import type { PackageFileMap } from './package_file_map';
 
 export class TsProjectFileMap {
   private readonly filesByTsProject = new SetMap<TsProject, RepoPath>();

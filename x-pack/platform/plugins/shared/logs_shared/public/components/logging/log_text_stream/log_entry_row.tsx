@@ -8,17 +8,19 @@
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { LogColumn, LogEntry } from '../../../../common/log_entry';
-import { TextScale } from '../../../../common/log_text_scale';
+import type { LogColumn, LogEntry } from '../../../../common/log_entry';
+import type { TextScale } from '../../../../common/log_text_scale';
+import type {
+  LogColumnRenderConfiguration} from '../../../utils/log_column_render_configuration';
 import {
-  LogColumnRenderConfiguration,
   isFieldColumnRenderConfiguration,
   isMessageColumnRenderConfiguration,
   isTimestampColumnRenderConfiguration,
 } from '../../../utils/log_column_render_configuration';
 import { isTimestampColumn } from '../../../utils/log_entry';
 import { useUiTracker } from '../../../utils/use_ui_tracker';
-import { LogEntryColumn, LogEntryColumnWidths, iconColumnId } from './log_entry_column';
+import type { LogEntryColumnWidths} from './log_entry_column';
+import { LogEntryColumn, iconColumnId } from './log_entry_column';
 import { LogEntryContextMenu } from './log_entry_context_menu';
 import { LogEntryFieldColumn } from './log_entry_field_column';
 import { LogEntryMessageColumn } from './log_entry_message_column';

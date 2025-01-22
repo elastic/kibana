@@ -8,7 +8,7 @@
 import { of, throwError } from 'rxjs';
 import supertest from 'supertest';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
-import { GlobalSearchResult, GlobalSearchBatchedResults } from '../../../common/types';
+import type { GlobalSearchResult, GlobalSearchBatchedResults } from '../../../common/types';
 import { GlobalSearchFindError } from '../../../common/errors';
 import { globalSearchPluginMock } from '../../mocks';
 import { registerInternalFindRoute } from '../find';

@@ -32,7 +32,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import {
   LazyDataViewPicker,
   LazyFieldPicker,
@@ -57,7 +57,7 @@ import {
   type DataControlFactory,
   type DataControlFieldRegistry,
 } from './types';
-import { ControlFactory } from '../types';
+import type { ControlFactory } from '../types';
 
 export interface ControlEditorProps<
   State extends DefaultDataControlState = DefaultDataControlState

@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 import type { SortDirection } from '@kbn/data-plugin/common';
 import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import type { Filter } from '@kbn/es-query';
-import { CookieCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { CookieCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

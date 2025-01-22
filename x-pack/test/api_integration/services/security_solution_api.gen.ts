@@ -20,153 +20,153 @@ import {
 } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 
-import { AlertsMigrationCleanupRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/delete_signals_migration/delete_signals_migration.gen';
-import { BulkCreateRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_create_rules/bulk_create_rules_route.gen';
-import { BulkDeleteRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_delete_rules/bulk_delete_rules_route.gen';
-import { BulkDeleteRulesPostRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_delete_rules/bulk_delete_rules_route.gen';
-import { BulkPatchRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_patch_rules/bulk_patch_rules_route.gen';
-import { BulkUpdateRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_update_rules/bulk_update_rules_route.gen';
-import { BulkUpsertAssetCriticalityRecordsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/bulk_upload_asset_criticality.gen';
-import { CleanDraftTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/clean_draft_timelines/clean_draft_timelines_route.gen';
-import { ConfigureRiskEngineSavedObjectRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/engine_configure_saved_object_route.gen';
-import { CopyTimelineRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/copy_timeline/copy_timeline_route.gen';
-import { CreateAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/create_signals_migration/create_signals_migration.gen';
-import { CreateAssetCriticalityRecordRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/create_asset_criticality.gen';
-import { CreateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/create_rule/create_rule_route.gen';
-import {
+import type { AlertsMigrationCleanupRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/delete_signals_migration/delete_signals_migration.gen';
+import type { BulkCreateRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_create_rules/bulk_create_rules_route.gen';
+import type { BulkDeleteRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_delete_rules/bulk_delete_rules_route.gen';
+import type { BulkDeleteRulesPostRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_delete_rules/bulk_delete_rules_route.gen';
+import type { BulkPatchRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_patch_rules/bulk_patch_rules_route.gen';
+import type { BulkUpdateRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_update_rules/bulk_update_rules_route.gen';
+import type { BulkUpsertAssetCriticalityRecordsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/bulk_upload_asset_criticality.gen';
+import type { CleanDraftTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/clean_draft_timelines/clean_draft_timelines_route.gen';
+import type { ConfigureRiskEngineSavedObjectRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/engine_configure_saved_object_route.gen';
+import type { CopyTimelineRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/copy_timeline/copy_timeline_route.gen';
+import type { CreateAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/create_signals_migration/create_signals_migration.gen';
+import type { CreateAssetCriticalityRecordRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/create_asset_criticality.gen';
+import type { CreateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/create_rule/create_rule_route.gen';
+import type {
   CreateRuleMigrationRequestParamsInput,
   CreateRuleMigrationRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
-import { CreateTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/create_timelines/create_timelines_route.gen';
-import {
+import type { CreateTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/create_timelines/create_timelines_route.gen';
+import type {
   CreateUpdateProtectionUpdatesNoteRequestParamsInput,
   CreateUpdateProtectionUpdatesNoteRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
-import { DeleteAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/delete_asset_criticality.gen';
-import {
+import type { DeleteAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/delete_asset_criticality.gen';
+import type {
   DeleteEntityEngineRequestQueryInput,
   DeleteEntityEngineRequestParamsInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/delete.gen';
-import { DeleteNoteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/delete_note/delete_note_route.gen';
-import { DeleteRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/delete_rule/delete_rule_route.gen';
-import { DeleteTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/delete_timelines/delete_timelines_route.gen';
-import { DeprecatedTriggerRiskScoreCalculationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
-import { EndpointExecuteActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/execute/execute.gen';
-import { EndpointFileDownloadRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/file_download/file_download.gen';
-import { EndpointFileInfoRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/file_info/file_info.gen';
-import { EndpointGetActionsDetailsRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/details/details.gen';
-import { EndpointGetActionsListRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/list/list.gen';
-import { EndpointGetActionsStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/status/status.gen';
-import { EndpointGetFileActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/get_file/get_file.gen';
-import { EndpointGetProcessesActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/running_procs/running_procs.gen';
-import { EndpointIsolateActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/isolate/isolate.gen';
-import { EndpointKillProcessActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/kill_process/kill_process.gen';
-import { EndpointScanActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/scan/scan.gen';
-import { EndpointSuspendProcessActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/suspend_process/suspend_process.gen';
-import { EndpointUnisolateActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/unisolate/unisolate.gen';
-import { EndpointUploadActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/upload/upload.gen';
-import {
+import type { DeleteNoteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/delete_note/delete_note_route.gen';
+import type { DeleteRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/delete_rule/delete_rule_route.gen';
+import type { DeleteTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/delete_timelines/delete_timelines_route.gen';
+import type { DeprecatedTriggerRiskScoreCalculationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
+import type { EndpointExecuteActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/execute/execute.gen';
+import type { EndpointFileDownloadRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/file_download/file_download.gen';
+import type { EndpointFileInfoRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/file_info/file_info.gen';
+import type { EndpointGetActionsDetailsRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/details/details.gen';
+import type { EndpointGetActionsListRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/list/list.gen';
+import type { EndpointGetActionsStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/status/status.gen';
+import type { EndpointGetFileActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/get_file/get_file.gen';
+import type { EndpointGetProcessesActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/running_procs/running_procs.gen';
+import type { EndpointIsolateActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/isolate/isolate.gen';
+import type { EndpointKillProcessActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/kill_process/kill_process.gen';
+import type { EndpointScanActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/scan/scan.gen';
+import type { EndpointSuspendProcessActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/suspend_process/suspend_process.gen';
+import type { EndpointUnisolateActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/unisolate/unisolate.gen';
+import type { EndpointUploadActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/upload/upload.gen';
+import type {
   ExportRulesRequestQueryInput,
   ExportRulesRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/export_rules/export_rules_route.gen';
-import {
+import type {
   ExportTimelinesRequestQueryInput,
   ExportTimelinesRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/timeline/export_timelines/export_timelines_route.gen';
-import { FinalizeAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/finalize_signals_migration/finalize_signals_migration.gen';
-import { FindAssetCriticalityRecordsRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/list_asset_criticality.gen';
-import { FindRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/find_rules/find_rules_route.gen';
-import { GetAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/get_asset_criticality.gen';
-import { GetDraftTimelinesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_draft_timelines/get_draft_timelines_route.gen';
-import { GetEndpointMetadataListRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/metadata/get_metadata.gen';
-import {
+import type { FinalizeAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/finalize_signals_migration/finalize_signals_migration.gen';
+import type { FindAssetCriticalityRecordsRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/list_asset_criticality.gen';
+import type { FindRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/find_rules/find_rules_route.gen';
+import type { GetAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/get_asset_criticality.gen';
+import type { GetDraftTimelinesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_draft_timelines/get_draft_timelines_route.gen';
+import type { GetEndpointMetadataListRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/metadata/get_metadata.gen';
+import type {
   GetEndpointSuggestionsRequestParamsInput,
   GetEndpointSuggestionsRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/endpoint/suggestions/get_suggestions.gen';
-import { GetEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/get.gen';
-import { GetEntityStoreStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/status.gen';
-import { GetNotesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_notes/get_notes_route.gen';
-import { GetPolicyResponseRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/policy/policy_response.gen';
-import { GetProtectionUpdatesNoteRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
-import {
+import type { GetEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/get.gen';
+import type { GetEntityStoreStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/status.gen';
+import type { GetNotesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_notes/get_notes_route.gen';
+import type { GetPolicyResponseRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/policy/policy_response.gen';
+import type { GetProtectionUpdatesNoteRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
+import type {
   GetRuleExecutionEventsRequestQueryInput,
   GetRuleExecutionEventsRequestParamsInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_events/get_rule_execution_events_route.gen';
-import {
+import type {
   GetRuleExecutionResultsRequestQueryInput,
   GetRuleExecutionResultsRequestParamsInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen';
-import {
+import type {
   GetRuleMigrationRequestQueryInput,
   GetRuleMigrationRequestParamsInput,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
-import { GetRuleMigrationPrebuiltRulesRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
-import {
+import type { GetRuleMigrationPrebuiltRulesRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+import type {
   GetRuleMigrationResourcesRequestQueryInput,
   GetRuleMigrationResourcesRequestParamsInput,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
-import { GetRuleMigrationResourcesMissingRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
-import { GetRuleMigrationStatsRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
-import { GetRuleMigrationTranslationStatsRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
-import { GetTimelineRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_timeline/get_timeline_route.gen';
-import { GetTimelinesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_timelines/get_timelines_route.gen';
-import { GetWorkflowInsightsRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/workflow_insights/workflow_insights.gen';
-import { ImportRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/import_rules/import_rules_route.gen';
-import { ImportTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/import_timelines/import_timelines_route.gen';
-import {
+import type { GetRuleMigrationResourcesMissingRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+import type { GetRuleMigrationStatsRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+import type { GetRuleMigrationTranslationStatsRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+import type { GetTimelineRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_timeline/get_timeline_route.gen';
+import type { GetTimelinesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_timelines/get_timelines_route.gen';
+import type { GetWorkflowInsightsRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/workflow_insights/workflow_insights.gen';
+import type { ImportRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/import_rules/import_rules_route.gen';
+import type { ImportTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/import_timelines/import_timelines_route.gen';
+import type {
   InitEntityEngineRequestParamsInput,
   InitEntityEngineRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/init.gen';
-import { InitEntityStoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/enable.gen';
-import {
+import type { InitEntityStoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/enable.gen';
+import type {
   InstallMigrationRulesRequestParamsInput,
   InstallMigrationRulesRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
-import { InstallPrepackedTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/install_prepackaged_timelines/install_prepackaged_timelines_route.gen';
-import { ListEntitiesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/list_entities.gen';
-import { PatchRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/patch_rule/patch_rule_route.gen';
-import { PatchTimelineRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/patch_timelines/patch_timeline_route.gen';
-import {
+import type { InstallPrepackedTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/install_prepackaged_timelines/install_prepackaged_timelines_route.gen';
+import type { ListEntitiesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/list_entities.gen';
+import type { PatchRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/patch_rule/patch_rule_route.gen';
+import type { PatchTimelineRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/patch_timelines/patch_timeline_route.gen';
+import type {
   PerformRulesBulkActionRequestQueryInput,
   PerformRulesBulkActionRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route.gen';
-import { PersistFavoriteRouteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/persist_favorite/persist_favorite_route.gen';
-import { PersistNoteRouteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/persist_note/persist_note_route.gen';
-import { PersistPinnedEventRouteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/pinned_events/pinned_events_route.gen';
-import { PreviewRiskScoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/preview_route.gen';
-import { ReadAlertsMigrationStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/read_signals_migration_status/read_signals_migration_status.gen';
-import { ReadRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/read_rule/read_rule_route.gen';
-import { ResolveTimelineRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/resolve_timeline/resolve_timeline_route.gen';
-import {
+import type { PersistFavoriteRouteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/persist_favorite/persist_favorite_route.gen';
+import type { PersistNoteRouteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/persist_note/persist_note_route.gen';
+import type { PersistPinnedEventRouteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/pinned_events/pinned_events_route.gen';
+import type { PreviewRiskScoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/preview_route.gen';
+import type { ReadAlertsMigrationStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/read_signals_migration_status/read_signals_migration_status.gen';
+import type { ReadRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/read_rule/read_rule_route.gen';
+import type { ResolveTimelineRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/resolve_timeline/resolve_timeline_route.gen';
+import type {
   RulePreviewRequestQueryInput,
   RulePreviewRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_preview/rule_preview.gen';
-import { RunScriptActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/run_script/run_script.gen';
-import { SearchAlertsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/query_signals/query_signals_route.gen';
-import { SetAlertAssigneesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_assignees/set_alert_assignees_route.gen';
-import { SetAlertsStatusRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
-import { SetAlertTagsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_tags/set_alert_tags/set_alert_tags.gen';
-import { StartEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/start.gen';
-import {
+import type { RunScriptActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/run_script/run_script.gen';
+import type { SearchAlertsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/query_signals/query_signals_route.gen';
+import type { SetAlertAssigneesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_assignees/set_alert_assignees_route.gen';
+import type { SetAlertsStatusRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
+import type { SetAlertTagsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_tags/set_alert_tags/set_alert_tags.gen';
+import type { StartEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/start.gen';
+import type {
   StartRuleMigrationRequestParamsInput,
   StartRuleMigrationRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
-import { StopEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/stop.gen';
-import { StopRuleMigrationRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
-import { SuggestUserProfilesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/users/suggest_user_profiles_route.gen';
-import { TriggerRiskScoreCalculationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
-import { UpdateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/update_rule/update_rule_route.gen';
-import { UpdateRuleMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
-import {
+import type { StopEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/stop.gen';
+import type { StopRuleMigrationRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+import type { SuggestUserProfilesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/users/suggest_user_profiles_route.gen';
+import type { TriggerRiskScoreCalculationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
+import type { UpdateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/update_rule/update_rule_route.gen';
+import type { UpdateRuleMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+import type {
   UpdateWorkflowInsightRequestParamsInput,
   UpdateWorkflowInsightRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/endpoint/workflow_insights/workflow_insights.gen';
-import {
+import type {
   UpsertRuleMigrationResourcesRequestParamsInput,
   UpsertRuleMigrationResourcesRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { routeWithNamespace } from '../../common/utils/security_solution';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

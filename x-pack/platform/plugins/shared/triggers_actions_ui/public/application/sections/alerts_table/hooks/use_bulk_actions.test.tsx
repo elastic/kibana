@@ -7,7 +7,8 @@
 
 import { renderHook } from '@testing-library/react';
 import { useBulkActions, useBulkAddToCaseActions, useBulkUntrackActions } from './use_bulk_actions';
-import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
+import type { AppMockRenderer} from '../../test_utils';
+import { createAppMockRenderer } from '../../test_utils';
 import { createCasesServiceMock } from '../index.mock';
 import { BulkActionsVerbs } from '../../../../types';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';

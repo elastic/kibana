@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
-import { AttackDiscoveryResponse } from '@kbn/elastic-assistant-common';
-import { EsAttackDiscoverySchema } from '../types';
+import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AttackDiscoveryResponse } from '@kbn/elastic-assistant-common';
+import type { EsAttackDiscoverySchema } from '../types';
 import { transformESSearchToAttackDiscovery } from '../transforms/transforms';
 
 export interface FindAttackDiscoveryParams {

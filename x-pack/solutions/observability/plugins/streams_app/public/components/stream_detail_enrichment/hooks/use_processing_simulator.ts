@@ -6,11 +6,11 @@
  */
 
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
-import { ReadStreamDefinition, ProcessingDefinition, Condition } from '@kbn/streams-schema';
+import type { ReadStreamDefinition, ProcessingDefinition, Condition } from '@kbn/streams-schema';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
-import { APIReturnType } from '@kbn/streams-plugin/public/api';
+import type { APIReturnType } from '@kbn/streams-plugin/public/api';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
 

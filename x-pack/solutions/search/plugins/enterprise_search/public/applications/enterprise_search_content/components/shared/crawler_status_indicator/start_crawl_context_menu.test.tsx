@@ -9,7 +9,8 @@ import { setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { ReactWrapper, shallow } from 'enzyme';
+import type { ReactWrapper} from 'enzyme';
+import { shallow } from 'enzyme';
 
 import {
   EuiContextMenuItem,

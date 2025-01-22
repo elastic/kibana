@@ -24,9 +24,10 @@ import React, { useCallback, useState } from 'react';
 import { Stats } from '../../../data_anonymization_editor/stats';
 import { ContextEditor } from '../../../data_anonymization_editor/context_editor';
 import * as i18n from '../anonymization_settings/translations';
+import type {
+  UseAnonymizationListUpdateProps} from '../anonymization_settings/use_anonymization_list_update';
 import {
-  useAnonymizationListUpdate,
-  UseAnonymizationListUpdateProps,
+  useAnonymizationListUpdate
 } from '../anonymization_settings/use_anonymization_list_update';
 import {
   DEFAULT_ANONYMIZATION_FIELDS,

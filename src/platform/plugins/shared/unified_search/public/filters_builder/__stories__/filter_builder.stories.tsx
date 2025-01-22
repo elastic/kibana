@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
-import { ComponentStory } from '@storybook/react';
+import type { FC } from 'react';
+import React from 'react';
+import type { ComponentStory } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiForm } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -16,7 +17,8 @@ import { action } from '@storybook/addon-actions';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { getFiltersMock, getFiltersMockOrHide } from '../__mock__/filters';
-import FiltersBuilder, { FiltersBuilderProps } from '../filters_builder';
+import type { FiltersBuilderProps } from '../filters_builder';
+import FiltersBuilder from '../filters_builder';
 
 export default {
   title: 'Filters Builder',

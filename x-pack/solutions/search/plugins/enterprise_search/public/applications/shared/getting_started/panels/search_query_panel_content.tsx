@@ -8,14 +8,15 @@
 import React from 'react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type {
+  LanguageDefinition,
+  LanguageDefinitionSnippetArguments} from '@kbn/search-api-panels';
 import {
   CodeBox,
-  getLanguageDefinitionCodeSnippet,
-  LanguageDefinition,
-  LanguageDefinitionSnippetArguments,
+  getLanguageDefinitionCodeSnippet
 } from '@kbn/search-api-panels';
 
-import { KibanaDeps } from '../../../../../common/types';
+import type { KibanaDeps } from '../../../../../common/types';
 
 import { consoleDefinition } from '../languages/console';
 import { languageDefinitions } from '../languages/languages';

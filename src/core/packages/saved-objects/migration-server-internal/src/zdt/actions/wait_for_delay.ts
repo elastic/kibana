@@ -8,7 +8,7 @@
  */
 
 import * as Either from 'fp-ts/lib/Either';
-import * as TaskEither from 'fp-ts/lib/TaskEither';
+import type * as TaskEither from 'fp-ts/lib/TaskEither';
 
 export interface WaitForDelayParams {
   delayInSec: number;

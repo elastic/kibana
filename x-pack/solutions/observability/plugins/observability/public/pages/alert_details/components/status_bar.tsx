@@ -11,8 +11,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, useEuiTheme, EuiToolTip } 
 import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type {
+  AlertStatus} from '@kbn/rule-data-utils';
 import {
-  AlertStatus,
   ALERT_DURATION,
   ALERT_FLAPPING,
   TIMESTAMP,
@@ -25,7 +26,7 @@ import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '../../../utils/kibana_react';
 import { paths } from '../../../../common/locators/paths';
 import { asDuration } from '../../../../common/utils/formatters';
-import { TopAlert } from '../../../typings/alerts';
+import type { TopAlert } from '../../../typings/alerts';
 
 export interface StatusBarProps {
   alert: TopAlert | null;

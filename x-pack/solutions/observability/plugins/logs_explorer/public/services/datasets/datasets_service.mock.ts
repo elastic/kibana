@@ -6,7 +6,7 @@
  */
 
 import { createDatasetsClientMock } from './datasets_client.mock';
-import { DatasetsServiceStart } from './types';
+import type { DatasetsServiceStart } from './types';
 
 export const createDatasetsServiceStartMock = () => ({
   client: createDatasetsClientMock(),

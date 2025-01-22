@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import {
+import type {
   AttackDiscoveryCreateProps,
   AttackDiscoveryUpdateProps,
   AttackDiscoveryResponse,
 } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/core-security-common';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { findAllAttackDiscoveries } from './find_all_attack_discoveries/find_all_attack_discoveries';
 import { findAttackDiscoveryByConnectorId } from './find_attack_discovery_by_connector_id/find_attack_discovery_by_connector_id';
 import { updateAttackDiscovery } from './update_attack_discovery/update_attack_discovery';
 import { createAttackDiscovery } from './create_attack_discovery/create_attack_discovery';
 import { getAttackDiscovery } from './get_attack_discovery/get_attack_discovery';
+import type {
+  AIAssistantDataClientParams} from '../../../ai_assistant_data_clients';
 import {
-  AIAssistantDataClient,
-  AIAssistantDataClientParams,
+  AIAssistantDataClient
 } from '../../../ai_assistant_data_clients';
 
 type AttackDiscoveryDataClientParams = AIAssistantDataClientParams;

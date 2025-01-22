@@ -6,10 +6,11 @@
  */
 
 import { buildEsQuery, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { QuerySchema, kqlQuerySchema } from '@kbn/slo-schema';
-import { Logger } from '@kbn/logging';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { SLODefinition } from '../../domain/models';
+import type { QuerySchema} from '@kbn/slo-schema';
+import { kqlQuerySchema } from '@kbn/slo-schema';
+import type { Logger } from '@kbn/logging';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { SLODefinition } from '../../domain/models';
 import { getDelayInSecondsFromSLO } from '../../domain/services/get_delay_in_seconds_from_slo';
 import { InvalidTransformError } from '../../errors';
 

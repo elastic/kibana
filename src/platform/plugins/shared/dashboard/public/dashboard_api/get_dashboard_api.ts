@@ -11,8 +11,8 @@ import { BehaviorSubject, debounceTime, merge } from 'rxjs';
 import { omit } from 'lodash';
 import { v4 } from 'uuid';
 import type { Reference } from '@kbn/content-management-utils';
-import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
-import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import type { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
+import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import {
   getReferencesForControls,
   getReferencesForPanelId,
@@ -22,14 +22,15 @@ import { initializeTrackOverlay } from './track_overlay';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { DASHBOARD_APP_ID } from '../plugin_constants';
 import { DEFAULT_DASHBOARD_INPUT } from './default_dashboard_input';
-import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
+import type { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { initializePanelsManager } from './panels_manager';
-import {
-  DASHBOARD_API_TYPE,
+import type {
   DashboardApi,
   DashboardCreationOptions,
   DashboardInternalApi,
-  DashboardState,
+  DashboardState} from './types';
+import {
+  DASHBOARD_API_TYPE
 } from './types';
 import { initializeDataViewsManager } from './data_views_manager';
 import { initializeSettingsManager } from './settings_manager';
@@ -40,7 +41,7 @@ import { getDashboardContentManagementService } from '../services/dashboard_cont
 import { openSaveModal } from './open_save_modal';
 import { initializeSearchSessionManager } from './search_session_manager';
 import { initializeViewModeManager } from './view_mode_manager';
-import { UnsavedPanelState } from '../dashboard_container/types';
+import type { UnsavedPanelState } from '../dashboard_container/types';
 import { initializeTrackContentfulRender } from './track_contentful_render';
 import { getSerializedState } from './get_serialized_state';
 

@@ -10,9 +10,9 @@ import type {
   CspFinding,
   MisconfigurationEvaluationStatus,
 } from '@kbn/cloud-security-posture-common';
-import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
+import type { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
 
-import { getComplianceDashboardSchema } from './schemas/stats';
+import type { getComplianceDashboardSchema } from './schemas/stats';
 
 export type AwsCredentialsType =
   | 'assume_role'

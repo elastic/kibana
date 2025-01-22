@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type {
+  DynamicSettings,
+  DynamicSettingsSaveResponse} from '../../../../common/runtime_types';
 import {
   DynamicSettingsCodec,
-  DynamicSettings,
-  DynamicSettingsSaveResponse,
   DynamicSettingsSaveCodec,
 } from '../../../../common/runtime_types';
 import { apiService } from './utils';

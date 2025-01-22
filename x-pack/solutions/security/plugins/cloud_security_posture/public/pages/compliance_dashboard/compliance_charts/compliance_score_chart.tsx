@@ -15,6 +15,8 @@ import {
   timeFormatter,
   Tooltip,
 } from '@elastic/charts';
+import type {
+  EuiToolTipProps} from '@elastic/eui';
 import {
   useEuiTheme,
   EuiFlexGroup,
@@ -25,7 +27,6 @@ import {
   type EuiLinkButtonProps,
   type EuiTextProps,
   EuiToolTip,
-  EuiToolTipProps,
   type CommonProps,
 } from '@elastic/eui';
 import { FormattedDate, FormattedTime } from '@kbn/i18n-react';

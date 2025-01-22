@@ -13,13 +13,14 @@ import type { Version } from '@kbn/object-versioning';
 import { LISTING_LIMIT_SETTING, PER_PAGE_SETTING } from '@kbn/saved-objects-settings';
 
 import type { MSearchIn, MSearchOut } from '../../common';
+import type {
+  IContentClient} from '../content_client';
 import {
   getContentClientFactory,
-  getMSearchClientFactory,
-  IContentClient,
+  getMSearchClientFactory
 } from '../content_client';
-import { EventStreamService } from '../event_stream';
-import { ContentCrud } from './crud';
+import type { EventStreamService } from '../event_stream';
+import type { ContentCrud } from './crud';
 import { EventBus } from './event_bus';
 import { ContentRegistry } from './registry';
 import { MSearchService } from './msearch';

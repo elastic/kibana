@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { setupApp } from './app/setup_app';
 import { DATA_TABLE_ID } from './react_embeddables/data_table/constants';
 import { registerCreateDataTableAction } from './react_embeddables/data_table/create_data_table_action';

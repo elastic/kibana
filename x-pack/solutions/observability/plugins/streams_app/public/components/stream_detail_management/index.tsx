@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { isWiredReadStream, ReadStreamDefinition } from '@kbn/streams-schema';
+import type { ReadStreamDefinition } from '@kbn/streams-schema';
+import { isWiredReadStream } from '@kbn/streams-schema';
 import { WiredStreamDetailManagement } from './wired';
 import { ClassicStreamDetailManagement } from './classic';
 

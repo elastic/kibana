@@ -7,8 +7,8 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { ElasticsearchClient, Logger, SavedObject } from '@kbn/core/server';
-import {
+import type { ElasticsearchClient, Logger, SavedObject } from '@kbn/core/server';
+import type {
   ConcreteTaskInstance,
   TaskInstance,
   TaskManagerSetupContract,
@@ -19,29 +19,32 @@ import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import pMap from 'p-map';
 import moment from 'moment';
 import { registerCleanUpTask } from './private_location/clean_up_task';
-import { SyntheticsServerSetup } from '../types';
+import type { SyntheticsServerSetup } from '../types';
 import { syntheticsMonitorType, syntheticsParamType } from '../../common/types/saved_objects';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import { installSyntheticsIndexTemplates } from '../routes/synthetics_service/install_index_templates';
 import { getAPIKeyForSyntheticsService } from './get_api_key';
 import { getEsHosts } from './get_es_hosts';
-import { ServiceConfig } from '../config';
-import { ServiceAPIClient, ServiceData } from './service_api_client';
+import type { ServiceConfig } from '../config';
+import type { ServiceData } from './service_api_client';
+import { ServiceAPIClient } from './service_api_client';
 
-import {
-  ConfigKey,
+import type {
   MonitorFields,
   ServiceLocationErrors,
   ServiceLocations,
   SyntheticsMonitorWithSecretsAttributes,
   SyntheticsParams,
-  ThrottlingOptions,
+  ThrottlingOptions} from '../../common/runtime_types';
+import {
+  ConfigKey
 } from '../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
 
 import { normalizeSecrets } from './utils/secrets';
+import type {
+  ConfigData} from './formatters/public_formatters/format_configs';
 import {
-  ConfigData,
   formatHeartbeatRequest,
   formatMonitorConfigFields,
   mixParamsWithGlobalParams,

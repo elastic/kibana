@@ -6,7 +6,8 @@
  */
 
 import { ApmSynthtraceKibanaClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
-import url, { format, UrlObject } from 'url';
+import type { UrlObject } from 'url';
+import url, { format } from 'url';
 
 import { getLogsSynthtraceEsClient } from '../../../common/utils/synthtrace/logs_es_client';
 import { getApmSynthtraceEsClient } from '../../../common/utils/synthtrace/apm_es_client';

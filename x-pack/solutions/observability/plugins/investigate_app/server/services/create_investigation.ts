@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CreateInvestigationParams, CreateInvestigationResponse } from '@kbn/investigation-shared';
+import type { CreateInvestigationParams, CreateInvestigationResponse } from '@kbn/investigation-shared';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
-import { InvestigationRepository } from './investigation_repository';
-import { Investigation } from '../models/investigation';
+import type { InvestigationRepository } from './investigation_repository';
+import type { Investigation } from '../models/investigation';
 
 export async function createInvestigation(
   params: CreateInvestigationParams,

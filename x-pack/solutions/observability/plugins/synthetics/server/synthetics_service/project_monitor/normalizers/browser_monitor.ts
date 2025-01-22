@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   BrowserFields,
+  ProjectMonitor,
+  ThrottlingConfig} from '../../../../common/runtime_types';
+import {
   ConfigKey,
   MonitorTypeEnum,
-  FormMonitorType,
-  ProjectMonitor,
-  ThrottlingConfig,
+  FormMonitorType
 } from '../../../../common/runtime_types';
 import {
   PROFILE_VALUES_ENUM,
@@ -20,9 +21,10 @@ import {
   PROFILE_VALUES,
   CUSTOM_LABEL,
 } from '../../../../common/constants/monitor_defaults';
-import {
+import type {
   NormalizedProjectProps,
-  NormalizerResult,
+  NormalizerResult} from './common_fields';
+import {
   getNormalizeCommonFields,
   getValueInSeconds,
 } from './common_fields';

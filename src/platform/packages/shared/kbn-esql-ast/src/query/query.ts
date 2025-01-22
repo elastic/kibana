@@ -8,11 +8,13 @@
  */
 
 import type { Token } from 'antlr4';
-import { ParseOptions, parse } from '../parser';
+import type { ParseOptions} from '../parser';
+import { parse } from '../parser';
 import type { ESQLAstQueryExpression, EditorError } from '../types';
+import type {
+  WrappingPrettyPrinterOptions} from '../pretty_print/wrapping_pretty_printer';
 import {
-  WrappingPrettyPrinter,
-  WrappingPrettyPrinterOptions,
+  WrappingPrettyPrinter
 } from '../pretty_print/wrapping_pretty_printer';
 
 /**

@@ -6,8 +6,7 @@
  */
 
 import { calculateAuto } from '@kbn/calculate-auto';
-import {
-  ALL_VALUE,
+import type {
   APMTransactionErrorRateIndicator,
   SyntheticsAvailabilityIndicator,
   GetPreviewDataParams,
@@ -15,18 +14,20 @@ import {
   HistogramIndicator,
   KQLCustomIndicator,
   MetricCustomIndicator,
-  TimesliceMetricIndicator,
+  TimesliceMetricIndicator} from '@kbn/slo-schema';
+import {
+  ALL_VALUE
 } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { estypes } from '@elastic/elasticsearch';
-import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { estypes } from '@elastic/elasticsearch';
+import type { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 import { getElasticsearchQueryOrThrow } from './transform_generators';
 
 import { buildParamValues } from './transform_generators/synthetics_availability';
 import { typedSearch } from '../utils/queries';
-import { APMTransactionDurationIndicator } from '../domain/models';
+import type { APMTransactionDurationIndicator } from '../domain/models';
 import { computeSLIForPreview } from '../domain/services';
 import {
   GetCustomMetricIndicatorAggregation,

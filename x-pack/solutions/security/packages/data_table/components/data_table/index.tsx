@@ -28,19 +28,20 @@ import type {
   FieldBrowserProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   BrowserFields,
   ColumnHeaderOptions,
   DeprecatedCellValueElementProps,
   DeprecatedRowRenderer,
   TimelineItem,
 } from '@kbn/timelines-plugin/common';
+import type {
+  UseDataGridColumnsCellActionsProps} from '@kbn/cell-actions';
 import {
-  useDataGridColumnsCellActions,
-  UseDataGridColumnsCellActionsProps,
+  useDataGridColumnsCellActions
 } from '@kbn/cell-actions';
-import { FieldSpec } from '@kbn/data-views-plugin/common';
-import { DataTableModel, DataTableState } from '../../store/data_table/types';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { DataTableModel, DataTableState } from '../../store/data_table/types';
 
 import { getColumnHeader, getColumnHeaders } from './column_headers/helpers';
 import { addBuildingBlockStyle, mapSortDirectionToDirection, mapSortingColumns } from './helpers';

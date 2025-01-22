@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient, IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
-import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
+import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ElasticsearchClient, IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { asyncForEach } from '@kbn/std';
 import { merge } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
@@ -21,13 +22,14 @@ import {
 } from '../../common/constants';
 import { getSLOPipelineTemplate } from '../assets/ingest_templates/slo_pipeline_template';
 import { getSLOSummaryPipelineTemplate } from '../assets/ingest_templates/slo_summary_pipeline_template';
-import { Duration, DurationUnit, SLODefinition } from '../domain/models';
+import type { SLODefinition } from '../domain/models';
+import { Duration, DurationUnit } from '../domain/models';
 import { validateSLO } from '../domain/services';
 import { SLOIdConflict, SecurityException } from '../errors';
 import { retryTransientEsErrors } from '../utils/retry';
-import { SLORepository } from './slo_repository';
+import type { SLORepository } from './slo_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
-import { TransformManager } from './transform_manager';
+import type { TransformManager } from './transform_manager';
 import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_expected_indicator_source_index_privileges';
 import { getTransformQueryComposite } from './utils/get_transform_compite_query';
 

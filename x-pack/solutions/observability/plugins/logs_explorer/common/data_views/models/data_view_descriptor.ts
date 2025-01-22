@@ -7,8 +7,8 @@
 
 import { createRegExpPatternFrom, testPatternAgainstAllowedList } from '@kbn/data-view-utils';
 import { DEFAULT_ALLOWED_LOGS_BASE_PATTERNS } from '@kbn/discover-utils';
-import { DataViewSpecWithId } from '../../data_source_selection';
-import { DataViewDescriptorType } from '../types';
+import type { DataViewSpecWithId } from '../../data_source_selection';
+import type { DataViewDescriptorType } from '../types';
 
 const LOGS_ALLOWED_LIST = [
   createRegExpPatternFrom(DEFAULT_ALLOWED_LOGS_BASE_PATTERNS, 'data'),

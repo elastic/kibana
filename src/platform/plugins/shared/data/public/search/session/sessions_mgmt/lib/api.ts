@@ -13,16 +13,17 @@ import moment from 'moment';
 import { from, race, timer } from 'rxjs';
 import { mapTo, tap } from 'rxjs';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { ACTION } from '../components/actions';
-import {
+import type {
   PersistedSearchSessionSavedObjectAttributes,
   UISearchSessionState,
   UISession,
 } from '../types';
-import { ISessionsClient } from '../../sessions_client';
-import { SearchUsageCollector } from '../../../collectors';
-import { SearchSessionsFindResponse, SearchSessionStatus } from '../../../../../common';
+import type { ISessionsClient } from '../../sessions_client';
+import type { SearchUsageCollector } from '../../../collectors';
+import type { SearchSessionsFindResponse} from '../../../../../common';
+import { SearchSessionStatus } from '../../../../../common';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
 
 type LocatorsStart = SharePluginStart['url']['locators'];

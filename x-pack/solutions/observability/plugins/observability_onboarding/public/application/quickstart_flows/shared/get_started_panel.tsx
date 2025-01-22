@@ -18,11 +18,12 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type {
+  OnboardingFlowEventContext} from '../../../../common/telemetry_events';
 import {
-  OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT,
-  OnboardingFlowEventContext,
+  OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT
 } from '../../../../common/telemetry_events';
-import { ObservabilityOnboardingContextValue } from '../../../plugin';
+import type { ObservabilityOnboardingContextValue } from '../../../plugin';
 
 export function GetStartedPanel({
   onboardingFlowType,

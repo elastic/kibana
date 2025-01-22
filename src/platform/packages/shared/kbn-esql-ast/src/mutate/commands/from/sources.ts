@@ -8,7 +8,7 @@
  */
 
 import { Builder } from '../../../builder';
-import { ESQLAstQueryExpression, ESQLSource } from '../../../types';
+import type { ESQLAstQueryExpression, ESQLSource } from '../../../types';
 import { Visitor } from '../../../visitor';
 import * as generic from '../../generic';
 import * as util from '../../util';

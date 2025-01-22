@@ -9,24 +9,26 @@
 
 import { BehaviorSubject, Subject, combineLatest, map, merge } from 'rxjs';
 import { v4 as generateId } from 'uuid';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
+import type {
+  PanelPackage} from '@kbn/presentation-containers';
 import {
-  PanelPackage,
   apiHasSerializableState,
   childrenUnsavedChanges$,
   combineCompatibleChildrenApis,
 } from '@kbn/presentation-containers';
 import { isEqual, omit } from 'lodash';
-import {
+import type {
   PublishesDataLoading,
   PublishingSubject,
-  ViewMode,
+  ViewMode} from '@kbn/presentation-publishing';
+import {
   apiPublishesDataLoading,
   apiPublishesUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import { DEFAULT_STATE, lastSavedStateSessionStorage } from './session_storage/last_saved_state';
 import { unsavedChangesSessionStorage } from './session_storage/unsaved_changes';
-import { LastSavedState, PageApi, UnsavedChanges } from './types';
+import type { LastSavedState, PageApi, UnsavedChanges } from './types';
 
 export function getPageApi() {
   const initialUnsavedChanges = unsavedChangesSessionStorage.load();

@@ -6,7 +6,7 @@
  */
 
 import { HashedCache } from '../../../../common/hashed_cache';
-import { DefaultDataViewsContext } from './types';
+import type { DefaultDataViewsContext } from './types';
 
 export const createDefaultContext = (): DefaultDataViewsContext => ({
   cache: new HashedCache(),

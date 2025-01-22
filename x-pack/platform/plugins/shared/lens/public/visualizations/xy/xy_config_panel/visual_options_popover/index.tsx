@@ -14,7 +14,7 @@ import { ToolbarPopover } from '../../../../shared_components';
 import { MissingValuesOptions } from './missing_values_option';
 import { LineCurveOption } from './line_curve_option';
 import { FillOpacityOption } from './fill_opacity_option';
-import { XYState } from '../../types';
+import type { XYState } from '../../types';
 import {
   flipSeriesType,
   getBarSeriesLayers,

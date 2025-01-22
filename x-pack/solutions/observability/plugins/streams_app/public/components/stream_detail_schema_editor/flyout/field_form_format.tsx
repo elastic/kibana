@@ -7,8 +7,8 @@
 
 import { EuiFieldText } from '@elastic/eui';
 import React from 'react';
-import { FieldDefinitionConfig } from '@kbn/streams-schema';
-import { SchemaEditorEditingState } from '../hooks/use_editing_state';
+import type { FieldDefinitionConfig } from '@kbn/streams-schema';
+import type { SchemaEditorEditingState } from '../hooks/use_editing_state';
 
 type FieldFormFormatProps = Pick<
   SchemaEditorEditingState,

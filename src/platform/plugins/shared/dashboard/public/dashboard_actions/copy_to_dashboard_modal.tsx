@@ -18,7 +18,8 @@ import {
   EuiRadio,
   EuiSpacer,
 } from '@elastic/eui';
-import { EmbeddablePackageState, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePackageState} from '@kbn/embeddable-plugin/public';
+import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 import { LazyDashboardPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
 import { omit } from 'lodash';
@@ -27,7 +28,7 @@ import { CREATE_NEW_DASHBOARD_URL, createDashboardEditUrl } from '../utils/urls'
 import { embeddableService } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
-import { CopyToDashboardAPI } from './copy_to_dashboard_action';
+import type { CopyToDashboardAPI } from './copy_to_dashboard_action';
 
 interface CopyToDashboardModalProps {
   api: CopyToDashboardAPI;

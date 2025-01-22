@@ -6,12 +6,13 @@
  */
 
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { CUSTOM_PALETTE, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { ExpressionAstExpression, ExpressionAstFunction } from '@kbn/expressions-plugin/common';
+import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import { CUSTOM_PALETTE } from '@kbn/coloring';
+import type { ExpressionAstExpression, ExpressionAstFunction } from '@kbn/expressions-plugin/common';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { createMockDatasource, createMockFramePublicAPI, generateActiveData } from '../../mocks';
-import {
+import type {
   DatasourceLayers,
   DatasourcePublicAPI,
   OperationDescriptor,
@@ -21,9 +22,9 @@ import {
 import { GROUP_ID } from './constants';
 import { getMetricVisualization } from './visualization';
 import { themeServiceMock } from '@kbn/core/public/mocks';
-import { Ast } from '@kbn/interpreter';
+import type { Ast } from '@kbn/interpreter';
 import { LayoutDirection } from '@elastic/charts';
-import { MetricVisualizationState } from './types';
+import type { MetricVisualizationState } from './types';
 
 const paletteService = chartPluginMock.createPaletteRegistry();
 const theme = themeServiceMock.createStartContract();

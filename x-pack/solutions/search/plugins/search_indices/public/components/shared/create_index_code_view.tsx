@@ -9,7 +9,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elasti
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
 import { useSearchApiKey } from '@kbn/search-api-keys-components';
-import { Languages, AvailableLanguages, LanguageOptions } from '../../code_examples';
+import type { AvailableLanguages} from '../../code_examples';
+import { Languages, LanguageOptions } from '../../code_examples';
 
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { useKibana } from '../../hooks/use_kibana';
@@ -20,7 +21,7 @@ import { CodeSample } from './code_sample';
 import { useWorkflow } from './hooks/use_workflow';
 import { LanguageSelector } from './language_selector';
 import { GuideSelector } from './guide_selector';
-import { Workflow, WorkflowId } from '../../code_examples/workflows';
+import type { Workflow, WorkflowId } from '../../code_examples/workflows';
 
 export interface CreateIndexCodeViewProps {
   selectedLanguage: AvailableLanguages;

@@ -9,11 +9,12 @@ import { act } from 'react-dom/test-utils';
 import type { Observable } from 'rxjs';
 
 import type { ILicense } from '@kbn/licensing-plugin/public';
-import { IlmPolicyMigrationStatus } from '@kbn/reporting-common/types';
+import type { IlmPolicyMigrationStatus } from '@kbn/reporting-common/types';
 
-import { ListingProps as Props } from '.';
+import type { ListingProps as Props } from '.';
 import { mockJobs } from '../../common/test';
-import { TestBed, TestDependencies, setup } from './__test__';
+import type { TestBed, TestDependencies} from './__test__';
+import { setup } from './__test__';
 import { mockConfig } from './__test__/report_listing.test.helpers';
 import { Job } from '@kbn/reporting-public';
 

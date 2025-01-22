@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Client } from '@elastic/elasticsearch';
-import { JsonObject } from '@kbn/utility-types';
+import type { Client } from '@elastic/elasticsearch';
+import type { JsonObject } from '@kbn/utility-types';
 import expect from '@kbn/expect';
-import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { StreamConfigDefinition } from '@kbn/streams-schema';
-import { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
-import { StreamsRouteRepository } from '@kbn/streams-plugin/server';
-import { StreamsSupertestRepositoryClient } from './repository_client';
+import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { StreamConfigDefinition } from '@kbn/streams-schema';
+import type { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
+import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
+import type { StreamsSupertestRepositoryClient } from './repository_client';
 
 export async function enableStreams(client: StreamsSupertestRepositoryClient) {
   await client.fetch('POST /api/streams/_enable').expect(200);

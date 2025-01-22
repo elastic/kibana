@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import { Observable } from 'rxjs';
-import { TaskManagerConfig } from '../config';
+import type { Logger } from '@kbn/core/server';
+import type { Observable } from 'rxjs';
+import type { TaskManagerConfig } from '../config';
+import type {
+  MonitoringStats} from './monitoring_stats_stream';
 import {
-  MonitoringStats,
   createAggregators,
   createMonitoringStatsStream,
 } from './monitoring_stats_stream';
-import { TaskStore } from '../task_store';
-import { TaskPollingLifecycle } from '../polling_lifecycle';
-import { ManagedConfiguration } from '../lib/create_managed_configuration';
-import { AdHocTaskCounter } from '../lib/adhoc_task_counter';
-import { TaskTypeDictionary } from '../task_type_dictionary';
+import type { TaskStore } from '../task_store';
+import type { TaskPollingLifecycle } from '../polling_lifecycle';
+import type { ManagedConfiguration } from '../lib/create_managed_configuration';
+import type { AdHocTaskCounter } from '../lib/adhoc_task_counter';
+import type { TaskTypeDictionary } from '../task_type_dictionary';
 
 export type { MonitoringStats, RawMonitoringStats } from './monitoring_stats_stream';
 export {

@@ -9,10 +9,11 @@
 
 import type { ContextWithProfileId } from '../../../../profile_service';
 import { createEsqlDataSource } from '../../../../../../common/data_sources';
+import type {
+  DataSourceProfileProviderParams,
+  RootContext} from '../../../../profiles';
 import {
   DataSourceCategory,
-  DataSourceProfileProviderParams,
-  RootContext,
   SolutionType,
 } from '../../../../profiles';
 import { createResolve } from './create_resolve';

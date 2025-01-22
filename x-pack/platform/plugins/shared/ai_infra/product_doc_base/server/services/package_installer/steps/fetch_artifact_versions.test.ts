@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import fetch, { Response } from 'node-fetch';
+import type { Response } from 'node-fetch';
+import fetch from 'node-fetch';
 import { fetchArtifactVersions } from './fetch_artifact_versions';
-import { getArtifactName, DocumentationProduct, ProductName } from '@kbn/product-doc-common';
+import type { ProductName } from '@kbn/product-doc-common';
+import { getArtifactName, DocumentationProduct } from '@kbn/product-doc-common';
 
 jest.mock('node-fetch');
 const fetchMock = fetch as jest.MockedFn<typeof fetch>;

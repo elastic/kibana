@@ -11,7 +11,7 @@ import {
   SLO_INGEST_PIPELINE_INDEX_NAME_PREFIX,
   SLO_RESOURCES_VERSION,
 } from '../../../common/constants';
-import { SLODefinition } from '../../domain/models';
+import type { SLODefinition } from '../../domain/models';
 
 export const getSLOPipelineTemplate = (slo: SLODefinition) => ({
   id: getSLOPipelineId(slo.id, slo.revision),

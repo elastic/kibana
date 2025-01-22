@@ -8,7 +8,7 @@
  */
 
 import deepmerge from 'deepmerge';
-import { CspConfigType } from './config';
+import type { CspConfigType } from './config';
 
 export type CspDirectiveName =
   | 'script-src'

@@ -9,6 +9,9 @@ import moment from 'moment';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import type {
+  EuiTableSortingType,
+  EuiSelectableOption} from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiFlexGroup,
@@ -18,16 +21,15 @@ import {
   EuiButtonEmpty,
   EuiText,
   EuiToolTip,
-  EuiTableSortingType,
   EuiButtonIcon,
-  EuiSelectableOption,
   EuiScreenReaderOnly,
   EuiCheckbox,
   RIGHT_ALIGNMENT,
   useEuiTheme,
 } from '@elastic/eui';
+import type {
+  RuleExecutionStatus} from '@kbn/alerting-plugin/common';
 import {
-  RuleExecutionStatus,
   formatDuration,
   parseDuration,
   MONITORING_HISTORY_LIMIT,
@@ -40,16 +42,17 @@ import {
   SELECT_ALL_ARIA_LABEL,
   CLEAR_FILTERS,
 } from '../translations';
-import {
+import type {
   Rule,
   RuleTableItem,
   RuleTypeIndex,
   Pagination,
-  Percentiles,
   TriggersActionsUiConfig,
   RuleTypeRegistryContract,
   SnoozeSchedule,
-  BulkOperationResponse,
+  BulkOperationResponse} from '../../../../types';
+import {
+  Percentiles
 } from '../../../../types';
 import { DEFAULT_NUMBER_FORMAT } from '../../../constants';
 import { shouldShowDurationWarning } from '../../../lib/execution_duration_utils';
@@ -63,7 +66,8 @@ import { RuleStatusDropdown } from './rule_status_dropdown';
 import { RulesListNotifyBadge } from './notify_badge';
 import { RulesListTableStatusCell } from './rules_list_table_status_cell';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
-import { RulesListColumns, useRulesListColumnSelector } from './rules_list_column_selector';
+import type { RulesListColumns} from './rules_list_column_selector';
+import { useRulesListColumnSelector } from './rules_list_column_selector';
 
 interface RuleTypeState {
   isLoading: boolean;

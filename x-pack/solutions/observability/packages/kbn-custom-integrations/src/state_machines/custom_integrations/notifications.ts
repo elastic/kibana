@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { createNotificationChannel, NotificationChannel } from '@kbn/xstate-utils';
-import { CreateCustomIntegrationNotificationEvent } from '../create/notifications';
-import { CustomIntegrationsContext, CustomIntegrationsEvent } from './types';
+import type { NotificationChannel } from '@kbn/xstate-utils';
+import { createNotificationChannel } from '@kbn/xstate-utils';
+import type { CreateCustomIntegrationNotificationEvent } from '../create/notifications';
+import type { CustomIntegrationsContext, CustomIntegrationsEvent } from './types';
 
 export type CustomIntegrationsNotificationChannel = NotificationChannel<
   CustomIntegrationsContext,

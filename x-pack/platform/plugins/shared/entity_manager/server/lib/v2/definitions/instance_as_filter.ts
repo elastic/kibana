@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EntityV2 } from '@kbn/entities-schema';
-import { Logger } from '@kbn/core/server';
+import type { EntityV2 } from '@kbn/entities-schema';
+import type { Logger } from '@kbn/core/server';
 import { compact } from 'lodash';
 import { readSourceDefinitions } from './source_definition';
-import { InternalClusterClient } from '../types';
+import type { InternalClusterClient } from '../types';
 import { UnknownEntityType } from '../errors/unknown_entity_type';
 import { InvalidEntityInstance } from '../errors/invalid_entity_instance';
 

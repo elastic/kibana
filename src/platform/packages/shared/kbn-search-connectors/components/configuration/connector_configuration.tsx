@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { createContext, useEffect, useRef, useState, FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { createContext, useEffect, useRef, useState } from 'react';
 
 import {
   EuiButton,
@@ -23,10 +24,11 @@ import { i18n } from '@kbn/i18n';
 
 import { isDeepEqual } from 'react-use/lib/util';
 import { sortAndFilterConnectorConfiguration } from '../../utils/connector_configuration_utils';
-import {
+import type {
   Connector,
   ConnectorConfigProperties,
-  ConnectorConfiguration,
+  ConnectorConfiguration} from '../..';
+import {
   ConnectorStatus,
   FeatureName,
 } from '../..';

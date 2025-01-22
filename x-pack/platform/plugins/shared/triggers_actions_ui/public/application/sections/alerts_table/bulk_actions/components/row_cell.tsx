@@ -6,7 +6,8 @@
  */
 
 import { EuiCheckbox, EuiLoadingSpinner } from '@elastic/eui';
-import React, { ChangeEvent, useCallback } from 'react';
+import type { ChangeEvent} from 'react';
+import React, { useCallback } from 'react';
 import { useContext } from 'react';
 import { SELECT_ROW_ARIA_LABEL } from '../translations';
 import { AlertsTableContext } from '../../contexts/alerts_table_context';

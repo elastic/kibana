@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import type { Action} from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   tracksOverlays,
@@ -28,10 +29,10 @@ import {
   apiHasDynamicActions,
   type HasDynamicActions,
 } from '@kbn/embeddable-enhanced-plugin/public';
-import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { txtDisplayName } from './i18n';
 import { MenuItem } from './menu_item';
-import { StartDependencies } from '../../../../plugin';
+import type { StartDependencies } from '../../../../plugin';
 import {
   createDrilldownTemplatesFromSiblings,
   DRILLDOWN_ACTION_GROUP,

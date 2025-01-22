@@ -7,7 +7,7 @@
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { FleetSetup, FleetStart } from '@kbn/fleet-plugin/public';
-import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import type { ComponentType, ReactNode } from 'react';
 import type {
   UsageCollectionSetup,
@@ -16,7 +16,7 @@ import type {
 import type { CloudDefendRouterProps } from './application/router';
 import type { CloudDefendPageId } from './common/navigation/types';
 import * as i18n from './components/control_general_view/translations';
-import { SelectorType, SelectorCondition, Selector, Response } from '../common';
+import type { SelectorType, SelectorCondition, Selector, Response } from '../common';
 
 /**
  * cloud_defend plugin types

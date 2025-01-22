@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
+import type {
+  EuiContextMenuPanelItemDescriptor} from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiContextMenu,
-  EuiIcon,
-  EuiContextMenuPanelItemDescriptor,
+  EuiIcon
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Popover, ClosePopoverFn } from '../../popover';
+import type { ClosePopoverFn } from '../../popover';
+import { Popover } from '../../popover';
 import {
   MAX_ZOOM_LEVEL,
   MIN_ZOOM_LEVEL,

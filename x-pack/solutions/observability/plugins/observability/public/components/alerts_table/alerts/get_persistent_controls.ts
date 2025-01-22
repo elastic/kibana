@@ -9,7 +9,7 @@ import { useMemo, useCallback } from 'react';
 import { type AlertsGroupingProps, useAlertsGroupingState } from '@kbn/alerts-grouping';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import { useGetGroupSelectorStateless } from '@kbn/grouping/src/hooks/use_get_group_selector';
-import { AlertsByGroupingAgg } from '../types';
+import type { AlertsByGroupingAgg } from '../types';
 
 interface GetPersistentControlsParams {
   groupingId: string;

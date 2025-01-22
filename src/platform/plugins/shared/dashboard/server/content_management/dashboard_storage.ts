@@ -9,17 +9,17 @@
 
 import Boom from '@hapi/boom';
 import { tagsToFindOptions } from '@kbn/content-management-utils';
-import {
+import type {
   SavedObjectsFindOptions,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 
-import { CreateResult, DeleteResult, SearchQuery } from '@kbn/content-management-plugin/common';
-import { StorageContext } from '@kbn/content-management-plugin/server';
+import type { CreateResult, DeleteResult, SearchQuery } from '@kbn/content-management-plugin/common';
+import type { StorageContext } from '@kbn/content-management-plugin/server';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../dashboard_saved_object';
 import { cmServicesDefinition } from './cm_services';
-import { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
+import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import { itemAttrsToSavedObjectAttrs, savedObjectToItem } from './latest';
 import type {
   DashboardAttributes,

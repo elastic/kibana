@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
-import { QueryObserverResult } from '@tanstack/react-query';
-import { PromptResponse } from '@kbn/elastic-assistant-common';
+import type { Dispatch, SetStateAction} from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { QueryObserverResult } from '@tanstack/react-query';
+import type { PromptResponse } from '@kbn/elastic-assistant-common';
 import { find } from 'lodash';
 import deepEqual from 'fast-deep-equal';
-import { AIConnector } from '../../connectorland/connector_selector';
+import type { AIConnector } from '../../connectorland/connector_selector';
 import { getGenAiConfig } from '../../connectorland/helpers';
 import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 import { getDefaultNewSystemPrompt, getDefaultSystemPrompt } from '../use_conversation/helpers';
 import { useConversation } from '../use_conversation';
 import { sleep } from '../helpers';
-import { Conversation, WELCOME_CONVERSATION_TITLE } from '../../..';
+import type { Conversation} from '../../..';
+import { WELCOME_CONVERSATION_TITLE } from '../../..';
 
 export interface Props {
   allSystemPrompts: PromptResponse[];

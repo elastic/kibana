@@ -13,7 +13,7 @@ import {
 } from './crawl_events.mock';
 import { CRAWLER_DOMAIN, CRAWLER_DOMAIN_FROM_SERVER } from './crawler_domains.mock';
 
-import { CrawlerData, CrawlerDataFromServer } from '../types';
+import type { CrawlerData, CrawlerDataFromServer } from '../types';
 
 export const CRAWLER_DATA: CrawlerData = {
   domains: [CRAWLER_DOMAIN],

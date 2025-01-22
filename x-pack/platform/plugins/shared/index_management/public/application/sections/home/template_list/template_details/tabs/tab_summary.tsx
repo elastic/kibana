@@ -24,7 +24,7 @@ import { reactRouterNavigate } from '../../../../../../shared_imports';
 import { useAppContext } from '../../../../../app_context';
 import { serializeAsESLifecycle } from '../../../../../../../common/lib';
 import { getLifecycleValue } from '../../../../../lib/data_streams';
-import { TemplateDeserialized } from '../../../../../../../common';
+import type { TemplateDeserialized } from '../../../../../../../common';
 import { ILM_PAGES_POLICY_EDIT, INGEST_PIPELINES_EDIT } from '../../../../../constants';
 import { useIlmLocator } from '../../../../../services/use_ilm_locator';
 import { useIngestPipelinesLocator } from '../../../../../services/use_ingest_pipeline_locator';

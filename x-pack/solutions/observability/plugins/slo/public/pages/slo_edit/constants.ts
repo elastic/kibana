@@ -6,8 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  ALL_VALUE,
+import type {
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
   SyntheticsAvailabilityIndicator,
@@ -17,7 +16,9 @@ import {
   KQLCustomIndicator,
   MetricCustomIndicator,
   TimesliceMetricIndicator,
-  TimeWindowType,
+  TimeWindowType} from '@kbn/slo-schema';
+import {
+  ALL_VALUE
 } from '@kbn/slo-schema';
 import {
   BUDGETING_METHOD_OCCURRENCES,
@@ -31,7 +32,7 @@ import {
   INDICATOR_TIMESLICE_METRIC,
 } from '../../utils/slo/labels';
 import { SYNTHETICS_DEFAULT_GROUPINGS, SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
-import { CreateSLOForm } from './types';
+import type { CreateSLOForm } from './types';
 
 export const MAX_WIDTH = 900;
 

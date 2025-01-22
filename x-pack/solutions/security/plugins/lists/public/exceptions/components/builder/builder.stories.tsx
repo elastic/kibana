@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { Story, addDecorator } from '@storybook/react';
+import type { Story} from '@storybook/react';
+import { addDecorator } from '@storybook/react';
 import React from 'react';
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
@@ -18,10 +19,11 @@ import { getEntryExistsMock } from '../../../../common/schemas/types/entry_exist
 import { getEntryNestedMock } from '../../../../common/schemas/types/entry_nested.mock';
 import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
 
-import {
-  ExceptionBuilderComponent,
+import type {
   ExceptionBuilderProps,
-  OnChangeProps,
+  OnChangeProps} from './exception_items_renderer';
+import {
+  ExceptionBuilderComponent
 } from './exception_items_renderer';
 
 const mockHttpService: HttpStart = {

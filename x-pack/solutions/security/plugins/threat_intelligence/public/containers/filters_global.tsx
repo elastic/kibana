@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { useSecurityContext } from '../hooks/use_security_context';
 
 export const FiltersGlobal: FC<PropsWithChildren<unknown>> = ({ children }) => {

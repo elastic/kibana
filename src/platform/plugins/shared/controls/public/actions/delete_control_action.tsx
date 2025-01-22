@@ -26,7 +26,8 @@ import {
 } from '@kbn/presentation-publishing';
 import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/public';
 
-import { PresentationContainer, apiIsPresentationContainer } from '@kbn/presentation-containers';
+import type { PresentationContainer} from '@kbn/presentation-containers';
+import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { CONTROL_GROUP_TYPE } from '../../common';
 import { ACTION_DELETE_CONTROL } from './constants';
 import { coreServices } from '../services/kibana_services';

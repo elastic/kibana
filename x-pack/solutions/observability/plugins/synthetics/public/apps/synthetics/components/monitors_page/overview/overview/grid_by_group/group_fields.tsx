@@ -12,8 +12,9 @@ import { useUrlParams } from '../../../../../hooks';
 import { GroupMenu } from './group_menu';
 import { ConfigKey } from '../../../../../../../../common/runtime_types';
 
+import type {
+  GroupByState} from '../../../../../state/overview';
 import {
-  GroupByState,
   selectOverviewState,
   setOverviewGroupByAction,
 } from '../../../../../state/overview';

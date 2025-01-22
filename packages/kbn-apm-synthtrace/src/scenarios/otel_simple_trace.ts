@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { otel, generateShortId, OtelDocument } from '@kbn/apm-synthtrace-client';
+import type { OtelDocument } from '@kbn/apm-synthtrace-client';
+import { otel, generateShortId } from '@kbn/apm-synthtrace-client';
 import { times } from 'lodash';
-import { Scenario } from '../cli/scenario';
+import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 
 const scenario: Scenario<OtelDocument> = async (runOptions) => {

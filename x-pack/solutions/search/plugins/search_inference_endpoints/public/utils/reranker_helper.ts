@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 export const isProviderTechPreview = (provider: InferenceAPIConfigResponse) => {
   if (hasModelId(provider)) {
     return provider.task_type === 'rerank' && provider.service_settings?.model_id?.startsWith('.');

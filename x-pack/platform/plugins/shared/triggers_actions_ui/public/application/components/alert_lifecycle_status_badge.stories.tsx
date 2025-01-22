@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { ComponentProps } from 'react';
-import { Story } from '@storybook/react';
+import type { ComponentProps } from 'react';
+import React from 'react';
+import type { Story } from '@storybook/react';
 import { ALERT_STATUS_RECOVERED, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
+import type {
+  AlertLifecycleStatusBadgeProps} from './alert_lifecycle_status_badge';
 import {
-  AlertLifecycleStatusBadge,
-  AlertLifecycleStatusBadgeProps,
+  AlertLifecycleStatusBadge
 } from './alert_lifecycle_status_badge';
 
 type Args = ComponentProps<typeof AlertLifecycleStatusBadge>;

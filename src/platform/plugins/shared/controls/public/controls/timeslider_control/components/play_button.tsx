@@ -9,8 +9,8 @@
 
 import React from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { ViewMode } from '@kbn/presentation-publishing';
-import { Observable } from 'rxjs';
+import type { ViewMode } from '@kbn/presentation-publishing';
+import type { Observable } from 'rxjs';
 import { TimeSliderStrings } from './time_slider_strings';
 
 interface Props {

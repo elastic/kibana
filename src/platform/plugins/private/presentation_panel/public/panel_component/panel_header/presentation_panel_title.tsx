@@ -25,9 +25,10 @@ import {
 } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
-import { ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode } from '@kbn/presentation-publishing';
+import type {
+  CustomizePanelActionApi} from '../../panel_actions/customize_panel_action';
 import {
-  CustomizePanelActionApi,
   isApiCompatibleWithCustomizePanelAction,
 } from '../../panel_actions/customize_panel_action';
 import { openCustomizePanelFlyout } from '../../panel_actions/customize_panel_action/open_customize_panel';

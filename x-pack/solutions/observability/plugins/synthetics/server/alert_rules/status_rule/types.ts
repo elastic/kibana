@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
-import { ActionGroupIdsOf } from '@kbn/alerting-types';
-import {
+import type { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
+import type { ActionGroupIdsOf } from '@kbn/alerting-types';
+import type {
   AlertInstanceContext as AlertContext,
   RuleExecutorOptions,
 } from '@kbn/alerting-plugin/server';
-import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
-import { MONITOR_STATUS } from '../../../common/constants/synthetics_alerts';
-import {
+import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import type { MONITOR_STATUS } from '../../../common/constants/synthetics_alerts';
+import type {
   SyntheticsCommonState,
   SyntheticsMonitorStatusAlertState,
 } from '../../../common/runtime_types/alert_rules/common';

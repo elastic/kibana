@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { QueryState } from '@kbn/data-plugin/public';
-import { DiscoverContainerProps } from '@kbn/discover-plugin/public';
-import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { Observable } from 'rxjs';
-import {
+import type { QueryState } from '@kbn/data-plugin/public';
+import type { DiscoverContainerProps } from '@kbn/discover-plugin/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { Observable } from 'rxjs';
+import type {
   availableControlsPanels,
   DataSourceSelectionPlain,
   DisplayOptions,
   PartialDisplayOptions,
 } from '../../common';
-import { IDatasetsClient } from '../services/datasets';
-import {
+import type { IDatasetsClient } from '../services/datasets';
+import type {
   LogsExplorerControllerStateMachine,
   LogsExplorerControllerStateService,
 } from '../state_machines/logs_explorer_controller';
-import { LogsExplorerCustomizations } from '../customizations/types';
+import type { LogsExplorerCustomizations } from '../customizations/types';
 
 export interface LogsExplorerController {
   actions: {};

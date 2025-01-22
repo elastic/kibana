@@ -9,14 +9,15 @@ import { EuiFlexGrid, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
 import { useKibana } from '../../../../../utils/kibana_react';
 import { paths } from '../../../../../../common/locators/paths';
 import { useHasData } from '../../../../../hooks/use_has_data';
-import { EmptySection, Section } from './empty_section';
+import type { Section } from './empty_section';
+import { EmptySection } from './empty_section';
 
 export function EmptySections() {
   const { http, share } = useKibana().services;

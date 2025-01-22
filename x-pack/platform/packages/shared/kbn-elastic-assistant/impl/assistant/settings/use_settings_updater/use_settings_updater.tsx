@@ -5,20 +5,23 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
-import { PerformAnonymizationFieldsBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
-import {
+import type React from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
+import type { PerformAnonymizationFieldsBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import type {
   PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
-  PromptResponse,
+  PromptResponse} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import {
   PromptTypeEnum,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
-import { FindPromptsResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/find_prompts_route.gen';
-import { Conversation } from '../../../..';
+import type { FindPromptsResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/find_prompts_route.gen';
+import type { Conversation } from '../../../..';
 import { useAssistantContext } from '../../../assistant_context';
 import type { KnowledgeBaseConfig } from '../../types';
+import type {
+  ConversationsBulkActions} from '../../api/conversations/bulk_update_actions_conversations';
 import {
-  ConversationsBulkActions,
   bulkUpdateConversations,
 } from '../../api/conversations/bulk_update_actions_conversations';
 import { bulkUpdateAnonymizationFields } from '../../api/anonymization_fields/bulk_update_anonymization_fields';

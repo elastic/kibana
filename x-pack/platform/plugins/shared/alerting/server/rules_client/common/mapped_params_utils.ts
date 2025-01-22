@@ -6,12 +6,13 @@
  */
 
 import { snakeCase } from 'lodash';
-import { SavedObjectAttribute } from '@kbn/core/server';
-import { RuleTypeParams, MappedParams, MappedParamsProperties } from '../../types';
+import type { SavedObjectAttribute } from '@kbn/core/server';
+import type { RuleTypeParams, MappedParams, MappedParamsProperties } from '../../types';
+import type {
+  IterateFilterKureyNodeParams,
+  IterateActionProps} from './validate_attributes';
 import {
   iterateFilterKureyNode,
-  IterateFilterKureyNodeParams,
-  IterateActionProps,
   getFieldNameAttribute,
 } from './validate_attributes';
 

@@ -17,9 +17,10 @@ import {
   getFindExceptionListItemSchemaMock,
   getFindExceptionListItemSchemaMultipleMock,
 } from './index.mock';
-import {
+import type {
   FindExceptionListItemSchema,
-  FindExceptionListItemSchemaDecoded,
+  FindExceptionListItemSchemaDecoded} from '.';
+import {
   findExceptionListItemSchema,
 } from '.';
 

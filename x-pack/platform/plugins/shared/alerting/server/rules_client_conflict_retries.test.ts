@@ -7,7 +7,8 @@
 
 import { cloneDeep } from 'lodash';
 
-import { RulesClient, ConstructorOptions } from './rules_client';
+import type { ConstructorOptions } from './rules_client';
+import { RulesClient } from './rules_client';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
@@ -19,8 +20,8 @@ import { ruleTypeRegistryMock } from './rule_type_registry.mock';
 import { alertingAuthorizationMock } from './authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsClientMock, actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from './authorization/alerting_authorization';
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import type { AlertingAuthorization } from './authorization/alerting_authorization';
+import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { RetryForConflictsAttempts } from './lib/retry_if_conflicts';
 import { TaskStatus } from '@kbn/task-manager-plugin/server/task';

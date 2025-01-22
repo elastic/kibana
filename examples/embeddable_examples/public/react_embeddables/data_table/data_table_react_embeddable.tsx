@@ -10,8 +10,8 @@
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -21,13 +21,14 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { DataLoadingState, UnifiedDataTable, UnifiedDataTableProps } from '@kbn/unified-data-table';
+import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
+import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
 import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { StartDeps } from '../../plugin';
+import type { StartDeps } from '../../plugin';
 import { DATA_TABLE_ID } from './constants';
 import { initializeDataTableQueries } from './data_table_queries';
-import { DataTableApi, DataTableRuntimeState, DataTableSerializedState } from './types';
+import type { DataTableApi, DataTableRuntimeState, DataTableSerializedState } from './types';
 
 export const getDataTableFactory = (
   core: CoreStart,

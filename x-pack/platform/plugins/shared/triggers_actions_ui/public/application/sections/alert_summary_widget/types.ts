@@ -6,10 +6,10 @@
  */
 
 import type { BrushEndListener, PartialTheme, SettingsProps, Theme } from '@elastic/charts';
-import { estypes } from '@elastic/elasticsearch';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { AlertStatus } from '@kbn/rule-data-utils';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { estypes } from '@elastic/elasticsearch';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { AlertStatus } from '@kbn/rule-data-utils';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 
 export interface Alert {
   key: number;

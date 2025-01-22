@@ -14,9 +14,9 @@ import {
   makeEmbeddableServices,
 } from './mocks';
 import { BehaviorSubject, filter, firstValueFrom } from 'rxjs';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { LensDocument } from '../persistence';
-import {
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { LensDocument } from '../persistence';
+import type {
   GetStateType,
   LensApi,
   LensEmbeddableStartServices,
@@ -25,14 +25,14 @@ import {
   LensPublicCallbacks,
   LensRuntimeState,
 } from './types';
-import {
+import type {
   HasParentApi,
   PublishesTimeRange,
   PublishesUnifiedSearch,
   PublishingSubject,
   ViewMode,
 } from '@kbn/presentation-publishing';
-import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { isObject } from 'lodash';
 import { defaultDoc } from '../mocks';
 

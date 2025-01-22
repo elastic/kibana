@@ -12,7 +12,8 @@ import { coreMock } from '@kbn/core/public/mocks';
 import type { Capabilities } from '@kbn/core/public';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useBulkGetMaintenanceWindows } from './use_bulk_get_maintenance_windows';
-import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
+import type { AppMockRenderer} from '../../test_utils';
+import { createAppMockRenderer } from '../../test_utils';
 import { useLicense } from '../../../hooks/use_license';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 

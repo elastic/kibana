@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  CollectionActionsProps} from './collection_actions';
 import {
   handleChange,
   handleAdd,
-  handleDelete,
-  CollectionActionsProps,
+  handleDelete
 } from './collection_actions';
 
 describe('collection actions', () => {

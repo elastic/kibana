@@ -12,7 +12,7 @@ import type {
   CoreSetup,
   Logger,
 } from '@kbn/core/server';
-import { ConnectorServerSideDefinition } from '@kbn/search-connectors';
+import type { ConnectorServerSideDefinition } from '@kbn/search-connectors';
 import { isAgentlessEnabled } from '@kbn/fleet-plugin/server/services/utils/agentless';
 import { getConnectorTypes } from '../common/lib/connector_types';
 import type {
@@ -23,7 +23,7 @@ import type {
 } from './types';
 
 import { AgentlessConnectorDeploymentsSyncService } from './task';
-import { SearchConnectorsConfig } from './config';
+import type { SearchConnectorsConfig } from './config';
 
 export class SearchConnectorsPlugin
   implements

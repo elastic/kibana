@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CspFinding, CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common';
+import type { CspFinding, CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common';
 import { isNativeCspFinding } from './is_native_csp_finding';
 
 export const CSP_MISCONFIGURATIONS_DATASET = 'cloud_security_posture.findings';

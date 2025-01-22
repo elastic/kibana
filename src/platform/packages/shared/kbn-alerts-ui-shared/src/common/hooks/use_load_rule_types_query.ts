@@ -11,7 +11,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import type { RuleType } from '@kbn/triggers-actions-ui-types';
-import {
+import type {
   RuleTypeIndexWithDescriptions,
   RuleTypeWithDescription,
 } from '@kbn/triggers-actions-ui-types';

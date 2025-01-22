@@ -7,7 +7,7 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AuthenticatedUser } from '@kbn/security-plugin/common';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import React, { useState } from 'react';
 import { paths } from '../../../../../common/paths';
 import { InvestigationEditForm } from '../../../../components/investigation_edit_form/investigation_edit_form';

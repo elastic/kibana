@@ -9,8 +9,8 @@ import { getKibanaInfo } from '../../../../lib/kibana/get_kibana_info';
 import { handleError } from '../../../../lib/errors';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { metricSet } from './metric_set_instance';
-import { LegacyRequest } from '../../../../types';
-import { MonitoringCore } from '../../../../types';
+import type { LegacyRequest } from '../../../../types';
+import type { MonitoringCore } from '../../../../types';
 import {
   postKibanaInstanceRequestParamsRT,
   postKibanaInstanceRequestPayloadRT,

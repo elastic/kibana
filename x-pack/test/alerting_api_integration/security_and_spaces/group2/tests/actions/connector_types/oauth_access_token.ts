@@ -8,14 +8,14 @@
 import fs from 'fs';
 import expect from '@kbn/expect';
 import { promisify } from 'util';
-import httpProxy from 'http-proxy';
+import type httpProxy from 'http-proxy';
 import { KBN_KEY_PATH } from '@kbn/dev-utils';
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
 import {
   ExternalServiceSimulator,
   getExternalServiceSimulatorPath,
 } from '@kbn/actions-simulators-plugin/server/plugin';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function oAuthAccessTokenTest({ getService }: FtrProviderContext) {

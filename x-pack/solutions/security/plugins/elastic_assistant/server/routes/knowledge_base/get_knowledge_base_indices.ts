@@ -7,14 +7,15 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 
+import type {
+  GetKnowledgeBaseIndicesResponse} from '@kbn/elastic-assistant-common';
 import {
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
-  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL,
-  GetKnowledgeBaseIndicesResponse,
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL
 } from '@kbn/elastic-assistant-common';
-import { IKibanaResponse } from '@kbn/core/server';
+import type { IKibanaResponse } from '@kbn/core/server';
 import { buildResponse } from '../../lib/build_response';
-import { ElasticAssistantPluginRouter } from '../../types';
+import type { ElasticAssistantPluginRouter } from '../../types';
 
 /**
  * Get the indices that have fields of `semantic_text` type

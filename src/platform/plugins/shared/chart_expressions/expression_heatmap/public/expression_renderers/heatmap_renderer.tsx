@@ -13,21 +13,23 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { getTimeZone } from '@kbn/visualization-utils';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
-import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
+import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
+import type {
+  ChartSizeEvent} from '@kbn/chart-expressions-common';
 import {
-  ChartSizeEvent,
   extractContainerType,
   extractVisualizationType,
 } from '@kbn/chart-expressions-common';
-import { MultiFilterEvent } from '../../common/types';
-import { ExpressionHeatmapPluginStart } from '../plugin';
-import {
-  EXPRESSION_HEATMAP_NAME,
+import type { MultiFilterEvent } from '../../common/types';
+import type { ExpressionHeatmapPluginStart } from '../plugin';
+import type {
   HeatmapExpressionProps,
   FilterEvent,
-  BrushEvent,
+  BrushEvent} from '../../common';
+import {
+  EXPRESSION_HEATMAP_NAME
 } from '../../common';
 import {
   getDatatableUtilities,

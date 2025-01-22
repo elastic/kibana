@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
+import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { coreMock } from '@kbn/core/public/mocks';
-import { Style } from '@kbn/expressions-plugin/common';
+import type { Style } from '@kbn/expressions-plugin/common';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getMetricRenderer } from '../metric_renderer';
-import { MetricRendererConfig } from '../../../common';
+import type { MetricRendererConfig } from '../../../common';
 
 const labelFontSpec: CSSProperties = {
   fontFamily: "Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif",

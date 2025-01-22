@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { TypeOf } from '@kbn/config-schema';
-import { ruleSnoozeScheduleSchema as ruleSnoozeScheduleRequestSchema } from '../../../../../../common/routes/rule/request';
+import type { TypeOf } from '@kbn/config-schema';
+import type { ruleSnoozeScheduleSchema as ruleSnoozeScheduleRequestSchema } from '../../../../../../common/routes/rule/request';
 
 export interface SnoozeRuleOptions {
   id: string;

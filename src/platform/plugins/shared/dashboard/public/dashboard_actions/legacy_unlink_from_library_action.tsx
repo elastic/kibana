@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import type { Action} from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
+import type {
+  CanAccessViewMode,
+  EmbeddableApiContext,
+  PublishesPanelTitle,
+  HasLegacyLibraryTransforms} from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
   apiHasLegacyLibraryTransforms,
-  CanAccessViewMode,
-  EmbeddableApiContext,
   getInheritedViewMode,
-  getPanelTitle,
-  PublishesPanelTitle,
-  HasLegacyLibraryTransforms,
+  getPanelTitle
 } from '@kbn/presentation-publishing';
 import { dashboardUnlinkFromLibraryActionStrings } from './_dashboard_actions_strings';
 import { coreServices } from '../services/kibana_services';

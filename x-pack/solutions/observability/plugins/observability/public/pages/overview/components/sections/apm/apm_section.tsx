@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import type {
+  XYBrushEvent} from '@elastic/charts';
 import {
   Axis,
   BarSeries,
   niceTimeFormatter,
   Position,
   ScaleType,
-  Settings,
-  XYBrushEvent,
+  Settings
 } from '@elastic/charts';
 import { timeFormatter } from '@elastic/charts/dist/utils/data/formatters';
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiIcon } from '@elastic/eui';

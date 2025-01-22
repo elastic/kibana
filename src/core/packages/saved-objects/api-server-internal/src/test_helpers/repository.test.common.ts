@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Payload } from 'elastic-apm-node';
@@ -55,7 +55,7 @@ import {
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
 import { mockGetSearchDsl } from '../lib/repository.test.mock';
-import { SavedObjectsRepository } from '../lib/repository';
+import type { SavedObjectsRepository } from '../lib/repository';
 
 export const DEFAULT_SPACE = 'default';
 

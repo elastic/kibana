@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { QueryFunctionContext, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { QueryFunctionContext} from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef } from 'react';
 import { filterIntegrations } from '../utils/filter_integrations';
 import { useKibana } from './use_kibana';

@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { openSans } from '@kbn/expressions-plugin/common/fonts';
 import { FONT_FAMILY, FONT_WEIGHT, CSS, NUMERALJS } from '../constants';
-import { ExpressionMetricFunction } from '../types';
+import type { ExpressionMetricFunction } from '../types';
 
 export const strings = {
   help: i18n.translate('expressionMetric.functions.metricHelpText', {

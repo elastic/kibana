@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { entityMetadataExtractorProcessor } from '@kbn/security-solution-plugin/server/lib/entity_analytics/entity_store/entity_definitions/entity_descriptions/universal';
 import { dynamicNewestRetentionSteps } from '@kbn/security-solution-plugin/server/lib/entity_analytics/entity_store/field_retention/dynamic_retention';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { applyIngestProcessorToDoc } from '../utils/ingest';
 
 export default ({ getService }: FtrProviderContext) => {

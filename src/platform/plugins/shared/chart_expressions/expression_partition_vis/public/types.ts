@@ -12,14 +12,14 @@ import type {
   ValueClickContext,
   MultiValueClickContext,
 } from '@kbn/embeddable-plugin/public';
-import { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
-import {
+import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type {
   Plugin as ExpressionsPublicPlugin,
   ExpressionsServiceStart,
 } from '@kbn/expressions-plugin/public';
-import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 export type ExpressionPartitionVisPluginSetup = void;
 export type ExpressionPartitionVisPluginStart = void;

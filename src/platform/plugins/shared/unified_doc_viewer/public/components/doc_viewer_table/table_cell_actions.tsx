@@ -8,10 +8,10 @@
  */
 
 import React from 'react';
-import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { FieldRow } from './field_row';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { FieldRow } from './field_row';
 
 interface TableActionsProps {
   Component: EuiDataGridColumnCellActionProps['Component'];

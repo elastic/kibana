@@ -18,8 +18,8 @@ import {
   EuiSelect,
   EuiTitle,
 } from '@elastic/eui';
-import { ReadonlyRepository, Repository } from '../../../../../common/types';
-import { RepositorySettingsValidation } from '../../../services/validation';
+import type { ReadonlyRepository, Repository } from '../../../../../common/types';
+import type { RepositorySettingsValidation } from '../../../services/validation';
 
 interface Props {
   repository: ReadonlyRepository;

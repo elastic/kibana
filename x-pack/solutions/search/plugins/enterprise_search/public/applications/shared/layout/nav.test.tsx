@@ -13,7 +13,7 @@ import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
 
 import { renderHook } from '@testing-library/react';
 
-import { EuiSideNavItemType } from '@elastic/eui';
+import type { EuiSideNavItemType } from '@elastic/eui';
 
 import { DEFAULT_PRODUCT_FEATURES } from '../../../../common/constants';
 

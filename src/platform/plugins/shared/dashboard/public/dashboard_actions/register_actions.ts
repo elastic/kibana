@@ -8,7 +8,7 @@
  */
 
 import { CONTEXT_MENU_TRIGGER, PANEL_NOTIFICATION_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { DashboardStartDependencies } from '../plugin';
+import type { DashboardStartDependencies } from '../plugin';
 import {
   ACTION_ADD_TO_LIBRARY,
   ACTION_CLONE_PANEL,

@@ -6,20 +6,22 @@
  */
 
 import React, { useMemo, useCallback, useState } from 'react';
-import moment, { Duration } from 'moment';
+import type { Duration } from 'moment';
+import moment from 'moment';
 import { padStart, chunk } from 'lodash';
 import { EuiBasicTable, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type {
+  AlertStatus} from '@kbn/rule-data-utils';
 import {
-  AlertStatus,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
 } from '@kbn/rule-data-utils';
-import { AlertStatusValues, MaintenanceWindow } from '@kbn/alerting-plugin/common';
+import type { AlertStatusValues, MaintenanceWindow } from '@kbn/alerting-plugin/common';
 import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
-import { Pagination } from '../../../../types';
-import { AlertListItem } from './types';
+import type { Pagination } from '../../../../types';
+import type { AlertListItem } from './types';
 import { AlertMutedSwitch } from './alert_muted_switch';
 import { AlertLifecycleStatusBadge } from '../../../components/alert_lifecycle_status_badge';
 import { useBulkGetMaintenanceWindows } from '../../alerts_table/hooks/use_bulk_get_maintenance_windows';

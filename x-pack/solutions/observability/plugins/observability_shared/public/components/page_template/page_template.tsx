@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiSideNavItemType, EuiPageSectionProps } from '@elastic/eui';
-import { _EuiPageBottomBarProps } from '@elastic/eui/src/components/page_template/bottom_bar/page_bottom_bar';
+import type { EuiSideNavItemType, EuiPageSectionProps } from '@elastic/eui';
+import type { _EuiPageBottomBarProps } from '@elastic/eui/src/components/page_template/bottom_bar/page_bottom_bar';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
@@ -23,7 +23,7 @@ import type {
   KibanaPageTemplateProps,
   KibanaPageTemplateKibanaDependencies,
 } from '@kbn/shared-ux-page-kibana-template';
-import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { SearchBarPortal } from './search_bar_portal';
 import { ObservabilityTour } from '../tour';
 import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';

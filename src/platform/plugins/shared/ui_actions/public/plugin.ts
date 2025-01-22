@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   rowClickTrigger,
   visualizeFieldTrigger,

@@ -13,10 +13,11 @@ import { useLegacyUrlParams } from '../../../../context/url_params_context/use_u
 import { getExcludedName } from '../local_uifilters';
 
 import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
-import {
-  uxFiltersByName,
+import type {
   UxLocalUIFilter,
-  UxLocalUIFilterName,
+  UxLocalUIFilterName} from '../../../../../common/ux_ui_filter';
+import {
+  uxFiltersByName
 } from '../../../../../common/ux_ui_filter';
 
 export type FiltersUIHook = ReturnType<typeof useLocalUIFilters>;

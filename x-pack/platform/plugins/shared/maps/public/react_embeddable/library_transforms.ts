@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { SerializedPanelState } from '@kbn/presentation-containers';
-import { HasLibraryTransforms } from '@kbn/presentation-publishing';
+import type { SerializedPanelState } from '@kbn/presentation-containers';
+import type { HasLibraryTransforms } from '@kbn/presentation-publishing';
 import { getCore, getCoreOverlays } from '../kibana_services';
 import type { MapAttributes } from '../../common/content_management';
-import { SavedMap } from '../routes/map_page';
+import type { SavedMap } from '../routes/map_page';
 import { checkForDuplicateTitle, getMapClient } from '../content_management';
 import { MAP_EMBEDDABLE_NAME } from '../../common/constants';
-import { MapSerializedState } from './types';
+import type { MapSerializedState } from './types';
 
 export function getByReferenceState(state: MapSerializedState | undefined, savedObjectId: string) {
   const { attributes, ...byRefState } = state ?? {};

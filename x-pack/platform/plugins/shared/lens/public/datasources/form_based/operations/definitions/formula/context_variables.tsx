@@ -8,12 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { partition } from 'lodash';
+import type {
+  ExpressionFunctionDefinitions} from '@kbn/expressions-plugin/common';
 import {
   buildExpressionFunction,
-  buildExpression,
-  ExpressionFunctionDefinitions,
+  buildExpression
 } from '@kbn/expressions-plugin/common';
-import {
+import type {
   ExpressionFunctionFormulaInterval,
   ExpressionFunctionFormulaNow,
   ExpressionFunctionFormulaTimeRange,
@@ -30,7 +31,7 @@ import type {
   OperationDefinition,
 } from '..';
 import type { ReferenceBasedIndexPatternColumn } from '../column_types';
-import { IndexPattern } from '../../../../../types';
+import type { IndexPattern } from '../../../../../types';
 import {
   INTERVAL_OP_MISSING_DATE_HISTOGRAM_TO_COMPUTE_INTERVAL,
   INTERVAL_OP_MISSING_TIME_RANGE,

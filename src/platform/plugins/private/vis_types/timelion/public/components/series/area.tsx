@@ -10,13 +10,14 @@
 // @ts-ignore
 import chroma from 'chroma-js';
 import React from 'react';
+import type {
+  AreaSeriesStyle,
+  RecursivePartial} from '@elastic/charts';
 import {
   AreaSeries,
   ScaleType,
   CurveType,
-  AreaSeriesStyle,
-  PointShape,
-  RecursivePartial,
+  PointShape
 } from '@elastic/charts';
 import type { VisSeries } from '../../../common/vis_data';
 

@@ -8,12 +8,14 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
+import type { TestBed } from '@kbn/test-jest-helpers';
+import { registerTestBed } from '@kbn/test-jest-helpers';
 
-import { Context } from '../../public/components/field_editor_context';
+import type { Context } from '../../public/components/field_editor_context';
+import type {
+  Props} from '../../public/components/field_editor_flyout_content';
 import {
-  FieldEditorFlyoutContent,
-  Props,
+  FieldEditorFlyoutContent
 } from '../../public/components/field_editor_flyout_content';
 import { WithFieldEditorDependencies, getCommonActions } from './helpers';
 

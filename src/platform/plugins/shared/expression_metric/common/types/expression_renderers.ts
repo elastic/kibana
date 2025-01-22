@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Style } from '@kbn/expressions-plugin/common';
+import type { Style } from '@kbn/expressions-plugin/common';
 
 export interface MetricRendererConfig {
   /** The text to display under the metric */

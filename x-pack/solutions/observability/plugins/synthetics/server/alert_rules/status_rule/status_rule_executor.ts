@@ -5,22 +5,22 @@
  * 2.0.
  */
 import moment from 'moment';
-import {
+import type {
   SavedObjectsClientContract,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { intersection, isEmpty, uniq } from 'lodash';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
-import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
-import {
+import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import type {
   AlertOverviewStatus,
   AlertStatusConfigs,
   AlertStatusMetaData,
   StaleDownConfig,
 } from '../../../common/runtime_types/alert_rules/common';
 import { queryFilterMonitors } from './queries/filter_monitors';
-import { MonitorSummaryStatusRule, StatusRuleExecutorOptions } from './types';
+import type { MonitorSummaryStatusRule, StatusRuleExecutorOptions } from './types';
 import {
   AND_LABEL,
   getFullViewInAppMessage,
@@ -35,7 +35,7 @@ import {
 } from './message_utils';
 import { queryMonitorStatusAlert } from './queries/query_monitor_status_alert';
 import { parseArrayFilters } from '../../routes/common';
-import { SyntheticsServerSetup } from '../../types';
+import type { SyntheticsServerSetup } from '../../types';
 import { SyntheticsEsClient } from '../../lib';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 import {
@@ -43,8 +43,9 @@ import {
   processMonitors,
 } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { getConditionType } from '../../../common/rules/status_rule';
-import { ConfigKey, EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
-import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import type { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
+import { ConfigKey } from '../../../common/runtime_types';
+import type { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { monitorAttributes } from '../../../common/types/saved_objects';
 import { AlertConfigKey } from '../../../common/constants/monitor_management';
 import { ALERT_DETAILS_URL, VIEW_IN_APP_URL } from '../action_variables';

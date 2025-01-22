@@ -8,13 +8,14 @@
 import moment from 'moment';
 import { isEmpty } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { KIBANA_SYSTEM_ID, TELEMETRY_COLLECTION_INTERVAL } from '../../common/constants';
+import type {
+  ClustersHighLevelStats,
+  ClusterHighLevelStats} from './get_high_level_stats';
 import {
   fetchHighLevelStats,
-  handleHighLevelStatsResponse,
-  ClustersHighLevelStats,
-  ClusterHighLevelStats,
+  handleHighLevelStatsResponse
 } from './get_high_level_stats';
 
 export function rollUpTotals(

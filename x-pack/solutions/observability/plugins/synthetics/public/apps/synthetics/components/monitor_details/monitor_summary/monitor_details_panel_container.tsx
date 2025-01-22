@@ -8,8 +8,9 @@
 import React from 'react';
 import { EuiSkeletonText } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
+import type {
+  MonitorDetailsPanelProps} from '../../common/components/monitor_details_panel';
 import {
-  MonitorDetailsPanelProps,
   MonitorDetailsPanel,
 } from '../../common/components/monitor_details_panel';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';

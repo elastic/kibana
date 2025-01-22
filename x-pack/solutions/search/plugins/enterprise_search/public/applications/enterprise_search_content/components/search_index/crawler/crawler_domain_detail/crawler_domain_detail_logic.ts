@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
 import { Status } from '../../../../../../../common/types/api';
-import { ExtractionRule } from '../../../../../../../common/types/extraction_rules';
+import type { ExtractionRule } from '../../../../../../../common/types/extraction_rules';
 
 import { generateEncodedPath } from '../../../../../shared/encode_path_params';
 
@@ -16,12 +17,13 @@ import { flashAPIErrors } from '../../../../../shared/flash_messages';
 
 import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
-import {
-  DeleteCrawlerDomainApiLogic,
+import type {
   DeleteCrawlerDomainArgs,
-  DeleteCrawlerDomainResponse,
-} from '../../../../api/crawler/delete_crawler_domain_api_logic';
+  DeleteCrawlerDomainResponse} from '../../../../api/crawler/delete_crawler_domain_api_logic';
 import {
+  DeleteCrawlerDomainApiLogic
+} from '../../../../api/crawler/delete_crawler_domain_api_logic';
+import type {
   CrawlerAuth,
   CrawlerDomain,
   CrawlerDomainFromServer,

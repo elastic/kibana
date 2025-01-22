@@ -11,7 +11,7 @@ import { InferenceServiceFormFields } from '@kbn/inference-endpoint-ui-common';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import * as i18n from './translations';
 import { useAddEndpoint } from '../../hooks/use_add_endpoint';
-import { InferenceEndpoint } from '../../types';
+import type { InferenceEndpoint } from '../../types';
 import { useKibana } from '../../hooks/use_kibana';
 
 interface InferenceFormProps {

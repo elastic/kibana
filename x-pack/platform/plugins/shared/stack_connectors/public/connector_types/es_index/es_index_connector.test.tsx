@@ -10,9 +10,11 @@ import { act } from 'react-dom/test-utils';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { screen, fireEvent, waitFor, render } from '@testing-library/react';
 import IndexActionConnectorFields from './es_index_connector';
-import { EuiComboBox, EuiSwitch, EuiSwitchEvent, EuiSelect } from '@elastic/eui';
+import type { EuiSwitchEvent} from '@elastic/eui';
+import { EuiComboBox, EuiSwitch, EuiSelect } from '@elastic/eui';
+import type {
+  AppMockRenderer} from '../lib/test_utils';
 import {
-  AppMockRenderer,
   ConnectorFormTestProvider,
   createAppMockRenderer,
 } from '../lib/test_utils';

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { ElementType } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
-import type { FC } from 'react';
-import { EuiCommentProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { FC , ElementType } from 'react';
+import type { EuiCommentProps} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import type {
   CommentsArray,
@@ -17,7 +18,8 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import { euiThemeVars } from '@kbn/ui-theme';
-import { EmptyViewerState, ExceptionItemCard, Pagination, PaginationProps } from '../..';
+import type { PaginationProps } from '../..';
+import { EmptyViewerState, ExceptionItemCard, Pagination } from '../..';
 
 import type {
   RuleReferences,

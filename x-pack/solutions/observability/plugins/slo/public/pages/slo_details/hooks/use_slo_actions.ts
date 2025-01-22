@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { rulesLocatorID, RulesParams } from '@kbn/observability-plugin/public';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RulesParams } from '@kbn/observability-plugin/public';
+import { rulesLocatorID } from '@kbn/observability-plugin/public';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import path from 'path';
 import { paths } from '../../../../common/locators/paths';
 import { useSpace } from '../../../hooks/use_space';
-import { BurnRateRuleParams } from '../../../typings';
+import type { BurnRateRuleParams } from '../../../typings';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
   createRemoteSloDeleteUrl,

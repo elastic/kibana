@@ -16,7 +16,7 @@ import { css } from '@emotion/react';
 
 import { DragPreview } from '../drag_preview';
 import { GridPanel } from '../grid_panel';
-import { GridLayoutStateManager, PanelInteractionEvent, UserInteractionEvent } from '../types';
+import type { GridLayoutStateManager, PanelInteractionEvent, UserInteractionEvent } from '../types';
 import { getKeysInOrder } from '../utils/resolve_grid_row';
 import { isMouseEvent, isTouchEvent } from '../utils/sensors';
 import { GridRowHeader } from './grid_row_header';

@@ -9,14 +9,16 @@ import { mockFlashMessageHelpers, setMockActions } from '../../../../../__mocks_
 
 import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import type { ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 
 import { EuiFieldText, EuiSelect } from '@elastic/eui';
 
 import { GenericEndpointInlineEditableTable } from '../../../../../shared/tables/generic_endpoint_inline_editable_table';
 import { CrawlerPolicies, CrawlerRules } from '../../../../api/crawler/types';
 
-import { CrawlRulesTable, CrawlRulesTableProps } from './crawl_rules_table';
+import type { CrawlRulesTableProps } from './crawl_rules_table';
+import { CrawlRulesTable } from './crawl_rules_table';
 
 describe('CrawlRulesTable', () => {
   const { clearFlashMessages, flashSuccessToast } = mockFlashMessageHelpers;

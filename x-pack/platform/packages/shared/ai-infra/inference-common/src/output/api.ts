@@ -6,8 +6,8 @@
  */
 
 import type { Observable } from 'rxjs';
-import { Message, FunctionCallingMode, FromToolSchema, ToolSchema } from '../chat_complete';
-import { Output, OutputEvent } from './events';
+import type { Message, FunctionCallingMode, FromToolSchema, ToolSchema } from '../chat_complete';
+import type { Output, OutputEvent } from './events';
 
 /**
  * Generate a response with the LLM for a prompt, optionally based on a schema.

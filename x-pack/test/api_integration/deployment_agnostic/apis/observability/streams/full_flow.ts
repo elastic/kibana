@@ -6,9 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type {
+  StreamsSupertestRepositoryClient} from './helpers/repository_client';
 import {
-  StreamsSupertestRepositoryClient,
   createStreamsRepositoryAdminClient,
 } from './helpers/repository_client';
 import {

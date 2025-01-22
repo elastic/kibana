@@ -7,7 +7,7 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   SubFeaturePrivilegeGroupConfig,
   SubFeaturePrivilegeGroupType,
 } from '@kbn/features-plugin/common';

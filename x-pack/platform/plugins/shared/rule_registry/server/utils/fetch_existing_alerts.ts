@@ -6,8 +6,8 @@
  */
 
 import { chunk } from 'lodash';
-import { PublicContract } from '@kbn/utility-types';
-import { IRuleDataClient } from '../rule_data_client';
+import type { PublicContract } from '@kbn/utility-types';
+import type { IRuleDataClient } from '../rule_data_client';
 import {
   ALERT_RULE_UUID,
   ALERT_UUID,

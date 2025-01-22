@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, {
+import type {
   ComponentType,
-  ReactNode,
+  ReactNode} from 'react';
+import React, {
   createContext,
   useContext,
   useState,
@@ -15,7 +16,8 @@ import React, {
   useEffect,
 } from 'react';
 import { useHistory } from 'react-router-dom';
-import { generateNavEvents, NavEvent } from './nav_events';
+import type { NavEvent } from './nav_events';
+import { generateNavEvents } from './nav_events';
 import { generatePath } from './path';
 
 type Entry<T> = { [K in keyof T]: [K, T[K]] }[keyof T];

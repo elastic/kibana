@@ -10,8 +10,8 @@ import type { CoreStart } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { MonitorFilters } from '../monitors_overview/types';
-import { ClientPluginsStart } from '../../../plugin';
+import type { MonitorFilters } from '../monitors_overview/types';
+import type { ClientPluginsStart } from '../../../plugin';
 import { MonitorConfiguration } from './monitor_configuration';
 
 export async function openMonitorConfiguration({

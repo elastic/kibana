@@ -11,16 +11,17 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
 
+import type {
+  CommonProps} from '@elastic/eui';
 import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiCopy,
   EuiButtonEmpty,
-  EuiSpacer,
-  CommonProps,
+  EuiSpacer
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
-import { VegaAdapter } from '../vega_adapter';
+import type { VegaAdapter } from '../vega_adapter';
 
 interface SpecViewerProps extends CommonProps {
   vegaAdapter: VegaAdapter;

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { ConnectorServerSideDefinition } from '@kbn/search-connectors';
+import type { ConnectorServerSideDefinition } from '@kbn/search-connectors';
 import type { FleetStartContract, FleetSetupContract } from '@kbn/fleet-plugin/server';
-import {
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { SavedObjectsServiceSetup, SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { SavedObjectsServiceSetup, SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 

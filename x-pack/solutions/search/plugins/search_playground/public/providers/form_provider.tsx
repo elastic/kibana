@@ -9,7 +9,8 @@ import React, { useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useIndicesValidation } from '../hooks/use_indices_validation';
 import { useLoadFieldsByIndices } from '../hooks/use_load_fields_by_indices';
-import { ChatForm, ChatFormFields } from '../types';
+import type { ChatForm} from '../types';
+import { ChatFormFields } from '../types';
 import { useLLMsModels } from '../hooks/use_llms_models';
 
 type PartialChatForm = Partial<ChatForm>;

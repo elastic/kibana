@@ -10,8 +10,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
+import type {
+  AutoAbortedObservabilityClient} from '../services/rest/create_call_api';
 import {
-  AutoAbortedObservabilityClient,
   callObservabilityOnboardingApi,
 } from '../services/rest/create_call_api';
 

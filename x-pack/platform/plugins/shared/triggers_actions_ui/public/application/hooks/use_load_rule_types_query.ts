@@ -10,7 +10,7 @@ import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { useMemo } from 'react';
 import { loadRuleTypes } from '../lib/rule_api/rule_types';
 import { useKibana } from '../../common/lib/kibana';
-import { RuleType, RuleTypeIndex } from '../../types';
+import type { RuleType, RuleTypeIndex } from '../../types';
 
 interface UseLoadRuleTypesQueryProps {
   filteredRuleTypes: string[];

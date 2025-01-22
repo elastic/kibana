@@ -5,13 +5,14 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import {
+import type {
   Message,
   MessageAddEvent,
-  MessageRole,
-  StreamingChatResponseEvent,
+  StreamingChatResponseEvent} from '@kbn/observability-ai-assistant-plugin/common';
+import {
+  MessageRole
 } from '@kbn/observability-ai-assistant-plugin/common';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { ObservabilityAIAssistantApiClient } from '../../../../../services/observability_ai_assistant_api';
 

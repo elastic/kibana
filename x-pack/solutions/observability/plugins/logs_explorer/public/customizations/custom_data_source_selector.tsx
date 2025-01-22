@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import React from 'react';
 import { DataSourceSelector } from '../components/data_source_selector';
-import { LogsExplorerController } from '../controller';
+import type { LogsExplorerController } from '../controller';
 import { DatasetsProvider, useDatasetsContext } from '../hooks/use_datasets';
 import { useDataSourceSelection } from '../hooks/use_data_source_selection';
 import { DataViewsProvider, useDataViewsContext } from '../hooks/use_data_views';
 import { useEsql } from '../hooks/use_esql';
 import { IntegrationsProvider, useIntegrationsContext } from '../hooks/use_integrations';
-import { IDatasetsClient } from '../services/datasets';
-import { LogsExplorerControllerStateService } from '../state_machines/logs_explorer_controller';
+import type { IDatasetsClient } from '../services/datasets';
+import type { LogsExplorerControllerStateService } from '../state_machines/logs_explorer_controller';
 
 interface CustomDataSourceSelectorProps {
   logsExplorerControllerStateService: LogsExplorerControllerStateService;

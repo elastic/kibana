@@ -8,7 +8,7 @@
  */
 
 import { firstValueFrom, type Observable } from 'rxjs';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { CloudDetector } from './detector';
 
 interface Usage {

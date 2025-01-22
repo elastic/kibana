@@ -6,10 +6,11 @@
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import {
-  APMEmbeddableRoot,
+import type {
   APMTransactionDurationSLOResponse,
-  APMErrorRateSLOResponse,
+  APMErrorRateSLOResponse} from './embeddable_root';
+import {
+  APMEmbeddableRoot
 } from './embeddable_root';
 import type { BurnRateRule, BurnRateAlert, TimeRange } from '../../../types';
 

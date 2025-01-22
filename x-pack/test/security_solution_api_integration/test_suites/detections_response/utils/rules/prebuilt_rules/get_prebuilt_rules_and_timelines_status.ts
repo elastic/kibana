@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type {
+  ReadPrebuiltRulesAndTimelinesStatusResponse} from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
 import {
-  ReadPrebuiltRulesAndTimelinesStatusResponse,
   PREBUILT_RULES_STATUS_URL,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
 import type SuperTest from 'supertest';

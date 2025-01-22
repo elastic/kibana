@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SuggestionRawDefinition } from '@kbn/esql-validation-autocomplete';
-import { monaco } from '../../monaco_imports';
+import type { SuggestionRawDefinition } from '@kbn/esql-validation-autocomplete';
+import type { monaco } from '../../monaco_imports';
 
 export type MonacoAutocompleteCommandDefinition = Pick<
   monaco.languages.CompletionItem,

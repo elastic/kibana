@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { dataPluginMock } from '../../mocks';
 import { setIndexPatterns, setSearchService } from '../../services';
 import {
   createFiltersFromValueClickAction,
   appendFilterToESQLQueryFromValueClickAction,
 } from './create_filters_from_value_click';
-import { FieldFormatsGetConfigFn, BytesFormat } from '@kbn/field-formats-plugin/common';
-import { RangeFilter } from '@kbn/es-query';
+import type { FieldFormatsGetConfigFn} from '@kbn/field-formats-plugin/common';
+import { BytesFormat } from '@kbn/field-formats-plugin/common';
+import type { RangeFilter } from '@kbn/es-query';
 
 const mockField = {
   name: 'bytes',

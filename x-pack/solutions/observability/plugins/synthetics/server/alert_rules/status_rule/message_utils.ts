@@ -8,12 +8,12 @@
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
-import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
-import { AlertStatusMetaData } from '../../../common/runtime_types/alert_rules/common';
+import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import type { AlertStatusMetaData } from '../../../common/runtime_types/alert_rules/common';
 import { getConditionType } from '../../../common/rules/status_rule';
 import { AND_LABEL, getTimeUnitLabel } from '../common';
 import { ALERT_REASON_MSG } from '../action_variables';
-import { MonitorSummaryStatusRule } from './types';
+import type { MonitorSummaryStatusRule } from './types';
 import {
   MONITOR_ID,
   MONITOR_TYPE,
@@ -27,7 +27,7 @@ import {
   SERVICE_NAME,
   ERROR_STACK_TRACE,
 } from '../../../common/field_names';
-import { OverviewPing } from '../../../common/runtime_types';
+import type { OverviewPing } from '../../../common/runtime_types';
 import { UNNAMED_LOCATION } from '../../../common/constants';
 
 export const getMonitorAlertDocument = (

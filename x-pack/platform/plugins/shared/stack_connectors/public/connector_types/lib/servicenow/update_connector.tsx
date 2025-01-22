@@ -27,7 +27,7 @@ import { CredentialsApiUrl } from './credentials_api_url';
 import { CredentialsAuth, OAuth } from './auth_types';
 import { SNStoreLink } from './sn_store_button';
 import { ApplicationRequiredCallout } from './application_required_callout';
-import { ServiceNowConfig, ServiceNowSecrets } from './types';
+import type { ServiceNowConfig, ServiceNowSecrets } from './types';
 
 const title = i18n.translate('xpack.stackConnectors.components.serviceNow.updateFormTitle', {
   defaultMessage: 'Update ServiceNow connector',

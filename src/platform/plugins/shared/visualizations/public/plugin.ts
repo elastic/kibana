@@ -12,10 +12,7 @@ import { filter, map } from 'rxjs';
 import { createHashHistory } from 'history';
 import { BehaviorSubject } from 'rxjs';
 import {
-  AppMountParameters,
-  AppUpdater,
-  DEFAULT_APP_CATEGORIES,
-  ScopedHistory,
+  DEFAULT_APP_CATEGORIES
 } from '@kbn/core/public';
 
 import {
@@ -36,8 +33,12 @@ import type {
   Plugin,
   ApplicationStart,
   SavedObjectsClientContract,
-} from '@kbn/core/public';
-import { UiActionsStart, UiActionsSetup, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+
+  AppMountParameters,
+  AppUpdater,
+  ScopedHistory} from '@kbn/core/public';
+import type { UiActionsStart, UiActionsSetup} from '@kbn/ui-actions-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
   Setup as InspectorSetup,
@@ -47,10 +48,11 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
-import {
-  CONTEXT_MENU_TRIGGER,
+import type {
   EmbeddableSetup,
-  EmbeddableStart,
+  EmbeddableStart} from '@kbn/embeddable-plugin/public';
+import {
+  CONTEXT_MENU_TRIGGER
 } from '@kbn/embeddable-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
@@ -61,15 +63,15 @@ import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/publ
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import {
+import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
-import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
+import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
@@ -78,7 +80,8 @@ import {
   dashboardVisualizationPanelTrigger,
   visualizeEditorTrigger,
 } from './triggers';
-import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
+import type { VisEditorsRegistry } from './vis_editors_registry';
+import { createVisEditorsRegistry } from './vis_editors_registry';
 import { showNewVisModal } from './wizard';
 import { VisualizeLocatorDefinition } from '../common/locator';
 import { xyDimension as xyDimensionExpressionFunction } from '../common/expression_functions/xy_dimension';
@@ -120,11 +123,12 @@ import {
 } from './services';
 import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '../common/constants';
 import { EditInLensAction } from './actions/edit_in_lens_action';
-import { ListingViewRegistry } from './types';
+import type { ListingViewRegistry } from './types';
+import type {
+  VisualizationSavedObjectAttributes} from '../common/content_management';
 import {
   LATEST_VERSION,
-  CONTENT_ID,
-  VisualizationSavedObjectAttributes,
+  CONTENT_ID
 } from '../common/content_management';
 import { AddAggVisualizationPanelAction } from './actions/add_agg_vis_action';
 import type { VisualizeSerializedState } from './embeddable/types';

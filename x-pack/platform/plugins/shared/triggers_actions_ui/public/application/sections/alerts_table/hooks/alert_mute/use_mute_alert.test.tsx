@@ -8,7 +8,8 @@
 import * as api from '../../../../lib/rule_api/mute_alert';
 import { waitFor, renderHook } from '@testing-library/react';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { AppMockRenderer, createAppMockRenderer } from '../../../test_utils';
+import type { AppMockRenderer} from '../../../test_utils';
+import { createAppMockRenderer } from '../../../test_utils';
 import { useMuteAlert } from './use_mute_alert';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 

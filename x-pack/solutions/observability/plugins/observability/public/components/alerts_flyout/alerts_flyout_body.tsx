@@ -5,10 +5,11 @@
  * 2.0.
  */
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiPanel, EuiTabbedContentTab } from '@elastic/eui';
+import type { EuiTabbedContentTab } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AlertFieldsTable, ScrollableFlyoutTabbedContent } from '@kbn/alerts-ui-shared';
-import { AlertsTableFlyoutBaseProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { AlertsTableFlyoutBaseProps } from '@kbn/triggers-actions-ui-plugin/public';
 import type { TopAlert } from '../../typings/alerts';
 import { AlertOverview } from '../alert_overview/alert_overview';
 

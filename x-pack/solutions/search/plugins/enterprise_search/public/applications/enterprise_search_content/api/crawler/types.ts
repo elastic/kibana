@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Meta } from '../../../../../common/types';
+import type { Meta } from '../../../../../common/types';
 import { CrawlerStatus } from '../../../../../common/types/crawler';
-import { ExtractionRule } from '../../../../../common/types/extraction_rules';
+import type { ExtractionRule } from '../../../../../common/types/extraction_rules';
 
 // TODO remove this proxy export, which will affect a lot of files
 export { CrawlerStatus };

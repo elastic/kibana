@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FunctionRegistrationParameters } from '.';
+import type { FunctionRegistrationParameters } from '.';
 import { FunctionVisibility } from '../../common';
 
 export const EXECUTE_CONNECTOR_FUNCTION_NAME = 'execute_connector';

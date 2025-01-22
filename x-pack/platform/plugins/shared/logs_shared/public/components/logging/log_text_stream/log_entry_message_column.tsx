@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { LogColumn, LogMessagePart } from '../../../../common/log_entry';
+import type { LogColumn, LogMessagePart } from '../../../../common/log_entry';
 import {
   isConstantSegment,
   isFieldSegment,
@@ -17,11 +17,12 @@ import {
 } from '../../../utils/log_entry';
 import { FieldValue } from './field_value';
 import { LogEntryColumnContent } from './log_entry_column';
+import type {
+  WrapMode} from './text_styles';
 import {
   longWrappedContentStyle,
   preWrappedContentStyle,
-  unwrappedContentStyle,
-  WrapMode,
+  unwrappedContentStyle
 } from './text_styles';
 
 export interface LogEntryMessageColumnProps {

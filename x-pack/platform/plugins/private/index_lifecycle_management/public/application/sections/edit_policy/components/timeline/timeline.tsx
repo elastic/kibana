@@ -11,7 +11,8 @@ import { css, jsx } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import React, { FunctionComponent, memo } from 'react';
+import type { FunctionComponent} from 'react';
+import React, { memo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,12 +24,13 @@ import {
 
 import { useKibana } from '../../../../../shared_imports';
 
-import { PhaseExceptDelete } from '../../../../../../common/types';
+import type { PhaseExceptDelete } from '../../../../../../common/types';
 
-import {
-  calculateRelativeFromAbsoluteMilliseconds,
+import type {
   PhaseAgeInMilliseconds,
-  AbsoluteTimings,
+  AbsoluteTimings} from '../../lib';
+import {
+  calculateRelativeFromAbsoluteMilliseconds
 } from '../../lib';
 
 import { InfinityIcon, LearnMoreLink } from '..';

@@ -11,7 +11,7 @@ import {
   mockKibanaValues,
 } from '../../../../__mocks__/kea_logic';
 
-import { HttpError } from '../../../../../../common/types/api';
+import type { HttpError } from '../../../../../../common/types/api';
 
 import { CreateCrawlerIndexApiLogic } from '../../../api/crawler/create_crawler_index_api_logic';
 

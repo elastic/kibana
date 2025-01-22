@@ -7,11 +7,11 @@
 
 import { cancelAttackDiscoveryRoute } from './cancel_attack_discovery';
 
-import { AuthenticatedUser } from '@kbn/core-security-common';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { serverMock } from '../../../../__mocks__/server';
 import { requestContextMock } from '../../../../__mocks__/request_context';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { AttackDiscoveryDataClient } from '../../../../lib/attack_discovery/persistence';
+import type { AttackDiscoveryDataClient } from '../../../../lib/attack_discovery/persistence';
 import { transformESSearchToAttackDiscovery } from '../../../../lib/attack_discovery/persistence/transforms/transforms';
 import { getAttackDiscoverySearchEsMock } from '../../../../__mocks__/attack_discovery_schema.mock';
 import { getCancelAttackDiscoveryRequest } from '../../../../__mocks__/request';

@@ -11,7 +11,7 @@ import { render } from '../../utils/testing/rtl_helpers';
 import { GettingStartedPage } from './getting_started_page';
 import * as privateLocationsHooks from '../settings/private_locations/hooks/use_locations_api';
 import * as settingsHooks from '../../contexts/synthetics_settings_context';
-import { SyntheticsSettingsContextValues } from '../../contexts/synthetics_settings_context';
+import type { SyntheticsSettingsContextValues } from '../../contexts/synthetics_settings_context';
 import { fireEvent } from '@testing-library/react';
 import { kibanaService } from '../../../../utils/kibana_service';
 

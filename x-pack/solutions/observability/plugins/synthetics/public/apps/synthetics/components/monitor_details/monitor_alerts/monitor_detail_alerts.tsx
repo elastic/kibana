@@ -12,7 +12,7 @@ import { useParams } from 'react-router-dom';
 import { useRefreshedRangeFromUrl } from '../../../hooks';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { useSelectedLocation } from '../hooks/use_selected_location';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 
 export const MONITOR_ALERTS_TABLE_ID = 'xpack.observability.slo.sloDetails.alertTable';
 

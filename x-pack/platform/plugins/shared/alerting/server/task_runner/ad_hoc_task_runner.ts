@@ -7,35 +7,40 @@
 
 import apm from 'elastic-apm-node';
 import { v4 as uuidv4 } from 'uuid';
-import {
+import type {
   ISavedObjectsRepository,
   KibanaRequest,
   Logger,
-  SavedObject,
+  SavedObject} from '@kbn/core/server';
+import {
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
+import type {
+  ConcreteTaskInstance} from '@kbn/task-manager-plugin/server';
 import {
-  ConcreteTaskInstance,
   createTaskRunError,
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/common';
-import { CancellableTask, RunResult, TaskPriority } from '@kbn/task-manager-plugin/server/task';
-import { AdHocRunStatus, adHocRunStatus } from '../../common/constants';
-import { RuleRunnerErrorStackTraceLog, RuleTaskStateAndMetrics, TaskRunnerContext } from './types';
+import type { CancellableTask, RunResult} from '@kbn/task-manager-plugin/server/task';
+import { TaskPriority } from '@kbn/task-manager-plugin/server/task';
+import type { AdHocRunStatus} from '../../common/constants';
+import { adHocRunStatus } from '../../common/constants';
+import type { RuleRunnerErrorStackTraceLog, RuleTaskStateAndMetrics, TaskRunnerContext } from './types';
 import { getExecutorServices } from './get_executor_services';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleAlertData,
-  RuleExecutionStatusErrorReasons,
   RuleTypeParams,
   RuleTypeRegistry,
-  RuleTypeState,
+  RuleTypeState} from '../types';
+import {
+  RuleExecutionStatusErrorReasons
 } from '../types';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
-import { AdHocRun, AdHocRunSO, AdHocRunSchedule } from '../data/ad_hoc_run/types';
+import type { AdHocRun, AdHocRunSO, AdHocRunSchedule } from '../data/ad_hoc_run/types';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { AdHocTaskRunningHandler } from './ad_hoc_task_running_handler';
@@ -44,14 +49,16 @@ import { RuleResultService } from '../monitoring/rule_result_service';
 import { RuleTypeRunner } from './rule_type_runner';
 import { initializeAlertsClient } from '../alerts_client';
 import { partiallyUpdateAdHocRun, processRunResults } from './lib';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import {
   AlertingEventLogger,
   executionType,
 } from '../lib/alerting_event_logger/alerting_event_logger';
-import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
+import type { RuleRunMetrics} from '../lib/rule_run_metrics_store';
+import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { getEsErrorMessage } from '../lib/errors';
-import { Result, isOk, asOk, asErr } from '../lib/result_type';
+import type { Result} from '../lib/result_type';
+import { isOk, asOk, asErr } from '../lib/result_type';
 import { ActionScheduler } from './action_scheduler';
 import { transformAdHocRunToAdHocRunData } from '../application/backfill/transforms/transform_ad_hoc_run_to_backfill_result';
 

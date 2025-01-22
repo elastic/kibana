@@ -6,7 +6,7 @@
  */
 
 import { Dataset } from './dataset';
-import { IntegrationId, IntegrationType } from '../types';
+import type { IntegrationId, IntegrationType } from '../types';
 
 export class Integration {
   id: IntegrationId;

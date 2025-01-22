@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
+import type {
+  UpdateSearchApplicationApiLogicActions} from '../../api/search_applications/update_search_application_api_logic';
 import {
-  UpdateSearchApplicationApiLogic,
-  UpdateSearchApplicationApiLogicActions,
+  UpdateSearchApplicationApiLogic
 } from '../../api/search_applications/update_search_application_api_logic';
 
-import {
+import type {
   SearchApplicationViewActions,
-  SearchApplicationViewLogic,
-  SearchApplicationViewValues,
+  SearchApplicationViewValues} from './search_application_view_logic';
+import {
+  SearchApplicationViewLogic
 } from './search_application_view_logic';
 
 export interface SearchApplicationIndicesLogicActions {

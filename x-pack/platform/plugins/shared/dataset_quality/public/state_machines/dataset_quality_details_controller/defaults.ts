@@ -11,7 +11,7 @@ import {
   DEFAULT_DEGRADED_FIELD_SORT_FIELD,
   DEFAULT_TIME_RANGE,
 } from '../../../common/constants';
-import { DefaultDatasetQualityDetailsContext } from './types';
+import type { DefaultDatasetQualityDetailsContext } from './types';
 
 export const DEFAULT_CONTEXT: DefaultDatasetQualityDetailsContext = {
   degradedFields: {

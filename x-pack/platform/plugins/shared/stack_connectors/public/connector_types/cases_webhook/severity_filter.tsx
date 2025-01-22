@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
+import type {
+  EuiSuperSelectOption} from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
   EuiSuperSelect,
-  EuiSuperSelectOption,
   useEuiTheme,
 } from '@elastic/eui';
 

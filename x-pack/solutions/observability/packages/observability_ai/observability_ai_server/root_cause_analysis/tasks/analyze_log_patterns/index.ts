@@ -12,16 +12,17 @@ import {
   P_VALUE_SIGNIFICANCE_HIGH,
   P_VALUE_SIGNIFICANCE_MEDIUM,
 } from '@kbn/observability-utils-common/ml/p_value_to_label';
+import type {
+  FieldPatternResultWithChanges} from '@kbn/observability-utils-server/entities/get_log_patterns';
 import {
-  FieldPatternResultWithChanges,
   getLogPatterns,
 } from '@kbn/observability-utils-server/entities/get_log_patterns';
 import { castArray, compact, groupBy, orderBy } from 'lodash';
 import { RCA_PROMPT_CHANGES, RCA_PROMPT_ENTITIES } from '../../prompts';
-import { RootCauseAnalysisContext } from '../../types';
+import type { RootCauseAnalysisContext } from '../../types';
 import { formatEntity } from '../../util/format_entity';
 import { serializeKnowledgeBaseEntries } from '../../util/serialize_knowledge_base_entries';
-import { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
+import type { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
 
 type LogPatternRelevance = 'normal' | 'unusual' | 'warning' | 'critical';
 

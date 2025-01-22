@@ -9,11 +9,12 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
+import type {
+  EuiTableFieldDataColumnType,
+  EuiTableComputedColumnType} from '@elastic/eui';
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiTableFieldDataColumnType,
-  EuiTableComputedColumnType,
   EuiEmptyPrompt,
   EuiLink,
 } from '@elastic/eui';
@@ -21,7 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { CustomFormattedTimestamp } from '../../../../../shared/custom_formatted_timestamp/custom_formatted_timestamp';
-import { CrawlEvent } from '../../../../api/crawler/types';
+import type { CrawlEvent } from '../../../../api/crawler/types';
 import { CrawlDetailLogic } from '../crawl_details_flyout/crawl_detail_logic';
 import { CrawlerLogic } from '../crawler_logic';
 

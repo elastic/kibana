@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { ElasticsearchIndexWithIngestion } from '../../../../../../common/types/indices';
-import { Actions } from '../../../../shared/api_logic/create_api_logic';
+import type { ElasticsearchIndexWithIngestion } from '../../../../../../common/types/indices';
+import type { Actions } from '../../../../shared/api_logic/create_api_logic';
 import { flashAPIErrors, flashSuccessToast } from '../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../shared/http';
-import { StartSyncApiLogic, StartSyncArgs } from '../../../api/connector/start_sync_api_logic';
-import { GetCrawlerApiLogic, GetCrawlerArgs } from '../../../api/crawler/get_crawler_api_logic';
-import {
+import type { StartSyncArgs } from '../../../api/connector/start_sync_api_logic';
+import { StartSyncApiLogic } from '../../../api/connector/start_sync_api_logic';
+import type { GetCrawlerArgs } from '../../../api/crawler/get_crawler_api_logic';
+import { GetCrawlerApiLogic } from '../../../api/crawler/get_crawler_api_logic';
+import type {
   CrawlerData,
   CrawlerDomain,
   CrawlerStatus,
@@ -23,9 +26,10 @@ import {
   CrawlRequest,
 } from '../../../api/crawler/types';
 
+import type {
+  CachedFetchIndexApiLogicActions} from '../../../api/index/cached_fetch_index_api_logic';
 import {
-  CachedFetchIndexApiLogic,
-  CachedFetchIndexApiLogicActions,
+  CachedFetchIndexApiLogic
 } from '../../../api/index/cached_fetch_index_api_logic';
 
 import { isCrawlerIndex } from '../../../utils/indices';

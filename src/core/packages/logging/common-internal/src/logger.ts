@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   Appender,
-  LogLevel,
   LogRecord,
   LoggerFactory,
   LogMeta,
   Logger,
   LogMessageSource,
-  LogLevelId,
+  LogLevelId} from '@kbn/logging';
+import {
+  LogLevel
 } from '@kbn/logging';
 
 /**

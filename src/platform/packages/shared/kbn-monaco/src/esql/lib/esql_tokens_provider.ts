@@ -9,7 +9,7 @@
 
 import { CharStreams, type Token } from 'antlr4';
 import { getLexer, ESQLErrorListener } from '@kbn/esql-ast';
-import { monaco } from '../../monaco_imports';
+import type { monaco } from '../../monaco_imports';
 
 import { ESQLToken } from './esql_token';
 import { ESQLLineTokens } from './esql_line_tokens';

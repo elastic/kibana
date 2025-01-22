@@ -26,7 +26,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
-import { ObservabilityOnboardingAppServices } from '../../..';
+import type { ObservabilityOnboardingAppServices } from '../../..';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { MultiIntegrationInstallBanner } from './multi_integration_install_banner';
 import { EmptyPrompt } from '../shared/empty_prompt';

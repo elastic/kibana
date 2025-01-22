@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Dispatch, SetStateAction, useCallback } from 'react';
-import { BoolQuery, Filter } from '@kbn/es-query';
-import { CriteriaWithPagination } from '@elastic/eui';
-import { DataTableRecord } from '@kbn/discover-utils/types';
+import type { Dispatch, SetStateAction} from 'react';
+import { useCallback } from 'react';
+import type { BoolQuery, Filter } from '@kbn/es-query';
+import type { CriteriaWithPagination } from '@elastic/eui';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { useUrlQuery } from '../use_url_query';
 import { usePageSize } from '../use_page_size';
 import { getDefaultQuery } from './utils';
 import { LOCAL_STORAGE_DATA_TABLE_COLUMNS_KEY } from '../../constants';
-import { FindingsBaseURLQuery } from '../../types';
+import type { FindingsBaseURLQuery } from '../../types';
 import { useBaseEsQuery } from './use_base_es_query';
 import { usePersistedQuery } from './use_persisted_query';
 

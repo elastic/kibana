@@ -6,16 +6,17 @@
  */
 
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import type {
+  ExecutionResponseItem} from '@kbn/actions-plugin/server/create_execute_function';
 import {
-  ExecutionResponseItem,
   ExecutionResponseType,
 } from '@kbn/actions-plugin/server/create_execute_function';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { chunk } from 'lodash';
-import { ThrottledActions } from '../../types';
-import { ActionSchedulerOptions, ActionsToSchedule, IActionScheduler } from './types';
-import { Alert } from '../../alert';
-import {
+import type { ThrottledActions } from '../../types';
+import type { ActionSchedulerOptions, ActionsToSchedule, IActionScheduler } from './types';
+import type { Alert } from '../../alert';
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleTypeParams,

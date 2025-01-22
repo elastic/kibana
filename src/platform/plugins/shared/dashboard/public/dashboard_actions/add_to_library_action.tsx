@@ -9,8 +9,8 @@
 
 import React from 'react';
 
-import { PresentationContainer } from '@kbn/presentation-containers';
-import {
+import type { PresentationContainer } from '@kbn/presentation-containers';
+import type {
   CanAccessViewMode,
   EmbeddableApiContext,
   HasInPlaceLibraryTransforms,
@@ -19,7 +19,8 @@ import {
   HasType,
   HasTypeDisplayName,
   HasUniqueId,
-  PublishesPanelTitle,
+  PublishesPanelTitle} from '@kbn/presentation-publishing';
+import {
   apiCanAccessViewMode,
   apiHasInPlaceLibraryTransforms,
   apiHasLibraryTransforms,
@@ -29,13 +30,15 @@ import {
   getInheritedViewMode,
   getPanelTitle,
 } from '@kbn/presentation-publishing';
-import {
+import type {
   OnSaveProps,
-  SaveResult,
+  SaveResult} from '@kbn/saved-objects-plugin/public';
+import {
   SavedObjectSaveModal,
   showSaveModal,
 } from '@kbn/saved-objects-plugin/public';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import type { Action} from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { coreServices } from '../services/kibana_services';
 import { dashboardAddToLibraryActionStrings } from './_dashboard_actions_strings';

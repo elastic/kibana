@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../functional/ftr_provider_context';
+import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 import { TransformAPIProvider } from '../../functional/services/transform/api';
 import { TransformSecurityCommonProvider } from '../../functional/services/transform/security_common';

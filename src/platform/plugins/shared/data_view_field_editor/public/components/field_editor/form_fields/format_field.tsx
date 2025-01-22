@@ -9,12 +9,13 @@
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useRef, useState } from 'react';
+import type {
+  ES_FIELD_TYPES,
+  SerializedFieldFormat} from '../../../shared_imports';
 import {
   UseField,
   useFormData,
-  ES_FIELD_TYPES,
-  useFormContext,
-  SerializedFieldFormat,
+  useFormContext
 } from '../../../shared_imports';
 import { useFieldEditorContext } from '../../field_editor_context';
 import { FormatSelectEditor } from '../../field_format_editor';

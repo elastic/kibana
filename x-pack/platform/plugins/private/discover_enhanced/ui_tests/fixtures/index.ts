@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import type {
+  PageObjects,
+  ScoutTestFixtures,
+  ScoutWorkerFixtures} from '@kbn/scout';
 import {
   test as base,
-  PageObjects,
-  createLazyPageObject,
-  ScoutTestFixtures,
-  ScoutWorkerFixtures,
+  createLazyPageObject
 } from '@kbn/scout';
 import { DemoPage } from './page_objects';
 

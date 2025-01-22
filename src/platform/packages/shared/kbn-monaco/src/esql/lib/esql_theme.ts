@@ -10,7 +10,7 @@
 import type { UseEuiTheme } from '@elastic/eui';
 import { themeRuleGroupBuilderFactory } from '../../common/theme';
 import { ESQL_TOKEN_POSTFIX } from './constants';
-import { monaco } from '../../monaco_imports';
+import type { monaco } from '../../monaco_imports';
 
 const buildRuleGroup = themeRuleGroupBuilderFactory(ESQL_TOKEN_POSTFIX);
 

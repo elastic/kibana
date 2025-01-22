@@ -11,7 +11,7 @@ import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
 import type { ReviewRuleUpgradeResponseBody } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules/review_rule_upgrade/review_rule_upgrade_route';
 import type { Threshold } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
-import { AlertSuppression } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
+import type { AlertSuppression } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 
 import { createRuleAssetSavedObject } from '../../../../helpers/rules';
 import {

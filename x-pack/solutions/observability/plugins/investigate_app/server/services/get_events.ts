@@ -6,14 +6,15 @@
  */
 
 import datemath from '@elastic/datemath';
-import {
+import type {
   AlertEventResponse,
   AnnotationEventResponse,
-  GetEventsParams,
+  GetEventsParams} from '@kbn/investigation-shared';
+import {
   alertEventSchema,
   annotationEventSchema,
 } from '@kbn/investigation-shared';
-import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
+import type { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import {
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
@@ -22,7 +23,7 @@ import {
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
 import { rangeQuery } from '../lib/queries';
-import { AlertsClient } from './get_alerts_client';
+import type { AlertsClient } from './get_alerts_client';
 
 export async function getAnnotationEvents(
   params: GetEventsParams,

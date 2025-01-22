@@ -6,12 +6,13 @@
  */
 
 import { AggregationTemporality, MetricReader } from '@opentelemetry/sdk-metrics-base';
+import type {
+  ExporterConfig} from '@opentelemetry/exporter-prometheus';
 import {
   PrometheusExporter as OpenTelemetryPrometheusExporter,
-  ExporterConfig,
   PrometheusSerializer,
 } from '@opentelemetry/exporter-prometheus';
-import { KibanaResponseFactory } from '@kbn/core/server';
+import type { KibanaResponseFactory } from '@kbn/core/server';
 
 export class PrometheusExporter extends MetricReader {
   private readonly prefix?: string;

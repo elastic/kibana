@@ -7,14 +7,14 @@
 
 import * as t from 'io-ts';
 import Boom from '@hapi/boom';
-import { ElasticAgentVersionInfo } from '../../../common/types';
+import type { ElasticAgentVersionInfo } from '../../../common/types';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { getKibanaUrl } from '../../lib/get_fallback_urls';
 import { getAgentVersionInfo } from '../../lib/get_agent_version';
 import { saveObservabilityOnboardingFlow } from '../../lib/state';
 import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
-import { ObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
+import type { ObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
 
 const logMonitoringPrivilegesRoute = createObservabilityOnboardingServerRoute({

@@ -13,7 +13,7 @@ import { getLogsEsClient } from './get_logs_es_client';
 import { getInfraEsClient } from './get_infra_es_client';
 import { getKibanaClient } from './get_kibana_client';
 import { getServiceUrls } from './get_service_urls';
-import { RunOptions } from './parse_run_cli_flags';
+import type { RunOptions } from './parse_run_cli_flags';
 import { getSyntheticsEsClient } from './get_synthetics_es_client';
 import { getOtelSynthtraceEsClient } from './get_otel_es_client';
 import { getEntitiesEsClient } from './get_entities_es_client';

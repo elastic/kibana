@@ -8,10 +8,11 @@
  */
 
 import Joi from 'joi';
-import { Request, ResponseToolkit } from '@hapi/hapi';
+import type { Request, ResponseToolkit } from '@hapi/hapi';
+import type {
+  HapiValidationError} from './default_validation_error_handler';
 import {
-  defaultValidationErrorHandler,
-  HapiValidationError,
+  defaultValidationErrorHandler
 } from './default_validation_error_handler';
 
 const emptyOutput = {

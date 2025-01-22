@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import { Meta, Story } from '@storybook/react/types-6-0';
+import type { Meta, Story } from '@storybook/react/types-6-0';
 import React, { useCallback, useEffect, useState } from 'react';
-import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
+import type {
+  CustomMetricExpressionParams} from '../../../../../common/custom_threshold_rule/types';
 import {
-  Aggregators,
-  CustomMetricExpressionParams,
+  Aggregators
 } from '../../../../../common/custom_threshold_rule/types';
-import { TimeUnitChar } from '../../../../../common';
+import type { TimeUnitChar } from '../../../../../common';
 
-import { CustomEquationEditor, CustomEquationEditorProps } from './custom_equation_editor';
+import type { CustomEquationEditorProps } from './custom_equation_editor';
+import { CustomEquationEditor } from './custom_equation_editor';
 import { aggregationType } from '../expression_row';
-import { MetricExpression } from '../../types';
+import type { MetricExpression } from '../../types';
 import { validateCustomThreshold } from '../validation';
 
 export default {

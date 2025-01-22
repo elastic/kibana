@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import type {
+  EuiSelectableOption} from '@elastic/eui';
 import {
   EuiFilterButton,
   EuiFilterGroup,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
-  EuiSelectableOption,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

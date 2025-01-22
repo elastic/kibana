@@ -24,7 +24,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { EuiSelectableLIOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import type { EuiSelectableLIOption } from '@elastic/eui/src/components/selectable/selectable_option';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

@@ -8,7 +8,7 @@
  */
 
 import type { ReporterDescription } from 'playwright/test';
-import { ScoutPlaywrightReporterOptions } from './playwright/scout_playwright_reporter';
+import type { ScoutPlaywrightReporterOptions } from './playwright/scout_playwright_reporter';
 
 export * from './report';
 

@@ -8,7 +8,7 @@
 /// <reference types="@kbn/ambient-ftr-types"/>
 
 import expect from '@kbn/expect';
-import {
+import type {
   InstallationStatusResponse,
   PerformInstallResponse,
   UninstallResponse,

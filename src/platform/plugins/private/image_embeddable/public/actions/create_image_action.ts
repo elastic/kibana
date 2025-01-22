@@ -8,15 +8,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CanAddNewPanel } from '@kbn/presentation-containers';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { CanAddNewPanel } from '@kbn/presentation-containers';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { ADD_PANEL_ANNOTATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { IncompatibleActionError, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import {
   ADD_IMAGE_EMBEDDABLE_ACTION_ID,
   IMAGE_EMBEDDABLE_TYPE,
 } from '../image_embeddable/constants';
-import { ImageEmbeddableSerializedState } from '../image_embeddable/types';
+import type { ImageEmbeddableSerializedState } from '../image_embeddable/types';
 import { uiActionsService } from '../services/kibana_services';
 
 const parentApiIsCompatible = async (parentApi: unknown): Promise<CanAddNewPanel | undefined> => {

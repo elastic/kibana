@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { annotationsIconSet } from '@kbn/event-annotation-components';
-import { IconType } from '@elastic/eui/src/components/icon/icon';
-import { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
+import type { IconType } from '@elastic/eui/src/components/icon/icon';
+import type { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
 
 export function AnnotationIcon({
   annotation,

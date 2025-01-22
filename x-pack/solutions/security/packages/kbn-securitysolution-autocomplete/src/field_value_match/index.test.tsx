@@ -6,10 +6,12 @@
  */
 
 import React from 'react';
-import { ReactWrapper, mount } from 'enzyme';
+import type { ReactWrapper} from 'enzyme';
+import { mount } from 'enzyme';
+import type {
+  EuiComboBoxOptionOption} from '@elastic/eui';
 import {
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFormHelpText,
   EuiSuperSelect,
 } from '@elastic/eui';

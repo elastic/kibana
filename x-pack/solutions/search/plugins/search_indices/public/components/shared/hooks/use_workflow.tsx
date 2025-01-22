@@ -11,7 +11,8 @@ import {
   SemanticIngestDataCodeExamples,
   DefaultIngestDataCodeExamples,
 } from '../../../code_examples/ingest_data';
-import { WorkflowId, workflows } from '../../../code_examples/workflows';
+import type { WorkflowId} from '../../../code_examples/workflows';
+import { workflows } from '../../../code_examples/workflows';
 import {
   DefaultCodeExamples,
   DenseVectorCodeExamples,

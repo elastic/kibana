@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { TimeBounds } from '../types';
+import type { TimeBounds } from '../types';
 import { useFetchHistoricalSummary } from '../../../hooks/use_fetch_historical_summary';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
-import { SloTabId } from './slo_details';
+import type { SloTabId } from './slo_details';
 import { SliChartPanel } from './sli_chart_panel';
 import { ErrorBudgetChartPanel } from './error_budget_chart_panel';
 

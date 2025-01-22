@@ -11,15 +11,16 @@ import fastIsEqual from 'fast-deep-equal';
 import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   apiHasSaveNotification,
   combineCompatibleChildrenApis,
 } from '@kbn/presentation-containers';
+import type {
+  PublishesDataViews} from '@kbn/presentation-publishing';
 import {
-  PublishesDataViews,
   apiPublishesDataViews,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';

@@ -6,8 +6,8 @@
  */
 
 import { createContext, useContext } from 'react';
-import { Filter, Query, TimeRange } from '@kbn/es-query';
-import { FilterManager } from '@kbn/data-plugin/public';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { FilterManager } from '@kbn/data-plugin/public';
 
 export interface IndicatorsFiltersContextValue {
   timeRange: TimeRange;

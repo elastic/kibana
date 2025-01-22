@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
 const paramsSchema = schema.object({

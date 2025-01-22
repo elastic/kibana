@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { calculatePostureScore } from '../../../common/utils/helpers';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,

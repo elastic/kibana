@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { MapSerializedState } from '@kbn/maps-plugin/public';
-import { SavedObjectReference } from '@kbn/core/types';
-import { ExpressionValueFilter, MapCenter, TimeRange as TimeRangeArg } from '../../../types';
+import type { SavedObjectReference } from '@kbn/core/types';
+import type { ExpressionValueFilter, MapCenter, TimeRange as TimeRangeArg } from '../../../types';
+import type {
+  EmbeddableExpression} from '../../expression_types';
 import {
   EmbeddableTypes,
-  EmbeddableExpressionType,
-  EmbeddableExpression,
+  EmbeddableExpressionType
 } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
 

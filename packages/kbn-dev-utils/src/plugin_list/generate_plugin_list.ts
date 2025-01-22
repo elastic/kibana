@@ -12,7 +12,7 @@ import Path from 'path';
 import normalizePath from 'normalize-path';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import { Plugins } from './discover_plugins';
+import type { Plugins } from './discover_plugins';
 
 const sortPlugins = (plugins: Plugins) => plugins.sort((a, b) => a.id.localeCompare(b.id));
 

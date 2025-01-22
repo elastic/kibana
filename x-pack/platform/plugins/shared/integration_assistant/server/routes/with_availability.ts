@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RequestHandler, RouteMethod } from '@kbn/core/server';
-import { IntegrationAssistantRouteHandlerContext } from '../plugin';
+import type { RequestHandler, RouteMethod } from '@kbn/core/server';
+import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 
 /**
  * Wraps a request handler with a check for whether the API route is available.

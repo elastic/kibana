@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useReducer, Reducer } from 'react';
+import type { Reducer } from 'react';
+import React, { useCallback, useContext, useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '../../../../shared_imports';
-import {
+import type {
   DeserializedProcessorResult,
-  deserializeVerboseTestOutput,
-  DeserializeResult,
+  DeserializeResult} from '../deserialize';
+import {
+  deserializeVerboseTestOutput
 } from '../deserialize';
 import { serialize } from '../serialize';
-import { Document } from '../types';
+import type { Document } from '../types';
 import { useIsMounted } from '../use_is_mounted';
 
 export interface TestPipelineData {

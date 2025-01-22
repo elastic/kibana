@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRuleDataService } from './rule_data_plugin_service';
+import type { IRuleDataService } from './rule_data_plugin_service';
 
 export const ruleDataServiceMock = {
   create: (): jest.Mocked<IRuleDataService> => ({

@@ -7,20 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiTableFieldDataColumnType } from '@elastic/eui';
+import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { mount } from 'enzyme';
-import { CoreSetup, CoreStart } from '@kbn/core/public';
+import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import moment from 'moment';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
-import { SearchUsageCollector, SessionsClient } from '../../..';
+import type { SearchUsageCollector} from '../../..';
+import { SessionsClient } from '../../..';
 import { SearchSessionStatus } from '../../../../../common';
-import { OnActionComplete } from '../components';
-import { UISession } from '../types';
+import type { OnActionComplete } from '../components';
+import type { UISession } from '../types';
 import { SearchSessionsMgmtAPI } from './api';
 import { getColumns } from './get_columns';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
 import { createSearchUsageCollectorMock } from '../../../collectors/mocks';

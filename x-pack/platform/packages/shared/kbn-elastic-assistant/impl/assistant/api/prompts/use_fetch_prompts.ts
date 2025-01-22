@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { FindPromptsResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/find_prompts_route.gen';
+import type { FindPromptsResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/find_prompts_route.gen';
 import { useQuery } from '@tanstack/react-query';
 import { API_VERSIONS, ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND } from '@kbn/elastic-assistant-common';
-import { HttpSetup, IToasts } from '@kbn/core/public';
+import type { HttpSetup, IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useAssistantContext } from '../../../assistant_context';
 

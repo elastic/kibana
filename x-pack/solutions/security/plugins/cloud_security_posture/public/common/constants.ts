@@ -8,6 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import type { CloudSecurityPolicyTemplate, PostureInput } from '../../common/types_old';
+import type {
+  CLOUDBEAT_AKS,
+  CLOUDBEAT_GKE} from '../../common/constants';
 import {
   CLOUDBEAT_EKS,
   CLOUDBEAT_VANILLA,
@@ -15,9 +18,7 @@ import {
   CLOUDBEAT_GCP,
   CLOUDBEAT_AZURE,
   CLOUDBEAT_VULN_MGMT_AWS,
-  VULN_MGMT_POLICY_TEMPLATE,
-  CLOUDBEAT_AKS,
-  CLOUDBEAT_GKE,
+  VULN_MGMT_POLICY_TEMPLATE
 } from '../../common/constants';
 
 import eksLogo from '../assets/icons/cis_eks_logo.svg';

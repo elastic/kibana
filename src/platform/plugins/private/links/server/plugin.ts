@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { CONTENT_ID, LATEST_VERSION } from '../common';
-import { LinksAttributes } from '../common/content_management';
+import type { LinksAttributes } from '../common/content_management';
 import { LinksStorage } from './content_management';
 import { linksSavedObjectType } from './saved_objects';
 

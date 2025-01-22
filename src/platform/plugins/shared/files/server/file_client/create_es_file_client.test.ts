@@ -12,12 +12,12 @@ import {
   elasticsearchServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
-import { MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
 import { createEsFileClient } from './create_es_file_client';
-import { FileClient } from './types';
+import type { FileClient } from './types';
 import { ElasticsearchBlobStorageClient } from '../blob_storage_service';
-import * as estypes from '@elastic/elasticsearch/lib/api/types';
-import { FileDocument } from './file_metadata_client/adapters/es_index';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { FileDocument } from './file_metadata_client/adapters/es_index';
 
 describe('When initializing file client via createESFileClient()', () => {
   let esClient: ElasticsearchClientMock;

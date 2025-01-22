@@ -12,17 +12,18 @@ import {
   getSeriesAndDomain,
   getSidebarItems,
 } from './data_formatting';
+import type {
+  WaterfallTooltipItem} from './types';
 import {
   MimeType,
   FriendlyFlyoutLabels,
   FriendlyTimingLabels,
   Timings,
-  Metadata,
-  WaterfallTooltipItem,
+  Metadata
 } from './types';
 import type { DateFormatter } from '../../../../../../hooks/use_date_format';
 import { mockMoment } from '../../../../utils/formatting/test_helpers';
-import { NetworkEvent } from '../../../../../../../common/runtime_types';
+import type { NetworkEvent } from '../../../../../../../common/runtime_types';
 
 export const networkItems: NetworkEvent[] = [
   {

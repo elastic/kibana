@@ -6,9 +6,9 @@
  */
 
 import type { Alert } from '@kbn/alerts-as-data-utils';
-import { DeepPartial } from '@kbn/utility-types';
-import { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
-import {
+import type { DeepPartial } from '@kbn/utility-types';
+import type { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
+import type {
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_EXECUTION_UUID,
@@ -22,8 +22,8 @@ import {
   ALERT_UUID,
   SPACE_IDS,
 } from '@kbn/rule-data-utils';
-import { Alert as LegacyAlert } from '../alert/alert';
-import {
+import type { Alert as LegacyAlert } from '../alert/alert';
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   AlertsFilter,
@@ -32,11 +32,11 @@ import {
   RuleAlertData,
   WithoutReservedActionGroups,
 } from '../types';
-import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
-import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
+import type { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import type { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
+import type { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 import type { PublicAlertFactory } from '../alert/create_alert_factory';
-import { MaintenanceWindow } from '../application/maintenance_window/types';
+import type { MaintenanceWindow } from '../application/maintenance_window/types';
 
 export interface AlertRuleData {
   consumer: string;

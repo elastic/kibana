@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { DecoratorFn } from '@storybook/react';
+import type { DecoratorFn } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { LegacyServicesProvider } from '../../public/services/legacy';

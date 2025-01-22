@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import {
+import type {
   ElasticsearchClientMock,
+  ScopedClusterClientMock} from '@kbn/core/server/mocks';
+import {
   elasticsearchServiceMock,
   httpServiceMock,
-  loggingSystemMock,
-  ScopedClusterClientMock,
+  loggingSystemMock
 } from '@kbn/core/server/mocks';
-import { MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
 import { CreateSLO } from './create_slo';
 import { fiveMinute, oneMinute } from './fixtures/duration';
 import { createAPMTransactionErrorRateIndicator, createSLOParams } from './fixtures/slo';
@@ -21,9 +22,9 @@ import {
   createSummaryTransformManagerMock,
   createTransformManagerMock,
 } from './mocks';
-import { SLORepository } from './slo_repository';
-import { TransformManager } from './transform_manager';
-import { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SLORepository } from './slo_repository';
+import type { TransformManager } from './transform_manager';
+import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 
 describe('CreateSLO', () => {
   let mockEsClient: ElasticsearchClientMock;

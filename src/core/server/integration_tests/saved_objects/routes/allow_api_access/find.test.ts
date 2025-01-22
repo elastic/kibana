@@ -9,7 +9,7 @@
 
 import supertest from 'supertest';
 
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import type { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
 import {
   coreUsageStatsClientMock,

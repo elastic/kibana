@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 import { CaseSeverity, CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   createUsersAndRoles,
   deleteUsersAndRoles,

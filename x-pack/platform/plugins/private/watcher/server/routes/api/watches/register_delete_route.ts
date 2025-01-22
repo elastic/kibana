@@ -7,8 +7,8 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from '@kbn/core/server';
-import { RouteDependencies } from '../../../types';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { RouteDependencies } from '../../../types';
 
 const bodySchema = schema.object({
   watchIds: schema.arrayOf(schema.string()),

@@ -5,28 +5,33 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
-import { Connector, IngestionMethod, IngestPipelineParams } from '@kbn/search-connectors';
+import type { Connector, IngestionMethod, IngestPipelineParams } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../common/types/api';
 
-import {
-  CachedFetchConnectorByIdApiLogic,
+import type {
   CachedFetchConnectorByIdApiLogicActions,
-  CachedFetchConnectorByIdApiLogicValues,
+  CachedFetchConnectorByIdApiLogicValues} from '../../api/connector/cached_fetch_connector_by_id_api_logic';
+import {
+  CachedFetchConnectorByIdApiLogic
 } from '../../api/connector/cached_fetch_connector_by_id_api_logic';
 
+import type {
+  GenerateConnectorApiKeyApiLogicActions} from '../../api/connector/generate_connector_api_key_api_logic';
 import {
-  GenerateConnectorApiKeyApiLogicActions,
   GenerateConnectorApiKeyApiLogic,
 } from '../../api/connector/generate_connector_api_key_api_logic';
+import type {
+  PostConnectorConfigurationActions} from '../../api/connector/update_connector_configuration_api_logic';
 import {
-  ConnectorConfigurationApiLogic,
-  PostConnectorConfigurationActions,
+  ConnectorConfigurationApiLogic
 } from '../../api/connector/update_connector_configuration_api_logic';
-import { FetchIndexActions, FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
-import { ElasticsearchViewIndex } from '../../types';
+import type { FetchIndexActions} from '../../api/index/fetch_index_api_logic';
+import { FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
+import type { ElasticsearchViewIndex } from '../../types';
 
 import {
   hasAdvancedFilteringFeature,
@@ -40,11 +45,13 @@ import {
   isLastSeenOld,
 } from '../../utils/connector_status_helpers';
 
+import type {
+  ConnectorNameAndDescriptionActions} from './connector_name_and_description_logic';
 import {
-  ConnectorNameAndDescriptionActions,
   ConnectorNameAndDescriptionLogic,
 } from './connector_name_and_description_logic';
-import { DeploymentLogic, DeploymentLogicActions } from './deployment_logic';
+import type { DeploymentLogicActions } from './deployment_logic';
+import { DeploymentLogic } from './deployment_logic';
 
 export interface ConnectorViewActions {
   fetchConnector: CachedFetchConnectorByIdApiLogicActions['makeRequest'];

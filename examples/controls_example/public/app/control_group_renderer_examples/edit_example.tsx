@@ -27,11 +27,12 @@ import {
   RANGE_SLIDER_CONTROL,
   type ControlGroupRuntimeState,
 } from '@kbn/controls-plugin/common';
+import type {
+  ControlGroupRendererApi} from '@kbn/controls-plugin/public';
 import {
   ACTION_DELETE_CONTROL,
   ACTION_EDIT_CONTROL,
   ControlGroupRenderer,
-  ControlGroupRendererApi,
   type ControlStateTransform,
 } from '@kbn/controls-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';

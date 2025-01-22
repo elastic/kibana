@@ -21,8 +21,9 @@ import {
   isNestedFieldParent,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
+import type {
+  DiscoverAppState} from '../application/main/state_management/discover_app_state_container';
 import {
-  DiscoverAppState,
   isEqualFilters,
 } from '../application/main/state_management/discover_app_state_container';
 import { getSortForSearchSource } from './sorting';

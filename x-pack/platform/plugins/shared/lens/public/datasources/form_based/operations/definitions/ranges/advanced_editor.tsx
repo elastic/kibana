@@ -22,14 +22,15 @@ import {
   htmlIdGenerator,
   keys,
 } from '@elastic/eui';
-import { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import {
   DragDropBuckets,
   DraggableBucketContainer,
   NewBucketButton,
 } from '@kbn/visualization-ui-components';
 import { useDebounceWithOptions } from '../../../../../shared_components';
-import { RangeTypeLens, isValidRange } from './ranges';
+import type { RangeTypeLens} from './ranges';
+import { isValidRange } from './ranges';
 import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
 import { LabelInput } from '../shared_components';
 import { isValidNumber } from '../helpers';

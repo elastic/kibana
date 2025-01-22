@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
-import {
+import type { Readable } from 'stream';
+import type {
   ConversationCreateEvent,
   ConversationUpdateEvent,
-  StreamingChatResponseEvent,
+  StreamingChatResponseEvent} from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
+import {
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
 

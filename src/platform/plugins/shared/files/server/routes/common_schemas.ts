@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, Type } from '@kbn/config-schema';
+import type { Type } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 const ALPHA_NUMERIC_WITH_SPACES_REGEX = /^[a-z0-9\s_]+$/i;
 const ALPHA_NUMERIC_WITH_SPACES_EXT_REGEX = /^[a-z0-9\s\._]+$/i;

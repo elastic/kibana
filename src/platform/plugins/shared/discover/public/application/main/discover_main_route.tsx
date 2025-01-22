@@ -24,7 +24,7 @@ import { getInitialESQLQuery } from '@kbn/esql-utils';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { useUrl } from './hooks/use_url';
 import { useDiscoverStateContainer } from './hooks/use_discover_state_container';
-import { MainHistoryLocationState } from '../../../common';
+import type { MainHistoryLocationState } from '../../../common';
 import { DiscoverMainApp } from './discover_main_app';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
@@ -32,14 +32,15 @@ import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { DiscoverMainProvider } from './state_management/discover_state_provider';
-import {
+import type {
   CustomizationCallback,
-  DiscoverCustomizationContext,
+  DiscoverCustomizationContext} from '../../customizations';
+import {
   DiscoverCustomizationProvider,
   useDiscoverCustomizationService,
 } from '../../customizations';
 import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
-import { DiscoverStateContainer, LoadParams } from './state_management/discover_state';
+import type { DiscoverStateContainer, LoadParams } from './state_management/discover_state';
 import { DataSourceType, isDataSourceType } from '../../../common/data_sources';
 import { useRootProfile } from '../../context_awareness';
 

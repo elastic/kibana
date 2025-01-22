@@ -9,11 +9,12 @@ import React, { lazy } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import TestConnectorForm from './test_connector_form';
 import { none, some } from 'fp-ts/lib/Option';
-import {
+import type {
   ActionConnector,
-  ActionConnectorMode,
   ActionParamsProps,
-  GenericValidationResult,
+  GenericValidationResult} from '../../../types';
+import {
+  ActionConnectorMode
 } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { EuiFormRow, EuiFieldText, EuiText, EuiLink, EuiForm, EuiSelect } from '@elastic/eui';

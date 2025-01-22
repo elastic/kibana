@@ -11,10 +11,11 @@
 // The color picker is not yet accessible.
 
 import React, { useState } from 'react';
+import type {
+  EuiColorPickerProps} from '@elastic/eui';
 import {
   EuiIconTip,
   EuiColorPicker,
-  EuiColorPickerProps,
   EuiColorPickerSwatch,
   useEuiTheme,
 } from '@elastic/eui';

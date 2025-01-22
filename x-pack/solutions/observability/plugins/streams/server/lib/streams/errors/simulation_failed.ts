@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
+import type { errors } from '@elastic/elasticsearch';
 
 export class SimulationFailed extends Error {
   constructor(error: errors.ResponseError) {

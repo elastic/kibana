@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Replacements } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { useAssistantContext } from '../../assistant_context';
@@ -15,8 +15,9 @@ import { useConversation } from '../use_conversation';
 import { getDefaultConnector, mergeBaseWithPersistedConversations } from '../helpers';
 import { getGenAiConfig } from '../../connectorland/helpers';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
-import { FetchConversationsResponse, useFetchCurrentUserConversations } from '../api';
-import { Conversation } from '../../assistant_context/types';
+import type { FetchConversationsResponse} from '../api';
+import { useFetchCurrentUserConversations } from '../api';
+import type { Conversation } from '../../assistant_context/types';
 
 interface UseAssistantOverlay {
   showAssistantOverlay: (show: boolean, silent?: boolean) => void;

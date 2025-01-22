@@ -13,9 +13,10 @@ import {
   getFindExceptionListSchemaDecodedMock,
   getFindExceptionListSchemaMock,
 } from './index.mock';
-import {
+import type {
   FindExceptionListSchema,
-  FindExceptionListSchemaDecoded,
+  FindExceptionListSchemaDecoded} from '.';
+import {
   findExceptionListSchema,
 } from '.';
 

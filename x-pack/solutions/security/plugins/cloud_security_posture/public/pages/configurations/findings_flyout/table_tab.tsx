@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import type {
+  EuiInMemoryTableProps} from '@elastic/eui';
 import {
   EuiCode,
   EuiCodeBlock,
   EuiInMemoryTable,
-  EuiInMemoryTableProps,
   EuiText,
 } from '@elastic/eui';
 import React from 'react';

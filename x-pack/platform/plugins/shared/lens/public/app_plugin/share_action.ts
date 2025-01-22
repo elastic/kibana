@@ -7,7 +7,7 @@
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { LensAppLocatorParams } from '../../common/locator/locator';
 import type { LensAppState } from '../state_management';
 import type { LensAppServices } from './types';

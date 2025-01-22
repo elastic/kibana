@@ -10,7 +10,7 @@ import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { ALERT_INSTANCE_ID, ALERT_RULE_UUID, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { nodeBuilder } from '@kbn/es-query';
 import { Spaces } from '../../../scenarios';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 
 const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';

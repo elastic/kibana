@@ -7,13 +7,14 @@
 import { i18n } from '@kbn/i18n';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { ReactNode, useState } from 'react';
-import { FieldPath } from 'react-hook-form';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { ReactNode} from 'react';
+import React, { useState } from 'react';
+import type { FieldPath } from 'react-hook-form';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { RunTimeFieldUsed } from './runtime_field_used';
 import { QuerySearchBar } from './query_search_bar';
 import { QueryDocumentsFlyout } from './query_documents_flyout';
-import { CreateSLOForm } from '../../types';
+import type { CreateSLOForm } from '../../types';
 
 export interface SearchBarProps {
   dataTestSubj: string;

@@ -22,7 +22,7 @@ import {
   UPDATE_ESQL_QUERY_TRIGGER,
 } from './triggers';
 import { setKibanaServices } from './kibana_services';
-import { JoinIndicesAutocompleteResult } from '../common';
+import type { JoinIndicesAutocompleteResult } from '../common';
 import { cacheNonParametrizedAsyncFunction } from './util/cache';
 
 interface EsqlPluginSetupDependencies {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { DeepPartial } from '@kbn/utility-types';
+import type { DeepPartial } from '@kbn/utility-types';
 import { merge } from 'lodash';
-import { AxiosResponse } from 'axios/index';
-import {
+import type { AxiosResponse } from 'axios/index';
+import type {
   ServiceParams,
   SubActionRequestParams,
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
@@ -19,7 +19,7 @@ import { Readable } from 'stream';
 import { createAxiosResponseMock } from '../lib/mocks';
 import { SENTINELONE_CONNECTOR_ID } from '../../../common/sentinelone/constants';
 import { SentinelOneConnector } from './sentinelone';
-import {
+import type {
   SentinelOneConfig,
   SentinelOneFetchAgentFilesResponse,
   SentinelOneGetAgentsResponse,

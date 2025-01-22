@@ -19,7 +19,7 @@ import {
   type ESQLSource,
   type ESQLTimeInterval,
 } from '@kbn/esql-ast';
-import {
+import type {
   ESQLIdentifier,
   ESQLInlineCast,
   ESQLParamLiteral,
@@ -41,7 +41,7 @@ import {
   withOption,
   appendSeparatorOption,
 } from '../definitions/options';
-import {
+import type {
   CommandDefinition,
   CommandOptionsDefinition,
   FunctionParameter,

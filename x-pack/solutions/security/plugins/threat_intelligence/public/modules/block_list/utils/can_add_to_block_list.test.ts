@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type {
+  Indicator} from '../../../../common/types/indicator';
 import {
   generateMockFileIndicator,
-  Indicator,
   RawIndicatorFieldId,
 } from '../../../../common/types/indicator';
 import { canAddToBlockList } from './can_add_to_block_list';

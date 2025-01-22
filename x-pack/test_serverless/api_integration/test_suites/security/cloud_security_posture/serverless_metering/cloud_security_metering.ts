@@ -8,13 +8,14 @@
 import expect from '@kbn/expect';
 import { CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '@kbn/cloud-security-posture-plugin/common/constants';
-import * as http from 'http';
+import type * as http from 'http';
 import { createPackagePolicy } from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/helper';
 import { EsIndexDataProvider } from '@kbn/test-suites-xpack/cloud_security_posture_api/utils';
-import { RoleCredentials } from '../../../../../shared/services';
+import type { RoleCredentials } from '../../../../../shared/services';
 import { getMockFindings } from './mock_data';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import { UsageRecord, getInterceptedRequestPayload, setupMockServer } from './mock_usage_server';
+import type { UsageRecord} from './mock_usage_server';
+import { getInterceptedRequestPayload, setupMockServer } from './mock_usage_server';
 
 export default function (providerContext: FtrProviderContext) {
   const mockUsageApiApp = setupMockServer();

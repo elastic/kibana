@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CSSProperties, Dispatch } from 'react';
+import type { CSSProperties, Dispatch } from 'react';
 import { debounce, range } from 'lodash';
-import { ConsoleParsedRequestsProvider, getParsedRequestsProvider, monaco } from '@kbn/monaco';
+import type { ConsoleParsedRequestsProvider} from '@kbn/monaco';
+import { getParsedRequestsProvider, monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
@@ -17,7 +18,7 @@ import { isQuotaExceededError } from '../../../services/history';
 import { DEFAULT_VARIABLES, KIBANA_API_PREFIX } from '../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../services';
 import { sendRequest } from '../../hooks';
-import { Actions } from '../../stores/request';
+import type { Actions } from '../../stores/request';
 
 import {
   AutocompleteType,
@@ -42,7 +43,7 @@ import {
 import type { AdjustedParsedRequest } from './types';
 import { type RequestToRestore, RestoreMethod } from '../../../types';
 import { StorageQuotaError } from '../../components/storage_quota_error';
-import { ContextValue } from '../../contexts';
+import type { ContextValue } from '../../contexts';
 import { containsComments, indentData } from './utils/requests_utils';
 
 const AUTO_INDENTATION_ACTION_LABEL = 'Apply indentations';

@@ -12,6 +12,8 @@ import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { context } from '@opentelemetry/api';
 import { last, merge, omit } from 'lodash';
+import type {
+  Observable} from 'rxjs';
 import {
   catchError,
   combineLatest,
@@ -21,7 +23,6 @@ import {
   from,
   map,
   merge as mergeOperator,
-  Observable,
   of,
   shareReplay,
   switchMap,
@@ -31,22 +32,24 @@ import {
 import { v4 } from 'uuid';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
-import { ChatCompleteResponse, FunctionCallingMode, ToolChoiceType } from '@kbn/inference-common';
+import type { ChatCompleteResponse, FunctionCallingMode} from '@kbn/inference-common';
+import { ToolChoiceType } from '@kbn/inference-common';
 
 import { resourceNames } from '..';
-import {
+import type {
   ChatCompletionChunkEvent,
   ChatCompletionMessageEvent,
   ChatCompletionErrorEvent,
   ConversationCreateEvent,
   ConversationUpdateEvent,
+  TokenCountEvent} from '../../../common/conversation_complete';
+import {
   createConversationNotFoundError,
   StreamingChatResponseEventType,
-  TokenCountEvent,
   type StreamingChatResponseEvent,
 } from '../../../common/conversation_complete';
 import { convertMessagesForInference } from '../../../common/convert_messages_for_inference';
-import { CompatibleJSONSchema } from '../../../common/functions/types';
+import type { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
   type AdHocInstruction,
   type Conversation,
@@ -61,7 +64,7 @@ import {
 import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 import type { ChatFunctionClient } from '../chat_function_client';
-import { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
+import type { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
 import { getAccessQuery } from '../util/get_access_query';
 import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
 import { replaceSystemMessage } from '../util/replace_system_message';
@@ -78,8 +81,8 @@ import {
   runSemanticTextKnowledgeBaseMigration,
   scheduleSemanticTextMigration,
 } from '../task_manager_definitions/register_migrate_knowledge_base_entries_task';
-import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
-import { ObservabilityAIAssistantConfig } from '../../config';
+import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
+import type { ObservabilityAIAssistantConfig } from '../../config';
 import { getElserModelId } from '../knowledge_base_service/get_elser_model_id';
 
 const MAX_FUNCTION_CALLS = 8;
